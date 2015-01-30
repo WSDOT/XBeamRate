@@ -9,13 +9,18 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <EAF\EAFDocument.h>
+#include <EAF\EAFBrokerDocument.h>
 
-class CXBeamRateDoc : public CEAFDocument
+class CXBeamRateDocProxyAgent;
+
+class CXBeamRateDoc : public CEAFBrokerDocument
 {
 protected: // create from serialization only
 	CXBeamRateDoc();
 	DECLARE_DYNCREATE(CXBeamRateDoc)
+
+   // CEBrokerDocument over-rides
+   virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
 
 // Attributes
 public:
@@ -45,12 +50,16 @@ public:
 #endif
 
 protected:
+   virtual CATID GetAgentCategoryID();
 
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CXBeamRateDoc)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+   CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;
+   virtual void BrokerShutDown();
 };
 
 /////////////////////////////////////////////////////////////////////////////

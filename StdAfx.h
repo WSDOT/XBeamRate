@@ -26,6 +26,10 @@ extern CComModule _Module;
 
 #include <WBFLTypes.h>
 
+#include <WBFLCore.h>
+#include <AgentTools.h>
+
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 

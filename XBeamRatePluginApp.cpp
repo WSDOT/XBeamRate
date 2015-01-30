@@ -12,8 +12,13 @@
 #include "XBeamRatePlugin_i.h"
 #include "XBeamRatePlugin_i.c"
 
-#include "XBeamRateAppPlugin.h"
+#include <IFace\Project.h>
 
+#include <WBFLCore_i.c>
+
+#include "XBeamRateAppPlugin.h"
+#include "XBeamRateDocProxyAgent.h"
+#include <XBeamRateCatCom.h>
 
 #include <BridgeLinkCATID.h>
 #include <System\ComCatMgr.h>

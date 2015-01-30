@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.wsdot.wa.gov/XBeamRate"
+           xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
+>
+  <xs:annotation>
+    <xs:documentation>
+      This schema defines the WSDOT XBeam Rate data format.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="OpenBridgeML_Units.xsd" />
+
+   <!-- define the basic data types -->
+  <xs:complexType name="XBeam">
+    <xs:annotation>
+      <xs:documentation>
+        Defines a cross beam
+      </xs:documentation>
+    </xs:annotation>
+      <xs:sequence>
+        <xs:element name="LeftOverhang" type="bxu:LengthValueType"/>
+        <xs:element name="RightOverhang" type="bxu:LengthValueType"/>
+      </xs:sequence>
+  </xs:complexType>
+
+   <xs:complexType name="Column">
+      <xs:annotation>
+         <xs:documentation>
+            Defines a column
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="Length" type="bxu:LengthValueType"/>
+      </xs:sequence>
+   </xs:complexType>
+
+   <xs:element name="XBeamRate">
+      <xs:annotation>
+         <xs:documentation>This is the root of XBeamRate</xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:documentation>
+               This is the main sequence of elements in an instance document.
+            </xs:documentation>
+         </xs:annotation>
+         <xs:sequence>
+            <xs:element name="CrossBeam" type="XBeam"/>
+            <xs:element name="Column" type="Column"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

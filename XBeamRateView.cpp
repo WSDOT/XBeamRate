@@ -6,6 +6,8 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
 
+#include <IFace\Project.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -57,7 +59,13 @@ void CXBeamRateView::OnDraw(CDC* pDC)
 	CXBeamRateDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 	// TODO: add draw code for native data here
-   pDC->TextOut(0,0,"CXBeamRateView");
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IProject,pProject);
+   CString strProjectName = pProject->GetProjectName();
+
+   pDC->TextOut(0,0,strProjectName);
 }
 
 /////////////////////////////////////////////////////////////////////////////

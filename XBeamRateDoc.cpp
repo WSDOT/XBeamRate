@@ -5,6 +5,9 @@
 #include "resource.h"
 #include "XBeamRatePluginApp.h"
 #include "XBeamRateDoc.h"
+#include "XBeamRateDocProxyAgent.h"
+
+#include <XBeamRateCatCom.h>
 
 #include <EAF\EAFMainFrame.h>
 
@@ -17,9 +20,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateDoc
 
-IMPLEMENT_DYNCREATE(CXBeamRateDoc, CEAFDocument)
+IMPLEMENT_DYNCREATE(CXBeamRateDoc, CEAFBrokerDocument)
 
-BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFDocument)
+BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
 	//{{AFX_MSG_MAP(CXBeamRateDoc)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -27,19 +30,51 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateDoc construction/destruction
 
+#define XBR_PLUGIN_COMMAND_COUNT 256
+
 CXBeamRateDoc::CXBeamRateDoc()
 {
 	// TODO: add one-time construction code here
+   GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
 
+   m_pMyDocProxyAgent = NULL;
 }
 
 CXBeamRateDoc::~CXBeamRateDoc()
 {
 }
 
+BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
+{
+   if ( !CEAFBrokerDocument::LoadSpecialAgents(pBrokerInit) )
+   {
+      return FALSE;
+   }
+
+   CComObject<CXBeamRateDocProxyAgent>* pDocProxyAgent;
+   CComObject<CXBeamRateDocProxyAgent>::CreateInstance(&pDocProxyAgent);
+   m_pMyDocProxyAgent = dynamic_cast<CXBeamRateDocProxyAgent*>(pDocProxyAgent);
+   m_pMyDocProxyAgent->SetDocument( this );
+
+   CComPtr<IAgentEx> pAgent(m_pMyDocProxyAgent);
+   
+   HRESULT hr = pBrokerInit->AddAgent( pAgent );
+   if ( FAILED(hr) )
+   {
+      return FALSE;
+   }
+
+   return TRUE;
+}
+
+CATID CXBeamRateDoc::GetAgentCategoryID()
+{
+   return CATID_XBeamRateAgent;
+}
+
 BOOL CXBeamRateDoc::OnNewDocument()
 {
-	if (!CEAFDocument::OnNewDocument())
+	if (!CEAFBrokerDocument::OnNewDocument())
 		return FALSE;
 
 	// TODO: add reinitialization code here
@@ -81,14 +116,21 @@ BOOL CXBeamRateDoc::GetToolTipMessageString(UINT nID, CString& rMessage) const
 #ifdef _DEBUG
 void CXBeamRateDoc::AssertValid() const
 {
-	CEAFDocument::AssertValid();
+	CEAFBrokerDocument::AssertValid();
 }
 
 void CXBeamRateDoc::Dump(CDumpContext& dc) const
 {
-	CEAFDocument::Dump(dc);
+	CEAFBrokerDocument::Dump(dc);
 }
 #endif //_DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateDoc commands
+
+void CXBeamRateDoc::BrokerShutDown()
+{
+   CEAFBrokerDocument::BrokerShutDown();
+
+   m_pMyDocProxyAgent = NULL;
+}

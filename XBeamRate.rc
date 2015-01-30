@@ -90,7 +90,7 @@ END
 // REGISTRY
 //
 
-IDR_XBEAMRATEAPP              REGISTRY                "XBeamRateAppPlugin.rgs"
+IDR_XBEAMRATEAPP        REGISTRY                "XBeamRateAppPlugin.rgs"
 IDR_COMPONENTINFO       REGISTRY                "ComponentInfo.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -132,7 +132,31 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON                ICON                    "res\\BridgeLink.ico"
+IDI_ICON                ICON                    "res\\XBeamRate.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_XBEAMRATE TOOLBAR  16, 16
+BEGIN
+    BUTTON      ID_FILE_NEW
+    BUTTON      ID_FILE_OPEN
+    BUTTON      ID_FILE_SAVE
+    BUTTON      ID_FILE_PRINT_DIRECT
+    SEPARATOR
+    BUTTON      EAFID_UNITS_SI
+    BUTTON      EAFID_UNITS_US
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_XBEAMRATE           BITMAP                  "res\\toolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -142,11 +166,7 @@ IDI_ICON                ICON                    "res\\BridgeLink.ico"
 STRINGTABLE 
 BEGIN
     IDS_PROJNAME            "XBeam Rate"
-END
-
-STRINGTABLE 
-BEGIN
-    IDR_XBEAMRATE             "\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
+    IDR_XBEAMRATE           "\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
 END
 
 STRINGTABLE 
@@ -172,6 +192,11 @@ STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE 
+BEGIN
+    ID_EDIT_PROJECTNAME     "Edit the Project Name\nEdit the project name"
 END
 
 #endif    // English (U.S.) resources
