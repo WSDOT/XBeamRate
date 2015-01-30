@@ -1,0 +1,37 @@
+// XBeamRate.idl : IDL source for XBeamRate.dll
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (XBeamRate.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[
+	uuid(CDAAC48F-11E7-46a3-B186-8C5418EB611F),
+	version(1.0),
+	helpstring("XBeam Rate Type Library")
+]
+library XBeamRateLibrary
+{
+	importlib("stdole32.tlb");
+	importlib("stdole2.tlb");
+
+	[
+		uuid(B195CE70-2D27-4fa6-B0E5-99D09022D662),
+		helpstring("XBeam Rate Application Plugin")
+	]
+	coclass XBeamRateAppPlugin
+	{
+		[default] interface IUnknown;
+	};
+
+   [
+      uuid(8CB5644D-5CC5-4fca-A86C-0A1D566D30CB)
+   ]
+   coclass XBeamRateComponentInfo
+   {
+      interface IUnknown;
+   }
+};
