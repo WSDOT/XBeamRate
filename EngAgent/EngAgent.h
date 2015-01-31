@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// ExtensionAgentExample - Extension Agent Example Project for PGSuper
+// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,12 +20,16 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// dllmain.h : Declaration of module class.
+#ifndef INCLUDED_EngAgent_H_
+#define INCLUDED_EngAgent_H_
 
-class CProjectAgentModule : public CAtlDllModuleT< CProjectAgentModule >
-{
-public :
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_PROJECTAGENTMODULE, "{D6F8BA46-34F8-472b-8E4C-D8B8763B1BAD}")
-};
+/*****************************************************************************
+COPYRIGHT
+   Copyright © 1997-1998
+   Washington State Department Of Transportation
+   All Rights Reserved
+*****************************************************************************/
 
-extern class CProjectAgentModule _AtlModule;
+#include <IFace\LoadRating.h>
+
+#endif // INCLUDED_EngAgent_H_

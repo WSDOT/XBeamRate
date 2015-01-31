@@ -8,6 +8,7 @@
 
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
 #include <MFCTools\Text.h>
 
 #ifdef _DEBUG
@@ -70,8 +71,11 @@ void CXBeamRateView::OnDraw(CDC* pDC)
    GET_IFACE2(pBroker,IAnalysisResults,pResults);
    Float64 value = pResults->GetResult();
 
+   GET_IFACE2(pBroker,ILoadRating,pRating);
+   Float64 RF = pRating->GetRatingFactor();
+
    CString strMsg;
-   strMsg.Format(_T("%s\n%f"),strProjectName,value);
+   strMsg.Format(_T("%s\nM = %f\nRF = %f"),strProjectName,value,RF);
 
    MultiLineTextOut(pDC,0,0,strMsg);
 }

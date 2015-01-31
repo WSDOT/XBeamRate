@@ -25,7 +25,6 @@
 class CAnalysisAgentModule : public CAtlDllModuleT< CAnalysisAgentModule >
 {
 public :
-	//DECLARE_LIBID(LIBID_ExtensionAgentExampleLib)
 	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_ANALYSISAGENTMODULE, "{297FAFC4-276D-471f-9C76-EC1C11FC088E}")
 };
 

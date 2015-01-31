@@ -20,12 +20,36 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// dllmain.h : Declaration of module class.
+// dllmain.cpp : Implementation of DllMain.
 
-class CProjectAgentModule : public CAtlDllModuleT< CProjectAgentModule >
+#include "stdafx.h"
+#include "resource.h"
+#include "dllmain.h"
+
+CEngAgentModule _AtlModule;
+
+class CEngAgentModuleApp : public CWinApp
 {
-public :
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_PROJECTAGENTMODULE, "{D6F8BA46-34F8-472b-8E4C-D8B8763B1BAD}")
+public:
+
+// Overrides
+	virtual BOOL InitInstance();
+	virtual int ExitInstance();
+
+	DECLARE_MESSAGE_MAP()
 };
 
-extern class CProjectAgentModule _AtlModule;
+BEGIN_MESSAGE_MAP(CEngAgentModuleApp, CWinApp)
+END_MESSAGE_MAP()
+
+CEngAgentModuleApp theApp;
+
+BOOL CEngAgentModuleApp::InitInstance()
+{
+	return CWinApp::InitInstance();
+}
+
+int CEngAgentModuleApp::ExitInstance()
+{
+	return CWinApp::ExitInstance();
+}

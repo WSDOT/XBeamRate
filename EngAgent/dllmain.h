@@ -22,10 +22,10 @@
 
 // dllmain.h : Declaration of module class.
 
-class CProjectAgentModule : public CAtlDllModuleT< CProjectAgentModule >
+class CEngAgentModule : public CAtlDllModuleT< CEngAgentModule >
 {
 public :
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_PROJECTAGENTMODULE, "{D6F8BA46-34F8-472b-8E4C-D8B8763B1BAD}")
+	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_ENGAGENTMODULE, "{7D8DB6F0-4302-4025-A630-5A3BD10D8171}")
 };
 
-extern class CProjectAgentModule _AtlModule;
+extern class CEngAgentModule _AtlModule;

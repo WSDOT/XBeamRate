@@ -1,10 +1,10 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by AnalysisAgent.rc
+// Used by EngAgent.rc
 //
 #define IDS_PROJNAME                    100
-#define IDR_ANALYSISAGENT                101
-#define IDR_ANALYSISAGENTMODULE          102
+#define IDR_ENGAGENT                101
+#define IDR_ENGAGENTMODULE          102
 
 // Next default values for new objects
 // 

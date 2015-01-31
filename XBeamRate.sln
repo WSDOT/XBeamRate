@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XBeamRate", "XBeamRate.vcproj", "{DC673D35-C7CE-4E7D-9043-B38814C050D5}"
 	ProjectSection(ProjectDependencies) = postProject
+		{01092969-A67E-4534-832F-C1925619A138} = {01092969-A67E-4534-832F-C1925619A138}
 		{A69BD69E-07D6-4326-B25A-938BEC2BB378} = {A69BD69E-07D6-4326-B25A-938BEC2BB378}
 		{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8} = {D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}
 	EndProjectSection
@@ -10,6 +11,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectAgent", "ProjectAgent\ProjectAgent.vcproj", "{A69BD69E-07D6-4326-B25A-938BEC2BB378}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnalysisAgent", "AnalysisAgent\AnalysisAgent.vcproj", "{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngAgent", "EngAgent\EngAgent.vcproj", "{01092969-A67E-4534-832F-C1925619A138}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +59,18 @@ Global
 		{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}.Release|Win32.Build.0 = Release|Win32
 		{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}.Release|x64.ActiveCfg = Release|x64
 		{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}.Release|x64.Build.0 = Release|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Debug|Win32.ActiveCfg = Debug|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Debug|Win32.Build.0 = Debug|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Debug|x64.ActiveCfg = Debug|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Debug|x64.Build.0 = Debug|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Profile|Win32.ActiveCfg = Profile|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Profile|Win32.Build.0 = Profile|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Profile|x64.ActiveCfg = Profile|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Profile|x64.Build.0 = Profile|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Release|Win32.ActiveCfg = Release|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Release|Win32.Build.0 = Release|Win32
+		{01092969-A67E-4534-832F-C1925619A138}.Release|x64.ActiveCfg = Release|x64
+		{01092969-A67E-4534-832F-C1925619A138}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

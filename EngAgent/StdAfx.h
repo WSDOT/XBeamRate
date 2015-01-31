@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// ExtensionAgentExample - Extension Agent Example Project for PGSuper
+// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,12 +20,41 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// dllmain.h : Declaration of module class.
+// stdafx.h : include file for standard system include files,
+//      or project specific include files that are used frequently,
+//      but are changed infrequently
 
-class CProjectAgentModule : public CAtlDllModuleT< CProjectAgentModule >
-{
-public :
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_PROJECTAGENTMODULE, "{D6F8BA46-34F8-472b-8E4C-D8B8763B1BAD}")
-};
+#pragma once
 
-extern class CProjectAgentModule _AtlModule;
+#ifndef STRICT
+#define STRICT
+#endif
+
+#define VC_EXTRALEAN
+#define COM_STDMETHOD_CAN_THROW
+
+#define _ATL_APARTMENT_THREADED
+#define _ATL_NO_AUTOMATIC_NAMESPACE
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
+
+
+#include <WBFLVersion.h>
+
+#include <afxwin.h>         // MFC core and standard components
+#include <afxext.h>         // MFC extensions
+#include <afxpriv.h>        // Private MFC extensions
+#include <afxole.h>         // MFC OLE classes
+#include <afxodlgs.h>       // MFC OLE dialog classes
+#include <afxdisp.h>        // MFC OLE automation classes
+
+#include <atlbase.h>
+#include <atlcom.h>
+
+using namespace ATL;
+
+#include <WBFLDebug.h>
+#include <System\Transaction.h>
+
+#include <WBFLCore.h>
+#include <AgentTools.h>
+
