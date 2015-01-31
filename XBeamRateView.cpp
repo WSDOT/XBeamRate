@@ -7,6 +7,8 @@
 #include "XBeamRateView.h"
 
 #include <IFace\Project.h>
+#include <IFace\AnalysisResults.h>
+#include <MFCTools\Text.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -65,7 +67,13 @@ void CXBeamRateView::OnDraw(CDC* pDC)
    GET_IFACE2(pBroker,IProject,pProject);
    CString strProjectName = pProject->GetProjectName();
 
-   pDC->TextOut(0,0,strProjectName);
+   GET_IFACE2(pBroker,IAnalysisResults,pResults);
+   Float64 value = pResults->GetResult();
+
+   CString strMsg;
+   strMsg.Format(_T("%s\n%f"),strProjectName,value);
+
+   MultiLineTextOut(pDC,0,0,strMsg);
 }
 
 /////////////////////////////////////////////////////////////////////////////

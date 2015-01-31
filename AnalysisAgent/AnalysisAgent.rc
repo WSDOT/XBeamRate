@@ -46,7 +46,7 @@ END
 
 4 TEXTINCLUDE 
 BEGIN
-    "1 TYPELIB ""ProjectAgent.tlb""\r\n"
+    "1 TYPELIB ""AnalysisAgent.tlb""\r\n"
     "\0"
 END
 
@@ -77,11 +77,11 @@ BEGIN
         BEGIN
             VALUE "Comments", "A member of the Alternate Route Project"
             VALUE "CompanyName", "Washington State Department of Transportation"
-            VALUE "FileDescription", "ProjectAgent Module"
+            VALUE "FileDescription", "AnalysisAgent Module"
             VALUE "FileVersion", "1.0.0.1"
-            VALUE "InternalName", "ProjectAgent"
+            VALUE "InternalName", "AnalysisAgent"
             VALUE "LegalCopyright", "Copyright © 1999-2015, Washington State Department of Transportation, All Rights Reserved"
-            VALUE "OriginalFilename", "ProjectAgent.dll"
+            VALUE "OriginalFilename", "AnalysisAgent.DLL"
             VALUE "ProductName", "XBeam Rate"
             VALUE "ProductVersion", "1.0.0.1"
         END
@@ -98,19 +98,8 @@ END
 // REGISTRY
 //
 
-IDR_PROJECTAGENT        REGISTRY                "ProjectAgent.rgs"
-IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_MENU MENU 
-BEGIN
-    MENUITEM "Project Name",                ID_EDIT_PROJECT_NAME
-END
-
+IDR_ANALYSISAGENT       REGISTRY                "AnalysisAgent.rgs"
+IDR_ANALYSISAGENTMODULE REGISTRY                "AnalysisAgentModule.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -119,7 +108,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PROJNAME            "ProjectAgent"
+    IDS_PROJNAME            "AnalysisAgent"
 END
 
 STRINGTABLE 

@@ -13,6 +13,7 @@
 #include "XBeamRatePlugin_i.c"
 
 #include <IFace\Project.h>
+#include <IFace\AnalysisResults.h>
 
 #include <WBFLCore_i.c>
 

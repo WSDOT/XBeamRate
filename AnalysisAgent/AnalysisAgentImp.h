@@ -20,58 +20,50 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// ProjectAgentImp.h : Declaration of the CProjectAgentImp
+// AnalysisAgentImp.h : Declaration of the CAnalysisAgentImp
 
-// This agent provides everything related to the input data including the data itself,
-// the UI for manipulating the data, and persistence of the data.
+// This agent is responsible for creating structural analysis models
+// and providing analysis results
 
 #pragma once
 
 #include "resource.h"       // main symbols
-#include <ProjectAgent.h>
-#include "CPProjectAgent.h"
-#include "ProjectAgentCLSID.h"
-#include "AgentCmdTarget.h"
+#include <AnalysisAgent.h>
+#include "AnalysisAgentCLSID.h"
 
 #include <EAF\EAFInterfaceCache.h>
-#include <EAF\EAFUIIntegration.h>
 
 /////////////////////////////////////////////////////////////////////////////
-// CProjectAgentImp
-class ATL_NO_VTABLE CProjectAgentImp : 
+// CAnalysisAgentImp
+class ATL_NO_VTABLE CAnalysisAgentImp : 
 	public CComObjectRootEx<CComSingleThreadModel>,
-   //public CComRefCountTracer<CProjectAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
-	public CComCoClass<CProjectAgentImp, &CLSID_ProjectAgent>,
-	public IConnectionPointContainerImpl<CProjectAgentImp>,
-   public CProxyIProjectEventSink<CProjectAgentImp>,
+   //public CComRefCountTracer<CAnalysisAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
+	public CComCoClass<CAnalysisAgentImp, &CLSID_AnalysisAgent>,
+	public IConnectionPointContainerImpl<CAnalysisAgentImp>,
+   //public CProxyIProjectEventSink<CAnalysisAgentImp>,
    public IAgentEx,
-   public IAgentUIIntegration,
-   //public IAgentPersist,
-   public IEAFCommandCallback,
-   public IProject
+   public IAnalysisResults
 {  
 public:
-	CProjectAgentImp(); 
-   virtual ~CProjectAgentImp();
+	CAnalysisAgentImp(); 
+   virtual ~CAnalysisAgentImp();
 
    DECLARE_PROTECT_FINAL_CONSTRUCT();
 
    HRESULT FinalConstruct();
    void FinalRelease();
 
-DECLARE_REGISTRY_RESOURCEID(IDR_PROJECTAGENT)
+DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 
-BEGIN_COM_MAP(CProjectAgentImp)
+BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IAgentUIIntegration)
-	//COM_INTERFACE_ENTRY(IAgentPersist)
-	COM_INTERFACE_ENTRY(IProject)
+	COM_INTERFACE_ENTRY(IAnalysisResults)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
-BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
-   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
+BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
+//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -84,25 +76,9 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IAgentUIIntegration
+// IAnalysisResults
 public:
-   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
-
-//// IAgentPersist
-//public:
-//	STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
-//	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
-
-// IEAFCommandCallback
-public:
-   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
-   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
-   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
-
-// IProject
-public:
-   virtual void SetProjectName(LPCTSTR strName);
-   virtual LPCTSTR GetProjectName();
+   virtual Float64 GetResult();
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -110,16 +86,7 @@ public:
 
 private:
    DECLARE_EAF_AGENT_DATA;
-
-   CAgentCmdTarget m_CommandTarget;
-
-   CString m_ProjectName;
-
-   friend CProxyIProjectEventSink<CProjectAgentImp>;
-
-   void CreateMenus();
-   void RemoveMenus();
 };
 
-OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)
+OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)
 
