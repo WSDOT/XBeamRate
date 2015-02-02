@@ -43,6 +43,7 @@
 #include <System\ComCatMgr.h>
 
 #include <EAF\EAFTransactions.h>
+#include <EAF\EAFDisplayUnits.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

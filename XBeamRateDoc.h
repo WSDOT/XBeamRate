@@ -35,8 +35,6 @@ public:
 	virtual BOOL OnNewDocument();
 	//}}AFX_VIRTUAL
 
-   virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
-   virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
    virtual CString GetToolbarSectionName();
    virtual BOOL GetStatusBarMessageString(UINT nID,CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;

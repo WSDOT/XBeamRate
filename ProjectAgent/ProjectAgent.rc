@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include <EAF\EAFResources.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -34,17 +35,22 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
+    "EAF\EAFResources.h\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
     "#include ""winres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE 
+4 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
 END
 
-4 TEXTINCLUDE 
+5 TEXTINCLUDE 
 BEGIN
     "1 TYPELIB ""ProjectAgent.tlb""\r\n"
     "\0"
@@ -109,6 +115,7 @@ IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
 IDR_MENU MENU 
 BEGIN
     MENUITEM "Project Name",                ID_EDIT_PROJECT_NAME
+    MENUITEM "Units", EAFID_EDIT_UNITS
 END
 
 

@@ -83,16 +83,6 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	return TRUE;
 }
 
-HRESULT CXBeamRateDoc::WriteTheDocument(IStructuredSave* pStrSave)
-{
-   return S_OK;
-}
-
-HRESULT CXBeamRateDoc::LoadTheDocument(IStructuredLoad* pStrLoad)
-{
-   return S_OK;
-}
-
 CString CXBeamRateDoc::GetToolbarSectionName()
 {
    return "XBeamRate";

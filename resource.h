@@ -16,6 +16,7 @@
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
 #define EAFID_UNITS_SI                  32772
+#define ID_FILE_SAFE                    32772
 #define EAFID_UNITS_US                  32773
 
 // Next default values for new objects
@@ -23,7 +24,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        208
-#define _APS_NEXT_COMMAND_VALUE         32772
+#define _APS_NEXT_COMMAND_VALUE         32773
 #define _APS_NEXT_CONTROL_VALUE         201
 #define _APS_NEXT_SYMED_VALUE           103
 #endif

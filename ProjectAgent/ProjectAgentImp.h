@@ -46,7 +46,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public CProxyIProjectEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
-   //public IAgentPersist,
+   public IAgentPersist,
    public IEAFCommandCallback,
    public IProject
 {  
@@ -65,7 +65,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
-	//COM_INTERFACE_ENTRY(IAgentPersist)
+	COM_INTERFACE_ENTRY(IAgentPersist)
 	COM_INTERFACE_ENTRY(IProject)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
@@ -88,10 +88,10 @@ public:
 public:
    STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
 
-//// IAgentPersist
-//public:
-//	STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
-//	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
+// IAgentPersist
+public:
+	STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
+	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
 
 // IEAFCommandCallback
 public:

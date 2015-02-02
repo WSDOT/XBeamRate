@@ -17,6 +17,9 @@
 		/>
 	</Platforms>
 	<ToolFiles>
+		<ToolFile
+			RelativePath="..\..\..\CodeSynthesis XSD 3.3\etc\vc-9.0\xsd-cxx-tree.rules"
+		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -40,6 +43,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -59,7 +67,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm600 "
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="_AFXDLL;_ATL_NO_UUIDOF;_DEBUG;WIN32;_WINDOWS;ENABLE_LOGGING"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
@@ -78,7 +86,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -87,7 +95,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1D.lib xerces-c_3D.lib OpenBridgeMLD.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -146,6 +154,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -165,7 +178,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm600 "
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="_AFXDLL;_ATL_NO_UUIDOF;_DEBUG;WIN32;_WINDOWS;ENABLE_LOGGING"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
@@ -184,7 +197,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -193,7 +206,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1D.lib xerces-c_3D.lib OpenBridgeMLD.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
@@ -253,6 +266,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -276,7 +294,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -293,7 +311,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -302,7 +320,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1.lib xerces-c_3.lib OpenBridgeML.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -363,6 +381,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -386,7 +409,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -403,7 +426,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -412,7 +435,7 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1.lib xerces-c_3.lib OpenBridgeML.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
@@ -473,6 +496,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -496,7 +524,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -514,7 +542,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -585,6 +613,11 @@
 				Outputs=""
 			/>
 			<Tool
+				Name="C++/Tree Mapping Rule"
+				GenSerialization="true"
+				GenDoxygen="true"
+			/>
+			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -608,7 +641,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -626,7 +659,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="$(IntDir)"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -1015,6 +1048,76 @@
 					>
 				</File>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Schema Files"
+			Filter="xsd"
+			>
+			<File
+				RelativePath=".\Schema\XBeamRate.xsd"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|x64"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Profile|Win32"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Profile|x64"
+					>
+					<Tool
+						Name="C++/Tree Mapping Rule"
+						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
+					/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Generated Files"
+			Filter="hxx;cxx"
+			>
+			<File
+				RelativePath=".\XBeamRate.cxx"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRate.hxx"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

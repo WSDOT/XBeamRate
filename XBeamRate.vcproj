@@ -73,7 +73,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\PGSuper\Include;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -168,7 +168,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\PGSuper\Include;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -261,7 +261,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\PGSuper\Include;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -356,7 +356,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\PGSuper\Include;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
