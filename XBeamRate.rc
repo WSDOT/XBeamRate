@@ -39,12 +39,6 @@ BEGIN
     "\0"
 END
 
-3 TEXTINCLUDE 
-BEGIN
-    "1 TYPELIB ""XBeamRatePlugin.tlb""\r\n"
-    "\0"
-END
-
 #endif    // APSTUDIO_INVOKED
 
 

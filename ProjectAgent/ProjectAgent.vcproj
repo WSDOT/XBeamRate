@@ -44,8 +44,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -155,8 +156,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -267,8 +269,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -382,8 +385,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -497,8 +501,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -614,8 +619,9 @@
 			/>
 			<Tool
 				Name="C++/Tree Mapping Rule"
+				CharType="1"
 				GenSerialization="true"
-				GenDoxygen="true"
+				GenDoxygen="false"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

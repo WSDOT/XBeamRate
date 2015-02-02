@@ -29,14 +29,17 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "dllmain.h"
 #include "initguid.h"
-#include "AnalysisAgent.h"
+
+#include <WBFLCore_i.c>
+#include <WBFLFem2d_i.c>
+
+#include "dllmain.h"
 
 #include "AnalysisAgentCLSID.h"
 
-#include <WBFLCore_i.c>
 
+#include "AnalysisAgent.h"
 #include "AnalysisAgentImp.h"
 
 #include "XBeamRateCatCom.h"

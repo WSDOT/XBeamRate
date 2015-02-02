@@ -12,7 +12,10 @@ public:
 	public:
     virtual BOOL InitInstance();
     virtual int ExitInstance();
- 	 virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+
+    CString GetVersion(bool bIncludeBuildNumber) const;
+
+    virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 
 	//}}AFX_VIRTUAL
 

@@ -139,26 +139,37 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    USES_CONVERSION;
    HRESULT hr = S_OK;
 
+   // Load the entire node for this agent
    CComBSTR bstrUnit;
    pStrLoad->LoadRawUnit(&bstrUnit);
 
+   // remove the <Agent></Agent> tags... remove the <CLSID> element
    CString strUnit(OLE2T(bstrUnit));
    int i = strUnit.Find(_T("</CLSID>")) + CString(_T("</CLSID>")).GetLength();
    strUnit = strUnit.Right(strUnit.GetLength()-i);
    strUnit.Replace(_T("</Agent>"),_T(""));
 
+   // add the processing instruction at the head of the XML stream
+   std::_tstringstream ss;
+   ss << _T("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>") << strUnit;
 
-   std::stringstream ss;
-   ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << T2A(strUnit);
+   // create the XML\C++ binding reading from the string stream
+   // for instance document validation, we need to tell the XML parser where the schema files are located
+   xml_schema::properties props;
+   props.no_namespace_schema_location(_T("F:\\ARP\\XBeamRate\\Schema\\XBeamRate.xsd"));
+   props.schema_location(_T("http://www.wsdot.wa.gov/OpenBridgeML/Units"),_T("F:\\ARP\\OpenBridgeML\\Schema\\OpenBridgeML_Units.xsd"));
+   std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss.str(),0,props);
+   //std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss,xml_schema::flags::dont_validate);
 
-   std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss);
-
+   // extract our data from the binding object
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    ApplicationSettings settings = xbrXML->Settings();
    if ( settings.Units() == UnitModeEnum::SI )
       pDisplayUnits->SetUnitMode(eafTypes::umSI);
    else
       pDisplayUnits->SetUnitMode(eafTypes::umUS);
+
+   m_ProjectName = xbrXML->ProjectName().c_str();
 
    return hr;
 }
@@ -171,18 +182,22 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? UnitModeEnum::SI : UnitModeEnum::US);
    ApplicationSettings settings(units);
 
-   std::auto_ptr<XBeamRate> xbrXML(new XBeamRate(settings));
+   // Create the XML\C++ binding object and fill it with data
+   std::auto_ptr<XBeamRate> xbrXML(new XBeamRate(settings,m_ProjectName.GetBuffer()));
 
+   // write the XML stream into the string-stream
    std::ostringstream ss;
    XBeamRate_(ss,*xbrXML);
 
-   std::string string = ss.str();
-   std::string::size_type a = string.find_first_of("<");
-   std::string::size_type b = string.find_first_of(">");
-   string.replace(a,b+1,"");
-
+   // remove the initial <?xml> processing instruction
    USES_CONVERSION;
-   pStrSave->SaveRawUnit(A2T(string.c_str()));
+   std::_tstring string = A2T(ss.str().c_str());
+   std::_tstring::size_type a = string.find_first_of(_T("<"));
+   std::_tstring::size_type b = string.find_first_of(_T(">"));
+   string.replace(a,b+1,_T(""));
+
+   // dump the XML stream into our structure storage container
+   pStrSave->SaveRawUnit(string.c_str());
 
    return hr;
 }

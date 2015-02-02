@@ -3,16 +3,16 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
 >
-  <xs:annotation>
-    <xs:documentation>
-      This schema defines the WSDOT XBeam Rate data format.
-    </xs:documentation>
-  </xs:annotation>
+   <xs:annotation>
+      <xs:documentation>
+         This schema defines the WSDOT XBeam Rate data format.
+      </xs:documentation>
+   </xs:annotation>
 
-  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
+   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
 
    <!-- define the basic data types -->
-  <!--<xs:complexType name="XBeam">
+   <!--<xs:complexType name="XBeam">
     <xs:annotation>
       <xs:documentation>
         Defines a cross beam
@@ -35,31 +35,31 @@
       </xs:sequence>
    </xs:complexType>-->
 
-  <xs:simpleType name="UnitModeEnum">
-    <xs:annotation>
-      <xs:documentation>
-        Defines the system unit mode.
-      </xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="SI" />
-      <xs:enumeration value="US"/>
-    </xs:restriction>
-  </xs:simpleType>
+   <xs:simpleType name="UnitModeEnum">
+      <xs:annotation>
+         <xs:documentation>
+            Defines the system unit mode.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="SI" />
+         <xs:enumeration value="US"/>
+      </xs:restriction>
+   </xs:simpleType>
 
-  <xs:complexType name="ApplicationSettings">
-    <xs:annotation>
-      <xs:documentation>
-        Defines application settings
-      </xs:documentation>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="Units" type="UnitModeEnum"/>
-    </xs:sequence>
-  </xs:complexType>
+   <xs:complexType name="ApplicationSettings">
+      <xs:annotation>
+         <xs:documentation>
+            Defines application settings
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="Units" type="UnitModeEnum"/>
+      </xs:sequence>
+   </xs:complexType>
 
-  <!-- Define Instance Document Format -->
-  <!-- 
+   <!-- Define Instance Document Format -->
+   <!-- 
   The goal is to have two sections. The first section is XBeamRate specific information such as settings and options. The 
   second section is an OpenBridgeML generic product defintion of a bent. Together, these two sections make up a
   XBeam Rate input file
@@ -76,6 +76,7 @@
          </xs:annotation>
          <xs:sequence>
             <xs:element name="Settings" type="ApplicationSettings"/>
+            <xs:element name="ProjectName" type="xs:string"/>
          </xs:sequence>
       </xs:complexType>
    </xs:element>

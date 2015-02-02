@@ -72,6 +72,67 @@ CATID CXBeamRateDoc::GetAgentCategoryID()
    return CATID_XBeamRateAgent;
 }
 
+HRESULT CXBeamRateDoc::LoadTheDocument(IStructuredLoad* pStrLoad)
+{
+   Float64 version;
+   HRESULT hr = pStrLoad->get_Version(&version);
+   if ( FAILED(hr) )
+   {
+      return hr;
+   }
+
+   CComVariant var;
+   var.vt = VT_BSTR;
+   hr = pStrLoad->get_Property(_T("Version"),&var);
+   if ( FAILED(hr) )
+   {
+      return hr;
+   }
+
+#if defined _DEBUG
+   TRACE(_T("Loading data saved with XBeamRate Version %s\n"),CComBSTR(var.bstrVal));
+#endif
+
+   hr = CEAFBrokerDocument::LoadTheDocument(pStrLoad);
+   if ( FAILED(hr) )
+   {
+      return hr;
+   }
+
+   return S_OK;
+}
+
+HRESULT CXBeamRateDoc::WriteTheDocument(IStructuredSave* pStrSave)
+{
+   // before the standard broker document persistence, write out the version
+   // number of the application that created this document
+   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+   HRESULT hr = pStrSave->put_Property(_T("Version"),CComVariant(pApp->GetVersion(true)));
+   if ( FAILED(hr) )
+   {
+      return hr;
+   }
+
+   hr = CEAFBrokerDocument::WriteTheDocument(pStrSave);
+   if ( FAILED(hr) )
+   {
+      return hr;
+   }
+
+
+   return S_OK;
+}
+
+CString CXBeamRateDoc::GetRootNodeName()
+{
+   return _T("XBeamRate");
+}
+
+Float64 CXBeamRateDoc::GetRootNodeVersion()
+{
+   return 1.0;
+}
+
 BOOL CXBeamRateDoc::OnNewDocument()
 {
 	if (!CEAFBrokerDocument::OnNewDocument())

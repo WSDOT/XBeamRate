@@ -24,6 +24,8 @@ protected: // create from serialization only
 
 // Attributes
 public:
+   virtual CString GetRootNodeName();
+   virtual Float64 GetRootNodeVersion();
 
 // Operations
 public:
@@ -49,6 +51,8 @@ public:
 
 protected:
    virtual CATID GetAgentCategoryID();
+   virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
+   virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
 
 // Generated message map functions
 protected:

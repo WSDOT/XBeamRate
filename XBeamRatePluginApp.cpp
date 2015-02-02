@@ -7,6 +7,8 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include <MFCTools\VersionInfo.h>
+
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
 #include "XBeamRatePlugin_i.h"
@@ -67,6 +69,31 @@ int CXBeamRatePluginApp::ExitInstance()
    return CWinApp::ExitInstance();
 }
 
+CString CXBeamRatePluginApp::GetVersion(bool bIncludeBuildNumber) const
+{
+   CString strExe( m_pszExeName );
+   strExe += ".dll";
+
+   CVersionInfo verInfo;
+   verInfo.Load(strExe);
+   
+   CString strVersion = verInfo.GetProductVersionAsString();
+
+#if defined _DEBUG || defined _BETA_VERSION
+   // always include the build number in debug and beta versions
+   bIncludeBuildNumber = true;
+#endif
+
+   if (!bIncludeBuildNumber)
+   {
+      // remove the build number
+      int pos = strVersion.ReverseFind(_T('.')); // find the last '.'
+      strVersion = strVersion.Left(pos);
+   }
+
+   return strVersion;
+}
+
 BOOL CXBeamRatePluginApp::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
 {
    // in order scan the message map for this plugin, the module state must be set
@@ -98,7 +125,7 @@ STDAPI DllRegisterServer(void)
 {
     // registers object, typelib and all interfaces in typelib
 
-   HRESULT hr = _Module.RegisterServer(TRUE);
+   HRESULT hr = _Module.RegisterServer(FALSE);
    if ( FAILED(hr) )
       return hr;
 
@@ -118,5 +145,5 @@ STDAPI DllUnregisterServer(void)
 
    sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,false);
 
-   return _Module.UnregisterServer(TRUE);
+   return _Module.UnregisterServer(FALSE);
 }

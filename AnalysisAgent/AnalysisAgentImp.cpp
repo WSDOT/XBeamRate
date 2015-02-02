@@ -79,22 +79,29 @@ STDMETHODIMP CAnalysisAgentImp::RegInterfaces()
 STDMETHODIMP CAnalysisAgentImp::Init()
 {
    //EAF_AGENT_INIT;
+   return AGENT_S_SECONDPASSINIT;
+}
 
-   ////
-   //// Attach to connection points for interfaces this agent depends on
-   ////
-   //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   //CComPtr<IConnectionPoint> pCP;
-   //HRESULT hr = S_OK;
+STDMETHODIMP CAnalysisAgentImp::Init2()
+{
+   //
+   // Attach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   // Connection point for the bridge description
+   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+
    return S_OK;
 }
 
 STDMETHODIMP CAnalysisAgentImp::Reset()
-{
-   return S_OK;
-}
-
-STDMETHODIMP CAnalysisAgentImp::Init2()
 {
    return S_OK;
 }
@@ -107,14 +114,155 @@ STDMETHODIMP CAnalysisAgentImp::GetClassID(CLSID* pCLSID)
 
 STDMETHODIMP CAnalysisAgentImp::ShutDown()
 {
+   //
+   // Detach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   hr = pBrokerInit->FindConnectionPoint(IID_IProjectEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Unadvise( m_dwProjectCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the connection point
+
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
 
+//////////////////////////////////////////////////////////////////////
+void CAnalysisAgentImp::Validate()
+{
+   if ( m_Model == NULL )
+   {
+      m_Model.CoCreateInstance(CLSID_Fem2dModel);
+
+      // Build the frame model
+
+      // some dummy dimensions
+      Float64 leftOverhang = 3;
+      Float64 rightOverhang = 3;
+      Float64 columnHeight = 10;
+      std::vector<Float64> columnSpacing;
+      columnSpacing.push_back(10);
+      columnSpacing.push_back(10);
+
+      Float64 EAb = 1;
+      Float64 EIb = 1;
+      Float64 EAc = 1;
+      Float64 EIc = 1;
+
+      CComPtr<IFem2dJointCollection> joints;
+      m_Model->get_Joints(&joints);
+
+      CComPtr<IFem2dMemberCollection> members;
+      m_Model->get_Members(&members);
+
+      JointIDType jntID = 0;
+
+      // Start joint at left end of cross beam
+      CComPtr<IFem2dJoint> joint;
+      joints->Create(jntID++,0,0,&joint);
+
+      // create joint at top of first column
+      joint.Release();
+      joints->Create(jntID++,leftOverhang,0,&joint);
+
+      // create left overhang member
+      MemberIDType mbrID = 0;
+      CComPtr<IFem2dMember> mbr;
+      members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
+
+      Float64 x = leftOverhang;
+      if ( columnSpacing.size() == 0 )
+      {
+         // hammer head pier - only one column
+
+         // create joint at bottom of column
+         joint.Release();
+         joints->Create(jntID++,x,-columnHeight,&joint);
+         joint->Support();
+
+         // create column member
+         mbr.Release();
+         members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
+      }
+      else
+      {
+         BOOST_FOREACH(Float64 space,columnSpacing)
+         {
+            // create joint at bottom of column
+            joint.Release();
+            joints->Create(jntID++,x,-columnHeight,&joint);
+            joint->Support();
+
+            // create column member
+            mbr.Release();
+            members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
+
+            x += space;
+
+            // create next top of column joint
+            joint.Release();
+            joints->Create(jntID++,x,0,&joint);
+
+            // create cross beam member
+            mbr.Release();
+            members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
+         }
+      }
+
+      // create joint at right end of cross beam
+      joint.Release();
+      joints->Create(jntID++,x+rightOverhang,0,&joint);
+
+      // create right overhang
+      mbr.Release();
+      members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
+
+      // create some dummy loads
+      CComPtr<IFem2dLoadingCollection> loadings;
+      m_Model->get_Loadings(&loadings);
+
+      LoadCaseIDType loadCaseID = 0;
+      CComPtr<IFem2dLoading> loading;
+      loadings->Create(loadCaseID,&loading);
+
+      CComPtr<IFem2dDistributedLoadCollection> distLoads;
+      loading->get_DistributedLoads(&distLoads);
+
+      LoadIDType loadID = 0;
+      for ( MemberIDType id = 0; id < mbrID; id++ )
+      {
+         CComPtr<IFem2dDistributedLoad> distLoad;
+         distLoads->Create(loadID++,id,loadDirFy,0.0,-1.0,-10,-10,lotMember,&distLoad);
+      }
+   }
+}
+
+void CAnalysisAgentImp::Invalidate()
+{
+   m_Model.Release();
+}
+
+//////////////////////////////////////////////////////////////////////
+// IProjectEventSink
+HRESULT CAnalysisAgentImp::OnProjectChanged()
+{
+   Invalidate();
+   return S_OK;
+}
 
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
 Float64 CAnalysisAgentImp::GetResult()
 {
-   return 1.0;
+   Validate();
+
+   CComQIPtr<IFem2dModelResults> results(m_Model);
+   Float64 startFx, startFy, startMz;
+   Float64 endFx,   endFy,   endMz;
+   results->ComputeMemberForces(0,0,&startFx,&startFy,&startMz,&endFx,&endFy,&endMz);
+   return endMz;
 }

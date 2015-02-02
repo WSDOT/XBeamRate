@@ -52,6 +52,7 @@
 
 using namespace ATL;
 
+#include <WBFLTypes.h>
 #include <WBFLDebug.h>
 #include <System\Transaction.h>
 

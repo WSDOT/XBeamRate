@@ -33,15 +33,20 @@
 
 #include <EAF\EAFInterfaceCache.h>
 
+#include <IFace\Project.h>
+
+#include <WBFLFem2d.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
 	public CComObjectRootEx<CComSingleThreadModel>,
    //public CComRefCountTracer<CAnalysisAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CAnalysisAgentImp, &CLSID_AnalysisAgent>,
-	public IConnectionPointContainerImpl<CAnalysisAgentImp>,
-   //public CProxyIProjectEventSink<CAnalysisAgentImp>,
+	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
+   //public CProxyIProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
    public IAgentEx,
+   public IProjectEventSink,
    public IAnalysisResults
 {  
 public:
@@ -58,13 +63,15 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IProjectEventSink)
 	COM_INTERFACE_ENTRY(IAnalysisResults)
-	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
+	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
 END_COM_MAP()
 
-BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
-END_CONNECTION_POINT_MAP()
+// needed if we implement a connection point
+//BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
+   //CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
+//END_CONNECTION_POINT_MAP()
 
 // IAgentEx
 public:
@@ -76,6 +83,10 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IProjectEventSink
+public:
+   HRESULT OnProjectChanged();
+
 // IAnalysisResults
 public:
    virtual Float64 GetResult();
@@ -86,6 +97,13 @@ public:
 
 private:
    DECLARE_EAF_AGENT_DATA;
+
+   void Validate();
+   void Invalidate();
+
+   DWORD m_dwProjectCookie;
+
+   CComPtr<IFem2dModel> m_Model;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)
