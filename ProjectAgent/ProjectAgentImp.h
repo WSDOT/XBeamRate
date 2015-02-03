@@ -36,6 +36,8 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <EAF\EAFUIIntegration.h>
 
+#include "XBeamRate.hxx" // XML/C++ Binding Object
+
 /////////////////////////////////////////////////////////////////////////////
 // CProjectAgentImp
 class ATL_NO_VTABLE CProjectAgentImp : 
@@ -94,6 +96,8 @@ public:
 	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
 
 // IEAFCommandCallback
+   // NOTE: this interface should be on CAgentCmdTarget, but it can't until
+   // CAgentCmdTarget supports IUnknown. This is a COM interface
 public:
    virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
@@ -104,6 +108,12 @@ public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
+   virtual Float64 GetLeftOverhang();
+   virtual Float64 GetRightOverhang();
+   virtual IndexType GetColumnCount();
+   virtual Float64 GetColumnHeight(IndexType colIdx);
+   virtual Float64 GetSpacing(IndexType spaceIdx);
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -113,7 +123,7 @@ private:
 
    CAgentCmdTarget m_CommandTarget;
 
-   CString m_ProjectName;
+   std::auto_ptr<XBeamRate> m_XBeamRateXML;
 
    friend CProxyIProjectEventSink<CProjectAgentImp>;
 

@@ -14,6 +14,12 @@ interface IProject : IUnknown
 {
    virtual void SetProjectName(LPCTSTR strName) = 0;
    virtual LPCTSTR GetProjectName() = 0;
+
+   virtual Float64 GetLeftOverhang() = 0;
+   virtual Float64 GetRightOverhang() = 0;
+   virtual IndexType GetColumnCount() = 0;
+   virtual Float64 GetColumnHeight(IndexType colIdx) = 0;
+   virtual Float64 GetSpacing(IndexType spaceIdx) = 0;
 };
 
 /*****************************************************************************

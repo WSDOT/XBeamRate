@@ -27,8 +27,6 @@
 
 #include <EAF\EAFDisplayUnits.h>
 
-#include "XBeamRate.hxx"
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -39,7 +37,6 @@ static char THIS_FILE[] = __FILE__;
 // CProjectAgentImp
 CProjectAgentImp::CProjectAgentImp()
 {
-   m_ProjectName = _T("XBeam Rating Project");
    m_pBroker = 0;
 }
 
@@ -91,6 +88,24 @@ STDMETHODIMP CProjectAgentImp::Init()
    //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
    //CComPtr<IConnectionPoint> pCP;
    //HRESULT hr = S_OK;
+
+   ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
+
+   OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0);
+
+   OpenBridgeML::Pier::IdealizedSupportType supportType(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed,OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
+   OpenBridgeML::Pier::BaseElement baseElement(supportType);
+   OpenBridgeML::Pier::ColumnType column(10.0,baseElement);
+
+   OpenBridgeML::Pier::ColumnsType columns;
+   columns.Column().push_back( column );
+   columns.Spacing().push_back(5.0);
+   columns.Column().push_back(column);
+
+   OpenBridgeML::Pier::Pier pier(capBeam,columns);
+
+   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pier));
+
    return S_OK;
 }
 
@@ -150,26 +165,24 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    strUnit.Replace(_T("</Agent>"),_T(""));
 
    // add the processing instruction at the head of the XML stream
-   std::_tstringstream ss;
-   ss << _T("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>") << strUnit;
+   std::stringstream ss;
+   ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << T2A(strUnit);
 
    // create the XML\C++ binding reading from the string stream
    // for instance document validation, we need to tell the XML parser where the schema files are located
-   xml_schema::properties props;
-   props.no_namespace_schema_location(_T("F:\\ARP\\XBeamRate\\Schema\\XBeamRate.xsd"));
-   props.schema_location(_T("http://www.wsdot.wa.gov/OpenBridgeML/Units"),_T("F:\\ARP\\OpenBridgeML\\Schema\\OpenBridgeML_Units.xsd"));
-   std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss.str(),0,props);
-   //std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss,xml_schema::flags::dont_validate);
+   //xml_schema::properties props;
+   //props.no_namespace_schema_location(_T("F:\\ARP\\XBeamRate\\Schema\\XBeamRate.xsd"));
+   //props.schema_location(_T("http://www.wsdot.wa.gov/OpenBridgeML/Units"),_T("F:\\ARP\\OpenBridgeML\\Schema\\OpenBridgeML_Units.xsd"));
+   //std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss,0,props);
+   m_XBeamRateXML = XBeamRate_(ss,xml_schema::flags::dont_validate); // can't figure out validation right now
 
    // extract our data from the binding object
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   ApplicationSettings settings = xbrXML->Settings();
+   ApplicationSettings& settings( m_XBeamRateXML->Settings() );
    if ( settings.Units() == UnitModeEnum::SI )
       pDisplayUnits->SetUnitMode(eafTypes::umSI);
    else
       pDisplayUnits->SetUnitMode(eafTypes::umUS);
-
-   m_ProjectName = xbrXML->ProjectName().c_str();
 
    return hr;
 }
@@ -180,14 +193,11 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? UnitModeEnum::SI : UnitModeEnum::US);
-   ApplicationSettings settings(units);
-
-   // Create the XML\C++ binding object and fill it with data
-   std::auto_ptr<XBeamRate> xbrXML(new XBeamRate(settings,m_ProjectName.GetBuffer()));
+   m_XBeamRateXML->Settings().Units(units);
 
    // write the XML stream into the string-stream
    std::ostringstream ss;
-   XBeamRate_(ss,*xbrXML);
+   XBeamRate_(ss,*m_XBeamRateXML);
 
    // remove the initial <?xml> processing instruction
    USES_CONVERSION;
@@ -254,13 +264,38 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 // IProject
 void CProjectAgentImp::SetProjectName(LPCTSTR strName)
 {
-   m_ProjectName = strName;
+   m_XBeamRateXML->Settings().ProjectName(strName);
    Fire_OnProjectChanged();
 }
 
 LPCTSTR CProjectAgentImp::GetProjectName()
 {
-   return m_ProjectName;
+   return m_XBeamRateXML->Settings().ProjectName().c_str();
+}
+
+Float64 CProjectAgentImp::GetLeftOverhang()
+{
+   return m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
+}
+
+Float64 CProjectAgentImp::GetRightOverhang()
+{
+   return m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+}
+
+IndexType CProjectAgentImp::GetColumnCount()
+{
+   return m_XBeamRateXML->Pier().Columns().Column().size();
+}
+
+Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
+{
+   return m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height();
+}
+
+Float64 CProjectAgentImp::GetSpacing(IndexType spaceIdx)
+{
+   return m_XBeamRateXML->Pier().Columns().Spacing()[spaceIdx];
 }
 
 //////////////////////////////////////////////////////////

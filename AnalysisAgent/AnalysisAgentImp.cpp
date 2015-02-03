@@ -139,14 +139,12 @@ void CAnalysisAgentImp::Validate()
       m_Model.CoCreateInstance(CLSID_Fem2dModel);
 
       // Build the frame model
+      GET_IFACE(IProject,pProject);
 
       // some dummy dimensions
-      Float64 leftOverhang = 3;
-      Float64 rightOverhang = 3;
-      Float64 columnHeight = 10;
-      std::vector<Float64> columnSpacing;
-      columnSpacing.push_back(10);
-      columnSpacing.push_back(10);
+      Float64 leftOverhang = pProject->GetLeftOverhang();
+      Float64 rightOverhang = pProject->GetRightOverhang();
+      IndexType nColumns = pProject->GetColumnCount();
 
       Float64 EAb = 1;
       Float64 EIb = 1;
@@ -175,9 +173,11 @@ void CAnalysisAgentImp::Validate()
       members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
 
       Float64 x = leftOverhang;
-      if ( columnSpacing.size() == 0 )
+      if ( nColumns == 1 )
       {
          // hammer head pier - only one column
+
+         Float64 columnHeight = pProject->GetColumnHeight(0);
 
          // create joint at bottom of column
          joint.Release();
@@ -190,8 +190,12 @@ void CAnalysisAgentImp::Validate()
       }
       else
       {
-         BOOST_FOREACH(Float64 space,columnSpacing)
+         IndexType nSpaces = nColumns-1;
+         for ( IndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
          {
+            Float64 space = pProject->GetSpacing(spaceIdx);
+            Float64 columnHeight = pProject->GetColumnHeight(spaceIdx);
+
             // create joint at bottom of column
             joint.Release();
             joints->Create(jntID++,x,-columnHeight,&joint);

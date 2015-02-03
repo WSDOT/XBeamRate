@@ -12,4 +12,6 @@ private:
    IBroker* m_pBroker; // weak reference
 
    DECLARE_MESSAGE_MAP()
+public:
+   afx_msg void OnEditPier();
 };

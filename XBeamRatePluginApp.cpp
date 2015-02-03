@@ -71,7 +71,10 @@ int CXBeamRatePluginApp::ExitInstance()
 
 CString CXBeamRatePluginApp::GetVersion(bool bIncludeBuildNumber) const
 {
-   CString strExe( m_pszExeName );
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CWinApp* pApp = AfxGetApp();
+   CString strExe( pApp->m_pszExeName );
    strExe += ".dll";
 
    CVersionInfo verInfo;

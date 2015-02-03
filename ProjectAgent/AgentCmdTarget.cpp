@@ -7,8 +7,11 @@
 #include <EAF\EAFTransactions.h>
 #include <txnEditProject.h>
 
+#include "PierDlg.h"
+
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
    ON_COMMAND(ID_EDIT_PROJECT_NAME,OnEditProjectName)
+   ON_COMMAND(ID_EDIT_PIER, &CAgentCmdTarget::OnEditPier)
 END_MESSAGE_MAP()
 
 CAgentCmdTarget::CAgentCmdTarget()
@@ -33,5 +36,16 @@ void CAgentCmdTarget::OnEditProjectName()
       txnEditProject txn(m_pBroker,strOldProjectName,strNewProjectName);
       GET_IFACE(IEAFTransactions,pTransactions);
       pTransactions->Execute(txn);
+   }
+}
+
+void CAgentCmdTarget::OnEditPier()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   // TODO: Add your command handler code here
+   CPierDlg dlg(_T("Edit Pier"));
+   if ( dlg.DoModal() == IDOK )
+   {
    }
 }

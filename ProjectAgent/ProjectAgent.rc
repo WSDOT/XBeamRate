@@ -1,16 +1,14 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include <EAF\EAFResources.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "winres.h"
-
 /////////////////////////////////////////////////////////////////////////////
+#include "afxres.h"
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
@@ -31,26 +29,22 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 1 TEXTINCLUDE 
 BEGIN
     "resource.h\0"
+    "EAF\\EAFResources.h\0"
 END
 
 2 TEXTINCLUDE 
-BEGIN
-    "EAF\EAFResources.h\0"
-END
-
-3 TEXTINCLUDE 
 BEGIN
     "#include ""winres.h""\r\n"
     "\0"
 END
 
-4 TEXTINCLUDE 
+3 TEXTINCLUDE 
 BEGIN
     "\r\n"
     "\0"
 END
 
-5 TEXTINCLUDE 
+4 TEXTINCLUDE 
 BEGIN
     "1 TYPELIB ""ProjectAgent.tlb""\r\n"
     "\0"
@@ -115,8 +109,42 @@ IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
 IDR_MENU MENU 
 BEGIN
     MENUITEM "Project Name",                ID_EDIT_PROJECT_NAME
-    MENUITEM "Units", EAFID_EDIT_UNITS
+    MENUITEM "Units",                       EAFID_EDIT_UNITS
+    MENUITEM "Pier",                        ID_EDIT_PIER
 END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PIER_LAYOUT_PAGE DIALOGEX 0, 0, 210, 154
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Layout"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "TODO: layout property page",IDC_STATIC,60,73,90,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PIER_LAYOUT_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+END
+#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -144,7 +172,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-
+#include "winres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

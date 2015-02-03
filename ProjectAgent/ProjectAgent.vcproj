@@ -731,6 +731,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PierDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PierLayoutPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="ProjectAgent.cpp"
 				>
 				<FileConfiguration
@@ -990,6 +998,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PierDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PierLayoutPage.h"
+				>
+			</File>
+			<File
 				RelativePath="ProjectAgent.h"
 				>
 			</File>
@@ -1127,5 +1143,9 @@
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="ProjectAgent.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

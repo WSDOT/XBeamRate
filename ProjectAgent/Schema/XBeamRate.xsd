@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-           xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
+           xmlns:bxp="http://www.wsdot.wa.gov/OpenBridgeML/Pier"
 >
    <xs:annotation>
       <xs:documentation>
@@ -9,31 +9,7 @@
       </xs:documentation>
    </xs:annotation>
 
-   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
-
-   <!-- define the basic data types -->
-   <!--<xs:complexType name="XBeam">
-    <xs:annotation>
-      <xs:documentation>
-        Defines a cross beam
-      </xs:documentation>
-    </xs:annotation>
-      <xs:sequence>
-        <xs:element name="LeftOverhang" type="bxu:LengthValueType"/>
-        <xs:element name="RightOverhang" type="bxu:LengthValueType"/>
-      </xs:sequence>
-  </xs:complexType>
-
-   <xs:complexType name="Column">
-      <xs:annotation>
-         <xs:documentation>
-            Defines a column
-         </xs:documentation>
-      </xs:annotation>
-      <xs:sequence>
-         <xs:element name="Length" type="bxu:LengthValueType"/>
-      </xs:sequence>
-   </xs:complexType>-->
+   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
 
    <xs:simpleType name="UnitModeEnum">
       <xs:annotation>
@@ -55,6 +31,7 @@
       </xs:annotation>
       <xs:sequence>
          <xs:element name="Units" type="UnitModeEnum"/>
+         <xs:element name="ProjectName" type="xs:string"/>
       </xs:sequence>
    </xs:complexType>
 
@@ -76,7 +53,7 @@
          </xs:annotation>
          <xs:sequence>
             <xs:element name="Settings" type="ApplicationSettings"/>
-            <xs:element name="ProjectName" type="xs:string"/>
+            <xs:element name="Pier" type="bxp:Pier"/>
          </xs:sequence>
       </xs:complexType>
    </xs:element>
