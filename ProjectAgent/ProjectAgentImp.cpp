@@ -93,8 +93,7 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0);
 
-   OpenBridgeML::Pier::IdealizedSupportType supportType(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed,OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
-   OpenBridgeML::Pier::BaseElement baseElement(supportType);
+   OpenBridgeML::Pier::BaseElement baseElement(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
    OpenBridgeML::Pier::ColumnType column(10.0,baseElement);
 
    OpenBridgeML::Pier::ColumnsType columns;
@@ -291,6 +290,21 @@ IndexType CProjectAgentImp::GetColumnCount()
 Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
 {
    return m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height();
+}
+
+xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
+{
+   xbrTypes::ColumnBaseType baseType;
+   if ( m_XBeamRateXML->Pier().Columns().Column()[colIdx].BaseElement().IdealizedSupport() == OpenBridgeML::Pier::IdealizedSupportEnum::Fixed) 
+   {
+      baseType = xbrTypes::cbtFixed;
+   }
+   else
+   {
+      baseType = xbrTypes::cbtPinned;
+   }
+
+   return baseType;
 }
 
 Float64 CProjectAgentImp::GetSpacing(IndexType spaceIdx)

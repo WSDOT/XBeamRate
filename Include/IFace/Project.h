@@ -19,6 +19,7 @@ interface IProject : IUnknown
    virtual Float64 GetRightOverhang() = 0;
    virtual IndexType GetColumnCount() = 0;
    virtual Float64 GetColumnHeight(IndexType colIdx) = 0;
+   virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx) = 0;
    virtual Float64 GetSpacing(IndexType spaceIdx) = 0;
 };
 

@@ -29,6 +29,7 @@ extern CComModule _Module;
 #include <WBFLCore.h>
 #include <AgentTools.h>
 
+#include <XBeamRateTypes.h>
 
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.

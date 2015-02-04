@@ -182,7 +182,12 @@ void CAnalysisAgentImp::Validate()
          // create joint at bottom of column
          joint.Release();
          joints->Create(jntID++,x,-columnHeight,&joint);
-         joint->Support();
+
+         joint->Support(); // fully fixed
+         if ( pProject->GetColumnBaseType(0) == xbrTypes::cbtPinned )
+         {
+            joint->ReleaseDof(jrtMz); // pinned
+         }
 
          // create column member
          mbr.Release();
@@ -199,7 +204,12 @@ void CAnalysisAgentImp::Validate()
             // create joint at bottom of column
             joint.Release();
             joints->Create(jntID++,x,-columnHeight,&joint);
-            joint->Support();
+
+            joint->Support(); // fully fixed
+            if ( pProject->GetColumnBaseType(spaceIdx) == xbrTypes::cbtPinned )
+            {
+               joint->ReleaseDof(jrtMz); // pinned
+            }
 
             // create column member
             mbr.Release();

@@ -59,3 +59,5 @@ using namespace ATL;
 #include <WBFLCore.h>
 #include <AgentTools.h>
 #include <afxdlgs.h>
+
+#include <XBeamRateTypes.h>

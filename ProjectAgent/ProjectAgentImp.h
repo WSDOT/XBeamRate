@@ -112,6 +112,7 @@ public:
    virtual Float64 GetRightOverhang();
    virtual IndexType GetColumnCount();
    virtual Float64 GetColumnHeight(IndexType colIdx);
+   virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx);
    virtual Float64 GetSpacing(IndexType spaceIdx);
 
 #ifdef _DEBUG
