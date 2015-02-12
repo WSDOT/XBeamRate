@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// ExtensionAgentExample - Extension Agent Example Project for PGSuper
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,15 +20,36 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+// dllmain.cpp : Implementation of DllMain.
 
-/*****************************************************************************
-COPYRIGHT
-   Copyright © 1997-1998
-   Washington State Department Of Transportation
-   All Rights Reserved
-*****************************************************************************/
+#include "stdafx.h"
+#include "resource.h"
+#include "dllmain.h"
 
+CGraphingAgentModule _AtlModule;
 
-#endif // INCLUDED_ReportAgent_H_
+class CGraphingAgentModuleApp : public CWinApp
+{
+public:
+
+// Overrides
+	virtual BOOL InitInstance();
+	virtual int ExitInstance();
+
+	DECLARE_MESSAGE_MAP()
+};
+
+BEGIN_MESSAGE_MAP(CGraphingAgentModuleApp, CWinApp)
+END_MESSAGE_MAP()
+
+CGraphingAgentModuleApp theApp;
+
+BOOL CGraphingAgentModuleApp::InitInstance()
+{
+	return CWinApp::InitInstance();
+}
+
+int CGraphingAgentModuleApp::ExitInstance()
+{
+	return CWinApp::ExitInstance();
+}

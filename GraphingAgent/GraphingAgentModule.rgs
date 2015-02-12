@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'GraphingAgent'
+		'XBeamRateGraphingAgent.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

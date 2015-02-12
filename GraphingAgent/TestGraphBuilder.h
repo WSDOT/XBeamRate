@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// ExtensionAgentExample - Extension Agent Example Project for PGSuper
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,15 +20,31 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+#pragma once
 
-/*****************************************************************************
-COPYRIGHT
-   Copyright © 1997-1998
-   Washington State Department Of Transportation
-   All Rights Reserved
-*****************************************************************************/
+#include <EAF\EAFGraphBuilderBase.h>
+#include "TestGraphController.h"
 
+class CEAFGraphChildFrame;
 
-#endif // INCLUDED_ReportAgent_H_
+class CTestGraphBuilder : public CEAFGraphBuilderBase
+{
+public:
+   CTestGraphBuilder();
+   CTestGraphBuilder(const CTestGraphBuilder& other);
+   virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
+   virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
+   virtual CGraphBuilder* Clone();
+
+protected:
+   virtual CEAFGraphControlWindow* GetGraphControlWindow();
+
+   afx_msg void OnGraphTypeChanged();
+
+   virtual bool UpdateNow() { return true; }
+
+   DECLARE_MESSAGE_MAP()
+
+private:
+   CTestGraphController m_GraphControls;
+};

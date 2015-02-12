@@ -82,8 +82,9 @@ public:
 //   virtual CString GetVersionString(bool bIncludeBuildNumber=false);
 //   virtual CString GetVersion(bool bIncludeBuildNumber=false);
 
-
+// IViews ??? 
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
+   virtual void CreateGraphView(CollectionIndexType graphIdx);
 
 private:
    DECLARE_EAF_AGENT_DATA;
@@ -96,6 +97,7 @@ private:
    void RegisterViews();
    void UnregisterViews();
    long m_ReportViewKey;
+   long m_GraphingViewKey;
    
    CXBeamRateDoc* m_pMyDocument;
 };

@@ -20,15 +20,46 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+#pragma once
 
-/*****************************************************************************
-COPYRIGHT
-   Copyright © 1997-1998
-   Washington State Department Of Transportation
-   All Rights Reserved
-*****************************************************************************/
+#include <EAF\EAFAutoCalcGraphView.h>
 
+/////////////////////////////////////////////////////////////////////////////
+// CXBeamRateGraphView view
 
-#endif // INCLUDED_ReportAgent_H_
+class CXBeamRateGraphView : public CEAFAutoCalcGraphView
+{
+protected:
+	CXBeamRateGraphView();           // protected constructor used by dynamic creation
+	DECLARE_DYNCREATE(CXBeamRateGraphView)
+
+// Attributes
+public:
+
+// Operations
+public:
+   virtual bool DoResultsExist();
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CXBeamRateGraphView)
+	protected:
+	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	virtual ~CXBeamRateGraphView();
+#ifdef _DEBUG
+	virtual void AssertValid() const;
+	virtual void Dump(CDumpContext& dc) const;
+#endif
+
+	// Generated message map functions
+protected:
+	//{{AFX_MSG(CXBeamRateGraphView)
+   afx_msg void DumpLBAM();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};

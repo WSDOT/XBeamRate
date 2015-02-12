@@ -20,15 +20,12 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+// stdafx.cpp : source file that includes just the standard includes
+//  stdafx.pch will be the pre-compiled header
+//  stdafx.obj will contain the pre-compiled type information
 
-/*****************************************************************************
-COPYRIGHT
-   Copyright © 1997-1998
-   Washington State Department Of Transportation
-   All Rights Reserved
-*****************************************************************************/
+#include "stdafx.h"
 
-
-#endif // INCLUDED_ReportAgent_H_
+#ifdef _ATL_STATIC_REGISTRY
+#include <statreg.h>
+#endif

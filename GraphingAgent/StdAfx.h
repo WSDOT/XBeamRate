@@ -20,15 +20,44 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+// stdafx.h : include file for standard system include files,
+//      or project specific include files that are used frequently,
+//      but are changed infrequently
 
-/*****************************************************************************
-COPYRIGHT
-   Copyright © 1997-1998
-   Washington State Department Of Transportation
-   All Rights Reserved
-*****************************************************************************/
+#pragma once
+
+#ifndef STRICT
+#define STRICT
+#endif
+
+#define VC_EXTRALEAN
+#define COM_STDMETHOD_CAN_THROW
+
+#define _ATL_APARTMENT_THREADED
+#define _ATL_NO_AUTOMATIC_NAMESPACE
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
 
-#endif // INCLUDED_ReportAgent_H_
+#include <WBFLVersion.h>
+
+#include <afxwin.h>         // MFC core and standard components
+#include <afxext.h>         // MFC extensions
+#include <afxpriv.h>        // Private MFC extensions
+#include <afxole.h>         // MFC OLE classes
+#include <afxodlgs.h>       // MFC OLE dialog classes
+#include <afxdisp.h>        // MFC OLE automation classes
+
+#include <atlbase.h>
+#include <atlcom.h>
+
+using namespace ATL;
+
+#include <XBeamRateTypes.h>
+
+#include <WBFLDebug.h>
+#include <System\Transaction.h>
+
+#include <WBFLCore.h>
+#include <AgentTools.h>
+#include <GraphManager\GraphManager.h>
+

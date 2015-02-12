@@ -20,11 +20,11 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// EngAgentImp.cpp : Implementation of CEngAgentImp
+// GraphingAgentImp.cpp : Implementation of CGraphingAgentImp
 #include "stdafx.h"
-#include "EngAgent.h"
-#include "EngAgentImp.h"
-
+#include "GraphingAgent.h"
+#include "GraphingAgentImp.h"
+#include <IGraphManager.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -33,27 +33,27 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CEngAgentImp
-CEngAgentImp::CEngAgentImp()
+// CGraphingAgentImp
+CGraphingAgentImp::CGraphingAgentImp()
 {
    m_pBroker = 0;
 }
 
-CEngAgentImp::~CEngAgentImp()
+CGraphingAgentImp::~CGraphingAgentImp()
 {
 }
 
-HRESULT CEngAgentImp::FinalConstruct()
+HRESULT CGraphingAgentImp::FinalConstruct()
 {
    return S_OK;
 }
 
-void CEngAgentImp::FinalRelease()
+void CGraphingAgentImp::FinalRelease()
 {
 }
 
 #if defined _DEBUG
-bool CEngAgentImp::AssertValid() const
+bool CGraphingAgentImp::AssertValid() const
 {
    return true;
 }
@@ -61,22 +61,22 @@ bool CEngAgentImp::AssertValid() const
 
 //////////////////////////////////////////////////////////////////////
 // IAgent
-STDMETHODIMP CEngAgentImp::SetBroker(IBroker* pBroker)
+STDMETHODIMP CGraphingAgentImp::SetBroker(IBroker* pBroker)
 {
    EAF_AGENT_SET_BROKER(pBroker);
    return S_OK;
 }
 
-STDMETHODIMP CEngAgentImp::RegInterfaces()
+STDMETHODIMP CGraphingAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_ILoadRating,    this );
+   //pBrokerInit->RegInterface( IID_ILoadRating,    this );
 
    return S_OK;
 };
 
-STDMETHODIMP CEngAgentImp::Init()
+STDMETHODIMP CGraphingAgentImp::Init()
 {
    //EAF_AGENT_INIT;
 
@@ -86,35 +86,36 @@ STDMETHODIMP CEngAgentImp::Init()
    //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
    //CComPtr<IConnectionPoint> pCP;
    //HRESULT hr = S_OK;
+
+   InitGraphBuilders();
+
    return S_OK;
 }
 
-STDMETHODIMP CEngAgentImp::Init2()
+STDMETHODIMP CGraphingAgentImp::Init2()
 {
    return S_OK;
 }
 
-STDMETHODIMP CEngAgentImp::Reset()
+STDMETHODIMP CGraphingAgentImp::Reset()
 {
    return S_OK;
 }
 
-STDMETHODIMP CEngAgentImp::GetClassID(CLSID* pCLSID)
+STDMETHODIMP CGraphingAgentImp::GetClassID(CLSID* pCLSID)
 {
-   *pCLSID = CLSID_EngAgent;
+   *pCLSID = CLSID_GraphingAgent;
    return S_OK;
 }
 
-STDMETHODIMP CEngAgentImp::ShutDown()
+STDMETHODIMP CGraphingAgentImp::ShutDown()
 {
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
 
-
-//////////////////////////////////////////////////////////////////////
-// ILoadRating
-Float64 CEngAgentImp::GetRatingFactor()
+HRESULT CGraphingAgentImp::InitGraphBuilders()
 {
-   return 1.2;
+   GET_IFACE(IGraphManager,pGraphMgr);
+   return S_OK;
 }

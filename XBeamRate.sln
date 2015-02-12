@@ -17,6 +17,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngAgent", "EngAgent\EngAge
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReportAgent", "ReportAgent\ReportAgent.vcproj", "{A1E91AC6-70CE-4921-B249-B062DAC622ED}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "GraphingAgent", "GraphingAgent\GraphingAgent.vcproj", "{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -86,6 +88,18 @@ Global
 		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|Win32.Build.0 = Release|Win32
 		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|x64.ActiveCfg = Release|x64
 		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|x64.Build.0 = Release|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Debug|Win32.Build.0 = Debug|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Debug|x64.ActiveCfg = Debug|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Debug|x64.Build.0 = Debug|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Profile|Win32.ActiveCfg = Profile|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Profile|Win32.Build.0 = Profile|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Profile|x64.ActiveCfg = Profile|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Profile|x64.Build.0 = Profile|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Release|Win32.ActiveCfg = Release|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Release|Win32.Build.0 = Release|Win32
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Release|x64.ActiveCfg = Release|x64
+		{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

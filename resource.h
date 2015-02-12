@@ -12,6 +12,7 @@
 #define IDR_XBEAMRATEAPP                129
 #define IDR_COMPONENTINFO               130
 #define IDR_REPORT                      131
+#define IDR_GRAPHING                    139
 #define IDI_ICON                        205
 #define IDR_TOOLBAR1                    206
 #define EAF_RESERVED_COMMAND_BASE       0x8000

@@ -143,6 +143,7 @@ END
 // remains consistent on all systems.
 IDI_ICON                ICON                    "res\\XBeamRate.ico"
 IDR_REPORT              ICON                    "res\\ReportView.ico"
+IDR_GRAPHING            ICON                    "res\\GraphingView.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -178,6 +179,7 @@ BEGIN
     IDS_PROJNAME            "XBeam Rate"
     IDR_XBEAMRATE           "\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
     IDR_REPORT              "Report\n\n\n\n\n\n"
+    IDR_GRAPHING            "Graphing\n\n\n\n\n\n"
 END
 
 STRINGTABLE 

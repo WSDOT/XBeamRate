@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="XBeamRateReportAgent"
-	ProjectGUID="{A1E91AC6-70CE-4921-B249-B062DAC622ED}"
-	RootNamespace="ReportAgent"
+	Name="XBeamRateGraphingAgent"
+	ProjectGUID="{0947B96C-C1EB-4FEF-96C8-5DB18EABD9D1}"
+	RootNamespace="GraphingAgent"
 	Keyword="AtlProj"
 	TargetFrameworkVersion="0"
 	>
@@ -93,7 +93,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -113,7 +113,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ReportAgent.bsc"
+				OutputFile=".\Debug/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -199,7 +199,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -219,7 +219,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ReportAgent.bsc"
+				OutputFile=".\Debug/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -307,7 +307,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -329,7 +329,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ReportAgent.bsc"
+				OutputFile=".\Release/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -417,7 +417,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -439,7 +439,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ReportAgent.bsc"
+				OutputFile=".\Release/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -502,7 +502,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/ReportAgent.pch"
+				PrecompiledHeaderFile=".\Release/GraphingAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -528,7 +528,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -551,7 +551,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ReportAgent.bsc"
+				OutputFile=".\Release/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -614,7 +614,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/ReportAgent.pch"
+				PrecompiledHeaderFile=".\Release/GraphingAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -640,7 +640,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ReportAgent.def"
+				ModuleDefinitionFile=".\GraphingAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -663,7 +663,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ReportAgent.bsc"
+				OutputFile=".\Release/GraphingAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -688,7 +688,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgent.cpp"
+				RelativePath=".\GraphingAgent.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -746,11 +746,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ReportAgent.def"
+				RelativePath=".\GraphingAgent.def"
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgent.rc"
+				RelativePath=".\GraphingAgent.rc"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -808,7 +808,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\ReportAgentImp.cpp"
+				RelativePath=".\GraphingAgentImp.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -930,15 +930,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TestChapterBuilder.cpp"
+				RelativePath=".\TestGraphBuilder.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\XBeamRateChapterBuilder.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\XBeamRateTitlePageBuilder.cpp"
+				RelativePath=".\TestGraphController.cpp"
 				>
 			</File>
 		</Filter>
@@ -951,15 +947,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgent.h"
+				RelativePath=".\GraphingAgent.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgentCLSID.h"
+				RelativePath=".\GraphingAgentCLSID.h"
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgentImp.h"
+				RelativePath=".\GraphingAgentImp.h"
 				>
 			</File>
 			<File
@@ -971,15 +967,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\TestChapterBuilder.h"
+				RelativePath=".\TestGraphBuilder.h"
 				>
 			</File>
 			<File
-				RelativePath=".\XBeamRateChapterBuilder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\XBeamRateTitlePageBuilder.h"
+				RelativePath=".\TestGraphController.h"
 				>
 			</File>
 		</Filter>
@@ -988,11 +980,11 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath=".\ReportAgent.rgs"
+				RelativePath=".\GraphingAgent.rgs"
 				>
 			</File>
 			<File
-				RelativePath=".\ReportAgentModule.rgs"
+				RelativePath=".\GraphingAgentModule.rgs"
 				>
 			</File>
 		</Filter>

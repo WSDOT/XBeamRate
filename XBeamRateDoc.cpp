@@ -168,7 +168,7 @@ void CXBeamRateDoc::CreateReportView(CollectionIndexType rptIdx,bool bPrompt)
 
 void CXBeamRateDoc::CreateGraphView(CollectionIndexType graphIdx)
 {
-   CEAFBrokerDocument::CreateGraphView(graphIdx);
+   m_pMyDocProxyAgent->CreateGraphView(graphIdx);
 }
 
 CString CXBeamRateDoc::GetRootNodeName()

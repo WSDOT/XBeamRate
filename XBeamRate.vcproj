@@ -410,6 +410,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphViewChildFrame.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ReportViewChildFrame.cpp"
 				>
 			</File>
@@ -574,6 +578,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateGraphView.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRatePlugin.idl"
 				>
 				<FileConfiguration
@@ -711,6 +719,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphViewChildFrame.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ReportViewChildFrame.h"
 				>
 			</File>
@@ -732,6 +744,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateDocProxyAgent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateGraphView.h"
 				>
 			</File>
 			<File

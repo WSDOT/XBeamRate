@@ -20,8 +20,8 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+#ifndef INCLUDED_GraphingAgent_H_
+#define INCLUDED_GraphingAgent_H_
 
 /*****************************************************************************
 COPYRIGHT
@@ -31,4 +31,4 @@ COPYRIGHT
 *****************************************************************************/
 
 
-#endif // INCLUDED_ReportAgent_H_
+#endif // INCLUDED_GraphingAgent_H_

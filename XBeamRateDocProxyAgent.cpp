@@ -8,6 +8,9 @@
 #include "ReportViewChildFrame.h"
 #include "XBeamRateReportView.h"
 
+#include "GraphViewChildFrame.h"
+#include "XBeamRateGraphView.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -226,6 +229,17 @@ void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,bool b
    pViewReg->CreateView(m_ReportViewKey,(LPVOID)&data);
 }
 
+void CXBeamRateDocProxyAgent::CreateGraphView(CollectionIndexType graphIdx)
+{
+   CEAFGraphViewCreationData data;
+   GET_IFACE(IGraphManager,pGraphMgr);
+   data.m_pIGraphMgr = pGraphMgr;
+   data.m_GraphIndex = graphIdx;
+
+   GET_IFACE(IEAFViewRegistrar,pViewReg);
+   pViewReg->CreateView(m_GraphingViewKey,(LPVOID)&data);
+}
+
 /////////////////////////////////////////////////////////////////////
 void CXBeamRateDocProxyAgent::RegisterViews()
 {
@@ -242,11 +256,13 @@ void CXBeamRateDocProxyAgent::RegisterViews()
    // for the views below will register them. For example, the analysis results view is the
    // responsiblity of the analysis results agent, so that view's implementation will move
    GET_IFACE(IEAFViewRegistrar,pViewReg);
-   m_ReportViewKey = pViewReg->RegisterView(IDR_REPORT, NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
+   m_ReportViewKey    = pViewReg->RegisterView(IDR_REPORT,   NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
+   m_GraphingViewKey  = pViewReg->RegisterView(IDR_GRAPHING, NULL, RUNTIME_CLASS(CGraphViewChildFrame),  RUNTIME_CLASS(CXBeamRateGraphView),  hMenu, -1); // unlimited number of reports
 }
 
 void CXBeamRateDocProxyAgent::UnregisterViews()
 {
    GET_IFACE(IEAFViewRegistrar,pViewReg);
    pViewReg->RemoveView(m_ReportViewKey);
+   pViewReg->RemoveView(m_GraphingViewKey);
 }
