@@ -21,32 +21,41 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "txnEditProject.h"
+#include "txnEditPier.h"
 
 #include <IFace\Project.h>
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+txnEditPier::txnEditPier(Float64 oldLeftOverhang,Float64 oldRightOverhang,IndexType oldColumnCount,Float64 oldColumnHeight,Float64 oldColumnSpacing,
+                         Float64 newLeftOverhang,Float64 newRightOverhang,IndexType newColumnCount,Float64 newColumnHeight,Float64 newColumnSpacing)
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
+   m_LeftOverhang[0] = oldLeftOverhang;
+   m_LeftOverhang[1] = newLeftOverhang;
+   m_RightOverhang[0] = oldRightOverhang;
+   m_RightOverhang[1] = newRightOverhang;
+   m_nColumns[0] = oldColumnCount;
+   m_nColumns[1] = newColumnCount;
+   m_ColumnHeight[0] = oldColumnHeight;
+   m_ColumnHeight[1] = newColumnHeight;
+   m_ColumnSpacing[0] = oldColumnSpacing;
+   m_ColumnSpacing[1] = newColumnSpacing;
 }
 
-txnEditProject::~txnEditProject(void)
+txnEditPier::~txnEditPier(void)
 {
 }
 
-bool txnEditProject::Execute()
+bool txnEditPier::Execute()
 {
    Execute(1);
    return true;
 }
 
-void txnEditProject::Undo()
+void txnEditPier::Undo()
 {
    Execute(0);
 }
 
-void txnEditProject::Execute(int i)
+void txnEditPier::Execute(int i)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -55,27 +64,29 @@ void txnEditProject::Execute(int i)
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
+   pProject->SetOverhangs(m_LeftOverhang[i],m_RightOverhang[i]);
+   pProject->SetColumns(m_nColumns[i],m_ColumnHeight[i],m_ColumnSpacing[i]);
 
    //pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditProject::CreateClone() const
+txnTransaction* txnEditPier::CreateClone() const
 {
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
+   return new txnEditPier(m_LeftOverhang[0],m_RightOverhang[0],m_nColumns[0],m_ColumnHeight[0],m_ColumnSpacing[0],
+                          m_LeftOverhang[1],m_RightOverhang[1],m_nColumns[1],m_ColumnHeight[1],m_ColumnSpacing[1]);
 }
 
-std::_tstring txnEditProject::Name() const
+std::_tstring txnEditPier::Name() const
 {
-   return _T("Edit Project Name");
+   return _T("Edit Pier");
 }
 
-bool txnEditProject::IsUndoable()
+bool txnEditPier::IsUndoable()
 {
    return true;
 }
 
-bool txnEditProject::IsRepeatable()
+bool txnEditPier::IsRepeatable()
 {
    return false;
 }

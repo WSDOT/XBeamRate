@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// ExtensionAgentExample - Extension Agent Example Project for PGSuper
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,26 +19,13 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
-#pragma once
 
-#include <WBFLCore.h>
+// dllmain.h : Declaration of module class.
 
-class txnEditProject :
-   public txnTransaction
+class CReportAgentModule : public CAtlDllModuleT< CReportAgentModule >
 {
-public:
-   txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName);
-   ~txnEditProject(void);
-
-   virtual bool Execute();
-   virtual void Undo();
-   virtual txnTransaction* CreateClone() const;
-   virtual std::_tstring Name() const;
-   virtual bool IsUndoable();
-   virtual bool IsRepeatable();
-
-private:
-   void Execute(int i);
-
-	CString m_ProjectName[2];
+public :
+	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_REPORTAGENTMODULE, "{A2AB5469-7285-4602-8E8F-28CF7C30B5B1}")
 };
+
+extern class CReportAgentModule _AtlModule;

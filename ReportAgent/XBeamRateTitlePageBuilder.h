@@ -20,62 +20,23 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "txnEditProject.h"
+#pragma once
 
-#include <IFace\Project.h>
+#include <ReportManager\TitlePageBuilder.h>
+#include <WBFLCore.h>
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+class CXBeamRateTitlePageBuilder : public CTitlePageBuilder
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
-}
+public:
+   CXBeamRateTitlePageBuilder(IBroker* pBroker,LPCTSTR strTitle);
+   CXBeamRateTitlePageBuilder(const CXBeamRateTitlePageBuilder& other);
+   ~CXBeamRateTitlePageBuilder(void);
 
-txnEditProject::~txnEditProject(void)
-{
-}
+   virtual rptChapter* Build(boost::shared_ptr<CReportSpecification>& pRptSpec);
+   virtual bool NeedsUpdate(CReportHint* pHint,boost::shared_ptr<CReportSpecification>& pRptSpec);
 
-bool txnEditProject::Execute()
-{
-   Execute(1);
-   return true;
-}
+   virtual CTitlePageBuilder* Clone() const;
 
-void txnEditProject::Undo()
-{
-   Execute(0);
-}
-
-void txnEditProject::Execute(int i)
-{
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
-
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
-
-   //pEvents->FirePendingEvents();
-}
-
-txnTransaction* txnEditProject::CreateClone() const
-{
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
-}
-
-std::_tstring txnEditProject::Name() const
-{
-   return _T("Edit Project Name");
-}
-
-bool txnEditProject::IsUndoable()
-{
-   return true;
-}
-
-bool txnEditProject::IsRepeatable()
-{
-   return false;
-}
+protected:
+   CComPtr<IBroker> m_pBroker;
+};

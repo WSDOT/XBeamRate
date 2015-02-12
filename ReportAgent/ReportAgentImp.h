@@ -20,7 +20,7 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// AnalysisAgentImp.h : Declaration of the CAnalysisAgentImp
+// ReportAgentImp.h : Declaration of the CReportAgentImp
 
 // This agent is responsible for creating structural analysis models
 // and providing analysis results
@@ -28,49 +28,40 @@
 #pragma once
 
 #include "resource.h"       // main symbols
-#include <AnalysisAgent.h>
-#include "AnalysisAgentCLSID.h"
+#include <ReportAgent.h>
+#include "ReportAgentCLSID.h"
 
 #include <EAF\EAFInterfaceCache.h>
 
-#include <IFace\Project.h>
-
-#include <WBFLFem2d.h>
-
 /////////////////////////////////////////////////////////////////////////////
-// CAnalysisAgentImp
-class ATL_NO_VTABLE CAnalysisAgentImp : 
+// CReportAgentImp
+class ATL_NO_VTABLE CReportAgentImp : 
 	public CComObjectRootEx<CComSingleThreadModel>,
-   //public CComRefCountTracer<CAnalysisAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
-	public CComCoClass<CAnalysisAgentImp, &CLSID_AnalysisAgent>,
-	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
-   //public CProxyIXBRProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
-   public IAgentEx,
-   public IXBRProjectEventSink,
-   public IAnalysisResults
+   //public CComRefCountTracer<CReportAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
+	public CComCoClass<CReportAgentImp, &CLSID_ReportAgent>,
+	//public IConnectionPointContainerImpl<CReportAgentImp>,
+   //public CProxyIXBRProjectEventSink<CReportAgentImp>,
+   public IAgentEx
 {  
 public:
-	CAnalysisAgentImp(); 
-   virtual ~CAnalysisAgentImp();
+	CReportAgentImp(); 
+   virtual ~CReportAgentImp();
 
    DECLARE_PROTECT_FINAL_CONSTRUCT();
 
    HRESULT FinalConstruct();
    void FinalRelease();
 
-DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
+DECLARE_REGISTRY_RESOURCEID(IDR_REPORTAGENT)
 
-BEGIN_COM_MAP(CAnalysisAgentImp)
+BEGIN_COM_MAP(CReportAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
-	COM_INTERFACE_ENTRY(IAnalysisResults)
-	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
+   //COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
-// needed if we implement a connection point
-//BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
-   //CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+//BEGIN_CONNECTION_POINT_MAP(CReportAgentImp)
+////   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
 //END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -83,14 +74,6 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IXBRProjectEventSink
-public:
-   HRESULT OnProjectChanged();
-
-// IAnalysisResults
-public:
-   virtual Float64 GetResult();
-
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -98,13 +81,8 @@ public:
 private:
    DECLARE_EAF_AGENT_DATA;
 
-   void Validate();
-   void Invalidate();
-
-   DWORD m_dwProjectCookie;
-
-   CComPtr<IFem2dModel> m_Model;
+   void InitReportBuilders();
 };
 
-OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)
+OBJECT_ENTRY_AUTO(CLSID_ReportAgent, CReportAgentImp)
 

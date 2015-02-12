@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="ProjectAgent"
-	ProjectGUID="{A69BD69E-07D6-4326-B25A-938BEC2BB378}"
-	RootNamespace="ProjectAgent"
+	Name="ReportAgent"
+	ProjectGUID="{A1E91AC6-70CE-4921-B249-B062DAC622ED}"
+	RootNamespace="ReportAgent"
 	Keyword="AtlProj"
 	TargetFrameworkVersion="0"
 	>
@@ -17,9 +17,6 @@
 		/>
 	</Platforms>
 	<ToolFiles>
-		<ToolFile
-			RelativePath="..\..\..\CodeSynthesis XSD 3.3\etc\vc-9.0\xsd-cxx-tree.rules"
-		/>
 	</ToolFiles>
 	<Configurations>
 		<Configuration
@@ -43,12 +40,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -68,7 +59,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm600 "
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="_AFXDLL;_ATL_NO_UUIDOF;_DEBUG;WIN32;_WINDOWS;ENABLE_LOGGING"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
@@ -87,7 +78,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -96,13 +87,13 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1D.lib xerces-c_3D.lib OpenBridgeMLD.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -122,7 +113,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ProjectAgent.bsc"
+				OutputFile=".\Debug/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -155,12 +146,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -180,7 +165,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zm600 "
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="_AFXDLL;_ATL_NO_UUIDOF;_DEBUG;WIN32;_WINDOWS;ENABLE_LOGGING"
 				MinimalRebuild="true"
 				RuntimeLibrary="3"
@@ -199,7 +184,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -208,13 +193,13 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1D.lib xerces-c_3D.lib OpenBridgeMLD.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -234,7 +219,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/ProjectAgent.bsc"
+				OutputFile=".\Debug/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -268,12 +253,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -297,7 +276,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -314,7 +293,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -323,12 +302,12 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1.lib xerces-c_3.lib OpenBridgeML.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -350,7 +329,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ProjectAgent.bsc"
+				OutputFile=".\Release/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -384,12 +363,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -413,7 +386,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
@@ -430,7 +403,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -439,12 +412,12 @@
 				Name="VCLinkerTool"
 				RegisterOutput="true"
 				IgnoreImportLibrary="true"
-				AdditionalDependencies="odbc32.lib odbccp32.lib  Xalan-C_1.lib xerces-c_3.lib OpenBridgeML.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)\XBeamRate$(ProjectName).dll"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -466,7 +439,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ProjectAgent.bsc"
+				OutputFile=".\Release/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -500,12 +473,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -529,13 +496,13 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/ProjectAgent.pch"
+				PrecompiledHeaderFile=".\Release/ReportAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -547,7 +514,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -561,7 +528,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -584,7 +551,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ProjectAgent.bsc"
+				OutputFile=".\Release/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -618,12 +585,6 @@
 				Outputs=""
 			/>
 			<Tool
-				Name="C++/Tree Mapping Rule"
-				CharType="1"
-				GenSerialization="true"
-				GenDoxygen="false"
-			/>
-			<Tool
 				Name="VCXMLDataGeneratorTool"
 			/>
 			<Tool
@@ -647,13 +608,13 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				WholeProgramOptimization="true"
-				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\OpenBridgeML\Include"
+				AdditionalIncludeDirectories=".\;..\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;"
 				PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF"
 				RuntimeLibrary="2"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/ProjectAgent.pch"
+				PrecompiledHeaderFile=".\Release/ReportAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -665,7 +626,7 @@
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"
-				AdditionalIncludeDirectories="&quot;$(IntDir)&quot;;\ARP\WBFL\Include"
+				AdditionalIncludeDirectories="$(IntDir)"
 			/>
 			<Tool
 				Name="VCPreLinkEventTool"
@@ -679,7 +640,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\ProjectAgent.def"
+				ModuleDefinitionFile=".\ReportAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -702,7 +663,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/ProjectAgent.bsc"
+				OutputFile=".\Release/ReportAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -723,23 +684,11 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
-				RelativePath=".\AgentCmdTarget.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\dllmain.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\PierDlg.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\PierLayoutPage.cpp"
-				>
-			</File>
-			<File
-				RelativePath="ProjectAgent.cpp"
+				RelativePath=".\ReportAgent.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -797,11 +746,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ProjectAgent.def"
+				RelativePath=".\ReportAgent.def"
 				>
 			</File>
 			<File
-				RelativePath="ProjectAgent.rc"
+				RelativePath=".\ReportAgent.rc"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -859,7 +808,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="ProjectAgentImp.cpp"
+				RelativePath=".\ReportAgentImp.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -980,41 +929,37 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\TestChapterBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateChapterBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateTitlePageBuilder.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\AgentCmdTarget.h"
-				>
-			</File>
-			<File
-				RelativePath="CPProjectAgent.h"
-				>
-			</File>
-			<File
 				RelativePath=".\dllmain.h"
 				>
 			</File>
 			<File
-				RelativePath=".\PierDlg.h"
+				RelativePath=".\ReportAgent.h"
 				>
 			</File>
 			<File
-				RelativePath=".\PierLayoutPage.h"
+				RelativePath=".\ReportAgentCLSID.h"
 				>
 			</File>
 			<File
-				RelativePath="ProjectAgent.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ProjectAgentCLSID.h"
-				>
-			</File>
-			<File
-				RelativePath="ProjectAgentImp.h"
+				RelativePath=".\ReportAgentImp.h"
 				>
 			</File>
 			<File
@@ -1025,27 +970,35 @@
 				RelativePath="StdAfx.h"
 				>
 			</File>
+			<File
+				RelativePath=".\TestChapterBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateChapterBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateTitlePageBuilder.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath="ProjectAgent.rgs"
+				RelativePath=".\ReportAgent.rgs"
 				>
 			</File>
 			<File
-				RelativePath=".\ProjectAgentModule.rgs"
+				RelativePath=".\ReportAgentModule.rgs"
 				>
 			</File>
 		</Filter>
 		<Filter
 			Name="IFace"
 			>
-			<File
-				RelativePath="..\Include\IFace\Project.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Status Items"
@@ -1057,103 +1010,13 @@
 			<Filter
 				Name="Header Files"
 				>
-				<File
-					RelativePath=".\txnEditPier.h"
-					>
-				</File>
-				<File
-					RelativePath=".\txnEditProject.h"
-					>
-				</File>
 			</Filter>
 			<Filter
 				Name="Source Files"
 				>
-				<File
-					RelativePath=".\txnEditPier.cpp"
-					>
-				</File>
-				<File
-					RelativePath=".\txnEditProject.cpp"
-					>
-				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Schema Files"
-			Filter="xsd"
-			>
-			<File
-				RelativePath=".\Schema\XBeamRate.xsd"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
-			Name="Generated Files"
-			Filter="hxx;cxx"
-			>
-			<File
-				RelativePath=".\XBeamRate.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\XBeamRate.hxx"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
-		<Global
-			Name="RESOURCE_FILE"
-			Value="ProjectAgent.rc"
-		/>
 	</Globals>
 </VisualStudioProject>

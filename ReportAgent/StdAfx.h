@@ -20,62 +20,46 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "txnEditProject.h"
+// stdafx.h : include file for standard system include files,
+//      or project specific include files that are used frequently,
+//      but are changed infrequently
 
-#include <IFace\Project.h>
+#pragma once
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
-{
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
-}
+#ifndef STRICT
+#define STRICT
+#endif
 
-txnEditProject::~txnEditProject(void)
-{
-}
+#define VC_EXTRALEAN
+#define COM_STDMETHOD_CAN_THROW
 
-bool txnEditProject::Execute()
-{
-   Execute(1);
-   return true;
-}
+#define _ATL_APARTMENT_THREADED
+#define _ATL_NO_AUTOMATIC_NAMESPACE
+#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
-void txnEditProject::Undo()
-{
-   Execute(0);
-}
 
-void txnEditProject::Execute(int i)
-{
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+#include <WBFLVersion.h>
 
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
+#include <afxwin.h>         // MFC core and standard components
+#include <afxext.h>         // MFC extensions
+#include <afxpriv.h>        // Private MFC extensions
+#include <afxole.h>         // MFC OLE classes
+#include <afxodlgs.h>       // MFC OLE dialog classes
+#include <afxdisp.h>        // MFC OLE automation classes
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
+#include <atlbase.h>
+#include <atlcom.h>
 
-   //pEvents->FirePendingEvents();
-}
+using namespace ATL;
 
-txnTransaction* txnEditProject::CreateClone() const
-{
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
-}
+#include <XBeamRateTypes.h>
 
-std::_tstring txnEditProject::Name() const
-{
-   return _T("Edit Project Name");
-}
+#include <WBFLDebug.h>
+#include <System\Transaction.h>
 
-bool txnEditProject::IsUndoable()
-{
-   return true;
-}
+#include <WBFLCore.h>
+#include <AgentTools.h>
 
-bool txnEditProject::IsRepeatable()
-{
-   return false;
-}
+#include <Reporter\Reporter.h>
+#include <ReportManager\ReportManager.h>
+#include <EAF\EAFBrokerReportSpecification.h>

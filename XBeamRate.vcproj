@@ -410,6 +410,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReportViewChildFrame.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -658,6 +662,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\XBeamRateReportView.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateView.cpp"
 				>
 				<FileConfiguration
@@ -703,6 +711,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReportViewChildFrame.h"
+				>
+			</File>
+			<File
 				RelativePath="Resource.h"
 				>
 			</File>
@@ -724,6 +736,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRatePluginApp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateReportView.h"
 				>
 			</File>
 			<File

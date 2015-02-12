@@ -20,62 +20,20 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "txnEditProject.h"
+#pragma once
 
-#include <IFace\Project.h>
+#include <ReportManager\ChapterBuilder.h>
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+class CXBeamRateChapterBuilder : public CChapterBuilder
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
-}
+public:
+   CXBeamRateChapterBuilder();
 
-txnEditProject::~txnEditProject(void)
-{
-}
+   // returns 1
+   virtual Uint16 GetMaxLevel() const;
 
-bool txnEditProject::Execute()
-{
-   Execute(1);
-   return true;
-}
+   virtual bool Select() const;
 
-void txnEditProject::Undo()
-{
-   Execute(0);
-}
-
-void txnEditProject::Execute(int i)
-{
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
-
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
-
-   //pEvents->FirePendingEvents();
-}
-
-txnTransaction* txnEditProject::CreateClone() const
-{
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
-}
-
-std::_tstring txnEditProject::Name() const
-{
-   return _T("Edit Project Name");
-}
-
-bool txnEditProject::IsUndoable()
-{
-   return true;
-}
-
-bool txnEditProject::IsRepeatable()
-{
-   return false;
-}
+   // creates a new chapter object and configures it with the correct style for our reports
+   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
+};

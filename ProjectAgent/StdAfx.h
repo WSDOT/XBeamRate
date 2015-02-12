@@ -61,3 +61,4 @@ using namespace ATL;
 #include <afxdlgs.h>
 
 #include <XBeamRateTypes.h>
+#include <EAF\EAFUtilities.h>

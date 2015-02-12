@@ -73,7 +73,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IProject,    this );
+   pBrokerInit->RegInterface( IID_IXBRProject,    this );
 
    return S_OK;
 };
@@ -89,6 +89,8 @@ STDMETHODIMP CProjectAgentImp::Init()
    //CComPtr<IConnectionPoint> pCP;
    //HRESULT hr = S_OK;
 
+
+   // Create default data model
    ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
 
    OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0);
@@ -179,9 +181,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    ApplicationSettings& settings( m_XBeamRateXML->Settings() );
    if ( settings.Units() == UnitModeEnum::SI )
+   {
       pDisplayUnits->SetUnitMode(eafTypes::umSI);
+   }
    else
+   {
       pDisplayUnits->SetUnitMode(eafTypes::umUS);
+   }
 
    return hr;
 }
@@ -248,7 +254,9 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 		// tip is after first newline 
       int pos = string.Find('\n');
       if ( 0 < pos )
+      {
          rMessage = string.Mid(pos+1);
+      }
 	}
 	else
 	{
@@ -260,7 +268,7 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 }
 
 //////////////////////////////////////////////////////////////////////
-// IProject
+// IXBRProject
 void CProjectAgentImp::SetProjectName(LPCTSTR strName)
 {
    m_XBeamRateXML->Settings().ProjectName(strName);
@@ -272,6 +280,13 @@ LPCTSTR CProjectAgentImp::GetProjectName()
    return m_XBeamRateXML->Settings().ProjectName().c_str();
 }
 
+void CProjectAgentImp::SetOverhangs(Float64 left,Float64 right)
+{
+   m_XBeamRateXML->Pier().CapBeam().LeftOverhang(left);
+   m_XBeamRateXML->Pier().CapBeam().RightOverhang(right);
+   Fire_OnProjectChanged();
+}
+
 Float64 CProjectAgentImp::GetLeftOverhang()
 {
    return m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
@@ -280,6 +295,24 @@ Float64 CProjectAgentImp::GetLeftOverhang()
 Float64 CProjectAgentImp::GetRightOverhang()
 {
    return m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+}
+
+void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,Float64 spacing)
+{
+   OpenBridgeML::Pier::BaseElement baseElement(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
+   OpenBridgeML::Pier::ColumnType newColumn(height,baseElement);
+   m_XBeamRateXML->Pier().Columns().Column().resize(nColumns,newColumn);
+   m_XBeamRateXML->Pier().Columns().Spacing().resize(nColumns-1,spacing);
+
+   for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   {
+      m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height(height);
+      if ( colIdx < nColumns-1 )
+      {
+         m_XBeamRateXML->Pier().Columns().Spacing()[colIdx] = spacing;
+      }
+   }
+   Fire_OnProjectChanged();
 }
 
 IndexType CProjectAgentImp::GetColumnCount()
@@ -324,7 +357,7 @@ void CProjectAgentImp::CreateMenus()
    UINT filePos = pMenu->FindMenuItem(_T("&File"));
 
    CEAFMenu* pEditMenu = pMenu->CreatePopupMenu(filePos+1,_T("&Edit"));
-   pEditMenu->LoadMenu(IDR_MENU,this);
+   pEditMenu->LoadMenu(IDR_EDIT_MENU,this);
 }
 
 void CProjectAgentImp::RemoveMenus()

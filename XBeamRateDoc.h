@@ -10,16 +10,23 @@
 #endif // _MSC_VER > 1000
 
 #include <EAF\EAFBrokerDocument.h>
+#include <EAF\EAFAutoCalcDoc.h>
 
 class CXBeamRateDocProxyAgent;
 
-class CXBeamRateDoc : public CEAFBrokerDocument
+class CXBeamRateDoc : public CEAFBrokerDocument, public CEAFAutoCalcDocMixin
 {
 protected: // create from serialization only
 	CXBeamRateDoc();
 	DECLARE_DYNCREATE(CXBeamRateDoc)
 
-   // CEBrokerDocument over-rides
+// CEAFAutoCalcDocMixin over-rides
+public:
+   virtual bool IsAutoCalcEnabled() const;
+   virtual void EnableAutoCalc(bool bEnable);
+
+// CEBrokerDocument over-rides
+public:
    virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
 
 // Attributes
@@ -53,6 +60,8 @@ protected:
    virtual CATID GetAgentCategoryID();
    virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
    virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
+   virtual void CreateReportView(CollectionIndexType rptIdx,bool bPrompt);
+   virtual void CreateGraphView(CollectionIndexType graphIdx);
 
 // Generated message map functions
 protected:
@@ -60,8 +69,15 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;
+   
+   bool m_bAutoCalcEnabled;
+
+   virtual void OnCreateFinalize();
    virtual void BrokerShutDown();
+
+   void PopulateReportMenu();
 };
 
 /////////////////////////////////////////////////////////////////////////////

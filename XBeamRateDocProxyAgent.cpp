@@ -5,6 +5,9 @@
 
 #include <IFace\Project.h>
 
+#include "ReportViewChildFrame.h"
+#include "XBeamRateReportView.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -39,7 +42,7 @@ void CXBeamRateDocProxyAgent::AdviseEventSinks()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -55,7 +58,7 @@ void CXBeamRateDocProxyAgent::UnadviseEventSinks()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -114,29 +117,28 @@ STDMETHODIMP CXBeamRateDocProxyAgent::GetClassID(CLSID* pCLSID)
 
 ////////////////////////////////////////////////////////////////////
 // IAgentUIIntegration
-
-//STDMETHODIMP CPGSuperDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
-//{
-//   if ( bIntegrate )
-//   {
-//      RegisterViews();
+STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
+{
+   if ( bIntegrate )
+   {
+      RegisterViews();
 //      CreateToolBars();
 //      CreateAcceleratorKeys();
 //      CreateStatusBar();
-//   }
-//   else
-//   {
+   }
+   else
+   {
 //      ResetStatusBar();
 //      RemoveAcceleratorKeys();
 //      RemoveToolBars();
-//      UnregisterViews();
-//   }
-//
-//   return S_OK;
-//}
+      UnregisterViews();
+   }
+
+   return S_OK;
+}
 
 ////////////////////////////////////////////////////////////////////
-// IProjectEventSink
+// IXBRProjectEventSink
 HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
 {
    AFX_MANAGE_STATE(AfxGetAppModuleState());
@@ -209,3 +211,42 @@ HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
 //
 //   return strVersion;
 //}
+
+/////////////////////////////////////////////////////////////////////
+void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec)
+{
+   CEAFReportViewCreationData data;
+   data.m_RptIdx = rptIdx;
+   data.m_bPromptForSpec = bPromptForSpec;
+
+   GET_IFACE(IReportManager,pRptMgr);
+   data.m_pRptMgr = pRptMgr;
+
+   GET_IFACE(IEAFViewRegistrar,pViewReg);
+   pViewReg->CreateView(m_ReportViewKey,(LPVOID)&data);
+}
+
+/////////////////////////////////////////////////////////////////////
+void CXBeamRateDocProxyAgent::RegisterViews()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)(m_pMyDocument->GetDocTemplate());
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+
+   HMENU hMenu = pAppPlugin->GetSharedMenuHandle();
+
+   // Register all secondary views that are associated with our document type
+   // TODO: After the menu and command extensions can be made, the agents that are responsble
+   // for the views below will register them. For example, the analysis results view is the
+   // responsiblity of the analysis results agent, so that view's implementation will move
+   GET_IFACE(IEAFViewRegistrar,pViewReg);
+   m_ReportViewKey = pViewReg->RegisterView(IDR_REPORT, NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
+}
+
+void CXBeamRateDocProxyAgent::UnregisterViews()
+{
+   GET_IFACE(IEAFViewRegistrar,pViewReg);
+   pViewReg->RemoveView(m_ReportViewKey);
+}

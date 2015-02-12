@@ -20,62 +20,38 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#include "stdafx.h"
-#include "txnEditProject.h"
+#include "StdAfx.h"
+#include <XBeamRateChapterBuilder.h>
 
-#include <IFace\Project.h>
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+
+CXBeamRateChapterBuilder::CXBeamRateChapterBuilder()
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
 }
 
-txnEditProject::~txnEditProject(void)
+Uint16 CXBeamRateChapterBuilder::GetMaxLevel() const
 {
+   return 1;
 }
 
-bool txnEditProject::Execute()
-{
-   Execute(1);
-   return true;
-}
-
-void txnEditProject::Undo()
-{
-   Execute(0);
-}
-
-void txnEditProject::Execute(int i)
-{
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
-
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
-
-   //pEvents->FirePendingEvents();
-}
-
-txnTransaction* txnEditProject::CreateClone() const
-{
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
-}
-
-std::_tstring txnEditProject::Name() const
-{
-   return _T("Edit Project Name");
-}
-
-bool txnEditProject::IsUndoable()
+bool CXBeamRateChapterBuilder::Select() const
 {
    return true;
 }
 
-bool txnEditProject::IsRepeatable()
+rptChapter* CXBeamRateChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
 {
-   return false;
+   ASSERT( level <= GetMaxLevel() );
+
+   rptChapter* pChapter = new rptChapter(GetName());
+   rptParagraph* p_para = new rptParagraph;
+   //p_para->SetStyleName(pgsReportStyleHolder::GetChapterTitleStyle());
+   *pChapter << p_para;
+   *p_para << GetName() << rptNewLine;
+   return pChapter;
 }

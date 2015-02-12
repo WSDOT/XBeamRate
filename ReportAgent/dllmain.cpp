@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// ExtensionAgentExample - Extension Agent Example Project for PGSuper
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,26 +19,37 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
-#pragma once
 
-#include <WBFLCore.h>
+// dllmain.cpp : Implementation of DllMain.
 
-class txnEditProject :
-   public txnTransaction
+#include "stdafx.h"
+#include "resource.h"
+#include "dllmain.h"
+
+CReportAgentModule _AtlModule;
+
+class CReportAgentModuleApp : public CWinApp
 {
 public:
-   txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName);
-   ~txnEditProject(void);
 
-   virtual bool Execute();
-   virtual void Undo();
-   virtual txnTransaction* CreateClone() const;
-   virtual std::_tstring Name() const;
-   virtual bool IsUndoable();
-   virtual bool IsRepeatable();
+// Overrides
+	virtual BOOL InitInstance();
+	virtual int ExitInstance();
 
-private:
-   void Execute(int i);
-
-	CString m_ProjectName[2];
+	DECLARE_MESSAGE_MAP()
 };
+
+BEGIN_MESSAGE_MAP(CReportAgentModuleApp, CWinApp)
+END_MESSAGE_MAP()
+
+CReportAgentModuleApp theApp;
+
+BOOL CReportAgentModuleApp::InitInstance()
+{
+	return CWinApp::InitInstance();
+}
+
+int CReportAgentModuleApp::ExitInstance()
+{
+	return CWinApp::ExitInstance();
+}

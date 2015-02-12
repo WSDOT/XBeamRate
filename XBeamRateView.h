@@ -9,8 +9,10 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <DManip\DManip.h>
+#include <DManipTools\DManipTools.h>
 
-class CXBeamRateView : public CView
+class CXBeamRateView : public CDisplayView
 {
 protected: // create from serialization only
 	CXBeamRateView();
@@ -27,13 +29,15 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateView)
 	public:
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
 	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_VIRTUAL
+
+   virtual void OnInitialUpdate();
 
 // Implementation
 public:
@@ -44,6 +48,12 @@ public:
 #endif
 
 protected:
+   virtual void OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint);
+   void UpdateDisplayObjects();
+
+   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
+
+   IDType m_DisplayObjectID; // used to generate display object IDs
 
 // Generated message map functions
 protected:

@@ -92,7 +92,7 @@ STDMETHODIMP CAnalysisAgentImp::Init2()
    HRESULT hr = S_OK;
 
    // Connection point for the bridge description
-   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -121,7 +121,7 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -139,7 +139,7 @@ void CAnalysisAgentImp::Validate()
       m_Model.CoCreateInstance(CLSID_Fem2dModel);
 
       // Build the frame model
-      GET_IFACE(IProject,pProject);
+      GET_IFACE(IXBRProject,pProject);
 
       // some dummy dimensions
       Float64 leftOverhang = pProject->GetLeftOverhang();
@@ -173,18 +173,17 @@ void CAnalysisAgentImp::Validate()
       members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
 
       Float64 x = leftOverhang;
-      if ( nColumns == 1 )
+      for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
       {
-         // hammer head pier - only one column
-
-         Float64 columnHeight = pProject->GetColumnHeight(0);
+         Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
+         Float64 columnHeight = pProject->GetColumnHeight(colIdx);
 
          // create joint at bottom of column
          joint.Release();
          joints->Create(jntID++,x,-columnHeight,&joint);
 
          joint->Support(); // fully fixed
-         if ( pProject->GetColumnBaseType(0) == xbrTypes::cbtPinned )
+         if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
          {
             joint->ReleaseDof(jrtMz); // pinned
          }
@@ -192,48 +191,17 @@ void CAnalysisAgentImp::Validate()
          // create column member
          mbr.Release();
          members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
+
+         x += space;
+
+         // create next top of column joint
+         joint.Release();
+         joints->Create(jntID++,x,0,&joint);
+
+         // create cross beam member
+         mbr.Release();
+         members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
       }
-      else
-      {
-         IndexType nSpaces = nColumns-1;
-         for ( IndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
-         {
-            Float64 space = pProject->GetSpacing(spaceIdx);
-            Float64 columnHeight = pProject->GetColumnHeight(spaceIdx);
-
-            // create joint at bottom of column
-            joint.Release();
-            joints->Create(jntID++,x,-columnHeight,&joint);
-
-            joint->Support(); // fully fixed
-            if ( pProject->GetColumnBaseType(spaceIdx) == xbrTypes::cbtPinned )
-            {
-               joint->ReleaseDof(jrtMz); // pinned
-            }
-
-            // create column member
-            mbr.Release();
-            members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
-
-            x += space;
-
-            // create next top of column joint
-            joint.Release();
-            joints->Create(jntID++,x,0,&joint);
-
-            // create cross beam member
-            mbr.Release();
-            members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
-         }
-      }
-
-      // create joint at right end of cross beam
-      joint.Release();
-      joints->Create(jntID++,x+rightOverhang,0,&joint);
-
-      // create right overhang
-      mbr.Release();
-      members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
 
       // create some dummy loads
       CComPtr<IFem2dLoadingCollection> loadings;
@@ -261,7 +229,7 @@ void CAnalysisAgentImp::Invalidate()
 }
 
 //////////////////////////////////////////////////////////////////////
-// IProjectEventSink
+// IXBRProjectEventSink
 HRESULT CAnalysisAgentImp::OnProjectChanged()
 {
    Invalidate();

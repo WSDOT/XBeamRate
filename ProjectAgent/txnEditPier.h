@@ -19,63 +19,31 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
+#pragma once
 
-#include "stdafx.h"
-#include "txnEditProject.h"
+#include <WBFLCore.h>
 
-#include <IFace\Project.h>
-
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+class txnEditPier :
+   public txnTransaction
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
-}
+public:
+   txnEditPier(Float64 oldLeftOverhang,Float64 oldRightOverhang,IndexType oldColumnCount,Float64 oldColumnHeight,Float64 oldColumnSpacing,
+               Float64 newLeftOverhang,Float64 newRightOverhang,IndexType newColumnCount,Float64 newColumnHeight,Float64 newColumnSpacing);
+   ~txnEditPier(void);
 
-txnEditProject::~txnEditProject(void)
-{
-}
+   virtual bool Execute();
+   virtual void Undo();
+   virtual txnTransaction* CreateClone() const;
+   virtual std::_tstring Name() const;
+   virtual bool IsUndoable();
+   virtual bool IsRepeatable();
 
-bool txnEditProject::Execute()
-{
-   Execute(1);
-   return true;
-}
+private:
+   void Execute(int i);
 
-void txnEditProject::Undo()
-{
-   Execute(0);
-}
-
-void txnEditProject::Execute(int i)
-{
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
-
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
-
-   //pEvents->FirePendingEvents();
-}
-
-txnTransaction* txnEditProject::CreateClone() const
-{
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
-}
-
-std::_tstring txnEditProject::Name() const
-{
-   return _T("Edit Project Name");
-}
-
-bool txnEditProject::IsUndoable()
-{
-   return true;
-}
-
-bool txnEditProject::IsRepeatable()
-{
-   return false;
-}
+	Float64 m_LeftOverhang[2];
+	Float64 m_RightOverhang[2];
+   IndexType m_nColumns[2];
+   Float64 m_ColumnHeight[2];
+   Float64 m_ColumnSpacing[2];
+};

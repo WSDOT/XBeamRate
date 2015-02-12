@@ -11,6 +11,9 @@
 
 #include <EAF\EAFMainFrame.h>
 
+#include <WBFLReportManagerAgent.h>
+#include <WBFLGraphManagerAgent.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -38,10 +41,38 @@ CXBeamRateDoc::CXBeamRateDoc()
    GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
 
    m_pMyDocProxyAgent = NULL;
+   m_bAutoCalcEnabled = true;
+
+   CEAFAutoCalcDocMixin::SetDocument(this);
 }
 
 CXBeamRateDoc::~CXBeamRateDoc()
 {
+}
+
+// CEAFAutoCalcDocMixin overrides
+bool CXBeamRateDoc::IsAutoCalcEnabled() const
+{
+   return m_bAutoCalcEnabled;
+}
+
+void CXBeamRateDoc::EnableAutoCalc(bool bEnable)
+{
+   if ( m_bAutoCalcEnabled != bEnable )
+   {
+      bool bWasDisabled = !IsAutoCalcEnabled();
+      m_bAutoCalcEnabled = bEnable;
+
+      //CPGSuperStatusBar* pStatusBar = ((CPGSuperStatusBar*)EAFGetMainFrame()->GetStatusBar());
+      //pStatusBar->AutoCalcEnabled( m_bAutoCalcEnabled );
+
+      // If AutoCalc was off and now it is on,
+      // Update the views.
+      if ( bWasDisabled && IsAutoCalcEnabled() )
+      {
+        OnUpdateNow();
+      }
+   }
 }
 
 BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
@@ -60,6 +91,13 @@ BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
    
    HRESULT hr = pBrokerInit->AddAgent( pAgent );
    if ( FAILED(hr) )
+   {
+      return FALSE;
+   }
+
+   // we want to use some special agents
+   CLSID clsid[] = {CLSID_SysAgent,CLSID_ReportManagerAgent,CLSID_GraphManagerAgent};
+   if ( !CEAFBrokerDocument::LoadAgents(pBrokerInit, clsid, sizeof(clsid)/sizeof(CLSID) ) )
    {
       return FALSE;
    }
@@ -123,6 +161,16 @@ HRESULT CXBeamRateDoc::WriteTheDocument(IStructuredSave* pStrSave)
    return S_OK;
 }
 
+void CXBeamRateDoc::CreateReportView(CollectionIndexType rptIdx,bool bPrompt)
+{
+   m_pMyDocProxyAgent->CreateReportView(rptIdx,bPrompt);
+}
+
+void CXBeamRateDoc::CreateGraphView(CollectionIndexType graphIdx)
+{
+   CEAFBrokerDocument::CreateGraphView(graphIdx);
+}
+
 CString CXBeamRateDoc::GetRootNodeName()
 {
    return _T("XBeamRate");
@@ -179,9 +227,35 @@ void CXBeamRateDoc::Dump(CDumpContext& dc) const
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateDoc commands
 
+void CXBeamRateDoc::OnCreateFinalize()
+{
+   CEAFBrokerDocument::OnCreateFinalize();
+   PopulateReportMenu();
+}
+
 void CXBeamRateDoc::BrokerShutDown()
 {
    CEAFBrokerDocument::BrokerShutDown();
 
    m_pMyDocProxyAgent = NULL;
+}
+
+void CXBeamRateDoc::PopulateReportMenu()
+{
+   CEAFMenu* pMainMenu = GetMainMenu();
+
+   UINT viewPos = pMainMenu->FindMenuItem(_T("&View"));
+   ASSERT( 0 <= viewPos );
+
+   CEAFMenu* pViewMenu = pMainMenu->GetSubMenu(viewPos);
+   ASSERT( pViewMenu != NULL );
+
+   UINT reportsPos = pViewMenu->FindMenuItem(_T("&Reports"));
+   ASSERT( 0 <= reportsPos );
+
+   // Get the reports menu
+   CEAFMenu* pReportsMenu = pViewMenu->GetSubMenu(reportsPos);
+   ASSERT(pReportsMenu != NULL);
+
+   CEAFBrokerDocument::PopulateReportMenu(pReportsMenu);
 }

@@ -26,8 +26,8 @@ class CXBeamRateDocProxyAgent :
 	public IConnectionPointContainerImpl<CXBeamRateDocProxyAgent>,
    //public CProxyIExtendUIEventSink<CXBeamRateDocProxyAgent>,
    public IAgentEx,
-   //public IAgentUIIntegration,
-   public IProjectEventSink
+   public IAgentUIIntegration,
+   public IXBRProjectEventSink
    //public IEAFDisplayUnitsEventSink,
    //public IVersionInfo,
 {
@@ -39,8 +39,8 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
    COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   //COM_INTERFACE_ENTRY(IAgentUIIntegration)
-   COM_INTERFACE_ENTRY(IProjectEventSink)
+   COM_INTERFACE_ENTRY(IAgentUIIntegration)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    //COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    //COM_INTERFACE_ENTRY(IVersionInfo)
 END_COM_MAP()
@@ -63,12 +63,12 @@ public:
 	STDMETHOD(ShutDown)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-//// IAgentUIIntegration
-//public:
-//   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
+// IAgentUIIntegration
+public:
+   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
 
 
-// IProjectEventSink
+// IXBRProjectEventSink
 public:
    virtual HRESULT OnProjectChanged();
 
@@ -83,14 +83,19 @@ public:
 //   virtual CString GetVersion(bool bIncludeBuildNumber=false);
 
 
+   virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
+
 private:
    DECLARE_EAF_AGENT_DATA;
 
    void AdviseEventSinks();
    void UnadviseEventSinks();
-
    DWORD m_dwProjectCookie;
    //DWORD m_dwDisplayUnitsCookie;
+
+   void RegisterViews();
+   void UnregisterViews();
+   long m_ReportViewKey;
    
    CXBeamRateDoc* m_pMyDocument;
 };

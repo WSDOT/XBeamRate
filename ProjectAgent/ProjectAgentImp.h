@@ -45,12 +45,12 @@ class ATL_NO_VTABLE CProjectAgentImp :
    //public CComRefCountTracer<CProjectAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CProjectAgentImp, &CLSID_ProjectAgent>,
 	public IConnectionPointContainerImpl<CProjectAgentImp>,
-   public CProxyIProjectEventSink<CProjectAgentImp>,
+   public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
-   public IProject
+   public IXBRProject
 {  
 public:
 	CProjectAgentImp(); 
@@ -68,12 +68,12 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
-	COM_INTERFACE_ENTRY(IProject)
+	COM_INTERFACE_ENTRY(IXBRProject)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
-   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
+   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -103,13 +103,15 @@ public:
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
 
-// IProject
+// IXBRProject
 public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
+   virtual void SetOverhangs(Float64 left,Float64 right);
    virtual Float64 GetLeftOverhang();
    virtual Float64 GetRightOverhang();
+   virtual void SetColumns(IndexType nColumns,Float64 height,Float64 spacing);
    virtual IndexType GetColumnCount();
    virtual Float64 GetColumnHeight(IndexType colIdx);
    virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx);
@@ -126,7 +128,7 @@ private:
 
    std::auto_ptr<XBeamRate> m_XBeamRateXML;
 
-   friend CProxyIProjectEventSink<CProjectAgentImp>;
+   friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
 
    void CreateMenus();
    void RemoveMenus();

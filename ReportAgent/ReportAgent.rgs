@@ -1,0 +1,24 @@
+HKCR
+{
+	XBeamRate.ReportAgent.1 = s 'ReportAgent Class'
+	{
+		CLSID = s '{0AC6A8BA-EED1-4d82-BED9-FA38617D255A}'
+	}
+	XBeamRate.ReportAgent = s 'ReportAgent Class'
+	{
+		CLSID = s '{0AC6A8BA-EED1-4d82-BED9-FA38617D255A}'
+		CurVer = s 'XBeamRate.ReportAgent.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {0AC6A8BA-EED1-4d82-BED9-FA38617D255A} = s 'ReportAgent Class'
+		{
+			ProgID = s 'XBeamRate.ReportAgent.1'
+			VersionIndependentProgID = s 'XBeamRate.ReportAgent'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+		}
+	}
+}

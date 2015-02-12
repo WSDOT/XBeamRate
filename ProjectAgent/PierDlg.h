@@ -18,6 +18,7 @@ protected:
 
    void Init();
 
+public:
    CPierLayoutPage m_LayoutPage;
 };
 

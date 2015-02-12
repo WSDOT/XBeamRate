@@ -5,6 +5,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "XBeamRate", "XBeamRate.vcpr
 	ProjectSection(ProjectDependencies) = postProject
 		{01092969-A67E-4534-832F-C1925619A138} = {01092969-A67E-4534-832F-C1925619A138}
 		{A69BD69E-07D6-4326-B25A-938BEC2BB378} = {A69BD69E-07D6-4326-B25A-938BEC2BB378}
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED} = {A1E91AC6-70CE-4921-B249-B062DAC622ED}
 		{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8} = {D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}
 	EndProjectSection
 EndProject
@@ -13,6 +14,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AnalysisAgent", "AnalysisAgent\AnalysisAgent.vcproj", "{D7107ECB-ECEF-492D-B94E-B6FA6C8542D8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngAgent", "EngAgent\EngAgent.vcproj", "{01092969-A67E-4534-832F-C1925619A138}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ReportAgent", "ReportAgent\ReportAgent.vcproj", "{A1E91AC6-70CE-4921-B249-B062DAC622ED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -71,6 +74,18 @@ Global
 		{01092969-A67E-4534-832F-C1925619A138}.Release|Win32.Build.0 = Release|Win32
 		{01092969-A67E-4534-832F-C1925619A138}.Release|x64.ActiveCfg = Release|x64
 		{01092969-A67E-4534-832F-C1925619A138}.Release|x64.Build.0 = Release|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Debug|Win32.Build.0 = Debug|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Debug|x64.ActiveCfg = Debug|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Debug|x64.Build.0 = Debug|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Profile|Win32.ActiveCfg = Profile|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Profile|Win32.Build.0 = Profile|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Profile|x64.ActiveCfg = Profile|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Profile|x64.Build.0 = Profile|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|Win32.ActiveCfg = Release|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|Win32.Build.0 = Release|Win32
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|x64.ActiveCfg = Release|x64
+		{A1E91AC6-70CE-4921-B249-B062DAC622ED}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

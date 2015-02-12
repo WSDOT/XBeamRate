@@ -9,16 +9,30 @@
 #include "resource.h"
 #include <MFCTools\VersionInfo.h>
 
+#include <WBFLGeometry.h>
+#include <WBFLDManip.h>
+#include <WBFLDManipTools.h>
+#include <WBFLReportManagerAgent.h>
+#include <WBFLGraphManagerAgent.h>
+
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
 #include "XBeamRatePlugin_i.h"
 #include "XBeamRatePlugin_i.c"
+
+#include <EAF\EAFDisplayUnits.h>
 
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 
 #include <WBFLCore_i.c>
+#include <WBFLReportManagerAgent_i.c>
+#include <WBFLGraphManagerAgent_i.c>
+#include <WBFLGeometry_i.c>
+#include <WBFLDManip_i.c>
+#include <WBFLDManipTools_i.c>
+#include <DManip\DManip.h>
 
 #include "XBeamRateAppPlugin.h"
 #include "XBeamRateDocProxyAgent.h"
