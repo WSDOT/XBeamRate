@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9.00"
 	Name="XBeamRateProjectAgent"
-	ProjectGUID="{A69BD69E-07D6-4326-B25A-938BEC2BB378}"
+	ProjectGUID="{A5BD6C08-AA35-47D2-901F-2ED427781C7A}"
 	RootNamespace="ProjectAgent"
 	Keyword="AtlProj"
 	TargetFrameworkVersion="0"

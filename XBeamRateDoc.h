@@ -78,6 +78,7 @@ protected:
    virtual void BrokerShutDown();
 
    void PopulateReportMenu();
+   void PopulateGraphMenu();
 };
 
 /////////////////////////////////////////////////////////////////////////////

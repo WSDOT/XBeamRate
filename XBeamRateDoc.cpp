@@ -231,6 +231,7 @@ void CXBeamRateDoc::OnCreateFinalize()
 {
    CEAFBrokerDocument::OnCreateFinalize();
    PopulateReportMenu();
+   PopulateGraphMenu();
 }
 
 void CXBeamRateDoc::BrokerShutDown()
@@ -258,4 +259,24 @@ void CXBeamRateDoc::PopulateReportMenu()
    ASSERT(pReportsMenu != NULL);
 
    CEAFBrokerDocument::PopulateReportMenu(pReportsMenu);
+}
+
+void CXBeamRateDoc::PopulateGraphMenu()
+{
+   CEAFMenu* pMainMenu = GetMainMenu();
+
+   UINT viewPos = pMainMenu->FindMenuItem(_T("&View"));
+   ASSERT( 0 <= viewPos );
+
+   CEAFMenu* pViewMenu = pMainMenu->GetSubMenu(viewPos);
+   ASSERT( pViewMenu != NULL );
+
+   UINT graphsPos = pViewMenu->FindMenuItem(_T("&Graphs"));
+   ASSERT( 0 <= graphsPos );
+
+   // Get the graphs menu
+   CEAFMenu* pGraphMenu = pViewMenu->GetSubMenu(graphsPos);
+   ASSERT(pGraphMenu != NULL);
+
+   CEAFBrokerDocument::PopulateGraphMenu(pGraphMenu);
 }

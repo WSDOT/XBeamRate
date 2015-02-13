@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="XBeamRateEngAgent"
-	ProjectGUID="{01092969-A67E-4534-832F-C1925619A138}"
-	RootNamespace="EngAgent"
+	Name="XBeamRatePierAgent"
+	ProjectGUID="{A822F431-EE4D-40CC-B036-9EA71C5BB432}"
+	RootNamespace="PierAgent"
 	Keyword="AtlProj"
 	TargetFrameworkVersion="0"
 	>
@@ -93,7 +93,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -113,7 +113,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/EngAgent.bsc"
+				OutputFile=".\Debug/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -199,7 +199,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				IgnoreDefaultLibraryNames="msvcrt.lib"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -219,7 +219,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Debug/EngAgent.bsc"
+				OutputFile=".\Debug/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -307,7 +307,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -329,7 +329,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/EngAgent.bsc"
+				OutputFile=".\Release/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -417,7 +417,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -439,7 +439,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/EngAgent.bsc"
+				OutputFile=".\Release/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -502,7 +502,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/EngAgent.pch"
+				PrecompiledHeaderFile=".\Release/PierAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -528,7 +528,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -551,7 +551,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/EngAgent.bsc"
+				OutputFile=".\Release/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -614,7 +614,7 @@
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="stdafx.h"
-				PrecompiledHeaderFile=".\Release/EngAgent.pch"
+				PrecompiledHeaderFile=".\Release/PierAgent.pch"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				DebugInformationFormat="3"
@@ -640,7 +640,7 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
-				ModuleDefinitionFile=".\EngAgent.def"
+				ModuleDefinitionFile=".\PierAgent.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				OptimizeReferences="2"
@@ -663,7 +663,7 @@
 			<Tool
 				Name="VCBscMakeTool"
 				SuppressStartupBanner="true"
-				OutputFile=".\Release/EngAgent.bsc"
+				OutputFile=".\Release/PierAgent.bsc"
 			/>
 			<Tool
 				Name="VCFxCopTool"
@@ -688,7 +688,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgent.cpp"
+				RelativePath=".\PierAgent.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -746,11 +746,11 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\EngAgent.def"
+				RelativePath=".\PierAgent.def"
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgent.rc"
+				RelativePath=".\PierAgent.rc"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -808,7 +808,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\EngAgentImp.cpp"
+				RelativePath=".\PierAgentImp.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -939,15 +939,15 @@
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgent.h"
+				RelativePath=".\PierAgent.h"
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgentCLSID.h"
+				RelativePath=".\PierAgentCLSID.h"
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgentImp.h"
+				RelativePath=".\PierAgentImp.h"
 				>
 			</File>
 			<File
@@ -964,11 +964,11 @@
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
 			<File
-				RelativePath=".\EngAgent.rgs"
+				RelativePath=".\PierAgent.rgs"
 				>
 			</File>
 			<File
-				RelativePath=".\EngAgentModule.rgs"
+				RelativePath=".\PierAgentModule.rgs"
 				>
 			</File>
 		</Filter>

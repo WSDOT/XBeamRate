@@ -1,0 +1,24 @@
+HKCR
+{
+	XBeamRate.PierAgent.1 = s 'PierAgent Class'
+	{
+		CLSID = s '{F5F56C70-715B-4a8c-B81F-65CB93FF2DD5}'
+	}
+	XBeamRate.PierAgent = s 'PierAgent Class'
+	{
+		CLSID = s '{F5F56C70-715B-4a8c-B81F-65CB93FF2DD5}'
+		CurVer = s 'XBeamRate.PierAgent.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {F5F56C70-715B-4a8c-B81F-65CB93FF2DD5} = s 'PierAgent Class'
+		{
+			ProgID = s 'XBeamRate.PierAgent.1'
+			VersionIndependentProgID = s 'XBeamRate.PierAgent'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+		}
+	}
+}

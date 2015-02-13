@@ -124,6 +124,10 @@ BEGIN
         BEGIN
             MENUITEM "This is a placeholder",       ID_REPORTS_THISISAPLACEHOLDER
         END
+        POPUP "&Graphs"
+        BEGIN
+            MENUITEM "This is a placeholder",       ID_GRAPHS_THISISAPLACEHOLDER
+        END
     END
     POPUP "&Help"
     BEGIN
@@ -141,8 +145,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_ICON                ICON                    "res\\XBeamRate.ico"
 IDR_REPORT              ICON                    "res\\ReportView.ico"
+IDI_ICON                ICON                    "res\\XBeamRate.ico"
 IDR_GRAPHING            ICON                    "res\\GraphingView.ico"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -178,6 +182,10 @@ STRINGTABLE
 BEGIN
     IDS_PROJNAME            "XBeam Rate"
     IDR_XBEAMRATE           "\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
+END
+
+STRINGTABLE 
+BEGIN
     IDR_REPORT              "Report\n\n\n\n\n\n"
     IDR_GRAPHING            "Graphing\n\n\n\n\n\n"
 END
