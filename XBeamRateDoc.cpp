@@ -96,7 +96,7 @@ BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
    }
 
    // we want to use some special agents
-   CLSID clsid[] = {CLSID_SysAgent,CLSID_ReportManagerAgent,CLSID_GraphManagerAgent};
+   CLSID clsid[] = {CLSID_ReportManagerAgent,CLSID_GraphManagerAgent};
    if ( !CEAFBrokerDocument::LoadAgents(pBrokerInit, clsid, sizeof(clsid)/sizeof(CLSID) ) )
    {
       return FALSE;

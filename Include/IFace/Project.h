@@ -7,9 +7,9 @@ INTERFACE
 DESCRIPTION
    Interface for getting this application going.
 *****************************************************************************/
-// {AAF586AA-D06E-446b-9EB2-CA916427AD9E}
+// {2600A729-D7E6-44f6-9F9B-DF086FF9E53B}
 DEFINE_GUID(IID_IXBRProject, 
-0xaaf586aa, 0xd06e, 0x446b, 0x9e, 0xb2, 0xca, 0x91, 0x64, 0x27, 0xad, 0x9e);
+0x2600a729, 0xd7e6, 0x44f6, 0x9f, 0x9b, 0xdf, 0x8, 0x6f, 0xf9, 0xe5, 0x3b);
 interface IXBRProject : IUnknown
 {
    virtual void SetProjectName(LPCTSTR strName) = 0;
@@ -33,9 +33,9 @@ INTERFACE
 DESCRIPTION
    Callback interface for changes to the project data
 *****************************************************************************/
-// {E677C320-9E35-4ce2-9FA6-083E99F87742}
+// {9DD03140-A788-4e46-A283-0B343956A619}
 DEFINE_GUID(IID_IXBRProjectEventSink, 
-0xe677c320, 0x9e35, 0x4ce2, 0x9f, 0xa6, 0x8, 0x3e, 0x99, 0xf8, 0x77, 0x42);
+0x9dd03140, 0xa788, 0x4e46, 0xa2, 0x83, 0xb, 0x34, 0x39, 0x56, 0xa6, 0x19);
 interface IXBRProjectEventSink : IUnknown
 {
    virtual HRESULT OnProjectChanged() = 0;

@@ -36,7 +36,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
 				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
 				Outputs="\ARP\BridgeLink\XBeamRate.tip"
 			/>
@@ -55,7 +55,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -86,7 +86,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				ModuleDefinitionFile=".\XBeamRate.def"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
 				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
 				Outputs="\ARP\BridgeLink\XBeamRate.tip"
 			/>
@@ -154,7 +154,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -185,7 +185,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				ModuleDefinitionFile=".\XBeamRate.def"
 				SubSystem="2"
 				RandomizedBaseAddress="1"
@@ -232,7 +232,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
 				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
 				Outputs="\ARP\BridgeLink\XBeamRate.tip"
 			/>
@@ -250,7 +250,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -282,7 +282,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				ModuleDefinitionFile=".\XBeamRate.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -330,7 +330,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
 				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
 				Outputs="\ARP\BridgeLink\XBeamRate.tip"
 			/>
@@ -349,7 +349,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -381,7 +381,7 @@
 				Name="VCLinkerTool"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
-				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
+				AdditionalLibraryDirectories="&quot;\ARP\WBFL\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;;&quot;\ARP\BridgeLink\RegFreeCOM\$(PlatformName)\$(ConfigurationName)&quot;"
 				ModuleDefinitionFile=".\XBeamRate.def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -516,6 +516,10 @@
 						AdditionalIncludeDirectories="$(OUTDIR)"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\XBeamRateAgent.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\XBeamRateAppPlugin.cpp"
@@ -751,6 +755,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateAgent.h"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateAppPlugin.h"
 				>
 			</File>
@@ -805,6 +813,10 @@
 			</File>
 			<File
 				RelativePath=".\res\XBeamRate.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateAgent.rgs"
 				>
 			</File>
 			<File

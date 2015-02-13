@@ -975,10 +975,6 @@
 		<Filter
 			Name="IFace"
 			>
-			<File
-				RelativePath="..\Include\IFace\LoadRating.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Status Items"

@@ -25,7 +25,7 @@
 extern CComModule _Module;
 #include <atlcom.h>
 
-#include <WBFLTypes.h>
+#include <PGSuperTypes.h>
 
 #include <WBFLCore.h>
 #include <AgentTools.h>

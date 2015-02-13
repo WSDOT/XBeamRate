@@ -20,11 +20,17 @@
 #include "XBeamRatePlugin_i.h"
 #include "XBeamRatePlugin_i.c"
 
+// EAF Common Interfaces
 #include <EAF\EAFDisplayUnits.h>
 
+// XBeam Rate Interfaces
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+
+// PGSuper/PGSplice Interfaces
+#include <IFace\ExtendUI.h>
+
 
 #include <WBFLCore_i.c>
 #include <WBFLReportManagerAgent_i.c>
@@ -39,6 +45,8 @@
 #include <XBeamRateCatCom.h>
 
 #include <BridgeLinkCATID.h>
+#include <PGSuperCatCom.h>
+#include <PGSpliceCatCom.h>
 #include <System\ComCatMgr.h>
 
 #include "XBeamRatePluginApp.h"
@@ -138,6 +146,17 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 /////////////////////////////////////////////////////////////////////////////
 // DllRegisterServer - Adds entries to the system registry
 
+void RegisterComponents(bool bRegister)
+{
+   // These components are for the "stand alone" XBeam Rate application
+   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin,    CATID_BridgeLinkAppPlugin, bRegister);
+   sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,bRegister);
+
+   // These components are for the PGSuper and PGSplice extension agents
+   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSuperExtensionAgent,  bRegister);
+   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSpliceExtensionAgent, bRegister);
+}
+
 STDAPI DllRegisterServer(void)
 {
     // registers object, typelib and all interfaces in typelib
@@ -146,9 +165,7 @@ STDAPI DllRegisterServer(void)
    if ( FAILED(hr) )
       return hr;
 
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin, CATID_BridgeLinkAppPlugin, true);
-
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,true);
+   RegisterComponents(true);
 
    return S_OK;
 }
@@ -158,9 +175,7 @@ STDAPI DllRegisterServer(void)
 
 STDAPI DllUnregisterServer(void)
 {
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin, CATID_BridgeLinkAppPlugin, false);
-
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,false);
+   RegisterComponents(false);
 
    return _Module.UnregisterServer(FALSE);
 }

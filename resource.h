@@ -9,9 +9,12 @@
 #define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_XBEAMRATE                   102
+#define IDD_PROPPAGE_MEDIUM             106
+#define IDD_PIER_PAGE                   106
 #define IDR_XBEAMRATEAPP                129
 #define IDR_COMPONENTINFO               130
-#define IDR_REPORT                      131
+#define IDR_XBEAMRATEAGENT              131
+#define IDR_REPORT                      132
 #define IDR_GRAPHING                    139
 #define IDI_ICON                        205
 #define IDR_TOOLBAR1                    206

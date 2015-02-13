@@ -6,6 +6,7 @@
 
 import "oaidl.idl";
 import "ocidl.idl";
+import "WBFLCore.idl"; // for the Agent plugin
 
 
 [
@@ -28,10 +29,21 @@ library XBeamRateLibrary
 	};
 
    [
-      uuid(8CB5644D-5CC5-4fca-A86C-0A1D566D30CB)
+      uuid(8CB5644D-5CC5-4fca-A86C-0A1D566D30CB),
+		helpstring("XBeam Rate Component Information")
    ]
    coclass XBeamRateComponentInfo
    {
       interface IUnknown;
    }
+
+   // This agent is an extension agent for PGSuper and PGSplice
+	[
+		uuid(60BF2930-673C-4d29-B654-8A2E0879DE2B),
+		helpstring("XBeamRateAgent Class")
+	]
+	coclass XBeamRateAgent
+	{
+		[default] interface IAgentEx;
+	};
 };

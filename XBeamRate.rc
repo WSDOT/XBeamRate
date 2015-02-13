@@ -93,6 +93,7 @@ END
 
 IDR_XBEAMRATEAPP        REGISTRY                "XBeamRateAppPlugin.rgs"
 IDR_COMPONENTINFO       REGISTRY                "ComponentInfo.rgs"
+IDR_XBEAMRATEAGENT      REGISTRY                "XBeamRateAgent.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -172,6 +173,39 @@ END
 //
 
 IDR_XBEAMRATE           BITMAP                  "res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PIER_PAGE DIALOGEX 0, 0, 210, 154
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "XBeam Reinforcement"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "TODO: XBeam Rate Controls",IDC_STATIC,60,73,100,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PIER_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 203
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 147
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

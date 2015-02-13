@@ -7,9 +7,9 @@ INTERFACE
 DESCRIPTION
    Interface for getting analysis results
 *****************************************************************************/
-// {40AC2396-A43A-4ed4-8980-1B0485969CB2}
+// {D8B2E731-710A-48ae-9916-AC152FEF2031}
 DEFINE_GUID(IID_IAnalysisResults, 
-0x40ac2396, 0xa43a, 0x4ed4, 0x89, 0x80, 0x1b, 0x4, 0x85, 0x96, 0x9c, 0xb2);
+0xd8b2e731, 0x710a, 0x48ae, 0x99, 0x16, 0xac, 0x15, 0x2f, 0xef, 0x20, 0x31);
 interface IAnalysisResults : IUnknown
 {
    virtual Float64 GetResult() = 0;
