@@ -45,7 +45,7 @@ void CXBeamRateDocProxyAgent::AdviseEventSinks()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -61,7 +61,7 @@ void CXBeamRateDocProxyAgent::UnadviseEventSinks()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -141,7 +141,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
 }
 
 ////////////////////////////////////////////////////////////////////
-// IXBRProjectEventSink
+// IProjectEventSink
 HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
 {
    AFX_MANAGE_STATE(AfxGetAppModuleState());

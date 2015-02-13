@@ -25,6 +25,7 @@
 #include <EAF\EAFDisplayUnits.h>
 
 #include <IFace\Project.h>
+using namespace XBR;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,9 +63,11 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
+   GET_IFACE2(pBroker,IProject,pProject);
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
+
+   *pPara << _T("Project Name = ") << pProject->GetProjectName() << rptNewLine;
 
    rptRcTable* pTable = new rptRcTable(2,0);
    *pPara << pTable << rptNewLine;

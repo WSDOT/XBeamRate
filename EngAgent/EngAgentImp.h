@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CEngAgentImp :
    //public CComRefCountTracer<CEngAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CEngAgentImp, &CLSID_EngAgent>,
 	public IConnectionPointContainerImpl<CEngAgentImp>,
-   //public CProxyIXBRProjectEventSink<CEngAgentImp>,
+   //public CProxyIProjectEventSink<CEngAgentImp>,
    public IAgentEx,
    public ILoadRating
 {  
@@ -63,7 +63,7 @@ BEGIN_COM_MAP(CEngAgentImp)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CEngAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx

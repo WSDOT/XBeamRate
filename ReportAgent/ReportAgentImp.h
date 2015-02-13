@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CReportAgentImp :
    //public CComRefCountTracer<CReportAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CReportAgentImp, &CLSID_ReportAgent>,
 	//public IConnectionPointContainerImpl<CReportAgentImp>,
-   //public CProxyIXBRProjectEventSink<CReportAgentImp>,
+   //public CProxyIProjectEventSink<CReportAgentImp>,
    public IAgentEx
 {  
 public:
@@ -61,7 +61,7 @@ BEGIN_COM_MAP(CReportAgentImp)
 END_COM_MAP()
 
 //BEGIN_CONNECTION_POINT_MAP(CReportAgentImp)
-////   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+////   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 //END_CONNECTION_POINT_MAP()
 
 // IAgentEx

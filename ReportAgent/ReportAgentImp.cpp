@@ -103,7 +103,7 @@ STDMETHODIMP CReportAgentImp::Init2()
    //HRESULT hr = S_OK;
 
    //// Connection point for the bridge description
-   //hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   //hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
    //ATLASSERT( SUCCEEDED(hr) );
    //hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    //ATLASSERT( SUCCEEDED(hr) );

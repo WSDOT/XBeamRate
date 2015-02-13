@@ -3,6 +3,8 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
 
+using namespace XBR;
+
 class CXBeamRateDoc;
 struct IBroker;
 
@@ -27,7 +29,7 @@ class CXBeamRateDocProxyAgent :
    //public CProxyIExtendUIEventSink<CXBeamRateDocProxyAgent>,
    public IAgentEx,
    public IAgentUIIntegration,
-   public IXBRProjectEventSink
+   public IProjectEventSink
    //public IEAFDisplayUnitsEventSink,
    //public IVersionInfo,
 {
@@ -40,7 +42,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+   COM_INTERFACE_ENTRY(IProjectEventSink)
    //COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    //COM_INTERFACE_ENTRY(IVersionInfo)
 END_COM_MAP()
@@ -68,7 +70,7 @@ public:
    STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
 
 
-// IXBRProjectEventSink
+// IProjectEventSink
 public:
    virtual HRESULT OnProjectChanged();
 

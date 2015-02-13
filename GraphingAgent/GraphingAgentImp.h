@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CGraphingAgentImp :
    //public CComRefCountTracer<CGraphingAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CGraphingAgentImp, &CLSID_GraphingAgent>,
 	public IConnectionPointContainerImpl<CGraphingAgentImp>,
-   //public CProxyIXBRProjectEventSink<CGraphingAgentImp>,
+   //public CProxyIProjectEventSink<CGraphingAgentImp>,
    public IAgentEx
 {  
 public:
@@ -61,7 +61,7 @@ BEGIN_COM_MAP(CGraphingAgentImp)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CGraphingAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx

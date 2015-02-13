@@ -24,6 +24,9 @@
 
 #include "stdafx.h"
 #include "XBeamRateAgent.h"
+#include <XBeamRateCatCom.h>
+
+#include <IFace\Project.h>
 
 //#include <EAF\EAFOutputChildFrame.h>
 //#include "MyView.h"
@@ -49,7 +52,6 @@
 
 // CXBeamRateAgent
 
-#include <XBeamRateCatCom.h>
 HRESULT CXBeamRateAgent::FinalConstruct()
 {
    CComPtr<IBroker> pBroker;
@@ -269,18 +271,18 @@ STDMETHODIMP CXBeamRateAgent::Init()
    //
    // Attach to connection points
    //
-   //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   //CComPtr<IConnectionPoint> pCP;
-   //HRESULT hr = S_OK;
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
 
-   //// Connection point for the user interface extension events
-   //hr = pBrokerInit->FindConnectionPoint( IID_IExtendUIEventSink, &pCP );
-   //if ( SUCCEEDED(hr) )
-   //{
-   //   hr = pCP->Advise( GetUnknown(), &m_dwExtendUICookie );
-   //   ATLASSERT( SUCCEEDED(hr) );
-   //   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-   //}
+   // Connection point for the user interface extension events
+   hr = pBrokerInit->FindConnectionPoint( IID_IProjectPropertiesEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwProjectPropertiesCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
 
    return S_OK;
 }
@@ -301,17 +303,17 @@ STDMETHODIMP CXBeamRateAgent::ShutDown()
    //
    // Detach to connection points
    //
-   //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   //CComPtr<IConnectionPoint> pCP;
-   //HRESULT hr = S_OK;
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
 
-   //hr = pBrokerInit->FindConnectionPoint(IID_IExtendUIEventSink, &pCP );
-   //if ( SUCCEEDED(hr) )
-   //{
-   //   hr = pCP->Unadvise( m_dwExtendUICookie );
-   //   ATLASSERT( SUCCEEDED(hr) );
-   //   pCP.Release(); // Recycle the connection point
-   //}
+   hr = pBrokerInit->FindConnectionPoint(IID_IProjectPropertiesEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwProjectPropertiesCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the connection point
+   }
 
    return S_OK;
 }
@@ -608,3 +610,13 @@ IDType CXBeamRateAgent::GetEditBridgeCallbackID()
 //   AfxMessageBox(_T("Example Extension Agent - Hints Reset"));
 //   return S_OK;
 //}
+
+//IProjectPropertiesEventSink
+using namespace XBR;
+HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
+{
+   GET_IFACE(IProjectProperties,pProjectProps);
+   GET_IFACE(IProject, pProject);
+   pProject->SetProjectName(pProjectProps->GetBridgeName());
+   return S_OK;
+}

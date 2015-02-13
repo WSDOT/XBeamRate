@@ -79,7 +79,7 @@ BOOL CXBeamRateView::PreCreateWindow(CREATESTRUCT& cs)
 //
 //   CComPtr<IBroker> pBroker;
 //   EAFGetBroker(&pBroker);
-//   GET_IFACE2(pBroker,IXBRProject,pProject);
+//   GET_IFACE2(pBroker,IProject,pProject);
 //   CString strProjectName = pProject->GetProjectName();
 //
 //   GET_IFACE2(pBroker,IAnalysisResults,pResults);
@@ -202,7 +202,10 @@ void CXBeamRateView::UpdateDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
+   //GET_IFACE2(pBroker,IProject,pProject);
+   CComPtr<XBR::IProject> pProject;
+   pBroker->GetInterface( XBR::IID_IProject, (IUnknown**)&pProject);
+   ASSERT( pProject.p != NULL );
 
    Float64 leftOverhang = pProject->GetLeftOverhang();
    Float64 rightOverhang = pProject->GetRightOverhang();

@@ -92,7 +92,7 @@ STDMETHODIMP CAnalysisAgentImp::Init2()
    HRESULT hr = S_OK;
 
    // Connection point for the bridge description
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -121,7 +121,7 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint(IID_IProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -139,7 +139,7 @@ void CAnalysisAgentImp::Validate()
       m_Model.CoCreateInstance(CLSID_Fem2dModel);
 
       // Build the frame model
-      GET_IFACE(IXBRProject,pProject);
+      GET_IFACE(IProject,pProject);
 
       // some dummy dimensions
       Float64 leftOverhang = pProject->GetLeftOverhang();
@@ -229,7 +229,7 @@ void CAnalysisAgentImp::Invalidate()
 }
 
 //////////////////////////////////////////////////////////////////////
-// IXBRProjectEventSink
+// IProjectEventSink
 HRESULT CAnalysisAgentImp::OnProjectChanged()
 {
    Invalidate();

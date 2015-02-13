@@ -25,6 +25,8 @@
 
 #include <IFace\Project.h>
 
+using namespace XBR;
+
 txnEditPier::txnEditPier(Float64 oldLeftOverhang,Float64 oldRightOverhang,IndexType oldColumnCount,Float64 oldColumnHeight,Float64 oldColumnSpacing,
                          Float64 newLeftOverhang,Float64 newRightOverhang,IndexType newColumnCount,Float64 newColumnHeight,Float64 newColumnSpacing)
 {
@@ -63,7 +65,7 @@ void txnEditPier::Execute(int i)
    //GET_IFACE2(pBroker,IEvents, pEvents);
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
+   GET_IFACE2(pBroker,IProject,pProject);
    pProject->SetOverhangs(m_LeftOverhang[i],m_RightOverhang[i]);
    pProject->SetColumns(m_nColumns[i],m_ColumnHeight[i],m_ColumnSpacing[i]);
 

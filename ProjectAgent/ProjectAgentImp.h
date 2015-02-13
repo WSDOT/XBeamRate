@@ -28,6 +28,9 @@
 #pragma once
 
 #include "resource.h"       // main symbols
+
+using namespace XBR;
+
 #include <ProjectAgent.h>
 #include "CPProjectAgent.h"
 #include "ProjectAgentCLSID.h"
@@ -45,12 +48,12 @@ class ATL_NO_VTABLE CProjectAgentImp :
    //public CComRefCountTracer<CProjectAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CProjectAgentImp, &CLSID_ProjectAgent>,
 	public IConnectionPointContainerImpl<CProjectAgentImp>,
-   public CProxyIXBRProjectEventSink<CProjectAgentImp>,
+   public CProxyIProjectEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
-   public IXBRProject
+   public IProject
 {  
 public:
 	CProjectAgentImp(); 
@@ -68,12 +71,12 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
-	COM_INTERFACE_ENTRY(IXBRProject)
+	COM_INTERFACE_ENTRY(IProject)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
-   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -103,7 +106,7 @@ public:
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
 
-// IXBRProject
+// IProject
 public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
@@ -128,7 +131,7 @@ private:
 
    std::auto_ptr<XBeamRate> m_XBeamRateXML;
 
-   friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
+   friend CProxyIProjectEventSink<CProjectAgentImp>;
 
    void CreateMenus();
    void RemoveMenus();

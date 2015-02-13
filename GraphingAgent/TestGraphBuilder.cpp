@@ -50,7 +50,7 @@ END_MESSAGE_MAP()
 
 CTestGraphBuilder::CTestGraphBuilder()
 {
-   SetName(_T("Test Graph Builder"));
+   SetName(_T("XBeam Rate Test Graph Builder"));
 }
 
 CTestGraphBuilder::CTestGraphBuilder(const CTestGraphBuilder& other) :

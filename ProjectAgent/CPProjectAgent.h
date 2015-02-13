@@ -1,12 +1,12 @@
 
 //////////////////////////////////////////////////////////////////////////////
-// CProxyIXBRProjectEventSink
+// CProxyIProjectEventSink
 template <class T>
-class CProxyIXBRProjectEventSink : public IConnectionPointImpl<T, &IID_IXBRProjectEventSink, CComDynamicUnkArray>
+class CProxyIProjectEventSink : public IConnectionPointImpl<T, &IID_IProjectEventSink, CComDynamicUnkArray>
 {
 public:
 
-//IXBRProjectEventSink : IUnknown
+//IProjectEventSink : IUnknown
 public:
 	HRESULT Fire_OnProjectChanged()
 	{
@@ -26,7 +26,7 @@ public:
 		{
 			if (*pp != NULL)
 			{
-				IXBRProjectEventSink* pEventSink = reinterpret_cast<IXBRProjectEventSink*>(*pp);
+				IProjectEventSink* pEventSink = reinterpret_cast<IProjectEventSink*>(*pp);
 				ret = pEventSink->OnProjectChanged();
 			}
 			pp++;

@@ -3,12 +3,16 @@
 #include "AgentCmdTarget.h"
 
 #include <MFCTools\Prompts.h>
-#include <IFace\Project.h>
 #include <EAF\EAFTransactions.h>
 #include <txnEditProject.h>
 #include <txnEditPier.h>
 
 #include "PierDlg.h"
+
+#include <IFace\Project.h>
+
+using namespace XBR;
+
 
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
    ON_COMMAND(ID_EDIT_PROJECT_NAME,OnEditProjectName)
@@ -29,7 +33,7 @@ void CAgentCmdTarget::OnEditProjectName()
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
    CString strOldProjectName, strNewProjectName;
-   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IProject,pProject);
    strOldProjectName = pProject->GetProjectName();
 
    if ( AfxQuestion(_T("Project Name"),_T("Enter project name"),strOldProjectName,strNewProjectName) )
@@ -44,7 +48,7 @@ void CAgentCmdTarget::OnEditPier()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IProject,pProject);
    CPierDlg dlg(_T("Edit Pier"));
    dlg.m_LayoutPage.m_LeftOverhang  = pProject->GetLeftOverhang();
    dlg.m_LayoutPage.m_RightOverhang = pProject->GetRightOverhang();

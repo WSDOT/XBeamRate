@@ -37,6 +37,8 @@
 
 #include <WBFLFem2d.h>
 
+using namespace XBR;
+
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
@@ -44,9 +46,9 @@ class ATL_NO_VTABLE CAnalysisAgentImp :
    //public CComRefCountTracer<CAnalysisAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CAnalysisAgentImp, &CLSID_AnalysisAgent>,
 	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
-   //public CProxyIXBRProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
+   //public CProxyIProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
    public IAgentEx,
-   public IXBRProjectEventSink,
+   public IProjectEventSink,
    public IAnalysisResults
 {  
 public:
@@ -63,14 +65,14 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+   COM_INTERFACE_ENTRY(IProjectEventSink)
 	COM_INTERFACE_ENTRY(IAnalysisResults)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
 END_COM_MAP()
 
 // needed if we implement a connection point
 //BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
-   //CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+   //CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 //END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -83,7 +85,7 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IXBRProjectEventSink
+// IProjectEventSink
 public:
    HRESULT OnProjectChanged();
 

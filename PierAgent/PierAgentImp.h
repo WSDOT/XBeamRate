@@ -40,7 +40,7 @@ class ATL_NO_VTABLE CPierAgentImp :
    //public CComRefCountTracer<CPierAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CPierAgentImp, &CLSID_PierAgent>,
 	public IConnectionPointContainerImpl<CPierAgentImp>,
-   //public CProxyIXBRProjectEventSink<CPierAgentImp>,
+   //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx
 {  
 public:
@@ -61,7 +61,7 @@ BEGIN_COM_MAP(CPierAgentImp)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CPierAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
