@@ -27,6 +27,7 @@
 #include <XBeamRateCatCom.h>
 
 #include <IFace\Project.h>
+#include <PgsExt\PierData2.h>
 
 //#include <EAF\EAFOutputChildFrame.h>
 //#include "MyView.h"
@@ -484,8 +485,17 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithGraphing(BOOL bIntegrate)
 //
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return new CPropertyPage(IDD_PIER_PAGE);
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->GetPier(pEditPierData->GetPier());
+   if ( pPier->IsAbutment() )
+   {
+      return NULL;
+   }
+   else
+   {
+      AFX_MANAGE_STATE(AfxGetStaticModuleState());
+      return new CPropertyPage(IDD_PIER_PAGE);
+   }
 }
 
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage)
