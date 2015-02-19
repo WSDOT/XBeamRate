@@ -824,6 +824,15 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="IFace"
+			Filter="*.h"
+			>
+			<File
+				RelativePath=".\Include\IFace\XBeamRateAgent.h"
+				>
+			</File>
+		</Filter>
 		<File
 			RelativePath=".\XBeamRate.tip"
 			>

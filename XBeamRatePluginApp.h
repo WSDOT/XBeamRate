@@ -5,6 +5,7 @@
 class CXBeamRatePluginApp : public CWinApp
 {
 public:
+   CXBeamRatePluginApp();
 
 // Overrides
 	// ClassWizard generated virtual function overrides

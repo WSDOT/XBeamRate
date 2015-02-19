@@ -44,6 +44,7 @@
 
 #include <EAF\EAFTransactions.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <IFace\XBeamRateAgent.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

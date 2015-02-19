@@ -26,6 +26,7 @@
 #include "ProjectAgentImp.h"
 
 #include <EAF\EAFDisplayUnits.h>
+#include <IFace\XBeamRateAgent.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -136,6 +137,14 @@ STDMETHODIMP CProjectAgentImp::ShutDown()
 // IAgentUIIntegration
 STDMETHODIMP CProjectAgentImp::IntegrateWithUI(BOOL bIntegrate)
 {
+   CComPtr<IXBeamRateAgent> pXBR;
+   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
+   if ( SUCCEEDED(hr) )
+   {
+      // XBeam Rate is acting as an extension to PGSuper/PGSplice
+      return S_OK;
+   }
+
    if ( bIntegrate )
    {
       CreateMenus();

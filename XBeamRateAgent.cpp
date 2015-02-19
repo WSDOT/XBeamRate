@@ -255,8 +255,9 @@ STDMETHODIMP CXBeamRateAgent::SetBroker(IBroker *pBroker)
 STDMETHODIMP CXBeamRateAgent::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   
    // Register interfaces here
-   // pBrokerInit->RegInterface( IID_ISomeInterfaceThisAgentImplements, this);
+   pBrokerInit->RegInterface( IID_IXBeamRateAgent, this);
 
    return S_OK;
 }
@@ -332,7 +333,7 @@ STDMETHODIMP CXBeamRateAgent::Load(IStructuredLoad* pStrLoad)
 {
    USES_CONVERSION;
    CComVariant var;
-   var.vt = VT_BSTR;
+   //var.vt = VT_BSTR;
    
    HRESULT hr = pStrLoad->BeginUnit(_T("XBeamRateAgent"));
    if ( FAILED(hr) )
@@ -360,6 +361,12 @@ STDMETHODIMP CXBeamRateAgent::Save(IStructuredSave* pStrSave)
    return S_OK;
 }
 
+////////////////////////////////////////////////////////////////////
+// IXBeamRateAgent
+bool CXBeamRateAgent::IsExtendingPGSuper()
+{
+   return true;
+}
 
 ////////////////////////////////////////////////////////////////////
 // IAgentUIIntegration

@@ -24,6 +24,7 @@
 #include <EAF\EAFDisplayUnits.h>
 
 // XBeam Rate Interfaces
+#include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
@@ -69,6 +70,10 @@ BEGIN_MESSAGE_MAP(CXBeamRatePluginApp, CWinApp)
 END_MESSAGE_MAP()
 
 CXBeamRatePluginApp theApp;
+
+CXBeamRatePluginApp::CXBeamRatePluginApp()
+{
+}
 
 BOOL CXBeamRatePluginApp::InitInstance()
 {

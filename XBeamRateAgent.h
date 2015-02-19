@@ -29,6 +29,8 @@
 #include "XBeamRatePlugin_i.h"
 #include <EAF\EAFInterfaceCache.h>
 
+#include <IFace\XBeamRateAgent.h>
+
 #include <IFace\ExtendUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 
@@ -36,6 +38,7 @@
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
+using namespace XBR;
 
 // CXBeamRateAgent
 
@@ -44,6 +47,7 @@ class ATL_NO_VTABLE CXBeamRateAgent :
 	public CComCoClass<CXBeamRateAgent, &CLSID_XBeamRateAgent>,
 	public IAgentEx,
    public IAgentPersist,
+   public IXBeamRateAgent,
    public IAgentUIIntegration,
    public IAgentReportingIntegration,
    public IAgentGraphingIntegration,
@@ -71,14 +75,13 @@ BEGIN_COM_MAP(CXBeamRateAgent)
 	COM_INTERFACE_ENTRY(IAgent)
 	COM_INTERFACE_ENTRY(IAgentEx)
 	COM_INTERFACE_ENTRY(IAgentPersist)
+   COM_INTERFACE_ENTRY(IXBeamRateAgent)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
    COM_INTERFACE_ENTRY(IAgentReportingIntegration)
    COM_INTERFACE_ENTRY(IAgentGraphingIntegration)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
 END_COM_MAP()
-
-
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
    DECLARE_EAF_AGENT_DATA;
@@ -105,6 +108,10 @@ public:
 public:
    STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
    STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
+
+// IXBeamRateAgent
+public:
+   virtual bool IsExtendingPGSuper();
 
 // IAgentUIIntegration
 public:
