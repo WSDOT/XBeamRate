@@ -96,8 +96,8 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0);
 
-   OpenBridgeML::Pier::BaseElement baseElement(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType column(10.0,baseElement);
+   OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
+   OpenBridgeML::Pier::ColumnType column(10.0,foundation);
 
    OpenBridgeML::Pier::ColumnsType columns;
    columns.Column().push_back( column );
@@ -308,8 +308,8 @@ Float64 CProjectAgentImp::GetRightOverhang()
 
 void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,Float64 spacing)
 {
-   OpenBridgeML::Pier::BaseElement baseElement(OpenBridgeML::Pier::IdealizedSupportEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType newColumn(height,baseElement);
+   OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
+   OpenBridgeML::Pier::ColumnType newColumn(height,foundation);
    m_XBeamRateXML->Pier().Columns().Column().resize(nColumns,newColumn);
    m_XBeamRateXML->Pier().Columns().Spacing().resize(nColumns-1,spacing);
 
@@ -337,7 +337,7 @@ Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
 xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
 {
    xbrTypes::ColumnBaseType baseType;
-   if ( m_XBeamRateXML->Pier().Columns().Column()[colIdx].BaseElement().IdealizedSupport() == OpenBridgeML::Pier::IdealizedSupportEnum::Fixed) 
+   if ( m_XBeamRateXML->Pier().Columns().Column()[colIdx].Foundation().IdealizedFoundation() == OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed) 
    {
       baseType = xbrTypes::cbtFixed;
    }
