@@ -184,7 +184,14 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    //props.no_namespace_schema_location(_T("F:\\ARP\\XBeamRate\\Schema\\XBeamRate.xsd"));
    //props.schema_location(_T("http://www.wsdot.wa.gov/OpenBridgeML/Units"),_T("F:\\ARP\\OpenBridgeML\\Schema\\OpenBridgeML_Units.xsd"));
    //std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss,0,props);
-   m_XBeamRateXML = XBeamRate_(ss,xml_schema::flags::dont_validate); // can't figure out validation right now
+   try
+   {
+      m_XBeamRateXML = XBeamRate_(ss,xml_schema::flags::dont_validate); // can't figure out validation right now
+   }
+   catch(...)
+   {
+      return E_FAIL;
+   }
 
    // extract our data from the binding object
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
