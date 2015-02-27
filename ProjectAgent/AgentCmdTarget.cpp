@@ -48,6 +48,7 @@ void CAgentCmdTarget::OnEditPier()
 
    GET_IFACE_(XBR,IProject,pProject);
    CPierDlg dlg(_T("Edit Pier"));
+#pragma Reminder("WORKING HERE - pier data modeling")
    //dlg.m_LayoutPage.m_LeftOverhang  = pProject->GetLeftOverhang();
    //dlg.m_LayoutPage.m_RightOverhang = pProject->GetRightOverhang();
    //dlg.m_LayoutPage.m_nColumns = pProject->GetColumnCount();
