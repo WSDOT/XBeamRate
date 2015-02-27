@@ -56,7 +56,7 @@ void txnEditProject::Execute(int i)
    //GET_IFACE2(pBroker,IEvents, pEvents);
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   GET_IFACE2(pBroker,IProject,pProject);
+   GET_IFACE2_(XBR,pBroker,IProject,pProject);
    pProject->SetProjectName(m_ProjectName[i]);
 
    //pEvents->FirePendingEvents();

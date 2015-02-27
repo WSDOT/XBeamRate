@@ -53,7 +53,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
-   public IProject
+   public XBR::IProject
 {  
 public:
 	CProjectAgentImp(); 
@@ -71,7 +71,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
-	COM_INTERFACE_ENTRY(IProject)
+   COM_INTERFACE_ENTRY_IID(XBR::IID_IProject,XBR::IProject)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 

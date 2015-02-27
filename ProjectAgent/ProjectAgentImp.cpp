@@ -74,7 +74,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IProject,    this );
+   pBrokerInit->RegInterface( XBR::IID_IProject,    this );
 
    return S_OK;
 };
@@ -94,17 +94,18 @@ STDMETHODIMP CProjectAgentImp::Init()
    // Create default data model
    ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
 
-   OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0);
+   OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0,5.0,5.0,0,0,5.0,0,0);
 
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType column(10.0,foundation);
+   OpenBridgeML::Pier::ColumnType column(foundation);
+   column.Height() = 10.0;
 
    OpenBridgeML::Pier::ColumnsType columns;
    columns.Column().push_back( column );
    columns.Spacing().push_back(5.0);
    columns.Column().push_back(column);
 
-   OpenBridgeML::Pier::Pier pier(capBeam,columns);
+   OpenBridgeML::Pier::PierType pier(capBeam,columns);
 
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pier));
 
@@ -316,7 +317,8 @@ Float64 CProjectAgentImp::GetRightOverhang()
 void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,Float64 spacing)
 {
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType newColumn(height,foundation);
+   OpenBridgeML::Pier::ColumnType newColumn(foundation);
+   newColumn.Height() = height;
    m_XBeamRateXML->Pier().Columns().Column().resize(nColumns,newColumn);
    m_XBeamRateXML->Pier().Columns().Spacing().resize(nColumns-1,spacing);
 
@@ -338,7 +340,8 @@ IndexType CProjectAgentImp::GetColumnCount()
 
 Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
 {
-   return m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height();
+   ATLASSERT(m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().present());
+   return m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().get();
 }
 
 xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)

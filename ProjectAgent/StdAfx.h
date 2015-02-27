@@ -46,13 +46,14 @@
 #include <afxole.h>         // MFC OLE classes
 #include <afxodlgs.h>       // MFC OLE dialog classes
 #include <afxdisp.h>        // MFC OLE automation classes
+#include <afxcmn.h>
 
 #include <atlbase.h>
 #include <atlcom.h>
 
 using namespace ATL;
 
-#include <WBFLTypes.h>
+#include <PGSuperTypes.h>
 #include <WBFLDebug.h>
 #include <System\Transaction.h>
 
@@ -62,3 +63,5 @@ using namespace ATL;
 
 #include <XBeamRateTypes.h>
 #include <EAF\EAFUtilities.h>
+
+#include <MFCTools\MFCTools.h>

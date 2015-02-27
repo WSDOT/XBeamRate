@@ -53,7 +53,7 @@
          </xs:annotation>
          <xs:sequence>
             <xs:element name="Settings" type="ApplicationSettings"/>
-            <xs:element name="Pier" type="bxp:Pier"/>
+            <xs:element name="Pier" type="bxp:PierType"/>
          </xs:sequence>
       </xs:complexType>
    </xs:element>
