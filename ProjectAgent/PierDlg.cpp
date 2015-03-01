@@ -27,6 +27,16 @@ CPierDlg::~CPierDlg()
 {
 }
 
+void CPierDlg::SetPierData(const txnEditPierData& pierData)
+{
+   m_PierData = pierData;
+}
+
+const txnEditPierData& CPierDlg::GetPierData() const
+{
+   return m_PierData;
+}
+
 void CPierDlg::Init()
 {
    AddPage(&m_LayoutPage);

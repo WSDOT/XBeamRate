@@ -79,7 +79,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::SetBroker(IBroker* pBroker)
 STDMETHODIMP CXBeamRateDocProxyAgent::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2> pBrokerInit(m_pBroker);
- //  pBrokerInit->RegInterface( IID_IEditByUI,           this );
+   pBrokerInit->RegInterface( IID_IXBeamRate,  this );
    return S_OK;
 }
 
@@ -138,6 +138,18 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
    }
 
    return S_OK;
+}
+
+////////////////////////////////////////////////////////////////////
+// IXBeamRate
+void CXBeamRateDocProxyAgent::GetUnitServer(IUnitServer** ppUnitServer)
+{
+   m_pMyDocument->m_DocUnitServer.CopyTo(ppUnitServer);
+}
+
+void CXBeamRateDocProxyAgent::GetUnitConverter(IUnitConvert2** ppUnitConvert)
+{
+   m_pMyDocument->m_DocConvert.CopyTo(ppUnitConvert);
 }
 
 ////////////////////////////////////////////////////////////////////

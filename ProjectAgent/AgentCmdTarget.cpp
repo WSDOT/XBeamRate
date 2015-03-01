@@ -48,17 +48,30 @@ void CAgentCmdTarget::OnEditPier()
 
    GET_IFACE_(XBR,IProject,pProject);
    CPierDlg dlg(_T("Edit Pier"));
-#pragma Reminder("WORKING HERE - pier data modeling")
-   //dlg.m_LayoutPage.m_LeftOverhang  = pProject->GetLeftOverhang();
-   //dlg.m_LayoutPage.m_RightOverhang = pProject->GetRightOverhang();
-   //dlg.m_LayoutPage.m_nColumns = pProject->GetColumnCount();
-   //dlg.m_LayoutPage.m_ColumnHeight = pProject->GetColumnHeight(0);
-   //dlg.m_LayoutPage.m_ColumnSpacing = pProject->GetSpacing(0);
+
+   txnEditPierData oldPierData;
+   oldPierData.m_Ec = pProject->GetModE();
+   for ( int i = 0; i < 2; i++ )
+   {
+      pgsTypes::PierSideType side = (pgsTypes::PierSideType)i;
+      pProject->GetXBeamDimensions(side,&oldPierData.m_XBeamHeight[side],&oldPierData.m_XBeamTaperHeight[side],&oldPierData.m_XBeamTaperLength[side]);
+      oldPierData.m_XBeamOverhang[side] = pProject->GetXBeamOverhang(side);
+   }
+   oldPierData.m_XBeamWidth = pProject->GetXBeamWidth();
+
+   oldPierData.m_nColumns = pProject->GetColumnCount();
+   oldPierData.m_ColumnHeight = pProject->GetColumnHeight(0);
+   oldPierData.m_ColumnHeightMeasurementType = pProject->GetColumnHeightMeasurementType();
+   oldPierData.m_ColumnSpacing = pProject->GetSpacing(0);
+
+   pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);
+
+   dlg.SetPierData(oldPierData);
    if ( dlg.DoModal() == IDOK )
    {
-      //txnEditPier txn(pProject->GetLeftOverhang(),pProject->GetRightOverhang(),pProject->GetColumnCount(),pProject->GetColumnHeight(0),pProject->GetSpacing(0),
-      //                dlg.m_LayoutPage.m_LeftOverhang,dlg.m_LayoutPage.m_RightOverhang,dlg.m_LayoutPage.m_nColumns,dlg.m_LayoutPage.m_ColumnHeight,dlg.m_LayoutPage.m_ColumnSpacing);
-      //GET_IFACE(IEAFTransactions,pTransactions);
-      //pTransactions->Execute(txn);
+      txnEditPierData newPierData = dlg.GetPierData();
+      txnEditPier txn(oldPierData,newPierData);
+      GET_IFACE(IEAFTransactions,pTransactions);
+      pTransactions->Execute(txn);
    }
 }

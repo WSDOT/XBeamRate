@@ -142,8 +142,8 @@ void CAnalysisAgentImp::Validate()
       GET_IFACE(IProject,pProject);
 
       // some dummy dimensions
-      Float64 leftOverhang = pProject->GetLeftOverhang();
-      Float64 rightOverhang = pProject->GetRightOverhang();
+      Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
+      Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
       IndexType nColumns = pProject->GetColumnCount();
 
       Float64 EAb = 1;

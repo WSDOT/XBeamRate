@@ -27,19 +27,10 @@
 
 using namespace XBR;
 
-txnEditPier::txnEditPier(Float64 oldLeftOverhang,Float64 oldRightOverhang,IndexType oldColumnCount,Float64 oldColumnHeight,Float64 oldColumnSpacing,
-                         Float64 newLeftOverhang,Float64 newRightOverhang,IndexType newColumnCount,Float64 newColumnHeight,Float64 newColumnSpacing)
+txnEditPier::txnEditPier(const txnEditPierData& oldPierData,const txnEditPierData& newPierData)
 {
-   m_LeftOverhang[0] = oldLeftOverhang;
-   m_LeftOverhang[1] = newLeftOverhang;
-   m_RightOverhang[0] = oldRightOverhang;
-   m_RightOverhang[1] = newRightOverhang;
-   m_nColumns[0] = oldColumnCount;
-   m_nColumns[1] = newColumnCount;
-   m_ColumnHeight[0] = oldColumnHeight;
-   m_ColumnHeight[1] = newColumnHeight;
-   m_ColumnSpacing[0] = oldColumnSpacing;
-   m_ColumnSpacing[1] = newColumnSpacing;
+   m_PierData[0] = oldPierData;
+   m_PierData[1] = newPierData;
 }
 
 txnEditPier::~txnEditPier(void)
@@ -66,16 +57,31 @@ void txnEditPier::Execute(int i)
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
    GET_IFACE2_(XBR,pBroker,IProject,pProject);
-   pProject->SetOverhangs(m_LeftOverhang[i],m_RightOverhang[i]);
-   pProject->SetColumns(m_nColumns[i],m_ColumnHeight[i],m_ColumnSpacing[i]);
+
+   pProject->SetModE(m_PierData[i].m_Ec);
+
+   for ( int j = 0; j < 2; j++ )
+   {
+      pgsTypes::PierSideType side = (pgsTypes::PierSideType)j;
+      pProject->SetXBeamDimensions(side,m_PierData[i].m_XBeamHeight[side],m_PierData[i].m_XBeamTaperHeight[side],m_PierData[i].m_XBeamTaperLength[side]);
+      pProject->SetXBeamOverhang(side,m_PierData[i].m_XBeamOverhang[side]);
+   }
+   
+   pProject->SetXBeamWidth(m_PierData[i].m_XBeamWidth);
+   pProject->SetColumns(m_PierData[i].m_nColumns,m_PierData[i].m_ColumnHeight,m_PierData[i].m_ColumnHeightMeasurementType,m_PierData[i].m_ColumnSpacing);
+
+   pProject->SetTransverseLocation(m_PierData[i].m_RefColumnIdx,m_PierData[i].m_TransverseOffset,m_PierData[i].m_TransverseOffsetMeasurement);
+
+#pragma Reminder("WORKING HERE - need to update IProject for the rest of the pier data")
+   // reference column, column shape, and column height measurement type
+
 
    //pEvents->FirePendingEvents();
 }
 
 txnTransaction* txnEditPier::CreateClone() const
 {
-   return new txnEditPier(m_LeftOverhang[0],m_RightOverhang[0],m_nColumns[0],m_ColumnHeight[0],m_ColumnSpacing[0],
-                          m_LeftOverhang[1],m_RightOverhang[1],m_nColumns[1],m_ColumnHeight[1],m_ColumnSpacing[1]);
+   return new txnEditPier(m_PierData[0],m_PierData[1]);
 }
 
 std::_tstring txnEditPier::Name() const

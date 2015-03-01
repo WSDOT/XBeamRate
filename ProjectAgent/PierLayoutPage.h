@@ -51,8 +51,7 @@ public:
 		//    DO NOT EDIT what you see in these blocks of generated code !
 	//}}AFX_DATA
 
-   //void Init(CPierData2* pPier);
-// Overrides
+   // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CPierLayoutPage)
 	public:
@@ -80,29 +79,6 @@ protected:
    void FillTransverseLocationComboBox();
 
    void UpdateColumnSpacingControls();
-
-   //CPierData2* m_pPier;
-   //PierIndexType m_PierIdx;
-
-   Float64 m_Ec;
-
-   ColumnIndexType m_nColumns;
-   ColumnIndexType m_RefColumnIdx;
-   Float64 m_TransverseOffset;
-   pgsTypes::OffsetMeasurementType m_TransverseOffsetMeasurement;
-   Float64 m_XBeamWidth;
-   Float64 m_XBeamHeight[2];
-   Float64 m_XBeamTaperHeight[2];
-   Float64 m_XBeamTaperLength[2];
-   Float64 m_XBeamOverhang[2];
-
-   CColumnData::ColumnHeightMeasurementType m_ColumnHeightMeasurementType;
-   Float64 m_ColumnHeight;
-   Float64 m_ColumnSpacing;
-
-   CColumnData::ColumnShapeType m_ColumnShape;
-   Float64 m_B;
-   Float64 m_D;
 };
 
 //{{AFX_INSERT_LOCATION}}

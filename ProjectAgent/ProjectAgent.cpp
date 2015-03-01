@@ -36,6 +36,7 @@
 #include "ProjectAgentCLSID.h"
 
 #include <WBFLCore_i.c>
+#include <WBFLUnitServer_i.c>
 
 #include "ProjectAgentImp.h"
 

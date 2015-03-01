@@ -43,6 +43,20 @@ CXBeamRateDoc::CXBeamRateDoc()
    m_pMyDocProxyAgent = NULL;
    m_bAutoCalcEnabled = true;
 
+   // The reporting sub-system doesn't use the WBFLUnitServer implementation. It uses the old regular C++
+   // units sytem. That system is in kms units, so we will create a unit server here also in the kms system
+   // so that the data, after loading is in set of consistent base units we want.
+   // If the report system could handle the WBFLUnitServer, the <ConsistentUnits> declaration in the
+   // instance document would work throughout this program because we are working exclusively in
+   // consistent units.
+   m_DocUnitServer.CoCreateInstance(CLSID_UnitServer);
+   m_DocUnitServer->SetBaseUnits(CComBSTR(unitSysUnitsMgr::GetMassUnit().UnitTag().c_str()),
+                            CComBSTR(unitSysUnitsMgr::GetLengthUnit().UnitTag().c_str()),
+                            CComBSTR(unitSysUnitsMgr::GetTimeUnit().UnitTag().c_str()),
+                            CComBSTR(unitSysUnitsMgr::GetTemperatureUnit().UnitTag().c_str()),
+                            CComBSTR(unitSysUnitsMgr::GetAngleUnit().UnitTag().c_str()));  
+   m_DocUnitServer->QueryInterface(&m_DocConvert);
+
    CEAFAutoCalcDocMixin::SetDocument(this);
 }
 

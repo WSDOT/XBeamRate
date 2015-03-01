@@ -11,6 +11,7 @@
 
 #include <EAF\EAFBrokerDocument.h>
 #include <EAF\EAFAutoCalcDoc.h>
+#include <WBFLUnitServer.h>
 
 class CXBeamRateDocProxyAgent;
 
@@ -70,8 +71,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 
+   friend CXBeamRateDocProxyAgent;
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;
-   
+
+   CComPtr<IUnitServer> m_DocUnitServer;
+   CComPtr<IUnitConvert2> m_DocConvert;
+
    bool m_bAutoCalcEnabled;
 
    virtual void OnCreateFinalize();

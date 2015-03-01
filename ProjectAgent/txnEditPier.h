@@ -22,13 +22,37 @@
 #pragma once
 
 #include <WBFLCore.h>
+#include <PgsExt\ColumnData.h>
+
+class txnEditPierData
+{
+public:
+   Float64 m_Ec;
+
+   ColumnIndexType m_nColumns;
+   ColumnIndexType m_RefColumnIdx;
+   Float64 m_TransverseOffset;
+   pgsTypes::OffsetMeasurementType m_TransverseOffsetMeasurement;
+   Float64 m_XBeamWidth;
+   Float64 m_XBeamHeight[2];
+   Float64 m_XBeamTaperHeight[2];
+   Float64 m_XBeamTaperLength[2];
+   Float64 m_XBeamOverhang[2];
+
+   CColumnData::ColumnHeightMeasurementType m_ColumnHeightMeasurementType;
+   Float64 m_ColumnHeight;
+   Float64 m_ColumnSpacing;
+
+   CColumnData::ColumnShapeType m_ColumnShape;
+   Float64 m_B;
+   Float64 m_D;
+};
 
 class txnEditPier :
    public txnTransaction
 {
 public:
-   txnEditPier(Float64 oldLeftOverhang,Float64 oldRightOverhang,IndexType oldColumnCount,Float64 oldColumnHeight,Float64 oldColumnSpacing,
-               Float64 newLeftOverhang,Float64 newRightOverhang,IndexType newColumnCount,Float64 newColumnHeight,Float64 newColumnSpacing);
+   txnEditPier(const txnEditPierData& oldPierData,const txnEditPierData& newPierData);
    ~txnEditPier(void);
 
    virtual bool Execute();
@@ -41,9 +65,6 @@ public:
 private:
    void Execute(int i);
 
-	Float64 m_LeftOverhang[2];
-	Float64 m_RightOverhang[2];
-   IndexType m_nColumns[2];
-   Float64 m_ColumnHeight[2];
-   Float64 m_ColumnSpacing[2];
+   txnEditPierData m_PierData[2];
+
 };

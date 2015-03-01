@@ -28,6 +28,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
 
+#include <WBFLUnitServer\UnitServerUtils.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -107,7 +109,12 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    OpenBridgeML::Pier::PierType pier(capBeam,columns);
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pier));
+   TransverseOffsetType transverseOffset(10.,OffsetMeasurementEnum::Alignment);
+   ColumnIndexType refColIdx = 0;
+
+   Float64 modE = 10;
+
+   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,modE,refColIdx,transverseOffset,pier));
 
    return S_OK;
 }
@@ -176,7 +183,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    strUnit.Replace(_T("</Agent>"),_T(""));
 
    // add the processing instruction at the head of the XML stream
-   std::stringstream ss;
+   std::stringstream ss; // NOTE: XML Stream uses ANSI character set
    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << T2A(strUnit);
 
    // create the XML\C++ binding reading from the string stream
@@ -205,6 +212,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    {
       pDisplayUnits->SetUnitMode(eafTypes::umUS);
    }
+
+   // convert the units of measure into our base units
+   hr = ConvertToBaseUnits();
 
    return hr;
 }
@@ -297,34 +307,119 @@ LPCTSTR CProjectAgentImp::GetProjectName()
    return m_XBeamRateXML->Settings().ProjectName().c_str();
 }
 
-void CProjectAgentImp::SetOverhangs(Float64 left,Float64 right)
+void CProjectAgentImp::SetModE(Float64 Ec)
 {
-   m_XBeamRateXML->Pier().CapBeam().LeftOverhang(left);
-   m_XBeamRateXML->Pier().CapBeam().RightOverhang(right);
+   m_XBeamRateXML->ModE() = Ec;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetLeftOverhang()
+Float64 CProjectAgentImp::GetModE()
 {
-   return m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
+   return m_XBeamRateXML->ModE();
 }
 
-Float64 CProjectAgentImp::GetRightOverhang()
+void CProjectAgentImp::SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength)
 {
-   return m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+   if ( side == pgsTypes::pstLeft )
+   {
+      m_XBeamRateXML->Pier().CapBeam().LeftHeight()      = height;
+      m_XBeamRateXML->Pier().CapBeam().LeftTaperHeight() = taperHeight;
+      m_XBeamRateXML->Pier().CapBeam().LeftTaperLength() = taperLength;
+   }
+   else
+   {
+      m_XBeamRateXML->Pier().CapBeam().RightHeight()      = height;
+      m_XBeamRateXML->Pier().CapBeam().RightTaperHeight() = taperHeight;
+      m_XBeamRateXML->Pier().CapBeam().RightTaperLength() = taperLength;
+   }
+   Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,Float64 spacing)
+void CProjectAgentImp::GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength)
+{
+   if ( side == pgsTypes::pstLeft )
+   {
+      *pHeight      = m_XBeamRateXML->Pier().CapBeam().LeftHeight();
+      *pTaperHeight = m_XBeamRateXML->Pier().CapBeam().LeftTaperHeight();
+      *pTaperLength = m_XBeamRateXML->Pier().CapBeam().LeftTaperLength();
+   }
+   else
+   {
+      *pHeight      = m_XBeamRateXML->Pier().CapBeam().RightHeight();
+      *pTaperHeight = m_XBeamRateXML->Pier().CapBeam().RightTaperHeight();
+      *pTaperLength = m_XBeamRateXML->Pier().CapBeam().RightTaperLength();
+   }
+}
+
+void CProjectAgentImp::SetXBeamWidth(Float64 width)
+{
+   m_XBeamRateXML->Pier().CapBeam().Width() = width;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetXBeamWidth()
+{
+   return m_XBeamRateXML->Pier().CapBeam().Width();
+}
+
+void CProjectAgentImp::SetXBeamOverhang(pgsTypes::PierSideType side,Float64 overhang)
+{
+   if ( side == pgsTypes::pstLeft )
+   {
+      m_XBeamRateXML->Pier().CapBeam().LeftOverhang(overhang);
+   }
+   else
+   {
+      m_XBeamRateXML->Pier().CapBeam().RightOverhang(overhang);
+   }
+   Fire_OnProjectChanged();
+}
+
+void CProjectAgentImp::SetXBeamOverhangs(Float64 leftOverhang,Float64 rightOverhang)
+{
+   m_XBeamRateXML->Pier().CapBeam().LeftOverhang(leftOverhang);
+   m_XBeamRateXML->Pier().CapBeam().RightOverhang(rightOverhang);
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetXBeamOverhang(pgsTypes::PierSideType side)
+{
+   if ( side == pgsTypes::pstLeft )
+   {
+      return m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
+   }
+   else
+   {
+      return m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+   }
+}
+
+void CProjectAgentImp::GetXBeamOverhangs(Float64* pLeftOverhang,Float64* pRightOverhang)
+{
+   *pLeftOverhang  = m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
+   *pRightOverhang = m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+}
+
+void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,CColumnData::ColumnHeightMeasurementType heightMeasure,Float64 spacing)
 {
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
    OpenBridgeML::Pier::ColumnType newColumn(foundation);
-   newColumn.Height() = height;
+
    m_XBeamRateXML->Pier().Columns().Column().resize(nColumns,newColumn);
    m_XBeamRateXML->Pier().Columns().Spacing().resize(nColumns-1,spacing);
 
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height(height);
+      if ( heightMeasure == CColumnData::chtHeight )
+      {
+         m_XBeamRateXML->Pier().Columns().Column()[colIdx].BottomElevation().reset();
+         m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height() = height;
+      }
+      else
+      {
+         m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().reset();
+         m_XBeamRateXML->Pier().Columns().Column()[colIdx].BottomElevation() = height;
+      }
       if ( colIdx < nColumns-1 )
       {
          m_XBeamRateXML->Pier().Columns().Spacing()[colIdx] = spacing;
@@ -340,8 +435,30 @@ IndexType CProjectAgentImp::GetColumnCount()
 
 Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
 {
-   ATLASSERT(m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().present());
-   return m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().get();
+   if ( m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() )
+   {
+      return m_XBeamRateXML->Pier().Columns().Column()[0].Height().get();
+   }
+   else
+   {
+      ATLASSERT( m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
+      return m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().get();
+   }
+}
+
+CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType()
+{
+   if ( m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() )
+   {
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
+      return CColumnData::chtHeight;
+   }
+   else
+   {
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() );
+      ATLASSERT( m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
+      return CColumnData::chtBottomElevation;
+   }
 }
 
 xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
@@ -362,6 +479,20 @@ xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
 Float64 CProjectAgentImp::GetSpacing(IndexType spaceIdx)
 {
    return m_XBeamRateXML->Pier().Columns().Spacing()[spaceIdx];
+}
+
+void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure)
+{
+   m_XBeamRateXML->RefColumnIdx() = colIdx;
+   m_XBeamRateXML->TransverseOffset().TransverseOffset(offset);
+   m_XBeamRateXML->TransverseOffset().Measure((OffsetMeasurementEnum::value)measure);
+}
+
+void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure)
+{
+   *pColIdx = m_XBeamRateXML->RefColumnIdx();
+   *pOffset = m_XBeamRateXML->TransverseOffset().TransverseOffset();
+   *pMeasure = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)(m_XBeamRateXML->TransverseOffset().Measure());
 }
 
 //////////////////////////////////////////////////////////
@@ -387,4 +518,71 @@ void CProjectAgentImp::RemoveMenus()
    // remove the Edit menu
    UINT editPos = pMenu->FindMenuItem(_T("&Edit"));
    VERIFY(pMenu->RemoveMenu(editPos,MF_BYPOSITION,this));
+}
+
+HRESULT CProjectAgentImp::ConvertToBaseUnits()
+{
+   // Called just after the document is loaded.... at this point data in the the XBeamRateXML
+   // object is in the units defined in the input document. This could be any combination
+   // of consistent units and specified units. We need to convert everything into the
+   // internal consistent unit system of this application. That is what this method does.
+
+   // Create a generic unit server. This object defaults to a KMS system of units
+   CComPtr<IUnitServer> xmlDocumentUnitServer;
+   xmlDocumentUnitServer.CoCreateInstance(CLSID_UnitServer);
+
+   // See if the XML instance data has a units declaration
+   XBeamRate::UnitsDeclaration_optional& unitsDeclaration(m_XBeamRateXML->UnitsDeclaration());
+   if ( unitsDeclaration.present() )
+   {
+      // there was a units declaration in the XML instance document
+      // initialize the generic unit server into the units specified in the 
+      // XML instance document.
+      if ( !InitializeWBFLUnitServer(&unitsDeclaration.get(),xmlDocumentUnitServer) )
+      {
+         return E_FAIL;
+      }
+   }
+
+   // The the unit server for this application
+   GET_IFACE(IXBeamRate,pXBeamRate);
+   CComPtr<IUnitServer> pOurUnitServer;
+   pXBeamRate->GetUnitServer(&pOurUnitServer);
+
+
+   // Convert the XML instance data into the internal units for this application
+
+   // General data
+   ConvertBetweenBaseUnits(m_XBeamRateXML->ModE(),                              xmlDocumentUnitServer, pOurUnitServer);
+   
+   // Cap Beam
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().LeftOverhang(),     xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().LeftHeight(),       xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().LeftTaperHeight(),  xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().LeftTaperLength(),  xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().RightHeight(),      xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().RightTaperHeight(), xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().RightTaperLength(), xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().Width(),            xmlDocumentUnitServer, pOurUnitServer);
+   
+   // Column
+   BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::Column_type& column,m_XBeamRateXML->Pier().Columns().Column())
+   {
+      if ( column.Height().present() )
+      {
+         ConvertBetweenBaseUnits(column.Height().get(), xmlDocumentUnitServer, pOurUnitServer);
+      }
+
+      if ( column.BottomElevation().present() )
+      {
+         ConvertBetweenBaseUnits(column.BottomElevation().get(), xmlDocumentUnitServer, pOurUnitServer);
+      }
+   }
+
+   BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::Spacing_type& spacing,m_XBeamRateXML->Pier().Columns().Spacing())
+   {
+      ConvertBetweenBaseUnits(spacing, xmlDocumentUnitServer, pOurUnitServer);
+   }
+
+   return S_OK;
 }

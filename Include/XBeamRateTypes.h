@@ -1,5 +1,7 @@
 #pragma once
 
+#include <PGSuperTypes.h>
+
 typedef struct xbrTypes
 {
    typedef enum ColumnBaseType

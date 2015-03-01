@@ -1,5 +1,7 @@
 #pragma once
 
+#include <PgsExt\ColumnData.h>
+
 namespace XBR
 {
 
@@ -18,15 +20,27 @@ interface IProject : IUnknown
    virtual void SetProjectName(LPCTSTR strName) = 0;
    virtual LPCTSTR GetProjectName() = 0;
 
-   virtual void SetOverhangs(Float64 left,Float64 right) = 0;
-   virtual Float64 GetLeftOverhang() = 0;
-   virtual Float64 GetRightOverhang() = 0;
+   virtual void SetModE(Float64 Ec) = 0;
+   virtual Float64 GetModE() = 0;
 
-   virtual void SetColumns(IndexType nColumns,Float64 height,Float64 spacing) = 0;
+   virtual void SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength) = 0;
+   virtual void GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength) = 0;
+   virtual void SetXBeamWidth(Float64 width) = 0;
+   virtual Float64 GetXBeamWidth() = 0;
+   virtual void SetXBeamOverhang(pgsTypes::PierSideType side,Float64 overhang) = 0;
+   virtual void SetXBeamOverhangs(Float64 leftOverhang,Float64 rightOverhang) = 0;
+   virtual Float64 GetXBeamOverhang(pgsTypes::PierSideType side) = 0; 
+   virtual void GetXBeamOverhangs(Float64* pLeftOverhang,Float64* pRightOverhang) = 0;
+
+   virtual void SetColumns(IndexType nColumns,Float64 height,CColumnData::ColumnHeightMeasurementType heightMeasure,Float64 spacing) = 0;
    virtual IndexType GetColumnCount() = 0;
    virtual Float64 GetColumnHeight(IndexType colIdx) = 0;
+   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType() = 0;
    virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx) = 0;
    virtual Float64 GetSpacing(IndexType spaceIdx) = 0;
+
+   virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure) = 0;
+   virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
 };
 
 /*****************************************************************************

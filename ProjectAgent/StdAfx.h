@@ -53,7 +53,6 @@
 
 using namespace ATL;
 
-#include <PGSuperTypes.h>
 #include <WBFLDebug.h>
 #include <System\Transaction.h>
 

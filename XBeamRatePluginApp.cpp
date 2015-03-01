@@ -10,6 +10,7 @@
 #include <MFCTools\VersionInfo.h>
 
 #include <WBFLGeometry.h>
+#include <WBFLUnitServer.h>
 #include <WBFLDManip.h>
 #include <WBFLDManipTools.h>
 #include <WBFLReportManagerAgent.h>
@@ -35,6 +36,7 @@
 
 
 #include <WBFLCore_i.c>
+#include <WBFLUnitServer_i.c>
 #include <WBFLReportManagerAgent_i.c>
 #include <WBFLGraphManagerAgent_i.c>
 #include <WBFLGeometry_i.c>

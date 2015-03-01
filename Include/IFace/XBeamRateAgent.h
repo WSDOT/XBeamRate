@@ -1,5 +1,7 @@
 #pragma once
 
+#include <WBFLUnitServer.h>
+
 namespace XBR
 {
 
@@ -21,6 +23,21 @@ interface IXBeamRateAgent : IUnknown
    // always returns true. If this interface is implemented
    // XBeam Rate is an extension to PGSuper/PGSplice
    virtual bool IsExtendingPGSuper() = 0;
+};
+
+/*****************************************************************************
+INTERFACE
+   IXBeamRate
+
+DESCRIPTION
+*****************************************************************************/
+// {3AF5D94F-6CC6-4aec-907E-6663BB1317E8}
+DEFINE_GUID(IID_IXBeamRate, 
+0x3af5d94f, 0x6cc6, 0x4aec, 0x90, 0x7e, 0x66, 0x63, 0xbb, 0x13, 0x17, 0xe8);
+interface IXBeamRate : IUnknown
+{
+   virtual void GetUnitServer(IUnitServer** ppUnitServer) = 0;
+   virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert) = 0;
 };
 
 }; //

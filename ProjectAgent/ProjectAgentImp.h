@@ -111,14 +111,27 @@ public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
-   virtual void SetOverhangs(Float64 left,Float64 right);
-   virtual Float64 GetLeftOverhang();
-   virtual Float64 GetRightOverhang();
-   virtual void SetColumns(IndexType nColumns,Float64 height,Float64 spacing);
+   virtual void SetModE(Float64 Ec);
+   virtual Float64 GetModE();
+
+   virtual void SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength);
+   virtual void GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength);
+   virtual void SetXBeamWidth(Float64 width);
+   virtual Float64 GetXBeamWidth();
+   virtual void SetXBeamOverhang(pgsTypes::PierSideType side,Float64 overhang);
+   virtual void SetXBeamOverhangs(Float64 leftOverhang,Float64 rightOverhang);
+   virtual Float64 GetXBeamOverhang(pgsTypes::PierSideType side);
+   virtual void GetXBeamOverhangs(Float64* pLeftOverhang,Float64* pRightOverhang);
+
+   virtual void SetColumns(IndexType nColumns,Float64 height,CColumnData::ColumnHeightMeasurementType measure,Float64 spacing);
    virtual IndexType GetColumnCount();
    virtual Float64 GetColumnHeight(IndexType colIdx);
+   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType();
    virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx);
    virtual Float64 GetSpacing(IndexType spaceIdx);
+
+   virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure);
+   virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure);
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -135,6 +148,8 @@ private:
 
    void CreateMenus();
    void RemoveMenus();
+
+   HRESULT ConvertToBaseUnits();
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

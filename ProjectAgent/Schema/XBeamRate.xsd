@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
            xmlns:bxp="http://www.wsdot.wa.gov/OpenBridgeML/Pier"
 >
    <xs:annotation>
@@ -9,9 +10,10 @@
       </xs:documentation>
    </xs:annotation>
 
-   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
 
-   <xs:simpleType name="UnitModeEnum">
+  <xs:simpleType name="UnitModeEnum">
       <xs:annotation>
          <xs:documentation>
             Defines the system unit mode.
@@ -32,10 +34,28 @@
       <xs:sequence>
          <xs:element name="Units" type="UnitModeEnum"/>
          <xs:element name="ProjectName" type="xs:string"/>
+        <!-- more stuff, like full project properties go here-->
       </xs:sequence>
    </xs:complexType>
 
-   <!-- Define Instance Document Format -->
+
+  <!-- This is temporary... eventually this needs to move to the Pier Model -->
+  <xs:simpleType name="OffsetMeasurementEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Alignment" />
+      <xs:enumeration value="BridgeLine"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- This is temporary... eventually this needs to move to the Pier Model -->
+  <xs:complexType name="TransverseOffsetType">
+    <xs:sequence>
+      <xs:element name="TransverseOffset" type="bxu:LengthValueType"/>
+    </xs:sequence>
+    <xs:attribute name="Measure" type="OffsetMeasurementEnum" use="required"/>
+  </xs:complexType>
+
+  <!-- Define Instance Document Format -->
    <!-- 
   The goal is to have two sections. The first section is XBeamRate specific information such as settings and options. The 
   second section is an OpenBridgeML generic product defintion of a bent. Together, these two sections make up a
@@ -52,7 +72,19 @@
             </xs:documentation>
          </xs:annotation>
          <xs:sequence>
-            <xs:element name="Settings" type="ApplicationSettings"/>
+           <!-- Part 1: XBeam Rate Application Settings -->
+           <xs:element ref="bxu:UnitsDeclaration" minOccurs="0" maxOccurs="1" />
+           <xs:element name="Settings" type="ApplicationSettings"/>
+           <xs:element name="ModE" type="bxu:PressureValueType">
+             <xs:annotation>
+               <xs:documentation>Modulus of elasticity of the pier concrete</xs:documentation>
+             </xs:annotation>
+           </xs:element>
+           <!-- This is temporary... eventually this needs to move to the Pier Model -->
+           <xs:element name="RefColumnIdx" type="xs:unsignedLong"/>
+           <xs:element name="TransverseOffset" type="TransverseOffsetType"/>
+           
+           <!-- Part 2: OpenBridgeML Pier -->
             <xs:element name="Pier" type="bxp:PierType"/>
          </xs:sequence>
       </xs:complexType>

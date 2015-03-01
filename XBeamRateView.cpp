@@ -207,8 +207,8 @@ void CXBeamRateView::UpdateDisplayObjects()
    pBroker->GetInterface( XBR::IID_IProject, (IUnknown**)&pProject);
    ASSERT( pProject.p != NULL );
 
-   Float64 leftOverhang = pProject->GetLeftOverhang();
-   Float64 rightOverhang = pProject->GetRightOverhang();
+   Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
+   Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
    IndexType nColumns = pProject->GetColumnCount();
 
    // Start point at left end of cross beam
