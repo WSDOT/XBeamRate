@@ -92,6 +92,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    //CComPtr<IConnectionPoint> pCP;
    //HRESULT hr = S_OK;
 
+#pragma Reminder("WORKING HERE - Need better default values")
 
    // Create default data model
    ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
@@ -99,20 +100,22 @@ STDMETHODIMP CProjectAgentImp::Init()
    OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0,5.0,5.0,0,0,5.0,0,0);
 
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType column(foundation);
+   OpenBridgeML::Pier::PrismaticColumnType column(foundation);
+   OpenBridgeML::Pier::CicularColumnSectionType circularSection(5.0);
+   column.CircularSection().set(circularSection);
    column.Height() = 10.0;
 
    OpenBridgeML::Pier::ColumnsType columns;
-   columns.Column().push_back( column );
+   columns.PrismaticColumn().push_back( column );
    columns.Spacing().push_back(5.0);
-   columns.Column().push_back(column);
+   columns.PrismaticColumn().push_back(column);
 
    OpenBridgeML::Pier::PierType pier(capBeam,columns);
 
    TransverseOffsetType transverseOffset(10.,OffsetMeasurementEnum::Alignment);
    ColumnIndexType refColIdx = 0;
 
-   Float64 modE = 10;
+   Float64 modE = 5000;
 
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,modE,refColIdx,transverseOffset,pier));
 
@@ -403,22 +406,22 @@ void CProjectAgentImp::GetXBeamOverhangs(Float64* pLeftOverhang,Float64* pRightO
 void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,CColumnData::ColumnHeightMeasurementType heightMeasure,Float64 spacing)
 {
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
-   OpenBridgeML::Pier::ColumnType newColumn(foundation);
+   OpenBridgeML::Pier::PrismaticColumnType newColumn(foundation);
 
-   m_XBeamRateXML->Pier().Columns().Column().resize(nColumns,newColumn);
+   m_XBeamRateXML->Pier().Columns().PrismaticColumn().resize(nColumns,newColumn);
    m_XBeamRateXML->Pier().Columns().Spacing().resize(nColumns-1,spacing);
 
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       if ( heightMeasure == CColumnData::chtHeight )
       {
-         m_XBeamRateXML->Pier().Columns().Column()[colIdx].BottomElevation().reset();
-         m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height() = height;
+         m_XBeamRateXML->Pier().Columns().PrismaticColumn()[colIdx].BottomElevation().reset();
+         m_XBeamRateXML->Pier().Columns().PrismaticColumn()[colIdx].Height() = height;
       }
       else
       {
-         m_XBeamRateXML->Pier().Columns().Column()[colIdx].Height().reset();
-         m_XBeamRateXML->Pier().Columns().Column()[colIdx].BottomElevation() = height;
+         m_XBeamRateXML->Pier().Columns().PrismaticColumn()[colIdx].Height().reset();
+         m_XBeamRateXML->Pier().Columns().PrismaticColumn()[colIdx].BottomElevation() = height;
       }
       if ( colIdx < nColumns-1 )
       {
@@ -430,33 +433,33 @@ void CProjectAgentImp::SetColumns(IndexType nColumns,Float64 height,CColumnData:
 
 IndexType CProjectAgentImp::GetColumnCount()
 {
-   return m_XBeamRateXML->Pier().Columns().Column().size();
+   return m_XBeamRateXML->Pier().Columns().PrismaticColumn().size();
 }
 
 Float64 CProjectAgentImp::GetColumnHeight(IndexType colIdx)
 {
-   if ( m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() )
+   if ( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].Height().present() )
    {
-      return m_XBeamRateXML->Pier().Columns().Column()[0].Height().get();
+      return m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].Height().get();
    }
    else
    {
-      ATLASSERT( m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
-      return m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().get();
+      ATLASSERT( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].BottomElevation().present() );
+      return m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].BottomElevation().get();
    }
 }
 
 CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType()
 {
-   if ( m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() )
+   if ( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].Height().present() )
    {
-      ATLASSERT( !m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].BottomElevation().present() );
       return CColumnData::chtHeight;
    }
    else
    {
-      ATLASSERT( !m_XBeamRateXML->Pier().Columns().Column()[0].Height().present() );
-      ATLASSERT( m_XBeamRateXML->Pier().Columns().Column()[0].BottomElevation().present() );
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].Height().present() );
+      ATLASSERT( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].BottomElevation().present() );
       return CColumnData::chtBottomElevation;
    }
 }
@@ -464,7 +467,7 @@ CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasur
 xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
 {
    xbrTypes::ColumnBaseType baseType;
-   if ( m_XBeamRateXML->Pier().Columns().Column()[colIdx].Foundation().IdealizedFoundation() == OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed) 
+   if ( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[colIdx].Foundation().IdealizedFoundation() == OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed) 
    {
       baseType = xbrTypes::cbtFixed;
    }
@@ -479,6 +482,50 @@ xbrTypes::ColumnBaseType CProjectAgentImp::GetColumnBaseType(IndexType colIdx)
 Float64 CProjectAgentImp::GetSpacing(IndexType spaceIdx)
 {
    return m_XBeamRateXML->Pier().Columns().Spacing()[spaceIdx];
+}
+
+void CProjectAgentImp::SetColumnShape(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2)
+{
+   if ( shapeType == CColumnData::cstCircle )
+   {
+      OpenBridgeML::Pier::CicularColumnSectionType section(D1);
+      BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::PrismaticColumn_type& column,m_XBeamRateXML->Pier().Columns().PrismaticColumn())
+      {
+         column.RectangularSection().reset();
+         column.CircularSection().set(section);
+      }
+   }
+   else if ( shapeType == CColumnData::cstRectangle )
+   {
+      OpenBridgeML::Pier::RectangularColumnSectionType section(D1,D2);
+      BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::PrismaticColumn_type& column,m_XBeamRateXML->Pier().Columns().PrismaticColumn())
+      {
+         column.CircularSection().reset();
+         column.RectangularSection().set(section);
+      }
+   }
+   else
+   {
+      ATLASSERT(false); // is there a new shape type?
+   }
+}
+
+void CProjectAgentImp::GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2)
+{
+   if ( m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].CircularSection().present() )
+   {
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].RectangularSection().present() );
+      *pShapeType = CColumnData::cstCircle;
+      *pD1 = m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].CircularSection().get().Diameter();
+      *pD2 = *pD1;
+   }
+   else
+   {
+      ATLASSERT( !m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].CircularSection().present() );
+      *pShapeType = CColumnData::cstRectangle;
+      *pD1 = m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].RectangularSection().get().B();
+      *pD2 = m_XBeamRateXML->Pier().Columns().PrismaticColumn()[0].RectangularSection().get().D();
+   }
 }
 
 void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure)
@@ -566,7 +613,7 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().Width(),            xmlDocumentUnitServer, pOurUnitServer);
    
    // Column
-   BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::Column_type& column,m_XBeamRateXML->Pier().Columns().Column())
+   BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::PrismaticColumn_type& column,m_XBeamRateXML->Pier().Columns().PrismaticColumn())
    {
       if ( column.Height().present() )
       {

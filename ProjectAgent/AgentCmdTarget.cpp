@@ -63,6 +63,7 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_ColumnHeight = pProject->GetColumnHeight(0);
    oldPierData.m_ColumnHeightMeasurementType = pProject->GetColumnHeightMeasurementType();
    oldPierData.m_ColumnSpacing = pProject->GetSpacing(0);
+   pProject->GetColumnShape(&oldPierData.m_ColumnShape,&oldPierData.m_B,&oldPierData.m_D);
 
    pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);
 

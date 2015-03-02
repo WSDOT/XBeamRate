@@ -129,6 +129,8 @@ public:
    virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType();
    virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx);
    virtual Float64 GetSpacing(IndexType spaceIdx);
+   virtual void SetColumnShape(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2);
+   virtual void GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2);
 
    virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure);
    virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure);

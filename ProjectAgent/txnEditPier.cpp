@@ -53,6 +53,7 @@ void txnEditPier::Execute(int i)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
+#pragma Reminder("UPDATE: implement event holding")
    //GET_IFACE2(pBroker,IEvents, pEvents);
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
@@ -69,12 +70,8 @@ void txnEditPier::Execute(int i)
    
    pProject->SetXBeamWidth(m_PierData[i].m_XBeamWidth);
    pProject->SetColumns(m_PierData[i].m_nColumns,m_PierData[i].m_ColumnHeight,m_PierData[i].m_ColumnHeightMeasurementType,m_PierData[i].m_ColumnSpacing);
-
+   pProject->SetColumnShape(m_PierData[i].m_ColumnShape,m_PierData[i].m_B,m_PierData[i].m_D);
    pProject->SetTransverseLocation(m_PierData[i].m_RefColumnIdx,m_PierData[i].m_TransverseOffset,m_PierData[i].m_TransverseOffsetMeasurement);
-
-#pragma Reminder("WORKING HERE - need to update IProject for the rest of the pier data")
-   // reference column, column shape, and column height measurement type
-
 
    //pEvents->FirePendingEvents();
 }

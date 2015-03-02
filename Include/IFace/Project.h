@@ -38,6 +38,8 @@ interface IProject : IUnknown
    virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType() = 0;
    virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx) = 0;
    virtual Float64 GetSpacing(IndexType spaceIdx) = 0;
+   virtual void SetColumnShape(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2) = 0;
+   virtual void GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2) = 0;
 
    virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure) = 0;
    virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
