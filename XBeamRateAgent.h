@@ -46,7 +46,7 @@ class ATL_NO_VTABLE CXBeamRateAgent :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CXBeamRateAgent, &CLSID_XBeamRateAgent>,
 	public IAgentEx,
-   public IAgentPersist,
+   //public IAgentPersist,
    public IXBeamRateAgent,
    public IAgentUIIntegration,
    public IAgentReportingIntegration,
@@ -60,7 +60,8 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    //public IEditSplicedGirderCallback,
    //public IEditGirderCallback,
    //public IExtendUIEventSink,
-   public IProjectPropertiesEventSink
+   public IProjectPropertiesEventSink,
+   public IXBeamRate
 {
 public:
    CXBeamRateAgent()
@@ -74,13 +75,14 @@ DECLARE_NOT_AGGREGATABLE(CXBeamRateAgent)
 BEGIN_COM_MAP(CXBeamRateAgent)
 	COM_INTERFACE_ENTRY(IAgent)
 	COM_INTERFACE_ENTRY(IAgentEx)
-	COM_INTERFACE_ENTRY(IAgentPersist)
+	//COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY(IXBeamRateAgent)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
    COM_INTERFACE_ENTRY(IAgentReportingIntegration)
    COM_INTERFACE_ENTRY(IAgentGraphingIntegration)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
+   COM_INTERFACE_ENTRY(IXBeamRate)
 END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -104,14 +106,19 @@ public:
    STDMETHOD(ShutDown)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IAgentPersist
-public:
-   STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
-   STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
+//// IAgentPersist
+//public:
+//   STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
+//   STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
 
 // IXBeamRateAgent
 public:
    virtual bool IsExtendingPGSuper();
+
+// IXBeamRate
+public:
+   virtual void GetUnitServer(IUnitServer** ppUnitServer);
+   virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert);
 
 // IAgentUIIntegration
 public:

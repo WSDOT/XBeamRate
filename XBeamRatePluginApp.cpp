@@ -33,6 +33,7 @@
 // PGSuper/PGSplice Interfaces
 #include <IFace\ExtendUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <\ARP\PGSuper\Include\IFace\DocumentType.h>
 
 
 #include <WBFLCore_i.c>

@@ -59,6 +59,14 @@ void txnEditPier::Execute(int i)
 
    GET_IFACE2_(XBR,pBroker,IProject,pProject);
 
+   pProject->SetTransverseDimensionsMeasurementType(m_PierData[i].m_TransverseMeasurementType);
+   pProject->SetDeckElevation(m_PierData[i].m_DeckElevation);
+   pProject->SetCrownPointOffset(m_PierData[i].m_CrownPointOffset);
+   pProject->SetBridgeLineOffset(m_PierData[i].m_BridgeLineOffset);
+   pProject->SetOrientation(m_PierData[i].m_strOrientation);
+
+   pProject->SetBearingLineCount(m_PierData[i].m_nBearingLines);
+
    pProject->SetModE(m_PierData[i].m_Ec);
 
    for ( int j = 0; j < 2; j++ )

@@ -14,6 +14,7 @@
 #define IDR_EDIT_MENU                   201
 #define IDC_LEFT_OVERHANG               201
 #define IDC_LEFT_OVERHANG_UNIT          202
+#define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  202
 #define IDC_RIGHT_OVERHANG              203
 #define IDC_RIGHT_OVERHANG_UNIT         204
 #define IDC_COLUMN_COUNT                205
@@ -22,6 +23,16 @@
 #define IDC_EDIT5                       208
 #define IDC_COLUMN_SPACING              208
 #define IDC_COLUMN_SPACING_UNIT         209
+#define IDC_TRANSVERSE_MEASUREMENT_TYPE 210
+#define IDC_DECK_ELEVATION              211
+#define IDC_DECK_ELEVATION_UNIT         212
+#define IDC_CPO                         213
+#define IDC_CPO_UNIT                    214
+#define IDC_BLO                         215
+#define IDC_BLO_UNIT                    216
+#define IDC_SKEW                        217
+#define IDC_COMBO2                      218
+#define IDC_BEARING_LINE_COUNT          218
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_EC                          1483
 #define IDC_EC_UNIT                     1484
@@ -80,9 +91,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        202
+#define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         210
+#define _APS_NEXT_CONTROL_VALUE         219
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

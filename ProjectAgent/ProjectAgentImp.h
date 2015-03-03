@@ -111,6 +111,21 @@ public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
+   virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType();
+   virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType);
+   virtual void SetDeckElevation(Float64 deckElevation);
+   virtual Float64 GetDeckElevation();
+   virtual void SetCrownPointOffset(Float64 cpo);
+   virtual Float64 GetCrownPointOffset();
+   virtual void SetBridgeLineOffset(Float64 blo);
+   virtual Float64 GetBridgeLineOffset();
+
+   virtual void SetOrientation(LPCTSTR strOrientation);
+   virtual LPCTSTR GetOrientation();
+
+   virtual IndexType GetBearingLineCount();
+   virtual void SetBearingLineCount(IndexType nBearingLines);
+
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
 

@@ -27,6 +27,15 @@
 class txnEditPierData
 {
 public:
+   xbrTypes::TransverseDimensionMeasurementType m_TransverseMeasurementType;
+   Float64 m_DeckElevation;
+   Float64 m_CrownPointOffset;
+   Float64 m_BridgeLineOffset;
+
+   CString m_strOrientation;
+
+   IndexType m_nBearingLines;
+
    Float64 m_Ec;
 
    ColumnIndexType m_nColumns;

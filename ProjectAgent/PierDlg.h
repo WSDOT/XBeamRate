@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SuperstructureLayoutPage.h"
 #include "PierLayoutPage.h"
 #include "txnEditPier.h"
 
@@ -25,9 +26,11 @@ protected:
    txnEditPierData m_PierData;
 
 public:
+   friend CSuperstructureLayoutPage;
    friend CPierLayoutPage;
 
-   CPierLayoutPage m_LayoutPage;
+   CSuperstructureLayoutPage m_SuperstructurePage;
+   CPierLayoutPage m_SubstructurePage;
 };
 
 

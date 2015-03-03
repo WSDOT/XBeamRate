@@ -29,6 +29,8 @@
 #include <IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
+#include <IFace\DocumentType.h>
+
 //#include <EAF\EAFOutputChildFrame.h>
 //#include "MyView.h"
 //
@@ -258,6 +260,7 @@ STDMETHODIMP CXBeamRateAgent::RegInterfaces()
    
    // Register interfaces here
    pBrokerInit->RegInterface( IID_IXBeamRateAgent, this);
+   pBrokerInit->RegInterface( IID_IXBeamRate,      this);
 
    return S_OK;
 }
@@ -329,43 +332,59 @@ STDMETHODIMP CXBeamRateAgent::GetClassID(CLSID* pCLSID)
 
 ////////////////////////////////////////////////////////////////////
 // IAgentPersist
-STDMETHODIMP CXBeamRateAgent::Load(IStructuredLoad* pStrLoad)
-{
-   USES_CONVERSION;
-   CComVariant var;
-   //var.vt = VT_BSTR;
-   
-   HRESULT hr = pStrLoad->BeginUnit(_T("XBeamRateAgent"));
-   if ( FAILED(hr) )
-      return hr;
-
-   //var.vt = VT_BSTR;
-   //hr = pStrLoad->get_Property(_T("SampleData"),&var);
-   //if ( FAILED(hr) )
-   //   return hr;
-
-   //m_Answer = OLE2T(var.bstrVal);
-
-   hr = pStrLoad->EndUnit();
-   if ( FAILED(hr) )
-      return hr;
-
-   return S_OK;
-}
-
-STDMETHODIMP CXBeamRateAgent::Save(IStructuredSave* pStrSave)
-{
-   pStrSave->BeginUnit(_T("XBeamRateAgent"),1.0);
-   //pStrSave->put_Property(_T("SampleData"),CComVariant(m_Answer));
-   pStrSave->EndUnit();
-   return S_OK;
-}
+//STDMETHODIMP CXBeamRateAgent::Load(IStructuredLoad* pStrLoad)
+//{
+//   USES_CONVERSION;
+//   CComVariant var;
+//   //var.vt = VT_BSTR;
+//   
+//   HRESULT hr = pStrLoad->BeginUnit(_T("XBeamRateAgent"));
+//   if ( FAILED(hr) )
+//      return hr;
+//
+//   //var.vt = VT_BSTR;
+//   //hr = pStrLoad->get_Property(_T("SampleData"),&var);
+//   //if ( FAILED(hr) )
+//   //   return hr;
+//
+//   //m_Answer = OLE2T(var.bstrVal);
+//
+//   hr = pStrLoad->EndUnit();
+//   if ( FAILED(hr) )
+//      return hr;
+//
+//   return S_OK;
+//}
+//
+//STDMETHODIMP CXBeamRateAgent::Save(IStructuredSave* pStrSave)
+//{
+//   pStrSave->BeginUnit(_T("XBeamRateAgent"),1.0);
+//   //pStrSave->put_Property(_T("SampleData"),CComVariant(m_Answer));
+//   pStrSave->EndUnit();
+//   return S_OK;
+//}
 
 ////////////////////////////////////////////////////////////////////
 // IXBeamRateAgent
 bool CXBeamRateAgent::IsExtendingPGSuper()
 {
    return true;
+}
+
+////////////////////////////////////////////////////////////////////
+// IXBeamRate
+void CXBeamRateAgent::GetUnitServer(IUnitServer** ppUnitServer)
+{
+   GET_IFACE(IDocumentUnitSystem,pDocUnits);
+   pDocUnits->GetUnitServer(ppUnitServer);
+}
+
+void CXBeamRateAgent::GetUnitConverter(IUnitConvert2** ppUnitConvert)
+{
+   GET_IFACE(IDocumentUnitSystem,pDocUnits);
+   CComPtr<IUnitServer> unitServer;
+   pDocUnits->GetUnitServer(&unitServer);
+   unitServer.QueryInterface(ppUnitConvert);
 }
 
 ////////////////////////////////////////////////////////////////////

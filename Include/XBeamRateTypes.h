@@ -10,4 +10,10 @@ typedef struct xbrTypes
       cbtPinned
    } ColumnBaseType;
 
+   typedef enum TransverseDimensionMeasurementType
+   {
+      tdmNormalToAlignment, // transverse dimensions are normal to the alignment
+      tdmPlaneOfPier        // transverse dimensions are in the plane of the pier
+   } TransverseDimensionMeasurementType;
+
 } xbrTypes;

@@ -3,6 +3,7 @@
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
            xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
            xmlns:bxp="http://www.wsdot.wa.gov/OpenBridgeML/Pier"
+           xmlns:bxg="http://www.wsdot.wa.gov/OpenBridgeML/Geometry"
 >
    <xs:annotation>
       <xs:documentation>
@@ -12,6 +13,7 @@
 
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Geometry" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Geometry.xsd" />
 
   <xs:simpleType name="UnitModeEnum">
       <xs:annotation>
@@ -38,6 +40,18 @@
       </xs:sequence>
    </xs:complexType>
 
+  <xs:simpleType name="TransverseMeasurementEnum">
+    <xs:annotation>
+      <xs:documentation>
+        Enumeration that defines how transverse dimensions are measured
+      </xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="NormalToAlignemnt"/>
+      <xs:enumeration value="PlaneOfPier"/>
+    </xs:restriction>
+  </xs:simpleType>
+
 
   <!-- This is temporary... eventually this needs to move to the Pier Model -->
   <xs:simpleType name="OffsetMeasurementEnum">
@@ -53,6 +67,12 @@
       <xs:element name="TransverseOffset" type="bxu:LengthValueType"/>
     </xs:sequence>
     <xs:attribute name="Measure" type="OffsetMeasurementEnum" use="required"/>
+  </xs:complexType>
+
+  <xs:complexType name="BearingLineType">
+    <xs:sequence>
+      <xs:element name="Bearing" type="xs:string"/>
+    </xs:sequence>
   </xs:complexType>
 
   <!-- Define Instance Document Format -->
@@ -72,9 +92,21 @@
             </xs:documentation>
          </xs:annotation>
          <xs:sequence>
-           <!-- Part 1: XBeam Rate Application Settings -->
+           <!-- Part 1: XBeam Rate information not modeled in OpenBridgeML -->
+           <!-- Application Settings -->
            <xs:element ref="bxu:UnitsDeclaration" minOccurs="0" maxOccurs="1" />
            <xs:element name="Settings" type="ApplicationSettings"/>
+           
+           <!-- Superstructure Description -->
+           <xs:element name="TransverseDimensionMeasurementType" type="TransverseMeasurementEnum"/>
+           <xs:element name="DeckElevation" type="bxu:LengthValueType"/>
+           <xs:element name="BridgeLineOffset" type="bxu:LengthValueType"/>
+           <xs:element name="CrownPointOffset" type="bxu:LengthValueType"/>
+           <xs:element name="Orientation" type="bxg:SkewType"/>
+
+           <xs:element name="BearingLine" type="BearingLineType" minOccurs="1" maxOccurs="2"/>
+
+           <!-- Substructure Description -->
            <xs:element name="ModE" type="bxu:PressureValueType">
              <xs:annotation>
                <xs:documentation>Modulus of elasticity of the pier concrete</xs:documentation>

@@ -20,6 +20,21 @@ interface IProject : IUnknown
    virtual void SetProjectName(LPCTSTR strName) = 0;
    virtual LPCTSTR GetProjectName() = 0;
 
+   virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType() = 0;
+   virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType) = 0;
+   virtual void SetDeckElevation(Float64 deckElevation) = 0;
+   virtual Float64 GetDeckElevation() = 0;
+   virtual void SetCrownPointOffset(Float64 cpo) = 0;
+   virtual Float64 GetCrownPointOffset() = 0;
+   virtual void SetBridgeLineOffset(Float64 blo) = 0;
+   virtual Float64 GetBridgeLineOffset() = 0;
+
+   virtual void SetOrientation(LPCTSTR strOrientation) = 0;
+   virtual LPCTSTR GetOrientation() = 0;
+
+   virtual IndexType GetBearingLineCount() = 0;
+   virtual void SetBearingLineCount(IndexType nBearingLines) = 0;
+
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;
 

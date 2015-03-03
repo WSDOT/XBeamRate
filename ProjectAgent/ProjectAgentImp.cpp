@@ -117,7 +117,15 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    Float64 modE = 5000;
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,modE,refColIdx,transverseOffset,pier));
+
+   TransverseMeasurementEnum transverseMeasurementType = TransverseMeasurementEnum::NormalToAlignemnt;
+   Float64 deckElevation = 0;
+   Float64 bridgeLineOffset = 0;
+   Float64 crownPointOffset = 0;
+
+   LPCTSTR strOrientation = _T("0");
+
+   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
 
    return S_OK;
 }
@@ -170,6 +178,31 @@ STDMETHODIMP CProjectAgentImp::IntegrateWithUI(BOOL bIntegrate)
 
 //////////////////////////////////////////////////////////////////////
 // IAgentPersist
+STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
+{
+   HRESULT hr = S_OK;
+
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? UnitModeEnum::SI : UnitModeEnum::US);
+   m_XBeamRateXML->Settings().Units(units);
+
+   // write the XML stream into the string-stream
+   std::ostringstream ss;
+   XBeamRate_(ss,*m_XBeamRateXML);
+
+   // remove the initial <?xml> processing instruction
+   USES_CONVERSION;
+   std::_tstring string = A2T(ss.str().c_str());
+   std::_tstring::size_type a = string.find_first_of(_T("<"));
+   std::_tstring::size_type b = string.find_first_of(_T(">"));
+   string.replace(a,b+1,_T(""));
+
+   // dump the XML stream into our structure storage container
+   pStrSave->SaveRawUnit(string.c_str());
+
+   return hr;
+}
+
 STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 {
    USES_CONVERSION;
@@ -221,32 +254,6 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
    return hr;
 }
-
-STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
-{
-   HRESULT hr = S_OK;
-
-   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? UnitModeEnum::SI : UnitModeEnum::US);
-   m_XBeamRateXML->Settings().Units(units);
-
-   // write the XML stream into the string-stream
-   std::ostringstream ss;
-   XBeamRate_(ss,*m_XBeamRateXML);
-
-   // remove the initial <?xml> processing instruction
-   USES_CONVERSION;
-   std::_tstring string = A2T(ss.str().c_str());
-   std::_tstring::size_type a = string.find_first_of(_T("<"));
-   std::_tstring::size_type b = string.find_first_of(_T(">"));
-   string.replace(a,b+1,_T(""));
-
-   // dump the XML stream into our structure storage container
-   pStrSave->SaveRawUnit(string.c_str());
-
-   return hr;
-}
-
 
 //////////////////////////////////////////////////////////////////////
 // IEAFCommandCallback
@@ -308,6 +315,76 @@ void CProjectAgentImp::SetProjectName(LPCTSTR strName)
 LPCTSTR CProjectAgentImp::GetProjectName()
 {
    return m_XBeamRateXML->Settings().ProjectName().c_str();
+}
+
+xbrTypes::TransverseDimensionMeasurementType CProjectAgentImp::GetTransverseDimensionsMeasurementType()
+{
+   xbrTypes::TransverseDimensionMeasurementType measurementType =
+      (xbrTypes::TransverseDimensionMeasurementType)(TransverseMeasurementEnum::value)(m_XBeamRateXML->TransverseDimensionMeasurementType());
+   
+   return measurementType;
+}
+
+void CProjectAgentImp::SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType)
+{
+   if ( measurementType == xbrTypes::tdmNormalToAlignment )
+   {
+      m_XBeamRateXML->TransverseDimensionMeasurementType(TransverseMeasurementEnum::NormalToAlignemnt);
+   }
+   else
+   {
+      m_XBeamRateXML->TransverseDimensionMeasurementType(TransverseMeasurementEnum::PlaneOfPier);
+   }
+}
+
+void CProjectAgentImp::SetDeckElevation(Float64 deckElevation)
+{
+   m_XBeamRateXML->DeckElevation(deckElevation);
+}
+
+Float64 CProjectAgentImp::GetDeckElevation()
+{
+   return m_XBeamRateXML->DeckElevation();
+}
+
+void CProjectAgentImp::SetCrownPointOffset(Float64 cpo)
+{
+   m_XBeamRateXML->CrownPointOffset(cpo);
+}
+
+Float64 CProjectAgentImp::GetCrownPointOffset()
+{
+   return m_XBeamRateXML->CrownPointOffset();
+}
+
+void CProjectAgentImp::SetBridgeLineOffset(Float64 blo)
+{
+   m_XBeamRateXML->BridgeLineOffset(blo);
+}
+
+Float64 CProjectAgentImp::GetBridgeLineOffset()
+{
+   return m_XBeamRateXML->BridgeLineOffset();
+}
+
+void CProjectAgentImp::SetOrientation(LPCTSTR strOrientation)
+{
+   m_XBeamRateXML->Orientation(strOrientation);
+}
+
+LPCTSTR CProjectAgentImp::GetOrientation()
+{
+   return m_XBeamRateXML->Orientation().c_str();
+}
+
+IndexType CProjectAgentImp::GetBearingLineCount()
+{
+   return (IndexType)m_XBeamRateXML->BearingLine().size();
+}
+
+void CProjectAgentImp::SetBearingLineCount(IndexType nBearingLines)
+{
+#pragma Reminder("IMPLEMENT")
 }
 
 void CProjectAgentImp::SetModE(Float64 Ec)
@@ -537,7 +614,7 @@ void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offs
 
 void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure)
 {
-   *pColIdx = m_XBeamRateXML->RefColumnIdx();
+   *pColIdx = (ColumnIndexType)m_XBeamRateXML->RefColumnIdx();
    *pOffset = m_XBeamRateXML->TransverseOffset().TransverseOffset();
    *pMeasure = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)(m_XBeamRateXML->TransverseOffset().Measure());
 }
@@ -600,7 +677,13 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    // Convert the XML instance data into the internal units for this application
 
    // General data
-   ConvertBetweenBaseUnits(m_XBeamRateXML->ModE(),                              xmlDocumentUnitServer, pOurUnitServer);
+#pragma Reminder("WORKING HERE - convert superstructure data")
+
+   ConvertBetweenBaseUnits(m_XBeamRateXML->DeckElevation(),    xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->CrownPointOffset(), xmlDocumentUnitServer, pOurUnitServer);
+   ConvertBetweenBaseUnits(m_XBeamRateXML->BridgeLineOffset(), xmlDocumentUnitServer, pOurUnitServer);
+
+   ConvertBetweenBaseUnits(m_XBeamRateXML->ModE(),             xmlDocumentUnitServer, pOurUnitServer);
    
    // Cap Beam
    ConvertBetweenBaseUnits(m_XBeamRateXML->Pier().CapBeam().LeftOverhang(),     xmlDocumentUnitServer, pOurUnitServer);
@@ -623,6 +706,16 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
       if ( column.BottomElevation().present() )
       {
          ConvertBetweenBaseUnits(column.BottomElevation().get(), xmlDocumentUnitServer, pOurUnitServer);
+      }
+
+      if ( column.CircularSection().present() )
+      {
+         ConvertBetweenBaseUnits(column.CircularSection().get().Diameter(), xmlDocumentUnitServer, pOurUnitServer);
+      }
+      else if ( column.RectangularSection().present() )
+      {
+         ConvertBetweenBaseUnits(column.RectangularSection().get().B(), xmlDocumentUnitServer, pOurUnitServer);
+         ConvertBetweenBaseUnits(column.RectangularSection().get().D(), xmlDocumentUnitServer, pOurUnitServer);
       }
    }
 
