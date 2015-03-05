@@ -137,7 +137,7 @@ void CReportAgentImp::InitReportBuilders()
    boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CEAFBrokerReportSpecificationBuilder(m_pBroker) );
 
 
-   CReportBuilder* pReportBuilder = new CReportBuilder(_T("Test Report"));
+   CReportBuilder* pReportBuilder = new CReportBuilder(_T("XBeam Rate Test Report"));
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
    pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CTestChapterBuilder()));
