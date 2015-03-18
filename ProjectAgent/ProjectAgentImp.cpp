@@ -123,7 +123,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    Float64 bridgeLineOffset = 0;
    Float64 crownPointOffset = 0;
 
-   LPCTSTR strOrientation = _T("0");
+   LPCTSTR strOrientation = _T("00 00 0.0 L");
 
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
 

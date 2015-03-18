@@ -202,7 +202,7 @@ BEGIN
     LTEXT           "Static",IDC_BLO_UNIT,143,80,19,8
     LTEXT           "To Do: Add controls for defining superstructure geometry",IDC_STATIC,69,145,185,8
     LTEXT           "Skew",IDC_STATIC,7,30,18,8
-    EDITTEXT        IDC_SKEW,26,28,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_SKEW,26,28,58,14,ES_AUTOHSCROLL
     LTEXT           "Number of Bearing Lines",IDC_STATIC,7,101,78,8
     COMBOBOX        IDC_BEARING_LINE_COUNT,86,99,29,42,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END

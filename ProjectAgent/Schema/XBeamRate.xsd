@@ -69,9 +69,65 @@
     <xs:attribute name="Measure" type="OffsetMeasurementEnum" use="required"/>
   </xs:complexType>
 
-  <xs:complexType name="BearingLineType">
+  <xs:complexType name="BearingType">
+    <xs:annotation>
+      <xs:documentation>
+        Defined a bearing. For the context of this application, a bearing is simply a
+        thing that is identified by its ID.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:attribute name="id" type="xs:int"/>
+  </xs:complexType>
+
+  <xs:complexType name="BearingLocatorType">
+    <xs:annotation>
+      <xs:documentation>
+        Defines the location of one of the bearings with respect to the alignment or bridge line
+      </xs:documentation>
+    </xs:annotation>
     <xs:sequence>
-      <xs:element name="Bearing" type="xs:string"/>
+      <xs:element name="ReferenceBearingID" type="xs:int">
+        <xs:annotation>
+          <xs:documentation>
+            ID of the bearing that is being located
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Measure" type="OffsetMeasurementEnum">
+        <xs:annotation>
+          <xs:documentation>
+            Describes the location from where the bearing is located
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="Location" type="bxu:LengthValueType">
+        <xs:annotation>
+          <xs:documentation>
+            Location of the bearing measured from the reference point defined in the Measure element
+          </xs:documentation>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="BearingLineType">
+    <xs:annotation>
+      <xs:documentation>
+        Defines a line of bearings.
+      </xs:documentation>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="Bearing" type="BearingType"/>
+      <xs:sequence minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Spacing" type="bxu:LengthValueType">
+          <xs:annotation>
+            <xs:documentation>
+              Spacing between the previous and next bearing, measured along the bearing line
+            </xs:documentation>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="Bearing" type="BearingType"/>
+      </xs:sequence>
     </xs:sequence>
   </xs:complexType>
 
@@ -104,7 +160,14 @@
            <xs:element name="CrownPointOffset" type="bxu:LengthValueType"/>
            <xs:element name="Orientation" type="bxg:SkewType"/>
 
-           <xs:element name="BearingLine" type="BearingLineType" minOccurs="1" maxOccurs="2"/>
+           <xs:element name="BearingLine" type="BearingLineType" minOccurs="1" maxOccurs="2">
+             <xs:annotation>
+               <xs:documentation>
+                 Defines the bearing lines on either side of the CL Pier.
+                 Use one bearing line if the girders are continuous over the pier (such as spliced girders)
+               </xs:documentation>
+             </xs:annotation>
+           </xs:element>
 
            <!-- Substructure Description -->
            <xs:element name="ModE" type="bxu:PressureValueType">
