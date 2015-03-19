@@ -67,6 +67,14 @@ void txnEditPier::Execute(int i)
 
    pProject->SetBearingLineCount(m_PierData[i].m_nBearingLines);
 
+   for ( IndexType brgLineIdx = 0; brgLineIdx < m_PierData[i].m_nBearingLines; brgLineIdx++ )
+   {
+      for ( IndexType brgIdx = 0; brgIdx < m_PierData[i].m_BearingLines[brgLineIdx].size()-1; brgIdx++ )
+      {
+         pProject->SetBearingSpacing(brgLineIdx,brgIdx,m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_S);
+      }
+   }
+
    pProject->SetModE(m_PierData[i].m_Ec);
 
    for ( int j = 0; j < 2; j++ )

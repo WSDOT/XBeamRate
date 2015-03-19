@@ -64,3 +64,6 @@ using namespace ATL;
 #include <EAF\EAFUtilities.h>
 
 #include <MFCTools\MFCTools.h>
+
+#include <grid\gxall.h>
+

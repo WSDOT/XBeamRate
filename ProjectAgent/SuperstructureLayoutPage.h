@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BearingLayoutGrid.h"
 
 // CSuperstructureLayoutPage dialog
 
@@ -16,6 +17,8 @@ public:
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+   CBearingLayoutGrid m_Grid;
 
 	//{{AFX_MSG(CPierLayoutPage)
 	virtual BOOL OnInitDialog();

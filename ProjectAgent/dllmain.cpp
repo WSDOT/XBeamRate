@@ -46,10 +46,13 @@ CProjectAgentModuleApp theApp;
 
 BOOL CProjectAgentModuleApp::InitInstance()
 {
+   ::GXInit();
+
 	return CWinApp::InitInstance();
 }
 
 int CProjectAgentModuleApp::ExitInstance()
 {
+   ::GXTerminate();
 	return CWinApp::ExitInstance();
 }

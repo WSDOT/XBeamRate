@@ -184,7 +184,7 @@ BEGIN
     LTEXT           "All dimensions are in the plane of the pier",IDC_STATIC,7,7,132,8
 END
 
-IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 316, 183
+IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 316, 266
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Superstructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -194,17 +194,18 @@ BEGIN
     LTEXT           "Deck elevation at alignment",IDC_STATIC,7,47,89,8
     EDITTEXT        IDC_DECK_ELEVATION,99,44,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,143,46,19,8
-    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,64,84,8
+    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,65,84,8
     EDITTEXT        IDC_CPO,99,61,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_CPO_UNIT,143,65,19,8
     LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,7,81,78,8
     EDITTEXT        IDC_BLO,99,78,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_BLO_UNIT,143,80,19,8
-    LTEXT           "To Do: Add controls for defining superstructure geometry",IDC_STATIC,69,145,185,8
+    LTEXT           "To Do: Add controls for defining superstructure geometry",IDC_STATIC,62,126,185,8
     LTEXT           "Skew",IDC_STATIC,7,30,18,8
     EDITTEXT        IDC_SKEW,26,28,58,14,ES_AUTOHSCROLL
     LTEXT           "Number of Bearing Lines",IDC_STATIC,7,101,78,8
     COMBOBOX        IDC_BEARING_LINE_COUNT,86,99,29,42,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Custom1",IDC_BEARING_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,139,302,120
 END
 
 
@@ -229,7 +230,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 309
         TOPMARGIN, 7
-        BOTTOMMARGIN, 176
+        BOTTOMMARGIN, 259
     END
 END
 #endif    // APSTUDIO_INVOKED

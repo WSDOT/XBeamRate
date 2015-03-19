@@ -20,21 +20,43 @@ interface IProject : IUnknown
    virtual void SetProjectName(LPCTSTR strName) = 0;
    virtual LPCTSTR GetProjectName() = 0;
 
+   // Sets the basis for measuring transverse dimensions
    virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType() = 0;
    virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType) = 0;
+
+   // Elevation of the deck on the alignment at the CL Pier
    virtual void SetDeckElevation(Float64 deckElevation) = 0;
    virtual Float64 GetDeckElevation() = 0;
+
+   // Distance from alignment to crown point.
    virtual void SetCrownPointOffset(Float64 cpo) = 0;
    virtual Float64 GetCrownPointOffset() = 0;
+
+   // Distance form alignemnt to bridge line
    virtual void SetBridgeLineOffset(Float64 blo) = 0;
    virtual Float64 GetBridgeLineOffset() = 0;
 
+   // Orientation of the pier
    virtual void SetOrientation(LPCTSTR strOrientation) = 0;
    virtual LPCTSTR GetOrientation() = 0;
 
+   // Number of bearing lines at the pier. Valid values are 1 and 2.
+   // Use 1 when girders are continuous (e.g. spliced girder, steel girders, etc)
+   // Use 2 when simple span girders are made continuous (or are just simple spans)
    virtual IndexType GetBearingLineCount() = 0;
    virtual void SetBearingLineCount(IndexType nBearingLines) = 0;
 
+   // Number of bearings on a bearing line. Some beam types, such as U-beams, use two
+   // bearings and others, such as I-beams, use one bearing. This is the total number
+   // of points of bearing along the bearing line
+   virtual IndexType GetBearingCount(IndexType brgLineIdx) = 0;
+   virtual void SetBearingCount(IndexType brgLineIdx,IndexType nBearings) = 0;
+
+   // Spacing between the specified bearing and the bearing to its right
+   virtual Float64 GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx) = 0;
+   virtual void SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) = 0;
+
+   // Material properties of the sub-structure concrete
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;
 
@@ -75,4 +97,4 @@ interface IProjectEventSink : IUnknown
    virtual HRESULT OnProjectChanged() = 0;
 };
 
-}; //
+}; // Namespace XBR

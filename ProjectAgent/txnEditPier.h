@@ -24,6 +24,15 @@
 #include <WBFLCore.h>
 #include <PgsExt\ColumnData.h>
 
+class txnBearingLineData
+{
+public:
+   Float64 m_S; // spacing to next bearing (ignored for last bearing)
+   Float64 m_DC;
+   Float64 m_DW;
+   Float64 m_LLIM;
+};
+
 class txnEditPierData
 {
 public:
@@ -35,6 +44,7 @@ public:
    CString m_strOrientation;
 
    IndexType m_nBearingLines;
+   std::vector<txnBearingLineData> m_BearingLines[2];
 
    Float64 m_Ec;
 

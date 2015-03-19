@@ -31,9 +31,10 @@
 #define IDC_BLO                         215
 #define IDC_BLO_UNIT                    216
 #define IDC_SKEW                        217
-#define IDC_COMBO2                      218
 #define IDC_BEARING_LINE_COUNT          218
 #define IDC_X5_MEASUREMENT              1423
+#define IDC_PIER_GRID                   1475
+#define IDC_BEARING_GRID                1475
 #define IDC_EC                          1483
 #define IDC_EC_UNIT                     1484
 #define IDC_REFCOLUMN                   1546

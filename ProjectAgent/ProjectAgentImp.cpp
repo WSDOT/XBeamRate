@@ -127,6 +127,12 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
 
+   // Start off with one bearing line that has one bearing
+   BearingLineType bearingLine;
+   BearingType bearing(0);
+   bearingLine.Bearing().push_back(bearing);
+   m_XBeamRateXML->BearingLine().push_back(bearingLine);
+
    return S_OK;
 }
 
@@ -384,7 +390,78 @@ IndexType CProjectAgentImp::GetBearingLineCount()
 
 void CProjectAgentImp::SetBearingLineCount(IndexType nBearingLines)
 {
-#pragma Reminder("IMPLEMENT")
+   ATLASSERT(1 <= nBearingLines && nBearingLines <= 2);
+   if ( nBearingLines != GetBearingLineCount() )
+   {
+      if ( nBearingLines == 1 )
+      {
+         // removing one bearing line
+         m_XBeamRateXML->BearingLine().pop_back();
+      }
+      else
+      {
+         ATLASSERT(nBearingLines == 2);
+         // add a bearing line... using a copy of the existing bearin gline
+         m_XBeamRateXML->BearingLine().push_back(m_XBeamRateXML->BearingLine().back());
+      }
+   }
+
+   ATLASSERT(nBearingLines == GetBearingLineCount());
+}
+
+IndexType CProjectAgentImp::GetBearingCount(IndexType brgLineIdx)
+{
+   ATLASSERT(brgLineIdx < GetBearingLineCount());
+   return m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().size();
+}
+
+void CProjectAgentImp::SetBearingCount(IndexType brgLineIdx,IndexType nBearings)
+{
+   ATLASSERT(1 <= nBearings); // must always be at least one bearing
+   IndexType nCurrentBearings = GetBearingCount(brgLineIdx);
+   if ( nBearings != nCurrentBearings )
+   {
+      if ( nBearings < nCurrentBearings )
+      {
+         // removing bearings
+         BearingLineType::Bearing_iterator brgBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().begin();
+         BearingLineType::Bearing_iterator brgEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().end();
+         brgBegin += nBearings;
+         m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().erase(brgBegin,brgEnd);
+
+         // remove spacing also
+         BearingLineType::Spacing_iterator spaBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().begin();
+         BearingLineType::Spacing_iterator spaEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().end();
+         spaBegin += nBearings;
+         m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().erase(spaBegin,spaEnd);
+      }
+      else
+      {
+         // adding bearings
+         IndexType nToAdd = nBearings - nCurrentBearings;
+         m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().insert(m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().end(),
+            nToAdd,
+            m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().back());
+
+         m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().insert(m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().end(),
+            nToAdd,
+            m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().back());
+      }
+   }
+
+   ATLASSERT(nBearings == GetBearingCount(brgLineIdx));
+}
+
+Float64 CProjectAgentImp::GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx)
+{
+   ATLASSERT(brgIdx < GetBearingCount(brgLineIdx)-1);
+   return m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing()[brgIdx];
+}
+
+void CProjectAgentImp::SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing)
+{
+   ATLASSERT(brgIdx < GetBearingCount(brgLineIdx)-1);
+   m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing()[brgIdx] = spacing;
 }
 
 void CProjectAgentImp::SetModE(Float64 Ec)

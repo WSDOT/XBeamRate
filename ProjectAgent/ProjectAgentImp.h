@@ -126,6 +126,12 @@ public:
    virtual IndexType GetBearingLineCount();
    virtual void SetBearingLineCount(IndexType nBearingLines);
 
+   virtual IndexType GetBearingCount(IndexType brgLineIdx);
+   virtual void SetBearingCount(IndexType brgLineIdx,IndexType nBearings);
+
+   virtual Float64 GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx);
+   virtual void SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing);
+
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
 

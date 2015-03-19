@@ -9,6 +9,19 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
 
+void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,std::vector<txnBearingLineData>& brgData)
+{
+   if ( pDX->m_bSaveAndValidate )
+   {
+      grid.GetBearingData(brgData);
+   }
+   else
+   {
+      grid.SetBearingData(brgData);
+   }
+}
+
+
 // CSuperstructureLayoutPage dialog
 
 IMPLEMENT_DYNAMIC(CSuperstructureLayoutPage, CPropertyPage)
@@ -38,6 +51,12 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_UnitValueAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_BridgeLineOffset,pDisplayUnits->GetSpanLengthUnit());
    DDX_Text(pDX,IDC_SKEW,pParent->m_PierData.m_strOrientation);
    DDX_CBIndex(pDX,IDC_BEARING_LINE_COUNT,pParent->m_PierData.m_nBearingLines);
+
+   for ( IndexType brgLineIdx = 0; brgLineIdx < pParent->m_PierData.m_nBearingLines; brgLineIdx++ )
+   {
+      // need to use two different grids
+      DDX_BearingGrid(pDX,m_Grid,pParent->m_PierData.m_BearingLines[brgLineIdx]);
+   }
 }
 
 
@@ -49,6 +68,9 @@ END_MESSAGE_MAP()
 // CSuperstructureLayoutPage message handlers
 BOOL CSuperstructureLayoutPage::OnInitDialog()
 {
+   m_Grid.SubclassDlgItem(IDC_BEARING_GRID, this);
+   m_Grid.CustomInit();
+
    FillTransverseMeasureComboBox();
 
    CPropertyPage::OnInitDialog();

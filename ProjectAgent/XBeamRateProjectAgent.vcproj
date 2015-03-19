@@ -727,6 +727,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BearingLayoutGrid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dllmain.cpp"
 				>
 			</File>
@@ -991,6 +995,10 @@
 			>
 			<File
 				RelativePath=".\AgentCmdTarget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\BearingLayoutGrid.h"
 				>
 			</File>
 			<File
