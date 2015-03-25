@@ -30,6 +30,7 @@
 
 #include "stdafx.h"
 #include "BearingLayoutGrid.h"
+#include <EAF\EAFDisplayUnits.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -152,10 +153,32 @@ void CBearingLayoutGrid::CustomInit()
 
 void CBearingLayoutGrid::GetBearingData(std::vector<txnBearingLineData>& vBrgData)
 {
+   vBrgData.clear();
+   ROWCOL nRows = GetRowCount();
+   if ( nRows == 1 )
+   {
+      txnBearingLineData brgData;
+      brgData.m_S = 0;
+      GetBearingData(nRows,brgData);
+      vBrgData.push_back(brgData);
+   }
+   else
+   {
+      for ( ROWCOL row = 0; row < nRows; row += 2 )
+      {
+         txnBearingLineData brgData;
+         GetBearingData(row,brgData);
+         GetSpacingData(row+1,brgData);
+         vBrgData.push_back(brgData);
+      }
+   }
 }
 
 void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingLineData>& vBrgData)
 {
+   GetParam()->EnableUndo(FALSE);
+   GetParam()->SetLockReadOnly(FALSE);
+
    std::vector<txnBearingLineData>::const_iterator iter(vBrgData.begin());
    std::vector<txnBearingLineData>::const_iterator end(vBrgData.end());
    for ( ; iter != end; iter++ )
@@ -167,12 +190,103 @@ void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingLineData>& v
          AddSpacingRow(brgData);
       }
    }
+
+   GetParam()->SetLockReadOnly(TRUE);
+   GetParam()->EnableUndo(TRUE);
 }
 
 void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
 {
+   ROWCOL row = GetRowCount();
+   InsertRows(row,1);
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   // Spacing
+   SetStyleRange(CGXRange(row,1), CGXStyle()
+            .SetEnabled(FALSE)
+            .SetReadOnly(TRUE)
+            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
+            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
+         );
+
+   // DC
+   Float64 value = ::ConvertFromSysUnits(brgData.m_DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,2), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // DW
+   value = ::ConvertFromSysUnits(brgData.m_DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,3), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // LLIM
+   value = ::ConvertFromSysUnits(brgData.m_LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,4), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
 }
 
 void CBearingLayoutGrid::AddSpacingRow(const txnBearingLineData& brgData)
+{
+   ROWCOL row = GetRowCount();
+   InsertRows(row,1);
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   // Spacing
+   Float64 value = ::ConvertFromSysUnits(brgData.m_S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,1), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+         );
+
+   // DC
+   SetStyleRange(CGXRange(row,2), CGXStyle()
+            .SetEnabled(FALSE)
+            .SetReadOnly(TRUE)
+            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
+            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
+      );
+
+   // DW
+   SetStyleRange(CGXRange(row,3), CGXStyle()
+            .SetEnabled(FALSE)
+            .SetReadOnly(TRUE)
+            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
+            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
+      );
+
+   // LLIM
+   SetStyleRange(CGXRange(row,4), CGXStyle()
+            .SetEnabled(FALSE)
+            .SetReadOnly(TRUE)
+            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
+            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
+      );
+}
+
+void CBearingLayoutGrid::GetBearingData(ROWCOL row,txnBearingLineData& brgData)
+{
+}
+
+void CBearingLayoutGrid::GetSpacingData(ROWCOL row,txnBearingLineData& brgData)
 {
 }

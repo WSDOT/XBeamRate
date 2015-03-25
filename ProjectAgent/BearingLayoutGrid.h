@@ -69,6 +69,8 @@ public:
 private:
    void AddBearingRow(const txnBearingLineData& brgData);
    void AddSpacingRow(const txnBearingLineData& brgData);
+   void GetBearingData(ROWCOL row,txnBearingLineData& brgData);
+   void GetSpacingData(ROWCOL row,txnBearingLineData& brgData);
 };
 
 /////////////////////////////////////////////////////////////////////////////
