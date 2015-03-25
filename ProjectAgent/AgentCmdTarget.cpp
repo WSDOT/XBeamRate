@@ -57,6 +57,22 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_strOrientation = pProject->GetOrientation();
 
    oldPierData.m_nBearingLines = pProject->GetBearingLineCount();
+   for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_nBearingLines; brgLineIdx++ )
+   {
+      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+      {
+         txnBearingLineData brgLineData;
+         if ( brgIdx < nBearings-1 )
+         {
+            brgLineData.m_S = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
+         }
+         brgLineData.m_DC = 100;
+         brgLineData.m_DW = 100;
+         brgLineData.m_LLIM = 100;
+         oldPierData.m_BearingLines[brgLineIdx].push_back(brgLineData);
+      }
+   }
 
    oldPierData.m_Ec = pProject->GetModE();
    for ( int i = 0; i < 2; i++ )
