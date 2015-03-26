@@ -197,8 +197,8 @@ void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingLineData>& v
 
 void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
 {
+   InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
-   InsertRows(row,1);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -242,8 +242,8 @@ void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
 
 void CBearingLayoutGrid::AddSpacingRow(const txnBearingLineData& brgData)
 {
+   InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
-   InsertRows(row,1);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);

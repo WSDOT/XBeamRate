@@ -131,6 +131,12 @@ STDMETHODIMP CProjectAgentImp::Init()
    BearingLineType bearingLine;
    BearingType bearing(0);
    bearingLine.Bearing().push_back(bearing);
+   bearingLine.Spacing().push_back(10);
+   bearingLine.Bearing().push_back(bearing);
+   bearingLine.Spacing().push_back(10);
+   bearingLine.Bearing().push_back(bearing);
+   bearingLine.Spacing().push_back(10);
+   bearingLine.Bearing().push_back(bearing);
    m_XBeamRateXML->BearingLine().push_back(bearingLine);
 
    return S_OK;
