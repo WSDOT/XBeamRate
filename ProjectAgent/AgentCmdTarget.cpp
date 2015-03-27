@@ -59,18 +59,27 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_nBearingLines = pProject->GetBearingLineCount();
    for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_nBearingLines; brgLineIdx++ )
    {
+      oldPierData.m_BearingLines[brgLineIdx].clear();
       IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         txnBearingLineData brgLineData;
+         txnBearingData brgData;
          if ( brgIdx < nBearings-1 )
          {
-            brgLineData.m_S = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
+            brgData.m_S = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
          }
-         brgLineData.m_DC = 100;
-         brgLineData.m_DW = 100;
-         brgLineData.m_LLIM = 100;
-         oldPierData.m_BearingLines[brgLineIdx].push_back(brgLineData);
+         brgData.m_DC = ::ConvertToSysUnits(100.0,unitMeasure::Kip);
+         brgData.m_DW = ::ConvertToSysUnits(200.0,unitMeasure::Kip);
+         brgData.m_LLIM = ::ConvertToSysUnits(300.0,unitMeasure::Kip);
+         oldPierData.m_BearingLines[brgLineIdx].push_back(brgData);
+
+         IndexType refIdx;
+         Float64 refBearingOffset;
+         pgsTypes::OffsetMeasurementType refBearingDatum;
+         pProject->GetReferenceBearing(brgLineIdx,&refIdx,&refBearingOffset,&refBearingDatum);
+         oldPierData.m_RefBearingIdx[brgLineIdx]      = refIdx;
+         oldPierData.m_RefBearingLocation[brgLineIdx] = refBearingOffset;
+         oldPierData.m_RefBearingDatum[brgLineIdx]    = refBearingDatum;
       }
    }
 

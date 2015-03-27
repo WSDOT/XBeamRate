@@ -27,6 +27,58 @@
 
 using namespace XBR;
 
+txnBearingData::txnBearingData()
+{
+   m_DC = 0;
+   m_DW = 0;
+   m_LLIM = 0;
+   m_S = 0;
+}
+
+/////////////////////////////////////////////////////////////////
+txnEditPierData::txnEditPierData()
+{
+   m_TransverseMeasurementType = xbrTypes::tdmNormalToAlignment;
+   m_DeckElevation = 0;
+   m_CrownPointOffset = 0;
+   m_BridgeLineOffset = 0;
+
+   m_strOrientation = _T("00 00 0.00");
+
+   m_nBearingLines = 1;
+   for ( int i = 0; i < 2; i++ )
+   {
+      m_BearingLines[i].push_back(txnBearingData());
+      m_RefBearingIdx[i] = 0;
+      m_RefBearingLocation[i] = 0;
+      m_RefBearingDatum[i] = pgsTypes::omtAlignment;
+   }
+
+   m_Ec = 0;
+
+   m_nColumns = 0;
+   m_RefColumnIdx = 0;
+   m_TransverseOffset = 0;
+   m_TransverseOffsetMeasurement = pgsTypes::omtAlignment;
+   m_XBeamWidth = 0;
+   for ( int i = 0; i < 2; i++ )
+   {
+      m_XBeamHeight[i] = 0;
+      m_XBeamTaperHeight[i] = 0;
+      m_XBeamTaperLength[i] = 0;
+      m_XBeamOverhang[i] = 0;
+   }
+
+   m_ColumnHeightMeasurementType = CColumnData::chtHeight;
+   m_ColumnHeight = 0;
+   m_ColumnSpacing = 0;
+
+   m_ColumnShape = CColumnData::cstCircle;
+   m_B = 0;
+   m_D = 0;
+}
+
+/////////////////////////////////////////////////////////////////
 txnEditPier::txnEditPier(const txnEditPierData& oldPierData,const txnEditPierData& newPierData)
 {
    m_PierData[0] = oldPierData;
@@ -69,10 +121,18 @@ void txnEditPier::Execute(int i)
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < m_PierData[i].m_nBearingLines; brgLineIdx++ )
    {
-      for ( IndexType brgIdx = 0; brgIdx < m_PierData[i].m_BearingLines[brgLineIdx].size()-1; brgIdx++ )
+      IndexType nBearings = m_PierData[i].m_BearingLines[brgLineIdx].size();
+      pProject->SetBearingCount(brgLineIdx,nBearings);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         pProject->SetBearingSpacing(brgLineIdx,brgIdx,m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_S);
+         //pProject->SetBearingData(brgLineIdx,brgIdx);
+         if ( brgIdx < nBearings-1 )
+         {
+            pProject->SetBearingSpacing(brgLineIdx,brgIdx,m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_S);
+         }
       }
+
+      pProject->SetReferenceBearing(brgLineIdx,m_PierData[i].m_RefBearingIdx[brgLineIdx],m_PierData[i].m_RefBearingLocation[brgLineIdx],m_PierData[i].m_RefBearingDatum[brgLineIdx]);
    }
 
    pProject->SetModE(m_PierData[i].m_Ec);

@@ -44,8 +44,11 @@ public:
 
 // Operations
 public:
-   void GetBearingData(std::vector<txnBearingLineData>& brgData);
-   void SetBearingData(const std::vector<txnBearingLineData>& brgData);
+   void AddBearing();
+   void RemoveSelectedBearings();
+
+   void GetBearingData(std::vector<txnBearingData>& brgData);
+   void SetBearingData(const std::vector<txnBearingData>& brgData);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -67,10 +70,10 @@ public:
    void CustomInit();
 
 private:
-   void AddBearingRow(const txnBearingLineData& brgData);
-   void AddSpacingRow(const txnBearingLineData& brgData);
-   void GetBearingData(ROWCOL row,txnBearingLineData& brgData);
-   void GetSpacingData(ROWCOL row,txnBearingLineData& brgData);
+   void AddBearingRow(const txnBearingData& brgData);
+   void SetBearingData(ROWCOL row,const txnBearingData& brgData);
+   void GetBearingData(ROWCOL row,txnBearingData& brgData);
+   CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };
 
 /////////////////////////////////////////////////////////////////////////////

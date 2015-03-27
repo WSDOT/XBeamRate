@@ -24,9 +24,10 @@
 #include <WBFLCore.h>
 #include <PgsExt\ColumnData.h>
 
-class txnBearingLineData
+class txnBearingData
 {
 public:
+   txnBearingData();
    Float64 m_S; // spacing to next bearing (ignored for last bearing)
    Float64 m_DC;
    Float64 m_DW;
@@ -36,6 +37,8 @@ public:
 class txnEditPierData
 {
 public:
+   txnEditPierData();
+
    xbrTypes::TransverseDimensionMeasurementType m_TransverseMeasurementType;
    Float64 m_DeckElevation;
    Float64 m_CrownPointOffset;
@@ -44,7 +47,11 @@ public:
    CString m_strOrientation;
 
    IndexType m_nBearingLines;
-   std::vector<txnBearingLineData> m_BearingLines[2];
+   std::vector<txnBearingData> m_BearingLines[2];
+   IndexType m_RefBearingIdx[2];
+   Float64 m_RefBearingLocation[2];
+   pgsTypes::OffsetMeasurementType m_RefBearingDatum[2];
+
 
    Float64 m_Ec;
 

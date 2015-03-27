@@ -132,6 +132,9 @@ public:
    virtual Float64 GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx);
    virtual void SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing);
 
+   virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
+   virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
+
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
 

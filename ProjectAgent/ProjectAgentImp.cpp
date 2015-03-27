@@ -115,7 +115,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    TransverseOffsetType transverseOffset(10.,OffsetMeasurementEnum::Alignment);
    ColumnIndexType refColIdx = 0;
 
-   Float64 modE = 5000;
+   Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
 
 
    TransverseMeasurementEnum transverseMeasurementType = TransverseMeasurementEnum::NormalToAlignemnt;
@@ -128,16 +128,23 @@ STDMETHODIMP CProjectAgentImp::Init()
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
 
    // Start off with one bearing line that has one bearing
-   BearingLineType bearingLine;
-   BearingType bearing(0);
-   bearingLine.Bearing().push_back(bearing);
-   bearingLine.Spacing().push_back(10);
-   bearingLine.Bearing().push_back(bearing);
-   bearingLine.Spacing().push_back(10);
-   bearingLine.Bearing().push_back(bearing);
-   bearingLine.Spacing().push_back(10);
-   bearingLine.Bearing().push_back(bearing);
-   m_XBeamRateXML->BearingLine().push_back(bearingLine);
+   BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,0.0);
+   BearingLineType backBearingLine(bearingLocator);
+   BearingType bearing1(0);
+   BearingType bearing2(0);
+   BearingType bearing3(0);
+   BearingType bearing4(0);
+   Float64 S = ::ConvertToSysUnits(6.0,unitMeasure::Feet);
+
+   backBearingLine.Bearing().push_back(bearing1);
+   backBearingLine.Spacing().push_back(S);
+   backBearingLine.Bearing().push_back(bearing2);
+   backBearingLine.Spacing().push_back(S);
+   backBearingLine.Bearing().push_back(bearing3);
+   backBearingLine.Spacing().push_back(S);
+   backBearingLine.Bearing().push_back(bearing4);
+
+   m_XBeamRateXML->BearingLine().push_back(backBearingLine);
 
    return S_OK;
 }
@@ -470,6 +477,22 @@ void CProjectAgentImp::SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,F
    m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing()[brgIdx] = spacing;
 }
 
+void CProjectAgentImp::GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
+{
+   *pRefIdx = (IndexType)m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().ReferenceBearingID();
+   *pRefBearingOffset = m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Location();
+   *pRefBearingDatum = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure();
+}
+
+void CProjectAgentImp::SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum)
+{
+   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().ReferenceBearingID() = (BearingLocatorType::ReferenceBearingID_type)refIdx;
+   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Location() = refBearingOffset;
+   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure((OffsetMeasurementEnum::value)refBearingDatum);
+
+   Fire_OnProjectChanged();
+}
+
 void CProjectAgentImp::SetModE(Float64 Ec)
 {
    m_XBeamRateXML->ModE() = Ec;
@@ -729,7 +752,7 @@ void CProjectAgentImp::RemoveMenus()
 
 HRESULT CProjectAgentImp::ConvertToBaseUnits()
 {
-   // Called just after the document is loaded.... at this point data in the the XBeamRateXML
+   // Called just after the document is loaded.... at this point the data in the the XBeamRateXML
    // object is in the units defined in the input document. This could be any combination
    // of consistent units and specified units. We need to convert everything into the
    // internal consistent unit system of this application. That is what this method does.
@@ -738,7 +761,7 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    CComPtr<IUnitServer> xmlDocumentUnitServer;
    xmlDocumentUnitServer.CoCreateInstance(CLSID_UnitServer);
 
-   // See if the XML instance data has a units declaration
+   // See if the XML instance document has a units declaration
    XBeamRate::UnitsDeclaration_optional& unitsDeclaration(m_XBeamRateXML->UnitsDeclaration());
    if ( unitsDeclaration.present() )
    {
@@ -756,15 +779,28 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    CComPtr<IUnitServer> pOurUnitServer;
    pXBeamRate->GetUnitServer(&pOurUnitServer);
 
-
    // Convert the XML instance data into the internal units for this application
 
    // General data
-#pragma Reminder("WORKING HERE - convert superstructure data")
-
    ConvertBetweenBaseUnits(m_XBeamRateXML->DeckElevation(),    xmlDocumentUnitServer, pOurUnitServer);
    ConvertBetweenBaseUnits(m_XBeamRateXML->CrownPointOffset(), xmlDocumentUnitServer, pOurUnitServer);
    ConvertBetweenBaseUnits(m_XBeamRateXML->BridgeLineOffset(), xmlDocumentUnitServer, pOurUnitServer);
+
+   BOOST_FOREACH(BearingLineType& brgLine,m_XBeamRateXML->BearingLine())
+   {
+      ConvertBetweenBaseUnits(brgLine.BearingLocator().Location(), xmlDocumentUnitServer, pOurUnitServer);
+      
+#pragma Reminder("Convert reactions here")
+      //BOOST_FOREACH(BearingType& bearing,brgLine.Bearing())
+      //{
+      //   ConvertBetweenBaseUnits(bearing.?? forces/
+      //}
+
+      BOOST_FOREACH(BearingLineType::Spacing_type& spacing,brgLine.Spacing())
+      {
+         ConvertBetweenBaseUnits(spacing, xmlDocumentUnitServer, pOurUnitServer);
+      }
+   }
 
    ConvertBetweenBaseUnits(m_XBeamRateXML->ModE(),             xmlDocumentUnitServer, pOurUnitServer);
    

@@ -91,6 +91,11 @@ void CBearingLayoutGrid::CustomInit()
 			.SetEnabled(FALSE)          // disables usage as current cell
 		);
 
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
 // set text along top row
    int col = 0;
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
@@ -101,7 +106,8 @@ void CBearingLayoutGrid::CustomInit()
 			.SetEnabled(FALSE)          // disables usage as current cell
 		);
 
-   CString cv = _T("Spacing");
+   CString cv;
+   cv.Format(_T("DC (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -110,7 +116,7 @@ void CBearingLayoutGrid::CustomInit()
 			.SetValue(cv)
 		);
 
-   cv = _T("DC");
+   cv.Format(_T("DW (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -119,7 +125,7 @@ void CBearingLayoutGrid::CustomInit()
 			.SetValue(cv)
 		);
 
-   cv = _T("DW");
+   cv.Format(_T("LL+IM (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -128,7 +134,7 @@ void CBearingLayoutGrid::CustomInit()
 			.SetValue(cv)
 		);
 
-   cv = _T("LL+IM");
+   cv.Format(_T("S (%s)"),pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -136,6 +142,7 @@ void CBearingLayoutGrid::CustomInit()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(cv)
 		);
+
 
    // make it so that text fits correctly in header row
 	ResizeRowHeightsToFit(CGXRange(0,0,0,num_cols));
@@ -151,43 +158,76 @@ void CBearingLayoutGrid::CustomInit()
 	GetParam( )->EnableUndo(TRUE);
 }
 
-void CBearingLayoutGrid::GetBearingData(std::vector<txnBearingLineData>& vBrgData)
+void CBearingLayoutGrid::AddBearing()
+{
+   ROWCOL nRows = GetRowCount();
+
+   txnBearingData brgData;
+   GetBearingData(nRows,brgData); // bearing data in the last row
+
+   Float64 S = ::ConvertToSysUnits(6.0,unitMeasure::Feet); // default spacing
+   if ( 1 < nRows )
+   {
+      // get the spacing between the last two bearings
+      txnBearingData brgData1;
+      GetBearingData(nRows-1,brgData1);
+      S = brgData1.m_S;
+   }
+
+	GetParam( )->EnableUndo(FALSE);
+   GetParam()->SetLockReadOnly(FALSE);
+
+   // set the default spacing in the last row
+   brgData.m_S = S;
+   SetBearingData(nRows,brgData);
+
+   // add the new bearing (adds row to the grid)
+   brgData.m_S = 0; // no spacing for the last bearing
+   AddBearingRow(brgData);
+
+   GetParam()->SetLockReadOnly(TRUE);
+	GetParam( )->EnableUndo(TRUE);
+}
+
+void CBearingLayoutGrid::RemoveSelectedBearings()
+{
+   AfxMessageBox(_T("Remove bearings"));
+}
+
+void CBearingLayoutGrid::GetBearingData(std::vector<txnBearingData>& vBrgData)
 {
    vBrgData.clear();
    ROWCOL nRows = GetRowCount();
-   if ( nRows == 1 )
+   for ( ROWCOL row = 1; row <= nRows; row++ )
    {
-      txnBearingLineData brgData;
-      brgData.m_S = 0;
-      GetBearingData(nRows,brgData);
+      txnBearingData brgData;
+      GetBearingData(row,brgData);
       vBrgData.push_back(brgData);
-   }
-   else
-   {
-      for ( ROWCOL row = 0; row < nRows; row += 2 )
-      {
-         txnBearingLineData brgData;
-         GetBearingData(row,brgData);
-         GetSpacingData(row+1,brgData);
-         vBrgData.push_back(brgData);
-      }
    }
 }
 
-void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingLineData>& vBrgData)
+void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingData>& vBrgData)
 {
    GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
 
-   std::vector<txnBearingLineData>::const_iterator iter(vBrgData.begin());
-   std::vector<txnBearingLineData>::const_iterator end(vBrgData.end());
-   for ( ; iter != end; iter++ )
+   ROWCOL nRows = GetRowCount();
+   if ( 0 < nRows )
    {
-      const txnBearingLineData& brgData(*iter);
+      RemoveRows(1,nRows);
+   }
+
+   if ( vBrgData.size() == 0 )
+   {
+      // Always have one bearing
+      txnBearingData brgData;
       AddBearingRow(brgData);
-      if ( iter != end-1 )
+   }
+   else
+   {
+      BOOST_FOREACH(const txnBearingData& brgData, vBrgData)
       {
-         AddSpacingRow(brgData);
+         AddBearingRow(brgData);
       }
    }
 
@@ -195,26 +235,17 @@ void CBearingLayoutGrid::SetBearingData(const std::vector<txnBearingLineData>& v
    GetParam()->EnableUndo(TRUE);
 }
 
-void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
+void CBearingLayoutGrid::SetBearingData(ROWCOL row,const txnBearingData& brgData)
 {
-   InsertRows(GetRowCount()+1,1);
-   ROWCOL row = GetRowCount();
-
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   // Spacing
-   SetStyleRange(CGXRange(row,1), CGXStyle()
-            .SetEnabled(FALSE)
-            .SetReadOnly(TRUE)
-            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
-            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
-         );
+   ROWCOL col = 1;
 
    // DC
    Float64 value = ::ConvertFromSysUnits(brgData.m_DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-   SetStyleRange(CGXRange(row,2), CGXStyle()
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetHorizontalAlignment(DT_RIGHT)
@@ -223,7 +254,7 @@ void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
 
    // DW
    value = ::ConvertFromSysUnits(brgData.m_DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-   SetStyleRange(CGXRange(row,3), CGXStyle()
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetHorizontalAlignment(DT_RIGHT)
@@ -232,61 +263,81 @@ void CBearingLayoutGrid::AddBearingRow(const txnBearingLineData& brgData)
 
    // LLIM
    value = ::ConvertFromSysUnits(brgData.m_LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-   SetStyleRange(CGXRange(row,4), CGXStyle()
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetHorizontalAlignment(DT_RIGHT)
       .SetValue(value)
       );
-}
-
-void CBearingLayoutGrid::AddSpacingRow(const txnBearingLineData& brgData)
-{
-   InsertRows(GetRowCount()+1,1);
-   ROWCOL row = GetRowCount();
-
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    // Spacing
-   Float64 value = ::ConvertFromSysUnits(brgData.m_S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
-   SetStyleRange(CGXRange(row,1), CGXStyle()
-      .SetEnabled(TRUE)
-      .SetReadOnly(FALSE)
+   // Set the value for the spacing to the next bearing and disable this cell
+   // This assumes this bearing is in the last row and spacing to next isn't applicable
+   value = ::ConvertFromSysUnits(brgData.m_S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,col), CGXStyle()
+      .SetEnabled(FALSE)
+      .SetReadOnly(TRUE)
+      .SetInterior(::GetSysColor(COLOR_BTNFACE))
+      .SetTextColor(::GetSysColor(COLOR_BTNFACE))
       .SetHorizontalAlignment(DT_RIGHT)
       .SetValue(value)
          );
 
-   // DC
-   SetStyleRange(CGXRange(row,2), CGXStyle()
-            .SetEnabled(FALSE)
-            .SetReadOnly(TRUE)
-            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
-            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
-      );
+   if ( 1 < row )
+   {
+      // if this isn't the first row, enable the spacing in the previous row
+      // because it obviously isn't the last row
+      SetStyleRange(CGXRange(row-1,col),CGXStyle()
+         .SetEnabled(TRUE)
+         .SetReadOnly(FALSE)
+         .SetInterior(::GetSysColor(COLOR_WINDOW))
+        .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
+         );
+   }
 
-   // DW
-   SetStyleRange(CGXRange(row,3), CGXStyle()
-            .SetEnabled(FALSE)
-            .SetReadOnly(TRUE)
-            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
-            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
-      );
-
-   // LLIM
-   SetStyleRange(CGXRange(row,4), CGXStyle()
-            .SetEnabled(FALSE)
-            .SetReadOnly(TRUE)
-            .SetInterior( ::GetSysColor(COLOR_BTNFACE) )
-            .SetTextColor( ::GetSysColor(COLOR_WINDOWTEXT) )
-      );
+   col++;
 }
 
-void CBearingLayoutGrid::GetBearingData(ROWCOL row,txnBearingLineData& brgData)
+void CBearingLayoutGrid::AddBearingRow(const txnBearingData& brgData)
 {
+   InsertRows(GetRowCount()+1,1);
+   ROWCOL row = GetRowCount();
+
+   SetBearingData(row,brgData);
 }
 
-void CBearingLayoutGrid::GetSpacingData(ROWCOL row,txnBearingLineData& brgData)
+void CBearingLayoutGrid::GetBearingData(ROWCOL row,txnBearingData& brgData)
 {
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   ROWCOL col = 1;
+
+   Float64 DC = _tstof(GetCellValue(row,col++));
+   brgData.m_DC = ::ConvertToSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+
+   Float64 DW = _tstof(GetCellValue(row,col++));
+   brgData.m_DW = ::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+
+   Float64 LLIM = _tstof(GetCellValue(row,col++));
+   brgData.m_LLIM = ::ConvertToSysUnits(LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+
+   Float64 S = _tstof(GetCellValue(row,col++));
+   brgData.m_S = ::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+}
+
+CString CBearingLayoutGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
+{
+    if (IsCurrentCell(nRow, nCol) && IsActiveCurrentCell())
+    {
+        CString s;
+        CGXControl* pControl = GetControl(nRow, nCol);
+        pControl->GetValue(s);
+        return s;
+    }
+    else
+    {
+        return GetValueRowCol(nRow, nCol);
+    }
 }

@@ -32,9 +32,26 @@
 #define IDC_BLO_UNIT                    216
 #define IDC_SKEW                        217
 #define IDC_BEARING_LINE_COUNT          218
+#define IDC_BACK_REF_BEARING_LIST       219
+#define IDC_AHEAD_REF_BEARING_LIST      220
+#define IDC_BACK_REF_BEARING_LOCATION   221
+#define IDC_AHEAD_REF_BEARING_LOCATION  222
+#define IDC_BACK_REF_BEARING_LOCATION_UNIT 223
+#define IDC_AHEAD_REF_BEARING_LOCATION_UNIT 224
+#define IDC_BACK_REF_BEARING_DATUM      225
+#define IDC_AHEAD_REF_BEARING_DATUM     226
+#define IDC_ADD_BACK                    227
+#define IDC_ADD_AHEAD                   228
+#define IDC_REMOVE_BACK                 229
+#define IDC_REMOVE_AHEAD                230
+#define IDC_BACK_LABEL                  231
+#define IDC_AHEAD_LABEL                 232
+#define IDC_COPY_AHEAD                  233
+#define IDC_COPY_AHEAD2                 234
+#define IDC_COPY_BACK                   234
 #define IDC_X5_MEASUREMENT              1423
-#define IDC_PIER_GRID                   1475
-#define IDC_BEARING_GRID                1475
+#define IDC_BACK_BEARING_GRID           1475
+#define IDC_AHEAD_BEARING_GRID          1476
 #define IDC_EC                          1483
 #define IDC_EC_UNIT                     1484
 #define IDC_REFCOLUMN                   1546
@@ -94,7 +111,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        204
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         219
+#define _APS_NEXT_CONTROL_VALUE         234
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

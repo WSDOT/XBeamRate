@@ -117,6 +117,7 @@
       </xs:documentation>
     </xs:annotation>
     <xs:sequence>
+      <xs:element name="BearingLocator" type="BearingLocatorType"/>
       <xs:element name="Bearing" type="BearingType"/>
       <xs:sequence minOccurs="0" maxOccurs="unbounded">
         <xs:element name="Spacing" type="bxu:LengthValueType">

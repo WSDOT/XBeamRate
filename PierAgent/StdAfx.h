@@ -57,4 +57,6 @@ using namespace ATL;
 
 #include <WBFLCore.h>
 #include <AgentTools.h>
+#include <WBFLGenericBridge.h>
 
+#include <XBeamRateTypes.h>

@@ -110,3 +110,23 @@ STDMETHODIMP CPierAgentImp::ShutDown()
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
+
+//////////////////////////////////////////
+// IProjectEventSink
+HRESULT CPierAgentImp::OnProjectChanged()
+{
+   Invalidate();
+   return S_OK;
+}
+
+//////////////////////////////////////////
+void CPierAgentImp::Validate()
+{
+   m_Pier.CoCreateInstance(CLSID_TransversePierDescription);
+   // Build Pier Description using raw data from the project agent
+}
+
+void CPierAgentImp::Invalidate()
+{
+   m_Pier.Release();
+}

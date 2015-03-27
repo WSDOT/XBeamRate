@@ -32,6 +32,9 @@
 #include "PierAgentCLSID.h"
 
 #include <EAF\EAFInterfaceCache.h>
+#include <IFace\Project.h>
+
+using namespace XBR;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPierAgentImp
@@ -39,9 +42,10 @@ class ATL_NO_VTABLE CPierAgentImp :
 	public CComObjectRootEx<CComSingleThreadModel>,
    //public CComRefCountTracer<CPierAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CPierAgentImp, &CLSID_PierAgent>,
-	public IConnectionPointContainerImpl<CPierAgentImp>,
+	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
-   public IAgentEx
+   public IAgentEx,
+   public IProjectEventSink
 {  
 public:
 	CPierAgentImp(); 
@@ -57,7 +61,8 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
+   COM_INTERFACE_ENTRY(IProjectEventSink)
+	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CPierAgentImp)
@@ -74,12 +79,20 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IProjectEventSink
+public:
+   HRESULT OnProjectChanged();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
 
 private:
    DECLARE_EAF_AGENT_DATA;
+
+   void Validate();
+   void Invalidate();
+   CComPtr<ITransversePierDescription> m_Pier;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)

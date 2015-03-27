@@ -56,6 +56,10 @@ interface IProject : IUnknown
    virtual Float64 GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx) = 0;
    virtual void SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) = 0;
 
+   // Reference bearing
+   virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
+   virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
+
    // Material properties of the sub-structure concrete
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;
