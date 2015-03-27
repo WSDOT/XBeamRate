@@ -20,6 +20,9 @@ interface IProject : IUnknown
    virtual void SetProjectName(LPCTSTR strName) = 0;
    virtual LPCTSTR GetProjectName() = 0;
 
+   virtual xbrTypes::PierConnectionType GetPierType() = 0;
+   virtual void SetPierType(xbrTypes::PierConnectionType pierType) = 0;
+
    // Sets the basis for measuring transverse dimensions
    virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType() = 0;
    virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType) = 0;

@@ -735,6 +735,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GeneralPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierDlg.cpp"
 				>
 			</File>
@@ -1007,6 +1011,10 @@
 			</File>
 			<File
 				RelativePath=".\dllmain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GeneralPage.h"
 				>
 			</File>
 			<File

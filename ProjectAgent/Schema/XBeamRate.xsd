@@ -62,6 +62,15 @@
   </xs:simpleType>
 
   <!-- This is temporary... eventually this needs to move to the Pier Model -->
+  <xs:simpleType name="PierTypeEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Continuous" />
+      <xs:enumeration value="Integral"/>
+      <xs:enumeration value="Expansion"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- This is temporary... eventually this needs to move to the Pier Model -->
   <xs:complexType name="TransverseOffsetType">
     <xs:sequence>
       <xs:element name="TransverseOffset" type="bxu:LengthValueType"/>
@@ -155,6 +164,7 @@
            <xs:element name="Settings" type="ApplicationSettings"/>
            
            <!-- Superstructure Description -->
+           <xs:element name="PierType" type="PierTypeEnum"/>
            <xs:element name="TransverseDimensionMeasurementType" type="TransverseMeasurementEnum"/>
            <xs:element name="DeckElevation" type="bxu:LengthValueType"/>
            <xs:element name="BridgeLineOffset" type="bxu:LengthValueType"/>

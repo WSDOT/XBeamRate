@@ -39,6 +39,7 @@ class txnEditPierData
 public:
    txnEditPierData();
 
+   xbrTypes::PierConnectionType m_PierType;
    xbrTypes::TransverseDimensionMeasurementType m_TransverseMeasurementType;
    Float64 m_DeckElevation;
    Float64 m_CrownPointOffset;

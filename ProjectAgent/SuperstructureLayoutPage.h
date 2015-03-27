@@ -33,7 +33,6 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   void FillTransverseMeasureComboBox();
    void FillRefBearingComboBox(IndexType brgLineIdx);
    void FillRefBearingDatumComboBox(IndexType brgLineIdx);
 };

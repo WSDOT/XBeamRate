@@ -111,6 +111,7 @@ void txnEditPier::Execute(int i)
 
    GET_IFACE2_(XBR,pBroker,IProject,pProject);
 
+   pProject->SetPierType(m_PierData[i].m_PierType);
    pProject->SetTransverseDimensionsMeasurementType(m_PierData[i].m_TransverseMeasurementType);
    pProject->SetDeckElevation(m_PierData[i].m_DeckElevation);
    pProject->SetCrownPointOffset(m_PierData[i].m_CrownPointOffset);

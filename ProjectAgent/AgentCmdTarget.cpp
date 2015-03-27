@@ -50,6 +50,7 @@ void CAgentCmdTarget::OnEditPier()
    CPierDlg dlg(_T("Edit Pier"));
 
    txnEditPierData oldPierData;
+   oldPierData.m_PierType = pProject->GetPierType();
    oldPierData.m_TransverseMeasurementType = pProject->GetTransverseDimensionsMeasurementType();
    oldPierData.m_DeckElevation = pProject->GetDeckElevation();
    oldPierData.m_CrownPointOffset = pProject->GetCrownPointOffset();

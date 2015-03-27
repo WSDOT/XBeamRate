@@ -17,6 +17,7 @@
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  202
 #define IDC_RIGHT_OVERHANG              203
 #define IDC_RIGHT_OVERHANG_UNIT         204
+#define IDD_GENERAL                     204
 #define IDC_COLUMN_COUNT                205
 #define IDC_COLUMN_LENGTH               206
 #define IDC_COLUMN_LENGTH_UNIT          207
@@ -47,8 +48,12 @@
 #define IDC_BACK_LABEL                  231
 #define IDC_AHEAD_LABEL                 232
 #define IDC_COPY_AHEAD                  233
-#define IDC_COPY_AHEAD2                 234
 #define IDC_COPY_BACK                   234
+#define IDC_PIER_TYPE                   234
+#define IDC_AHEAD_BEARING_LABEL         235
+#define IDC_AHEAD_BEARING_LABEL1        236
+#define IDC_AHEAD_BEARING_LABEL2        237
+#define IDC_AHEAD_BEARING_LABEL3        238
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_BACK_BEARING_GRID           1475
 #define IDC_AHEAD_BEARING_GRID          1476
@@ -109,9 +114,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        204
+#define _APS_NEXT_RESOURCE_VALUE        205
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         234
+#define _APS_NEXT_CONTROL_VALUE         239
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

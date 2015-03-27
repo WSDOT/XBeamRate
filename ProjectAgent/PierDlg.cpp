@@ -41,9 +41,11 @@ void CPierDlg::Init()
 {
    m_psh.dwFlags |= PSH_HASHELP | PSH_NOAPPLYNOW;
 
+   m_GeneralPage.m_psp.dwFlags         |= PSP_HASHELP;
    m_SuperstructurePage.m_psp.dwFlags  |= PSP_HASHELP;
-   m_SubstructurePage.m_psp.dwFlags   |= PSP_HASHELP;
+   m_SubstructurePage.m_psp.dwFlags    |= PSP_HASHELP;
 
+   AddPage(&m_GeneralPage);
    AddPage(&m_SuperstructurePage);
    AddPage(&m_SubstructurePage);
 }

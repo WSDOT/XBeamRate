@@ -9,6 +9,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
 
+#pragma warning(disable:4244)
+
 void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,std::vector<txnBearingData>& brgData)
 {
    if ( pDX->m_bSaveAndValidate )
@@ -45,11 +47,6 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_CBEnum(pDX,IDC_TRANSVERSE_MEASUREMENT_TYPE,pParent->m_PierData.m_TransverseMeasurementType);
-   DDX_UnitValueAndTag(pDX,IDC_DECK_ELEVATION,IDC_DECK_ELEVATION_UNIT,pParent->m_PierData.m_DeckElevation,pDisplayUnits->GetSpanLengthUnit());
-   DDX_OffsetAndTag(pDX,IDC_CPO,IDC_CPO_UNIT,pParent->m_PierData.m_CrownPointOffset,pDisplayUnits->GetSpanLengthUnit());
-   DDX_OffsetAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_BridgeLineOffset,pDisplayUnits->GetSpanLengthUnit());
-   DDX_Text(pDX,IDC_SKEW,pParent->m_PierData.m_strOrientation);
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,pParent->m_PierData.m_nBearingLines);
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
@@ -79,8 +76,6 @@ END_MESSAGE_MAP()
 // CSuperstructureLayoutPage message handlers
 BOOL CSuperstructureLayoutPage::OnInitDialog()
 {
-   FillTransverseMeasureComboBox();
-
    m_Grid[0].SubclassDlgItem(IDC_BACK_BEARING_GRID, this);
    m_Grid[0].CustomInit();
 
@@ -174,16 +169,10 @@ void CSuperstructureLayoutPage::OnBearingLineCountChanged()
    GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION_UNIT)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_REF_BEARING_DATUM)->ShowWindow(show);
-}
-
-void CSuperstructureLayoutPage::FillTransverseMeasureComboBox()
-{
-   CComboBox* pcbTransverseMeasure = (CComboBox*)GetDlgItem(IDC_TRANSVERSE_MEASUREMENT_TYPE);
-   pcbTransverseMeasure->ResetContent();
-   int idx = pcbTransverseMeasure->AddString(_T("normal to the alignment"));
-   pcbTransverseMeasure->SetItemData(idx,(DWORD_PTR)xbrTypes::tdmNormalToAlignment);
-   idx = pcbTransverseMeasure->AddString(_T("in the plane of the pier"));
-   pcbTransverseMeasure->SetItemData(idx,(DWORD_PTR)xbrTypes::tdmPlaneOfPier);
+   GetDlgItem(IDC_AHEAD_BEARING_LABEL)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BEARING_LABEL1)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BEARING_LABEL2)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BEARING_LABEL3)->ShowWindow(show);
 }
 
 void CSuperstructureLayoutPage::FillRefBearingComboBox(IndexType brgLineIdx)

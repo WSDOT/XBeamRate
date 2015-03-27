@@ -111,6 +111,9 @@ public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
+   virtual xbrTypes::PierConnectionType GetPierType();
+   virtual void SetPierType(xbrTypes::PierConnectionType pierType);
+
    virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType();
    virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType);
    virtual void SetDeckElevation(Float64 deckElevation);

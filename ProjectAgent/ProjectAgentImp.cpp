@@ -97,6 +97,8 @@ STDMETHODIMP CProjectAgentImp::Init()
    // Create default data model
    ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
 
+   PierTypeEnum pierType = PierTypeEnum::Integral;
+
    OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0,5.0,5.0,0,0,5.0,0,0);
 
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
@@ -125,7 +127,7 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    LPCTSTR strOrientation = _T("00 00 0.0 L");
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
+   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pierType,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
 
    // Start off with one bearing line that has one bearing
    BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,0.0);
@@ -334,6 +336,19 @@ void CProjectAgentImp::SetProjectName(LPCTSTR strName)
 LPCTSTR CProjectAgentImp::GetProjectName()
 {
    return m_XBeamRateXML->Settings().ProjectName().c_str();
+}
+
+xbrTypes::PierConnectionType CProjectAgentImp::GetPierType()
+{
+   xbrTypes::PierConnectionType pierType =
+      (xbrTypes::PierConnectionType)(PierTypeEnum::value)(m_XBeamRateXML->PierType());
+
+   return pierType;
+}
+
+void CProjectAgentImp::SetPierType(xbrTypes::PierConnectionType pierType)
+{
+   m_XBeamRateXML->PierType((PierTypeEnum::value)pierType);
 }
 
 xbrTypes::TransverseDimensionMeasurementType CProjectAgentImp::GetTransverseDimensionsMeasurementType()
