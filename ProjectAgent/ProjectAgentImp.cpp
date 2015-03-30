@@ -773,6 +773,20 @@ void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* p
    *pMeasure = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)(m_XBeamRateXML->TransverseOffset().Measure());
 }
 
+Float64 CProjectAgentImp::GetXBeamLength()
+{
+   Float64 X3 = m_XBeamRateXML->Pier().CapBeam().LeftOverhang();
+   Float64 X4 = m_XBeamRateXML->Pier().CapBeam().RightOverhang();
+
+   Float64 s = 0;
+   BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::Spacing_type& spacing,m_XBeamRateXML->Pier().Columns().Spacing())
+   {
+      s += spacing;
+   }
+
+   return X3 + s + X4;
+}
+
 //////////////////////////////////////////////////////////
 void CProjectAgentImp::CreateMenus()
 {

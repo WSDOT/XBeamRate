@@ -1,5 +1,7 @@
 #pragma once
 
+#include <XBeamRateExt\PointOfInterest.h>
+
 /*****************************************************************************
 INTERFACE
    IAnalysisResults
@@ -13,4 +15,6 @@ DEFINE_GUID(IID_IAnalysisResults,
 interface IAnalysisResults : IUnknown
 {
    virtual Float64 GetResult() = 0;
+
+   virtual Float64 GetMoment(const xbrPointOfInterest& poi) = 0;
 };

@@ -172,6 +172,8 @@ public:
    virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure);
    virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure);
 
+   virtual Float64 GetXBeamLength();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//

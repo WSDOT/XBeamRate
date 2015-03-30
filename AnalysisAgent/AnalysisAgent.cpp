@@ -46,6 +46,7 @@
 #include <System\ComCatMgr.h>
 
 #include <EAF\EAFTransactions.h>
+#include <IFace\PointOfInterest.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

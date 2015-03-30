@@ -25,6 +25,9 @@
 #include <EAF\EAFDisplayUnits.h>
 
 #include <IFace\Project.h>
+#include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
+
 using namespace XBR;
 
 #ifdef _DEBUG
@@ -62,6 +65,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
 
    GET_IFACE2(pBroker,IProject,pProject);
    rptParagraph* pPara = new rptParagraph;
@@ -83,6 +87,27 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
       Float64 height = pProject->GetColumnHeight(colIdx);
       (*pTable)(tableRowIdx,tableColIdx++) << colIdx;
       (*pTable)(tableRowIdx,tableColIdx++) << length.SetValue(height);
+   }
+
+   pTable = new rptRcTable(3,0);
+   *pPara << pTable << rptNewLine;
+
+   (*pTable)(0,0) << _T("POI ID");
+   (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,2) << COLHDR(_T("Moment"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+
+   GET_IFACE2(pBroker,IAnalysisResults,pResults);
+   GET_IFACE2(pBroker,IPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+   RowIndexType row = pTable->GetNumberOfHeaderRows();
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 Mz = pResults->GetMoment(poi);
+      (*pTable)(row,0) << poi.GetID();
+      (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,2) << moment.SetValue(Mz);
+
+      row++;
    }
    
    return pChapter;

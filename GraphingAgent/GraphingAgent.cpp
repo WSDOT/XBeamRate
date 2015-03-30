@@ -46,6 +46,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <IGraphManager.h>
 
+#include <IFace\AnalysisResults.h>
+#include <IFace\PointOfInterest.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

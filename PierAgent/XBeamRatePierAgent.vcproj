@@ -975,6 +975,10 @@
 		<Filter
 			Name="IFace"
 			>
+			<File
+				RelativePath="..\Include\IFace\PointOfInterest.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Status Items"

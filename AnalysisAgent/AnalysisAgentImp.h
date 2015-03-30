@@ -92,6 +92,7 @@ public:
 // IAnalysisResults
 public:
    virtual Float64 GetResult();
+   virtual Float64 GetMoment(const xbrPointOfInterest& poi);
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -106,6 +107,18 @@ private:
    DWORD m_dwProjectCookie;
 
    CComPtr<IFem2dModel> m_Model;
+
+   struct CapBeamMember
+   {
+      Float64 Xs;
+      Float64 Xe;
+      MemberIDType mbrID;
+   };
+   std::vector<CapBeamMember> m_CapBeamMembers;
+
+   // key is the product model poi ID
+   // value is the FEM model poi ID
+   std::map<PoiIDType,PoiIDType> m_PoiMap;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)

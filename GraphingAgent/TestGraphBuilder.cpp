@@ -34,7 +34,12 @@
 #include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
+#include <IFace\AnalysisResults.h>
+#include <IFace\PointOfInterest.h>
+
 #include <Colors.h>
+
+using namespace XBR;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -96,26 +101,42 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   int graphType = m_GraphControls.GetGraphType();
+   arvPhysicalConverter* pVertcalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
+   arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   grGraphXY graph(*pHorizontalAxisFormat,*pVertcalAxisFormat);
+   IndexType graphIdx = graph.CreateDataSeries();
 
-   // first x axis
-   const unitmgtScalar& scalar = pDisplayUnits->GetScalarFormat();
-   arvPhysicalConverter* pFormat = new ScalarTool(scalar);
-   grGraphXY graph(*pFormat,*pFormat);
-
-   IndexType idx = graph.CreateDataSeries();
-   for ( int i = 0; i <= 360; i++ )
+   GET_IFACE2(pBroker,IAnalysisResults,pResults);
+   GET_IFACE2(pBroker,IPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 angle = ::ToRadians((Float64)(i));
-      Float64 y;
-      if ( graphType == SINE_GRAPH )
-         y = sin(angle);
-      else
-         y = cos(angle);
-
-      gpPoint2d point(angle,y);
-      graph.AddPoint(idx,point);
+      Float64 Mz = pResults->GetMoment(poi);
+      gpPoint2d point(poi.GetDistFromStart(),Mz);
+      graph.AddPoint(graphIdx,point);
    }
+
+
+   //int graphType = m_GraphControls.GetGraphType();
+
+   //// first x axis
+   //const unitmgtScalar& scalar = pDisplayUnits->GetScalarFormat();
+   //arvPhysicalConverter* pFormat = new ScalarTool(scalar);
+   //grGraphXY graph(*pFormat,*pFormat);
+
+   //IndexType idx = graph.CreateDataSeries();
+   //for ( int i = 0; i <= 360; i++ )
+   //{
+   //   Float64 angle = ::ToRadians((Float64)(i));
+   //   Float64 y;
+   //   if ( graphType == SINE_GRAPH )
+   //      y = sin(angle);
+   //   else
+   //      y = cos(angle);
+
+   //   gpPoint2d point(angle,y);
+   //   graph.AddPoint(idx,point);
+   //}
 
 
    CRect wndRect;
@@ -123,5 +144,6 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    graph.SetOutputRect(wndRect);
    graph.Draw(pDC->GetSafeHdc());
 
-   delete pFormat;
+   delete pVertcalAxisFormat;
+   delete pHorizontalAxisFormat;
 }

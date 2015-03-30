@@ -96,6 +96,8 @@ interface IProject : IUnknown
 
    virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure) = 0;
    virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
+
+   virtual Float64 GetXBeamLength() = 0;
 };
 
 /*****************************************************************************

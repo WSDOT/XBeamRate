@@ -45,6 +45,8 @@
 #include <IReportManager.h>
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\Project.h>
+#include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

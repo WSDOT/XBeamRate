@@ -33,6 +33,7 @@
 
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
+#include <IFace\PointOfInterest.h>
 
 using namespace XBR;
 
@@ -45,6 +46,7 @@ class ATL_NO_VTABLE CPierAgentImp :
 	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx,
+   public IPointOfInterest,
    public IProjectEventSink
 {  
 public:
@@ -61,6 +63,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IPointOfInterest)
    COM_INTERFACE_ENTRY(IProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
@@ -79,6 +82,11 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IPointOfInterest
+public:
+   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest();
+   virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(ColumnIndexType colIdx);
+
 // IProjectEventSink
 public:
    HRESULT OnProjectChanged();
@@ -89,10 +97,14 @@ public:
 
 private:
    DECLARE_EAF_AGENT_DATA;
+   DWORD m_dwProjectCookie;
 
    void Validate();
    void Invalidate();
    CComPtr<ITransversePierDescription> m_Pier;
+
+   void ValidatePointsOfInterest();
+   std::vector<xbrPointOfInterest> m_XBeamPoi;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)

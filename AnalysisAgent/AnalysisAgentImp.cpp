@@ -25,6 +25,8 @@
 #include "AnalysisAgent.h"
 #include "AnalysisAgentImp.h"
 
+#include <IFace\PointOfInterest.h>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -134,92 +136,133 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
 //////////////////////////////////////////////////////////////////////
 void CAnalysisAgentImp::Validate()
 {
-   if ( m_Model == NULL )
+   if ( m_Model != NULL )
    {
-      m_Model.CoCreateInstance(CLSID_Fem2dModel);
+      return;
+   }
 
-      // Build the frame model
-      GET_IFACE(IProject,pProject);
+   m_Model.CoCreateInstance(CLSID_Fem2dModel);
 
-      // some dummy dimensions
-      Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
-      Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
-      IndexType nColumns = pProject->GetColumnCount();
+   // Build the frame model
+   GET_IFACE(IProject,pProject);
 
-      Float64 EAb = 1;
-      Float64 EIb = 1;
-      Float64 EAc = 1;
-      Float64 EIc = 1;
+   // some dummy dimensions
+   Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
+   Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
+   IndexType nColumns = pProject->GetColumnCount();
 
-      CComPtr<IFem2dJointCollection> joints;
-      m_Model->get_Joints(&joints);
+   Float64 EAb = 1;
+   Float64 EIb = 1;
+   Float64 EAc = 1;
+   Float64 EIc = 1;
 
-      CComPtr<IFem2dMemberCollection> members;
-      m_Model->get_Members(&members);
+   CComPtr<IFem2dJointCollection> joints;
+   m_Model->get_Joints(&joints);
 
-      JointIDType jntID = 0;
+   CComPtr<IFem2dMemberCollection> members;
+   m_Model->get_Members(&members);
 
-      // Start joint at left end of cross beam
-      CComPtr<IFem2dJoint> joint;
-      joints->Create(jntID++,0,0,&joint);
+   JointIDType jntID = 0;
 
-      // create joint at top of first column
+   Float64 Xs = 0.0;
+   Float64 Xe = leftOverhang;
+
+   // Start joint at left end of cross beam
+   CComPtr<IFem2dJoint> joint;
+   joints->Create(jntID++,Xs,0,&joint);
+
+   // create joint at top of first column
+   joint.Release();
+   joints->Create(jntID++,Xe,0,&joint);
+
+   // create left overhang member
+   MemberIDType mbrID = 0;
+   CComPtr<IFem2dMember> mbr;
+   members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
+   CapBeamMember capMbr;
+   capMbr.Xs = Xs;
+   capMbr.Xe = Xe;
+   capMbr.mbrID = mbrID-1;
+   m_CapBeamMembers.push_back(capMbr);
+
+   Float64 Xc = leftOverhang;
+   for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   {
+      Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
+      Float64 columnHeight = pProject->GetColumnHeight(colIdx);
+
+      // create joint at bottom of column
       joint.Release();
-      joints->Create(jntID++,leftOverhang,0,&joint);
+      joints->Create(jntID++,Xc,-columnHeight,&joint);
 
-      // create left overhang member
-      MemberIDType mbrID = 0;
-      CComPtr<IFem2dMember> mbr;
-      members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
-
-      Float64 x = leftOverhang;
-      for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+      joint->Support(); // fully fixed
+      if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
       {
-         Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
-         Float64 columnHeight = pProject->GetColumnHeight(colIdx);
+         joint->ReleaseDof(jrtMz); // pinned
+      }
 
-         // create joint at bottom of column
-         joint.Release();
-         joints->Create(jntID++,x,-columnHeight,&joint);
+      // create column member
+      mbr.Release();
+      members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
 
-         joint->Support(); // fully fixed
-         if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
+      Xs = Xe;
+      Xe += space;
+
+      // create next top of column joint
+      joint.Release();
+      joints->Create(jntID++,Xe,0,&joint);
+
+      // create cross beam member
+      mbr.Release();
+      members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
+      CapBeamMember capMbr;
+      capMbr.Xs = Xs;
+      capMbr.Xe = Xe;
+      capMbr.mbrID = mbrID-1;
+      m_CapBeamMembers.push_back(capMbr);
+   }
+
+   // Assign POIs
+   CComPtr<IFem2dPOICollection> femPois;
+   m_Model->get_POIs(&femPois);
+   PoiIDType femPoiID = 0;
+   GET_IFACE(IPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 Xpoi = poi.GetDistFromStart();
+      std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
+      std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
+      for ( ; iter != end; iter++ )
+      {
+         CapBeamMember& capMbr(*iter);
+         if ( InRange(capMbr.Xs,Xpoi,capMbr.Xe) )
          {
-            joint->ReleaseDof(jrtMz); // pinned
+            CComPtr<IFem2dPOI> femPoi;
+            femPois->Create(femPoiID,capMbr.mbrID,Xpoi-capMbr.Xs,&femPoi);
+            m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
+            femPoiID++;
+            break;
          }
-
-         // create column member
-         mbr.Release();
-         members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
-
-         x += space;
-
-         // create next top of column joint
-         joint.Release();
-         joints->Create(jntID++,x,0,&joint);
-
-         // create cross beam member
-         mbr.Release();
-         members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
       }
+   }
 
-      // create some dummy loads
-      CComPtr<IFem2dLoadingCollection> loadings;
-      m_Model->get_Loadings(&loadings);
+   // create some dummy loads
+   CComPtr<IFem2dLoadingCollection> loadings;
+   m_Model->get_Loadings(&loadings);
 
-      LoadCaseIDType loadCaseID = 0;
-      CComPtr<IFem2dLoading> loading;
-      loadings->Create(loadCaseID,&loading);
+   LoadCaseIDType loadCaseID = 0;
+   CComPtr<IFem2dLoading> loading;
+   loadings->Create(loadCaseID,&loading);
 
-      CComPtr<IFem2dDistributedLoadCollection> distLoads;
-      loading->get_DistributedLoads(&distLoads);
+   CComPtr<IFem2dDistributedLoadCollection> distLoads;
+   loading->get_DistributedLoads(&distLoads);
 
-      LoadIDType loadID = 0;
-      for ( MemberIDType id = 0; id < mbrID; id++ )
-      {
-         CComPtr<IFem2dDistributedLoad> distLoad;
-         distLoads->Create(loadID++,id,loadDirFy,0.0,-1.0,-10,-10,lotMember,&distLoad);
-      }
+   LoadIDType loadID = 0;
+   for ( MemberIDType id = 0; id < mbrID; id++ )
+   {
+      CComPtr<IFem2dDistributedLoad> distLoad;
+      distLoads->Create(loadID++,id,loadDirFy,0.0,-1.0,-10000,-10000,lotMember,&distLoad);
    }
 }
 
@@ -247,4 +290,19 @@ Float64 CAnalysisAgentImp::GetResult()
    Float64 endFx,   endFy,   endMz;
    results->ComputeMemberForces(0,0,&startFx,&startFy,&startMz,&endFx,&endFy,&endMz);
    return endMz;
+}
+
+Float64 CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi)
+{
+   Validate();
+
+   std::map<PoiIDType,PoiIDType>::iterator found = m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(m_Model);
+
+   Float64 Fx, Fy, Mz;
+   results->ComputePOIForces(0,femPoiID,mftRight,lotGlobalProjected,&Fx,&Fy,&Mz);
+   return Mz;
 }
