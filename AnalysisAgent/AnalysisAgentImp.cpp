@@ -185,7 +185,6 @@ void CAnalysisAgentImp::Validate()
    capMbr.mbrID = mbrID-1;
    m_CapBeamMembers.push_back(capMbr);
 
-   Float64 Xc = leftOverhang;
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
@@ -193,7 +192,7 @@ void CAnalysisAgentImp::Validate()
 
       // create joint at bottom of column
       joint.Release();
-      joints->Create(jntID++,Xc,-columnHeight,&joint);
+      joints->Create(jntID++,Xe,-columnHeight,&joint);
 
       joint->Support(); // fully fixed
       if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
@@ -303,6 +302,6 @@ Float64 CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi)
    CComQIPtr<IFem2dModelResults> results(m_Model);
 
    Float64 Fx, Fy, Mz;
-   results->ComputePOIForces(0,femPoiID,mftRight,lotGlobalProjected,&Fx,&Fy,&Mz);
+   results->ComputePOIForces(0,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
    return Mz;
 }

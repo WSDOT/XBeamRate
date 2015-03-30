@@ -76,8 +76,8 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_XBeamWidth,pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_UnitValueAndTag(pDX,IDC_X3,IDC_X3_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_X4,IDC_X4_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X3,IDC_X3_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstLeft], pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X4,IDC_X4_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstRight],pDisplayUnits->GetSpanLengthUnit() );
 
    DDX_Text(pDX,IDC_COLUMN_COUNT,pParent->m_PierData.m_nColumns);
    DDX_UnitValueAndTag(pDX,IDC_S,IDC_S_UNIT,pParent->m_PierData.m_ColumnSpacing,pDisplayUnits->GetSpanLengthUnit());
