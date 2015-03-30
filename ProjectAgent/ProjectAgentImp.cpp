@@ -120,14 +120,21 @@ STDMETHODIMP CProjectAgentImp::Init()
    Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
 
 
-   TransverseMeasurementEnum transverseMeasurementType = TransverseMeasurementEnum::NormalToAlignemnt;
    Float64 deckElevation = 0;
    Float64 bridgeLineOffset = 0;
    Float64 crownPointOffset = 0;
+   OffsetMeasurementEnum curbLineDatum = OffsetMeasurementEnum::Alignment;
+   Float64 LCO = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
+   Float64 RCO = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
+   Float64 SL = -0.02;
+   Float64 SR = -0.02;
+
+   Float64 diaphragmWidth = capBeam.Width();
+   Float64 diaphragmHeight = ::ConvertToSysUnits(8,unitMeasure::Feet);
 
    LPCTSTR strOrientation = _T("00 00 0.0 L");
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pierType,transverseMeasurementType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,modE,refColIdx,transverseOffset,pier));
+   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,modE,refColIdx,transverseOffset,pier));
 
    // Start off with one bearing line that has one bearing
    BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,0.0);
@@ -351,26 +358,6 @@ void CProjectAgentImp::SetPierType(xbrTypes::PierConnectionType pierType)
    m_XBeamRateXML->PierType((PierTypeEnum::value)pierType);
 }
 
-xbrTypes::TransverseDimensionMeasurementType CProjectAgentImp::GetTransverseDimensionsMeasurementType()
-{
-   xbrTypes::TransverseDimensionMeasurementType measurementType =
-      (xbrTypes::TransverseDimensionMeasurementType)(TransverseMeasurementEnum::value)(m_XBeamRateXML->TransverseDimensionMeasurementType());
-   
-   return measurementType;
-}
-
-void CProjectAgentImp::SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType)
-{
-   if ( measurementType == xbrTypes::tdmNormalToAlignment )
-   {
-      m_XBeamRateXML->TransverseDimensionMeasurementType(TransverseMeasurementEnum::NormalToAlignemnt);
-   }
-   else
-   {
-      m_XBeamRateXML->TransverseDimensionMeasurementType(TransverseMeasurementEnum::PlaneOfPier);
-   }
-}
-
 void CProjectAgentImp::SetDeckElevation(Float64 deckElevation)
 {
    m_XBeamRateXML->DeckElevation(deckElevation);
@@ -409,6 +396,52 @@ void CProjectAgentImp::SetOrientation(LPCTSTR strOrientation)
 LPCTSTR CProjectAgentImp::GetOrientation()
 {
    return m_XBeamRateXML->Orientation().c_str();
+}
+
+pgsTypes::OffsetMeasurementType CProjectAgentImp::GetCurbLineDatum()
+{
+   return (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)m_XBeamRateXML->CurbLineOffsetDatum();
+}
+
+void CProjectAgentImp::SetCurbLineDatum(pgsTypes::OffsetMeasurementType datumType)
+{
+   m_XBeamRateXML->CurbLineOffsetDatum((OffsetMeasurementEnum::value)datumType);
+}
+
+void CProjectAgentImp::SetCurbLineOffset(Float64 leftCLO,Float64 rightCLO)
+{
+   m_XBeamRateXML->LeftCurbOffset(leftCLO);
+   m_XBeamRateXML->RightCurbOffset(rightCLO);
+}
+
+void CProjectAgentImp::GetCurbLineOffset(Float64* pLeftCLO,Float64* pRightCLO)
+{
+   *pLeftCLO = m_XBeamRateXML->LeftCurbOffset();
+   *pRightCLO = m_XBeamRateXML->RightCurbOffset();
+}
+
+void CProjectAgentImp::SetCrownSlopes(Float64 sl,Float64 sr)
+{
+   m_XBeamRateXML->LeftCrownSlope(sl);
+   m_XBeamRateXML->RightCrownSlope(sr);
+}
+
+void CProjectAgentImp::GetCrownSlopes(Float64* psl,Float64* psr)
+{
+   *psl = m_XBeamRateXML->LeftCrownSlope();
+   *psr = m_XBeamRateXML->RightCrownSlope();
+}
+
+void CProjectAgentImp::GetDiaphragmDimensions(Float64* pH,Float64* pW)
+{
+   *pH = m_XBeamRateXML->DiaphragmHeight();
+   *pW = m_XBeamRateXML->DiaphragmWidth();
+}
+
+void CProjectAgentImp::SetDiaphragmDimensions(Float64 H,Float64 W)
+{
+   m_XBeamRateXML->DiaphragmHeight(H);
+   m_XBeamRateXML->DiaphragmWidth(W);
 }
 
 IndexType CProjectAgentImp::GetBearingLineCount()

@@ -731,11 +731,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\dllmain.cpp"
+				RelativePath=".\BearingsPage.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GeneralPage.cpp"
+				RelativePath=".\dllmain.cpp"
 				>
 			</File>
 			<File
@@ -1006,15 +1006,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\BearingsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="CPProjectAgent.h"
 				>
 			</File>
 			<File
 				RelativePath=".\dllmain.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GeneralPage.h"
 				>
 			</File>
 			<File
@@ -1173,6 +1173,26 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\res\Dimensions_Alignment.emf"
+			>
+		</File>
+		<File
+			RelativePath=".\res\Dimensions_Alignment_Continuous.emf"
+			>
+		</File>
+		<File
+			RelativePath=".\res\Dimensions_Alignment_Expansion.emf"
+			>
+		</File>
+		<File
+			RelativePath=".\res\Dimensions_Alignment_Integral.emf"
+			>
+		</File>
+		<File
+			RelativePath=".\res\Dimensions_BridgeLine.emf"
+			>
+		</File>
 		<File
 			RelativePath=".\res\PierLayout.emf"
 			>

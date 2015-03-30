@@ -51,11 +51,16 @@ void CAgentCmdTarget::OnEditPier()
 
    txnEditPierData oldPierData;
    oldPierData.m_PierType = pProject->GetPierType();
-   oldPierData.m_TransverseMeasurementType = pProject->GetTransverseDimensionsMeasurementType();
    oldPierData.m_DeckElevation = pProject->GetDeckElevation();
    oldPierData.m_CrownPointOffset = pProject->GetCrownPointOffset();
    oldPierData.m_BridgeLineOffset = pProject->GetBridgeLineOffset();
    oldPierData.m_strOrientation = pProject->GetOrientation();
+
+   oldPierData.m_CurbLineDatum = pProject->GetCurbLineDatum();
+   pProject->GetCurbLineOffset(&oldPierData.m_LeftCLO,&oldPierData.m_RightCLO);
+   pProject->GetCrownSlopes(&oldPierData.m_SL,&oldPierData.m_SR);
+
+   pProject->GetDiaphragmDimensions(&oldPierData.m_DiaphragmHeight,&oldPierData.m_DiaphragmWidth);
 
    oldPierData.m_nBearingLines = pProject->GetBearingLineCount();
    for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_nBearingLines; brgLineIdx++ )

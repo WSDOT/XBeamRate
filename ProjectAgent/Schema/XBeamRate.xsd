@@ -163,14 +163,24 @@
            <xs:element ref="bxu:UnitsDeclaration" minOccurs="0" maxOccurs="1" />
            <xs:element name="Settings" type="ApplicationSettings"/>
            
-           <!-- Superstructure Description -->
+           <!-- General Description -->
            <xs:element name="PierType" type="PierTypeEnum"/>
-           <xs:element name="TransverseDimensionMeasurementType" type="TransverseMeasurementEnum"/>
+           
            <xs:element name="DeckElevation" type="bxu:LengthValueType"/>
            <xs:element name="BridgeLineOffset" type="bxu:LengthValueType"/>
            <xs:element name="CrownPointOffset" type="bxu:LengthValueType"/>
            <xs:element name="Orientation" type="bxg:SkewType"/>
 
+           <xs:element name="CurbLineOffsetDatum" type="OffsetMeasurementEnum"/>
+           <xs:element name="LeftCurbOffset" type="bxu:LengthValueType"/>
+           <xs:element name="RightCurbOffset" type="bxu:LengthValueType"/>
+           <xs:element name="LeftCrownSlope" type="xs:double"/>
+           <xs:element name="RightCrownSlope" type="xs:double"/>
+
+           <xs:element name="DiaphragmHeight" type="bxu:LengthValueType"/>
+           <xs:element name="DiaphragmWidth" type="bxu:LengthValueType"/>
+
+           <!-- Superstructure Description -->
            <xs:element name="BearingLine" type="BearingLineType" minOccurs="1" maxOccurs="2">
              <xs:annotation>
                <xs:documentation>

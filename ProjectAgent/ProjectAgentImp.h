@@ -114,8 +114,6 @@ public:
    virtual xbrTypes::PierConnectionType GetPierType();
    virtual void SetPierType(xbrTypes::PierConnectionType pierType);
 
-   virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType();
-   virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType);
    virtual void SetDeckElevation(Float64 deckElevation);
    virtual Float64 GetDeckElevation();
    virtual void SetCrownPointOffset(Float64 cpo);
@@ -125,6 +123,18 @@ public:
 
    virtual void SetOrientation(LPCTSTR strOrientation);
    virtual LPCTSTR GetOrientation();
+
+   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum();
+   virtual void SetCurbLineDatum(pgsTypes::OffsetMeasurementType datumType);
+
+   virtual void SetCurbLineOffset(Float64 leftCLO,Float64 rightCLO);
+   virtual void GetCurbLineOffset(Float64* pLeftCLO,Float64* pRightCLO);
+
+   virtual void SetCrownSlopes(Float64 sl,Float64 sr);
+   virtual void GetCrownSlopes(Float64* psl,Float64* psr);
+
+   virtual void GetDiaphragmDimensions(Float64* pH,Float64* pW);
+   virtual void SetDiaphragmDimensions(Float64 H,Float64 W);
 
    virtual IndexType GetBearingLineCount();
    virtual void SetBearingLineCount(IndexType nBearingLines);

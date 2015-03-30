@@ -184,9 +184,9 @@ BEGIN
     LTEXT           "All dimensions are in the plane of the pier",IDC_STATIC,7,7,132,8
 END
 
-IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 316, 421
+IDD_BEARINGS_PAGE DIALOGEX 0, 0, 316, 421
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Superstructure"
+CAPTION "Bearings"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Along Back Bearing Line",IDC_BACK_LABEL,9,23,106,8
@@ -219,26 +219,47 @@ BEGIN
     PUSHBUTTON      "Copy to Back Bearing Line",IDC_COPY_BACK,255,195,54,31,BS_MULTILINE
 END
 
-IDD_GENERAL DIALOGEX 0, 0, 317, 165
+IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 317, 323
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "General"
+CAPTION "Superstructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Deck elevation at alignment",IDC_STATIC,93,67,89,8
-    EDITTEXT        IDC_DECK_ELEVATION,185,64,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,229,66,19,8
-    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,85,84,8
-    EDITTEXT        IDC_CPO,93,82,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_CPO_UNIT,137,85,19,8
-    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,165,85,78,8
-    EDITTEXT        IDC_BLO,247,82,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_BLO_UNIT,291,83,19,8
-    LTEXT           "Skew",IDC_STATIC,7,67,18,8
-    EDITTEXT        IDC_SKEW,27,65,58,14,ES_AUTOHSCROLL
-    LTEXT           "Transverse Dimensions are measured",IDC_STATIC,7,41,120,8
-    COMBOBOX        IDC_TRANSVERSE_MEASUREMENT_TYPE,131,39,147,115,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Deck elevation at alignment",IDC_STATIC,7,211,89,8
+    EDITTEXT        IDC_DECK_ELEVATION,99,208,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,143,211,19,8
+    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,227,84,8
+    EDITTEXT        IDC_CPO,93,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_CPO_UNIT,137,227,19,8
+    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,165,227,78,8
+    EDITTEXT        IDC_BLO,247,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_BLO_UNIT,291,225,19,8
+    LTEXT           "Skew",IDC_STATIC,7,194,18,8
+    EDITTEXT        IDC_SKEW,27,192,58,14,ES_AUTOHSCROLL
+    LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,7,28,274,8
     LTEXT           "Pier Type",IDC_STATIC,7,7,31,8
     COMBOBOX        IDC_PIER_TYPE,47,7,98,123,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,56,303,128
+    LTEXT           "Curb Line Measured from ",IDC_STATIC,7,41,83,8
+    COMBOBOX        IDC_CURB_LINE_MEASUREMENT,94,39,86,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,7,247,74,8
+    EDITTEXT        IDC_LCO,85,244,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_LCO_UNIT,129,248,19,8
+    LTEXT           "Right Curb Offset (RCO)",IDC_STATIC,163,249,80,8
+    EDITTEXT        IDC_RCO,244,245,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_RCO_UNIT,291,248,19,8
+    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,7,263,70,8
+    EDITTEXT        IDC_SL,85,259,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SL_UNIT,129,261,19,8
+    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,163,263,76,8
+    EDITTEXT        IDC_SR,243,260,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SR_UNIT,291,262,19,8
+    LTEXT           "W",IDC_STATIC,7,290,8,8
+    EDITTEXT        IDC_W,23,287,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_W_UNIT,66,290,19,8
+    LTEXT           "H",IDC_STATIC,116,290,8,8
+    EDITTEXT        IDC_H,127,287,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_H_UNIT,175,290,19,8
+    LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,308,184,8
 END
 
 
@@ -258,7 +279,7 @@ BEGIN
         BOTTOMMARGIN, 367
     END
 
-    IDD_SUPERSTRUCTURE_LAYOUT_PAGE, DIALOG
+    IDD_BEARINGS_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 309
@@ -266,12 +287,12 @@ BEGIN
         BOTTOMMARGIN, 414
     END
 
-    IDD_GENERAL, DIALOG
+    IDD_SUPERSTRUCTURE_LAYOUT_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 310
         TOPMARGIN, 7
-        BOTTOMMARGIN, 158
+        BOTTOMMARGIN, 316
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -283,6 +304,12 @@ END
 //
 
 PIERLAYOUT              METAFILE                "res\\PierLayout.emf"
+DIMENSIONS_ALIGNMENT_INTEGRAL METAFILE                "res\\Dimensions_Alignment_Integral.emf"
+DIMENSIONS_ALIGNMENT_CONTINUOUS METAFILE                "res\\Dimensions_Alignment_Continuous.emf"
+DIMENSIONS_ALIGNMENT_EXPANSION METAFILE                "res\\Dimensions_Alignment_Expansion.emf"
+DIMENSIONS_BRIDGELINE_INTEGRAL METAFILE                "res\\Dimensions_BridgeLine_Integral.emf"
+DIMENSIONS_BRIDGELINE_CONTINUOUS METAFILE                "res\\Dimensions_BridgeLine_Continuous.emf"
+DIMENSIONS_BRIDGELINE_EXPANSION METAFILE                "res\\Dimensions_BridgeLine_Expansion.emf"
 
 /////////////////////////////////////////////////////////////////////////////
 //

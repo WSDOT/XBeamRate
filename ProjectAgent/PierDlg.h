@@ -1,8 +1,8 @@
 #pragma once
 
-#include "GeneralPage.h"
 #include "SuperstructureLayoutPage.h"
 #include "PierLayoutPage.h"
+#include "BearingsPage.h"
 #include "txnEditPier.h"
 
 // CPierDlg
@@ -27,13 +27,13 @@ protected:
    txnEditPierData m_PierData;
 
 public:
-   friend CGeneralPage;
    friend CSuperstructureLayoutPage;
+   friend CBearingsPage;
    friend CPierLayoutPage;
 
-   CGeneralPage m_GeneralPage;
    CSuperstructureLayoutPage m_SuperstructurePage;
    CPierLayoutPage m_SubstructurePage;
+   CBearingsPage m_BearingsPage;
 };
 
 

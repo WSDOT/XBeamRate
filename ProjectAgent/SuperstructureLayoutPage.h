@@ -1,6 +1,5 @@
 #pragma once
 
-#include "BearingLayoutGrid.h"
 
 // CSuperstructureLayoutPage dialog
 
@@ -16,23 +15,20 @@ public:
 	enum { IDD = IDD_SUPERSTRUCTURE_LAYOUT_PAGE };
 
 protected:
+   CMetaFileStatic m_Dimensions;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-   CBearingLayoutGrid m_Grid[2];
+   afx_msg void OnCurbLineDatumChanged();
+   afx_msg void OnPierTypeChanged();
 
-	//{{AFX_MSG(CPierLayoutPage)
-	virtual BOOL OnInitDialog();
-   afx_msg void OnHelp();
-   afx_msg void OnAddBack();
-   afx_msg void OnRemoveBack();
-   afx_msg void OnAddAhead();
-   afx_msg void OnRemoveAhead();
-   afx_msg void OnCopyAhead();
-   afx_msg void OnCopyBack();
-   afx_msg void OnBearingLineCountChanged();
-	//}}AFX_MSG
+   CString GetImageName();
+
 	DECLARE_MESSAGE_MAP()
+public:
+   virtual BOOL OnInitDialog();
 
-   void FillRefBearingComboBox(IndexType brgLineIdx);
-   void FillRefBearingDatumComboBox(IndexType brgLineIdx);
+private:
+   void UpdateImage();
+   void FillCurbLineMeasureComboBox();
+   void FillPierTypeComboBox();
 };

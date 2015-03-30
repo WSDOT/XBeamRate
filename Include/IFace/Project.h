@@ -23,10 +23,6 @@ interface IProject : IUnknown
    virtual xbrTypes::PierConnectionType GetPierType() = 0;
    virtual void SetPierType(xbrTypes::PierConnectionType pierType) = 0;
 
-   // Sets the basis for measuring transverse dimensions
-   virtual xbrTypes::TransverseDimensionMeasurementType GetTransverseDimensionsMeasurementType() = 0;
-   virtual void SetTransverseDimensionsMeasurementType(xbrTypes::TransverseDimensionMeasurementType measurementType) = 0;
-
    // Elevation of the deck on the alignment at the CL Pier
    virtual void SetDeckElevation(Float64 deckElevation) = 0;
    virtual Float64 GetDeckElevation() = 0;
@@ -42,6 +38,19 @@ interface IProject : IUnknown
    // Orientation of the pier
    virtual void SetOrientation(LPCTSTR strOrientation) = 0;
    virtual LPCTSTR GetOrientation() = 0;
+
+   // Sets the basis for the curb lines
+   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum() = 0;
+   virtual void SetCurbLineDatum(pgsTypes::OffsetMeasurementType datumType) = 0;
+
+   virtual void SetCurbLineOffset(Float64 leftCLO,Float64 rightCLO) = 0;
+   virtual void GetCurbLineOffset(Float64* pLeftCLO,Float64* pRightCLO) = 0;
+
+   virtual void SetCrownSlopes(Float64 sl,Float64 sr) = 0;
+   virtual void GetCrownSlopes(Float64* psl,Float64* psr) = 0;
+
+   virtual void GetDiaphragmDimensions(Float64* pH,Float64* pW) = 0;
+   virtual void SetDiaphragmDimensions(Float64 H,Float64 W) = 0;
 
    // Number of bearing lines at the pier. Valid values are 1 and 2.
    // Use 1 when girders are continuous (e.g. spliced girder, steel girders, etc)

@@ -40,12 +40,19 @@ public:
    txnEditPierData();
 
    xbrTypes::PierConnectionType m_PierType;
-   xbrTypes::TransverseDimensionMeasurementType m_TransverseMeasurementType;
    Float64 m_DeckElevation;
    Float64 m_CrownPointOffset;
    Float64 m_BridgeLineOffset;
-
    CString m_strOrientation;
+
+   pgsTypes::OffsetMeasurementType m_CurbLineDatum;
+   Float64 m_LeftCLO;
+   Float64 m_RightCLO;
+   Float64 m_SL;
+   Float64 m_SR;
+
+   Float64 m_DiaphragmHeight;
+   Float64 m_DiaphragmWidth;
 
    IndexType m_nBearingLines;
    std::vector<txnBearingData> m_BearingLines[2];

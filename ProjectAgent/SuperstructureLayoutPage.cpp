@@ -1,4 +1,4 @@
-// SuperstructureLayoutPage.cpp : implementation file
+// GeneralPage.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -8,20 +8,6 @@
 
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
-
-#pragma warning(disable:4244)
-
-void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,std::vector<txnBearingData>& brgData)
-{
-   if ( pDX->m_bSaveAndValidate )
-   {
-      grid.GetBearingData(brgData);
-   }
-   else
-   {
-      grid.SetBearingData(brgData);
-   }
-}
 
 
 // CSuperstructureLayoutPage dialog
@@ -42,176 +28,137 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
+ //  CString strImageName = GetImageName();
+	//DDX_MetaFileStatic(pDX, IDC_DIMENSIONS, m_Dimensions,strImageName, _T("Metafile") );
+
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,pParent->m_PierData.m_nBearingLines);
+   DDX_CBEnum(pDX,IDC_PIER_TYPE,pParent->m_PierData.m_PierType);
+   DDX_UnitValueAndTag(pDX,IDC_DECK_ELEVATION,IDC_DECK_ELEVATION_UNIT,pParent->m_PierData.m_DeckElevation,pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_CPO,IDC_CPO_UNIT,pParent->m_PierData.m_CrownPointOffset,pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_BridgeLineOffset,pDisplayUnits->GetSpanLengthUnit());
+   DDX_Text(pDX,IDC_SKEW,pParent->m_PierData.m_strOrientation);
 
-   for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
+   DDX_CBEnum(pDX,IDC_CURB_LINE_MEASUREMENT,pParent->m_PierData.m_CurbLineDatum);
+   DDX_UnitValueAndTag(pDX,IDC_LCO,IDC_LCO_UNIT,pParent->m_PierData.m_LeftCLO,pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_RCO,IDC_RCO_UNIT,pParent->m_PierData.m_RightCLO,pDisplayUnits->GetSpanLengthUnit());
+   DDX_Text(pDX,IDC_SL,pParent->m_PierData.m_SL);
+   DDX_Text(pDX,IDC_SR,pParent->m_PierData.m_SR);
+
+   if ( !pDX->m_bSaveAndValidate )
    {
-      // need to use two different grids
-      DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_BearingLines[brgLineIdx]);
-
-      DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_RefBearingIdx[brgLineIdx]);
-      DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_RefBearingLocation[brgLineIdx],pDisplayUnits->GetSpanLengthUnit());
-      DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_RefBearingDatum[brgLineIdx]);
+      std::_tstring strUnitTag = pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag();
+      CString strSlopeUnit;
+      strSlopeUnit.Format(_T("%s/%s"),strUnitTag.c_str(),strUnitTag.c_str());
+      GetDlgItem(IDC_SL_UNIT)->SetWindowText(strSlopeUnit);
+      GetDlgItem(IDC_SR_UNIT)->SetWindowText(strSlopeUnit);
    }
+
+   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_DiaphragmHeight,pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_DiaphragmWidth,pDisplayUnits->GetSpanLengthUnit());
 }
 
-
 BEGIN_MESSAGE_MAP(CSuperstructureLayoutPage, CPropertyPage)
-	ON_COMMAND(ID_HELP, OnHelp)
-   ON_COMMAND(IDC_ADD_BACK, OnAddBack)
-   ON_COMMAND(IDC_REMOVE_BACK, OnRemoveBack)
-   ON_COMMAND(IDC_ADD_AHEAD, OnAddAhead)
-   ON_COMMAND(IDC_REMOVE_AHEAD, OnRemoveAhead)
-   ON_COMMAND(IDC_COPY_AHEAD, OnCopyAhead)
-   ON_COMMAND(IDC_COPY_BACK, OnCopyBack)
-   ON_CBN_SELCHANGE(IDC_BEARING_LINE_COUNT, OnBearingLineCountChanged)
+   ON_CBN_SELCHANGE(IDC_PIER_TYPE, OnPierTypeChanged)
+   ON_CBN_SELCHANGE(IDC_CURB_LINE_MEASUREMENT, OnCurbLineDatumChanged)
 END_MESSAGE_MAP()
 
 
 // CSuperstructureLayoutPage message handlers
+
 BOOL CSuperstructureLayoutPage::OnInitDialog()
 {
-   m_Grid[0].SubclassDlgItem(IDC_BACK_BEARING_GRID, this);
-   m_Grid[0].CustomInit();
-
-   m_Grid[1].SubclassDlgItem(IDC_AHEAD_BEARING_GRID, this);
-   m_Grid[1].CustomInit();
-
-   CPierDlg* pParent = (CPierDlg*)GetParent();
-   CComboBox* pcb = (CComboBox*)GetDlgItem(IDC_BEARING_LINE_COUNT);
-   for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
-   {
-      CString str;
-      str.Format(_T("%d"),brgLineIdx+1);
-      int idx = pcb->AddString(str);
-      pcb->SetItemData(idx,(DWORD_PTR)(brgLineIdx+1));
-
-      FillRefBearingComboBox(brgLineIdx);
-      FillRefBearingDatumComboBox(brgLineIdx);
-   }
+   FillCurbLineMeasureComboBox();
+   FillPierTypeComboBox();
 
    CPropertyPage::OnInitDialog();
 
-   OnBearingLineCountChanged();
+   OnCurbLineDatumChanged();
+
+   // TODO:  Add extra initialization here
 
    return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+   // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CSuperstructureLayoutPage::OnHelp()
+CString CSuperstructureLayoutPage::GetImageName()
 {
-#pragma Reminder("UPDATE: Update the help context id")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PIERDETAILS_CONNECTIONS );
-}
+   CComboBox* pcbCurbLineMeasure = (CComboBox*)GetDlgItem(IDC_CURB_LINE_MEASUREMENT);
+   int idx = pcbCurbLineMeasure->GetCurSel();
+   pgsTypes::OffsetMeasurementType datum = (pgsTypes::OffsetMeasurementType)pcbCurbLineMeasure->GetItemData(idx);
 
-void CSuperstructureLayoutPage::OnAddBack()
-{
-   m_Grid[0].AddBearing();
-   FillRefBearingComboBox(0);
-}
+   CComboBox* pcbPierType = (CComboBox*)GetDlgItem(IDC_PIER_TYPE);
+   idx = pcbPierType->GetCurSel();
+   xbrTypes::PierConnectionType pierType = (xbrTypes::PierConnectionType)pcbPierType->GetItemData(idx);
 
-void CSuperstructureLayoutPage::OnRemoveBack()
-{
-   m_Grid[0].RemoveSelectedBearings();
-   FillRefBearingComboBox(0);
-}
-
-void CSuperstructureLayoutPage::OnAddAhead()
-{
-   m_Grid[1].AddBearing();
-   FillRefBearingComboBox(1);
-}
-
-void CSuperstructureLayoutPage::OnRemoveAhead()
-{
-   m_Grid[1].RemoveSelectedBearings();
-   FillRefBearingComboBox(1);
-}
-
-void CSuperstructureLayoutPage::OnCopyAhead()
-{
-   std::vector<txnBearingData> brgData;
-   m_Grid[0].GetBearingData(brgData);
-   m_Grid[1].SetBearingData(brgData);
-
-#pragma Reminder("Need to copy the transverse location also")
-}
-
-void CSuperstructureLayoutPage::OnCopyBack()
-{
-   std::vector<txnBearingData> brgData;
-   m_Grid[1].GetBearingData(brgData);
-   m_Grid[0].SetBearingData(brgData);
-
-#pragma Reminder("Need to copy the transverse location also")
-}
-
-void CSuperstructureLayoutPage::OnBearingLineCountChanged()
-{
-   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_BEARING_LINE_COUNT);
-   int curSel = pCB->GetCurSel();
-   int show = (curSel == 0 ? SW_HIDE : SW_SHOW);
-
-   GetDlgItem(IDC_BACK_LABEL)->SetWindowText(curSel == 0 ? _T("Along CL Pier") : _T("Along Back Bearing Line"));
-
-   m_Grid[1].ShowWindow(show);
-   GetDlgItem(IDC_COPY_AHEAD)->ShowWindow(show);
-   GetDlgItem(IDC_COPY_BACK)->ShowWindow(show);
-   GetDlgItem(IDC_ADD_AHEAD)->ShowWindow(show);
-   GetDlgItem(IDC_REMOVE_AHEAD)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_LABEL)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_REF_BEARING_LIST)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION_UNIT)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_REF_BEARING_DATUM)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_BEARING_LABEL)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_BEARING_LABEL1)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_BEARING_LABEL2)->ShowWindow(show);
-   GetDlgItem(IDC_AHEAD_BEARING_LABEL3)->ShowWindow(show);
-}
-
-void CSuperstructureLayoutPage::FillRefBearingComboBox(IndexType brgLineIdx)
-{
-   CComboBox* pcbRefBearing = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_LIST+brgLineIdx);
-   int curSel = pcbRefBearing->GetCurSel();
-   pcbRefBearing->ResetContent();
-
-   CString strLabel;
-   CPierDlg* pParent = (CPierDlg*)GetParent();
-   IndexType nBearings = pParent->m_PierData.m_BearingLines[brgLineIdx].size();
-   nBearings = Max((IndexType)1,nBearings); // there is always one bearing minimum
-   for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+   if ( datum == pgsTypes::omtAlignment )
    {
-      strLabel.Format(_T("%d"),(brgIdx+1));
-      pcbRefBearing->AddString(strLabel);
+      switch(pierType)
+      {
+      case xbrTypes::pctIntegral:
+         return _T("DIMENSIONS_ALIGNMENT_INTEGRAL");
+      case xbrTypes::pctContinuous:
+         return _T("DIMENSIONS_ALIGNMENT_CONTINUOUS");
+      case xbrTypes::pctExpansion:
+         return _T("DIMENSIONS_ALIGNMENT_EXPANSION");
+      }
    }
-
-   if ( pcbRefBearing->SetCurSel(curSel) == CB_ERR )
+   else
    {
-      pcbRefBearing->SetCurSel(0);
+      switch(pierType)
+      {
+      case xbrTypes::pctIntegral:
+         return _T("DIMENSIONS_BRIDGELINE_INTEGRAL");
+      case xbrTypes::pctContinuous:
+         return _T("DIMENSIONS_BRIDGELINE_CONTINUOUS");
+      case xbrTypes::pctExpansion:
+         return _T("DIMENSIONS_BRIDGELINE_EXPANSION");
+      }
    }
 }
 
-void CSuperstructureLayoutPage::FillRefBearingDatumComboBox(IndexType brgLineIdx)
+void CSuperstructureLayoutPage::FillCurbLineMeasureComboBox()
 {
-   // do we need two datums, one for each bearing line, or is one good enough?
-   CComboBox* pcbRefBearingDatum = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_DATUM+brgLineIdx);
-   int curSel = pcbRefBearingDatum->GetCurSel();
-   pcbRefBearingDatum->ResetContent();
+   CComboBox* pcbCurbLineMeasure = (CComboBox*)GetDlgItem(IDC_CURB_LINE_MEASUREMENT);
+   pcbCurbLineMeasure->ResetContent();
 
-   int idx = pcbRefBearingDatum->AddString(_T("Alignment"));
-   pcbRefBearingDatum->SetItemData(idx,(DWORD_PTR)pgsTypes::omtAlignment);
+   int idx = pcbCurbLineMeasure->AddString(_T("Alignment"));
+   pcbCurbLineMeasure->SetItemData(idx,(DWORD_PTR)pgsTypes::omtAlignment);
 
-   idx = pcbRefBearingDatum->AddString(_T("Bridge Line"));
-   pcbRefBearingDatum->SetItemData(idx,(DWORD_PTR)pgsTypes::omtBridge);
+   idx = pcbCurbLineMeasure->AddString(_T("Bridge Line"));
+   pcbCurbLineMeasure->SetItemData(idx,(DWORD_PTR)pgsTypes::omtBridge);
+}
 
-   if ( pcbRefBearingDatum->SetCurSel(curSel) == CB_ERR )
-   {
-      pcbRefBearingDatum->SetCurSel(0);
-   }
+void CSuperstructureLayoutPage::FillPierTypeComboBox()
+{
+   CComboBox* pcbPierType = (CComboBox*)GetDlgItem(IDC_PIER_TYPE);
+   pcbPierType->ResetContent();
+   int idx = pcbPierType->AddString(_T("Continuous"));
+   pcbPierType->SetItemData(idx,(DWORD_PTR)xbrTypes::pctContinuous);
+
+   idx = pcbPierType->AddString(_T("Integral"));
+   pcbPierType->SetItemData(idx,(DWORD_PTR)xbrTypes::pctIntegral);
+
+   idx = pcbPierType->AddString(_T("Expansion"));
+   pcbPierType->SetItemData(idx,(DWORD_PTR)xbrTypes::pctExpansion);
+}
+
+void CSuperstructureLayoutPage::UpdateImage()
+{
+   CDataExchange dx(this,FALSE);
+   CString strImageName = GetImageName();
+	DDX_MetaFileStatic(&dx, IDC_DIMENSIONS, m_Dimensions,strImageName, _T("Metafile") );
+}
+
+void CSuperstructureLayoutPage::OnCurbLineDatumChanged()
+{
+   UpdateImage();
+}
+
+void CSuperstructureLayoutPage::OnPierTypeChanged()
+{
+   UpdateImage();
 }

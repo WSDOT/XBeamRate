@@ -38,12 +38,20 @@ txnBearingData::txnBearingData()
 /////////////////////////////////////////////////////////////////
 txnEditPierData::txnEditPierData()
 {
-   m_TransverseMeasurementType = xbrTypes::tdmNormalToAlignment;
    m_DeckElevation = 0;
    m_CrownPointOffset = 0;
    m_BridgeLineOffset = 0;
 
    m_strOrientation = _T("00 00 0.00");
+   
+   m_CurbLineDatum = pgsTypes::omtAlignment;
+   m_LeftCLO = 0;
+   m_RightCLO = 0;
+   m_SL = 0;
+   m_SR = 0;
+
+   m_DiaphragmHeight = 0;
+   m_DiaphragmWidth = 0;
 
    m_nBearingLines = 1;
    for ( int i = 0; i < 2; i++ )
@@ -112,11 +120,16 @@ void txnEditPier::Execute(int i)
    GET_IFACE2_(XBR,pBroker,IProject,pProject);
 
    pProject->SetPierType(m_PierData[i].m_PierType);
-   pProject->SetTransverseDimensionsMeasurementType(m_PierData[i].m_TransverseMeasurementType);
    pProject->SetDeckElevation(m_PierData[i].m_DeckElevation);
    pProject->SetCrownPointOffset(m_PierData[i].m_CrownPointOffset);
    pProject->SetBridgeLineOffset(m_PierData[i].m_BridgeLineOffset);
    pProject->SetOrientation(m_PierData[i].m_strOrientation);
+
+   pProject->SetCurbLineDatum(m_PierData[i].m_CurbLineDatum);
+   pProject->SetCurbLineOffset(m_PierData[i].m_LeftCLO,m_PierData[i].m_RightCLO);
+   pProject->SetCrownSlopes(m_PierData[i].m_SL,m_PierData[i].m_SR);
+
+   pProject->SetDiaphragmDimensions(m_PierData[i].m_DiaphragmHeight,m_PierData[i].m_DiaphragmWidth);
 
    pProject->SetBearingLineCount(m_PierData[i].m_nBearingLines);
 
