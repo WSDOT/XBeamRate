@@ -11,6 +11,7 @@
 #define IDR_PROJECTAGENT                101
 #define IDR_PROJECTAGENTMODULE          102
 #define IDD_PIER_LAYOUT_PAGE            106
+#define IDD_REINFORCEMENT_PAGE          107
 #define IDR_EDIT_MENU                   201
 #define IDC_LEFT_OVERHANG               201
 #define IDC_LEFT_OVERHANG_UNIT          202

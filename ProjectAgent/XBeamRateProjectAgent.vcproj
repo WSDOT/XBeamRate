@@ -925,6 +925,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ReinforcementPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -1038,6 +1042,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReinforcementPage.h"
+				>
+			</File>
+			<File
 				RelativePath="Resource.h"
 				>
 			</File>
@@ -1054,6 +1062,42 @@
 			Name="Resource Files"
 			Filter="ico;cur;bmp;dlg;rc2;rct;bin;cnt;rtf;gif;jpg;jpeg;jpe"
 			>
+			<File
+				RelativePath=".\res\Dimensions_Alignment.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_Alignment_Continuous.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_Alignment_Expansion.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_Alignment_Integral.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_BridgeLine.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_BridgeLine_Continuous.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_BridgeLine_Expansion.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\Dimensions_BridgeLine_Integral.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\PierLayout.emf"
+				>
+			</File>
 			<File
 				RelativePath="ProjectAgent.rgs"
 				>
@@ -1173,30 +1217,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\res\Dimensions_Alignment.emf"
-			>
-		</File>
-		<File
-			RelativePath=".\res\Dimensions_Alignment_Continuous.emf"
-			>
-		</File>
-		<File
-			RelativePath=".\res\Dimensions_Alignment_Expansion.emf"
-			>
-		</File>
-		<File
-			RelativePath=".\res\Dimensions_Alignment_Integral.emf"
-			>
-		</File>
-		<File
-			RelativePath=".\res\Dimensions_BridgeLine.emf"
-			>
-		</File>
-		<File
-			RelativePath=".\res\PierLayout.emf"
-			>
-		</File>
 	</Files>
 	<Globals>
 		<Global

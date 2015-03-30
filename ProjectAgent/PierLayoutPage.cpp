@@ -61,8 +61,6 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_MetaFileStatic(pDX, IDC_PIER_LAYOUT, m_LayoutPicture,_T("PIERLAYOUT"), _T("Metafile") );
    DDX_Control(pDX, IDC_S, m_SpacingControl);
 
-   DDX_UnitValueAndTag(pDX,IDC_EC,IDC_EC_UNIT,pParent->m_PierData.m_Ec,pDisplayUnits->GetModEUnit());
-
    // Transverse location of the pier
    DDX_CBIndex(pDX,IDC_REFCOLUMN,pParent->m_PierData.m_RefColumnIdx);
    DDX_UnitValueAndTag(pDX,IDC_X5,IDC_X5_UNIT,pParent->m_PierData.m_TransverseOffset, pDisplayUnits->GetSpanLengthUnit() );

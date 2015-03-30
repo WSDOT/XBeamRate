@@ -2,6 +2,7 @@
 
 #include "SuperstructureLayoutPage.h"
 #include "PierLayoutPage.h"
+#include "ReinforcementPage.h"
 #include "BearingsPage.h"
 #include "txnEditPier.h"
 
@@ -28,11 +29,13 @@ protected:
 
 public:
    friend CSuperstructureLayoutPage;
-   friend CBearingsPage;
    friend CPierLayoutPage;
+   friend CReinforcementPage;
+   friend CBearingsPage;
 
    CSuperstructureLayoutPage m_SuperstructurePage;
    CPierLayoutPage m_SubstructurePage;
+   CReinforcementPage m_ReinforcementPage;
    CBearingsPage m_BearingsPage;
 };
 

@@ -126,10 +126,6 @@ CAPTION "Substructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     CONTROL         "",IDC_PIER_LAYOUT,"Static",SS_ENHMETAFILE | WS_BORDER,15,23,335,145
-    GROUPBOX        "Material Properties",IDC_STATIC,7,173,351,28
-    LTEXT           "Ec",IDC_EC_LABEL,17,186,8,8
-    EDITTEXT        IDC_EC,35,183,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_EC_UNIT,77,186,19,8
     GROUPBOX        "Pier Cap Dimensions",IDC_STATIC,7,206,351,51
     LTEXT           "H1",IDC_H1_LABEL,20,222,10,8
     EDITTEXT        IDC_H1,34,219,40,14,ES_RIGHT | ES_AUTOHSCROLL
@@ -186,7 +182,7 @@ END
 
 IDD_BEARINGS_PAGE DIALOGEX 0, 0, 316, 421
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Bearings"
+CAPTION "Reactions"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     LTEXT           "Along Back Bearing Line",IDC_BACK_LABEL,9,23,106,8
@@ -217,6 +213,7 @@ BEGIN
     LTEXT           "Along Ahead Bearing Line",IDC_AHEAD_LABEL,7,185,82,8
     PUSHBUTTON      "Copy to Ahead Bearing Line",IDC_COPY_AHEAD,255,35,54,31,BS_MULTILINE
     PUSHBUTTON      "Copy to Back Bearing Line",IDC_COPY_BACK,255,195,54,31,BS_MULTILINE
+    LTEXT           "Spacing measured on CL Pier",IDC_STATIC,148,7,93,8
 END
 
 IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 317, 323
@@ -262,6 +259,20 @@ BEGIN
     LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,308,184,8
 END
 
+IDD_REINFORCEMENT_PAGE DIALOGEX 0, 0, 235, 156
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Materials and Reinforcement"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Material Properties",IDC_STATIC,7,7,221,49
+    LTEXT           "Ec",IDC_EC_LABEL,17,20,8,8
+    EDITTEXT        IDC_EC,35,17,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_EC_UNIT,81,20,19,8
+    LTEXT           "Longitudinal Reinforcement Definition Goes Here",IDC_STATIC,15,76,155,8
+    LTEXT           "Transverse Reinforcement Definition Goes Here",IDC_STATIC,16,115,153,8
+    LTEXT           "Rebar Material Goes Here",IDC_STATIC,18,38,83,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -293,6 +304,14 @@ BEGIN
         RIGHTMARGIN, 310
         TOPMARGIN, 7
         BOTTOMMARGIN, 316
+    END
+
+    IDD_REINFORCEMENT_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
     END
 END
 #endif    // APSTUDIO_INVOKED

@@ -118,6 +118,9 @@ CString CSuperstructureLayoutPage::GetImageName()
          return _T("DIMENSIONS_BRIDGELINE_EXPANSION");
       }
    }
+
+   ATLASSERT(false); // should not get here
+   return _T("");
 }
 
 void CSuperstructureLayoutPage::FillCurbLineMeasureComboBox()
