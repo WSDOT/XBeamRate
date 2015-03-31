@@ -648,11 +648,10 @@ IDType CXBeamRateAgent::GetEditBridgeCallbackID()
 //}
 
 //IProjectPropertiesEventSink
-using namespace XBR;
 HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
 {
    GET_IFACE(IProjectProperties,pProjectProps);
-   GET_IFACE(IProject, pProject);
+   GET_IFACE(IXBRProject, pProject);
    pProject->SetProjectName(pProjectProps->GetBridgeName());
    return S_OK;
 }

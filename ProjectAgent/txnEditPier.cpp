@@ -25,8 +25,6 @@
 
 #include <IFace\Project.h>
 
-using namespace XBR;
-
 txnBearingData::txnBearingData()
 {
    m_DC = 0;
@@ -117,7 +115,7 @@ void txnEditPier::Execute(int i)
    //GET_IFACE2(pBroker,IEvents, pEvents);
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   GET_IFACE2_(XBR,pBroker,IProject,pProject);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
 
    pProject->SetPierType(m_PierData[i].m_PierType);
    pProject->SetDeckElevation(m_PierData[i].m_DeckElevation);

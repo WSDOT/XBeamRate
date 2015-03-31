@@ -25,8 +25,6 @@
 
 #include <IFace\Project.h>
 
-using namespace XBR;
-
 txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
 {
    m_ProjectName[0] = strOldProjectName;
@@ -56,7 +54,7 @@ void txnEditProject::Execute(int i)
    //GET_IFACE2(pBroker,IEvents, pEvents);
    //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   GET_IFACE2_(XBR,pBroker,IProject,pProject);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
    pProject->SetProjectName(m_ProjectName[i]);
 
    //pEvents->FirePendingEvents();

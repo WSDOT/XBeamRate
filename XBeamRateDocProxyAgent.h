@@ -4,8 +4,6 @@
 #include <IFace\Project.h>
 #include <IFace\XBeamRateAgent.h>
 
-using namespace XBR;
-
 class CXBeamRateDoc;
 struct IBroker;
 
@@ -30,7 +28,7 @@ class CXBeamRateDocProxyAgent :
    //public CProxyIExtendUIEventSink<CXBeamRateDocProxyAgent>,
    public IAgentEx,
    public IAgentUIIntegration,
-   public IProjectEventSink,
+   public IXBRProjectEventSink,
    public IXBeamRate
    //public IEAFDisplayUnitsEventSink,
    //public IVersionInfo,
@@ -44,7 +42,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
-   COM_INTERFACE_ENTRY(IProjectEventSink)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
    //COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    //COM_INTERFACE_ENTRY(IVersionInfo)
@@ -78,7 +76,7 @@ public:
    virtual void GetUnitServer(IUnitServer** ppUnitServer);
    virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert);
 
-// IProjectEventSink
+// IXBRProjectEventSink
 public:
    virtual HRESULT OnProjectChanged();
 

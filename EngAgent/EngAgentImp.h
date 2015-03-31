@@ -42,7 +42,7 @@ class ATL_NO_VTABLE CEngAgentImp :
 	public IConnectionPointContainerImpl<CEngAgentImp>,
    //public CProxyIProjectEventSink<CEngAgentImp>,
    public IAgentEx,
-   public ILoadRating
+   public IXBRLoadRating
 {  
 public:
 	CEngAgentImp(); 
@@ -58,7 +58,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ENGAGENT)
 BEGIN_COM_MAP(CEngAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-	COM_INTERFACE_ENTRY(ILoadRating)
+	COM_INTERFACE_ENTRY(IXBRLoadRating)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -76,7 +76,7 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// ILoadRating
+// IXBRLoadRating
 public:
    virtual Float64 GetRatingFactor();
 

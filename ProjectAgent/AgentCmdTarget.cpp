@@ -31,7 +31,7 @@ void CAgentCmdTarget::OnEditProjectName()
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
    CString strOldProjectName, strNewProjectName;
-   GET_IFACE_(XBR,IProject,pProject);
+   GET_IFACE(IXBRProject,pProject);
    strOldProjectName = pProject->GetProjectName();
 
    if ( AfxQuestion(_T("Project Name"),_T("Enter project name"),strOldProjectName,strNewProjectName) )
@@ -46,7 +46,7 @@ void CAgentCmdTarget::OnEditPier()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-   GET_IFACE_(XBR,IProject,pProject);
+   GET_IFACE(IXBRProject,pProject);
    CPierDlg dlg(_T("Edit Pier"));
 
    txnEditPierData oldPierData;
@@ -101,7 +101,7 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_nColumns = pProject->GetColumnCount();
    oldPierData.m_ColumnHeight = pProject->GetColumnHeight(0);
    oldPierData.m_ColumnHeightMeasurementType = pProject->GetColumnHeightMeasurementType();
-   oldPierData.m_ColumnSpacing = pProject->GetSpacing(0);
+   oldPierData.m_ColumnSpacing = (oldPierData.m_nColumns == 1 ? 0 : pProject->GetSpacing(0));
    pProject->GetColumnShape(&oldPierData.m_ColumnShape,&oldPierData.m_B,&oldPierData.m_D);
 
    pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);

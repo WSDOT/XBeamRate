@@ -37,8 +37,6 @@
 
 #include <WBFLFem2d.h>
 
-using namespace XBR;
-
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
@@ -48,8 +46,8 @@ class ATL_NO_VTABLE CAnalysisAgentImp :
 	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
    //public CProxyIProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
    public IAgentEx,
-   public IProjectEventSink,
-   public IAnalysisResults
+   public IXBRProjectEventSink,
+   public IXBRAnalysisResults
 {  
 public:
 	CAnalysisAgentImp(); 
@@ -65,14 +63,14 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IProjectEventSink)
-	COM_INTERFACE_ENTRY(IAnalysisResults)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+	COM_INTERFACE_ENTRY(IXBRAnalysisResults)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
 END_COM_MAP()
 
 // needed if we implement a connection point
 //BEGIN_CONNECTION_POINT_MAP(CAnalysisAgentImp)
-   //CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
+   //CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
 //END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -85,11 +83,11 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IProjectEventSink
+// IXBRProjectEventSink
 public:
    HRESULT OnProjectChanged();
 
-// IAnalysisResults
+// IXBRAnalysisResults
 public:
    virtual Float64 GetResult();
    virtual Float64 GetMoment(const xbrPointOfInterest& poi);

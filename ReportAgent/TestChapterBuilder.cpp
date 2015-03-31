@@ -28,8 +28,6 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 
-using namespace XBR;
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -67,7 +65,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
 
-   GET_IFACE2(pBroker,IProject,pProject);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
@@ -96,8 +94,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
    (*pTable)(0,2) << COLHDR(_T("Moment"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
 
-   GET_IFACE2(pBroker,IAnalysisResults,pResults);
-   GET_IFACE2(pBroker,IPointOfInterest,pPoi);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
    RowIndexType row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)

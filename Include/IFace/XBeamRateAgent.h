@@ -2,9 +2,6 @@
 
 #include <WBFLUnitServer.h>
 
-namespace XBR
-{
-
 /*****************************************************************************
 INTERFACE
    IXBeamRateAgent
@@ -39,5 +36,3 @@ interface IXBeamRate : IUnknown
    virtual void GetUnitServer(IUnitServer** ppUnitServer) = 0;
    virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert) = 0;
 };
-
-}; //

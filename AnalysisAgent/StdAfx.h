@@ -56,6 +56,7 @@ using namespace ATL;
 #include <System\Transaction.h>
 
 #include <WBFLCore.h>
+#include <WBFLTools.h>
 #include <AgentTools.h>
 
 #include <XBeamRateTypes.h>

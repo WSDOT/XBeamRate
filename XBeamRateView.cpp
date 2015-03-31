@@ -202,10 +202,7 @@ void CXBeamRateView::UpdateDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
-   //GET_IFACE2(pBroker,IProject,pProject);
-   CComPtr<XBR::IProject> pProject;
-   pBroker->GetInterface( XBR::IID_IProject, (IUnknown**)&pProject);
-   ASSERT( pProject.p != NULL );
+   GET_IFACE2(pBroker,IXBRProject,pProject);
 
    Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
    Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);

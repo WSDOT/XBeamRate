@@ -35,8 +35,6 @@
 #include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 
-using namespace XBR;
-
 /////////////////////////////////////////////////////////////////////////////
 // CPierAgentImp
 class ATL_NO_VTABLE CPierAgentImp : 
@@ -46,8 +44,8 @@ class ATL_NO_VTABLE CPierAgentImp :
 	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx,
-   public IPointOfInterest,
-   public IProjectEventSink
+   public IXBRPointOfInterest,
+   public IXBRProjectEventSink
 {  
 public:
 	CPierAgentImp(); 
@@ -63,13 +61,13 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IPointOfInterest)
-   COM_INTERFACE_ENTRY(IProjectEventSink)
+   COM_INTERFACE_ENTRY(IXBRPointOfInterest)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CPierAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
+//   CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -82,12 +80,12 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IPointOfInterest
+// IXBRPointOfInterest
 public:
    virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest();
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(ColumnIndexType colIdx);
 
-// IProjectEventSink
+// IXBRProjectEventSink
 public:
    HRESULT OnProjectChanged();
 
@@ -105,6 +103,9 @@ private:
 
    void ValidatePointsOfInterest();
    std::vector<xbrPointOfInterest> m_XBeamPoi;
+
+   Float64 GetCrownPointLocation();
+   Float64 GetSkewAngle();
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)

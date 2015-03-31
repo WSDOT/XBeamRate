@@ -39,8 +39,6 @@
 
 #include <Colors.h>
 
-using namespace XBR;
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -104,15 +102,26 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    arvPhysicalConverter* pVertcalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
    arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
    grGraphXY graph(*pHorizontalAxisFormat,*pVertcalAxisFormat);
+
+   std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)pVertcalAxisFormat)->UnitTag() + _T(")");
+   graph.SetYAxisTitle(strYAxisTitle);
+
+   graph.SetXAxisTitle(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")"));
+
    IndexType graphIdx = graph.CreateDataSeries();
 
-   GET_IFACE2(pBroker,IAnalysisResults,pResults);
-   GET_IFACE2(pBroker,IPointOfInterest,pPoi);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
+      Float64 X = poi.GetDistFromStart();
       Float64 Mz = pResults->GetMoment(poi);
-      gpPoint2d point(poi.GetDistFromStart(),Mz);
+
+      X  = pHorizontalAxisFormat->Convert(X);
+      Mz = pVertcalAxisFormat->Convert(Mz);
+
+      gpPoint2d point(X,Mz);
       graph.AddPoint(graphIdx,point);
    }
 

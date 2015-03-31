@@ -25,6 +25,7 @@
 #include "PierAgent.h"
 #include "PierAgentImp.h"
 
+#include <IFace\Project.h>
 #include <algorithm>
 
 #ifdef _DEBUG
@@ -72,7 +73,7 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface(IID_IPointOfInterest, this);
+   pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
 
    return S_OK;
 };
@@ -88,7 +89,7 @@ STDMETHODIMP CPierAgentImp::Init()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -122,7 +123,7 @@ STDMETHODIMP CPierAgentImp::ShutDown()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -134,7 +135,7 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 }
 
 //////////////////////////////////////////
-// IPointOfInterest
+// IXBRointOfInterest
 std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest()
 {
    Validate();
@@ -148,7 +149,7 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(ColumnI
 }
 
 //////////////////////////////////////////
-// IProjectEventSink
+// IXBRProjectEventSink
 HRESULT CPierAgentImp::OnProjectChanged()
 {
    Invalidate();
@@ -181,7 +182,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
       return;
    }
 
-   GET_IFACE_(XBR,IProject,pProject);
+   GET_IFACE(IXBRProject,pProject);
 
    PoiIDType id = 0;
 
@@ -199,7 +200,11 @@ void CPierAgentImp::ValidatePointsOfInterest()
       m_XBeamPoi.push_back(xbrPointOfInterest(id++,X1,POI_SECTCHANGE));
    }
 
-#pragma Reminder("UPDATE: need a section change POI at the crown point")
+   Float64 crownPoint = GetCrownPointLocation();
+   if ( 0 < crownPoint && crownPoint < L )
+   {
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,crownPoint,POI_SECTCHANGE));
+   }
 
    if ( !IsZero(X2) )
    {
@@ -208,16 +213,93 @@ void CPierAgentImp::ValidatePointsOfInterest()
 
    m_XBeamPoi.push_back(xbrPointOfInterest(id++,L,POI_SECTCHANGE));
 
+   // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
+   Float64 LeftOH = pProject->GetXBeamOverhang(pgsTypes::pstLeft); 
+   ColumnIndexType nColumns = pProject->GetColumnCount();
+   if ( 1 < nColumns )
+   {
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH));
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH+0.001));
+      SpacingIndexType nSpaces = nColumns - 1;
+      Float64 X = LeftOH;
+      for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
+      {
+         Float64 space = pProject->GetSpacing(spaceIdx);
+         X += space;
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X));
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X+0.001));
+      }
+   }
+
+#pragma Reminder("UPDATE: need POIs at every bearing location")
+   // need to pick up shear jumps at points of concentrated load
+
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    Float64 Xpoi = 0;
-   while ( Xpoi < L/2 )
+   while ( Xpoi < L/2 - step)
    {
       m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xpoi));
       m_XBeamPoi.push_back(xbrPointOfInterest(id++,L-Xpoi));
 
       Xpoi += step;
    }
+   m_XBeamPoi.push_back(xbrPointOfInterest(id++,L/2));
    std::sort(m_XBeamPoi.begin(),m_XBeamPoi.end());
    m_XBeamPoi.erase(std::unique(m_XBeamPoi.begin(),m_XBeamPoi.end()),m_XBeamPoi.end());
+}
+
+Float64 CPierAgentImp::GetCrownPointLocation()
+{
+   // returns the location of the crown point, measured from the left edge
+   // of the cross beam
+
+   GET_IFACE(IXBRProject,pProject);
+
+   // Get location of first column from the alignment
+   ColumnIndexType refColIdx;
+   Float64 refColumnOffset;
+   pgsTypes::OffsetMeasurementType refColumnDatum;
+   pProject->GetTransverseLocation(&refColIdx,&refColumnOffset,&refColumnDatum);
+
+   if ( refColumnDatum == pgsTypes::omtBridge )
+   {
+      // reference column is located from the bridge line... adjust its location
+      // so that it is measured from the alignment
+      Float64 blo = pProject->GetBridgeLineOffset();
+      refColumnOffset += blo;
+   }
+
+   if ( 0 < refColIdx )
+   {
+      // make the reference column the first column
+      for ( SpacingIndexType spaceIdx = refColIdx-1; 0 <= spaceIdx && spaceIdx != INVALID_INDEX; spaceIdx-- )
+      {
+         Float64 space = pProject->GetSpacing(spaceIdx);
+         refColumnOffset -= space;
+      }
+   }
+
+   // at this point we know the location of the first column, measured from the alignment
+   // X is the distance from the left edge of the cross beam to the crown point
+   Float64 LOH = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
+   Float64 CPO = pProject->GetCrownPointOffset();
+   Float64 skew = GetSkewAngle();
+
+   Float64 X = refColumnOffset - LOH + CPO/cos(skew);
+   return X;
+}
+
+Float64 CPierAgentImp::GetSkewAngle()
+{
+   GET_IFACE(IXBRProject,pProject);
+   LPCTSTR lpszSkew = pProject->GetOrientation();
+   CComPtr<IAngle> objSkew;
+   objSkew.CoCreateInstance(CLSID_Angle);
+   HRESULT hr = objSkew->FromString(CComBSTR(lpszSkew));
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 skew;
+   objSkew->get_Value(&skew);
+   return skew;
 }

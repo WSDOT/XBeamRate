@@ -76,7 +76,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( XBR::IID_IProject,    this );
+   pBrokerInit->RegInterface( IID_IXBRProject,    this );
 
    return S_OK;
 };
@@ -333,7 +333,7 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 }
 
 //////////////////////////////////////////////////////////////////////
-// IProject
+// IXBRProject
 void CProjectAgentImp::SetProjectName(LPCTSTR strName)
 {
    m_XBeamRateXML->Settings().ProjectName(strName);

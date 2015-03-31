@@ -71,7 +71,7 @@ STDMETHODIMP CEngAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_ILoadRating,    this );
+   pBrokerInit->RegInterface( IID_IXBRLoadRating,    this );
 
    return S_OK;
 };

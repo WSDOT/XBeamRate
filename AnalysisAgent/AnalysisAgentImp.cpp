@@ -73,7 +73,7 @@ STDMETHODIMP CAnalysisAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IAnalysisResults,    this );
+   pBrokerInit->RegInterface( IID_IXBRAnalysisResults,    this );
 
    return S_OK;
 };
@@ -94,7 +94,7 @@ STDMETHODIMP CAnalysisAgentImp::Init2()
    HRESULT hr = S_OK;
 
    // Connection point for the bridge description
-   hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -123,7 +123,7 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    CComPtr<IConnectionPoint> pCP;
    HRESULT hr = S_OK;
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IProjectEventSink, &pCP );
+   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
@@ -142,15 +142,17 @@ void CAnalysisAgentImp::Validate()
    }
 
    m_Model.CoCreateInstance(CLSID_Fem2dModel);
+   m_Model->put_Name(CComBSTR(_T("XBeamRate")));
 
    // Build the frame model
-   GET_IFACE(IProject,pProject);
+   GET_IFACE(IXBRProject,pProject);
 
    // some dummy dimensions
    Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
    Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
    IndexType nColumns = pProject->GetColumnCount();
 
+#pragma Reminder("UPDATE: get real material and section properties")
    Float64 EAb = 1;
    Float64 EIb = 1;
    Float64 EAc = 1;
@@ -225,7 +227,7 @@ void CAnalysisAgentImp::Validate()
    CComPtr<IFem2dPOICollection> femPois;
    m_Model->get_POIs(&femPois);
    PoiIDType femPoiID = 0;
-   GET_IFACE(IPointOfInterest,pPoi);
+   GET_IFACE(IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
@@ -246,7 +248,8 @@ void CAnalysisAgentImp::Validate()
       }
    }
 
-   // create some dummy loads
+#pragma Reminder("UPDATE - use real loads")
+   // create some dummy loads along the xbeam
    CComPtr<IFem2dLoadingCollection> loadings;
    m_Model->get_Loadings(&loadings);
 
@@ -258,16 +261,27 @@ void CAnalysisAgentImp::Validate()
    loading->get_DistributedLoads(&distLoads);
 
    LoadIDType loadID = 0;
-   for ( MemberIDType id = 0; id < mbrID; id++ )
+   BOOST_FOREACH(CapBeamMember& capMbr,m_CapBeamMembers)
    {
       CComPtr<IFem2dDistributedLoad> distLoad;
-      distLoads->Create(loadID++,id,loadDirFy,0.0,-1.0,-10000,-10000,lotMember,&distLoad);
+      distLoads->Create(loadID++,capMbr.mbrID,loadDirFy,0.0,-1.0,-10000,-10000,lotMember,&distLoad);
    }
+
+   CComQIPtr<IStructuredStorage2> ss(m_Model);
+   CComPtr<IStructuredSave2> save;
+   save.CoCreateInstance(CLSID_StructuredSave2);
+   save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
+   ss->Save(save);
+   save->Close();
+   save.Release();
+   ss.Release();
 }
 
 void CAnalysisAgentImp::Invalidate()
 {
    m_Model.Release();
+   m_CapBeamMembers.clear();
+   m_PoiMap.clear();
 }
 
 //////////////////////////////////////////////////////////////////////

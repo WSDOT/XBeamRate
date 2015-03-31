@@ -37,6 +37,7 @@
 
 #include <WBFLCore_i.c>
 #include <WBFLGenericBridge_i.c>
+#include <WBFLCogo_i.c>
 
 #include "PierAgentImp.h"
 

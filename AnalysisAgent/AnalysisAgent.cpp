@@ -32,6 +32,7 @@
 #include "initguid.h"
 
 #include <WBFLCore_i.c>
+#include <WBFLTools_i.c>
 #include <WBFLFem2d_i.c>
 
 #include "dllmain.h"
