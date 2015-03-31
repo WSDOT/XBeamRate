@@ -78,6 +78,28 @@ END_MESSAGE_MAP()
 //   }
 //}
 
+BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CMDIFrameWnd* pParentWnd, CCreateContext* pContext)
+{
+   if ( !CEAFChildFrame::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, pContext) )
+      return FALSE;
+
+   // we can create more stuff here
+
+   return TRUE;
+}
+
+BOOL CXBeamRateChildFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParentWnd, CCreateContext* pContext)
+{
+   // CEAFChildFrame::LoadFrame is going to load resources based on nIDResource
+   // We have to set the module context to this module so the load happens
+   // correctly
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   if ( !CEAFChildFrame::LoadFrame(nIDResource, dwDefaultStyle, pParentWnd, pContext) )
+      return FALSE;
+
+   return TRUE;
+}
+
 BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs) 
 {
    // force this window to be maximized (not sure why WS_VISIBLE is required)

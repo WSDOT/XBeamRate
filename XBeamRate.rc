@@ -215,7 +215,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PROJNAME            "XBeam Rate"
-    IDR_XBEAMRATE           "\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
+    IDR_XBEAMRATE           "Main Window\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
 END
 
 STRINGTABLE 
