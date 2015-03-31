@@ -7,7 +7,7 @@
 
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
-#include <EAF\EAFChildFrame.h>
+#include "XBeamRateChildFrame.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
@@ -44,7 +44,7 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
       IDR_XBEAMRATE,
       NULL,
 		RUNTIME_CLASS(CXBeamRateDoc),
-		RUNTIME_CLASS(CEAFChildFrame),
+		RUNTIME_CLASS(CXBeamRateChildFrame),
 		RUNTIME_CLASS(CXBeamRateView),
       NULL,1);
 

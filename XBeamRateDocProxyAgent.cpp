@@ -25,6 +25,7 @@ CLASS
 CXBeamRateDocProxyAgent::CXBeamRateDocProxyAgent()
 {
    m_pMyDocument = NULL;
+   m_StdToolBarID = -1;
 }
 
 CXBeamRateDocProxyAgent::~CXBeamRateDocProxyAgent()
@@ -125,7 +126,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
    if ( bIntegrate )
    {
       RegisterViews();
-//      CreateToolBars();
+      CreateToolBars();
 //      CreateAcceleratorKeys();
 //      CreateStatusBar();
    }
@@ -133,7 +134,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
    {
 //      ResetStatusBar();
 //      RemoveAcceleratorKeys();
-//      RemoveToolBars();
+      RemoveToolBars();
       UnregisterViews();
    }
 
@@ -277,4 +278,29 @@ void CXBeamRateDocProxyAgent::UnregisterViews()
    GET_IFACE(IEAFViewRegistrar,pViewReg);
    pViewReg->RemoveView(m_ReportViewKey);
    pViewReg->RemoveView(m_GraphingViewKey);
+}
+
+void CXBeamRateDocProxyAgent::CreateToolBars()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   GET_IFACE(IEAFToolbars,pToolBars);
+
+   m_StdToolBarID = pToolBars->CreateToolBar(_T("Standard"));
+   CEAFToolBar* pToolBar = pToolBars->GetToolBar(m_StdToolBarID);
+   pToolBar->LoadToolBar(IDR_XBEAMRATE,NULL); // don't use a command callback because these commands are handled by 
+                                               // the standard MFC message routing
+
+   // Add a drop-down arrow to the Open and Report buttons
+   pToolBar->CreateDropDownButton(ID_FILE_OPEN,   NULL,BTNS_DROPDOWN);
+   //pToolBar->CreateDropDownButton(ID_VIEW_GRAPHS, NULL,BTNS_WHOLEDROPDOWN);
+   //pToolBar->CreateDropDownButton(ID_VIEW_REPORTS,NULL,BTNS_WHOLEDROPDOWN);
+
+   //OnStatusChanged(); // set the status items
+}
+
+void CXBeamRateDocProxyAgent::RemoveToolBars()
+{
+   GET_IFACE(IEAFToolbars,pToolBars);
+   pToolBars->DestroyToolBar(m_StdToolBarID);
 }

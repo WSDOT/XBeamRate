@@ -558,6 +558,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\XBeamRateChildFrame.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateDoc.cpp"
 				>
 				<FileConfiguration
@@ -760,6 +764,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateAppPlugin.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateChildFrame.h"
 				>
 			</File>
 			<File

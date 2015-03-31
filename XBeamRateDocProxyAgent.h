@@ -102,6 +102,10 @@ private:
    DWORD m_dwProjectCookie;
    //DWORD m_dwDisplayUnitsCookie;
 
+   void CreateToolBars();
+   void RemoveToolBars();
+   UINT m_StdToolBarID;
+
    void RegisterViews();
    void UnregisterViews();
    long m_ReportViewKey;
