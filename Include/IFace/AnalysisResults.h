@@ -2,6 +2,14 @@
 
 #include <XBeamRateExt\PointOfInterest.h>
 
+struct LowerXBeamLoad
+{
+   Float64 Xs;
+   Float64 Xe;
+   Float64 Ws;
+   Float64 We;
+};
+
 /*****************************************************************************
 INTERFACE
    IAnalysisResults

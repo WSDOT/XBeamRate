@@ -102,6 +102,14 @@ private:
    void Validate();
    void Invalidate();
 
+   void ApplyDeadLoad();
+   void ApplyLowerXBeamDeadLoad();
+   void ApplyUpperXBeamDeadLoad();
+
+   void ValidateLowerXBeamDeadLoad();
+
+   void GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
+
    DWORD m_dwProjectCookie;
 
    CComPtr<IFem2dModel> m_Model;
@@ -113,6 +121,8 @@ private:
       MemberIDType mbrID;
    };
    std::vector<CapBeamMember> m_CapBeamMembers;
+
+   std::vector<LowerXBeamLoad> m_LowerXBeamLoads;
 
    // key is the product model poi ID
    // value is the FEM model poi ID

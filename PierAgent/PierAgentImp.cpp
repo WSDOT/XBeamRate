@@ -73,6 +73,8 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
+   pBrokerInit->RegInterface(IID_IXBRPier, this);
+   pBrokerInit->RegInterface(IID_IXBRMaterial, this);
    pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
 
    return S_OK;
@@ -135,11 +137,41 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 }
 
 //////////////////////////////////////////
+// IXBRPier
+Float64 CPierAgentImp::GetArea(const xbrPointOfInterest& poi)
+{
+#pragma Reminder("UPDATE: need to compute and manage section properties")
+   return 10.0;
+}
+
+//////////////////////////////////////////
+// IXBRMaterial
+Float64 CPierAgentImp::GetXBeamDensity()
+{
+#pragma Reminder("UPDATE: need material model")
+   return ::ConvertToSysUnits(150.,unitMeasure::PCF);
+}
+
+//////////////////////////////////////////
 // IXBRointOfInterest
-std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest()
+std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PoiAttributeType attrib)
 {
    Validate();
-   return m_XBeamPoi;
+   if ( attrib == 0 )
+   {
+      return m_XBeamPoi;
+   }
+
+   std::vector<xbrPointOfInterest> vPoi;
+   BOOST_FOREACH(xbrPointOfInterest& poi,m_XBeamPoi)
+   {
+      if ( poi.HasAttribute(attrib) )
+      {
+         vPoi.push_back(poi);
+      }
+   }
+
+   return vPoi;
 }
 
 std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(ColumnIndexType colIdx)

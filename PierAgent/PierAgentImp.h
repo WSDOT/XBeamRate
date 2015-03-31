@@ -33,6 +33,7 @@
 
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
+#include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,8 @@ class ATL_NO_VTABLE CPierAgentImp :
 	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx,
+   public IXBRPier,
+   public IXBRMaterial,
    public IXBRPointOfInterest,
    public IXBRProjectEventSink
 {  
@@ -61,6 +64,8 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IXBRPier)
+   COM_INTERFACE_ENTRY(IXBRMaterial)
    COM_INTERFACE_ENTRY(IXBRPointOfInterest)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
@@ -80,9 +85,17 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IXBRPier
+public:
+   virtual Float64 GetArea(const xbrPointOfInterest& poi);
+
+// IXBRMaterial
+public:
+   virtual Float64 GetXBeamDensity();
+
 // IXBRPointOfInterest
 public:
-   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest();
+   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PoiAttributeType attrib);
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(ColumnIndexType colIdx);
 
 // IXBRProjectEventSink

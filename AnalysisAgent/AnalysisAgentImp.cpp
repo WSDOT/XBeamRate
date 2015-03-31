@@ -25,7 +25,10 @@
 #include "AnalysisAgent.h"
 #include "AnalysisAgentImp.h"
 
+#include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
+
+#include <Units\SysUnitsMgr.h>
 
 
 #ifdef _DEBUG
@@ -231,22 +234,17 @@ void CAnalysisAgentImp::Validate()
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Xpoi = poi.GetDistFromStart();
-      std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
-      std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
-      for ( ; iter != end; iter++ )
-      {
-         CapBeamMember& capMbr(*iter);
-         if ( InRange(capMbr.Xs,Xpoi,capMbr.Xe) )
-         {
-            CComPtr<IFem2dPOI> femPoi;
-            femPois->Create(femPoiID,capMbr.mbrID,Xpoi-capMbr.Xs,&femPoi);
-            m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
-            femPoiID++;
-            break;
-         }
-      }
+      MemberIDType mbrID;
+      Float64 mbrLocation;
+      GetFemModelLocation(poi,&mbrID,&mbrLocation);
+
+      CComPtr<IFem2dPOI> femPoi;
+      femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
+      m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
+      femPoiID++;
    }
+
+   ApplyDeadLoad();
 
 #pragma Reminder("UPDATE - use real loads")
    // create some dummy loads along the xbeam
@@ -277,11 +275,84 @@ void CAnalysisAgentImp::Validate()
    ss.Release();
 }
 
+void CAnalysisAgentImp::ApplyDeadLoad()
+{
+   ApplyLowerXBeamDeadLoad();
+   ApplyUpperXBeamDeadLoad();
+}
+
+void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
+{
+   ValidateLowerXBeamDeadLoad();
+#pragma Reminder("WORKING HERE - need to apply lower cross beam dead load")
+}
+
+void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
+{
+#pragma Reminder("WORKING HERE - need to compute and apply upper cross beam dead load")
+}
+
+void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
+{
+   GET_IFACE(IXBRPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(POI_SECTCHANGE);
+
+   GET_IFACE(IXBRPier,pPier);
+   GET_IFACE(IXBRMaterial,pMaterial);
+
+   Float64 density = pMaterial->GetXBeamDensity();
+   Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
+
+   std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
+   std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
+   Float64 Astart = pPier->GetArea(*iter);
+   Float64 Wstart = unitWeight*Astart;
+   Float64 Xstart = (*iter).GetDistFromStart();
+
+   iter++;
+   for ( ; iter != end; iter++ )
+   {
+      Float64 Aend = pPier->GetArea(*iter);
+      Float64 Wend = unitWeight*Aend;
+      Float64 Xend = (*iter).GetDistFromStart();
+
+      LowerXBeamLoad load;
+      load.Xs = Xstart;
+      load.Xe = Xend;
+      load.Ws = Wstart;
+      load.We = Wend;
+      m_LowerXBeamLoads.push_back(load);
+
+      Xstart = Xend;
+      Astart = Aend;
+      Wstart = Wend;
+   }
+}
+
+void CAnalysisAgentImp::GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation)
+{
+   Float64 Xpoi = poi.GetDistFromStart();
+   std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
+   std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
+   for ( ; iter != end; iter++ )
+   {
+      CapBeamMember& capMbr(*iter);
+      if ( InRange(capMbr.Xs,Xpoi,capMbr.Xe) )
+      {
+         *pMbrID = capMbr.mbrID;
+         *pMbrLocation = Xpoi - capMbr.Xs;
+         return;
+      }
+   }
+   ATLASSERT(false); // should never get here
+}
+
 void CAnalysisAgentImp::Invalidate()
 {
    m_Model.Release();
    m_CapBeamMembers.clear();
    m_PoiMap.clear();
+   m_LowerXBeamLoads.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
