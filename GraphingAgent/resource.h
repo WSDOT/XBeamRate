@@ -3,12 +3,14 @@
 // Used by GraphingAgent.rc
 //
 #define IDS_PROJNAME                    100
-#define IDR_GRAPHINGAGENT                101
-#define IDR_GRAPHINGAGENTMODULE          102
+#define IDR_GRAPHINGAGENT               101
+#define IDR_GRAPHINGAGENTMODULE         102
 #define IDD_TEST_GRAPH_CONTROLS         3006
 #define IDC_BUTTON1                     3012
 #define IDC_SINE                        3013
+#define IDC_MOMENT                      3013
 #define IDC_COSINE                      3014
+#define IDC_SHEAR                       3014
 
 // Next default values for new objects
 // 

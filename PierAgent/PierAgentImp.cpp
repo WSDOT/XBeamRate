@@ -27,6 +27,7 @@
 
 #include <IFace\Project.h>
 #include <algorithm>
+#include <Math\Math.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,7 +74,7 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface(IID_IXBRPier, this);
+   pBrokerInit->RegInterface(IID_IXBRSectionProperties, this);
    pBrokerInit->RegInterface(IID_IXBRMaterial, this);
    pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
 
@@ -137,11 +138,94 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 }
 
 //////////////////////////////////////////
-// IXBRPier
-Float64 CPierAgentImp::GetArea(const xbrPointOfInterest& poi)
+// IXBRSectionProperties
+Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
-#pragma Reminder("UPDATE: need to compute and manage section properties")
-   return 10.0;
+   GET_IFACE(IXBRProject,pProject);
+
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      pProject->GetColumnShape(&shapeType,&D1,&D2);
+      return D1;
+   }
+   else
+   {
+      // Create a function that represents the top of the lower cross beam
+      mathPwLinearFunction2dUsingPoints fnTop;
+      fnTop.AddPoint(0,0);
+
+      Float64 Xcrown = GetCrownPointLocation();
+      Float64 L = pProject->GetXBeamLength();
+      Float64 SL, SR;
+      pProject->GetCrownSlopes(&SL,&SR);
+
+      fnTop.AddPoint(Xcrown,-SL*Xcrown);
+      fnTop.AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
+
+      // Create a function that represents the bottom of the lower cross beam
+      Float64 H1, H2, X1;
+      pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
+
+      Float64 H3, H4, X2;
+      pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+
+      mathPwLinearFunction2dUsingPoints fnBottom;
+      fnBottom.AddPoint(0,-H1);
+      if ( !IsZero(X1) )
+      {
+         fnBottom.AddPoint(X1,-(H1+H2));
+      }
+
+      if ( !IsZero(X2) )
+      {
+         fnBottom.AddPoint(L-X2,-(H3+H4));
+      }
+      fnBottom.AddPoint(L,-H3);
+
+      Float64 Y1 = fnTop.Evaluate(poi.GetDistFromStart());
+      Float64 Y2 = fnBottom.Evaluate(poi.GetDistFromStart());
+
+      Float64 H = Y1 - Y2;
+
+      if ( stage == xbrTypes::Stage1 )
+      {
+         return H;
+      }
+
+      Float64 D,W;
+      pProject->GetDiaphragmDimensions(&D,&W);
+      H += D;
+
+      return H;
+   }
+}
+
+Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   GET_IFACE(IXBRProject,pProject);
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      pProject->GetColumnShape(&shapeType,&D1,&D2);
+      if (shapeType == CColumnData::cstCircle)
+      {
+         return M_PI*D1*D1/4;
+      }
+      else
+      {
+         return D1*D2;
+      }
+   }
+   else
+   {
+      Float64 W = pProject->GetXBeamWidth();
+      Float64 H = GetDepth(stage,poi);
+
+      return W*H;
+   }
 }
 
 //////////////////////////////////////////
@@ -318,7 +402,8 @@ Float64 CPierAgentImp::GetCrownPointLocation()
    Float64 CPO = pProject->GetCrownPointOffset();
    Float64 skew = GetSkewAngle();
 
-   Float64 X = refColumnOffset - LOH + CPO/cos(skew);
+   Float64 X = LOH - refColumnOffset + CPO/cos(skew);
+   ATLASSERT(::InRange(0.0,X,pProject->GetXBeamLength()));
    return X;
 }
 

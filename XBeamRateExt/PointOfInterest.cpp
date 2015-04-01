@@ -15,7 +15,7 @@ m_ID(id),m_ColumnIndex(INVALID_INDEX),m_Xpoi(Xpoi),m_Attributes(attribute)
 
 bool xbrPointOfInterest::operator==(const xbrPointOfInterest& other) const
 {
-   if ( m_ColumnIndex == other.m_ColumnIndex && IsEqual(m_Xpoi,other.m_Xpoi) )
+   if ( m_ColumnIndex == other.m_ColumnIndex && IsEqual(m_Xpoi,other.m_Xpoi) && m_Attributes == other.GetAttributes() )
    {
       return true;
    }

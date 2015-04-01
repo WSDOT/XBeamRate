@@ -76,6 +76,7 @@ STDMETHODIMP CAnalysisAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
+   pBrokerInit->RegInterface( IID_IXBRProductForces, this);
    pBrokerInit->RegInterface( IID_IXBRAnalysisResults,    this );
 
    return S_OK;
@@ -180,14 +181,16 @@ void CAnalysisAgentImp::Validate()
    joint.Release();
    joints->Create(jntID++,Xe,0,&joint);
 
+   MemberIDType xbeamMbrID = 0;
+   MemberIDType columnMbrID = -1;
+
    // create left overhang member
-   MemberIDType mbrID = 0;
    CComPtr<IFem2dMember> mbr;
-   members->Create(mbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
+   members->Create(xbeamMbrID++,jntID-2,jntID-1,EAb,EIb,&mbr);
    CapBeamMember capMbr;
    capMbr.Xs = Xs;
    capMbr.Xe = Xe;
-   capMbr.mbrID = mbrID-1;
+   capMbr.mbrID = xbeamMbrID-1;
    m_CapBeamMembers.push_back(capMbr);
 
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
@@ -207,7 +210,7 @@ void CAnalysisAgentImp::Validate()
 
       // create column member
       mbr.Release();
-      members->Create(mbrID++,jntID-2,jntID-1,EAc,EIc,&mbr);
+      members->Create(columnMbrID--,jntID-2,jntID-1,EAc,EIc,&mbr);
 
       Xs = Xe;
       Xe += space;
@@ -218,11 +221,11 @@ void CAnalysisAgentImp::Validate()
 
       // create cross beam member
       mbr.Release();
-      members->Create(mbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
+      members->Create(xbeamMbrID++,jntID-3,jntID-1,EAb,EIb,&mbr);
       CapBeamMember capMbr;
       capMbr.Xs = Xs;
       capMbr.Xe = Xe;
-      capMbr.mbrID = mbrID-1;
+      capMbr.mbrID = xbeamMbrID-1;
       m_CapBeamMembers.push_back(capMbr);
    }
 
@@ -246,25 +249,6 @@ void CAnalysisAgentImp::Validate()
 
    ApplyDeadLoad();
 
-#pragma Reminder("UPDATE - use real loads")
-   // create some dummy loads along the xbeam
-   CComPtr<IFem2dLoadingCollection> loadings;
-   m_Model->get_Loadings(&loadings);
-
-   LoadCaseIDType loadCaseID = 0;
-   CComPtr<IFem2dLoading> loading;
-   loadings->Create(loadCaseID,&loading);
-
-   CComPtr<IFem2dDistributedLoadCollection> distLoads;
-   loading->get_DistributedLoads(&distLoads);
-
-   LoadIDType loadID = 0;
-   BOOST_FOREACH(CapBeamMember& capMbr,m_CapBeamMembers)
-   {
-      CComPtr<IFem2dDistributedLoad> distLoad;
-      distLoads->Create(loadID++,capMbr.mbrID,loadDirFy,0.0,-1.0,-10000,-10000,lotMember,&distLoad);
-   }
-
    CComQIPtr<IStructuredStorage2> ss(m_Model);
    CComPtr<IStructuredSave2> save;
    save.CoCreateInstance(CLSID_StructuredSave2);
@@ -284,7 +268,96 @@ void CAnalysisAgentImp::ApplyDeadLoad()
 void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
 {
    ValidateLowerXBeamDeadLoad();
-#pragma Reminder("WORKING HERE - need to apply lower cross beam dead load")
+
+   CComPtr<IFem2dLoadingCollection> loadings;
+   m_Model->get_Loadings(&loadings);
+
+   LoadCaseIDType loadCaseID = GetLoadCaseID(pftLowerXBeam);
+   CComPtr<IFem2dLoading> loading;
+   loadings->Create(loadCaseID,&loading);
+
+   CComPtr<IFem2dDistributedLoadCollection> distLoads;
+   loading->get_DistributedLoads(&distLoads);
+
+   LoadIDType loadID = 0;
+   std::vector<LowerXBeamLoad>::iterator iter(m_LowerXBeamLoads.begin());
+   std::vector<LowerXBeamLoad>::iterator end(m_LowerXBeamLoads.end());
+   for ( ; iter != end; iter++ )
+   {
+      LowerXBeamLoad& load(*iter);
+
+      MemberIDType startMbrID, endMbrID;
+      Float64 startMbrLocation , endMbrLocation;
+      GetFemModelLocation(xbrPointOfInterest(INVALID_ID,load.Xs),&startMbrID,&startMbrLocation);
+      GetFemModelLocation(xbrPointOfInterest(INVALID_ID,load.Xe),&endMbrID,  &endMbrLocation);
+
+      if ( startMbrID == endMbrID )
+      {
+         CComPtr<IFem2dDistributedLoad> distLoad;
+         distLoads->Create(loadID++,startMbrID,loadDirFy,startMbrLocation,endMbrLocation,-load.Ws,-load.We,lotMember,&distLoad);
+      }
+      else
+      {
+         CComPtr<IFem2dMemberCollection> members;
+         m_Model->get_Members(&members);
+
+         CComPtr<IFem2dJointCollection> joints;
+         m_Model->get_Joints(&joints);
+
+         // load from start to end of first member
+         CComPtr<IFem2dMember> mbr;
+         members->Find(startMbrID,&mbr);
+
+         Float64 L;
+         mbr->get_Length(&L);
+
+         JointIDType jntID;
+         mbr->get_EndJoint(&jntID);
+         CComPtr<IFem2dJoint> joint;
+         joints->Find(jntID,&joint);
+         Float64 X;
+         joint->get_X(&X);
+
+         Float64 Ws = load.Ws;
+         Float64 We = ::LinInterp(X - load.Xs,load.Ws,load.We,load.Xe - load.Xs);
+
+         CComPtr<IFem2dDistributedLoad> distLoad;
+
+         if ( !IsEqual(startMbrLocation,L) )
+         {
+            distLoads->Create(loadID++,startMbrID,loadDirFy,startMbrLocation,L,-Ws,-We,lotMember,&distLoad);
+         }
+
+         Ws = We;
+
+         // load all intermediate members
+         for ( MemberIDType mbrID = startMbrID+1; mbrID < endMbrID; mbrID++ )
+         {
+            mbr.Release();
+            members->Find(mbrID,&mbr);
+            mbr->get_EndJoint(&jntID);
+            joint.Release();
+            joints->Find(jntID,&joint);
+            joint->get_X(&X);
+
+            mbr->get_Length(&L);
+
+            We = ::LinInterp(X - load.Xs,load.Ws,load.We,load.Xe - load.Xs);
+
+            distLoad.Release();
+            distLoads->Create(loadID++,mbrID,loadDirFy,0,L,-Ws,-We,lotMember,&distLoad);
+
+            Ws = We;
+         }
+
+         // load start of last member to the end of the loading
+         distLoad.Release();
+         if ( !IsZero(endMbrLocation) )
+         {
+            distLoads->Create(loadID++,endMbrID,loadDirFy,0.0,endMbrLocation,-Ws,-load.We,lotMember,&distLoad);
+         }
+      }
+   }
 }
 
 void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
@@ -294,10 +367,15 @@ void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
 
 void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
 {
+   if ( 0 < m_LowerXBeamLoads.size() )
+   {
+      return;
+   }
+
    GET_IFACE(IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(POI_SECTCHANGE);
 
-   GET_IFACE(IXBRPier,pPier);
+   GET_IFACE(IXBRSectionProperties,pSectProp);
    GET_IFACE(IXBRMaterial,pMaterial);
 
    Float64 density = pMaterial->GetXBeamDensity();
@@ -305,14 +383,14 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
 
    std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
    std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   Float64 Astart = pPier->GetArea(*iter);
+   Float64 Astart = pSectProp->GetArea(xbrTypes::Stage1,*iter);
    Float64 Wstart = unitWeight*Astart;
    Float64 Xstart = (*iter).GetDistFromStart();
 
    iter++;
    for ( ; iter != end; iter++ )
    {
-      Float64 Aend = pPier->GetArea(*iter);
+      Float64 Aend = pSectProp->GetArea(xbrTypes::Stage1,*iter);
       Float64 Wend = unitWeight*Aend;
       Float64 Xend = (*iter).GetDistFromStart();
 
@@ -331,6 +409,8 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
 
 void CAnalysisAgentImp::GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation)
 {
+   ATLASSERT(!poi.IsColumnPOI()); // not supporting POIs on the columns yet
+
    Float64 Xpoi = poi.GetDistFromStart();
    std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
    std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
@@ -345,6 +425,20 @@ void CAnalysisAgentImp::GetFemModelLocation(const xbrPointOfInterest& poi,Member
       }
    }
    ATLASSERT(false); // should never get here
+}
+
+LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(XBRProductForceType pfType)
+{
+   switch (pfType)
+   {
+   case pftLowerXBeam:
+      return 0;
+
+   default:
+      ATLASSERT(false);
+   }
+
+   return INVALID_ID;
 }
 
 void CAnalysisAgentImp::Invalidate()
@@ -364,19 +458,16 @@ HRESULT CAnalysisAgentImp::OnProjectChanged()
 }
 
 //////////////////////////////////////////////////////////////////////
-// IAnalysisResults
-Float64 CAnalysisAgentImp::GetResult()
+// IXBRProductForces
+const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading()
 {
-   Validate();
-
-   CComQIPtr<IFem2dModelResults> results(m_Model);
-   Float64 startFx, startFy, startMz;
-   Float64 endFx,   endFy,   endMz;
-   results->ComputeMemberForces(0,0,&startFx,&startFy,&startMz,&endFx,&endFy,&endMz);
-   return endMz;
+   ValidateLowerXBeamDeadLoad();
+   return m_LowerXBeamLoads;
 }
 
-Float64 CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi)
+//////////////////////////////////////////////////////////////////////
+// IAnalysisResults
+Float64 CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi)
 {
    Validate();
 
@@ -386,7 +477,29 @@ Float64 CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi)
 
    CComQIPtr<IFem2dModelResults> results(m_Model);
 
+   LoadCaseIDType lcid = GetLoadCaseID(pfType);
+
    Float64 Fx, Fy, Mz;
-   results->ComputePOIForces(0,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
+   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
    return Mz;
+}
+
+sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi)
+{
+   Validate();
+
+   std::map<PoiIDType,PoiIDType>::iterator found = m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(m_Model);
+
+   LoadCaseIDType lcid = GetLoadCaseID(pfType);
+
+   Float64 Fx, FyL, FyR, Mz;
+   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&FyL,&Mz);
+   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&Fx,&FyR,&Mz);
+
+   sysSectionValue V(-FyL,FyR);
+   return V;
 }

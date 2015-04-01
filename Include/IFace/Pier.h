@@ -3,11 +3,12 @@
 #include <XBeamRateExt\PointOfInterest.h>
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}
-DEFINE_GUID(IID_IXBRPier, 
+DEFINE_GUID(IID_IXBRSectionProperties, 
 0x7f260544, 0x5bbc, 0x4be3, 0x87, 0xe7, 0x5d, 0xf8, 0x9a, 0x45, 0xf3, 0x5d);
-interface IXBRPier : public IUnknown
+interface IXBRSectionProperties : public IUnknown
 {
-   virtual Float64 GetArea(const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 };
 
 // {BE372349-0F8D-48e4-90F2-536AC90BEBBE}

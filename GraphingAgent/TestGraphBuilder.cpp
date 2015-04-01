@@ -46,8 +46,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 BEGIN_MESSAGE_MAP(CTestGraphBuilder, CEAFGraphBuilderBase)
-   ON_BN_CLICKED(IDC_SINE, &CTestGraphBuilder::OnGraphTypeChanged)
-   ON_BN_CLICKED(IDC_COSINE, &CTestGraphBuilder::OnGraphTypeChanged)
+   ON_BN_CLICKED(IDC_MOMENT, &CTestGraphBuilder::OnGraphTypeChanged)
+   ON_BN_CLICKED(IDC_SHEAR, &CTestGraphBuilder::OnGraphTypeChanged)
 END_MESSAGE_MAP()
 
 
@@ -99,11 +99,22 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   arvPhysicalConverter* pVertcalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
-   arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
-   grGraphXY graph(*pHorizontalAxisFormat,*pVertcalAxisFormat);
+   int graphType = m_GraphControls.GetGraphType();
+   arvPhysicalConverter* pVerticalAxisFormat;
+   if ( graphType == MOMENT_GRAPH )
+      pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
+   else
+      pVerticalAxisFormat = new ShearTool(pDisplayUnits->GetShearUnit());
 
-   std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)pVertcalAxisFormat)->UnitTag() + _T(")");
+   arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   grGraphXY graph(*pHorizontalAxisFormat,*pVerticalAxisFormat);
+
+   std::_tstring strYAxisTitle;
+   if ( graphType == MOMENT_GRAPH )
+      strYAxisTitle = _T("Moment (") + ((MomentTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
+   else
+      strYAxisTitle = _T("Shear (") + ((ShearTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
+
    graph.SetYAxisTitle(strYAxisTitle);
 
    graph.SetXAxisTitle(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")"));
@@ -116,13 +127,23 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      Float64 Mz = pResults->GetMoment(poi);
-
       X  = pHorizontalAxisFormat->Convert(X);
-      Mz = pVertcalAxisFormat->Convert(Mz);
 
-      gpPoint2d point(X,Mz);
-      graph.AddPoint(graphIdx,point);
+      if ( graphType == MOMENT_GRAPH )
+      {
+         Float64 Mz = pResults->GetMoment(pftLowerXBeam,poi);
+         Mz = pVerticalAxisFormat->Convert(Mz);
+         gpPoint2d point(X,Mz);
+         graph.AddPoint(graphIdx,point);
+      }
+      else
+      {
+         sysSectionValue V = pResults->GetShear(pftLowerXBeam,poi);
+         Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
+         Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
+         graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+      }
    }
 
 
@@ -153,6 +174,6 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    graph.SetOutputRect(wndRect);
    graph.Draw(pDC->GetSafeHdc());
 
-   delete pVertcalAxisFormat;
+   delete pVerticalAxisFormat;
    delete pHorizontalAxisFormat;
 }

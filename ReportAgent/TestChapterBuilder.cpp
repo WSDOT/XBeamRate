@@ -64,6 +64,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
+   INIT_UV_PROTOTYPE( rptForcePerLengthUnitValue, fpl, pDisplayUnits->GetForcePerLengthUnit(), false);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
    rptParagraph* pPara = new rptParagraph;
@@ -100,13 +101,34 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    RowIndexType row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mz = pResults->GetMoment(poi);
+      Float64 Mz = pResults->GetMoment(pftLowerXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);
 
       row++;
    }
+
+   GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+   const std::vector<LowerXBeamLoad>& loads = pProductForces->GetLowerCrossBeamLoading();
+   pTable = new rptRcTable(4,0);
+   *pPara << pTable << rptNewLine;
+
+   (*pTable)(0,0) << COLHDR(_T("Xstart"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,1) << COLHDR(_T("Xend"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,2) << COLHDR(_T("Wstart"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+   (*pTable)(0,3) << COLHDR(_T("Wend"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+   row = 1;
+   BOOST_FOREACH(const LowerXBeamLoad& load,loads)
+   {
+      (*pTable)(row,0) << length.SetValue(load.Xs);
+      (*pTable)(row,1) << length.SetValue(load.Xe);
+      (*pTable)(row,2) << fpl.SetValue(load.Ws);
+      (*pTable)(row,3) << fpl.SetValue(load.We);
+      row++;
+   }
+
+
    
    return pChapter;
 }

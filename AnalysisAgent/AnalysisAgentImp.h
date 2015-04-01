@@ -46,8 +46,9 @@ class ATL_NO_VTABLE CAnalysisAgentImp :
 	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
    //public CProxyIProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
    public IAgentEx,
-   public IXBRProjectEventSink,
-   public IXBRAnalysisResults
+   public IXBRProductForces,
+   public IXBRAnalysisResults,
+   public IXBRProjectEventSink
 {  
 public:
 	CAnalysisAgentImp(); 
@@ -63,8 +64,9 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+   COM_INTERFACE_ENTRY(IXBRProductForces)
 	COM_INTERFACE_ENTRY(IXBRAnalysisResults)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
 END_COM_MAP()
 
@@ -83,14 +85,18 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IXBRProjectEventSink
+// IXBRProductForces
 public:
-   HRESULT OnProjectChanged();
+   const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading();
 
 // IXBRAnalysisResults
 public:
-   virtual Float64 GetResult();
-   virtual Float64 GetMoment(const xbrPointOfInterest& poi);
+   virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi);
+
+// IXBRProjectEventSink
+public:
+   HRESULT OnProjectChanged();
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -109,6 +115,7 @@ private:
    void ValidateLowerXBeamDeadLoad();
 
    void GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
+   LoadCaseIDType GetLoadCaseID(XBRProductForceType pfType);
 
    DWORD m_dwProjectCookie;
 

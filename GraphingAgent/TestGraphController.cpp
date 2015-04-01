@@ -40,7 +40,7 @@ END_MESSAGE_MAP()
 BOOL CTestGraphController::OnInitDialog()
 {
    CEAFGraphControlWindow::OnInitDialog();
-   CheckRadioButton(IDC_SINE,IDC_COSINE,IDC_SINE);
+   CheckRadioButton(IDC_MOMENT,IDC_SHEAR,IDC_MOMENT);
    return TRUE;
 }
 
@@ -63,8 +63,8 @@ void CTestGraphController::Dump(CDumpContext& dc) const
 
 int CTestGraphController::GetGraphType()
 {
-   if( GetCheckedRadioButton(IDC_SINE,IDC_COSINE) == IDC_SINE )
-      return SINE_GRAPH;
+   if( GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR) == IDC_MOMENT )
+      return MOMENT_GRAPH;
    else
-      return COSINE_GRAPH;
+      return SHEAR_GRAPH;
 }

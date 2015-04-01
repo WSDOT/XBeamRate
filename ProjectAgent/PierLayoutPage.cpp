@@ -63,7 +63,7 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
 
    // Transverse location of the pier
    DDX_CBIndex(pDX,IDC_REFCOLUMN,pParent->m_PierData.m_RefColumnIdx);
-   DDX_UnitValueAndTag(pDX,IDC_X5,IDC_X5_UNIT,pParent->m_PierData.m_TransverseOffset, pDisplayUnits->GetSpanLengthUnit() );
+   DDX_OffsetAndTag(pDX,IDC_X5,IDC_X5_UNIT,pParent->m_PierData.m_TransverseOffset, pDisplayUnits->GetSpanLengthUnit() );
    DDX_CBItemData(pDX,IDC_X5_MEASUREMENT,pParent->m_PierData.m_TransverseOffsetMeasurement);
 
    DDX_UnitValueAndTag(pDX,IDC_H1,IDC_H1_UNIT,pParent->m_PierData.m_XBeamHeight[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );

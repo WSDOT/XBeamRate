@@ -99,22 +99,26 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    PierTypeEnum pierType = PierTypeEnum::Integral;
 
-   OpenBridgeML::Pier::CapBeamType capBeam(5.0,5.0,5.0,5.0,0,0,5.0,0,0);
+   OpenBridgeML::Pier::CapBeamType capBeam(::ConvertToSysUnits(5.0,unitMeasure::Feet),
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),0,0,
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),0,0);
 
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
    OpenBridgeML::Pier::PrismaticColumnType column(foundation);
-   OpenBridgeML::Pier::CicularColumnSectionType circularSection(5.0);
+   OpenBridgeML::Pier::CicularColumnSectionType circularSection(::ConvertToSysUnits(5.0,unitMeasure::Feet));
    column.CircularSection().set(circularSection);
-   column.Height() = 10.0;
+   column.Height() = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
 
    OpenBridgeML::Pier::ColumnsType columns;
    columns.PrismaticColumn().push_back( column );
-   columns.Spacing().push_back(5.0);
+   columns.Spacing().push_back(::ConvertToSysUnits(5.0,unitMeasure::Feet));
    columns.PrismaticColumn().push_back(column);
 
    OpenBridgeML::Pier::PierType pier(capBeam,columns);
 
-   TransverseOffsetType transverseOffset(10.,OffsetMeasurementEnum::Alignment);
+   TransverseOffsetType transverseOffset(::ConvertToSysUnits(-2.5,unitMeasure::Feet),OffsetMeasurementEnum::Alignment);
    ColumnIndexType refColIdx = 0;
 
    Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
@@ -124,8 +128,8 @@ STDMETHODIMP CProjectAgentImp::Init()
    Float64 bridgeLineOffset = 0;
    Float64 crownPointOffset = 0;
    OffsetMeasurementEnum curbLineDatum = OffsetMeasurementEnum::Alignment;
-   Float64 LCO = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
-   Float64 RCO = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
+   Float64 LCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
+   Float64 RCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
    Float64 SL = -0.02;
    Float64 SR = -0.02;
 

@@ -976,6 +976,10 @@
 			Name="IFace"
 			>
 			<File
+				RelativePath="..\Include\IFace\Pier.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\IFace\PointOfInterest.h"
 				>
 			</File>

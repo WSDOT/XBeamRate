@@ -45,7 +45,7 @@ class ATL_NO_VTABLE CPierAgentImp :
 	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx,
-   public IXBRPier,
+   public IXBRSectionProperties,
    public IXBRMaterial,
    public IXBRPointOfInterest,
    public IXBRProjectEventSink
@@ -64,7 +64,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-   COM_INTERFACE_ENTRY(IXBRPier)
+   COM_INTERFACE_ENTRY(IXBRSectionProperties)
    COM_INTERFACE_ENTRY(IXBRMaterial)
    COM_INTERFACE_ENTRY(IXBRPointOfInterest)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
@@ -85,9 +85,10 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IXBRPier
+// IXBRSectionProperties
 public:
-   virtual Float64 GetArea(const xbrPointOfInterest& poi);
+   virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
 
 // IXBRMaterial
 public:

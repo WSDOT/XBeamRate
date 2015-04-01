@@ -22,8 +22,8 @@
 
 #pragma once
 
-#define SINE_GRAPH 1
-#define COSINE_GRAPH 2
+#define MOMENT_GRAPH 1
+#define SHEAR_GRAPH 2
 
 #include <EAF\EAFGraphControlWindow.h>
 
