@@ -30,6 +30,7 @@ DEFINE_GUID(IID_IXBRProductForces,
 interface IXBRProductForces : public IUnknown
 {
    virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading() = 0;
+   virtual Float64 GetUpperCrossBeamLoading() = 0;
 };
 
 

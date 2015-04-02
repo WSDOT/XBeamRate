@@ -7,6 +7,7 @@
 
 #include <afxwin.h>
 
+#include <XBeamRateVersion.h>
 #include <XBeamRateTypes.h>
 
 

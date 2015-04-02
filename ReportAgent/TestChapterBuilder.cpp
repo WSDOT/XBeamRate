@@ -64,6 +64,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
+   INIT_UV_PROTOTYPE( rptForceSectionValue, shear, pDisplayUnits->GetShearUnit(), false);
    INIT_UV_PROTOTYPE( rptForcePerLengthUnitValue, fpl, pDisplayUnits->GetForcePerLengthUnit(), false);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -88,12 +89,14 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
       (*pTable)(tableRowIdx,tableColIdx++) << length.SetValue(height);
    }
 
-   pTable = new rptRcTable(3,0);
+   pTable = new rptRcTable(4,0);
+   pTable->TableCaption() << _T("Lower XBeam Dead Load");
    *pPara << pTable << rptNewLine;
 
    (*pTable)(0,0) << _T("POI ID");
    (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
    (*pTable)(0,2) << COLHDR(_T("Moment"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+   (*pTable)(0,3) << COLHDR(_T("Shear"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
 
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
@@ -102,9 +105,33 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
       Float64 Mz = pResults->GetMoment(pftLowerXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pftLowerXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);
+      (*pTable)(row,3) << shear.SetValue(V);
+
+      row++;
+   }
+
+   pTable = new rptRcTable(4,0);
+   pTable->TableCaption() << _T("Upper XBeam Dead Load");
+   *pPara << pTable << rptNewLine;
+
+   (*pTable)(0,0) << _T("POI ID");
+   (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,2) << COLHDR(_T("Moment"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+   (*pTable)(0,3) << COLHDR(_T("Shear"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
+
+   row = pTable->GetNumberOfHeaderRows();
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 Mz = pResults->GetMoment(pftUpperXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pftUpperXBeam,poi);
+      (*pTable)(row,0) << poi.GetID();
+      (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,2) << moment.SetValue(Mz);
+      (*pTable)(row,3) << shear.SetValue(V);
 
       row++;
    }
@@ -112,6 +139,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
    const std::vector<LowerXBeamLoad>& loads = pProductForces->GetLowerCrossBeamLoading();
    pTable = new rptRcTable(4,0);
+   pTable->TableCaption() << _T("Lower XBeam Dead Load");
    *pPara << pTable << rptNewLine;
 
    (*pTable)(0,0) << COLHDR(_T("Xstart"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
@@ -127,6 +155,9 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
       (*pTable)(row,3) << fpl.SetValue(load.We);
       row++;
    }
+
+   fpl.ShowUnitTag(true);
+   *pPara << _T("Upper XBeam Dead Load, w = ") << fpl.SetValue(pProductForces->GetUpperCrossBeamLoading()) << rptNewLine;
 
 
    

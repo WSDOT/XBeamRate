@@ -87,7 +87,8 @@ public:
 
 // IXBRProductForces
 public:
-   const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading();
+   virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading();
+   virtual Float64 GetUpperCrossBeamLoading();
 
 // IXBRAnalysisResults
 public:

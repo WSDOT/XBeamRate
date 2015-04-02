@@ -362,7 +362,24 @@ void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
 
 void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
 {
-#pragma Reminder("WORKING HERE - need to compute and apply upper cross beam dead load")
+   CComPtr<IFem2dLoadingCollection> loadings;
+   m_Model->get_Loadings(&loadings);
+
+   LoadCaseIDType loadCaseID = GetLoadCaseID(pftUpperXBeam);
+   CComPtr<IFem2dLoading> loading;
+   loadings->Create(loadCaseID,&loading);
+
+   CComPtr<IFem2dDistributedLoadCollection> distLoads;
+   loading->get_DistributedLoads(&distLoads);
+
+   LoadIDType loadID = 0;
+
+   Float64 w = GetUpperCrossBeamLoading();
+   BOOST_FOREACH(CapBeamMember& capMbr,m_CapBeamMembers)
+   {
+      CComPtr<IFem2dDistributedLoad> distLoad;
+      distLoads->Create(loadID++,capMbr.mbrID,loadDirFy,0,-1,-w,-w,lotMember,&distLoad);
+   }
 }
 
 void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
@@ -434,6 +451,9 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(XBRProductForceType pfType)
    case pftLowerXBeam:
       return 0;
 
+   case pftUpperXBeam:
+      return 1;
+
    default:
       ATLASSERT(false);
    }
@@ -463,6 +483,25 @@ const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading()
 {
    ValidateLowerXBeamDeadLoad();
    return m_LowerXBeamLoads;
+}
+
+Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading()
+{
+   GET_IFACE(IXBRProject,pProject);
+   Float64 H, W;
+   pProject->GetDiaphragmDimensions(&H,&W);
+
+   if ( pProject->GetPierType() == xbrTypes::pctExpansion )
+   {
+      W *= 2;
+   }
+
+   GET_IFACE(IXBRMaterial,pMaterial);
+   Float64 density = pMaterial->GetXBeamDensity();
+   Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
+
+   Float64 w = H*W*unitWeight;
+   return w;
 }
 
 //////////////////////////////////////////////////////////////////////

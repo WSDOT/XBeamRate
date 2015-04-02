@@ -38,7 +38,7 @@
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 
 
-#include <WBFLVersion.h>
+#include <XBeamRateVersion.h>
 
 #include <afxwin.h>         // MFC core and standard components
 #include <afxext.h>         // MFC extensions
@@ -52,11 +52,11 @@
 
 using namespace ATL;
 
+#include <XBeamRateTypes.h>
+
 #include <WBFLDebug.h>
 #include <System\Transaction.h>
 
 #include <WBFLCore.h>
 #include <WBFLTools.h>
 #include <AgentTools.h>
-
-#include <XBeamRateTypes.h>
