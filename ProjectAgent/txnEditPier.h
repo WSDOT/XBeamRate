@@ -31,7 +31,6 @@ public:
    Float64 m_S; // spacing to next bearing (ignored for last bearing)
    Float64 m_DC;
    Float64 m_DW;
-   Float64 m_LLIM;
 };
 
 class txnEditPierData

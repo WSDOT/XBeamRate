@@ -112,10 +112,12 @@ private:
    void ApplyDeadLoad();
    void ApplyLowerXBeamDeadLoad();
    void ApplyUpperXBeamDeadLoad();
+   void ApplySuperstructureDeadLoadReactions();
 
    void ValidateLowerXBeamDeadLoad();
 
    void GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
+   void GetCapBeamFemModelLocation(Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
    LoadCaseIDType GetLoadCaseID(XBRProductForceType pfType);
 
    DWORD m_dwProjectCookie;

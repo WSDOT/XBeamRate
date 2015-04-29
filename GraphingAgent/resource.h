@@ -5,6 +5,8 @@
 #define IDS_PROJNAME                    100
 #define IDR_GRAPHINGAGENT               101
 #define IDR_GRAPHINGAGENTMODULE         102
+#define IDC_LIST1                       201
+#define IDC_LOADING                     201
 #define IDD_TEST_GRAPH_CONTROLS         3006
 #define IDC_BUTTON1                     3012
 #define IDC_SINE                        3013
@@ -18,7 +20,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        202
 #define _APS_NEXT_COMMAND_VALUE         32770
-#define _APS_NEXT_CONTROL_VALUE         201
+#define _APS_NEXT_CONTROL_VALUE         202
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

@@ -1010,5 +1010,9 @@
 		</Filter>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="GraphingAgent.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

@@ -85,6 +85,10 @@
         thing that is identified by its ID.
       </xs:documentation>
     </xs:annotation>
+    <xs:sequence>
+      <xs:element name="DC" type="bxu:ForceValueType"/>
+      <xs:element name="DW" type="bxu:ForceValueType"/>
+    </xs:sequence>
     <xs:attribute name="id" use="required" type="xs:int"/>
   </xs:complexType>
 

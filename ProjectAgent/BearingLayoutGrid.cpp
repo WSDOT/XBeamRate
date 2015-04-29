@@ -74,7 +74,7 @@ void CBearingLayoutGrid::CustomInit()
    SetMergeCellsMode(gxnMergeDelayEval);
 
    const int num_rows = 0;
-   const int num_cols = 4;
+   const int num_cols = 3;
 
 	SetRowCount(num_rows);
 	SetColCount(num_cols);
@@ -117,15 +117,6 @@ void CBearingLayoutGrid::CustomInit()
 		);
 
    cv.Format(_T("DW (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
-	SetStyleRange(CGXRange(0,col++), CGXStyle()
-         .SetWrapText(TRUE)
-			.SetEnabled(FALSE)          // disables usage as current cell
-         .SetHorizontalAlignment(DT_CENTER)
-         .SetVerticalAlignment(DT_VCENTER)
-			.SetValue(cv)
-		);
-
-   cv.Format(_T("LL+IM (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -261,15 +252,6 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,const txnBearingData& brgData
       .SetValue(value)
       );
 
-   // LLIM
-   value = ::ConvertFromSysUnits(brgData.m_LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-   SetStyleRange(CGXRange(row,col++), CGXStyle()
-      .SetEnabled(TRUE)
-      .SetReadOnly(FALSE)
-      .SetHorizontalAlignment(DT_RIGHT)
-      .SetValue(value)
-      );
-
    // Spacing
    // Set the value for the spacing to the next bearing and disable this cell
    // This assumes this bearing is in the last row and spacing to next isn't applicable
@@ -319,9 +301,6 @@ void CBearingLayoutGrid::GetBearingData(ROWCOL row,txnBearingData& brgData)
 
    Float64 DW = _tstof(GetCellValue(row,col++));
    brgData.m_DW = ::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-
-   Float64 LLIM = _tstof(GetCellValue(row,col++));
-   brgData.m_LLIM = ::ConvertToSysUnits(LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
 
    Float64 S = _tstof(GetCellValue(row,col++));
    brgData.m_S = ::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);

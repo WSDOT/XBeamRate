@@ -51,9 +51,7 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
    {
-      // need to use two different grids
       DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_BearingLines[brgLineIdx]);
-
       DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_RefBearingIdx[brgLineIdx]);
       DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_RefBearingLocation[brgLineIdx],pDisplayUnits->GetSpanLengthUnit());
       DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_RefBearingDatum[brgLineIdx]);

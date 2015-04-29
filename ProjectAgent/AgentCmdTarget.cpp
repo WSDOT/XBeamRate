@@ -74,9 +74,7 @@ void CAgentCmdTarget::OnEditPier()
          {
             brgData.m_S = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
          }
-         brgData.m_DC = ::ConvertToSysUnits(100.0,unitMeasure::Kip);
-         brgData.m_DW = ::ConvertToSysUnits(200.0,unitMeasure::Kip);
-         brgData.m_LLIM = ::ConvertToSysUnits(300.0,unitMeasure::Kip);
+         pProject->GetBearingReactions(brgLineIdx,brgIdx,&brgData.m_DC,&brgData.m_DW);
          oldPierData.m_BearingLines[brgLineIdx].push_back(brgData);
 
          IndexType refIdx;

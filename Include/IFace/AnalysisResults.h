@@ -14,7 +14,9 @@ struct LowerXBeamLoad
 typedef enum XBRProductForceType
 {
    pftLowerXBeam,
-   pftUpperXBeam
+   pftUpperXBeam,
+   pftDCReactions,
+   pftDWReactions
 } XBRProductForceType;
 
 /*****************************************************************************

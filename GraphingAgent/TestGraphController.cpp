@@ -34,19 +34,15 @@ CTestGraphController::CTestGraphController()
 BEGIN_MESSAGE_MAP(CTestGraphController, CEAFGraphControlWindow)
 	//{{AFX_MSG_MAP(CTestGraphController)
 	//}}AFX_MSG_MAP
-   ON_BN_CLICKED(IDC_BUTTON1,&CTestGraphController::OnButton)
 END_MESSAGE_MAP()
 
 BOOL CTestGraphController::OnInitDialog()
 {
+   FillLoadingList();
+
    CEAFGraphControlWindow::OnInitDialog();
    CheckRadioButton(IDC_MOMENT,IDC_SHEAR,IDC_MOMENT);
    return TRUE;
-}
-
-void CTestGraphController::OnButton()
-{
-   AfxMessageBox(_T("OnButton in CTestGraphController"));
 }
 
 #ifdef _DEBUG
@@ -67,4 +63,32 @@ int CTestGraphController::GetGraphType()
       return MOMENT_GRAPH;
    else
       return SHEAR_GRAPH;
+}
+
+XBRProductForceType CTestGraphController::GetLoading()
+{
+   CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
+   int curSel = plbLoading->GetCurSel();
+   if ( curSel == LB_ERR )
+   {
+      return pftLowerXBeam;
+   }
+
+   return XBRProductForceType(plbLoading->GetItemData(curSel));
+}
+
+void CTestGraphController::FillLoadingList()
+{
+   CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
+   int idx = plbLoading->AddString(_T("Lower Cross Beam Dead Load"));
+   plbLoading->SetItemData(idx,(DWORD_PTR)pftLowerXBeam);
+
+   idx = plbLoading->AddString(_T("Upper Cross Beam Dead Load"));
+   plbLoading->SetItemData(idx,(DWORD_PTR)pftUpperXBeam);
+
+   idx = plbLoading->AddString(_T("DC Reactions"));
+   plbLoading->SetItemData(idx,(DWORD_PTR)pftDCReactions);
+
+   idx = plbLoading->AddString(_T("DW Reactions"));
+   plbLoading->SetItemData(idx,(DWORD_PTR)pftDWReactions);
 }

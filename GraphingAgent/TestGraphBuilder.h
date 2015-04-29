@@ -40,6 +40,7 @@ protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow();
 
    afx_msg void OnGraphTypeChanged();
+   afx_msg void OnLbnSelChanged();
 
    virtual bool UpdateNow() { return true; }
 

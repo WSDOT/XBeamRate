@@ -65,6 +65,10 @@ interface IXBRProject : IUnknown
    virtual Float64 GetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx) = 0;
    virtual void SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) = 0;
 
+   // Bearing reactions
+   virtual void SetBearingReactions(IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW) = 0;
+   virtual void GetBearingReactions(IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW) = 0;
+
    // Reference bearing
    virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
    virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
@@ -91,8 +95,8 @@ interface IXBRProject : IUnknown
    virtual void SetColumnShape(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2) = 0;
    virtual void GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2) = 0;
 
-   virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure) = 0;
-   virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
+   virtual void SetTransverseLocation(ColumnIndexType refColIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure) = 0;
+   virtual void GetTransverseLocation(ColumnIndexType* pRefColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
 
    virtual Float64 GetXBeamLength() = 0;
 };

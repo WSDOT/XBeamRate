@@ -29,7 +29,6 @@ txnBearingData::txnBearingData()
 {
    m_DC = 0;
    m_DW = 0;
-   m_LLIM = 0;
    m_S = 0;
 }
 
@@ -137,11 +136,14 @@ void txnEditPier::Execute(int i)
       pProject->SetBearingCount(brgLineIdx,nBearings);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         //pProject->SetBearingData(brgLineIdx,brgIdx);
          if ( brgIdx < nBearings-1 )
          {
             pProject->SetBearingSpacing(brgLineIdx,brgIdx,m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_S);
          }
+
+         pProject->SetBearingReactions(brgLineIdx,brgIdx,
+                                       m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_DC,
+                                       m_PierData[i].m_BearingLines[brgLineIdx].at(brgIdx).m_DW);
       }
 
       pProject->SetReferenceBearing(brgLineIdx,m_PierData[i].m_RefBearingIdx[brgLineIdx],m_PierData[i].m_RefBearingLocation[brgLineIdx],m_PierData[i].m_RefBearingDatum[brgLineIdx]);

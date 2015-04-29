@@ -141,12 +141,11 @@ STDMETHODIMP CProjectAgentImp::Init()
    m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,modE,refColIdx,transverseOffset,pier));
 
    // Start off with one bearing line that has one bearing
-   BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,0.0);
+   BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
    BearingLineType backBearingLine(bearingLocator);
-   BearingType bearing1(0);
-   BearingType bearing2(0);
-   BearingType bearing3(0);
-   BearingType bearing4(0);
+   BearingType bearing1(0,0,0);
+   BearingType bearing2(0,0,0);
+   BearingType bearing3(0,0,0);
    Float64 S = ::ConvertToSysUnits(6.0,unitMeasure::Feet);
 
    backBearingLine.Bearing().push_back(bearing1);
@@ -154,8 +153,6 @@ STDMETHODIMP CProjectAgentImp::Init()
    backBearingLine.Bearing().push_back(bearing2);
    backBearingLine.Spacing().push_back(S);
    backBearingLine.Bearing().push_back(bearing3);
-   backBearingLine.Spacing().push_back(S);
-   backBearingLine.Bearing().push_back(bearing4);
 
    m_XBeamRateXML->BearingLine().push_back(backBearingLine);
 
@@ -254,6 +251,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    std::stringstream ss; // NOTE: XML Stream uses ANSI character set
    ss << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>" << T2A(strUnit);
 
+#pragma Reminder("UDPATE: need to bind to schema for validation")
    // create the XML\C++ binding reading from the string stream
    // for instance document validation, we need to tell the XML parser where the schema files are located
    //xml_schema::properties props;
@@ -527,6 +525,18 @@ void CProjectAgentImp::SetBearingSpacing(IndexType brgLineIdx,IndexType brgIdx,F
 {
    ATLASSERT(brgIdx < GetBearingCount(brgLineIdx)-1);
    m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing()[brgIdx] = spacing;
+}
+
+void CProjectAgentImp::SetBearingReactions(IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW)
+{
+   m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DC() = DC;
+   m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DW() = DW;
+}
+
+void CProjectAgentImp::GetBearingReactions(IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
+{
+   *pDC = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DC();
+   *pDW = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DW();
 }
 
 void CProjectAgentImp::GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
@@ -856,11 +866,11 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    {
       ConvertBetweenBaseUnits(brgLine.BearingLocator().Location(), xmlDocumentUnitServer, pOurUnitServer);
       
-#pragma Reminder("Convert reactions here")
-      //BOOST_FOREACH(BearingType& bearing,brgLine.Bearing())
-      //{
-      //   ConvertBetweenBaseUnits(bearing.?? forces/
-      //}
+      BOOST_FOREACH(BearingType& bearing,brgLine.Bearing())
+      {
+         ConvertBetweenBaseUnits(bearing.DC(), xmlDocumentUnitServer, pOurUnitServer);
+         ConvertBetweenBaseUnits(bearing.DW(), xmlDocumentUnitServer, pOurUnitServer);
+      }
 
       BOOST_FOREACH(BearingLineType::Spacing_type& spacing,brgLine.Spacing())
       {

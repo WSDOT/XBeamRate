@@ -26,6 +26,7 @@
 #define SHEAR_GRAPH 2
 
 #include <EAF\EAFGraphControlWindow.h>
+#include <IFace\AnalysisResults.h>
 
 class CTestGraphController : public CEAFGraphControlWindow
 {
@@ -34,6 +35,7 @@ public:
    DECLARE_DYNCREATE(CTestGraphController);
 
    int GetGraphType();
+   XBRProductForceType GetLoading();
 
 protected:
 
@@ -41,9 +43,10 @@ protected:
 
 	//{{AFX_MSG(CTestGraphController)
    //}}AFX_MSG
-   afx_msg void OnButton();
 
 	DECLARE_MESSAGE_MAP()
+
+   void FillLoadingList();
 
 #ifdef _DEBUG
 public:

@@ -45,6 +45,7 @@ class ATL_NO_VTABLE CPierAgentImp :
 	//public IConnectionPointContainerImpl<CPierAgentImp>,
    //public CProxyIProjectEventSink<CPierAgentImp>,
    public IAgentEx,
+   public IXBRPier,
    public IXBRSectionProperties,
    public IXBRMaterial,
    public IXBRPointOfInterest,
@@ -64,6 +65,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PIERAGENT)
 BEGIN_COM_MAP(CPierAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IXBRPier)
    COM_INTERFACE_ENTRY(IXBRSectionProperties)
    COM_INTERFACE_ENTRY(IXBRMaterial)
    COM_INTERFACE_ENTRY(IXBRPointOfInterest)
@@ -84,6 +86,12 @@ public:
 	STDMETHOD(ShutDown)();
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
+
+// IXBRPier
+public:
+   virtual IndexType GetBearingLineCount();
+   virtual IndexType GetBearingCount(IndexType brgLineIdx);
+   virtual Float64 GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx);
 
 // IXBRSectionProperties
 public:
@@ -118,6 +126,8 @@ private:
    void ValidatePointsOfInterest();
    std::vector<xbrPointOfInterest> m_XBeamPoi;
 
+   Float64 GetLeftBearingOffset(IndexType brgLineIdx);
+   Float64 GetLeftColumnOffset();
    Float64 GetCrownPointLocation();
    Float64 GetSkewAngle();
 };

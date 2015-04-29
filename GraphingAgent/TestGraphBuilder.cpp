@@ -48,6 +48,7 @@ static char THIS_FILE[] = __FILE__;
 BEGIN_MESSAGE_MAP(CTestGraphBuilder, CEAFGraphBuilderBase)
    ON_BN_CLICKED(IDC_MOMENT, &CTestGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CTestGraphBuilder::OnGraphTypeChanged)
+   ON_LBN_SELCHANGE(IDC_LOADING,&CTestGraphBuilder::OnLbnSelChanged)
 END_MESSAGE_MAP()
 
 
@@ -93,6 +94,11 @@ void CTestGraphBuilder::OnGraphTypeChanged()
    pGraphView->UpdateWindow();
 }
 
+void CTestGraphBuilder::OnLbnSelChanged()
+{
+   OnGraphTypeChanged();
+}
+
 void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 {
    CComPtr<IBroker> pBroker;
@@ -100,6 +106,8 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    int graphType = m_GraphControls.GetGraphType();
+   XBRProductForceType pfType = m_GraphControls.GetLoading();
+
    arvPhysicalConverter* pVerticalAxisFormat;
    if ( graphType == MOMENT_GRAPH )
       pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
@@ -119,7 +127,7 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
    graph.SetXAxisTitle(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")"));
 
-   IndexType graphIdx = graph.CreateDataSeries();
+   IndexType graphIdx = graph.CreateDataSeries(_T("Title"),PS_SOLID,2,RED);
 
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
@@ -131,14 +139,14 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
       if ( graphType == MOMENT_GRAPH )
       {
-         Float64 Mz = pResults->GetMoment(pftLowerXBeam,poi);
+         Float64 Mz = pResults->GetMoment(pfType,poi);
          Mz = pVerticalAxisFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
          graph.AddPoint(graphIdx,point);
       }
       else
       {
-         sysSectionValue V = pResults->GetShear(pftLowerXBeam,poi);
+         sysSectionValue V = pResults->GetShear(pfType,poi);
          Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
          Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
          graph.AddPoint(graphIdx,gpPoint2d(X,Vl));

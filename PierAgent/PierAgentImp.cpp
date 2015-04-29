@@ -74,6 +74,7 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
+   pBrokerInit->RegInterface(IID_IXBRPier, this);
    pBrokerInit->RegInterface(IID_IXBRSectionProperties, this);
    pBrokerInit->RegInterface(IID_IXBRMaterial, this);
    pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
@@ -135,6 +136,37 @@ STDMETHODIMP CPierAgentImp::ShutDown()
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
 
    return S_OK;
+}
+
+//////////////////////////////////////////
+// IXBRPier
+IndexType CPierAgentImp::GetBearingLineCount()
+{
+   GET_IFACE(IXBRProject,pProject);
+   return pProject->GetBearingLineCount();
+}
+
+IndexType CPierAgentImp::GetBearingCount(IndexType brgLineIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   return pProject->GetBearingCount(brgLineIdx);
+}
+
+Float64 CPierAgentImp::GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   Float64 leftBrgOffset    = GetLeftBearingOffset(brgLineIdx); // offset of left-most bearing from alignment
+   Float64 leftColumnOffset = GetLeftColumnOffset();  // offset of left-most column from alignment
+   Float64 leftColumnOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft); // overhang from left-most column to left edge of cross beam
+   Float64 leftBrgLocation  = leftColumnOverhang - leftColumnOffset + leftBrgOffset; // dist from left edge of cross beam to left most bearing
+
+   for ( IndexType idx = 0; idx < brgIdx && 0 < brgIdx; idx++ )
+   {
+      Float64 spacing = pProject->GetBearingSpacing(brgLineIdx,idx);
+      leftBrgLocation += spacing;
+   }
+
+   return leftBrgLocation;
 }
 
 //////////////////////////////////////////
@@ -347,8 +379,19 @@ void CPierAgentImp::ValidatePointsOfInterest()
       }
    }
 
-#pragma Reminder("UPDATE: need POIs at every bearing location")
    // need to pick up shear jumps at points of concentrated load
+   // put POI at at bearing locations
+   IndexType nBrgLines = pProject->GetBearingLineCount();
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBrgLines; brgLineIdx++ )
+   {
+      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+      {
+         Float64 Xbrg = GetBearingLocation(brgLineIdx,brgIdx);
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg));
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg+0.001));
+      }
+   }
 
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
@@ -361,18 +404,56 @@ void CPierAgentImp::ValidatePointsOfInterest()
       Xpoi += step;
    }
    m_XBeamPoi.push_back(xbrPointOfInterest(id++,L/2));
+
+   // put POI in left-to-right sorted order
    std::sort(m_XBeamPoi.begin(),m_XBeamPoi.end());
+
+   // remove any duplicates
    m_XBeamPoi.erase(std::unique(m_XBeamPoi.begin(),m_XBeamPoi.end()),m_XBeamPoi.end());
 }
 
-Float64 CPierAgentImp::GetCrownPointLocation()
+Float64 CPierAgentImp::GetLeftBearingOffset(IndexType brgLineIdx)
 {
-   // returns the location of the crown point, measured from the left edge
-   // of the cross beam
+   // returns the offset from the alignment to the left-most bearing
+   // values less than zero indicate the left-most bearing is to the
+   // left ofthe alignment
 
    GET_IFACE(IXBRProject,pProject);
+   ATLASSERT(brgLineIdx < pProject->GetBearingLineCount());
 
-   // Get location of first column from the alignment
+   IndexType refBrgIdx;
+   Float64 refBearingOffset;
+   pgsTypes::OffsetMeasurementType refBearingDatum;
+   pProject->GetReferenceBearing(brgLineIdx,&refBrgIdx,&refBearingOffset,&refBearingDatum);
+
+   if ( refBearingDatum == pgsTypes::omtBridge )
+   {
+      // reference bearing is located from the bridge line... adjust its location
+      // so that it is measured from the alignment
+      Float64 blo = pProject->GetBridgeLineOffset();
+      refBearingOffset += blo;
+   }
+
+   if ( 0 < refBrgIdx )
+   {
+      // make the reference bearing the first bearing
+      for ( IndexType brgIdx = refBrgIdx-1; 0 <= brgIdx && brgIdx != INVALID_INDEX; brgIdx-- )
+      {
+         Float64 space = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
+         refBearingOffset -= space;
+      }
+   }
+
+   return refBearingOffset;
+}
+
+Float64 CPierAgentImp::GetLeftColumnOffset()
+{
+   // returns the offset from the alignment to the left-most column
+   // values less than zero indicate the left-most column is to the 
+   // left of the alignment
+
+   GET_IFACE(IXBRProject,pProject);
    ColumnIndexType refColIdx;
    Float64 refColumnOffset;
    pgsTypes::OffsetMeasurementType refColumnDatum;
@@ -396,13 +477,23 @@ Float64 CPierAgentImp::GetCrownPointLocation()
       }
    }
 
-   // at this point we know the location of the first column, measured from the alignment
+   return refColumnOffset;
+}
+
+Float64 CPierAgentImp::GetCrownPointLocation()
+{
+   // returns the location of the crown point, measured from the left edge
+   // of the cross beam
+
+   Float64 refColumnOffset = GetLeftColumnOffset();
+
    // X is the distance from the left edge of the cross beam to the crown point
+   GET_IFACE(IXBRProject,pProject);
    Float64 LOH = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
    Float64 CPO = pProject->GetCrownPointOffset();
    Float64 skew = GetSkewAngle();
 
-   Float64 X = LOH - refColumnOffset + CPO/cos(skew);
+   Float64 X = LOH - refColumnOffset + CPO/cos(skew); // negative because of refColumnOffset sign convension
    ATLASSERT(::InRange(0.0,X,pProject->GetXBeamLength()));
    return X;
 }

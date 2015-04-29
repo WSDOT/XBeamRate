@@ -263,6 +263,7 @@ void CAnalysisAgentImp::ApplyDeadLoad()
 {
    ApplyLowerXBeamDeadLoad();
    ApplyUpperXBeamDeadLoad();
+   ApplySuperstructureDeadLoadReactions();
 }
 
 void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
@@ -382,6 +383,56 @@ void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
    }
 }
 
+void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions()
+{
+   GET_IFACE(IXBRPier,pPier);
+   GET_IFACE(IXBRProject,pProject);
+
+   LoadCaseIDType dcLoadCaseID = GetLoadCaseID(pftDCReactions);
+   LoadCaseIDType dwLoadCaseID = GetLoadCaseID(pftDWReactions);
+
+   LoadIDType dcLoadID = 0;
+   LoadIDType dwLoadID = 0;
+
+   CComPtr<IFem2dLoadingCollection> loadings;
+   m_Model->get_Loadings(&loadings);
+
+   CComPtr<IFem2dLoading> dcLoading;
+   loadings->Create(dcLoadCaseID,&dcLoading);
+
+   CComPtr<IFem2dLoading> dwLoading;
+   loadings->Create(dwLoadCaseID,&dwLoading);
+
+   CComPtr<IFem2dPointLoadCollection> dcPointLoads;
+   dcLoading->get_PointLoads(&dcPointLoads);
+
+   CComPtr<IFem2dPointLoadCollection> dwPointLoads;
+   dwLoading->get_PointLoads(&dwPointLoads);
+
+   IndexType nBearingLines = pProject->GetBearingLineCount();
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+   {
+      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+      {
+         Float64 Xbrg = pPier->GetBearingLocation(brgLineIdx,brgIdx);
+
+         MemberIDType mbrID;
+         Float64 mbrLocation;
+         GetCapBeamFemModelLocation(Xbrg,&mbrID,&mbrLocation);
+
+         Float64 DC, DW;
+         pProject->GetBearingReactions(brgLineIdx,brgIdx,&DC,&DW);
+
+         CComPtr<IFem2dPointLoad> dcLoad;
+         dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
+
+         CComPtr<IFem2dPointLoad> dwLoad;
+         dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+      }
+   }
+}
+
 void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
 {
    if ( 0 < m_LowerXBeamLoads.size() )
@@ -429,15 +480,20 @@ void CAnalysisAgentImp::GetFemModelLocation(const xbrPointOfInterest& poi,Member
    ATLASSERT(!poi.IsColumnPOI()); // not supporting POIs on the columns yet
 
    Float64 Xpoi = poi.GetDistFromStart();
+   GetCapBeamFemModelLocation(Xpoi,pMbrID,pMbrLocation);
+}
+
+void CAnalysisAgentImp::GetCapBeamFemModelLocation(Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation)
+{
    std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
    std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
    for ( ; iter != end; iter++ )
    {
       CapBeamMember& capMbr(*iter);
-      if ( InRange(capMbr.Xs,Xpoi,capMbr.Xe) )
+      if ( InRange(capMbr.Xs,X,capMbr.Xe) )
       {
          *pMbrID = capMbr.mbrID;
-         *pMbrLocation = Xpoi - capMbr.Xs;
+         *pMbrLocation = X - capMbr.Xs;
          return;
       }
    }
@@ -453,6 +509,12 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(XBRProductForceType pfType)
 
    case pftUpperXBeam:
       return 1;
+
+   case pftDCReactions:
+      return 2;
+
+   case pftDWReactions:
+      return 3;
 
    default:
       ATLASSERT(false);
@@ -519,7 +581,8 @@ Float64 CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const xbrPointOf
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
    Float64 Fx, Fy, Mz;
-   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
+   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
+   ATLASSERT(SUCCEEDED(hr));
    return Mz;
 }
 
