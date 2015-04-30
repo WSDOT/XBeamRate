@@ -95,9 +95,9 @@ STDMETHODIMP CProjectAgentImp::Init()
 #pragma Reminder("WORKING HERE - Need better default values")
 
    // Create default data model
-   ApplicationSettings settings(UnitModeEnum::US,_T("XBeam Rating Project"));
+   XBeamRate::ApplicationSettings settings(XBeamRate::UnitModeEnum::US,_T("XBeam Rating Project"));
 
-   PierTypeEnum pierType = PierTypeEnum::Integral;
+   XBeamRate::PierTypeEnum pierType = XBeamRate::PierTypeEnum::Integral;
 
    OpenBridgeML::Pier::CapBeamType capBeam(::ConvertToSysUnits(5.0,unitMeasure::Feet),
       ::ConvertToSysUnits(5.0,unitMeasure::Feet),
@@ -111,15 +111,15 @@ STDMETHODIMP CProjectAgentImp::Init()
    column.CircularSection().set(circularSection);
    column.Height() = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
 
-   OpenBridgeML::Pier::ColumnsType columns;
+   ColumnIndexType refColIdx = 0;
+   OpenBridgeML::Types::TransverseOffsetType transverseOffset(::ConvertToSysUnits(-2.5,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment);
+   OpenBridgeML::Pier::ColumnsType columns(refColIdx,transverseOffset);
    columns.PrismaticColumn().push_back( column );
    columns.Spacing().push_back(::ConvertToSysUnits(5.0,unitMeasure::Feet));
    columns.PrismaticColumn().push_back(column);
 
    OpenBridgeML::Pier::PierType pier(capBeam,columns);
 
-   TransverseOffsetType transverseOffset(::ConvertToSysUnits(-2.5,unitMeasure::Feet),OffsetMeasurementEnum::Alignment);
-   ColumnIndexType refColIdx = 0;
 
    Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
 
@@ -127,7 +127,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    Float64 deckElevation = 0;
    Float64 bridgeLineOffset = 0;
    Float64 crownPointOffset = 0;
-   OffsetMeasurementEnum curbLineDatum = OffsetMeasurementEnum::Alignment;
+   OpenBridgeML::Types::OffsetMeasurementEnum curbLineDatum = OpenBridgeML::Types::OffsetMeasurementEnum::Alignment;
    Float64 LCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
    Float64 RCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
    Float64 SL = -0.02;
@@ -138,14 +138,23 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    LPCTSTR strOrientation = _T("00 00 0.0 L");
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate>(new XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,modE,refColIdx,transverseOffset,pier));
+   XBeamRate::LiveLoadReactionsType designLiveLoad;
+   XBeamRate::LiveLoadReactionType truckLane(_T("Truck+Lane"),100);
+   designLiveLoad.Reactions().push_back(truckLane);
+
+   XBeamRate::LiveLoadReactionsType legalRoutineLiveLoad;
+   XBeamRate::LiveLoadReactionsType legalSpecialLiveLoad;
+   XBeamRate::LiveLoadReactionsType permitRoutineLiveLoad;
+   XBeamRate::LiveLoadReactionsType permitSpecialLiveLoad;
+
+   m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,pier));
 
    // Start off with one bearing line that has one bearing
-   BearingLocatorType bearingLocator(0,OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
-   BearingLineType backBearingLine(bearingLocator);
-   BearingType bearing1(0,0,0);
-   BearingType bearing2(0,0,0);
-   BearingType bearing3(0,0,0);
+   XBeamRate::BearingLocatorType bearingLocator(0,OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
+   XBeamRate::BearingLineType backBearingLine(bearingLocator);
+   XBeamRate::BearingType bearing1(0,0,0);
+   XBeamRate::BearingType bearing2(0,0,0);
+   XBeamRate::BearingType bearing3(0,0,0);
    Float64 S = ::ConvertToSysUnits(6.0,unitMeasure::Feet);
 
    backBearingLine.Bearing().push_back(bearing1);
@@ -212,7 +221,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    HRESULT hr = S_OK;
 
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? UnitModeEnum::SI : UnitModeEnum::US);
+   XBeamRate::UnitModeEnum units = (pDisplayUnits->GetUnitMode() == eafTypes::umSI ? XBeamRate::UnitModeEnum::SI : XBeamRate::UnitModeEnum::US);
    m_XBeamRateXML->Settings().Units(units);
 
    // write the XML stream into the string-stream
@@ -257,10 +266,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    //xml_schema::properties props;
    //props.no_namespace_schema_location(_T("F:\\ARP\\XBeamRate\\Schema\\XBeamRate.xsd"));
    //props.schema_location(_T("http://www.wsdot.wa.gov/OpenBridgeML/Units"),_T("F:\\ARP\\OpenBridgeML\\Schema\\OpenBridgeML_Units.xsd"));
-   //std::auto_ptr<XBeamRate> xbrXML = XBeamRate_(ss,0,props);
+   //std::auto_ptr<XBeamRate::XBeamRate> xbrXML = XBeamRate::XBeamRate_(ss,0,props);
    try
    {
-      m_XBeamRateXML = XBeamRate_(ss,xml_schema::flags::dont_validate); // can't figure out validation right now
+      m_XBeamRateXML = XBeamRate::XBeamRate_(ss,xml_schema::flags::dont_validate); // can't figure out validation right now
    }
    catch(...)
    {
@@ -269,8 +278,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
    // extract our data from the binding object
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   ApplicationSettings& settings( m_XBeamRateXML->Settings() );
-   if ( settings.Units() == UnitModeEnum::SI )
+   XBeamRate::ApplicationSettings& settings( m_XBeamRateXML->Settings() );
+   if ( settings.Units() == XBeamRate::UnitModeEnum::SI )
    {
       pDisplayUnits->SetUnitMode(eafTypes::umSI);
    }
@@ -350,14 +359,14 @@ LPCTSTR CProjectAgentImp::GetProjectName()
 xbrTypes::PierConnectionType CProjectAgentImp::GetPierType()
 {
    xbrTypes::PierConnectionType pierType =
-      (xbrTypes::PierConnectionType)(PierTypeEnum::value)(m_XBeamRateXML->PierType());
+      (xbrTypes::PierConnectionType)(XBeamRate::PierTypeEnum::value)(m_XBeamRateXML->PierType());
 
    return pierType;
 }
 
 void CProjectAgentImp::SetPierType(xbrTypes::PierConnectionType pierType)
 {
-   m_XBeamRateXML->PierType((PierTypeEnum::value)pierType);
+   m_XBeamRateXML->PierType((XBeamRate::PierTypeEnum::value)pierType);
 }
 
 void CProjectAgentImp::SetDeckElevation(Float64 deckElevation)
@@ -402,12 +411,12 @@ LPCTSTR CProjectAgentImp::GetOrientation()
 
 pgsTypes::OffsetMeasurementType CProjectAgentImp::GetCurbLineDatum()
 {
-   return (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)m_XBeamRateXML->CurbLineOffsetDatum();
+   return (pgsTypes::OffsetMeasurementType)(OpenBridgeML::Types::OffsetMeasurementEnum::value)m_XBeamRateXML->CurbLineOffsetDatum();
 }
 
 void CProjectAgentImp::SetCurbLineDatum(pgsTypes::OffsetMeasurementType datumType)
 {
-   m_XBeamRateXML->CurbLineOffsetDatum((OffsetMeasurementEnum::value)datumType);
+   m_XBeamRateXML->CurbLineOffsetDatum((OpenBridgeML::Types::OffsetMeasurementEnum::value)datumType);
 }
 
 void CProjectAgentImp::SetCurbLineOffset(Float64 leftCLO,Float64 rightCLO)
@@ -487,14 +496,14 @@ void CProjectAgentImp::SetBearingCount(IndexType brgLineIdx,IndexType nBearings)
       if ( nBearings < nCurrentBearings )
       {
          // removing bearings
-         BearingLineType::Bearing_iterator brgBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().begin();
-         BearingLineType::Bearing_iterator brgEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().end();
+         XBeamRate::BearingLineType::Bearing_iterator brgBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().begin();
+         XBeamRate::BearingLineType::Bearing_iterator brgEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().end();
          brgBegin += nBearings;
          m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing().erase(brgBegin,brgEnd);
 
          // remove spacing also
-         BearingLineType::Spacing_iterator spaBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().begin();
-         BearingLineType::Spacing_iterator spaEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().end();
+         XBeamRate::BearingLineType::Spacing_iterator spaBegin = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().begin();
+         XBeamRate::BearingLineType::Spacing_iterator spaEnd   = m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().end();
          spaBegin += nBearings;
          m_XBeamRateXML->BearingLine()[brgLineIdx].Spacing().erase(spaBegin,spaEnd);
       }
@@ -531,6 +540,8 @@ void CProjectAgentImp::SetBearingReactions(IndexType brgLineIdx,IndexType brgIdx
 {
    m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DC() = DC;
    m_XBeamRateXML->BearingLine()[brgLineIdx].Bearing()[brgIdx].DW() = DW;
+
+   Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::GetBearingReactions(IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
@@ -543,16 +554,120 @@ void CProjectAgentImp::GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefI
 {
    *pRefIdx = (IndexType)m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().ReferenceBearingID();
    *pRefBearingOffset = m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Location();
-   *pRefBearingDatum = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure();
+   *pRefBearingDatum = (pgsTypes::OffsetMeasurementType)(OpenBridgeML::Types::OffsetMeasurementEnum::value)m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure();
 }
 
 void CProjectAgentImp::SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum)
 {
-   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().ReferenceBearingID() = (BearingLocatorType::ReferenceBearingID_type)refIdx;
+   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().ReferenceBearingID() = (XBeamRate::BearingLocatorType::ReferenceBearingID_type)refIdx;
    m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Location() = refBearingOffset;
-   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure((OffsetMeasurementEnum::value)refBearingDatum);
+   m_XBeamRateXML->BearingLine()[brgLineIdx].BearingLocator().Measure((OpenBridgeML::Types::OffsetMeasurementEnum::value)refBearingDatum);
 
    Fire_OnProjectChanged();
+}
+
+IndexType CProjectAgentImp::GetLiveLoadReactionCount(pgsTypes::LiveLoadType liveLoadType)
+{
+   IndexType nReactions = 0;
+   switch ( liveLoadType )
+   {
+   case pgsTypes::lltDesign:
+      nReactions = m_XBeamRateXML->Design().Reactions().size();
+      break;
+
+   //case pgsTypes::lltPermit:
+   //case pgsTypes::lltFatigue:
+   //case pgsTypes::lltPedestrian:
+
+   case pgsTypes::lltLegalRating_Routine:
+      nReactions = m_XBeamRateXML->Legal_Routine().Reactions().size();
+      break;
+
+   case pgsTypes::lltLegalRating_Special:
+      nReactions = m_XBeamRateXML->Legal_Special().Reactions().size();
+      break;
+
+   case pgsTypes::lltPermitRating_Routine:
+      nReactions = m_XBeamRateXML->Permit_Routine().Reactions().size();
+      break;
+
+   case pgsTypes::lltPermitRating_Special:
+      nReactions = m_XBeamRateXML->Permit_Special().Reactions().size();
+      break;
+
+   }
+
+   return nReactions;
+}
+
+void CProjectAgentImp::SetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
+{
+   XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions = NULL;
+
+   switch ( liveLoadType )
+   {
+   case pgsTypes::lltDesign:
+      pReactions = &m_XBeamRateXML->Design().Reactions();
+      break;
+
+   //case pgsTypes::lltPermit:
+   //case pgsTypes::lltFatigue:
+   //case pgsTypes::lltPedestrian:
+
+   case pgsTypes::lltLegalRating_Routine:
+      pReactions = &m_XBeamRateXML->Legal_Routine().Reactions();
+      break;
+
+   case pgsTypes::lltLegalRating_Special:
+      pReactions = &m_XBeamRateXML->Legal_Special().Reactions();
+      break;
+
+   case pgsTypes::lltPermitRating_Routine:
+      pReactions = &m_XBeamRateXML->Permit_Routine().Reactions();
+      break;
+
+   case pgsTypes::lltPermitRating_Special:
+      pReactions = &m_XBeamRateXML->Permit_Special().Reactions();
+      break;
+
+   }
+
+   SetLiveLoadReactions( vLLIM, pReactions );
+}
+
+std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType)
+{
+   XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions = NULL;
+
+   switch ( liveLoadType )
+   {
+   case pgsTypes::lltDesign:
+      pReactions = &m_XBeamRateXML->Design().Reactions();
+      break;
+
+   //case pgsTypes::lltPermit:
+   //case pgsTypes::lltFatigue:
+   //case pgsTypes::lltPedestrian:
+
+   case pgsTypes::lltLegalRating_Routine:
+      pReactions = &m_XBeamRateXML->Legal_Routine().Reactions();
+      break;
+
+   case pgsTypes::lltLegalRating_Special:
+      pReactions = &m_XBeamRateXML->Legal_Special().Reactions();
+      break;
+
+   case pgsTypes::lltPermitRating_Routine:
+      pReactions = &m_XBeamRateXML->Permit_Routine().Reactions();
+      break;
+
+   case pgsTypes::lltPermitRating_Special:
+      pReactions = &m_XBeamRateXML->Permit_Special().Reactions();
+      break;
+
+   }
+
+   return GetLiveLoadReactions( pReactions );
 }
 
 void CProjectAgentImp::SetModE(Float64 Ec)
@@ -775,16 +890,16 @@ void CProjectAgentImp::GetColumnShape(CColumnData::ColumnShapeType* pShapeType,F
 
 void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure)
 {
-   m_XBeamRateXML->RefColumnIdx() = colIdx;
-   m_XBeamRateXML->TransverseOffset().TransverseOffset(offset);
-   m_XBeamRateXML->TransverseOffset().Measure((OffsetMeasurementEnum::value)measure);
+   m_XBeamRateXML->Pier().Columns().ReferenceColumn() = colIdx;
+   m_XBeamRateXML->Pier().Columns().TransverseOffset().TransverseOffset(offset);
+   m_XBeamRateXML->Pier().Columns().TransverseOffset().Measure((OpenBridgeML::Types::OffsetMeasurementEnum::value)measure);
 }
 
 void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure)
 {
-   *pColIdx = (ColumnIndexType)m_XBeamRateXML->RefColumnIdx();
-   *pOffset = m_XBeamRateXML->TransverseOffset().TransverseOffset();
-   *pMeasure = (pgsTypes::OffsetMeasurementType)(OffsetMeasurementEnum::value)(m_XBeamRateXML->TransverseOffset().Measure());
+   *pColIdx = (ColumnIndexType)m_XBeamRateXML->Pier().Columns().ReferenceColumn();
+   *pOffset = m_XBeamRateXML->Pier().Columns().TransverseOffset().TransverseOffset();
+   *pMeasure = (pgsTypes::OffsetMeasurementType)(OpenBridgeML::Types::OffsetMeasurementEnum::value)(m_XBeamRateXML->Pier().Columns().TransverseOffset().Measure());
 }
 
 Float64 CProjectAgentImp::GetXBeamLength()
@@ -838,7 +953,7 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    xmlDocumentUnitServer.CoCreateInstance(CLSID_UnitServer);
 
    // See if the XML instance document has a units declaration
-   XBeamRate::UnitsDeclaration_optional& unitsDeclaration(m_XBeamRateXML->UnitsDeclaration());
+   XBeamRate::XBeamRate::UnitsDeclaration_optional& unitsDeclaration(m_XBeamRateXML->UnitsDeclaration());
    if ( unitsDeclaration.present() )
    {
       // there was a units declaration in the XML instance document
@@ -862,17 +977,17 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    ConvertBetweenBaseUnits(m_XBeamRateXML->CrownPointOffset(), xmlDocumentUnitServer, pOurUnitServer);
    ConvertBetweenBaseUnits(m_XBeamRateXML->BridgeLineOffset(), xmlDocumentUnitServer, pOurUnitServer);
 
-   BOOST_FOREACH(BearingLineType& brgLine,m_XBeamRateXML->BearingLine())
+   BOOST_FOREACH(XBeamRate::BearingLineType& brgLine,m_XBeamRateXML->BearingLine())
    {
       ConvertBetweenBaseUnits(brgLine.BearingLocator().Location(), xmlDocumentUnitServer, pOurUnitServer);
       
-      BOOST_FOREACH(BearingType& bearing,brgLine.Bearing())
+      BOOST_FOREACH(XBeamRate::BearingType& bearing,brgLine.Bearing())
       {
          ConvertBetweenBaseUnits(bearing.DC(), xmlDocumentUnitServer, pOurUnitServer);
          ConvertBetweenBaseUnits(bearing.DW(), xmlDocumentUnitServer, pOurUnitServer);
       }
 
-      BOOST_FOREACH(BearingLineType::Spacing_type& spacing,brgLine.Spacing())
+      BOOST_FOREACH(XBeamRate::BearingLineType::Spacing_type& spacing,brgLine.Spacing())
       {
          ConvertBetweenBaseUnits(spacing, xmlDocumentUnitServer, pOurUnitServer);
       }
@@ -920,4 +1035,39 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    }
 
    return S_OK;
+}
+
+void CProjectAgentImp::SetLiveLoadReactions(const std::vector<std::pair<std::_tstring,Float64>>& vLLIM,XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions)
+{
+   pReactions->clear();
+   std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(vLLIM.begin());
+   std::vector<std::pair<std::_tstring,Float64>>::const_iterator end(vLLIM.end());
+   for ( ; iter != end; iter++ )
+   {
+      const std::pair<std::_tstring,Float64>& item(*iter);
+      XBeamRate::LiveLoadReactionType reaction(item.first.c_str(),item.second);
+      pReactions->push_back(reaction);
+   }
+}
+
+std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(const XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions)
+{
+   std::vector<std::pair<std::_tstring,Float64>> vLLIM;
+   if ( pReactions == NULL )
+   {
+      return vLLIM;
+   }
+
+   XBeamRate::LiveLoadReactionsType::Reactions_const_iterator iter(pReactions->begin());
+   XBeamRate::LiveLoadReactionsType::Reactions_const_iterator end(pReactions->end());
+   for ( ; iter != end; iter++ )
+   {
+      const XBeamRate::LiveLoadReactionType& reaction(*iter);
+      std::_tstring strName(reaction.Name());
+      Float64 r = reaction.LLIM();
+
+      vLLIM.push_back(std::make_pair(strName,r));
+   }
+
+   return vLLIM;
 }

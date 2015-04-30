@@ -104,6 +104,12 @@ void CAgentCmdTarget::OnEditPier()
 
    pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);
 
+   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltDesign);
+   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Routine);
+   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Special);
+   oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltPermitRating_Routine);
+   oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltPermitRating_Special);
+
    dlg.SetPierData(oldPierData);
    if ( dlg.DoModal() == IDOK )
    {

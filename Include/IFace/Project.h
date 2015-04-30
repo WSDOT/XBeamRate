@@ -73,6 +73,11 @@ interface IXBRProject : IUnknown
    virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
    virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
 
+   // Live Load Reactions per lane
+   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LiveLoadType liveLoadType) = 0;
+   virtual void SetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
+   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType) = 0;
+
    // Material properties of the sub-structure concrete
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;

@@ -149,6 +149,10 @@ public:
    virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
 
+   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LiveLoadType liveLoadType);
+   virtual void SetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
+   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType);
+
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
 
@@ -184,7 +188,7 @@ private:
 
    CAgentCmdTarget m_CommandTarget;
 
-   std::auto_ptr<XBeamRate> m_XBeamRateXML;
+   std::auto_ptr<XBeamRate::XBeamRate> m_XBeamRateXML;
 
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
 
@@ -192,6 +196,9 @@ private:
    void RemoveMenus();
 
    HRESULT ConvertToBaseUnits();
+
+   void SetLiveLoadReactions(const std::vector<std::pair<std::_tstring,Float64>>& vLLIM,XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions);
+   std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(const XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

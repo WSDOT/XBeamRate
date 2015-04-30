@@ -739,6 +739,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LiveLoadReactionGrid.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\LiveLoadReactionsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierDlg.cpp"
 				>
 			</File>
@@ -1019,6 +1027,14 @@
 			</File>
 			<File
 				RelativePath=".\dllmain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LiveLoadReactionGrid.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LiveLoadReactionsPage.h"
 				>
 			</File>
 			<File

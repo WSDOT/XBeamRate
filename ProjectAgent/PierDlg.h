@@ -4,6 +4,7 @@
 #include "PierLayoutPage.h"
 #include "ReinforcementPage.h"
 #include "BearingsPage.h"
+#include "LiveLoadReactionsPage.h"
 #include "txnEditPier.h"
 
 // CPierDlg
@@ -37,6 +38,7 @@ public:
    CPierLayoutPage m_SubstructurePage;
    CReinforcementPage m_ReinforcementPage;
    CBearingsPage m_BearingsPage;
+   CLiveLoadReactionsPage m_LiveLoadPage;
 };
 
 

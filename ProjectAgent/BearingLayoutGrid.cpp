@@ -182,7 +182,28 @@ void CBearingLayoutGrid::AddBearing()
 
 void CBearingLayoutGrid::RemoveSelectedBearings()
 {
-   AfxMessageBox(_T("Remove bearings"));
+	GetParam( )->EnableUndo(FALSE);
+   GetParam()->SetLockReadOnly(FALSE);
+
+   CDWordArray selRows;
+   ROWCOL nSelRows = GetSelectedRows(selRows);
+   for ( int r = nSelRows-1; r >= 0; r-- )
+   {
+      ROWCOL selRow = selRows[r];
+      RemoveRows(selRow,selRow);
+   }
+
+   ROWCOL nRows = GetRowCount();
+   SetStyleRange(CGXRange(nRows,3), CGXStyle()
+      .SetEnabled(FALSE)
+      .SetReadOnly(TRUE)
+      .SetInterior(::GetSysColor(COLOR_BTNFACE))
+      .SetTextColor(::GetSysColor(COLOR_BTNFACE))
+      .SetHorizontalAlignment(DT_RIGHT)
+         );
+
+   GetParam()->SetLockReadOnly(TRUE);
+	GetParam( )->EnableUndo(TRUE);
 }
 
 void CBearingLayoutGrid::GetBearingData(std::vector<txnBearingData>& vBrgData)

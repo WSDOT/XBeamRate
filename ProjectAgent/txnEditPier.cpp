@@ -32,6 +32,10 @@ txnBearingData::txnBearingData()
    m_S = 0;
 }
 
+txnLiveLoadData::txnLiveLoadData()
+{
+}
+
 /////////////////////////////////////////////////////////////////
 txnEditPierData::txnEditPierData()
 {
@@ -162,6 +166,12 @@ void txnEditPier::Execute(int i)
    pProject->SetColumns(m_PierData[i].m_nColumns,m_PierData[i].m_ColumnHeight,m_PierData[i].m_ColumnHeightMeasurementType,m_PierData[i].m_ColumnSpacing);
    pProject->SetColumnShape(m_PierData[i].m_ColumnShape,m_PierData[i].m_B,m_PierData[i].m_D);
    pProject->SetTransverseLocation(m_PierData[i].m_RefColumnIdx,m_PierData[i].m_TransverseOffset,m_PierData[i].m_TransverseOffsetMeasurement);
+
+   pProject->SetLiveLoadReactions(pgsTypes::lltDesign,m_PierData[i].m_DesignLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pgsTypes::lltLegalRating_Routine,m_PierData[i].m_LegalRoutineLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pgsTypes::lltLegalRating_Special,m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pgsTypes::lltPermitRating_Routine,m_PierData[i].m_PermitRoutineLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pgsTypes::lltPermitRating_Special,m_PierData[i].m_PermitSpecialLiveLoad.m_LLIM);
 
    //pEvents->FirePendingEvents();
 }

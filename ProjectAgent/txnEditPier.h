@@ -33,6 +33,13 @@ public:
    Float64 m_DW;
 };
 
+class txnLiveLoadData
+{
+public:
+   txnLiveLoadData();
+   std::vector<std::pair<std::_tstring,Float64>> m_LLIM;
+};
+
 class txnEditPierData
 {
 public:
@@ -79,6 +86,12 @@ public:
    CColumnData::ColumnShapeType m_ColumnShape;
    Float64 m_B;
    Float64 m_D;
+
+   txnLiveLoadData m_DesignLiveLoad;
+   txnLiveLoadData m_LegalRoutineLiveLoad;
+   txnLiveLoadData m_LegalSpecialLiveLoad;
+   txnLiveLoadData m_PermitRoutineLiveLoad;
+   txnLiveLoadData m_PermitSpecialLiveLoad;
 };
 
 class txnEditPier :

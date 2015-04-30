@@ -1,6 +1,9 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.wsdot.wa.gov/XBeamRate"
+           xmlns:xbr="http://www.wsdot.wa.gov/XBeamRate"
+           xmlns:bxt="http://www.wsdot.wa.gov/OpenBridgeML/Types"
            xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
            xmlns:bxp="http://www.wsdot.wa.gov/OpenBridgeML/Pier"
            xmlns:bxg="http://www.wsdot.wa.gov/OpenBridgeML/Geometry"
@@ -11,6 +14,7 @@
       </xs:documentation>
    </xs:annotation>
 
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Types" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Types.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Geometry" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Geometry.xsd" />
@@ -34,34 +38,12 @@
          </xs:documentation>
       </xs:annotation>
       <xs:sequence>
-         <xs:element name="Units" type="UnitModeEnum"/>
+         <xs:element name="Units" type="xbr:UnitModeEnum"/>
          <xs:element name="ProjectName" type="xs:string"/>
         <!-- more stuff, like full project properties go here-->
       </xs:sequence>
    </xs:complexType>
 
-  <xs:simpleType name="TransverseMeasurementEnum">
-    <xs:annotation>
-      <xs:documentation>
-        Enumeration that defines how transverse dimensions are measured
-      </xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="NormalToAlignemnt"/>
-      <xs:enumeration value="PlaneOfPier"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-
-  <!-- This is temporary... eventually this needs to move to the Pier Model -->
-  <xs:simpleType name="OffsetMeasurementEnum">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="Alignment" />
-      <xs:enumeration value="BridgeLine"/>
-    </xs:restriction>
-  </xs:simpleType>
-
-  <!-- This is temporary... eventually this needs to move to the Pier Model -->
   <xs:simpleType name="PierTypeEnum">
     <xs:restriction base="xs:string">
       <xs:enumeration value="Continuous" />
@@ -69,14 +51,6 @@
       <xs:enumeration value="Expansion"/>
     </xs:restriction>
   </xs:simpleType>
-
-  <!-- This is temporary... eventually this needs to move to the Pier Model -->
-  <xs:complexType name="TransverseOffsetType">
-    <xs:sequence>
-      <xs:element name="TransverseOffset" type="bxu:LengthValueType"/>
-    </xs:sequence>
-    <xs:attribute name="Measure" type="OffsetMeasurementEnum" use="required"/>
-  </xs:complexType>
 
   <xs:complexType name="BearingType">
     <xs:annotation>
@@ -106,7 +80,7 @@
           </xs:documentation>
         </xs:annotation>
       </xs:element>
-      <xs:element name="Measure" type="OffsetMeasurementEnum">
+      <xs:element name="Measure" type="bxt:OffsetMeasurementEnum">
         <xs:annotation>
           <xs:documentation>
             Describes the location from where the bearing is located
@@ -130,8 +104,8 @@
       </xs:documentation>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="BearingLocator" type="BearingLocatorType"/>
-      <xs:element name="Bearing" type="BearingType"/>
+      <xs:element name="BearingLocator" type="xbr:BearingLocatorType"/>
+      <xs:element name="Bearing" type="xbr:BearingType"/>
       <xs:sequence minOccurs="0" maxOccurs="unbounded">
         <xs:element name="Spacing" type="bxu:LengthValueType">
           <xs:annotation>
@@ -140,8 +114,21 @@
             </xs:documentation>
           </xs:annotation>
         </xs:element>
-        <xs:element name="Bearing" type="BearingType"/>
+        <xs:element name="Bearing" type="xbr:BearingType"/>
       </xs:sequence>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="LiveLoadReactionType">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="LLIM" type="bxu:ForceValueType"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="LiveLoadReactionsType">
+    <xs:sequence>
+      <xs:element name="Reactions" type="xbr:LiveLoadReactionType" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
@@ -163,19 +150,20 @@
          </xs:annotation>
          <xs:sequence>
            <!-- Part 1: XBeam Rate information not modeled in OpenBridgeML -->
+           
            <!-- Application Settings -->
            <xs:element ref="bxu:UnitsDeclaration" minOccurs="0" maxOccurs="1" />
-           <xs:element name="Settings" type="ApplicationSettings"/>
+           <xs:element name="Settings" type="xbr:ApplicationSettings"/>
            
            <!-- General Description -->
-           <xs:element name="PierType" type="PierTypeEnum"/>
+           <xs:element name="PierType" type="xbr:PierTypeEnum"/>
            
            <xs:element name="DeckElevation" type="bxu:LengthValueType"/>
            <xs:element name="BridgeLineOffset" type="bxu:LengthValueType"/>
            <xs:element name="CrownPointOffset" type="bxu:LengthValueType"/>
            <xs:element name="Orientation" type="bxg:SkewType"/>
 
-           <xs:element name="CurbLineOffsetDatum" type="OffsetMeasurementEnum"/>
+           <xs:element name="CurbLineOffsetDatum" type="bxt:OffsetMeasurementEnum"/>
            <xs:element name="LeftCurbOffset" type="bxu:LengthValueType"/>
            <xs:element name="RightCurbOffset" type="bxu:LengthValueType"/>
            <xs:element name="LeftCrownSlope" type="xs:double"/>
@@ -185,7 +173,7 @@
            <xs:element name="DiaphragmWidth" type="bxu:LengthValueType"/>
 
            <!-- Superstructure Description -->
-           <xs:element name="BearingLine" type="BearingLineType" minOccurs="1" maxOccurs="2">
+           <xs:element name="BearingLine" type="xbr:BearingLineType" minOccurs="1" maxOccurs="2">
              <xs:annotation>
                <xs:documentation>
                  Defines the bearing lines on either side of the CL Pier.
@@ -193,16 +181,20 @@
                </xs:documentation>
              </xs:annotation>
            </xs:element>
+           
+           <!-- Live Load Reactions -->
+           <xs:element name="Design" type="xbr:LiveLoadReactionsType"/>
+           <xs:element name="Legal_Routine" type="xbr:LiveLoadReactionsType"/>
+           <xs:element name="Legal_Special" type="xbr:LiveLoadReactionsType"/>
+           <xs:element name="Permit_Routine" type="xbr:LiveLoadReactionsType"/>
+           <xs:element name="Permit_Special" type="xbr:LiveLoadReactionsType"/>
 
-           <!-- Substructure Description -->
+           <!-- Material Description -->
            <xs:element name="ModE" type="bxu:PressureValueType">
              <xs:annotation>
                <xs:documentation>Modulus of elasticity of the pier concrete</xs:documentation>
              </xs:annotation>
            </xs:element>
-           <!-- This is temporary... eventually this needs to move to the Pier Model -->
-           <xs:element name="RefColumnIdx" type="xs:unsignedLong"/>
-           <xs:element name="TransverseOffset" type="TransverseOffsetType"/>
            
            <!-- Part 2: OpenBridgeML Pier -->
             <xs:element name="Pier" type="bxp:PierType"/>

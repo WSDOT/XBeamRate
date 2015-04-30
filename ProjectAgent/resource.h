@@ -20,6 +20,7 @@
 #define IDC_RIGHT_OVERHANG_UNIT         204
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDC_COLUMN_COUNT                205
+#define IDD_LIVE_LOAD_REACTIONS         205
 #define IDC_COLUMN_LENGTH               206
 #define IDC_COLUMN_LENGTH_UNIT          207
 #define IDC_EDIT5                       208
@@ -67,6 +68,22 @@
 #define IDC_SR                          247
 #define IDC_SR_UNIT                     248
 #define IDC_EDIT2                       250
+#define IDC_DESIGN_GRID                 251
+#define IDC_LEGAL_ROUTINE_GRID          252
+#define IDC_LEGAL_SPECIAL_GRID          253
+#define IDC_PERMIT_ROUTINE_GRID         254
+#define IDC_PERMIT_SPECIAL_GRID         255
+#define IDC_DESIGN_ADD                  256
+#define IDC_DESIGN_REMOVE               257
+#define IDC_LEGAL_ROUTINE_ADD           260
+#define IDC_LEGAL_ROUTINE_REMOVE        261
+#define IDC_LEGAL_SPECIAL_ADD           262
+#define IDC_LEGAL_SPECIAL_REMOVE        263
+#define IDC_PERMIT_ROUTINE_ADD          264
+#define IDC_PERMIT_ROUTINE_REMOVE       265
+#define IDC_PERMIT_SPECIAL_ADD          266
+#define IDC_DESIGN_REMOVE2              267
+#define IDC_PERMIT_SPECIAL_REMOVE       267
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_BACK_BEARING_GRID           1475
 #define IDC_AHEAD_BEARING_GRID          1476
@@ -127,9 +144,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        205
+#define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         251
+#define _APS_NEXT_CONTROL_VALUE         258
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif
