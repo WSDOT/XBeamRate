@@ -33,6 +33,7 @@ public:
    friend CPierLayoutPage;
    friend CReinforcementPage;
    friend CBearingsPage;
+   friend CLiveLoadReactionsPage;
 
    CSuperstructureLayoutPage m_SuperstructurePage;
    CPierLayoutPage m_SubstructurePage;

@@ -139,11 +139,21 @@ STDMETHODIMP CProjectAgentImp::Init()
    LPCTSTR strOrientation = _T("00 00 0.0 L");
 
    XBeamRate::LiveLoadReactionsType designLiveLoad;
-   XBeamRate::LiveLoadReactionType truckLane(_T("Truck+Lane"),100);
-   designLiveLoad.Reactions().push_back(truckLane);
+   designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Design Truck + Lane"),0));
+   designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Design Tandem + Lane"),0));
+   designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
+   designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
 
    XBeamRate::LiveLoadReactionsType legalRoutineLiveLoad;
+   legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3"),0));
+   legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3S2"),0));
+   legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3-3"),0));
+   //legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("0.75(Type 3-3) + Lane Load"),0)); // spans must be greater than 200 feet for this loading
+   legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0));
+
    XBeamRate::LiveLoadReactionsType legalSpecialLiveLoad;
+   legalSpecialLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Notional Rating Load (NRL)"),0));
+
    XBeamRate::LiveLoadReactionsType permitRoutineLiveLoad;
    XBeamRate::LiveLoadReactionsType permitSpecialLiveLoad;
 

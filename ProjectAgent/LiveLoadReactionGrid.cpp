@@ -66,8 +66,6 @@ void CLiveLoadReactionGrid::CustomInit()
 	GetParam( )->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
 
-   SetMergeCellsMode(gxnMergeDelayEval);
-
    const int num_rows = 0;
    const int num_cols = 2;
 
@@ -133,7 +131,7 @@ void CLiveLoadReactionGrid::AddVehicle()
    GetParam()->SetLockReadOnly(FALSE);
 
    InsertRows(nRows+1,1);
-//   ROWCOL row = GetRowCount();
+   SetRowStyle(GetRowCount());
 
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
@@ -173,109 +171,76 @@ void CLiveLoadReactionGrid::SetLiveLoadData(const txnLiveLoadData& llimData)
 {
    GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
-//
-//   ROWCOL nRows = GetRowCount();
-//   if ( 0 < nRows )
-//   {
-//      RemoveRows(1,nRows);
-//   }
-//
-//   if ( vBrgData.size() == 0 )
-//   {
-//      // Always have one bearing
-//      txnBearingData brgData;
-//      AddBearingRow(brgData);
-//   }
-//   else
-//   {
-//      BOOST_FOREACH(const txnBearingData& brgData, vBrgData)
-//      {
-//         AddBearingRow(brgData);
-//      }
-//   }
-//
+
+   ROWCOL nRows = GetRowCount();
+   if ( 0 < nRows )
+   {
+      RemoveRows(1,nRows);
+   }
+
+   std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(llimData.m_LLIM.begin());
+   std::vector<std::pair<std::_tstring,Float64>>::const_iterator end(llimData.m_LLIM.end());
+   for ( ; iter != end; iter++ )
+   {
+      AddLiveLoadData(iter->first,iter->second);
+   }
+
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
+
    GetParam()->SetLockReadOnly(TRUE);
    GetParam()->EnableUndo(TRUE);
 }
 
-//void CBearingLayoutGrid::SetBearingData(ROWCOL row,const txnBearingData& brgData)
-//{
-//   CComPtr<IBroker> pBroker;
-//   EAFGetBroker(&pBroker);
-//   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-//
-//   ROWCOL col = 1;
-//
-//   // DC
-//   Float64 value = ::ConvertFromSysUnits(brgData.m_DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//   SetStyleRange(CGXRange(row,col++), CGXStyle()
-//      .SetEnabled(TRUE)
-//      .SetReadOnly(FALSE)
-//      .SetHorizontalAlignment(DT_RIGHT)
-//      .SetValue(value)
-//      );
-//
-//   // DW
-//   value = ::ConvertFromSysUnits(brgData.m_DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//   SetStyleRange(CGXRange(row,col++), CGXStyle()
-//      .SetEnabled(TRUE)
-//      .SetReadOnly(FALSE)
-//      .SetHorizontalAlignment(DT_RIGHT)
-//      .SetValue(value)
-//      );
-//
-//   // Spacing
-//   // Set the value for the spacing to the next bearing and disable this cell
-//   // This assumes this bearing is in the last row and spacing to next isn't applicable
-//   value = ::ConvertFromSysUnits(brgData.m_S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
-//   SetStyleRange(CGXRange(row,col), CGXStyle()
-//      .SetEnabled(FALSE)
-//      .SetReadOnly(TRUE)
-//      .SetInterior(::GetSysColor(COLOR_BTNFACE))
-//      .SetTextColor(::GetSysColor(COLOR_BTNFACE))
-//      .SetHorizontalAlignment(DT_RIGHT)
-//      .SetValue(value)
-//         );
-//
-//   if ( 1 < row )
-//   {
-//      // if this isn't the first row, enable the spacing in the previous row
-//      // because it obviously isn't the last row
-//      SetStyleRange(CGXRange(row-1,col),CGXStyle()
-//         .SetEnabled(TRUE)
-//         .SetReadOnly(FALSE)
-//         .SetInterior(::GetSysColor(COLOR_WINDOW))
-//        .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
-//         );
-//   }
-//
-//   col++;
-//}
-//
-//void CBearingLayoutGrid::AddBearingRow(const txnBearingData& brgData)
-//{
-//   InsertRows(GetRowCount()+1,1);
-//   ROWCOL row = GetRowCount();
-//
-//   SetBearingData(row,brgData);
-//}
-//
+void CLiveLoadReactionGrid::SetRowStyle(ROWCOL row)
+{
+   ROWCOL col = 1;
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      );
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      );
+}
+
+void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const std::_tstring& strName,Float64 llim)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   ROWCOL col = 1;
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetValue(strName.c_str())
+      );
+
+   Float64 value = ::ConvertFromSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetValue(value)
+      );
+}
+
+void CLiveLoadReactionGrid::AddLiveLoadData(const std::_tstring& strName,Float64 llim)
+{
+   InsertRows(GetRowCount()+1,1);
+   ROWCOL row = GetRowCount();
+   SetRowStyle(row);
+   SetLiveLoadData(row,strName,llim);
+}
+
 void CLiveLoadReactionGrid::GetLiveLoadData(ROWCOL row,std::_tstring& strName,Float64& llim)
 {
-//   CComPtr<IBroker> pBroker;
-//   EAFGetBroker(&pBroker);
-//   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-//
-//   ROWCOL col = 1;
-//
-//   Float64 DC = _tstof(GetCellValue(row,col++));
-//   brgData.m_DC = ::ConvertToSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//
-//   Float64 DW = _tstof(GetCellValue(row,col++));
-//   brgData.m_DW = ::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//
-//   Float64 S = _tstof(GetCellValue(row,col++));
-//   brgData.m_S = ::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+   strName = GetCellValue(row,1);
+   llim = _tstof(GetCellValue(row,2));
+   llim = ::ConvertToSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
 }
 
 CString CLiveLoadReactionGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
@@ -291,4 +256,10 @@ CString CLiveLoadReactionGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
     {
         return GetValueRowCol(nRow, nCol);
     }
+}
+
+BOOL CLiveLoadReactionGrid::OnEndEditing(ROWCOL nRow,ROWCOL nCol)
+{
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
+   return CGXGridWnd::OnEndEditing(nRow,nCol);
 }

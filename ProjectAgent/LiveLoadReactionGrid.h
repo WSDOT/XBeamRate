@@ -70,8 +70,12 @@ public:
    void CustomInit();
 
 private:
-   //void AddBearingRow(const txnBearingData& brgData);
-   //void SetBearingData(ROWCOL row,const txnBearingData& brgData);
+   virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol);
+
+   void SetRowStyle(ROWCOL row);
+
+   void AddLiveLoadData(const std::_tstring& strName,Float64 llim);
+   void SetLiveLoadData(ROWCOL row,const std::_tstring& strName,Float64 llim);
    void GetLiveLoadData(ROWCOL row,std::_tstring& strName,Float64& llim);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };

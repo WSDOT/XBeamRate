@@ -4,6 +4,19 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "LiveLoadReactionsPage.h"
+#include "PierDlg.h"
+
+void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadData& llData)
+{
+   if ( pDX->m_bSaveAndValidate )
+   {
+      grid.GetLiveLoadData(llData);
+   }
+   else
+   {
+      grid.SetLiveLoadData(llData);
+   }
+}
 
 
 // CLiveLoadReactionsPage dialog
@@ -23,6 +36,15 @@ CLiveLoadReactionsPage::~CLiveLoadReactionsPage()
 void CLiveLoadReactionsPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
+
+   CPierDlg* pParent = (CPierDlg*)GetParent();
+
+   DDX_LiveLoadReactionsGrid(pDX,m_DesignGrid,        pParent->m_PierData.m_DesignLiveLoad);
+   DDX_LiveLoadReactionsGrid(pDX,m_LegalRoutineGrid,  pParent->m_PierData.m_LegalRoutineLiveLoad);
+   DDX_LiveLoadReactionsGrid(pDX,m_LegalSpecialGrid,  pParent->m_PierData.m_LegalSpecialLiveLoad);
+   DDX_LiveLoadReactionsGrid(pDX,m_PermitRoutineGrid, pParent->m_PierData.m_PermitRoutineLiveLoad);
+   DDX_LiveLoadReactionsGrid(pDX,m_PermitSpecialGrid, pParent->m_PierData.m_PermitSpecialLiveLoad);
+
 }
 
 
