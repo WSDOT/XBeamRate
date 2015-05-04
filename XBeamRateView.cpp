@@ -216,13 +216,19 @@ void CXBeamRateView::UpdateDisplayObjects()
    point1.CoCreateInstance(CLSID_Point2d);
    point1->Move(0,0);
 
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   Float64 Xcol = pPier->GetColumnLocation(0);
+
+   GET_IFACE2(pBroker,IXBRSectionProperties,pSectProps);
+   Float64 XbeamDepth = pSectProps->GetDepth(xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xcol));
+
+
    CComPtr<iPointDisplayObject> doPnt1;
    doPnt1.CoCreateInstance(CLSID_PointDisplayObject);
    doPnt1->SetID(m_DisplayObjectID++);
    doPnt1->SetPosition(point1,FALSE,FALSE);
    doPnt1->SetSelectionType(stAll);
 
-   GET_IFACE2(pBroker,IXBRPier,pPier);
    CComPtr<iShapeDrawStrategy> xbeamDrawStrategy;
    xbeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
    CComPtr<IShape> xbeamShape;
@@ -244,10 +250,14 @@ void CXBeamRateView::UpdateDisplayObjects()
 
    displayList->AddDisplayObject(doPnt1);
 
+   point1.Release();
+   point1.CoCreateInstance(CLSID_Point2d);
+   point1->Move(0,-XbeamDepth);
+
    // create point at top of first column
    CComPtr<IPoint2d> point2;
    point2.CoCreateInstance(CLSID_Point2d);
-   point2->Move(leftOverhang,0);
+   point2->Move(leftOverhang,-XbeamDepth);
 
    CComPtr<iPointDisplayObject> doPnt2;
    doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
@@ -281,7 +291,7 @@ void CXBeamRateView::UpdateDisplayObjects()
       // create point at bottom of column
       point2.Release();
       point2.CoCreateInstance(CLSID_Point2d);
-      point2->Move(x,-columnHeight);
+      point2->Move(x,-(XbeamDepth+columnHeight));
 
       doPnt2.Release();
       doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
@@ -331,9 +341,11 @@ void CXBeamRateView::UpdateDisplayObjects()
       x += space;
 
       // add joint at top of next column
+      Xcol += space;
+      XbeamDepth = pSectProps->GetDepth(xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xcol));
       CComPtr<IPoint2d> point3;
       point3.CoCreateInstance(CLSID_Point2d);
-      point3->Move(x,0);
+      point3->Move(x,-XbeamDepth);
 
       CComPtr<iPointDisplayObject> doPnt3;
       doPnt3.CoCreateInstance(CLSID_PointDisplayObject);

@@ -92,6 +92,8 @@ public:
    virtual IndexType GetBearingLineCount();
    virtual IndexType GetBearingCount(IndexType brgLineIdx);
    virtual Float64 GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx);
+   virtual IndexType GetColumnCount();
+   virtual Float64 GetColumnLocation(IndexType colIdx);
    virtual void GetXBeamProfile(IShape** ppShape);
 
 // IXBRSectionProperties

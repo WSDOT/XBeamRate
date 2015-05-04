@@ -103,20 +103,20 @@ STDMETHODIMP CProjectAgentImp::Init()
    OpenBridgeML::Pier::CapBeamType capBeam(::ConvertToSysUnits(5.0,unitMeasure::Feet),
       ::ConvertToSysUnits(5.0,unitMeasure::Feet),
       ::ConvertToSysUnits(5.0,unitMeasure::Feet),
-      ::ConvertToSysUnits(5.0,unitMeasure::Feet),0,0,
-      ::ConvertToSysUnits(5.0,unitMeasure::Feet),0,0);
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),::ConvertToSysUnits(1.0,unitMeasure::Feet),::ConvertToSysUnits(3.0,unitMeasure::Feet),
+      ::ConvertToSysUnits(5.0,unitMeasure::Feet),::ConvertToSysUnits(1.0,unitMeasure::Feet),::ConvertToSysUnits(3.0,unitMeasure::Feet));
 
    OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
    OpenBridgeML::Pier::PrismaticColumnType column(foundation);
-   OpenBridgeML::Pier::CicularColumnSectionType circularSection(::ConvertToSysUnits(5.0,unitMeasure::Feet));
+   OpenBridgeML::Pier::CicularColumnSectionType circularSection(::ConvertToSysUnits(3.0,unitMeasure::Feet));
    column.CircularSection().set(circularSection);
-   column.Height() = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
+   column.Height() = ::ConvertToSysUnits(30.0,unitMeasure::Feet);
 
    ColumnIndexType refColIdx = 0;
    OpenBridgeML::Types::TransverseOffsetType transverseOffset(::ConvertToSysUnits(-2.5,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment);
    OpenBridgeML::Pier::ColumnsType columns(refColIdx,transverseOffset);
    columns.PrismaticColumn().push_back( column );
-   columns.Spacing().push_back(::ConvertToSysUnits(5.0,unitMeasure::Feet));
+   columns.Spacing().push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
    columns.PrismaticColumn().push_back(column);
 
    OpenBridgeML::Pier::PierType pier(capBeam,columns);

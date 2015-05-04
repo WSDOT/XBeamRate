@@ -169,6 +169,26 @@ Float64 CPierAgentImp::GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx)
    return leftBrgLocation;
 }
 
+IndexType CPierAgentImp::GetColumnCount()
+{
+   GET_IFACE(IXBRProject,pProject);
+   return pProject->GetColumnCount();
+}
+
+Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   Float64 columnLocation = pProject->GetXBeamOverhang(pgsTypes::pstLeft); // overhang from left-most column to left edge of cross beam
+
+   for ( IndexType idx = 0; idx < colIdx && 0 < colIdx; idx++ )
+   {
+      Float64 spacing = pProject->GetSpacing(colIdx);
+      columnLocation += spacing;
+   }
+
+   return columnLocation;
+}
+
 void CPierAgentImp::GetXBeamProfile(IShape** ppShape)
 {
    GET_IFACE(IXBRProject,pProject);

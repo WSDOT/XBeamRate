@@ -12,6 +12,10 @@ interface IXBRPier : public IUnknown
    virtual IndexType GetBearingLineCount() = 0;
    virtual IndexType GetBearingCount(IndexType brgLineIdx) = 0;
    virtual Float64 GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx) = 0;
+
+   virtual IndexType GetColumnCount() = 0;
+   virtual Float64 GetColumnLocation(IndexType colIdx) = 0;
+
    virtual void GetXBeamProfile(IShape** ppShape) = 0;
 };
 
