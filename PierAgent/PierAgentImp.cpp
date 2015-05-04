@@ -169,6 +169,49 @@ Float64 CPierAgentImp::GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx)
    return leftBrgLocation;
 }
 
+void CPierAgentImp::GetXBeamProfile(IShape** ppShape)
+{
+   GET_IFACE(IXBRProject,pProject);
+
+   CComPtr<IPolyShape> shape;
+   shape.CoCreateInstance(CLSID_PolyShape);
+
+   // start at top-left of lower cross beam
+   shape->AddPoint(0,0);
+
+   // work left to right across top
+   Float64 Xcrown = GetCrownPointLocation();
+   Float64 L = pProject->GetXBeamLength();
+   Float64 SL, SR;
+   pProject->GetCrownSlopes(&SL,&SR);
+
+   shape->AddPoint(Xcrown,-SL*Xcrown);
+   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
+
+   // work right to left across bottom
+
+   Float64 H1, H2, X1;
+   pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
+
+   Float64 H3, H4, X2;
+   pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+
+   shape->AddPoint(L,-H3);
+   if ( !IsZero(X2) )
+   {
+      shape->AddPoint(L-X2,-(H3+H4));
+   }
+
+   if ( !IsZero(X1) )
+   {
+      shape->AddPoint(X1,-(H1+H2));
+   }
+
+   shape->AddPoint(0,-H1);
+
+   shape.QueryInterface(ppShape);
+}
+
 //////////////////////////////////////////
 // IXBRSectionProperties
 Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
@@ -366,7 +409,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
    ColumnIndexType nColumns = pProject->GetColumnCount();
    if ( 1 < nColumns )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH));
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH,POI_COLUMN));
       m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH+0.001));
       SpacingIndexType nSpaces = nColumns - 1;
       Float64 X = LeftOH;
@@ -374,7 +417,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
       {
          Float64 space = pProject->GetSpacing(spaceIdx);
          X += space;
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X));
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X,POI_COLUMN));
          m_XBeamPoi.push_back(xbrPointOfInterest(id++,X+0.001));
       }
    }
@@ -388,7 +431,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = GetBearingLocation(brgLineIdx,brgIdx);
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg));
+         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg,POI_BRG));
          m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg+0.001));
       }
    }

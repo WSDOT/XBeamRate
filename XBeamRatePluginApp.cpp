@@ -29,6 +29,7 @@
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\Pier.h>
 
 // PGSuper/PGSplice Interfaces
 #include <IFace\ExtendUI.h>

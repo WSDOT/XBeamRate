@@ -9,18 +9,21 @@
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\Pier.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
 
 #include <Colors.h>
 #define SELECTED_OBJECT_LINE_COLOR     RED4
-#define SELECTED_OBJECT_FILL_COLOR     BLUE
-#define COLUMN_LINE_COLOR              DARKSLATEGRAY4
-#define XBEAM_LINE_COLOR               DARKSLATEGRAY4
+#define SELECTED_OBJECT_FILL_COLOR     RED2
+#define COLUMN_LINE_COLOR              GREY50
+#define COLUMN_FILL_COLOR              GREY70
+#define XBEAM_LINE_COLOR               GREY50
+#define XBEAM_FILL_COLOR               GREY70
 
-#define COLUMN_LINE_WEIGHT             3
-#define XBEAM_LINE_WEIGHT              3
+#define COLUMN_LINE_WEIGHT             1
+//#define XBEAM_LINE_WEIGHT              3
 
 #define DISPLAY_LIST_ID 0
 
@@ -217,6 +220,23 @@ void CXBeamRateView::UpdateDisplayObjects()
    doPnt1.CoCreateInstance(CLSID_PointDisplayObject);
    doPnt1->SetID(m_DisplayObjectID++);
    doPnt1->SetPosition(point1,FALSE,FALSE);
+   doPnt1->SetSelectionType(stAll);
+
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   CComPtr<iShapeDrawStrategy> xbeamDrawStrategy;
+   xbeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+   CComPtr<IShape> xbeamShape;
+   pPier->GetXBeamProfile(&xbeamShape);
+   xbeamDrawStrategy->SetShape(xbeamShape);
+   xbeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
+   xbeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
+   xbeamDrawStrategy->DoFill(TRUE);
+   doPnt1->SetDrawingStrategy(xbeamDrawStrategy);
+
+   CComPtr<iShapeGravityWellStrategy> gravity_well;
+   gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+   gravity_well->SetShape(xbeamShape);
+   doPnt1->SetGravityWellStrategy(gravity_well);
 
    CComQIPtr<iConnectable> connectable1(doPnt1);
    CComPtr<iSocket> socket1;
@@ -241,28 +261,6 @@ void CXBeamRateView::UpdateDisplayObjects()
    displayList->AddDisplayObject(doPnt2);
 
    // create left overhang member
-   CComPtr<iLineDisplayObject> doLine1;
-   doLine1.CoCreateInstance(CLSID_LineDisplayObject);
-   doLine1->SetID(m_DisplayObjectID++);
-
-   CComPtr<iDrawLineStrategy> dlStrategy;
-   doLine1->GetDrawLineStrategy(&dlStrategy);
-   CComQIPtr<iSimpleDrawLineStrategy> strategy(dlStrategy);
-   strategy->SetColor(XBEAM_LINE_COLOR);
-   strategy->SetWidth(XBEAM_LINE_WEIGHT);
-   dlStrategy.Release();
-   strategy.Release();
-
-   CComQIPtr<iConnector> connector1(doLine1);
-   CComQIPtr<iPlug> startPlug,endPlug;
-   connector1->GetStartPlug(&startPlug);
-   connector1->GetEndPlug(&endPlug);
-   DWORD dwCookie;
-   connectable1->Connect(0,atByID,startPlug,&dwCookie);
-   connectable2->Connect(0,atByID,endPlug,  &dwCookie);
-
-   displayList->AddDisplayObject(doLine1);
-
    BuildDimensionLine(displayList,point1,point2,leftOverhang);
 
    point1 = point2;
@@ -275,6 +273,10 @@ void CXBeamRateView::UpdateDisplayObjects()
    {
       Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
       Float64 columnHeight = pProject->GetColumnHeight(colIdx);
+      CColumnData::ColumnShapeType colShapeType;
+      Float64 d1, d2;
+      pProject->GetColumnShape(&colShapeType,&d1,&d2);
+
 
       // create point at bottom of column
       point2.Release();
@@ -297,21 +299,30 @@ void CXBeamRateView::UpdateDisplayObjects()
       CComPtr<iLineDisplayObject> doColumn;
       doColumn.CoCreateInstance(CLSID_LineDisplayObject);
       doColumn->SetID(m_DisplayObjectID++);
+      doColumn->SetSelectionType(stAll);
+
+      CComPtr<iRectangleDrawLineStrategy> drawColumnStrategy;
+      drawColumnStrategy.CoCreateInstance(CLSID_RectangleDrawLineStrategy);
+      doColumn->SetDrawLineStrategy(drawColumnStrategy);
+
+      drawColumnStrategy->SetWidth(d1);
+      drawColumnStrategy->SetColor(COLUMN_LINE_COLOR);
+      drawColumnStrategy->SetLineWidth(COLUMN_LINE_WEIGHT);
+      drawColumnStrategy->SetFillColor(COLUMN_FILL_COLOR);
+      drawColumnStrategy->SetDoFill(TRUE);
+
+      drawColumnStrategy->PerimeterGravityWell(TRUE);
+      CComQIPtr<iGravityWellStrategy> gravity_well(drawColumnStrategy);
+      doColumn->SetGravityWellStrategy(gravity_well);
+
 
       CComQIPtr<iConnector> connector(doColumn);
-      startPlug.Release();
-      endPlug.Release();
+      CComQIPtr<iPlug> startPlug, endPlug;
       connector->GetStartPlug(&startPlug);
       connector->GetEndPlug(&endPlug);
+      DWORD dwCookie;
       connectable1->Connect(0,atByID,startPlug,&dwCookie);
       connectable2->Connect(0,atByID,endPlug,  &dwCookie);
-
-      doColumn->GetDrawLineStrategy(&dlStrategy);
-      dlStrategy.QueryInterface(&strategy);
-      strategy->SetColor(COLUMN_LINE_COLOR);
-      strategy->SetWidth(COLUMN_LINE_WEIGHT);
-      dlStrategy.Release();
-      strategy.Release();
 
       displayList->AddDisplayObject(doColumn);
 
@@ -336,26 +347,11 @@ void CXBeamRateView::UpdateDisplayObjects()
       displayList->AddDisplayObject(doPnt3);
 
       // create cross beam member
-      CComPtr<iLineDisplayObject> doXBeam;
-      doXBeam.CoCreateInstance(CLSID_LineDisplayObject);
-      doXBeam->SetID(m_DisplayObjectID++);
+      CComPtr<iLineDisplayObject> doXBeamPiece;
+      doXBeamPiece.CoCreateInstance(CLSID_LineDisplayObject);
+      doXBeamPiece->SetID(m_DisplayObjectID++);
+      doXBeamPiece->SetSelectionType(stAll);
 
-      doXBeam->GetDrawLineStrategy(&dlStrategy);
-      dlStrategy.QueryInterface(&strategy);
-      strategy->SetColor(XBEAM_LINE_COLOR);
-      strategy->SetWidth(XBEAM_LINE_WEIGHT);
-      dlStrategy.Release();
-      strategy.Release();
-
-      CComQIPtr<iConnector> connector3(doXBeam);
-      startPlug.Release();
-      endPlug.Release();
-      connector3->GetStartPlug(&startPlug);
-      connector3->GetEndPlug(&endPlug);
-      connectable1->Connect(0,atByID,startPlug,&dwCookie);
-      connectable3->Connect(0,atByID,endPlug,  &dwCookie);
-
-      displayList->AddDisplayObject(doXBeam);
 
       BuildDimensionLine(displayList,point1,point3,space);
 
@@ -432,4 +428,14 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
       (*ppDimLine) = dimLine;
       (*ppDimLine)->AddRef();
    }
+}
+
+void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
+{
+   CDisplayView::HandleLButtonDblClk(nFlags,logPoint);
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
+   pProjectEdit->EditPier(0);
 }

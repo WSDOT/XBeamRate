@@ -120,3 +120,18 @@ interface IXBRProjectEventSink : IUnknown
 {
    virtual HRESULT OnProjectChanged() = 0;
 };
+
+/*****************************************************************************
+INTERFACE
+   IXBRProjectEdit
+
+DESCRIPTION
+   Interface to enable programatic activation of the editing UI
+*****************************************************************************/
+// {BBA7F95B-A5DE-4c2a-BB68-19983F308767}
+DEFINE_GUID(IID_IXBRProjectEdit, 
+0xbba7f95b, 0xa5de, 0x4c2a, 0xbb, 0x68, 0x19, 0x98, 0x3f, 0x30, 0x87, 0x67);
+interface IXBRProjectEdit : IUnknown
+{
+   virtual void EditPier(int nPage) = 0;
+};

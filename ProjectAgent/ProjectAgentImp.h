@@ -51,7 +51,8 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
-   public IXBRProject
+   public IXBRProject,
+   public IXBRProjectEdit
 {  
 public:
 	CProjectAgentImp(); 
@@ -70,6 +71,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProject,IXBRProject)
+   COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -178,6 +180,10 @@ public:
    virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure);
 
    virtual Float64 GetXBeamLength();
+
+// IXBRProjectEdit
+public:
+   virtual void EditPier(int nPage);
 
 #ifdef _DEBUG
    bool AssertValid() const;

@@ -2,6 +2,8 @@
 
 #include <XBeamRateExt\PointOfInterest.h>
 
+interface IShape;
+
 // {7F04A0B9-FD4E-4965-8F26-8BE78B063803}
 DEFINE_GUID(IID_IXBRPier, 
 0x7f04a0b9, 0xfd4e, 0x4965, 0x8f, 0x26, 0x8b, 0xe7, 0x8b, 0x6, 0x38, 0x3);
@@ -10,6 +12,7 @@ interface IXBRPier : public IUnknown
    virtual IndexType GetBearingLineCount() = 0;
    virtual IndexType GetBearingCount(IndexType brgLineIdx) = 0;
    virtual Float64 GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx) = 0;
+   virtual void GetXBeamProfile(IShape** ppShape) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}

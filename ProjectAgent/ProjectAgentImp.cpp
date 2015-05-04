@@ -76,7 +76,8 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IXBRProject,    this );
+   pBrokerInit->RegInterface( IID_IXBRProject,     this );
+   pBrokerInit->RegInterface( IID_IXBRProjectEdit, this );
 
    return S_OK;
 };
@@ -924,6 +925,13 @@ Float64 CProjectAgentImp::GetXBeamLength()
    }
 
    return X3 + s + X4;
+}
+
+//////////////////////////////////////////////////////////
+// IXBRProjectEdit
+void CProjectAgentImp::EditPier(int nPage)
+{
+   m_CommandTarget.OnEditPier();
 }
 
 //////////////////////////////////////////////////////////
