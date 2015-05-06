@@ -50,6 +50,9 @@ public:
 protected:
    virtual void OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint);
    void UpdateDisplayObjects();
+   void UpdateXBeamDisplayObjects();
+   void UpdateColumnDisplayObjects();
+   void UpdateBearingDisplayObjects();
 
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
 

@@ -16,7 +16,8 @@ interface IXBRPier : public IUnknown
    virtual IndexType GetColumnCount() = 0;
    virtual Float64 GetColumnLocation(IndexType colIdx) = 0;
 
-   virtual void GetXBeamProfile(IShape** ppShape) = 0;
+   virtual void GetUpperXBeamProfile(IShape** ppShape) = 0;
+   virtual void GetLowerXBeamProfile(IShape** ppShape) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}

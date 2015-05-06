@@ -189,7 +189,37 @@ Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
    return columnLocation;
 }
 
-void CPierAgentImp::GetXBeamProfile(IShape** ppShape)
+void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)
+{
+   GET_IFACE(IXBRProject,pProject);
+
+   CComPtr<IPolyShape> shape;
+   shape.CoCreateInstance(CLSID_PolyShape);
+
+   // start at top-left of lower cross beam
+   shape->AddPoint(0,0);
+
+   // work left to right across top
+   Float64 Xcrown = GetCrownPointLocation();
+   Float64 L = pProject->GetXBeamLength();
+   Float64 SL, SR;
+   pProject->GetCrownSlopes(&SL,&SR);
+
+   shape->AddPoint(Xcrown,-SL*Xcrown);
+   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
+
+   Float64 H, W;
+   pProject->GetDiaphragmDimensions(&H,&W);
+
+   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown) - H);
+   shape->AddPoint(Xcrown,-SL*Xcrown - H);
+
+   shape->AddPoint(0,-H);
+
+   shape.QueryInterface(ppShape);
+}
+
+void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
 {
    GET_IFACE(IXBRProject,pProject);
 
@@ -228,6 +258,12 @@ void CPierAgentImp::GetXBeamProfile(IShape** ppShape)
    }
 
    shape->AddPoint(0,-H1);
+
+   // move below the upper cross beam
+   Float64 H, W;
+   pProject->GetDiaphragmDimensions(&H,&W);
+   CComQIPtr<IXYPosition> position(shape);
+   position->Offset(0,-H);
 
    shape.QueryInterface(ppShape);
 }

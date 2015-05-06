@@ -113,7 +113,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    column.Height() = ::ConvertToSysUnits(30.0,unitMeasure::Feet);
 
    ColumnIndexType refColIdx = 0;
-   OpenBridgeML::Types::TransverseOffsetType transverseOffset(::ConvertToSysUnits(-2.5,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment);
+   OpenBridgeML::Types::TransverseOffsetType transverseOffset(::ConvertToSysUnits(-5.0,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment);
    OpenBridgeML::Pier::ColumnsType columns(refColIdx,transverseOffset);
    columns.PrismaticColumn().push_back( column );
    columns.Spacing().push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
@@ -129,8 +129,8 @@ STDMETHODIMP CProjectAgentImp::Init()
    Float64 bridgeLineOffset = 0;
    Float64 crownPointOffset = 0;
    OpenBridgeML::Types::OffsetMeasurementEnum curbLineDatum = OpenBridgeML::Types::OffsetMeasurementEnum::Alignment;
-   Float64 LCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
-   Float64 RCO = ::ConvertToSysUnits(7.5,unitMeasure::Feet);
+   Float64 LCO = ::ConvertToSysUnits(10,unitMeasure::Feet);
+   Float64 RCO = ::ConvertToSysUnits(10,unitMeasure::Feet);
    Float64 SL = -0.02;
    Float64 SR = -0.02;
 
