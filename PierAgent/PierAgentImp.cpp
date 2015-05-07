@@ -182,11 +182,39 @@ Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
 
    for ( IndexType idx = 0; idx < colIdx && 0 < colIdx; idx++ )
    {
-      Float64 spacing = pProject->GetSpacing(colIdx);
+      Float64 spacing = pProject->GetSpacing(idx);
       columnLocation += spacing;
    }
 
    return columnLocation;
+}
+
+Float64 CPierAgentImp::GetColumnHeight(IndexType colIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   Float64 h = pProject->GetColumnHeight(colIdx);
+   CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType();
+   if ( heightType == CColumnData::chtBottomElevation )
+   {
+#pragma Reminder("IMPLEMENT: compute column height from elevation")
+      // Also need methods to get top and bottom column elevations
+      ATLASSERT(false); // not implemented yet... need to compute height based on bottom elevation
+   }
+
+   return h;
+}
+
+Float64 CPierAgentImp::GetMaxColumnHeight()
+{
+   IndexType nColumns = GetColumnCount();
+   Float64 Hmax = 0;
+   for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   {
+      Float64 h = GetColumnHeight(colIdx);
+      Hmax = Max(Hmax,h);
+   }
+
+   return Hmax;
 }
 
 void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)

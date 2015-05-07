@@ -32,8 +32,7 @@ public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	protected:
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-	virtual void OnBeginPrinting(CDC* pDC, CPrintInfo* pInfo);
-	virtual void OnEndPrinting(CDC* pDC, CPrintInfo* pInfo);
+	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_VIRTUAL
 
@@ -53,6 +52,7 @@ protected:
    void UpdateXBeamDisplayObjects();
    void UpdateColumnDisplayObjects();
    void UpdateBearingDisplayObjects();
+   void UpdateDimensionsDisplayObjects();
 
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
 
