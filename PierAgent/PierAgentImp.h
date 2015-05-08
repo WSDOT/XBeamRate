@@ -95,9 +95,15 @@ public:
    virtual IndexType GetColumnCount();
    virtual Float64 GetColumnLocation(IndexType colIdx);
    virtual Float64 GetColumnHeight(IndexType colIdx);
+   virtual Float64 GetTopColumnElevation(IndexType colIdx);
+   virtual Float64 GetBottomColumnElevation(IndexType colIdx);
    virtual Float64 GetMaxColumnHeight();
+   virtual void GetUpperXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR);
+   virtual void GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR);
    virtual void GetUpperXBeamProfile(IShape** ppShape);
    virtual void GetLowerXBeamProfile(IShape** ppShape);
+
+   virtual Float64 GetElevation(Float64 X);
 
 // IXBRSectionProperties
 public:

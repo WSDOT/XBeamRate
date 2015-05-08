@@ -232,16 +232,55 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
-   Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
-   Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
-   IndexType nColumns = pProject->GetColumnCount();
+   // Model a vertical line for the alignment
+   // Let X = 0 be at the alignment and Y = the alignment elevation
+   Float64 X = 0;
+   Float64 Y = pProject->GetDeckElevation() + ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   CComPtr<IPoint2d> pnt1;
+   pnt1.CoCreateInstance(CLSID_Point2d);
+   pnt1->Move(X,Y);
+   CComPtr<iPointDisplayObject> doPnt1;
+   doPnt1.CoCreateInstance(CLSID_PointDisplayObject);
+   doPnt1->Visible(FALSE);
+   doPnt1->SetPosition(pnt1,FALSE,FALSE);
+   CComQIPtr<iConnectable> connectable1(doPnt1);
+   CComPtr<iSocket> socket1;
+   connectable1->AddSocket(0,pnt1,&socket1);
 
-   Float64 H,W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   Y -= pPier->GetMaxColumnHeight();
+   CComPtr<IPoint2d> pnt2;
+   pnt2.CoCreateInstance(CLSID_Point2d);
+   pnt2->Move(X,Y);
+   CComPtr<iPointDisplayObject> doPnt2;
+   doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
+   doPnt2->Visible(FALSE);
+   doPnt2->SetPosition(pnt2,FALSE,FALSE);
+   CComQIPtr<iConnectable> connectable2(doPnt2);
+   CComPtr<iSocket> socket2;
+   connectable2->AddSocket(0,pnt2,&socket2);
 
-   Float64 H1, H2, X1;
-   pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
+   CComPtr<iLineDisplayObject> doAlignment;
+   doAlignment.CoCreateInstance(CLSID_LineDisplayObject);
+   CComPtr<iDrawLineStrategy> drawStrategy;
+   doAlignment->GetDrawLineStrategy(&drawStrategy);
+   CComQIPtr<iSimpleDrawLineStrategy> drawAlignmentStrategy(drawStrategy);
+   drawAlignmentStrategy->SetWidth(3);
+   drawAlignmentStrategy->SetColor(RED);
+   drawAlignmentStrategy->SetLineStyle(lsCenterline);
 
+
+   CComQIPtr<iConnector> connector(doAlignment);
+   CComPtr<iPlug> startPlug, endPlug;
+   connector->GetStartPlug(&startPlug);
+   connector->GetEndPlug(&endPlug);
+   DWORD dwCookie;
+   connectable1->Connect(0,atByID,startPlug,&dwCookie);
+   connectable2->Connect(0,atByID,endPlug,  &dwCookie);
+
+   displayList->AddDisplayObject(doAlignment);
+
+   // Model Upper Cross Beam
    CComPtr<IPoint2d> point;
    point.CoCreateInstance(CLSID_Point2d);
    point->Move(0,0);
@@ -252,7 +291,6 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doUpperXBeam->SetPosition(point,FALSE,FALSE);
    doUpperXBeam->SetSelectionType(stAll);
 
-   GET_IFACE2(pBroker,IXBRPier,pPier);
    CComPtr<IShape> upperXBeamShape;
    pPier->GetUpperXBeamProfile(&upperXBeamShape);
 
@@ -314,85 +352,49 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
+   GET_IFACE2(pBroker,IXBRPier,pPier);
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
-   Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
-   Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
-   IndexType nColumns = pProject->GetColumnCount();
+   CComPtr<IPoint2d> pntTL, pntTC, pntTR;
+   CComPtr<IPoint2d> pntBL, pntBC, pntBR;
+   pPier->GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
 
-   Float64 H,W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   Float64 Xoffset;
+   pntTL->get_X(&Xoffset);
 
-   Float64 H1, H2, X1;
-   pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
-
-   CComPtr<IPoint2d> point1;
-   point1.CoCreateInstance(CLSID_Point2d);
-   point1->Move(0,-(H+H1+H2));
-
-   CComPtr<iPointDisplayObject> doPnt1;
-   doPnt1.CoCreateInstance(CLSID_PointDisplayObject);
-   doPnt1->Visible(FALSE);
-   doPnt1->SetID(m_DisplayObjectID++);
-   doPnt1->SetPosition(point1,FALSE,FALSE);
-
-   displayList->AddDisplayObject(doPnt1);
-
-   CComQIPtr<iConnectable> connectable1(doPnt1);
-   CComPtr<iSocket> socket1;
-   connectable1->AddSocket(0,point1,&socket1);
-
-
-   // create point at top of first column
-   CComPtr<IPoint2d> point2;
-   point2.CoCreateInstance(CLSID_Point2d);
-   point2->Move(leftOverhang,-(H+H1+H2));
-
-   CComPtr<iPointDisplayObject> doPnt2;
-   doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
-   doPnt2->Visible(FALSE);
-   doPnt2->SetID(m_DisplayObjectID++);
-   doPnt2->SetPosition(point2,FALSE,FALSE);
-
-   CComQIPtr<iConnectable> connectable2(doPnt2);
-   CComPtr<iSocket> socket2;
-   connectable2->AddSocket(0,point2,&socket2);
-
-   displayList->AddDisplayObject(doPnt2);
-
-   point1 = point2;
-   doPnt1 = doPnt2;
-   connectable1 = connectable2;
-   socket1 = socket2;
-
-   Float64 x = leftOverhang;
-   for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   IndexType nColumns = pPier->GetColumnCount();
+   for (IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
-      Float64 columnHeight = pProject->GetColumnHeight(colIdx);
+      Float64 X = pPier->GetColumnLocation(colIdx);
+      Float64 Ytop = pPier->GetTopColumnElevation(colIdx);
+      Float64 Ybot = pPier->GetBottomColumnElevation(colIdx);
       CColumnData::ColumnShapeType colShapeType;
       Float64 d1, d2;
       pProject->GetColumnShape(&colShapeType,&d1,&d2);
 
-      // create point at bottom of column
-      point2.Release();
-      point2.CoCreateInstance(CLSID_Point2d);
-      point2->Move(x,-(H+H1+H2+columnHeight));
+      CComPtr<IPoint2d> pntTop, pntBot;
+      pntTop.CoCreateInstance(CLSID_Point2d);
+      pntTop->Move(X+Xoffset,Ytop);
 
-      doPnt2.Release();
-      doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
-      doPnt2->Visible(FALSE);
-      doPnt2->SetID(m_DisplayObjectID++);
-      doPnt2->SetPosition(point2,FALSE,FALSE);
+      pntBot.CoCreateInstance(CLSID_Point2d);
+      pntBot->Move(X+Xoffset,Ybot);
+   
+      CComPtr<iPointDisplayObject> doTop;
+      doTop.CoCreateInstance(CLSID_PointDisplayObject);
+      doTop->Visible(FALSE);
+      doTop->SetPosition(pntTop,FALSE,FALSE);
+      CComQIPtr<iConnectable> connectable1(doTop);
+      CComPtr<iSocket> socket1;
+      connectable1->AddSocket(0,pntTop,&socket1);
 
-      connectable2.Release();
-      doPnt2.QueryInterface(&connectable2);
-      socket2.Release();
-      connectable2->AddSocket(0,point2,&socket2);
+      CComPtr<iPointDisplayObject> doBot;
+      doBot.CoCreateInstance(CLSID_PointDisplayObject);
+      doBot->Visible(FALSE);
+      doBot->SetPosition(pntBot,FALSE,FALSE);
+      CComQIPtr<iConnectable> connectable2(doBot);
+      CComPtr<iSocket> socket2;
+      connectable2->AddSocket(0,pntBot,&socket2);
 
-      displayList->AddDisplayObject(doPnt2);
-
-      // create column member
       CComPtr<iLineDisplayObject> doColumn;
       doColumn.CoCreateInstance(CLSID_LineDisplayObject);
       doColumn->SetID(m_DisplayObjectID++);
@@ -414,7 +416,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
 
       CComQIPtr<iConnector> connector(doColumn);
-      CComQIPtr<iPlug> startPlug, endPlug;
+      CComPtr<iPlug> startPlug, endPlug;
       connector->GetStartPlug(&startPlug);
       connector->GetEndPlug(&endPlug);
       DWORD dwCookie;
@@ -422,30 +424,6 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       connectable2->Connect(0,atByID,endPlug,  &dwCookie);
 
       displayList->AddDisplayObject(doColumn);
-
-      x += space;
-
-      // add joint at top of next column
-      CComPtr<IPoint2d> point3;
-      point3.CoCreateInstance(CLSID_Point2d);
-      point3->Move(x,-(H+H1+H2));
-
-      CComPtr<iPointDisplayObject> doPnt3;
-      doPnt3.CoCreateInstance(CLSID_PointDisplayObject);
-      doPnt3->Visible(FALSE);
-      doPnt3->SetID(m_DisplayObjectID++);
-      doPnt3->SetPosition(point3,FALSE,FALSE);
-
-      CComQIPtr<iConnectable> connectable3(doPnt3);
-      CComPtr<iSocket> socket3;
-      connectable3->AddSocket(0,point3,&socket3);
-
-      displayList->AddDisplayObject(doPnt3);
-
-      point1 = point3;
-      doPnt1 = doPnt3;
-      connectable1 = connectable3;
-      socket1 = socket3;
    }
 }
 
@@ -472,6 +450,13 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
+   CComPtr<IPoint2d> pntTL, pntTC, pntTR;
+   CComPtr<IPoint2d> pntBL, pntBC, pntBR;
+   pPier->GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+
+   Float64 Xoffset;
+   pntTL->get_X(&Xoffset);
+
    IndexType nBearingLines = pPier->GetBearingLineCount();
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
@@ -479,10 +464,11 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = pPier->GetBearingLocation(brgLineIdx,brgIdx);
+         Float64 Y    = pPier->GetElevation(Xbrg);
 
          CComPtr<IPoint2d> pnt;
          pnt.CoCreateInstance(CLSID_Point2d);
-         pnt->Move(Xbrg,-H);
+         pnt->Move(Xbrg+Xoffset,Y-H);
 
          CComPtr<iPointDisplayObject> doPnt;
          doPnt.CoCreateInstance(CLSID_PointDisplayObject);
@@ -517,110 +503,100 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   Float64 xbeamLength = pProject->GetXBeamLength();
 
-   // Total cross beam length
-   CComPtr<IPoint2d> pnt1;
-   pnt1.CoCreateInstance(CLSID_Point2d);
-   pnt1->Move(0,0);
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   CComPtr<IPoint2d> uxbTL, uxbTC, uxbTR;
+   CComPtr<IPoint2d> uxbBL, uxbBC, uxbBR;
+   pPier->GetUpperXBeamPoints(&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
 
-   CComPtr<IPoint2d> pnt2;
-   pnt2.CoCreateInstance(CLSID_Point2d);
-   pnt2->Move(xbeamLength,0);
+   CComPtr<IPoint2d> lxbTL, lxbTC, lxbTR;
+   CComPtr<IPoint2d> lxbBL, lxbBL2, lxbBR2, lxbBR;
+   pPier->GetLowerXBeamPoints(&lxbTL,&lxbTC,&lxbTR,&lxbBL,&lxbBL2,&lxbBR2,&lxbBR);
 
-   BuildDimensionLine(displayList,pnt1,pnt2,xbeamLength);
+   CComPtr<IPoint2d> uxbTLC, uxbTRC;
+   uxbTLC.CoCreateInstance(CLSID_Point2d);
+   uxbTRC.CoCreateInstance(CLSID_Point2d);
+   Float64 x1,y1;
+   uxbTL->Location(&x1,&y1);
+   Float64 x2,y2;
+   uxbTR->Location(&x2,&y2);
+   uxbTLC->Move(x1,Max(y1,y2));
+   uxbTRC->Move(x2,Max(y1,y2));
+
+   CComPtr<IPoint2d> lxbBLC, lxbBRC;
+   lxbBLC.CoCreateInstance(CLSID_Point2d);
+   lxbBRC.CoCreateInstance(CLSID_Point2d);
+   Float64 x,y;
+   lxbBL->get_X(&x);
+   lxbBL2->get_Y(&y);
+   lxbBLC->Move(x,y);
+
+   lxbBR->get_X(&x);
+   lxbBR2->get_Y(&y);
+   lxbBRC->Move(x,y);
+
+   // Horizontal Cross Beam Dimensions
+   BuildDimensionLine(displayList,uxbTLC,uxbTRC);
+   BuildDimensionLine(displayList,lxbBL2,lxbBLC);
+   BuildDimensionLine(displayList,lxbBRC,lxbBR2);
 
    // Left Side of Cross Beam
 
    // Height of upper cross beam
-   Float64 H,W;
-   pProject->GetDiaphragmDimensions(&H,&W);
-   pnt2->Move(0,-H);
-   BuildDimensionLine(displayList,pnt2,pnt1,H);
+   BuildDimensionLine(displayList,uxbBL,uxbTL);
+   BuildDimensionLine(displayList,uxbTR,uxbBR);
 
    // Height of lower cross beam
-   Float64 H1, H2, X1;
-   pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
-   pnt1->Move(0,-H);
-   pnt2->Move(0,-(H+H1));
-   BuildDimensionLine(displayList,pnt2,pnt1,H1);
+   BuildDimensionLine(displayList,lxbBL,lxbTL);
+   BuildDimensionLine(displayList,lxbTR,lxbBR);
 
-   if ( !IsZero(H2) )
-   {
-      pnt1->Move(0,-(H+H1));
-      pnt2->Move(0,-(H+H1+H2));
-      BuildDimensionLine(displayList,pnt2,pnt1,H2);
-   }
-
-   if ( !IsZero(X1) )
-   {
-      pnt1->Move(X1,-(H+H1+H2));
-      pnt2->Move(0,-(H+H1+H2));
-      BuildDimensionLine(displayList,pnt1,pnt2,X1);
-   }
-
-
-   // Right Side of Cross Beam
-
-   // Height of upper cross beam
-   pnt1->Move(xbeamLength,0);
-   pnt2->Move(xbeamLength,-H);
-   BuildDimensionLine(displayList,pnt1,pnt2,H);
-
-   // Height of lower cross beam
-   Float64 H3, H4, X2;
-   pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
-   pnt1->Move(xbeamLength,-H);
-   pnt2->Move(xbeamLength,-(H+H3));
-   BuildDimensionLine(displayList,pnt1,pnt2,H3);
-
-   if ( !IsZero(H4) )
-   {
-      pnt1->Move(xbeamLength,-(H+H3));
-      pnt2->Move(xbeamLength,-(H+H3+H4));
-      BuildDimensionLine(displayList,pnt1,pnt2,H4);
-   }
-
-   if ( !IsZero(X2) )
-   {
-      pnt1->Move(xbeamLength,-(H+H3+H4));
-      pnt2->Move(xbeamLength-X2,-(H+H3+H4));
-      BuildDimensionLine(displayList,pnt1,pnt2,X2);
-   }
+   BuildDimensionLine(displayList,lxbBLC,lxbBL);
+   BuildDimensionLine(displayList,lxbBR,lxbBRC);
 
    // Column Dimensions
-   GET_IFACE2(pBroker,IXBRPier,pPier);
-   Float64 MaxColumnHeight = pPier->GetMaxColumnHeight();
-   Float64 Y = -(H + Max(H1+H2,H3+H4) + MaxColumnHeight);
    ColumnIndexType nColumns = pPier->GetColumnCount();
+   lxbBRC->get_X(&x);
+   Float64 Ycol = pPier->GetBottomColumnElevation(nColumns-1);
 
-   Float64 x1 = 0;
-   Float64 x2 = pPier->GetColumnLocation(0);
-   pnt1->Move(x1,Y);
-   pnt2->Move(x2,Y);
-   BuildDimensionLine(displayList,pnt2,pnt1,x2-x1);
-   x1 = x2;
-   for ( ColumnIndexType colIdx = 1; colIdx < nColumns; colIdx++ )
+   CComPtr<IPoint2d> pntBC;
+   pntBC.CoCreateInstance(CLSID_Point2d);
+   pntBC->Move(x,Ycol);
+   BuildDimensionLine(displayList,lxbBRC,pntBC);
+
+   Float64 Xoffset;
+   uxbTL->get_X(&Xoffset);
+   CComPtr<IPoint2d> pntLeft;
+   pntLeft.CoCreateInstance(CLSID_Point2d);
+   pntLeft->Move(Xoffset,Ycol);
+   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      x2 = pPier->GetColumnLocation(colIdx);
-      pnt1->Move(x1,Y);
-      pnt2->Move(x2,Y);
-      BuildDimensionLine(displayList,pnt2,pnt1,x2-x1);
-      x1 = x2;
-   }
-   x2 = xbeamLength;
-   pnt1->Move(x1,Y);
-   pnt2->Move(x2,Y);
-   BuildDimensionLine(displayList,pnt2,pnt1,x2-x1);
+      Float64 Xcol = pPier->GetColumnLocation(colIdx);
+      Xcol += Xoffset;
 
-   Float64 Hcol = pPier->GetColumnHeight(0);
-   x1 = pPier->GetColumnLocation(nColumns-1);
-   Float64 X4 = pProject->GetXBeamOverhang(pgsTypes::pstRight);
-   pnt1->Move(x1+X4,-(H+H3+H4));
-   pnt2->Move(x1+X4,-(H+H3+H4+Hcol));
-   CComPtr<iDimensionLine> dimLine;
-   BuildDimensionLine(displayList,pnt1,pnt2,Hcol,&dimLine);
+      CComPtr<IPoint2d> pntRight;
+      pntRight.CoCreateInstance(CLSID_Point2d);
+      pntRight->Move(Xcol,Ycol);
+     
+      BuildDimensionLine(displayList,pntRight,pntLeft);
+
+      pntLeft = pntRight;
+   }
+
+   uxbTR->get_X(&x);
+   CComPtr<IPoint2d> pntRight;
+   pntRight.CoCreateInstance(CLSID_Point2d);
+   pntRight->Move(x,Ycol);
+   BuildDimensionLine(displayList,pntRight,pntLeft);
+}
+
+void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)
+{
+   Float64 distance;
+   toPoint->DistanceEx(fromPoint,&distance);
+   if ( !IsZero(distance) )
+   {
+      BuildDimensionLine(pDL,fromPoint,toPoint,distance,ppDimLine);
+   }
 }
 
 void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine)

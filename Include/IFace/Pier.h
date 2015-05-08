@@ -3,6 +3,7 @@
 #include <XBeamRateExt\PointOfInterest.h>
 
 interface IShape;
+interface IPoint2d;
 
 // {7F04A0B9-FD4E-4965-8F26-8BE78B063803}
 DEFINE_GUID(IID_IXBRPier, 
@@ -17,9 +18,16 @@ interface IXBRPier : public IUnknown
    virtual Float64 GetColumnLocation(IndexType colIdx) = 0;
    virtual Float64 GetColumnHeight(IndexType colIdx) = 0;
    virtual Float64 GetMaxColumnHeight() = 0;
+   virtual Float64 GetTopColumnElevation(IndexType colIdx) = 0;
+   virtual Float64 GetBottomColumnElevation(IndexType colIdx) = 0;
+
+   virtual void GetUpperXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR) = 0;
+   virtual void GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR) = 0;
 
    virtual void GetUpperXBeamProfile(IShape** ppShape) = 0;
    virtual void GetLowerXBeamProfile(IShape** ppShape) = 0;
+
+   virtual Float64 GetElevation(Float64 X) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}

@@ -54,6 +54,7 @@ protected:
    void UpdateBearingDisplayObjects();
    void UpdateDimensionsDisplayObjects();
 
+   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
 
 	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint);

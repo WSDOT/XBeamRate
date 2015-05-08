@@ -204,6 +204,22 @@ Float64 CPierAgentImp::GetColumnHeight(IndexType colIdx)
    return h;
 }
 
+Float64 CPierAgentImp::GetTopColumnElevation(IndexType colIdx)
+{
+   Float64 Xcol = GetColumnLocation(colIdx);
+   Float64 elev = GetElevation(Xcol);
+   Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xcol));
+   elev -= H;
+   return elev;
+}
+
+Float64 CPierAgentImp::GetBottomColumnElevation(IndexType colIdx)
+{
+   Float64 Ytop = GetTopColumnElevation(colIdx);
+   Float64 Hcol = GetColumnHeight(colIdx);
+   return Ytop - Hcol;
+}
+
 Float64 CPierAgentImp::GetMaxColumnHeight()
 {
    IndexType nColumns = GetColumnCount();
@@ -217,56 +233,76 @@ Float64 CPierAgentImp::GetMaxColumnHeight()
    return Hmax;
 }
 
-void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)
+void CPierAgentImp::GetUpperXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR)
 {
    GET_IFACE(IXBRProject,pProject);
 
-   CComPtr<IPolyShape> shape;
-   shape.CoCreateInstance(CLSID_PolyShape);
-
-   // start at top-left of lower cross beam
-   shape->AddPoint(0,0);
-
-   // work left to right across top
+   // get the key dimensions
+   Float64 Ydeck = pProject->GetDeckElevation();
+   Float64 CPO    = pProject->GetCrownPointOffset(); // distance from Alignment to Crown Point
    Float64 Xcrown = GetCrownPointLocation();
    Float64 L = pProject->GetXBeamLength();
    Float64 SL, SR;
    pProject->GetCrownSlopes(&SL,&SR);
-
-   shape->AddPoint(Xcrown,-SL*Xcrown);
-   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
 
    Float64 H, W;
    pProject->GetDiaphragmDimensions(&H,&W);
 
-   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown) - H);
-   shape->AddPoint(Xcrown,-SL*Xcrown - H);
+   // Create the points
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppTL);
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppTC);
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppTR);
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppBL);
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppBC);
+   ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppBR);
 
-   shape->AddPoint(0,-H);
+   if ( 0 <= CPO )
+   {
+      (*ppTC)->Move(CPO,-CPO*SL+Ydeck);
+   }
+   else
+   {
+      (*ppTC)->Move(CPO,CPO*SR+Ydeck);
+   }
 
-   shape.QueryInterface(ppShape);
+   // work CCW around the upper cross beam
+   (*ppTR)->Move(CPO + L-Xcrown,SR*(L-Xcrown)+Ydeck);   // top-right corner
+   (*ppBR)->Move(CPO + L-Xcrown,SR*(L-Xcrown)+Ydeck-H); // bottom-right corner
+   (*ppBC)->Move(CPO,Ydeck-H);                          // bottom below crown point
+   (*ppBL)->Move(CPO-Xcrown,SL*Xcrown+Ydeck-H);         // bottom-left corner
+   (*ppTL)->Move(CPO-Xcrown,SL*Xcrown+Ydeck);           // top-left corner
+
+   Float64 XL, XC, XR;
+   (*ppTL)->get_X(&XL);
+   (*ppTC)->get_X(&XC);
+   (*ppTR)->get_X(&XR);
+
+   // make sure crown point is on the XBeam (it could actually be off the beam.. if it is, just put it at the edge)
+   if ( XC < XL )
+   {
+      Float64 Y;
+      (*ppTL)->get_Y(&Y);
+      (*ppTC)->Move(XL,Y);
+
+      Float64 X;
+      (*ppBL)->Location(&X,&Y);
+      (*ppBC)->Move(X,Y);
+   }
+   else if ( XR < XC )
+   {
+      Float64 Y;
+      (*ppTR)->get_Y(&Y);
+      (*ppTC)->Move(XR,Y);
+
+      Float64 X;
+      (*ppBR)->Location(&X,&Y);
+      (*ppBC)->Move(X,Y);
+   }
 }
 
-void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
+void CPierAgentImp::GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR)
 {
    GET_IFACE(IXBRProject,pProject);
-
-   CComPtr<IPolyShape> shape;
-   shape.CoCreateInstance(CLSID_PolyShape);
-
-   // start at top-left of lower cross beam
-   shape->AddPoint(0,0);
-
-   // work left to right across top
-   Float64 Xcrown = GetCrownPointLocation();
-   Float64 L = pProject->GetXBeamLength();
-   Float64 SL, SR;
-   pProject->GetCrownSlopes(&SL,&SR);
-
-   shape->AddPoint(Xcrown,-SL*Xcrown);
-   shape->AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
-
-   // work right to left across bottom
 
    Float64 H1, H2, X1;
    pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
@@ -274,26 +310,87 @@ void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
    Float64 H3, H4, X2;
    pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
 
-   shape->AddPoint(L,-H3);
-   if ( !IsZero(X2) )
-   {
-      shape->AddPoint(L-X2,-(H3+H4));
-   }
+   CComPtr<IPoint2d> uxbTL,uxbTC,uxbTR,uxbBL,uxbBC,uxbBR;
+   GetUpperXBeamPoints(&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
 
-   if ( !IsZero(X1) )
-   {
-      shape->AddPoint(X1,-(H1+H2));
-   }
+   uxbBL.CopyTo(ppTL);
+   uxbBC.CopyTo(ppTC);
+   uxbBR.CopyTo(ppTR);
 
-   shape->AddPoint(0,-H1);
+   uxbBL->Clone(ppBL);
+   uxbBL->Clone(ppBL2);
+   uxbBR->Clone(ppBR);
+   uxbBR->Clone(ppBR2);
+   (*ppBL)->Offset(0,-H1);
+   (*ppBL2)->Offset(X1,-(H1+H2));
+   (*ppBR2)->Offset(-X2,-(H3+H4));
+   (*ppBR)->Offset(0,-H3);
+}
 
-   // move below the upper cross beam
-   Float64 H, W;
-   pProject->GetDiaphragmDimensions(&H,&W);
-   CComQIPtr<IXYPosition> position(shape);
-   position->Offset(0,-H);
+void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)
+{
+   CComPtr<IPoint2d> pntTL, pntTC, pntTR;
+   CComPtr<IPoint2d> pntBL, pntBC, pntBR;
+   GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+
+   CComPtr<IPolyShape> shape;
+   shape.CoCreateInstance(CLSID_PolyShape);
+   shape->AddPointEx(pntTL);
+   shape->AddPointEx(pntTC);
+   shape->AddPointEx(pntTR);
+   shape->AddPointEx(pntBR);
+   shape->AddPointEx(pntBC);
+   shape->AddPointEx(pntBL);
 
    shape.QueryInterface(ppShape);
+}
+
+void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
+{
+   CComPtr<IPoint2d> pntTL,pntTC,pntTR,pntBL,pntBL2,pntBR2,pntBR;
+   GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+
+   CComPtr<IPolyShape> shape;
+   shape.CoCreateInstance(CLSID_PolyShape);
+   shape->AddPointEx(pntTL);
+   shape->AddPointEx(pntTC);
+   shape->AddPointEx(pntTR);
+   shape->AddPointEx(pntBR);
+   shape->AddPointEx(pntBR2);
+   shape->AddPointEx(pntBL2);
+   shape->AddPointEx(pntBL);
+
+   shape.QueryInterface(ppShape);
+}
+
+Float64 CPierAgentImp::GetElevation(Float64 X)
+{
+   CComPtr<IPoint2d> pntTL, pntTC, pntTR;
+   CComPtr<IPoint2d> pntBL, pntBC, pntBR;
+   GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+
+   Float64 x1,y1;
+   pntTL->Location(&x1,&y1);
+
+   Float64 x2,y2;
+   pntTC->Location(&x2,&y2);
+
+   Float64 x3,y3;
+   pntTR->Location(&x3,&y3);
+
+   X += x1;
+
+   Float64 y;
+   if ( ::InRange(x1,X,x2) )
+   {
+      y = ::LinInterp(X-x1,y1,y2,x2-x1);
+   }
+   else
+   {
+      ATLASSERT(::InRange(x2,X,x3));
+      y = ::LinInterp(X-x2,y2,y3,x3-x2);
+   }
+   return y;
 }
 
 //////////////////////////////////////////
@@ -313,35 +410,34 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
    {
       // Create a function that represents the top of the lower cross beam
       mathPwLinearFunction2dUsingPoints fnTop;
-      fnTop.AddPoint(0,0);
 
-      Float64 Xcrown = GetCrownPointLocation();
-      Float64 L = pProject->GetXBeamLength();
-      Float64 SL, SR;
-      pProject->GetCrownSlopes(&SL,&SR);
+      CComPtr<IPoint2d> pntTL,pntTC,pntTR,pntBL,pntBL2,pntBR2,pntBR;
+      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
 
-      fnTop.AddPoint(Xcrown,-SL*Xcrown);
-      fnTop.AddPoint(L,-SL*Xcrown + SR*(L-Xcrown));
+      Float64 Xoffset;
+      Float64 x,y;
+      pntTL->Location(&x,&y);
+      Xoffset = x;
+      fnTop.AddPoint(x-Xoffset,y);
 
-      // Create a function that represents the bottom of the lower cross beam
-      Float64 H1, H2, X1;
-      pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
+      pntTC->Location(&x,&y);
+      fnTop.AddPoint(x-Xoffset,y);
 
-      Float64 H3, H4, X2;
-      pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+      pntTR->Location(&x,&y);
+      fnTop.AddPoint(x-Xoffset,y);
 
       mathPwLinearFunction2dUsingPoints fnBottom;
-      fnBottom.AddPoint(0,-H1);
-      if ( !IsZero(X1) )
-      {
-         fnBottom.AddPoint(X1,-(H1+H2));
-      }
+      pntBL->Location(&x,&y);
+      fnBottom.AddPoint(x-Xoffset,y);
 
-      if ( !IsZero(X2) )
-      {
-         fnBottom.AddPoint(L-X2,-(H3+H4));
-      }
-      fnBottom.AddPoint(L,-H3);
+      pntBL2->Location(&x,&y);
+      fnBottom.AddPoint(x-Xoffset,y);
+
+      pntBR2->Location(&x,&y);
+      fnBottom.AddPoint(x-Xoffset,y);
+
+      pntBR->Location(&x,&y);
+      fnBottom.AddPoint(x-Xoffset,y);
 
       Float64 Y1 = fnTop.Evaluate(poi.GetDistFromStart());
       Float64 Y2 = fnBottom.Evaluate(poi.GetDistFromStart());
@@ -621,7 +717,6 @@ Float64 CPierAgentImp::GetCrownPointLocation()
    Float64 skew = GetSkewAngle();
 
    Float64 X = LOH - refColumnOffset + CPO/cos(skew); // negative because of refColumnOffset sign convension
-   ATLASSERT(::InRange(0.0,X,pProject->GetXBeamLength()));
    return X;
 }
 
