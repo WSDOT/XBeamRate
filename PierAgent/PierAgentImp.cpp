@@ -397,12 +397,11 @@ Float64 CPierAgentImp::GetElevation(Float64 X)
 // IXBRSectionProperties
 Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
-   GET_IFACE(IXBRProject,pProject);
-
    if ( poi.IsColumnPOI() )
    {
       CColumnData::ColumnShapeType shapeType;
       Float64 D1, D2;
+      GET_IFACE(IXBRProject,pProject);
       pProject->GetColumnShape(&shapeType,&D1,&D2);
       return D1;
    }
@@ -450,6 +449,7 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
       }
 
       Float64 D,W;
+      GET_IFACE(IXBRProject,pProject);
       pProject->GetDiaphragmDimensions(&D,&W);
       H += D;
 
