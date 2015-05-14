@@ -88,6 +88,15 @@ void CAgentCmdTarget::OnEditPier()
    }
 
    oldPierData.m_Ec = pProject->GetModE();
+
+   IndexType nRebarRows = pProject->GetRebarRowCount();
+   for ( IndexType rowIdx = 0; rowIdx < nRebarRows; rowIdx++ )
+   {
+      txnLongutindalRebarData rebarData;
+      pProject->GetRebarRow(rowIdx,&rebarData.datum,&rebarData.cover,&rebarData.barType,&rebarData.nBars,&rebarData.spacing);
+      oldPierData.m_Rebar.push_back(rebarData);
+   }
+
    for ( int i = 0; i < 2; i++ )
    {
       pgsTypes::PierSideType side = (pgsTypes::PierSideType)i;

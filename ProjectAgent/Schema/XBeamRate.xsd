@@ -7,6 +7,7 @@
            xmlns:bxu="http://www.wsdot.wa.gov/OpenBridgeML/Units"
            xmlns:bxp="http://www.wsdot.wa.gov/OpenBridgeML/Pier"
            xmlns:bxg="http://www.wsdot.wa.gov/OpenBridgeML/Geometry"
+           xmlns:bsr="http://www.wsdot.wa.gov/OpenBridgeML/StandardReinforcement"
 >
    <xs:annotation>
       <xs:documentation>
@@ -18,6 +19,7 @@
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Units" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Units.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Pier" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Pier.xsd" />
   <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/Geometry" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_Geometry.xsd" />
+  <xs:import namespace="http://www.wsdot.wa.gov/OpenBridgeML/StandardReinforcement" schemaLocation="..\..\..\OpenBridgeML\Schema\OpenBridgeML_StandardReinforcement.xsd" />
 
   <xs:simpleType name="UnitModeEnum">
       <xs:annotation>
@@ -51,6 +53,24 @@
       <xs:enumeration value="Expansion"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <xs:simpleType name="LongitudinalRebarDatumEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Bottom"/>
+      <xs:enumeration value="TopLowerXBeam"/>
+      <xs:enumeration value="TopUpperXBeam"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="LongitudinalRebarRowType">
+    <xs:sequence>
+      <xs:element name="Datum" type="xbr:LongitudinalRebarDatumEnum"/>
+      <xs:element name="Cover" type="bxu:LengthValueType"/>
+      <xs:element name="Bar" type="bsr:USBarEnum" />
+      <xs:element name="BarCount" type="xs:unsignedInt"/>
+      <xs:element name="Spacing" type="bxu:LengthValueType"/>
+    </xs:sequence>
+  </xs:complexType>
 
   <xs:complexType name="BearingType">
     <xs:annotation>
@@ -195,6 +215,11 @@
                <xs:documentation>Modulus of elasticity of the pier concrete</xs:documentation>
              </xs:annotation>
            </xs:element>
+           
+           <!-- Longitudinal Rebar -->
+           <xs:sequence minOccurs="0" maxOccurs="unbounded">
+             <xs:element name="LongitudinalRebar" type="xbr:LongitudinalRebarRowType"/>
+           </xs:sequence>
            
            <!-- Part 2: OpenBridgeML Pier -->
             <xs:element name="Pier" type="bxp:PierType"/>

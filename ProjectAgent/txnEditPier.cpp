@@ -36,6 +36,15 @@ txnLiveLoadData::txnLiveLoadData()
 {
 }
 
+txnLongutindalRebarData::txnLongutindalRebarData()
+{
+   datum = xbrTypes::Bottom;
+   cover = 0;
+   barType = matRebar::bs3;
+   nBars = 1;
+   spacing = 0;
+}
+
 /////////////////////////////////////////////////////////////////
 txnEditPierData::txnEditPierData()
 {
@@ -154,6 +163,13 @@ void txnEditPier::Execute(int i)
    }
 
    pProject->SetModE(m_PierData[i].m_Ec);
+
+   pProject->RemoveRebarRows();
+   BOOST_FOREACH(txnLongutindalRebarData& rebarData,m_PierData[i].m_Rebar)
+   {
+      pProject->AddRebarRow(rebarData.datum,rebarData.cover,rebarData.barType,rebarData.nBars,rebarData.spacing);
+   }
+
 
    for ( int j = 0; j < 2; j++ )
    {

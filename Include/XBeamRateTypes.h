@@ -29,4 +29,11 @@ typedef struct xbrTypes
       Stage2  // upper and lower cross beam together
    } Stage;
 
+   typedef enum LongitudinalRebarDatumType
+   {
+      Bottom,
+      TopLowerXBeam,
+      TopUpperXBeam
+   };
+
 } xbrTypes;

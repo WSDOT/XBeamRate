@@ -104,6 +104,14 @@ interface IXBRProject : IUnknown
    virtual void GetTransverseLocation(ColumnIndexType* pRefColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure) = 0;
 
    virtual Float64 GetXBeamLength() = 0;
+
+   // Longitudinal Rebar
+   virtual IndexType GetRebarRowCount() = 0;
+   virtual void AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing) = 0;
+   virtual void SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing) = 0;
+   virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing) = 0;
+   virtual void RemoveRebarRow(IndexType rowIdx) = 0;
+   virtual void RemoveRebarRows() = 0;
 };
 
 /*****************************************************************************

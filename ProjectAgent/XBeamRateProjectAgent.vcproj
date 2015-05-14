@@ -747,6 +747,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LongitudinalRebarGrid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierDlg.cpp"
 				>
 			</File>
@@ -1035,6 +1039,10 @@
 			</File>
 			<File
 				RelativePath=".\LiveLoadReactionsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LongitudinalRebarGrid.h"
 				>
 			</File>
 			<File

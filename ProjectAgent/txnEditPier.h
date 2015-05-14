@@ -40,6 +40,17 @@ public:
    std::vector<std::pair<std::_tstring,Float64>> m_LLIM;
 };
 
+class txnLongutindalRebarData
+{
+public:
+   txnLongutindalRebarData();
+   xbrTypes::LongitudinalRebarDatumType datum;
+   Float64 cover;
+   matRebar::Size barType;
+   Int16 nBars;
+   Float64 spacing;
+};
+
 class txnEditPierData
 {
 public:
@@ -68,6 +79,7 @@ public:
 
 
    Float64 m_Ec;
+   std::vector<txnLongutindalRebarData> m_Rebar;
 
    ColumnIndexType m_nColumns;
    ColumnIndexType m_RefColumnIdx;

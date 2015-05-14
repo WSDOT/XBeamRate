@@ -216,7 +216,7 @@ BEGIN
     LTEXT           "Spacing measured on CL Pier",IDC_STATIC,148,7,93,8
 END
 
-IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 317, 323
+IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 365, 354
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Superstructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -226,51 +226,55 @@ BEGIN
     LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,7,28,274,8
     LTEXT           "Curb Line Measured from ",IDC_STATIC,7,41,83,8
     COMBOBOX        IDC_CURB_LINE_MEASUREMENT,94,39,86,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,56,303,128
-    LTEXT           "Skew",IDC_STATIC,7,194,18,8
-    EDITTEXT        IDC_SKEW,27,192,58,14,ES_AUTOHSCROLL
-    LTEXT           "Deck elevation at alignment",IDC_STATIC,7,211,89,8
-    EDITTEXT        IDC_DECK_ELEVATION,99,208,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,143,211,19,8
-    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,227,84,8
-    EDITTEXT        IDC_CPO,93,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_CPO_UNIT,137,227,19,8
-    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,165,227,78,8
-    EDITTEXT        IDC_BLO,247,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_BLO_UNIT,291,225,19,8
-    LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,7,247,74,8
-    EDITTEXT        IDC_LCO,85,244,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_LCO_UNIT,129,248,19,8
-    LTEXT           "Right Curb Offset (RCO)",IDC_STATIC,163,249,80,8
-    EDITTEXT        IDC_RCO,244,245,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_RCO_UNIT,291,248,19,8
-    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,7,263,70,8
-    EDITTEXT        IDC_SL,85,259,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SL_UNIT,129,261,19,8
-    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,163,263,76,8
-    EDITTEXT        IDC_SR,243,260,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SR_UNIT,291,262,19,8
-    LTEXT           "W",IDC_STATIC,7,290,8,8
-    EDITTEXT        IDC_W,23,287,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_W_UNIT,66,290,19,8
-    LTEXT           "H",IDC_STATIC,116,290,8,8
-    EDITTEXT        IDC_H,127,287,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_H_UNIT,175,290,19,8
-    LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,308,184,8
+    CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,56,351,156
+    LTEXT           "Skew",IDC_STATIC,7,223,18,8
+    EDITTEXT        IDC_SKEW,27,221,58,14,ES_AUTOHSCROLL
+    LTEXT           "Deck elevation at alignment",IDC_STATIC,7,240,89,8
+    EDITTEXT        IDC_DECK_ELEVATION,99,237,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,143,240,19,8
+    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,256,84,8
+    EDITTEXT        IDC_CPO,93,253,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_CPO_UNIT,137,256,19,8
+    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,165,256,78,8
+    EDITTEXT        IDC_BLO,247,253,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_BLO_UNIT,299,254,19,8
+    LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,7,276,74,8
+    EDITTEXT        IDC_LCO,85,273,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_LCO_UNIT,129,277,19,8
+    LTEXT           "Right Curb Offset (RCO)",IDC_STATIC,163,278,80,8
+    EDITTEXT        IDC_RCO,244,274,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_RCO_UNIT,299,277,19,8
+    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,7,292,70,8
+    EDITTEXT        IDC_SL,85,288,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SL_UNIT,129,290,19,8
+    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,163,292,76,8
+    EDITTEXT        IDC_SR,243,289,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SR_UNIT,299,291,19,8
+    LTEXT           "W",IDC_STATIC,7,319,8,8
+    EDITTEXT        IDC_W,23,316,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_W_UNIT,66,319,19,8
+    LTEXT           "H",IDC_STATIC,116,319,8,8
+    EDITTEXT        IDC_H,127,316,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_H_UNIT,175,319,19,8
+    LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,339,184,8
 END
 
-IDD_REINFORCEMENT_PAGE DIALOGEX 0, 0, 235, 156
+IDD_REINFORCEMENT_PAGE DIALOGEX 0, 0, 371, 280
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Materials and Reinforcement"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "Material Properties",IDC_STATIC,7,7,221,49
+    GROUPBOX        "Material Properties",IDC_STATIC,7,7,357,49
     LTEXT           "Ec",IDC_EC_LABEL,17,20,8,8
     EDITTEXT        IDC_EC,35,17,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_EC_UNIT,81,20,19,8
-    LTEXT           "Longitudinal Reinforcement Definition Goes Here",IDC_STATIC,15,76,155,8
-    LTEXT           "Transverse Reinforcement Definition Goes Here",IDC_STATIC,16,115,153,8
+    LTEXT           "Longitudinal Reinforcement",IDC_STATIC,7,74,88,8
+    LTEXT           "Transverse Reinforcement Definition Goes Here",IDC_STATIC,27,204,153,8
     LTEXT           "Rebar Material Goes Here",IDC_STATIC,18,38,83,8
+    CONTROL         "Custom1",IDC_REBAR_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,84,321,107
+    LTEXT           "Concrete Properties... need unit weight.. compute E?",IDC_STATIC,145,26,172,8
+    PUSHBUTTON      "+",IDC_ADD_REBAR,332,84,23,14
+    PUSHBUTTON      "-",IDC_REMOVE_REBAR,332,102,23,14
 END
 
 IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 324, 449
@@ -329,17 +333,17 @@ BEGIN
     IDD_SUPERSTRUCTURE_LAYOUT_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 310
+        RIGHTMARGIN, 358
         TOPMARGIN, 7
-        BOTTOMMARGIN, 316
+        BOTTOMMARGIN, 347
     END
 
     IDD_REINFORCEMENT_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 228
+        RIGHTMARGIN, 364
         TOPMARGIN, 7
-        BOTTOMMARGIN, 149
+        BOTTOMMARGIN, 273
     END
 
     IDD_LIVE_LOAD_REACTIONS, DIALOG

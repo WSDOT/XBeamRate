@@ -176,6 +176,10 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    m_XBeamRateXML->BearingLine().push_back(backBearingLine);
 
+   // create a dummy rebar row
+   XBeamRate::LongitudinalRebarRowType rebarRow(XBeamRate::LongitudinalRebarDatumEnum::Bottom,::ConvertToSysUnits(2.0,unitMeasure::Inch),OpenBridgeML::StandardReinforcement::USBarEnum::US11,5,::ConvertToSysUnits(6.0,unitMeasure::Inch));
+   m_XBeamRateXML->LongitudinalRebar().push_back(rebarRow);
+
    return S_OK;
 }
 
@@ -927,6 +931,55 @@ Float64 CProjectAgentImp::GetXBeamLength()
    return X3 + s + X4;
 }
 
+IndexType CProjectAgentImp::GetRebarRowCount()
+{
+   return m_XBeamRateXML->LongitudinalRebar().size();
+}
+
+void CProjectAgentImp::AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing)
+{
+   XBeamRate::LongitudinalRebarRowType rebarRow(
+      (XBeamRate::LongitudinalRebarDatumEnum::value)datum,
+      cover,
+      (OpenBridgeML::StandardReinforcement::USBarEnum::value)barSize,
+      nBars,
+      spacing);
+
+   m_XBeamRateXML->LongitudinalRebar().push_back(rebarRow);
+}
+
+void CProjectAgentImp::SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing)
+{
+   XBeamRate::LongitudinalRebarRowType rebarRow(
+      (XBeamRate::LongitudinalRebarDatumEnum::value)datum,
+      cover,
+      (OpenBridgeML::StandardReinforcement::USBarEnum::value)barSize,
+      nBars,
+      spacing);
+
+   m_XBeamRateXML->LongitudinalRebar()[rowIdx] = rebarRow;
+}
+
+void CProjectAgentImp::GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing)
+{
+   XBeamRate::LongitudinalRebarRowType& rebarData = m_XBeamRateXML->LongitudinalRebar()[rowIdx];
+   *pDatum = (xbrTypes::LongitudinalRebarDatumType)(XBeamRate::LongitudinalRebarDatumEnum::value)rebarData.Datum();
+   *pCover = rebarData.Cover();
+   *pBarSize = (matRebar::Size)(OpenBridgeML::StandardReinforcement::USBarEnum::value)rebarData.Bar();
+   *pnBars = rebarData.BarCount();
+   *pSpacing = rebarData.Spacing();
+}
+
+void CProjectAgentImp::RemoveRebarRow(IndexType rowIdx)
+{
+   m_XBeamRateXML->LongitudinalRebar().erase(m_XBeamRateXML->LongitudinalRebar().begin()+rowIdx);
+}
+
+void CProjectAgentImp::RemoveRebarRows()
+{
+   m_XBeamRateXML->LongitudinalRebar().clear();
+}
+
 //////////////////////////////////////////////////////////
 // IXBRProjectEdit
 void CProjectAgentImp::EditPier(int nPage)
@@ -1050,6 +1103,12 @@ HRESULT CProjectAgentImp::ConvertToBaseUnits()
    BOOST_FOREACH(OpenBridgeML::Pier::ColumnsType::Spacing_type& spacing,m_XBeamRateXML->Pier().Columns().Spacing())
    {
       ConvertBetweenBaseUnits(spacing, xmlDocumentUnitServer, pOurUnitServer);
+   }
+
+   BOOST_FOREACH(XBeamRate::LongitudinalRebarRowType& rowType,m_XBeamRateXML->LongitudinalRebar())
+   {
+      ConvertBetweenBaseUnits(rowType.Cover(),xmlDocumentUnitServer,pOurUnitServer);
+      ConvertBetweenBaseUnits(rowType.Spacing(),xmlDocumentUnitServer,pOurUnitServer);
    }
 
    return S_OK;

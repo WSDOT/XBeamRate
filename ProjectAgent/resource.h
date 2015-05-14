@@ -75,14 +75,16 @@
 #define IDC_PERMIT_SPECIAL_GRID         255
 #define IDC_DESIGN_ADD                  256
 #define IDC_DESIGN_REMOVE               257
+#define IDC_REBAR_GRID                  258
+#define IDC_ADD_REBAR                   259
 #define IDC_LEGAL_ROUTINE_ADD           260
+#define IDC_REMOVE_REBAR                260
 #define IDC_LEGAL_ROUTINE_REMOVE        261
 #define IDC_LEGAL_SPECIAL_ADD           262
 #define IDC_LEGAL_SPECIAL_REMOVE        263
 #define IDC_PERMIT_ROUTINE_ADD          264
 #define IDC_PERMIT_ROUTINE_REMOVE       265
 #define IDC_PERMIT_SPECIAL_ADD          266
-#define IDC_DESIGN_REMOVE2              267
 #define IDC_PERMIT_SPECIAL_REMOVE       267
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_BACK_BEARING_GRID           1475
@@ -146,7 +148,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         258
+#define _APS_NEXT_CONTROL_VALUE         261
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

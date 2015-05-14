@@ -181,6 +181,13 @@ public:
 
    virtual Float64 GetXBeamLength();
 
+   virtual IndexType GetRebarRowCount();
+   virtual void AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing);
+   virtual void SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing);
+   virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing);
+   virtual void RemoveRebarRow(IndexType rowIdx);
+   virtual void RemoveRebarRows();
+
 // IXBRProjectEdit
 public:
    virtual void EditPier(int nPage);
