@@ -114,6 +114,11 @@ STDMETHODIMP CEngAgentImp::ShutDown()
 
 //////////////////////////////////////////////////////////////////////
 // ILoadRating
+Float64 CEngAgentImp::GetMomentCapacity(Float64 X,bool bPositiveMoment)
+{
+   return (bPositiveMoment ? 5e6 : -5e6);
+}
+
 Float64 CEngAgentImp::GetRatingFactor()
 {
    return 1.2;

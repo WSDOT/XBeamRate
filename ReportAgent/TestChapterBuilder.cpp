@@ -27,6 +27,7 @@
 #include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -158,7 +159,30 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
 
    fpl.ShowUnitTag(true);
    *pPara << _T("Upper XBeam Dead Load, w = ") << fpl.SetValue(pProductForces->GetUpperCrossBeamLoading()) << rptNewLine;
+   *pPara << rptNewLine;
 
+   pTable = new rptRcTable(4,0);
+   pTable->TableCaption() << _T("Capacity");
+   *pPara << pTable << rptNewLine;
+
+   (*pTable)(0,0) << _T("POI ID");
+   (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,2) << COLHDR(_T("+Mn"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+   (*pTable)(0,3) << COLHDR(_T("-Mn"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+
+   GET_IFACE2(pBroker,IXBRLoadRating,pLoadRating);
+   row = pTable->GetNumberOfHeaderRows();
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 pM = pLoadRating->GetMomentCapacity(poi.GetDistFromStart(),true);
+      Float64 nM = pLoadRating->GetMomentCapacity(poi.GetDistFromStart(),false);
+      (*pTable)(row,0) << poi.GetID();
+      (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,2) << moment.SetValue(pM);
+      (*pTable)(row,3) << moment.SetValue(nM);
+
+      row++;
+   }
 
    
    return pChapter;

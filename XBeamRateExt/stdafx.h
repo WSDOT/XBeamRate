@@ -5,9 +5,10 @@
 
 #pragma once
 
+#include <XBeamRateVersion.h>
+
 #include <afxwin.h>
 
-#include <XBeamRateVersion.h>
 #include <XBeamRateTypes.h>
 
 

@@ -78,6 +78,7 @@ public:
 
 // IXBRLoadRating
 public:
+   virtual Float64 GetMomentCapacity(Float64 X,bool bPositiveMoment);
    virtual Float64 GetRatingFactor();
 
 #ifdef _DEBUG
