@@ -688,6 +688,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphController.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphingAgent.cpp"
 				>
 				<FileConfiguration
@@ -929,14 +937,6 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\TestGraphBuilder.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\TestGraphController.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -944,6 +944,14 @@
 			>
 			<File
 				RelativePath=".\dllmain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphController.h"
 				>
 			</File>
 			<File
@@ -964,14 +972,6 @@
 			</File>
 			<File
 				RelativePath="StdAfx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TestGraphBuilder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TestGraphController.h"
 				>
 			</File>
 		</Filter>

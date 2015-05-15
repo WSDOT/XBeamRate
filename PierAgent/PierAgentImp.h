@@ -48,6 +48,7 @@ class ATL_NO_VTABLE CPierAgentImp :
    public IXBRPier,
    public IXBRSectionProperties,
    public IXBRMaterial,
+   public IXBRRebar,
    public IXBRPointOfInterest,
    public IXBRProjectEventSink
 {  
@@ -68,6 +69,7 @@ BEGIN_COM_MAP(CPierAgentImp)
    COM_INTERFACE_ENTRY(IXBRPier)
    COM_INTERFACE_ENTRY(IXBRSectionProperties)
    COM_INTERFACE_ENTRY(IXBRMaterial)
+   COM_INTERFACE_ENTRY(IXBRRebar)
    COM_INTERFACE_ENTRY(IXBRPointOfInterest)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
@@ -109,10 +111,19 @@ public:
 public:
    virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual void GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape);
+   virtual void GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape);
 
 // IXBRMaterial
 public:
    virtual Float64 GetXBeamDensity();
+
+// IXBRRebar
+public:
+   virtual IndexType GetRebarRowCount();
+   virtual IndexType GetRebarCount(IndexType rowIdx);
+   virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints);
+   virtual void GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
 
 // IXBRPointOfInterest
 public:

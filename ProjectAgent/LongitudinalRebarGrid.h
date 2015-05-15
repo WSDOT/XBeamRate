@@ -74,6 +74,7 @@ private:
    void SetRebarData(ROWCOL row,const txnLongutindalRebarData& rebarData);
    void GetRebarData(ROWCOL row,txnLongutindalRebarData& rebarData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
+   xbrTypes::LongitudinalRebarDatumType GetDatum(ROWCOL row,ROWCOL col);
    matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
 };
 

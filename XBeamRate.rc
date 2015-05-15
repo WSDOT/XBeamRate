@@ -122,13 +122,13 @@ BEGIN
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        POPUP "&Reports"
-        BEGIN
-            MENUITEM "This is a placeholder",       ID_REPORTS_THISISAPLACEHOLDER
-        END
         POPUP "&Graphs"
         BEGIN
             MENUITEM "This is a placeholder",       ID_GRAPHS_THISISAPLACEHOLDER
+        END
+        POPUP "&Reports"
+        BEGIN
+            MENUITEM "This is a placeholder",       ID_REPORTS_THISISAPLACEHOLDER
         END
     END
     POPUP "&Window"

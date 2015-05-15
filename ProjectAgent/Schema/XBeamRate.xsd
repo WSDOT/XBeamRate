@@ -56,9 +56,9 @@
 
   <xs:simpleType name="LongitudinalRebarDatumEnum">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="Bottom"/>
-      <xs:enumeration value="TopLowerXBeam"/>
       <xs:enumeration value="TopUpperXBeam"/>
+      <xs:enumeration value="TopLowerXBeam"/>
+      <xs:enumeration value="Bottom"/>
     </xs:restriction>
   </xs:simpleType>
 

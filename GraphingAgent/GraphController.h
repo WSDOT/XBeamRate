@@ -28,11 +28,11 @@
 #include <EAF\EAFGraphControlWindow.h>
 #include <IFace\AnalysisResults.h>
 
-class CTestGraphController : public CEAFGraphControlWindow
+class CXBRGraphController : public CEAFGraphControlWindow
 {
 public:
-   CTestGraphController();
-   DECLARE_DYNCREATE(CTestGraphController);
+   CXBRGraphController();
+   DECLARE_DYNCREATE(CXBRGraphController);
 
    int GetGraphType();
    XBRProductForceType GetLoading();
@@ -41,7 +41,7 @@ protected:
 
    virtual BOOL OnInitDialog();
 
-	//{{AFX_MSG(CTestGraphController)
+	//{{AFX_MSG(CXBRGraphController)
    //}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

@@ -26,7 +26,7 @@
 #include "GraphingAgentImp.h"
 #include <IGraphManager.h>
 
-#include "TestGraphBuilder.h"
+#include "GraphBuilder.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CGraphingAgentImp
+// CXBRGraphingAgentImp
 CGraphingAgentImp::CGraphingAgentImp()
 {
    m_pBroker = 0;
@@ -120,7 +120,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 {
    GET_IFACE(IGraphManager,pGraphMgr);
 
-   pGraphMgr->AddGraphBuilder( new CTestGraphBuilder );
+   pGraphMgr->AddGraphBuilder( new CXBRGraphBuilder );
 
    return S_OK;
 }

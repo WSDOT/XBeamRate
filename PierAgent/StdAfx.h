@@ -60,4 +60,6 @@ using namespace ATL;
 #include <WBFLCore.h>
 #include <AgentTools.h>
 #include <WBFLGenericBridge.h>
+#include <WBFLGeometry.h>
 #include <Units\Units.h>
+#include <LRFD\LRFD.h>

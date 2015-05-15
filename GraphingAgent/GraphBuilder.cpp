@@ -23,7 +23,7 @@
 #include "stdafx.h"
 
 #include "resource.h"
-#include "TestGraphBuilder.h"
+#include "GraphBuilder.h"
 
 #include <EAF\EAFGraphChildFrame.h>
 #include <EAF\EAFGraphView.h>
@@ -38,6 +38,11 @@
 #include <IFace\PointOfInterest.h>
 
 #include <Colors.h>
+#define GRAPH_BACKGROUND WHITE //RGB(220,255,220)
+#define GRAPH_GRID_PEN_STYLE PS_DOT
+#define GRAPH_GRID_PEN_WEIGHT 1
+#define GRAPH_GRID_COLOR GREY50 //RGB(0,150,0)
+#define GRAPH_PEN_WEIGHT 2
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,40 +50,40 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-BEGIN_MESSAGE_MAP(CTestGraphBuilder, CEAFGraphBuilderBase)
-   ON_BN_CLICKED(IDC_MOMENT, &CTestGraphBuilder::OnGraphTypeChanged)
-   ON_BN_CLICKED(IDC_SHEAR, &CTestGraphBuilder::OnGraphTypeChanged)
-   ON_LBN_SELCHANGE(IDC_LOADING,&CTestGraphBuilder::OnLbnSelChanged)
+BEGIN_MESSAGE_MAP(CXBRGraphBuilder, CEAFGraphBuilderBase)
+   ON_BN_CLICKED(IDC_MOMENT, &CXBRGraphBuilder::OnGraphTypeChanged)
+   ON_BN_CLICKED(IDC_SHEAR, &CXBRGraphBuilder::OnGraphTypeChanged)
+   ON_LBN_SELCHANGE(IDC_LOADING,&CXBRGraphBuilder::OnLbnSelChanged)
 END_MESSAGE_MAP()
 
 
-CTestGraphBuilder::CTestGraphBuilder()
+CXBRGraphBuilder::CXBRGraphBuilder()
 {
-   SetName(_T("XBeam Rate Test Graph Builder"));
+   SetName(_T("Analysis Results"));
 }
 
-CTestGraphBuilder::CTestGraphBuilder(const CTestGraphBuilder& other) :
+CXBRGraphBuilder::CXBRGraphBuilder(const CXBRGraphBuilder& other) :
 CEAFGraphBuilderBase(other)
 {
 }
 
-CEAFGraphControlWindow* CTestGraphBuilder::GetGraphControlWindow()
+CEAFGraphControlWindow* CXBRGraphBuilder::GetGraphControlWindow()
 {
-   return &m_GraphControls;
+   return &m_GraphController;
 }
 
-CGraphBuilder* CTestGraphBuilder::Clone()
+CGraphBuilder* CXBRGraphBuilder::Clone()
 {
    // set the module state or the commands wont route to the
    // the graph control window
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return new CTestGraphBuilder(*this);
+   return new CXBRGraphBuilder(*this);
 }
 
-BOOL CTestGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
+BOOL CXBRGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   if ( !m_GraphControls.Create(pParent,IDD_TEST_GRAPH_CONTROLS, CBRS_LEFT, nID) )
+   if ( !m_GraphController.Create(pParent,IDD_TEST_GRAPH_CONTROLS, CBRS_LEFT, nID) )
    {
       TRACE0("Failed to create control bar\n");
       return FALSE; // failed to create
@@ -87,41 +92,52 @@ BOOL CTestGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
    return TRUE;
 }
 
-void CTestGraphBuilder::OnGraphTypeChanged()
+void CXBRGraphBuilder::OnGraphTypeChanged()
 {
    CEAFGraphView* pGraphView = m_pFrame->GetGraphView();
    pGraphView->Invalidate();
    pGraphView->UpdateWindow();
 }
 
-void CTestGraphBuilder::OnLbnSelChanged()
+void CXBRGraphBuilder::OnLbnSelChanged()
 {
    OnGraphTypeChanged();
 }
 
-void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
+void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   int graphType = m_GraphControls.GetGraphType();
-   XBRProductForceType pfType = m_GraphControls.GetLoading();
+   int graphType = m_GraphController.GetGraphType();
+   XBRProductForceType pfType = m_GraphController.GetLoading();
 
    arvPhysicalConverter* pVerticalAxisFormat;
    if ( graphType == MOMENT_GRAPH )
+   {
       pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
+   }
    else
+   {
       pVerticalAxisFormat = new ShearTool(pDisplayUnits->GetShearUnit());
+   }
 
    arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
    grGraphXY graph(*pHorizontalAxisFormat,*pVerticalAxisFormat);
 
+   graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
+   graph.SetClientAreaColor(GRAPH_BACKGROUND);
+
    std::_tstring strYAxisTitle;
    if ( graphType == MOMENT_GRAPH )
+   {
       strYAxisTitle = _T("Moment (") + ((MomentTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
+   }
    else
+   {
       strYAxisTitle = _T("Shear (") + ((ShearTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
+   }
 
    graph.SetYAxisTitle(strYAxisTitle);
 
@@ -153,29 +169,6 @@ void CTestGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
          graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
       }
    }
-
-
-   //int graphType = m_GraphControls.GetGraphType();
-
-   //// first x axis
-   //const unitmgtScalar& scalar = pDisplayUnits->GetScalarFormat();
-   //arvPhysicalConverter* pFormat = new ScalarTool(scalar);
-   //grGraphXY graph(*pFormat,*pFormat);
-
-   //IndexType idx = graph.CreateDataSeries();
-   //for ( int i = 0; i <= 360; i++ )
-   //{
-   //   Float64 angle = ::ToRadians((Float64)(i));
-   //   Float64 y;
-   //   if ( graphType == SINE_GRAPH )
-   //      y = sin(angle);
-   //   else
-   //      y = cos(angle);
-
-   //   gpPoint2d point(angle,y);
-   //   graph.AddPoint(idx,point);
-   //}
-
 
    CRect wndRect;
    pGraphWnd->GetClientRect(&wndRect);

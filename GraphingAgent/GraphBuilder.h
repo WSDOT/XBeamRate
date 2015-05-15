@@ -23,15 +23,15 @@
 #pragma once
 
 #include <EAF\EAFGraphBuilderBase.h>
-#include "TestGraphController.h"
+#include "GraphController.h"
 
 class CEAFGraphChildFrame;
 
-class CTestGraphBuilder : public CEAFGraphBuilderBase
+class CXBRGraphBuilder : public CEAFGraphBuilderBase
 {
 public:
-   CTestGraphBuilder();
-   CTestGraphBuilder(const CTestGraphBuilder& other);
+   CXBRGraphBuilder();
+   CXBRGraphBuilder(const CXBRGraphBuilder& other);
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
    virtual CGraphBuilder* Clone();
@@ -47,5 +47,5 @@ protected:
    DECLARE_MESSAGE_MAP()
 
 private:
-   CTestGraphController m_GraphControls;
+   CXBRGraphController m_GraphController;
 };

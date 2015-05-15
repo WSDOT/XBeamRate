@@ -339,7 +339,7 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,txnLongutindalRebarData& re
    ROWCOL col = 1;
 
    // Beam Face
-   col++;
+   rebarData.datum = GetDatum(row,col++);
 
    // Cover
    Float64 cover = _tstof(GetCellValue(row,col++));
@@ -372,15 +372,47 @@ CString CLongitudinalRebarGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
     }
 }
 
+xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row,ROWCOL col)
+{
+   CString strDatum = GetCellValue(row,col);
+   if ( strDatum == _T("Top") )
+   {
+      CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
+      CPierDlg* pDlg = (CPierDlg*)pParent->GetParent();
+      const txnEditPierData& pierData = pDlg->GetPierData();
+      if ( pierData.m_PierType == xbrTypes::pctExpansion )
+      {
+         return xbrTypes::TopLowerXBeam;
+      }
+      else
+      {
+         return xbrTypes::Top;
+      }
+   }
+   else if ( strDatum == _T("Bottom") )
+   {
+      return xbrTypes::Bottom;
+   }
+   else
+   {
+      return xbrTypes::TopLowerXBeam;
+   }
+}
+
 matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
-   CGXControl* pControl = GetControl(row,col);
-   CGXComboBoxWnd* pcbBarSize = (CGXComboBoxWnd*)(pControl->GetWndPtr());
-   int curSel = pcbBarSize->GetCurSel();
-
+   std::_tstring strBarSize = GetCellValue(row,col);
    matRebar::Grade grade = matRebar::Grade60;
    matRebar::Type type = matRebar::A615;
    lrfdRebarIter rebarIter(grade,type);
-   rebarIter.MoveBy(curSel);
-   return rebarIter.GetCurrentRebar()->GetSize();
+   for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
+   {
+      if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )
+      {
+         return rebarIter.GetCurrentRebar()->GetSize();
+      }
+   }
+
+   ATLASSERT(false); // should never get here
+   return matRebar::bs3;
 }

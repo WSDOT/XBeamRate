@@ -4,6 +4,7 @@
 
 interface IShape;
 interface IPoint2d;
+interface IPoint2dCollection;
 
 // {7F04A0B9-FD4E-4965-8F26-8BE78B063803}
 DEFINE_GUID(IID_IXBRPier, 
@@ -37,6 +38,8 @@ interface IXBRSectionProperties : public IUnknown
 {
    virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual void GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape) = 0;
+   virtual void GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape) = 0;
 };
 
 // {BE372349-0F8D-48e4-90F2-536AC90BEBBE}
@@ -45,4 +48,15 @@ DEFINE_GUID(IID_IXBRMaterial,
 interface IXBRMaterial : public IUnknown
 {
    virtual Float64 GetXBeamDensity() = 0;
+};
+
+// {80B9F943-F0BF-4c4b-BCE9-70BBB3A55188}
+DEFINE_GUID(IID_IXBRRebar, 
+0x80b9f943, 0xf0bf, 0x4c4b, 0xbc, 0xe9, 0x70, 0xbb, 0xb3, 0xa5, 0x51, 0x88);
+interface IXBRRebar : public IUnknown
+{
+   virtual IndexType GetRebarRowCount() = 0;
+   virtual IndexType GetRebarCount(IndexType rowIdx) = 0;
+   virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints) = 0;
+   virtual void GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
 };

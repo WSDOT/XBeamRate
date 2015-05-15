@@ -23,20 +23,20 @@
 #include "stdafx.h"
 
 #include "resource.h"
-#include "TestGraphController.h"
+#include "GraphController.h"
 
-IMPLEMENT_DYNCREATE(CTestGraphController,CEAFGraphControlWindow)
+IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
 
-CTestGraphController::CTestGraphController()
+CXBRGraphController::CXBRGraphController()
 {
 }
 
-BEGIN_MESSAGE_MAP(CTestGraphController, CEAFGraphControlWindow)
-	//{{AFX_MSG_MAP(CTestGraphController)
+BEGIN_MESSAGE_MAP(CXBRGraphController, CEAFGraphControlWindow)
+	//{{AFX_MSG_MAP(CXBRGraphController)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-BOOL CTestGraphController::OnInitDialog()
+BOOL CXBRGraphController::OnInitDialog()
 {
    FillLoadingList();
 
@@ -46,18 +46,18 @@ BOOL CTestGraphController::OnInitDialog()
 }
 
 #ifdef _DEBUG
-void CTestGraphController::AssertValid() const
+void CXBRGraphController::AssertValid() const
 {
 	CEAFGraphControlWindow::AssertValid();
 }
 
-void CTestGraphController::Dump(CDumpContext& dc) const
+void CXBRGraphController::Dump(CDumpContext& dc) const
 {
 	CEAFGraphControlWindow::Dump(dc);
 }
 #endif //_DEBUG
 
-int CTestGraphController::GetGraphType()
+int CXBRGraphController::GetGraphType()
 {
    if( GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR) == IDC_MOMENT )
       return MOMENT_GRAPH;
@@ -65,7 +65,7 @@ int CTestGraphController::GetGraphType()
       return SHEAR_GRAPH;
 }
 
-XBRProductForceType CTestGraphController::GetLoading()
+XBRProductForceType CXBRGraphController::GetLoading()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
    int curSel = plbLoading->GetCurSel();
@@ -77,7 +77,7 @@ XBRProductForceType CTestGraphController::GetLoading()
    return XBRProductForceType(plbLoading->GetItemData(curSel));
 }
 
-void CTestGraphController::FillLoadingList()
+void CXBRGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
    int idx = plbLoading->AddString(_T("Lower Cross Beam Dead Load"));

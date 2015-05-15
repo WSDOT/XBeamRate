@@ -77,6 +77,7 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
    pBrokerInit->RegInterface(IID_IXBRPier, this);
    pBrokerInit->RegInterface(IID_IXBRSectionProperties, this);
    pBrokerInit->RegInterface(IID_IXBRMaterial, this);
+   pBrokerInit->RegInterface(IID_IXBRRebar, this);
    pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
 
    return S_OK;
@@ -483,12 +484,185 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
    }
 }
 
+void CPierAgentImp::GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape)
+{
+   Float64 Y = GetElevation(poi.GetDistFromStart());
+
+   Float64 D,W;
+   GET_IFACE(IXBRProject,pProject);
+   pProject->GetDiaphragmDimensions(&D,&W);
+
+   CComPtr<IRectangle> rect;
+   rect.CoCreateInstance(CLSID_Rect);
+   rect->put_Height(D);
+   rect->put_Width(W);
+
+   CComQIPtr<IXYPosition> position(rect);
+   CComPtr<IPoint2d> pnt;
+   position->get_LocatorPoint(lpTopCenter,&pnt);
+   pnt->Move(0,Y);
+   position->put_LocatorPoint(lpTopCenter,pnt);
+
+   rect->get_Shape(ppShape);
+}
+
+void CPierAgentImp::GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape)
+{
+   Float64 Y = GetElevation(poi.GetDistFromStart());
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 W = pProject->GetXBeamWidth();
+   Float64 D = GetDepth(xbrTypes::Stage1,poi);
+
+   CComPtr<IRectangle> rect;
+   rect.CoCreateInstance(CLSID_Rect);
+   rect->put_Height(D);
+   rect->put_Width(W);
+
+   pProject->GetDiaphragmDimensions(&D,&W);
+
+   CComQIPtr<IXYPosition> position(rect);
+   CComPtr<IPoint2d> pnt;
+   position->get_LocatorPoint(lpTopCenter,&pnt);
+   pnt->Move(0,Y-D);
+   position->put_LocatorPoint(lpTopCenter,pnt);
+
+   rect->get_Shape(ppShape);
+}
+
 //////////////////////////////////////////
 // IXBRMaterial
 Float64 CPierAgentImp::GetXBeamDensity()
 {
 #pragma Reminder("UPDATE: need material model")
    return ::ConvertToSysUnits(150.,unitMeasure::PCF);
+}
+
+//////////////////////////////////////////
+// IXBRRebar
+IndexType CPierAgentImp::GetRebarRowCount()
+{
+   GET_IFACE(IXBRProject,pProject);
+   return pProject->GetRebarRowCount();
+}
+
+IndexType CPierAgentImp::GetRebarCount(IndexType rowIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   xbrTypes::LongitudinalRebarDatumType datum;
+   Float64 cover;
+   matRebar::Size barSize;
+   Int16 nBars;
+   Float64 spacing;
+   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+   return nBars;
+}
+
+void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints)
+{
+   GET_IFACE(IXBRProject,pProject);
+   xbrTypes::LongitudinalRebarDatumType datum;
+   matRebar::Size barSize;
+   Int16 nBars;
+   Float64 cover;
+   Float64 spacing;
+   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+
+   lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
+   matRebar::Type barType = matRebar::A615;
+   matRebar::Grade barGrade = matRebar::Grade60;
+   const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
+   Float64 db = pRebar->GetNominalDimension();
+
+   Float64 offset = cover + db;
+
+   CComPtr<IPoint2dCollection> points;
+   points.CoCreateInstance(CLSID_Point2dCollection);
+
+   if ( datum == xbrTypes::Bottom )
+   {
+      CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBL2, pntBR2, pntBR;
+      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+      pntBL->Offset(0,offset);
+      pntBL2->Offset(0,offset);
+      pntBR2->Offset(0,offset);
+      pntBR->Offset(0,offset);
+      points->Add(pntBL);
+      points->Add(pntBL2);
+      points->Add(pntBR2);
+      points->Add(pntBR);
+   }
+   else if ( datum == xbrTypes::TopLowerXBeam )
+   {
+      CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBL2, pntBR2, pntBR;
+      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+      pntTL->Offset(0,-offset);
+      pntTC->Offset(0,-offset);
+      pntTR->Offset(0,-offset);
+      points->Add(pntTL);
+      points->Add(pntTC);
+      points->Add(pntTR);
+   }
+   else 
+   {
+      CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBC, pntBR;
+      GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+      pntTL->Offset(0,-offset);
+      pntTC->Offset(0,-offset);
+      pntTR->Offset(0,-offset);
+      points->Add(pntTL);
+      points->Add(pntTC);
+      points->Add(pntTR);
+   }
+
+   points.CopyTo(ppPoints);
+}
+
+void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+{
+   Float64 Y = GetElevation(X);
+
+   GET_IFACE(IXBRProject,pProject);
+   xbrTypes::LongitudinalRebarDatumType datum;
+   matRebar::Size barSize;
+   Int16 nBars;
+   Float64 cover;
+   Float64 spacing;
+   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+
+   // horizontal position of bar, assuming bar row is centered on cross beam
+   Float64 barSpacingWidth = spacing*(nBars - 1);
+   Float64 Xbar = -barSpacingWidth/2 + barIdx*spacing;
+
+   lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
+   matRebar::Type barType = matRebar::A615;
+   matRebar::Grade barGrade = matRebar::Grade60;
+   const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
+   Float64 db = pRebar->GetNominalDimension();
+
+   Float64 offset = cover + db;
+   Float64 Ybar;
+   if ( datum == xbrTypes::Bottom )
+   {
+      Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
+      Ybar = Y - H + offset;
+
+   }
+   else if ( datum == xbrTypes::TopLowerXBeam )
+   {
+      Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
+      Float64 Hlower = GetDepth(xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,X));
+      Ybar = Y - H + Hlower - offset;
+   }
+   else 
+   {
+      Ybar = Y - offset;
+   }
+
+   CComPtr<IPoint2d> pnt;
+   pnt.CoCreateInstance(CLSID_Point2d);
+   pnt->Move(Xbar,Ybar);
+   pnt.CopyTo(ppPoint);
 }
 
 //////////////////////////////////////////

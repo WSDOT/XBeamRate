@@ -15,6 +15,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\WsdotCalculationSheet.h>
 
+
+
 #include <Colors.h>
 #define SELECTED_OBJECT_LINE_COLOR     RED4
 #define SELECTED_OBJECT_FILL_COLOR     RED2
@@ -240,6 +242,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    pDoc->GetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
+   GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
 
    // Model a vertical line for the alignment
    // Let X = 0 be at the alignment and Y = the alignment elevation
@@ -289,7 +292,9 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    displayList->AddDisplayObject(doAlignment);
 
-   // Model Upper Cross Beam
+   // Model Upper Cross Beam (Elevation)
+   Float64 Z = pProject->GetXBeamLength();
+
    CComPtr<IPoint2d> point;
    point.CoCreateInstance(CLSID_Point2d);
    point->Move(0,0);
@@ -319,6 +324,35 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    displayList->AddDisplayObject(doUpperXBeam);
 
+   // Model Upper XBeam (End View)
+   doUpperXBeam.Release();
+   doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
+   doUpperXBeam->SetID(m_DisplayObjectID++);
+   doUpperXBeam->SetPosition(point,FALSE,FALSE);
+   doUpperXBeam->SetSelectionType(stAll);
+
+   upperXBeamShape.Release();
+   pSectProp->GetUpperXBeamShape(xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
+   CComQIPtr<IXYPosition> position(upperXBeamShape);
+   position->Offset(1.2*Z,0);
+
+   upperXBeamDrawStrategy.Release();
+   upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+   upperXBeamDrawStrategy->SetShape(upperXBeamShape);
+   upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
+   upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
+   upperXBeamDrawStrategy->DoFill(TRUE);
+
+   doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
+
+   upper_xbeam_gravity_well.Release();
+   upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+   upper_xbeam_gravity_well->SetShape(upperXBeamShape);
+   doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
+
+   displayList->AddDisplayObject(doUpperXBeam);
+
+   // Model Lower Cross Beam (Elevation)
    CComPtr<iPointDisplayObject> doLowerXBeam;
    doLowerXBeam.CoCreateInstance(CLSID_PointDisplayObject);
    doLowerXBeam->SetID(m_DisplayObjectID++);
@@ -338,6 +372,35 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doLowerXBeam->SetDrawingStrategy(lowerXBeamDrawStrategy);
 
    CComPtr<iShapeGravityWellStrategy> lower_xbeam_gravity_well;
+   lower_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+   lower_xbeam_gravity_well->SetShape(lowerXBeamShape);
+   doLowerXBeam->SetGravityWellStrategy(lower_xbeam_gravity_well);
+
+   displayList->AddDisplayObject(doLowerXBeam);
+
+   // Model Lower Cross Beam (End)
+   doLowerXBeam.Release();
+   doLowerXBeam.CoCreateInstance(CLSID_PointDisplayObject);
+   doLowerXBeam->SetID(m_DisplayObjectID++);
+   doLowerXBeam->SetPosition(point,FALSE,FALSE);
+   doLowerXBeam->SetSelectionType(stAll);
+
+   lowerXBeamShape.Release();
+   pSectProp->GetLowerXBeamShape(xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
+   position.Release();
+   lowerXBeamShape->QueryInterface(&position);
+   position->Offset(1.2*Z,0);
+
+   lowerXBeamDrawStrategy.Release();
+   lowerXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+   lowerXBeamDrawStrategy->SetShape(lowerXBeamShape);
+   lowerXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
+   lowerXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
+   lowerXBeamDrawStrategy->DoFill(TRUE);
+
+   doLowerXBeam->SetDrawingStrategy(lowerXBeamDrawStrategy);
+
+   lower_xbeam_gravity_well.Release();
    lower_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
    lower_xbeam_gravity_well->SetShape(lowerXBeamShape);
    doLowerXBeam->SetGravityWellStrategy(lower_xbeam_gravity_well);
@@ -452,7 +515,43 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
-   //GET_IFACE2(pBroker,IXBRProject,pProject);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   Float64 X = pProject->GetXBeamLength();
+
+   GET_IFACE2(pBroker,IXBRRebar,pRebar);
+   IndexType nRebarRows = pRebar->GetRebarRowCount();
+   for ( IndexType rowIdx = 0; rowIdx < nRebarRows; rowIdx++ )
+   {
+      CComPtr<IPoint2dCollection> points;
+      pRebar->GetRebarProfile(rowIdx,&points);
+
+      CComPtr<iPolyLineDisplayObject> doRebar;
+      doRebar.CoCreateInstance(CLSID_PolyLineDisplayObject);
+      doRebar->SetID(m_DisplayObjectID++);
+      doRebar->AddPoints(points);
+      doRebar->put_PointType(plpNone);
+      doRebar->put_Color(REBAR_COLOR);
+      doRebar->put_Width(REBAR_LINE_WEIGHT);
+      doRebar->Commit();
+      displayList->AddDisplayObject(doRebar);
+
+      IndexType nBars = pRebar->GetRebarCount(rowIdx);
+      for ( IndexType barIdx = 0; barIdx < nBars; barIdx++ )
+      {
+         CComPtr<IPoint2d> pntBar;
+         pRebar->GetRebarLocation(X,rowIdx,barIdx,&pntBar);
+
+         pntBar->Offset(1.2*X,0);
+
+         CComPtr<iPointDisplayObject> doBar;
+         doBar.CoCreateInstance(CLSID_PointDisplayObject);
+         doBar->SetID(m_DisplayObjectID++);
+         doBar->SetPosition(pntBar,FALSE,FALSE);
+         
+
+         displayList->AddDisplayObject(doBar);
+      }
+   }
 }
 
 void CXBeamRateView::UpdateBearingDisplayObjects()
