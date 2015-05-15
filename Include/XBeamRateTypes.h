@@ -31,9 +31,9 @@ typedef struct xbrTypes
 
    typedef enum LongitudinalRebarDatumType
    {
-      Bottom,
+      Top,
       TopLowerXBeam,
-      TopUpperXBeam
-   };
+      Bottom,
+   } LongitudinalRebarDatumType;
 
 } xbrTypes;

@@ -36,6 +36,89 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+OpenBridgeML::StandardReinforcement::USBarEnum::value ConvertBarSize(matRebar::Size barSize)
+{
+   switch( barSize )
+   {
+   case matRebar::bs3:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US3;
+
+   case matRebar::bs4:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US4;
+
+   case matRebar::bs5:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US5;
+
+   case matRebar::bs6:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US6;
+
+   case matRebar::bs7:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US7;
+
+   case matRebar::bs8:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US8;
+
+   case matRebar::bs9:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US9;
+
+   case matRebar::bs10:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US10;
+
+   case matRebar::bs11:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US11;
+
+   case matRebar::bs14:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US14;
+
+   case matRebar::bs18:
+      return OpenBridgeML::StandardReinforcement::USBarEnum::US18;
+   }
+
+   return OpenBridgeML::StandardReinforcement::USBarEnum::US3;
+}
+
+matRebar::Size ConvertBarSize(OpenBridgeML::StandardReinforcement::USBarEnum::value barSize)
+{
+   switch( barSize )
+   {
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US3:
+      return matRebar::bs3;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US4:
+      return matRebar::bs4;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US5:
+      return matRebar::bs5;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US6:
+      return matRebar::bs6;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US7:
+      return matRebar::bs7;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US8:
+      return matRebar::bs8;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US9:
+      return matRebar::bs9;
+   
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US10:
+      return matRebar::bs10;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US11:
+      return matRebar::bs11;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US14:
+      return matRebar::bs14;
+
+   case OpenBridgeML::StandardReinforcement::USBarEnum::US18:
+      return matRebar::bs18;
+   }
+
+   return matRebar::bs3;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CProjectAgentImp
 CProjectAgentImp::CProjectAgentImp()
@@ -941,7 +1024,7 @@ void CProjectAgentImp::AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Fl
    XBeamRate::LongitudinalRebarRowType rebarRow(
       (XBeamRate::LongitudinalRebarDatumEnum::value)datum,
       cover,
-      (OpenBridgeML::StandardReinforcement::USBarEnum::value)barSize,
+      ConvertBarSize(barSize),
       nBars,
       spacing);
 
@@ -953,7 +1036,7 @@ void CProjectAgentImp::SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarD
    XBeamRate::LongitudinalRebarRowType rebarRow(
       (XBeamRate::LongitudinalRebarDatumEnum::value)datum,
       cover,
-      (OpenBridgeML::StandardReinforcement::USBarEnum::value)barSize,
+      ConvertBarSize(barSize),
       nBars,
       spacing);
 
@@ -965,7 +1048,7 @@ void CProjectAgentImp::GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarD
    XBeamRate::LongitudinalRebarRowType& rebarData = m_XBeamRateXML->LongitudinalRebar()[rowIdx];
    *pDatum = (xbrTypes::LongitudinalRebarDatumType)(XBeamRate::LongitudinalRebarDatumEnum::value)rebarData.Datum();
    *pCover = rebarData.Cover();
-   *pBarSize = (matRebar::Size)(OpenBridgeML::StandardReinforcement::USBarEnum::value)rebarData.Bar();
+   *pBarSize = ConvertBarSize(rebarData.Bar());
    *pnBars = rebarData.BarCount();
    *pSpacing = rebarData.Spacing();
 }

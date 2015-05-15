@@ -46,7 +46,7 @@ public:
    txnLongutindalRebarData();
    xbrTypes::LongitudinalRebarDatumType datum;
    Float64 cover;
-   matRebar::Size barType;
+   matRebar::Size barSize;
    Int16 nBars;
    Float64 spacing;
 };

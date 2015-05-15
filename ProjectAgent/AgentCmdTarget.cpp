@@ -93,7 +93,7 @@ void CAgentCmdTarget::OnEditPier()
    for ( IndexType rowIdx = 0; rowIdx < nRebarRows; rowIdx++ )
    {
       txnLongutindalRebarData rebarData;
-      pProject->GetRebarRow(rowIdx,&rebarData.datum,&rebarData.cover,&rebarData.barType,&rebarData.nBars,&rebarData.spacing);
+      pProject->GetRebarRow(rowIdx,&rebarData.datum,&rebarData.cover,&rebarData.barSize,&rebarData.nBars,&rebarData.spacing);
       oldPierData.m_Rebar.push_back(rebarData);
    }
 

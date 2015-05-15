@@ -15,7 +15,7 @@ void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,std::vector<t
 {
    if ( pDX->m_bSaveAndValidate )
    {
-      //grid.GetRebarData(vRebarData);
+      grid.GetRebarData(vRebarData);
    }
    else
    {

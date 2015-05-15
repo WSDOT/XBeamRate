@@ -52,6 +52,7 @@ protected:
    void UpdateXBeamDisplayObjects();
    void UpdateColumnDisplayObjects();
    void UpdateBearingDisplayObjects();
+   void UpdateRebarDisplayObjects();
    void UpdateDimensionsDisplayObjects();
 
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);

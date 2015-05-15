@@ -47,7 +47,7 @@ public:
    void AddBar();
    void RemoveSelectedBars();
 
-   //void GetBearingData(std::vector<txnBearingData>& brgData);
+   void GetRebarData(std::vector<txnLongutindalRebarData>& vRebarData);
    void SetRebarData(const std::vector<txnLongutindalRebarData>& vRebarData);
 
 // Overrides
@@ -72,8 +72,9 @@ public:
 private:
    void AddRebarRow(const txnLongutindalRebarData& rebarData);
    void SetRebarData(ROWCOL row,const txnLongutindalRebarData& rebarData);
-   //void GetBearingData(ROWCOL row,txnBearingData& brgData);
+   void GetRebarData(ROWCOL row,txnLongutindalRebarData& rebarData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
+   matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
 };
 
 /////////////////////////////////////////////////////////////////////////////

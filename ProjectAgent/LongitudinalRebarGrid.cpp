@@ -23,9 +23,17 @@
 // LongitudinalRebarGrid.cpp : implementation file
 //
 
+#pragma Reminder("Update all grids of PGSuper with the techniques for getting rebar information used here")
+// rebar information is "discovered" rather than hard coded
+
 #include "stdafx.h"
+#include "resource.h"
 #include "LongitudinalRebarGrid.h"
 #include <EAF\EAFDisplayUnits.h>
+#include <LRFD\RebarPool.h>
+
+#include "ReinforcementPage.h"
+#include "PierDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -199,17 +207,17 @@ void CLongitudinalRebarGrid::RemoveSelectedBars()
 	GetParam( )->EnableUndo(TRUE);
 }
 
-//void CLongitudinalRebarGrid::GetBearingData(std::vector<txnBearingData>& vBrgData)
-//{
-//   vBrgData.clear();
-//   ROWCOL nRows = GetRowCount();
-//   for ( ROWCOL row = 1; row <= nRows; row++ )
-//   {
-//      txnBearingData brgData;
-//      GetBearingData(row,brgData);
-//      vBrgData.push_back(brgData);
-//   }
-//}
+void CLongitudinalRebarGrid::GetRebarData(std::vector<txnLongutindalRebarData>& vRebarData)
+{
+   vRebarData.clear();
+   ROWCOL nRows = GetRowCount();
+   for ( ROWCOL row = 1; row <= nRows; row++ )
+   {
+      txnLongutindalRebarData rebarData;
+      GetRebarData(row,rebarData);
+      vRebarData.push_back(rebarData);
+   }
+}
 
 void CLongitudinalRebarGrid::SetRebarData(const std::vector<txnLongutindalRebarData>& vRebarData)
 {
@@ -239,11 +247,30 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const txnLongutindalRebarDa
 
    ROWCOL col = 1;
 
+   CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
+   CPierDlg* pDlg = (CPierDlg*)pParent->GetParent();
+   const txnEditPierData& pierData = pDlg->GetPierData();
+
+   CString strBeamFaceChoiceList;
+   if ( pierData.m_PierType == xbrTypes::pctExpansion )
+   {
+      strBeamFaceChoiceList = _T("Top\nBottom\n");
+   }
+   else
+   {
+      strBeamFaceChoiceList = _T("Top\nTop Lower XBeam\nBottom\n");
+   }
+
    // Datum
+   CString strDatum = (rebarData.datum == xbrTypes::Top ? _T("Top") : (rebarData.datum == xbrTypes::TopLowerXBeam ? _T("Top Lower XBeam") : _T("Bottom")));
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
-      .SetValue(_T("??"))
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
+      .SetChoiceList(strBeamFaceChoiceList)
+      .SetValue(strDatum)
       );
 
    // Cover
@@ -256,10 +283,23 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const txnLongutindalRebarDa
       );
 
    // Bar Size
+   matRebar::Grade grade = matRebar::Grade60;
+   matRebar::Type type = matRebar::A615;
+   CString strBarSizeChoiceList;
+   lrfdRebarIter rebarIter(grade,type);
+   for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
+   {
+      const matRebar* pRebar = rebarIter.GetCurrentRebar();
+      strBarSizeChoiceList += pRebar->GetName().c_str();
+      strBarSizeChoiceList += _T("\n");
+   }
+
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
-      .SetValue(_T("??"))
+      .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
+      .SetChoiceList(strBarSizeChoiceList)
+      .SetValue(lrfdRebarPool::GetBarSize(rebarData.barSize).c_str())
       );
 
    // Bar Count
@@ -278,6 +318,8 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const txnLongutindalRebarDa
       .SetHorizontalAlignment(DT_RIGHT)
       .SetValue(value)
       );
+
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
 void CLongitudinalRebarGrid::AddRebarRow(const txnLongutindalRebarData& rebarData)
@@ -288,23 +330,32 @@ void CLongitudinalRebarGrid::AddRebarRow(const txnLongutindalRebarData& rebarDat
    SetRebarData(row,rebarData);
 }
 
-//void CLongitudinalRebarGrid::GetBearingData(ROWCOL row,txnBearingData& brgData)
-//{
-//   CComPtr<IBroker> pBroker;
-//   EAFGetBroker(&pBroker);
-//   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-//
-//   ROWCOL col = 1;
-//
-//   Float64 DC = _tstof(GetCellValue(row,col++));
-//   brgData.m_DC = ::ConvertToSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//
-//   Float64 DW = _tstof(GetCellValue(row,col++));
-//   brgData.m_DW = ::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
-//
-//   Float64 S = _tstof(GetCellValue(row,col++));
-//   brgData.m_S = ::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
-//}
+void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,txnLongutindalRebarData& rebarData)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   ROWCOL col = 1;
+
+   // Beam Face
+   col++;
+
+   // Cover
+   Float64 cover = _tstof(GetCellValue(row,col++));
+   rebarData.cover = ::ConvertToSysUnits(cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+
+   // Bar Size
+   rebarData.barSize = GetBarSize(row,col++);
+
+   // # Bars
+   Int16 nBars = _tstoi(GetCellValue(row,col++));
+   rebarData.nBars = nBars;
+
+   // Spacing;
+   Float64 spacing = _tstof(GetCellValue(row,col++));
+   rebarData.spacing = ::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+}
 
 CString CLongitudinalRebarGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
 {
@@ -319,4 +370,17 @@ CString CLongitudinalRebarGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
     {
         return GetValueRowCol(nRow, nCol);
     }
+}
+
+matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
+{
+   CGXControl* pControl = GetControl(row,col);
+   CGXComboBoxWnd* pcbBarSize = (CGXComboBoxWnd*)(pControl->GetWndPtr());
+   int curSel = pcbBarSize->GetCurSel();
+
+   matRebar::Grade grade = matRebar::Grade60;
+   matRebar::Type type = matRebar::A615;
+   lrfdRebarIter rebarIter(grade,type);
+   rebarIter.MoveBy(curSel);
+   return rebarIter.GetCurrentRebar()->GetSize();
 }

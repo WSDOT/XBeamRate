@@ -22,14 +22,17 @@
 #define COLUMN_FILL_COLOR              GREY70
 #define XBEAM_LINE_COLOR               GREY50
 #define XBEAM_FILL_COLOR               GREY70
+#define REBAR_COLOR                    GREEN
 
 #define COLUMN_LINE_WEIGHT             1
 //#define XBEAM_LINE_WEIGHT              3
+#define REBAR_LINE_WEIGHT              1
 
 #define BEARING_DISPLAY_LIST_ID        0
 #define XBEAM_DISPLAY_LIST_ID          1
 #define COLUMN_DISPLAY_LIST_ID         2
 #define DIMENSIONS_DISPLAY_LIST_ID     3
+#define REBAR_DISPLAY_LIST_ID          4
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -179,6 +182,11 @@ void CXBeamRateView::OnInitialUpdate()
 
    displayList.Release();
    ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   displayList->SetID(REBAR_DISPLAY_LIST_ID);
+   dispMgr->AddDisplayList(displayList);
+
+   displayList.Release();
+   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(BEARING_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
@@ -211,6 +219,7 @@ void CXBeamRateView::UpdateDisplayObjects()
    UpdateXBeamDisplayObjects();
    UpdateColumnDisplayObjects();
    UpdateBearingDisplayObjects();
+   UpdateRebarDisplayObjects();
    UpdateDimensionsDisplayObjects();
 }
 
@@ -425,6 +434,25 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
       displayList->AddDisplayObject(doColumn);
    }
+}
+
+void CXBeamRateView::UpdateRebarDisplayObjects()
+{
+   CWaitCursor wait;
+
+   CComPtr<iDisplayMgr> dispMgr;
+   GetDisplayMgr(&dispMgr);
+
+   CDManipClientDC dc(this);
+
+   CComPtr<iDisplayList> displayList;
+   dispMgr->FindDisplayList(REBAR_DISPLAY_LIST_ID,&displayList);
+
+   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
+   CComPtr<IBroker> pBroker;
+   pDoc->GetBroker(&pBroker);
+
+   //GET_IFACE2(pBroker,IXBRProject,pProject);
 }
 
 void CXBeamRateView::UpdateBearingDisplayObjects()
