@@ -196,13 +196,14 @@ STDMETHODIMP CProjectAgentImp::Init()
    column.Height() = ::ConvertToSysUnits(30.0,unitMeasure::Feet);
 
    ColumnIndexType refColIdx = 0;
-   OpenBridgeML::Types::TransverseOffsetType transverseOffset(::ConvertToSysUnits(-5.0,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment);
-   OpenBridgeML::Pier::ColumnsType columns(refColIdx,transverseOffset);
+   OpenBridgeML::Pier::PierLocationType pierLocation(::ConvertToSysUnits(-5.0,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,refColIdx);
+
+   OpenBridgeML::Pier::ColumnsType columns;
    columns.PrismaticColumn().push_back( column );
    columns.Spacing().push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
    columns.PrismaticColumn().push_back(column);
 
-   OpenBridgeML::Pier::PierType pier(capBeam,columns);
+   OpenBridgeML::Pier::PierType pier(pierLocation,capBeam,columns);
 
 
    Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
@@ -988,16 +989,16 @@ void CProjectAgentImp::GetColumnShape(CColumnData::ColumnShapeType* pShapeType,F
 
 void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure)
 {
-   m_XBeamRateXML->Pier().Columns().ReferenceColumn() = colIdx;
-   m_XBeamRateXML->Pier().Columns().TransverseOffset().TransverseOffset(offset);
-   m_XBeamRateXML->Pier().Columns().TransverseOffset().Measure((OpenBridgeML::Types::OffsetMeasurementEnum::value)measure);
+   m_XBeamRateXML->Pier().Location().ColumnIndex(colIdx);
+   m_XBeamRateXML->Pier().Location().TransverseOffset(offset);
+   m_XBeamRateXML->Pier().Location().Measure((OpenBridgeML::Types::OffsetMeasurementEnum::value)measure);
 }
 
 void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure)
 {
-   *pColIdx = (ColumnIndexType)m_XBeamRateXML->Pier().Columns().ReferenceColumn();
-   *pOffset = m_XBeamRateXML->Pier().Columns().TransverseOffset().TransverseOffset();
-   *pMeasure = (pgsTypes::OffsetMeasurementType)(OpenBridgeML::Types::OffsetMeasurementEnum::value)(m_XBeamRateXML->Pier().Columns().TransverseOffset().Measure());
+   *pColIdx = (ColumnIndexType)m_XBeamRateXML->Pier().Location().ColumnIndex();
+   *pOffset = m_XBeamRateXML->Pier().Location().TransverseOffset();
+   *pMeasure = (pgsTypes::OffsetMeasurementType)(OpenBridgeML::Types::OffsetMeasurementEnum::value)(m_XBeamRateXML->Pier().Location().Measure());
 }
 
 Float64 CProjectAgentImp::GetXBeamLength()
