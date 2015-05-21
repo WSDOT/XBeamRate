@@ -28,7 +28,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
 
-#include <WBFLUnitServer\UnitServerUtils.h>
+#include <WBFLUnitServer\OpenBridgeML.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
