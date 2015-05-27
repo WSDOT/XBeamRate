@@ -24,6 +24,7 @@
 
 #include "resource.h"
 #include "GraphController.h"
+#include "GraphBuilder.h"
 
 IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
 
@@ -57,38 +58,53 @@ void CXBRGraphController::Dump(CDumpContext& dc) const
 }
 #endif //_DEBUG
 
-int CXBRGraphController::GetGraphType()
+CGraphDefinitions CXBRGraphController::GetSelectedGraphDefinitions()
 {
-   if( GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR) == IDC_MOMENT )
-      return MOMENT_GRAPH;
-   else
-      return SHEAR_GRAPH;
-}
+   CXBRGraphBuilder* pGraphBuilder = (CXBRGraphBuilder*)GetGraphBuilder();
+   const CGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
 
-XBRProductForceType CXBRGraphController::GetLoading()
-{
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int curSel = plbLoading->GetCurSel();
-   if ( curSel == LB_ERR )
+   int nSel = plbLoading->GetSelCount();
+   CArray<int,int> selectedItems;
+   selectedItems.SetSize(nSel);
+   plbLoading->GetSelItems(nSel,selectedItems.GetData());
+
+   CGraphDefinitions selectedGraphDefinitions;
+   for ( int i = 0; i < nSel; i++ )
    {
-      return pftLowerXBeam;
+      int idx = selectedItems.GetAt(i);
+      IDType graphID = (IDType)plbLoading->GetItemData(idx);
+      const CGraphDefinition& graphDef(graphDefinitions.FindGraphDefinition(graphID));
+      selectedGraphDefinitions.AddGraphDefinition(graphDef);
    }
 
-   return XBRProductForceType(plbLoading->GetItemData(curSel));
+   return selectedGraphDefinitions;
+}
+
+ActionType CXBRGraphController::GetActionType()
+{
+#pragma Reminder("UPDATE: need to add load rating graph action")
+   int graphType = GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR);
+   if(  graphType == IDC_MOMENT )
+      return actionMoment;
+   else
+      return actionShear;
 }
 
 void CXBRGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int idx = plbLoading->AddString(_T("Lower Cross Beam Dead Load"));
-   plbLoading->SetItemData(idx,(DWORD_PTR)pftLowerXBeam);
 
-   idx = plbLoading->AddString(_T("Upper Cross Beam Dead Load"));
-   plbLoading->SetItemData(idx,(DWORD_PTR)pftUpperXBeam);
+   CXBRGraphBuilder* pGraphBuilder = (CXBRGraphBuilder*)GetGraphBuilder();
+   const CGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
+   IndexType nGraphs = graphDefinitions.GetGraphDefinitionCount();
+   for ( IndexType graphIdx = 0; graphIdx < nGraphs; graphIdx++ )
+   {
+      const CGraphDefinition& graphDefinition(graphDefinitions.GetGraphDefinition(graphIdx));
+      
+      int idx = plbLoading->AddString(graphDefinition.m_Name.c_str());
+      plbLoading->SetItemData(idx,graphDefinition.m_ID);
+   }
 
-   idx = plbLoading->AddString(_T("DC Reactions"));
-   plbLoading->SetItemData(idx,(DWORD_PTR)pftDCReactions);
-
-   idx = plbLoading->AddString(_T("DW Reactions"));
-   plbLoading->SetItemData(idx,(DWORD_PTR)pftDWReactions);
+   plbLoading->SetCurSel(0);
 }

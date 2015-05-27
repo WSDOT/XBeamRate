@@ -60,3 +60,4 @@ using namespace ATL;
 #include <WBFLCore.h>
 #include <AgentTools.h>
 
+#include <LRFD\LRFD.h>

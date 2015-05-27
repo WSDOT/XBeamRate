@@ -24,8 +24,11 @@
 
 #include <EAF\EAFGraphBuilderBase.h>
 #include "GraphController.h"
+#include "GraphDefinition.h"
 
 class CEAFGraphChildFrame;
+class grGraphXY;
+class arvPhysicalConverter;
 
 class CXBRGraphBuilder : public CEAFGraphBuilderBase
 {
@@ -35,6 +38,7 @@ public:
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
    virtual CGraphBuilder* Clone();
+   const CGraphDefinitions& GetGraphDefinitions();
 
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow();
@@ -42,10 +46,18 @@ protected:
    afx_msg void OnGraphTypeChanged();
    afx_msg void OnLbnSelChanged();
 
+   void UpdateGraphDefinitions();
+
    virtual bool UpdateNow() { return true; }
+
+   void BuildProductForceGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
+   void BuildCapacityGraph(const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType positiveGraphIdx,IndexType negativeGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
+
+   LPCTSTR GetGraphTitle(ActionType actionType);
 
    DECLARE_MESSAGE_MAP()
 
 private:
+   CGraphDefinitions m_GraphDefinitions;
    CXBRGraphController m_GraphController;
 };

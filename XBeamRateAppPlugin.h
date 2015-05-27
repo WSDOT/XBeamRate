@@ -21,6 +21,8 @@ public:
    HRESULT FinalConstruct();
    void FinalRelease();
 
+   LPCTSTR GetAppName() { return _T("XBeamRate"); }
+
 DECLARE_REGISTRY_RESOURCEID(IDR_XBEAMRATEAPP)
 
 DECLARE_PROTECT_FINAL_CONSTRUCT()

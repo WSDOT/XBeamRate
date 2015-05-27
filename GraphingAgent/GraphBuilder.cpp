@@ -34,8 +34,9 @@
 #include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
-#include <IFace\AnalysisResults.h>
 #include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
 
 #include <Colors.h>
 #define GRAPH_BACKGROUND WHITE //RGB(220,255,220)
@@ -60,11 +61,13 @@ END_MESSAGE_MAP()
 CXBRGraphBuilder::CXBRGraphBuilder()
 {
    SetName(_T("Analysis Results"));
+   UpdateGraphDefinitions();
 }
 
 CXBRGraphBuilder::CXBRGraphBuilder(const CXBRGraphBuilder& other) :
 CEAFGraphBuilderBase(other)
 {
+   UpdateGraphDefinitions();
 }
 
 CEAFGraphControlWindow* CXBRGraphBuilder::GetGraphControlWindow()
@@ -80,10 +83,15 @@ CGraphBuilder* CXBRGraphBuilder::Clone()
    return new CXBRGraphBuilder(*this);
 }
 
+const CGraphDefinitions& CXBRGraphBuilder::GetGraphDefinitions()
+{
+   return m_GraphDefinitions;
+}
+
 BOOL CXBRGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   if ( !m_GraphController.Create(pParent,IDD_TEST_GRAPH_CONTROLS, CBRS_LEFT, nID) )
+   if ( !m_GraphController.Create(pParent,IDD_GRAPH_CONTROLLER, CBRS_LEFT, nID) )
    {
       TRACE0("Failed to create control bar\n");
       return FALSE; // failed to create
@@ -104,17 +112,27 @@ void CXBRGraphBuilder::OnLbnSelChanged()
    OnGraphTypeChanged();
 }
 
+void CXBRGraphBuilder::UpdateGraphDefinitions()
+{
+   IDType graphID = 0;
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),pftLowerXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Upper Cross Beam Dead Load"),pftUpperXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),pftDCReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),pftDWReactions));
+
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Capacity")));
+}
+
 void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   int graphType = m_GraphController.GetGraphType();
-   XBRProductForceType pfType = m_GraphController.GetLoading();
+   ActionType actionType = m_GraphController.GetActionType();
 
    arvPhysicalConverter* pVerticalAxisFormat;
-   if ( graphType == MOMENT_GRAPH )
+   if ( actionType == actionMoment )
    {
       pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
    }
@@ -129,8 +147,10 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
    graph.SetClientAreaColor(GRAPH_BACKGROUND);
 
+   graph.SetTitle(GetGraphTitle(actionType));
+
    std::_tstring strYAxisTitle;
-   if ( graphType == MOMENT_GRAPH )
+   if ( actionType == actionMoment )
    {
       strYAxisTitle = _T("Moment (") + ((MomentTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
    }
@@ -143,17 +163,78 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
    graph.SetXAxisTitle(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")"));
 
-   IndexType graphIdx = graph.CreateDataSeries(_T("Title"),PS_SOLID,2,RED);
+   CGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
+   IndexType nGraphs = graphDefs.GetGraphDefinitionCount();
+   for ( IndexType idx = 0; idx < nGraphs; idx++ )
+   {
+      CGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
 
+      IndexType graphIdx, positiveGraphIdx, negativeGraphIdx;
+      if ( graphDef.m_GraphType == graphCapacity )
+      {
+         positiveGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
+         negativeGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,BLUE);
+      }
+      else
+      {
+         graphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
+      }
+
+      GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+      std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+
+      if ( graphDef.m_GraphType == graphProduct )
+      {
+         BuildProductForceGraph(vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else if ( graphDef.m_GraphType == graphCapacity )
+      {
+         BuildCapacityGraph(vPoi,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else
+      {
+         ATLASSERT(false);
+      }
+   }
+
+
+   CRect wndRect;
+   pGraphWnd->GetClientRect(&wndRect);
+   graph.SetOutputRect(wndRect);
+   graph.Draw(pDC->GetSafeHdc());
+
+   delete pVerticalAxisFormat;
+   delete pHorizontalAxisFormat;
+}
+
+LPCTSTR CXBRGraphBuilder::GetGraphTitle(ActionType actionType)
+{
+   switch(actionType)
+   {
+   case actionMoment:
+      return _T("Moment");
+
+   case actionShear:
+      return _T("Shear");
+   }
+   ATLASSERT(false);
+   return _T("Unknown Graph Type");
+}
+
+void CXBRGraphBuilder::BuildProductForceGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   XBRProductForceType pfType = graphDef.m_LoadType.ProductLoadType;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
-   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = pHorizontalAxisFormat->Convert(X);
 
-      if ( graphType == MOMENT_GRAPH )
+      if ( actionType == actionMoment )
       {
          Float64 Mz = pResults->GetMoment(pfType,poi);
          Mz = pVerticalAxisFormat->Convert(Mz);
@@ -169,12 +250,36 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
          graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
       }
    }
+}
 
-   CRect wndRect;
-   pGraphWnd->GetClientRect(&wndRect);
-   graph.SetOutputRect(wndRect);
-   graph.Draw(pDC->GetSafeHdc());
+void CXBRGraphBuilder::BuildCapacityGraph(const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType positiveGraphIdx,IndexType negativeGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRLoadRating,pCapacity);
 
-   delete pVerticalAxisFormat;
-   delete pHorizontalAxisFormat;
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mz = pCapacity->GetMomentCapacity(poi,true);
+         Mz = pVerticalAxisFormat->Convert(Mz);
+         gpPoint2d point(X,Mz);
+         graph.AddPoint(positiveGraphIdx,point);
+
+         Mz = pCapacity->GetMomentCapacity(poi,false);
+         Mz = pVerticalAxisFormat->Convert(Mz);
+         point.Y() = Mz;
+         graph.AddPoint(negativeGraphIdx,point);
+      }
+      else
+      {
+         Float64 V = pCapacity->GetShearCapacity(poi);
+         graph.AddPoint(positiveGraphIdx,gpPoint2d(X,V));
+         graph.AddPoint(negativeGraphIdx,gpPoint2d(X,-V));
+      }
+   }
 }

@@ -81,6 +81,8 @@ interface IXBRProject : IUnknown
    // Material properties of the sub-structure concrete
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;
+   virtual void SetFc(Float64 fc) = 0;
+   virtual Float64 GetFc() = 0;
 
    virtual void SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength) = 0;
    virtual void GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength) = 0;

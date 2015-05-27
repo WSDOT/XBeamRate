@@ -30,12 +30,15 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "dllmain.h"
+#include <WBFLRCCapacity.h>
+
 #include "initguid.h"
 #include "EngAgent.h"
 
 #include "EngAgentCLSID.h"
 
 #include <WBFLCore_i.c>
+#include <WBFLRCCapacity_i.c>
 
 #include "EngAgentImp.h"
 
@@ -43,7 +46,8 @@
 #include <System\ComCatMgr.h>
 
 #include <EAF\EAFTransactions.h>
-
+#include <IFace\Project.h>
+#include <IFace\Pier.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

@@ -206,6 +206,18 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	return TRUE;
 }
 
+void CXBeamRateDoc::LoadToolbarState()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   __super::LoadToolbarState();
+}
+
+void CXBeamRateDoc::SaveToolbarState()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   __super::SaveToolbarState();
+}
+
 CString CXBeamRateDoc::GetToolbarSectionName()
 {
    return "XBeamRate";

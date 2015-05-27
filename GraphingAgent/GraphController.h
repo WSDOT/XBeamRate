@@ -22,11 +22,11 @@
 
 #pragma once
 
-#define MOMENT_GRAPH 1
-#define SHEAR_GRAPH 2
-
 #include <EAF\EAFGraphControlWindow.h>
 #include <IFace\AnalysisResults.h>
+#include <GraphingTypes.h>
+
+class CGraphDefinitions;
 
 class CXBRGraphController : public CEAFGraphControlWindow
 {
@@ -34,8 +34,8 @@ public:
    CXBRGraphController();
    DECLARE_DYNCREATE(CXBRGraphController);
 
-   int GetGraphType();
-   XBRProductForceType GetLoading();
+   CGraphDefinitions GetSelectedGraphDefinitions();
+   ActionType GetActionType();
 
 protected:
 

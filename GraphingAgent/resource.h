@@ -7,7 +7,7 @@
 #define IDR_GRAPHINGAGENTMODULE         102
 #define IDC_LIST1                       201
 #define IDC_LOADING                     201
-#define IDD_TEST_GRAPH_CONTROLS         3006
+#define IDD_GRAPH_CONTROLLER         3006
 #define IDC_BUTTON1                     3012
 #define IDC_SINE                        3013
 #define IDC_MOMENT                      3013

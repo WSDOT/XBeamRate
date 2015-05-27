@@ -94,6 +94,8 @@ public:
 public:
    virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi);
    virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax);
+   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax);
 
 // IXBRProjectEventSink
 public:

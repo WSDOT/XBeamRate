@@ -618,7 +618,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    points.CopyTo(ppPoints);
 }
 
-void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
 {
    Float64 Y = GetElevation(X);
 
@@ -629,10 +629,6 @@ void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx
    Float64 cover;
    Float64 spacing;
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
-
-   // horizontal position of bar, assuming bar row is centered on cross beam
-   Float64 barSpacingWidth = spacing*(nBars - 1);
-   Float64 Xbar = -barSpacingWidth/2 + barIdx*spacing;
 
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
    matRebar::Type barType = matRebar::A615;
@@ -658,6 +654,25 @@ void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx
    {
       Ybar = Y - offset;
    }
+
+   return Ybar;
+}
+
+void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+{
+   Float64 Ybar = GetRebarRowLocation(X,rowIdx);
+
+   GET_IFACE(IXBRProject,pProject);
+   xbrTypes::LongitudinalRebarDatumType datum;
+   matRebar::Size barSize;
+   Int16 nBars;
+   Float64 cover;
+   Float64 spacing;
+   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+
+   // horizontal position of bar, assuming bar row is centered on cross beam
+   Float64 barSpacingWidth = spacing*(nBars - 1);
+   Float64 Xbar = -barSpacingWidth/2 + barIdx*spacing;
 
    CComPtr<IPoint2d> pnt;
    pnt.CoCreateInstance(CLSID_Point2d);

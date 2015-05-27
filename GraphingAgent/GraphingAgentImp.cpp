@@ -28,6 +28,8 @@
 
 #include "GraphBuilder.h"
 
+#include <IFace\XBeamRateAgent.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -120,7 +122,18 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 {
    GET_IFACE(IGraphManager,pGraphMgr);
 
-   pGraphMgr->AddGraphBuilder( new CXBRGraphBuilder );
+   CXBRGraphBuilder* pGraphBuilder = new CXBRGraphBuilder;
+   
+   CComPtr<IXBeamRateAgent> pXBR;
+   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
+   if ( SUCCEEDED(hr) )
+   {
+      // XBeam Rate is acting as an extension to PGSuper/PGSplice
+      // Change the default graph name so it doesn't conflict with PGSuper/PGSplice
+      pGraphBuilder->SetName(_T("Cross Beam Rating"));
+   }
+
+   VERIFY(pGraphMgr->AddGraphBuilder( pGraphBuilder ));
 
    return S_OK;
 }

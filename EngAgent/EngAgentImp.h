@@ -31,7 +31,10 @@
 #include <EngAgent.h>
 #include "EngAgentCLSID.h"
 
+#include <WBFLRCCapacity.h>
+
 #include <EAF\EAFInterfaceCache.h>
+#include <IFace\Project.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CEngAgentImp
@@ -39,10 +42,9 @@ class ATL_NO_VTABLE CEngAgentImp :
 	public CComObjectRootEx<CComSingleThreadModel>,
    //public CComRefCountTracer<CEngAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CEngAgentImp, &CLSID_EngAgent>,
-	public IConnectionPointContainerImpl<CEngAgentImp>,
-   //public CProxyIProjectEventSink<CEngAgentImp>,
    public IAgentEx,
-   public IXBRLoadRating
+   public IXBRLoadRating,
+   public IXBRProjectEventSink
 {  
 public:
 	CEngAgentImp(); 
@@ -59,12 +61,13 @@ BEGIN_COM_MAP(CEngAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
 	COM_INTERFACE_ENTRY(IXBRLoadRating)
-	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
-BEGIN_CONNECTION_POINT_MAP(CEngAgentImp)
+//BEGIN_CONNECTION_POINT_MAP(CEngAgentImp)
 //   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
-END_CONNECTION_POINT_MAP()
+//END_CONNECTION_POINT_MAP()
 
 // IAgentEx
 public:
@@ -78,15 +81,34 @@ public:
 
 // IXBRLoadRating
 public:
-   virtual Float64 GetMomentCapacity(Float64 X,bool bPositiveMoment);
+   virtual Float64 GetMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual Float64 GetShearCapacity(const xbrPointOfInterest& poi);
    virtual Float64 GetRatingFactor();
 
-#ifdef _DEBUG
-   bool AssertValid() const;
-#endif//
+// IXBRProjectEventSink
+public:
+   virtual HRESULT OnProjectChanged();
 
 private:
    DECLARE_EAF_AGENT_DATA;
+
+   DWORD m_dwProjectCookie;
+
+   typedef struct MomentCapacityDetails
+   {
+      CComPtr<IRCBeam2> rcBeam;
+      CComPtr<IRCSolutionEx> solution;
+      Float64 dt; // distance from compression face to extreme tensile reinforcement
+      Float64 phi; // capacity reduction factor
+      Float64 Mn; // nominal capacity
+      Float64 Mr; // nominal resistance (phi*Mn)
+   } MomentCapacityDetails;
+
+   std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity;
+   std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity;
+
+   MomentCapacityDetails GetMomentCapacityDetails(const xbrPointOfInterest& poi,bool bPositiveMoment);
+   MomentCapacityDetails ComputeMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)

@@ -605,3 +605,27 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbr
    sysSectionValue V(-FyL,FyR);
    return V;
 }
+
+void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax)
+{
+   ATLASSERT(liveLoadType == pgsTypes::lltDesign ||
+             liveLoadType == pgsTypes::lltLegalRating_Routine ||
+             liveLoadType == pgsTypes::lltLegalRating_Special ||
+             liveLoadType == pgsTypes::lltPermitRating_Routine ||
+             liveLoadType == pgsTypes::lltPermitRating_Special);
+
+   *pMin = 0;
+   *pMax = 0;
+}
+
+void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax)
+{
+   ATLASSERT(liveLoadType == pgsTypes::lltDesign ||
+             liveLoadType == pgsTypes::lltLegalRating_Routine ||
+             liveLoadType == pgsTypes::lltLegalRating_Special ||
+             liveLoadType == pgsTypes::lltPermitRating_Routine ||
+             liveLoadType == pgsTypes::lltPermitRating_Special);
+
+   *pMin = 0;
+   *pMax = 0;
+}

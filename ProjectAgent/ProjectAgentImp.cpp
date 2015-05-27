@@ -207,6 +207,7 @@ STDMETHODIMP CProjectAgentImp::Init()
 
 
    Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
+   Float64 fc = ::ConvertToSysUnits(4000,unitMeasure::PSI);
 
 
    Float64 deckElevation = 0;
@@ -242,7 +243,7 @@ STDMETHODIMP CProjectAgentImp::Init()
    XBeamRate::LiveLoadReactionsType permitRoutineLiveLoad;
    XBeamRate::LiveLoadReactionsType permitSpecialLiveLoad;
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,pier));
+   m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,fc,pier));
 
    // Start off with one bearing line that has one bearing
    XBeamRate::BearingLocatorType bearingLocator(0,OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
@@ -778,6 +779,17 @@ void CProjectAgentImp::SetModE(Float64 Ec)
 Float64 CProjectAgentImp::GetModE()
 {
    return m_XBeamRateXML->ModE();
+}
+
+void CProjectAgentImp::SetFc(Float64 fc)
+{
+   m_XBeamRateXML->Fc() = fc;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetFc()
+{
+   return m_XBeamRateXML->Fc();
 }
 
 void CProjectAgentImp::SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength)

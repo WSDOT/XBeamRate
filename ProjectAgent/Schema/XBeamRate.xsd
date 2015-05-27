@@ -215,7 +215,12 @@
                <xs:documentation>Modulus of elasticity of the pier concrete</xs:documentation>
              </xs:annotation>
            </xs:element>
-           
+           <xs:element name="Fc" type="bxu:PressureValueType">
+             <xs:annotation>
+               <xs:documentation>28 day strength of the pier concrete</xs:documentation>
+             </xs:annotation>
+           </xs:element>
+
            <!-- Longitudinal Rebar -->
            <xs:sequence minOccurs="0" maxOccurs="unbounded">
              <xs:element name="LongitudinalRebar" type="xbr:LongitudinalRebarRowType"/>

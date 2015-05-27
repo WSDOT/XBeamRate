@@ -157,6 +157,8 @@ public:
 
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
+   virtual void SetFc(Float64 fc);
+   virtual Float64 GetFc();
 
    virtual void SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength);
    virtual void GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength);

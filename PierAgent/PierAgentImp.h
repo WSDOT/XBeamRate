@@ -123,6 +123,7 @@ public:
    virtual IndexType GetRebarRowCount();
    virtual IndexType GetRebarCount(IndexType rowIdx);
    virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints);
+   virtual Float64 GetRebarRowLocation(Float64 X,IndexType rowIdx);
    virtual void GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
 
 // IXBRPointOfInterest

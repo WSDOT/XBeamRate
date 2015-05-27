@@ -83,6 +83,8 @@ BOOL CXBeamRatePluginApp::InitInstance()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+   SetRegistryKey( _T("Washington State Department of Transportation") );
+
    // Using a shared menu
    // See MSKB Article ID: Q118435, "Sharing Menus Between MDI Child Windows"
    m_hSharedMenu = NULL; /*::LoadMenu( m_hInstance, MAKEINTRESOURCE(IDR_???) );*/

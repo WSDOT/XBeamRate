@@ -48,6 +48,13 @@ DEFINE_GUID(IID_IXBRAnalysisResults,
 0xd8b2e731, 0x710a, 0x48ae, 0x99, 0x16, 0xac, 0x15, 0x2f, 0xef, 0x20, 0x31);
 interface IXBRAnalysisResults : IUnknown
 {
+   // Product Load Results
    virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
    virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
+
+   // Live Load Results
+   // Min/Max moment due to a particular live load vehicle
+   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax) = 0;
+   // Min/Max moment due to a particular live load type (envelope of all vehicles for the load type)
+   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax) = 0;
 };

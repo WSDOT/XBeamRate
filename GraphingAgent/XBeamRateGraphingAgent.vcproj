@@ -696,6 +696,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphDefinition.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphingAgent.cpp"
 				>
 				<FileConfiguration
@@ -955,6 +959,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\GraphDefinition.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphingAgent.h"
 				>
 			</File>
@@ -964,6 +972,10 @@
 			</File>
 			<File
 				RelativePath=".\GraphingAgentImp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GraphingTypes.h"
 				>
 			</File>
 			<File

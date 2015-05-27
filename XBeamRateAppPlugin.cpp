@@ -5,9 +5,13 @@
 #include "XBeamRatePlugin_i.h"
 #include "XBeamRateAppPlugin.h"
 
+#include "XBeamRatePluginApp.h"
+
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
 #include "XBeamRateChildFrame.h"
+
+#include <MFCTools\AutoRegistry.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
@@ -22,11 +26,24 @@ void CXBeamRateAppPlugin::FinalRelease()
 
 BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
 {
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+
+   CAutoRegistry autoReg(GetAppName());
+
+   int i = pApp->GetProfileInt(_T("Settings"),_T("Placeholder"),0);
+
    return TRUE;
 }
 
 void CXBeamRateAppPlugin::Terminate()
 {
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+
+   CAutoRegistry autoReg(GetAppName());
+
+   pApp->WriteProfileInt(_T("Settings"),_T("Placeholder"),1);
 }
 
 void CXBeamRateAppPlugin::IntegrateWithUI(BOOL bIntegrate)
