@@ -94,6 +94,8 @@ public:
 public:
    virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi);
    virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual Float64 GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
    virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax);
    virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax);
 
@@ -121,6 +123,8 @@ private:
    void GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
    void GetCapBeamFemModelLocation(Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
    LoadCaseIDType GetLoadCaseID(XBRProductForceType pfType);
+
+   std::vector<XBRProductForceType> GetLoads(XBRCombinedForceType lcType);
 
    DWORD m_dwProjectCookie;
 

@@ -159,8 +159,9 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IXBRProject,     this );
-   pBrokerInit->RegInterface( IID_IXBRProjectEdit, this );
+   pBrokerInit->RegInterface( IID_IXBRProject,             this );
+   pBrokerInit->RegInterface( IID_IXBRRatingSpecification, this );
+   pBrokerInit->RegInterface( IID_IXBRProjectEdit,         this );
 
    return S_OK;
 };
@@ -243,7 +244,11 @@ STDMETHODIMP CProjectAgentImp::Init()
    XBeamRate::LiveLoadReactionsType permitRoutineLiveLoad;
    XBeamRate::LiveLoadReactionsType permitSpecialLiveLoad;
 
-   m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,fc,pier));
+   XBeamRate::SystemFactor systemFactor(1.0,1.0);
+   XBeamRate::ConditionFactorType conditionFactor(1.0,XBeamRate::ConditionFactorEnum::Good);
+   XBeamRate::DeadLoadFactors deadLoadFactors(1.25,1.5);
+   XBeamRate::LiveLoadFactors liveLoadFactors(1.75,1.35,1.80,1.60,1.30,1.15);
+   m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,systemFactor,conditionFactor,deadLoadFactors,liveLoadFactors,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,fc,pier));
 
    // Start off with one bearing line that has one bearing
    XBeamRate::BearingLocatorType bearingLocator(0,OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
@@ -979,6 +984,7 @@ void CProjectAgentImp::SetColumnShape(CColumnData::ColumnShapeType shapeType,Flo
    {
       ATLASSERT(false); // is there a new shape type?
    }
+   Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2)
@@ -1004,6 +1010,7 @@ void CProjectAgentImp::SetTransverseLocation(ColumnIndexType colIdx,Float64 offs
    m_XBeamRateXML->Pier().Location().ColumnIndex(colIdx);
    m_XBeamRateXML->Pier().Location().TransverseOffset(offset);
    m_XBeamRateXML->Pier().Location().Measure((OpenBridgeML::Types::OffsetMeasurementEnum::value)measure);
+   Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure)
@@ -1042,6 +1049,7 @@ void CProjectAgentImp::AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Fl
       spacing);
 
    m_XBeamRateXML->LongitudinalRebar().push_back(rebarRow);
+   Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing)
@@ -1069,11 +1077,159 @@ void CProjectAgentImp::GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarD
 void CProjectAgentImp::RemoveRebarRow(IndexType rowIdx)
 {
    m_XBeamRateXML->LongitudinalRebar().erase(m_XBeamRateXML->LongitudinalRebar().begin()+rowIdx);
+   Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::RemoveRebarRows()
 {
    m_XBeamRateXML->LongitudinalRebar().clear();
+   Fire_OnProjectChanged();
+}
+
+void CProjectAgentImp::SetConditionFactor(pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
+{
+   m_XBeamRateXML->ConditionFactor().Value() = conditionFactor;
+   m_XBeamRateXML->ConditionFactor().ConditionFactor() = (XBeamRate::ConditionFactorEnum::value)conditionFactorType;
+   Fire_OnProjectChanged();
+}
+
+void CProjectAgentImp::GetConditionFactor(pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor)
+{
+   *pConditionFactorType = (pgsTypes::ConditionFactorType)(XBeamRate::ConditionFactorEnum::value)m_XBeamRateXML->ConditionFactor().ConditionFactor();
+   *pConditionFactor = m_XBeamRateXML->ConditionFactor().Value();
+}
+
+Float64 CProjectAgentImp::GetConditionFactor()
+{
+   pgsTypes::ConditionFactorType cfType;
+   Float64 CF;
+   GetConditionFactor(&cfType,&CF);
+
+   // MBE 6A.4.2.3
+   switch(cfType)
+   {
+   case pgsTypes::cfGood:
+      return 1.0;
+
+   case pgsTypes::cfFair:
+      return 0.95;
+
+   case pgsTypes::cfPoor:
+      return 0.85;
+
+   case pgsTypes::cfOther:
+      return CF;
+   }
+   ATLASSERT(false);
+   return 1.0;
+}
+
+void CProjectAgentImp::SetDCLoadFactor(Float64 dc)
+{
+   m_XBeamRateXML->DeadLoadFactors().DC() = dc;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetDCLoadFactor()
+{
+   return m_XBeamRateXML->DeadLoadFactors().DC();
+}
+
+void CProjectAgentImp::SetDWLoadFactor(Float64 dw)
+{
+   m_XBeamRateXML->DeadLoadFactors().DW() = dw;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetDWLoadFactor()
+{
+   return m_XBeamRateXML->DeadLoadFactors().DW();
+}
+
+void CProjectAgentImp::SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll)
+{
+   switch(ratingType)
+   {
+      case pgsTypes::lrDesign_Inventory:
+         m_XBeamRateXML->LiveLoadFactors().Inventory() = ll;
+         break;
+
+      case pgsTypes::lrDesign_Operating:
+         m_XBeamRateXML->LiveLoadFactors().Operating() = ll;
+         break;
+
+      case pgsTypes::lrLegal_Routine:
+         m_XBeamRateXML->LiveLoadFactors().Legal_Routine() = ll;
+         break;
+
+      case pgsTypes::lrLegal_Special:
+         m_XBeamRateXML->LiveLoadFactors().Legal_Special() = ll;
+         break;
+
+      case pgsTypes::lrPermit_Routine:
+         m_XBeamRateXML->LiveLoadFactors().Permit_Routine() = ll;
+         break;
+
+      case pgsTypes::lrPermit_Special:
+         m_XBeamRateXML->LiveLoadFactors().Permit_Special() = ll;
+         break;
+
+      default:
+         ATLASSERT(false); // should never get here
+   }
+
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType)
+{
+   switch(ratingType)
+   {
+      case pgsTypes::lrDesign_Inventory:
+         return m_XBeamRateXML->LiveLoadFactors().Inventory();
+
+      case pgsTypes::lrDesign_Operating:
+         return m_XBeamRateXML->LiveLoadFactors().Operating();
+
+      case pgsTypes::lrLegal_Routine:
+         return m_XBeamRateXML->LiveLoadFactors().Legal_Routine();
+
+      case pgsTypes::lrLegal_Special:
+         return m_XBeamRateXML->LiveLoadFactors().Legal_Special();
+
+      case pgsTypes::lrPermit_Routine:
+         return m_XBeamRateXML->LiveLoadFactors().Permit_Routine();
+
+      case pgsTypes::lrPermit_Special:
+         return m_XBeamRateXML->LiveLoadFactors().Permit_Special();
+  
+      default:
+         ATLASSERT(false); // should never get here
+   }
+
+   return 1.0;
+}
+
+//////////////////////////////////////////////////////////
+// IXBRRatingSpecification
+void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
+{
+   m_XBeamRateXML->SystemFactor().Flexure() = sysFactor;
+}
+
+Float64 CProjectAgentImp::GetSystemFactorFlexure()
+{
+   return m_XBeamRateXML->SystemFactor().Flexure();
+}
+
+void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
+{
+   m_XBeamRateXML->SystemFactor().Shear() = sysFactor;
+}
+
+Float64 CProjectAgentImp::GetSystemFactorShear()
+{
+   return m_XBeamRateXML->SystemFactor().Shear();
 }
 
 //////////////////////////////////////////////////////////

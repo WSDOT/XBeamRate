@@ -52,6 +52,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IAgentPersist,
    public IEAFCommandCallback,
    public IXBRProject,
+   public IXBRRatingSpecification,
    public IXBRProjectEdit
 {  
 public:
@@ -71,6 +72,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProject,IXBRProject)
+   COM_INTERFACE_ENTRY_IID(IID_IXBRRatingSpecification,IXBRRatingSpecification)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
@@ -189,6 +191,69 @@ public:
    virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing);
    virtual void RemoveRebarRow(IndexType rowIdx);
    virtual void RemoveRebarRows();
+
+   virtual void SetConditionFactor(pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor);
+   virtual void GetConditionFactor(pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor);
+   virtual Float64 GetConditionFactor();
+
+   virtual void SetDCLoadFactor(Float64 dc);
+   virtual Float64 GetDCLoadFactor();
+
+   virtual void SetDWLoadFactor(Float64 dw);
+   virtual Float64 GetDWLoadFactor();
+
+   virtual void SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll);
+   virtual Float64 GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType);
+
+// IXBRRatingSpecification
+public:
+   //virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) = 0;
+   //virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) = 0;
+
+   //virtual std::_tstring GetRatingSpecification() = 0;
+   //virtual void SetRatingSpecification(const std::_tstring& spec) = 0;
+
+   //virtual void SetADTT(Int16 adtt) = 0;
+   //virtual Int16 GetADTT() = 0; // < 0 = Unknown
+   
+   virtual void SetSystemFactorFlexure(Float64 sysFactor);
+   virtual Float64 GetSystemFactorFlexure();
+   
+   virtual void SetSystemFactorShear(Float64 sysFactor);
+   virtual Float64 GetSystemFactorShear();
+
+   //virtual void SetDeadLoadFactor(pgsTypes::LimitState ls,Float64 gDC) = 0;
+   //virtual Float64 GetDeadLoadFactor(pgsTypes::LimitState ls) = 0;
+
+   //virtual void SetWearingSurfaceFactor(pgsTypes::LimitState ls,Float64 gDW) = 0;
+   //virtual Float64 GetWearingSurfaceFactor(pgsTypes::LimitState ls) = 0;
+
+   //virtual void SetLiveLoadFactor(pgsTypes::LimitState ls,Float64 gLL) = 0;
+   //virtual Float64 GetLiveLoadFactor(pgsTypes::LimitState ls,bool bResolveIfDefault=false) = 0;
+   //virtual Float64 GetLiveLoadFactor(pgsTypes::LimitState ls,pgsTypes::SpecialPermitType specialPermitType,Int16 adtt,const RatingLibraryEntry* pRatingEntry,bool bResolveIfDefault=false) = 0;
+
+   //virtual void SetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType,Float64 t) = 0;
+   //virtual Float64 GetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType) = 0;
+
+   //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
+   //virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
+
+   //virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
+   //virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
+
+   //// Per last paragraph in MBE 6A.4.4.2.1a, the lane load may be excluded and the 0.75 truck factor taken as 1.0
+   //// for ADTT < 500 and in the Engineer's judgement it is warranted
+   //virtual void ExcludeLegalLoadLaneLoading(bool bExclude) = 0;
+   //virtual bool ExcludeLegalLoadLaneLoading() = 0;
+
+   //// returns fraction of yield stress that reinforcement can be stressed to during
+   //// a permit load rating evaluation MBE 6A.5.4.2.2b
+   //virtual void SetYieldStressLimitCoefficient(Float64 x) = 0;
+   //virtual Float64 GetYieldStressLimitCoefficient() = 0;
+
+   //// Permit type for rating for special/limited crossing permit vehicle
+   //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
+   //virtual pgsTypes::SpecialPermitType GetSpecialPermitType() = 0;
 
 // IXBRProjectEdit
 public:

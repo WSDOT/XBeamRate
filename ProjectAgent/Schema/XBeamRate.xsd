@@ -152,6 +152,20 @@
     </xs:sequence>
   </xs:complexType>
 
+  <xs:simpleType name="ConditionFactorEnum">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Good"/>
+      <xs:enumeration value="Fair"/>
+      <xs:enumeration value="Poor"/>
+      <xs:enumeration value="Other"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ConditionFactorType" >
+      <xs:attribute name="Value" type="xs:double" use="required"/>
+      <xs:attribute name="ConditionFactor" type="xbr:ConditionFactorEnum" use="required"/>
+  </xs:complexType>
+
   <!-- Define Instance Document Format -->
    <!-- 
   The goal is to have two sections. The first section is XBeamRate specific information such as settings and options. The 
@@ -174,7 +188,32 @@
            <!-- Application Settings -->
            <xs:element ref="bxu:UnitsDeclaration" minOccurs="0" maxOccurs="1" />
            <xs:element name="Settings" type="xbr:ApplicationSettings"/>
-           
+           <xs:element name="SystemFactor">
+             <xs:complexType>
+               <xs:attribute name="Flexure" type="xs:double" use="required"/>
+               <xs:attribute name="Shear" type="xs:double" use="required"/>
+             </xs:complexType>
+           </xs:element>
+           <xs:element name="ConditionFactor" type="xbr:ConditionFactorType"/>
+
+           <xs:element name="DeadLoadFactors">
+             <xs:complexType>
+               <xs:attribute name="DC" type="xs:double" use="required"/>
+               <xs:attribute name="DW" type="xs:double" use="required"/>
+             </xs:complexType>
+           </xs:element>
+
+           <xs:element name="LiveLoadFactors">
+             <xs:complexType>
+               <xs:attribute name="Inventory" type="xs:double" use="required"/>
+               <xs:attribute name="Operating" type="xs:double" use="required"/>
+               <xs:attribute name="Legal_Routine" type="xs:double" use="required"/>
+               <xs:attribute name="Legal_Special" type="xs:double" use="required"/>
+               <xs:attribute name="Permit_Routine" type="xs:double" use="required"/>
+               <xs:attribute name="Permit_Special" type="xs:double" use="required"/>
+             </xs:complexType>
+           </xs:element>
+
            <!-- General Description -->
            <xs:element name="PierType" type="xbr:PierTypeEnum"/>
            

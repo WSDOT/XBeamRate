@@ -67,6 +67,7 @@ protected:
    afx_msg void OnHelp();
    afx_msg void OnColumnShapeChanged();
    afx_msg void OnColumnCountChanged(NMHDR* pNMHDR, LRESULT* pResult);
+   afx_msg void OnConditionFactorTypeChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

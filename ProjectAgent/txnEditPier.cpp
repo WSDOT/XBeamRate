@@ -183,6 +183,16 @@ void txnEditPier::Execute(int i)
    pProject->SetColumnShape(m_PierData[i].m_ColumnShape,m_PierData[i].m_B,m_PierData[i].m_D);
    pProject->SetTransverseLocation(m_PierData[i].m_RefColumnIdx,m_PierData[i].m_TransverseOffset,m_PierData[i].m_TransverseOffsetMeasurement);
 
+   pProject->SetConditionFactor(m_PierData[i].m_ConditionFactorType,m_PierData[i].m_ConditionFactor);
+   
+   pProject->SetDCLoadFactor(m_PierData[i].m_gDC);
+   pProject->SetDWLoadFactor(m_PierData[i].m_gDW);
+   for ( int j = 0; j < 6; j++ )
+   {
+      pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)j;
+      pProject->SetLiveLoadFactor(ratingType,m_PierData[i].m_gLL[ratingType]);
+   }
+
    pProject->SetLiveLoadReactions(pgsTypes::lltDesign,m_PierData[i].m_DesignLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pgsTypes::lltLegalRating_Routine,m_PierData[i].m_LegalRoutineLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pgsTypes::lltLegalRating_Special,m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);

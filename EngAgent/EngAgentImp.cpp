@@ -27,6 +27,7 @@
 
 #include <XBeamRateExt\PointOfInterest.h>
 #include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 #include <IFace\Pier.h>
 
 #include <Units\SysUnits.h>
@@ -168,6 +169,18 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
 
 Float64 CEngAgentImp::GetRatingFactor()
 {
+   GET_IFACE(IXBRProject,pProject);
+   Float64 conditionFactor = pProject->GetConditionFactor();
+
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   Float64 sysFactorMoment = pRatingSpec->GetSystemFactorFlexure();
+   Float64 sysFactorShear  = pRatingSpec->GetSystemFactorShear();
+
+   //conditionFactor*sysFactor >= 0.85 // MBE Eqn 6A.4.2.1-3
+
+   // THERE IS ENOUGH BASIC INFORMATION TO COMPUTE RATING FACTORS!!!
+   // DO IT NEXT
+   
    return 1.2;
 }
 

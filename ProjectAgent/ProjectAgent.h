@@ -31,5 +31,6 @@ COPYRIGHT
 *****************************************************************************/
 
 #include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 
 #endif // INCLUDED_PROJECTAGENT_H_

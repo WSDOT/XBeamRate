@@ -47,6 +47,7 @@
 
 #include <EAF\EAFTransactions.h>
 #include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 #include <IFace\Pier.h>
 
 /////////////////////////////////////////////////////////////////////////////

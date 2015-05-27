@@ -99,6 +99,13 @@ public:
    Float64 m_B;
    Float64 m_D;
 
+   pgsTypes::ConditionFactorType m_ConditionFactorType;
+   Float64 m_ConditionFactor;
+
+   Float64 m_gDC;
+   Float64 m_gDW;
+   Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
+
    txnLiveLoadData m_DesignLiveLoad;
    txnLiveLoadData m_LegalRoutineLiveLoad;
    txnLiveLoadData m_LegalSpecialLiveLoad;

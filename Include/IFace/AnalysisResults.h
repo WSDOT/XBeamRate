@@ -19,6 +19,13 @@ typedef enum XBRProductForceType
    pftDWReactions
 } XBRProductForceType;
 
+typedef enum XBRCombinedForceType
+{
+   lcDC,
+   lcDW
+} XBRCombinedForceType;
+
+
 /*****************************************************************************
 INTERFACE
    IProductLoads
@@ -51,6 +58,10 @@ interface IXBRAnalysisResults : IUnknown
    // Product Load Results
    virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
    virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
+
+   // Combined Load Results
+   virtual Float64 GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
+   virtual sysSectionValue GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
 
    // Live Load Results
    // Min/Max moment due to a particular live load vehicle

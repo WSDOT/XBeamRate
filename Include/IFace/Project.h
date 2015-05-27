@@ -114,6 +114,19 @@ interface IXBRProject : IUnknown
    virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing) = 0;
    virtual void RemoveRebarRow(IndexType rowIdx) = 0;
    virtual void RemoveRebarRows() = 0;
+
+   virtual void SetConditionFactor(pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor) = 0;
+   virtual void GetConditionFactor(pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor) = 0;
+   virtual Float64 GetConditionFactor() = 0;
+
+   virtual void SetDCLoadFactor(Float64 dc) = 0;
+   virtual Float64 GetDCLoadFactor() = 0;
+
+   virtual void SetDWLoadFactor(Float64 dw) = 0;
+   virtual Float64 GetDWLoadFactor() = 0;
+
+   virtual void SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll) = 0;
+   virtual Float64 GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType) = 0;
 };
 
 /*****************************************************************************

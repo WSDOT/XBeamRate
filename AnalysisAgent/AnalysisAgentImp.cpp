@@ -606,6 +606,32 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbr
    return V;
 }
 
+Float64 CAnalysisAgentImp::GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+{
+   std::vector<XBRProductForceType> vPFTypes = GetLoads(lcType);
+   Float64 M = 0;
+   BOOST_FOREACH(XBRProductForceType pfType,vPFTypes)
+   {
+      Float64 m = GetMoment(pfType,poi);
+      M += m;
+   }
+
+   return M;
+}
+
+sysSectionValue CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+{
+   std::vector<XBRProductForceType> vPFTypes = GetLoads(lcType);
+   sysSectionValue V(0,0);
+   BOOST_FOREACH(XBRProductForceType pfType,vPFTypes)
+   {
+      sysSectionValue v = GetShear(pfType,poi);
+      V += v;
+   }
+
+   return V;
+}
+
 void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax)
 {
    ATLASSERT(liveLoadType == pgsTypes::lltDesign ||
@@ -628,4 +654,21 @@ void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLo
 
    *pMin = 0;
    *pMax = 0;
+}
+
+std::vector<XBRProductForceType> CAnalysisAgentImp::GetLoads(XBRCombinedForceType lcType)
+{
+   std::vector<XBRProductForceType> vPFTypes;
+   if ( lcType == lcDC )
+   {
+      vPFTypes.push_back(pftLowerXBeam);
+      vPFTypes.push_back(pftUpperXBeam);
+      vPFTypes.push_back(pftDCReactions);
+   }
+   else
+   {
+      vPFTypes.push_back(pftDWReactions);
+   }
+
+   return vPFTypes;
 }

@@ -25,6 +25,7 @@
 #define IDC_COLUMN_LENGTH_UNIT          207
 #define IDC_EDIT5                       208
 #define IDC_COLUMN_SPACING              208
+#define IDC_LF_PERMIT_ROUTINE           208
 #define IDC_COLUMN_SPACING_UNIT         209
 #define IDC_TRANSVERSE_MEASUREMENT_TYPE 210
 #define IDC_DECK_ELEVATION              211
@@ -66,8 +67,11 @@
 #define IDC_SL_UNIT                     246
 #define IDC_EDIT4                       247
 #define IDC_SR                          247
+#define IDC_LF_LEGAL_SPECIAL            247
 #define IDC_SR_UNIT                     248
 #define IDC_EDIT2                       250
+#define IDC_DW                          250
+#define IDC_LF_OPERATING                250
 #define IDC_DESIGN_GRID                 251
 #define IDC_LEGAL_ROUTINE_GRID          252
 #define IDC_LEGAL_SPECIAL_GRID          253
@@ -80,12 +84,19 @@
 #define IDC_LEGAL_ROUTINE_ADD           260
 #define IDC_REMOVE_REBAR                260
 #define IDC_LEGAL_ROUTINE_REMOVE        261
+#define IDC_DC                          261
 #define IDC_LEGAL_SPECIAL_ADD           262
 #define IDC_LEGAL_SPECIAL_REMOVE        263
 #define IDC_PERMIT_ROUTINE_ADD          264
 #define IDC_PERMIT_ROUTINE_REMOVE       265
 #define IDC_PERMIT_SPECIAL_ADD          266
 #define IDC_PERMIT_SPECIAL_REMOVE       267
+#define IDC_LF_INVENTORY                268
+#define IDC_LF_LEGAL_ROUTINE            269
+#define IDC_EDIT6                       270
+#define IDC_LF_PERMIT_SPECIAL           270
+#define IDC_CONDITION_FACTOR            1260
+#define IDC_CONDITION_FACTOR_TYPE       1407
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_BACK_BEARING_GRID           1475
 #define IDC_AHEAD_BEARING_GRID          1476
@@ -148,7 +159,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         261
+#define _APS_NEXT_CONTROL_VALUE         271
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

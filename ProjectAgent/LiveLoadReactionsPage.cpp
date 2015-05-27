@@ -39,6 +39,13 @@ void CLiveLoadReactionsPage::DoDataExchange(CDataExchange* pDX)
 
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
+   DDX_Text(pDX,IDC_LF_INVENTORY,pParent->m_PierData.m_gLL[pgsTypes::lrDesign_Inventory]);
+   DDX_Text(pDX,IDC_LF_OPERATING,pParent->m_PierData.m_gLL[pgsTypes::lrDesign_Operating]);
+   DDX_Text(pDX,IDC_LF_LEGAL_ROUTINE,pParent->m_PierData.m_gLL[pgsTypes::lrLegal_Routine]);
+   DDX_Text(pDX,IDC_LF_LEGAL_SPECIAL,pParent->m_PierData.m_gLL[pgsTypes::lrLegal_Special]);
+   DDX_Text(pDX,IDC_LF_PERMIT_ROUTINE,pParent->m_PierData.m_gLL[pgsTypes::lrPermit_Routine]);
+   DDX_Text(pDX,IDC_LF_PERMIT_SPECIAL,pParent->m_PierData.m_gLL[pgsTypes::lrPermit_Special]);
+
    DDX_LiveLoadReactionsGrid(pDX,m_DesignGrid,        pParent->m_PierData.m_DesignLiveLoad);
    DDX_LiveLoadReactionsGrid(pDX,m_LegalRoutineGrid,  pParent->m_PierData.m_LegalRoutineLiveLoad);
    DDX_LiveLoadReactionsGrid(pDX,m_LegalSpecialGrid,  pParent->m_PierData.m_LegalSpecialLiveLoad);

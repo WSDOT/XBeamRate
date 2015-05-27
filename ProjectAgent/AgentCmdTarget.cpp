@@ -113,6 +113,15 @@ void CAgentCmdTarget::OnEditPier()
 
    pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);
 
+   pProject->GetConditionFactor(&oldPierData.m_ConditionFactorType,&oldPierData.m_ConditionFactor);
+   oldPierData.m_gDC = pProject->GetDCLoadFactor();
+   oldPierData.m_gDW = pProject->GetDWLoadFactor();
+   for ( int i = 0; i < 6; i++ )
+   {
+      pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
+      oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(ratingType);
+   }
+
    oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltDesign);
    oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Routine);
    oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Special);

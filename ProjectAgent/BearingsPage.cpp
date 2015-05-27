@@ -47,6 +47,9 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
+   DDX_Text(pDX,IDC_DC,pParent->m_PierData.m_gDC);
+   DDX_Text(pDX,IDC_DW,pParent->m_PierData.m_gDW);
+
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,pParent->m_PierData.m_nBearingLines);
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )

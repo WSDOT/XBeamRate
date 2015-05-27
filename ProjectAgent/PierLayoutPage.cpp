@@ -88,6 +88,9 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_UnitValueAndTag(pDX,IDC_B,IDC_B_UNIT,pParent->m_PierData.m_B,pDisplayUnits->GetSpanLengthUnit() );
    DDX_UnitValueAndTag(pDX,IDC_D,IDC_D_UNIT,pParent->m_PierData.m_D,pDisplayUnits->GetSpanLengthUnit() );
 
+   DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, pParent->m_PierData.m_ConditionFactorType);
+   DDX_Text(pDX,   IDC_CONDITION_FACTOR,      pParent->m_PierData.m_ConditionFactor);
+
    if ( pDX->m_bSaveAndValidate )
    {
 #pragma Reminder("WOKRING HERE - need to validate overall pier geometry")
@@ -102,6 +105,7 @@ BEGIN_MESSAGE_MAP(CPierLayoutPage, CPropertyPage)
    ON_CBN_SELCHANGE(IDC_COLUMN_SHAPE, OnColumnShapeChanged)
    ON_NOTIFY(UDN_DELTAPOS, IDC_COLUMN_COUNT_SPINNER, OnColumnCountChanged)
 	ON_COMMAND(ID_HELP, OnHelp)
+   ON_CBN_SELCHANGE(IDC_CONDITION_FACTOR_TYPE, OnConditionFactorTypeChanged)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -118,13 +122,48 @@ BOOL CPierLayoutPage::OnInitDialog()
    CSpinButtonCtrl* pSpinner = (CSpinButtonCtrl*)GetDlgItem(IDC_COLUMN_COUNT_SPINNER);
    pSpinner->SetRange(1,UD_MAXVAL);
 
+   CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
+   pcbConditionFactor->AddString(_T("Good or Satisfactory (Structure condition rating 6 or higher)"));
+   pcbConditionFactor->AddString(_T("Fair (Structure condition rating of 5)"));
+   pcbConditionFactor->AddString(_T("Poor (Structure condition rating 4 or lower)"));
+   pcbConditionFactor->AddString(_T("Other"));
+   pcbConditionFactor->SetCurSel(0);
+
    CPropertyPage::OnInitDialog();
+
+   OnConditionFactorTypeChanged();
 
    OnColumnShapeChanged();
    UpdateColumnSpacingControls();
 
    return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CPierLayoutPage::OnConditionFactorTypeChanged()
+{
+   CEdit* pEdit = (CEdit*)GetDlgItem(IDC_CONDITION_FACTOR);
+   CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
+
+   int idx = pcbConditionFactor->GetCurSel();
+   switch(idx)
+   {
+   case 0:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("1.00"));
+      break;
+   case 1:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("0.95"));
+      break;
+   case 2:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("0.85"));
+      break;
+   case 3:
+      pEdit->EnableWindow(TRUE);
+      break;
+   }
 }
 
 void CPierLayoutPage::FillTransverseLocationComboBox()

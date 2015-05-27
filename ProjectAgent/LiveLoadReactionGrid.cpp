@@ -100,7 +100,7 @@ void CLiveLoadReactionGrid::CustomInit()
 		);
 
    CString cv;
-   cv.Format(_T("LLIM (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("LL+IM (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
