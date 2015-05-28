@@ -158,3 +158,42 @@ interface IXBRProjectEdit : IUnknown
 {
    virtual void EditPier(int nPage) = 0;
 };
+
+
+/*****************************************************************************
+INTERFACE
+   IEvents
+
+   Interface to control events
+
+DESCRIPTION
+   Interface to control events
+*****************************************************************************/
+// {F0674DBA-E867-4692-B214-FDB23F04685B}
+DEFINE_GUID(IID_IXBREvents, 
+0xf0674dba, 0xe867, 0x4692, 0xb2, 0x14, 0xfd, 0xb2, 0x3f, 0x4, 0x68, 0x5b);
+interface IXBREvents : IUnknown
+{
+   virtual void HoldEvents() = 0;
+   virtual void FirePendingEvents() = 0;
+   virtual void CancelPendingEvents() = 0;
+};
+
+/*****************************************************************************
+INTERFACE
+   IEventsSink
+
+   Interface to control events
+
+DESCRIPTION
+   Interface to control events
+*****************************************************************************/
+// {46E15C3D-F822-4b97-A7E3-6ED0CE5FF37E}
+DEFINE_GUID(IID_IXBREventsSink, 
+0x46e15c3d, 0xf822, 0x4b97, 0xa7, 0xe3, 0x6e, 0xd0, 0xce, 0x5f, 0xf3, 0x7e);
+interface IXBREventsSink : IUnknown
+{
+   virtual HRESULT OnHoldEvents() = 0;
+   virtual HRESULT OnFirePendingEvents() = 0;
+   virtual HRESULT OnCancelPendingEvents() = 0;
+};

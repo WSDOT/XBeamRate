@@ -123,9 +123,8 @@ void txnEditPier::Execute(int i)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-#pragma Reminder("UPDATE: implement event holding")
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
+   GET_IFACE2(pBroker,IXBREvents, pEvents);
+   pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
@@ -199,7 +198,7 @@ void txnEditPier::Execute(int i)
    pProject->SetLiveLoadReactions(pgsTypes::lltPermitRating_Routine,m_PierData[i].m_PermitRoutineLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pgsTypes::lltPermitRating_Special,m_PierData[i].m_PermitSpecialLiveLoad.m_LLIM);
 
-   //pEvents->FirePendingEvents();
+   pEvents->FirePendingEvents();
 }
 
 txnTransaction* txnEditPier::CreateClone() const

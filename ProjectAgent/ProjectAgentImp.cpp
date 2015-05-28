@@ -124,6 +124,7 @@ matRebar::Size ConvertBarSize(OpenBridgeML::StandardReinforcement::USBarEnum::va
 CProjectAgentImp::CProjectAgentImp()
 {
    m_pBroker = 0;
+   m_EventHoldCount = 0;
 }
 
 CProjectAgentImp::~CProjectAgentImp()
@@ -162,6 +163,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
    pBrokerInit->RegInterface( IID_IXBRProject,             this );
    pBrokerInit->RegInterface( IID_IXBRRatingSpecification, this );
    pBrokerInit->RegInterface( IID_IXBRProjectEdit,         this );
+   pBrokerInit->RegInterface( IID_IXBREvents,              this );
 
    return S_OK;
 };
@@ -1237,6 +1239,45 @@ Float64 CProjectAgentImp::GetSystemFactorShear()
 void CProjectAgentImp::EditPier(int nPage)
 {
    m_CommandTarget.OnEditPier();
+}
+
+////////////////////////////////////////////////////////////////////////
+// IXBREvents
+void CProjectAgentImp::HoldEvents()
+{
+   ATLASSERT(0 <= m_EventHoldCount);
+   m_EventHoldCount++;
+
+   Fire_OnHoldEvents();
+}
+
+void CProjectAgentImp::FirePendingEvents()
+{
+   if ( m_EventHoldCount == 0 )
+   {
+      return;
+   }
+
+   if ( m_EventHoldCount == 1 )
+   {
+      m_EventHoldCount--;
+      Fire_OnProjectChanged(); // fire our event
+	   Fire_OnFirePendingEvents(); // tell event listeners that it is time to fire their events
+   }
+   else
+   {
+      m_EventHoldCount--;
+   }
+}
+
+void CProjectAgentImp::CancelPendingEvents()
+{
+   m_EventHoldCount--;
+   if ( m_EventHoldCount <= 0 )
+   {
+      m_EventHoldCount = 0;
+      Fire_OnCancelPendingEvents();
+   }
 }
 
 //////////////////////////////////////////////////////////

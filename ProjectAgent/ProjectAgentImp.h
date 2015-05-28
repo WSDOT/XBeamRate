@@ -47,13 +47,15 @@ class ATL_NO_VTABLE CProjectAgentImp :
 	public CComCoClass<CProjectAgentImp, &CLSID_ProjectAgent>,
 	public IConnectionPointContainerImpl<CProjectAgentImp>,
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
+   public CProxyIXBREventsEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
    public IXBRProject,
    public IXBRRatingSpecification,
-   public IXBRProjectEdit
+   public IXBRProjectEdit,
+   public IXBREvents
 {  
 public:
 	CProjectAgentImp(); 
@@ -74,11 +76,13 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProject,IXBRProject)
    COM_INTERFACE_ENTRY_IID(IID_IXBRRatingSpecification,IXBRRatingSpecification)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
+   COM_INTERFACE_ENTRY_IID(IID_IXBREvents,IXBREvents)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
    CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+   CONNECTION_POINT_ENTRY( IID_IXBREventsSink )
 END_CONNECTION_POINT_MAP()
 
 // IAgentEx
@@ -259,6 +263,12 @@ public:
 public:
    virtual void EditPier(int nPage);
 
+// IEvents
+public:
+   virtual void HoldEvents();
+   virtual void FirePendingEvents();
+   virtual void CancelPendingEvents();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -269,6 +279,9 @@ private:
    CAgentCmdTarget m_CommandTarget;
 
    std::auto_ptr<XBeamRate::XBeamRate> m_XBeamRateXML;
+
+   // Events
+   int m_EventHoldCount;
 
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
 
