@@ -442,7 +442,9 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       Float64 Ybot = pPier->GetBottomColumnElevation(colIdx);
       CColumnData::ColumnShapeType colShapeType;
       Float64 d1, d2;
-      pProject->GetColumnShape(&colShapeType,&d1,&d2);
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+      Float64 H;
+      pProject->GetColumnProperties(&colShapeType,&d1,&d2,&columnHeightType,&H);
 
       CComPtr<IPoint2d> pntTop, pntBot;
       pntTop.CoCreateInstance(CLSID_Point2d);

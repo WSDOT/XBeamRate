@@ -25,7 +25,7 @@
 // LongitudinalRebarGrid.h : header file
 //
 
-#include "txnEditPier.h"
+#include <XBeamRateExt\LongitudinalRebarData.h>
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -47,8 +47,8 @@ public:
    void AddBar();
    void RemoveSelectedBars();
 
-   void GetRebarData(std::vector<txnLongutindalRebarData>& vRebarData);
-   void SetRebarData(const std::vector<txnLongutindalRebarData>& vRebarData);
+   void GetRebarData(xbrLongitudinalRebarData& rebarData);
+   void SetRebarData(const xbrLongitudinalRebarData& rebarData);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -70,9 +70,9 @@ public:
    void CustomInit();
 
 private:
-   void AddRebarRow(const txnLongutindalRebarData& rebarData);
-   void SetRebarData(ROWCOL row,const txnLongutindalRebarData& rebarData);
-   void GetRebarData(ROWCOL row,txnLongutindalRebarData& rebarData);
+   void AddRebarRow(const xbrLongitudinalRebarData::RebarRow& rebarData);
+   void SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData);
+   void GetRebarData(ROWCOL row,xbrLongitudinalRebarData::RebarRow& rebarData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
    xbrTypes::LongitudinalRebarDatumType GetDatum(ROWCOL row,ROWCOL col);
    matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);

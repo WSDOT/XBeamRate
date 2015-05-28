@@ -11,15 +11,15 @@
 #include <MFCTools\CustomDDX.h>
 
 
-void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,std::vector<txnLongutindalRebarData>& vRebarData)
+void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,xbrLongitudinalRebarData& rebars)
 {
    if ( pDX->m_bSaveAndValidate )
    {
-      grid.GetRebarData(vRebarData);
+      grid.GetRebarData(rebars);
    }
    else
    {
-      grid.SetRebarData(vRebarData);
+      grid.SetRebarData(rebars);
    }
 }
 
@@ -47,9 +47,9 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
 
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_UnitValueAndTag(pDX,IDC_EC,IDC_EC_UNIT,pParent->m_PierData.m_Ec,pDisplayUnits->GetModEUnit());
+   DDX_UnitValueAndTag(pDX,IDC_EC,IDC_EC_UNIT,pParent->m_PierData.m_PierData.GetEc(),pDisplayUnits->GetModEUnit());
 
-   DDX_RebarGrid(pDX,m_RebarGrid,pParent->m_PierData.m_Rebar);
+   DDX_RebarGrid(pDX,m_RebarGrid,pParent->m_PierData.m_PierData.GetLongitudinalRebar());
 }
 
 

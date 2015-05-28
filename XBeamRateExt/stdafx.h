@@ -8,7 +8,9 @@
 #include <XBeamRateVersion.h>
 
 #include <afxwin.h>
-
+#include <WBFLAtlExt.h>
+#include <System\System.h>
+#include <Units\Units.h>
 #include <XBeamRateTypes.h>
 
 

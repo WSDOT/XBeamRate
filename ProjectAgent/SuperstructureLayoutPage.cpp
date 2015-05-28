@@ -36,17 +36,20 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_CBEnum(pDX,IDC_PIER_TYPE,pParent->m_PierData.m_PierType);
-   DDX_UnitValueAndTag(pDX,IDC_DECK_ELEVATION,IDC_DECK_ELEVATION_UNIT,pParent->m_PierData.m_DeckElevation,pDisplayUnits->GetSpanLengthUnit());
-   DDX_OffsetAndTag(pDX,IDC_CPO,IDC_CPO_UNIT,pParent->m_PierData.m_CrownPointOffset,pDisplayUnits->GetSpanLengthUnit());
-   DDX_OffsetAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_BridgeLineOffset,pDisplayUnits->GetSpanLengthUnit());
-   DDX_Text(pDX,IDC_SKEW,pParent->m_PierData.m_strOrientation);
+   DDX_CBEnum(pDX,IDC_PIER_TYPE,pParent->m_PierData.m_PierData.GetSuperstructureConnectionType());
+   DDX_UnitValueAndTag(pDX,IDC_DECK_ELEVATION,IDC_DECK_ELEVATION_UNIT,pParent->m_PierData.m_PierData.GetDeckElevation(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_CPO,IDC_CPO_UNIT,pParent->m_PierData.m_PierData.GetCrownPointOffset(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_PierData.GetBridgeLineOffset(),pDisplayUnits->GetSpanLengthUnit());
 
-   DDX_CBEnum(pDX,IDC_CURB_LINE_MEASUREMENT,pParent->m_PierData.m_CurbLineDatum);
-   DDX_UnitValueAndTag(pDX,IDC_LCO,IDC_LCO_UNIT,pParent->m_PierData.m_LeftCLO,pDisplayUnits->GetSpanLengthUnit());
-   DDX_UnitValueAndTag(pDX,IDC_RCO,IDC_RCO_UNIT,pParent->m_PierData.m_RightCLO,pDisplayUnits->GetSpanLengthUnit());
-   DDX_Text(pDX,IDC_SL,pParent->m_PierData.m_SL);
-   DDX_Text(pDX,IDC_SR,pParent->m_PierData.m_SR);
+   CString strSkew(pParent->m_PierData.m_PierData.GetSkew());
+   DDX_Text(pDX,IDC_SKEW,strSkew);
+   pParent->m_PierData.m_PierData.SetSkew(strSkew);
+
+   DDX_CBEnum(pDX,IDC_CURB_LINE_MEASUREMENT,pParent->m_PierData.m_PierData.GetCurbLineDatum());
+   DDX_UnitValueAndTag(pDX,IDC_LCO,IDC_LCO_UNIT,pParent->m_PierData.m_PierData.GetLeftCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_RCO,IDC_RCO_UNIT,pParent->m_PierData.m_PierData.GetRightCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_Text(pDX,IDC_SL,pParent->m_PierData.m_PierData.GetLeftCrownSlope());
+   DDX_Text(pDX,IDC_SR,pParent->m_PierData.m_PierData.GetRightCrownSlope());
 
    if ( !pDX->m_bSaveAndValidate )
    {
@@ -57,8 +60,8 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
       GetDlgItem(IDC_SR_UNIT)->SetWindowText(strSlopeUnit);
    }
 
-   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_DiaphragmHeight,pDisplayUnits->GetSpanLengthUnit());
-   DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_DiaphragmWidth,pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_PierData.GetDiaphragmHeight(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_PierData.GetDiaphragmWidth(),pDisplayUnits->GetSpanLengthUnit());
 }
 
 BEGIN_MESSAGE_MAP(CSuperstructureLayoutPage, CPropertyPage)
@@ -92,7 +95,7 @@ CString CSuperstructureLayoutPage::GetImageName()
 
    CComboBox* pcbPierType = (CComboBox*)GetDlgItem(IDC_PIER_TYPE);
    idx = pcbPierType->GetCurSel();
-   xbrTypes::PierConnectionType pierType = (xbrTypes::PierConnectionType)pcbPierType->GetItemData(idx);
+   xbrTypes::SuperstructureConnectionType pierType = (xbrTypes::SuperstructureConnectionType)pcbPierType->GetItemData(idx);
 
    if ( datum == pgsTypes::omtAlignment )
    {

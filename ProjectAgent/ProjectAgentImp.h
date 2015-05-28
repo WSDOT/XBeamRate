@@ -36,8 +36,7 @@
 
 #include <EAF\EAFInterfaceCache.h>
 #include <EAF\EAFUIIntegration.h>
-
-#include "XBeamRate.hxx" // XML/C++ Binding Object
+#include <XBeamRateExt\PierData.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CProjectAgentImp
@@ -117,8 +116,11 @@ public:
    virtual void SetProjectName(LPCTSTR strName);
    virtual LPCTSTR GetProjectName();
 
-   virtual xbrTypes::PierConnectionType GetPierType();
-   virtual void SetPierType(xbrTypes::PierConnectionType pierType);
+   virtual void SetPierData(const xbrPierData& pierData);
+   virtual const xbrPierData& GetPierData();
+
+   virtual xbrTypes::SuperstructureConnectionType GetPierType();
+   virtual void SetPierType(xbrTypes::SuperstructureConnectionType pierType);
 
    virtual void SetDeckElevation(Float64 deckElevation);
    virtual Float64 GetDeckElevation();
@@ -157,42 +159,37 @@ public:
    virtual void GetReferenceBearing(IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
 
-   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LiveLoadType liveLoadType);
-   virtual void SetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
-   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LiveLoadType liveLoadType);
+   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType);
+   virtual void SetLiveLoadReactions(pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
+   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LoadRatingType ratingType);
 
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
    virtual void SetFc(Float64 fc);
    virtual Float64 GetFc();
 
-   virtual void SetXBeamDimensions(pgsTypes::PierSideType side,Float64 height,Float64 taperHeight,Float64 taperLength);
-   virtual void GetXBeamDimensions(pgsTypes::PierSideType side,Float64* pHeight,Float64* pTaperHeight,Float64* pTaperLength);
-   virtual void SetXBeamWidth(Float64 width);
+   virtual void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
+   virtual void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw);
+   virtual Float64 GetXBeamLeftOverhang();
+   virtual Float64 GetXBeamRightOverhang();
    virtual Float64 GetXBeamWidth();
-   virtual void SetXBeamOverhang(pgsTypes::PierSideType side,Float64 overhang);
-   virtual void SetXBeamOverhangs(Float64 leftOverhang,Float64 rightOverhang);
-   virtual Float64 GetXBeamOverhang(pgsTypes::PierSideType side);
-   virtual void GetXBeamOverhangs(Float64* pLeftOverhang,Float64* pRightOverhang);
 
-   virtual void SetColumns(IndexType nColumns,Float64 height,CColumnData::ColumnHeightMeasurementType measure,Float64 spacing);
+   virtual void SetColumnLayout(IndexType nColumns,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset,Float64 x3,Float64 x4,Float64 s);
+   virtual void GetColumnLayout(IndexType* pnColumns,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset,Float64* px3,Float64* px4,Float64* ps);
    virtual IndexType GetColumnCount();
-   virtual Float64 GetColumnHeight(IndexType colIdx);
+   virtual Float64 GetColumnHeight();
    virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType();
-   virtual xbrTypes::ColumnBaseType GetColumnBaseType(IndexType colIdx);
-   virtual Float64 GetSpacing(IndexType spaceIdx);
-   virtual void SetColumnShape(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2);
-   virtual void GetColumnShape(CColumnData::ColumnShapeType* pShapeType,Float64* pD1,Float64* pD2);
+   virtual Float64 GetColumnSpacing();
 
-   virtual void SetTransverseLocation(ColumnIndexType colIdx,Float64 offset,pgsTypes::OffsetMeasurementType measure);
-   virtual void GetTransverseLocation(ColumnIndexType* pColIdx,Float64* pOffset,pgsTypes::OffsetMeasurementType* pMeasure);
+   virtual void SetColumnProperties(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H);
+   virtual void GetColumnProperties(CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH);
 
    virtual Float64 GetXBeamLength();
 
    virtual IndexType GetRebarRowCount();
-   virtual void AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing);
-   virtual void SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,Int16 nBars,Float64 spacing);
-   virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,Int16* pnBars,Float64* pSpacing);
+   virtual void AddRebarRow(xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing);
+   virtual void SetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing);
+   virtual void GetRebarRow(IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,IndexType* pnBars,Float64* pSpacing);
    virtual void RemoveRebarRow(IndexType rowIdx);
    virtual void RemoveRebarRows();
 
@@ -263,7 +260,7 @@ public:
 public:
    virtual void EditPier(int nPage);
 
-// IEvents
+// IXBREvents
 public:
    virtual void HoldEvents();
    virtual void FirePendingEvents();
@@ -278,7 +275,39 @@ private:
 
    CAgentCmdTarget m_CommandTarget;
 
-   std::auto_ptr<XBeamRate::XBeamRate> m_XBeamRateXML;
+   std::_tstring m_strProjectName;
+
+   // The raw data for this project
+   xbrPierData m_PierData; // eventually this will be a vector supporting multiple piers
+
+   Float64 m_SysFactorFlexure;
+   Float64 m_SysFactorShear;
+
+   // Load Factors
+   Float64 m_gDC;
+   Float64 m_gDW;
+   Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
+
+   // Bearing Reactions
+   typedef struct
+   {
+      Float64 DC, DW;
+   } BearingReactions;
+   std::vector<std::vector<BearingReactions>> m_vvBearingReactions;
+   // outer vector is for number of bearing lines
+   // inner vector is for number of bearings on a bearing line
+   // m_vvBearingReactions[brgLineIdx][brgIdx].DC/DW
+
+   // Live Load Reactions
+   class LiveLoadReaction
+   {
+   public:
+      std::_tstring Name;
+      Float64 LLIM;
+      LiveLoadReaction() {;}
+      LiveLoadReaction(LPCTSTR name,Float64 llim) : Name(name), LLIM(llim) {;}
+   };
+   std::vector<LiveLoadReaction> m_vLiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
 
    // Events
    int m_EventHoldCount;
@@ -287,11 +316,6 @@ private:
 
    void CreateMenus();
    void RemoveMenus();
-
-   HRESULT ConvertToBaseUnits();
-
-   void SetLiveLoadReactions(const std::vector<std::pair<std::_tstring,Float64>>& vLLIM,XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions);
-   std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(const XBeamRate::LiveLoadReactionsType::Reactions_sequence* pReactions);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

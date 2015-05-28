@@ -62,34 +62,34 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_Control(pDX, IDC_S, m_SpacingControl);
 
    // Transverse location of the pier
-   DDX_CBIndex(pDX,IDC_REFCOLUMN,pParent->m_PierData.m_RefColumnIdx);
-   DDX_OffsetAndTag(pDX,IDC_X5,IDC_X5_UNIT,pParent->m_PierData.m_TransverseOffset, pDisplayUnits->GetSpanLengthUnit() );
-   DDX_CBItemData(pDX,IDC_X5_MEASUREMENT,pParent->m_PierData.m_TransverseOffsetMeasurement);
+   DDX_CBIndex(pDX,IDC_REFCOLUMN,pParent->m_PierData.m_PierData.GetRefColumnIndex());
+   DDX_OffsetAndTag(pDX,IDC_X5,IDC_X5_UNIT,pParent->m_PierData.m_PierData.GetRefColumnOffset(), pDisplayUnits->GetSpanLengthUnit() );
+   DDX_CBItemData(pDX,IDC_X5_MEASUREMENT,pParent->m_PierData.m_PierData.GetColumnLayoutDatum());
 
-   DDX_UnitValueAndTag(pDX,IDC_H1,IDC_H1_UNIT,pParent->m_PierData.m_XBeamHeight[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_H2,IDC_H2_UNIT,pParent->m_PierData.m_XBeamTaperHeight[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_X1,IDC_X1_UNIT,pParent->m_PierData.m_XBeamTaperLength[pgsTypes::pstLeft],pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_H1,IDC_H1_UNIT,pParent->m_PierData.m_PierData.GetH1(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_H2,IDC_H2_UNIT,pParent->m_PierData.m_PierData.GetH2(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X1,IDC_X1_UNIT,pParent->m_PierData.m_PierData.GetX1(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_UnitValueAndTag(pDX,IDC_H3,IDC_H3_UNIT,pParent->m_PierData.m_XBeamHeight[pgsTypes::pstRight],pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_H4,IDC_H4_UNIT,pParent->m_PierData.m_XBeamTaperHeight[pgsTypes::pstRight],pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_X2,IDC_X2_UNIT,pParent->m_PierData.m_XBeamTaperLength[pgsTypes::pstRight],pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_H3,IDC_H3_UNIT,pParent->m_PierData.m_PierData.GetH3(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_H4,IDC_H4_UNIT,pParent->m_PierData.m_PierData.GetH4(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X2,IDC_X2_UNIT,pParent->m_PierData.m_PierData.GetX2(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_XBeamWidth,pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_PierData.GetW(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_UnitValueAndTag(pDX,IDC_X3,IDC_X3_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstLeft], pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_X4,IDC_X4_UNIT,pParent->m_PierData.m_XBeamOverhang[pgsTypes::pstRight],pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X3,IDC_X3_UNIT,pParent->m_PierData.m_PierData.GetX3(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_X4,IDC_X4_UNIT,pParent->m_PierData.m_PierData.GetX4(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_Text(pDX,IDC_COLUMN_COUNT,pParent->m_PierData.m_nColumns);
-   DDX_UnitValueAndTag(pDX,IDC_S,IDC_S_UNIT,pParent->m_PierData.m_ColumnSpacing,pDisplayUnits->GetSpanLengthUnit());
-   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_ColumnHeight,pDisplayUnits->GetSpanLengthUnit());
-   DDX_CBItemData(pDX,IDC_HEIGHT_MEASURE,pParent->m_PierData.m_ColumnHeightMeasurementType);
+   DDX_Text(pDX,IDC_COLUMN_COUNT,pParent->m_PierData.m_PierData.GetColumnCount());
+   DDX_UnitValueAndTag(pDX,IDC_S,IDC_S_UNIT,pParent->m_PierData.m_PierData.GetColumnSpacing(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_PierData.GetColumnHeight(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_CBItemData(pDX,IDC_HEIGHT_MEASURE,pParent->m_PierData.m_PierData.GetColumnHeightMeasure());
 
-   DDX_CBItemData(pDX,IDC_COLUMN_SHAPE,pParent->m_PierData.m_ColumnShape);
-   DDX_UnitValueAndTag(pDX,IDC_B,IDC_B_UNIT,pParent->m_PierData.m_B,pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_D,IDC_D_UNIT,pParent->m_PierData.m_D,pDisplayUnits->GetSpanLengthUnit() );
+   DDX_CBItemData(pDX,IDC_COLUMN_SHAPE,pParent->m_PierData.m_PierData.GetColumnShape());
+   DDX_UnitValueAndTag(pDX,IDC_B,IDC_B_UNIT,pParent->m_PierData.m_PierData.GetD1(),pDisplayUnits->GetSpanLengthUnit() );
+   DDX_UnitValueAndTag(pDX,IDC_D,IDC_D_UNIT,pParent->m_PierData.m_PierData.GetD2(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, pParent->m_PierData.m_ConditionFactorType);
-   DDX_Text(pDX,   IDC_CONDITION_FACTOR,      pParent->m_PierData.m_ConditionFactor);
+   DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, pParent->m_PierData.m_PierData.GetConditionFactorType());
+   DDX_Text(pDX,   IDC_CONDITION_FACTOR,      pParent->m_PierData.m_PierData.GetConditionFactor());
 
    if ( pDX->m_bSaveAndValidate )
    {
@@ -182,7 +182,7 @@ void CPierLayoutPage::FillRefColumnComboBox()
    CComboBox* pcbRefColumn = (CComboBox*)GetDlgItem(IDC_REFCOLUMN);
    int curSel = pcbRefColumn->GetCurSel();
    pcbRefColumn->ResetContent();
-   for ( ColumnIndexType colIdx = 0; colIdx < pParent->m_PierData.m_nColumns; colIdx++ )
+   for ( ColumnIndexType colIdx = 0; colIdx < pParent->m_PierData.m_PierData.GetColumnCount(); colIdx++ )
    {
       CString strLabel;
       strLabel.Format(_T("Column %d"),LABEL_COLUMN(colIdx));
@@ -250,7 +250,7 @@ void CPierLayoutPage::OnColumnCountChanged(NMHDR* pNMHDR, LRESULT* pResult)
    int new_count = pNMUpDown->iPos + pNMUpDown->iDelta;
 
    CPierDlg* pParent = (CPierDlg*)GetParent();
-   pParent->m_PierData.m_nColumns = new_count;
+   pParent->m_PierData.m_PierData.GetColumnCount() = new_count;
 
    *pResult = 0;
 
@@ -261,7 +261,7 @@ void CPierLayoutPage::OnColumnCountChanged(NMHDR* pNMHDR, LRESULT* pResult)
 void CPierLayoutPage::UpdateColumnSpacingControls()
 {
    CPierDlg* pParent = (CPierDlg*)GetParent();
-   BOOL bEnable = (1 < pParent->m_PierData.m_nColumns ? TRUE : FALSE);
+   BOOL bEnable = (1 < pParent->m_PierData.m_PierData.GetColumnCount() ? TRUE : FALSE);
    GetDlgItem(IDC_S_LABEL)->EnableWindow(bEnable);
    m_SpacingControl.EnableWindow(bEnable);
    GetDlgItem(IDC_S_UNIT)->EnableWindow(bEnable);

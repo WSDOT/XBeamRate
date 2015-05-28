@@ -4,12 +4,12 @@
 
 typedef struct xbrTypes
 {
-   typedef enum PierConnectionType
+   typedef enum SuperstructureConnectionType
    {
       pctContinuous, // superstructure is continuous but hinged with substructure
       pctIntegral,   // superstructure is fully continuous with substructure
       pctExpansion   // no moment connectivity at pier
-   } PierConnectionType;
+   } SuperstructureConnectionType;
 
    typedef enum ColumnBaseType
    {

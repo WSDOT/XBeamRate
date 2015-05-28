@@ -85,7 +85,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++, tableRowIdx++ )
    {
       ColumnIndexType tableColIdx = 0;
-      Float64 height = pProject->GetColumnHeight(colIdx);
+      Float64 height = pProject->GetColumnHeight();
       (*pTable)(tableRowIdx,tableColIdx++) << colIdx;
       (*pTable)(tableRowIdx,tableColIdx++) << length.SetValue(height);
    }

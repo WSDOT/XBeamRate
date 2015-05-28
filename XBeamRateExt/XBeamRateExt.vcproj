@@ -488,6 +488,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\BearingLineData.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dllmain.cpp"
 				>
 				<FileConfiguration
@@ -544,6 +548,14 @@
 						CompileAsManaged="0"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\LongitudinalRebarData.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PierData.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\PointOfInterest.cpp"
@@ -609,6 +621,18 @@
 			>
 			<File
 				RelativePath="..\Include\XBeamRateExt\AutoLib.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\BearingLineData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\LongitudinalRebarData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\PierData.h"
 				>
 			</File>
 			<File

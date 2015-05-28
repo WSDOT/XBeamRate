@@ -11,15 +11,15 @@
 
 #pragma warning(disable:4244)
 
-void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,std::vector<txnBearingData>& brgData)
+void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,xbrBearingLineData& brgLineData,std::vector<txnDeadLoadReaction>& deadLoadReactions)
 {
    if ( pDX->m_bSaveAndValidate )
    {
-      grid.GetBearingData(brgData);
+      grid.GetBearingData(brgLineData,deadLoadReactions);
    }
    else
    {
-      grid.SetBearingData(brgData);
+      grid.SetBearingData(brgLineData,deadLoadReactions);
    }
 }
 
@@ -50,14 +50,15 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    DDX_Text(pDX,IDC_DC,pParent->m_PierData.m_gDC);
    DDX_Text(pDX,IDC_DW,pParent->m_PierData.m_gDW);
 
-   DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,pParent->m_PierData.m_nBearingLines);
+   IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
+   DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);
 
-   for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
-      DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_BearingLines[brgLineIdx]);
-      DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_RefBearingIdx[brgLineIdx]);
-      DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_RefBearingLocation[brgLineIdx],pDisplayUnits->GetSpanLengthUnit());
-      DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_RefBearingDatum[brgLineIdx]);
+      DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx),pParent->m_PierData.m_DeadLoadReactions[brgLineIdx]);
+      DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingIndex());
+      DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingOffset(),pDisplayUnits->GetSpanLengthUnit());
+      DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingDatum());
    }
 }
 
@@ -136,18 +137,18 @@ void CBearingsPage::OnRemoveAhead()
 
 void CBearingsPage::OnCopyAhead()
 {
-   std::vector<txnBearingData> brgData;
-   m_Grid[0].GetBearingData(brgData);
-   m_Grid[1].SetBearingData(brgData);
+   //std::vector<txnBearingData> brgData;
+   //m_Grid[0].GetBearingData(brgData);
+   //m_Grid[1].SetBearingData(brgData);
 
 #pragma Reminder("Need to copy the transverse location also")
 }
 
 void CBearingsPage::OnCopyBack()
 {
-   std::vector<txnBearingData> brgData;
-   m_Grid[1].GetBearingData(brgData);
-   m_Grid[0].SetBearingData(brgData);
+   //std::vector<txnBearingData> brgData;
+   //m_Grid[1].GetBearingData(brgData);
+   //m_Grid[0].SetBearingData(brgData);
 
 #pragma Reminder("Need to copy the transverse location also")
 }
@@ -184,7 +185,7 @@ void CBearingsPage::FillRefBearingComboBox(IndexType brgLineIdx)
 
    CString strLabel;
    CPierDlg* pParent = (CPierDlg*)GetParent();
-   IndexType nBearings = pParent->m_PierData.m_BearingLines[brgLineIdx].size();
+   IndexType nBearings = pParent->m_PierData.m_PierData.GetBearingLineCount();
    nBearings = Max((IndexType)1,nBearings); // there is always one bearing minimum
    for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
    {

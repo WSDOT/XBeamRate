@@ -22,33 +22,21 @@
 #pragma once
 
 #include <WBFLCore.h>
-#include <PgsExt\ColumnData.h>
+#include <XBeamRateExt\PierData.h>
 
-class txnBearingData
+class txnDeadLoadReaction
 {
 public:
-   txnBearingData();
-   Float64 m_S; // spacing to next bearing (ignored for last bearing)
+   txnDeadLoadReaction();
    Float64 m_DC;
    Float64 m_DW;
 };
 
-class txnLiveLoadData
+class txnLiveLoadReactions
 {
 public:
-   txnLiveLoadData();
+   txnLiveLoadReactions();
    std::vector<std::pair<std::_tstring,Float64>> m_LLIM;
-};
-
-class txnLongutindalRebarData
-{
-public:
-   txnLongutindalRebarData();
-   xbrTypes::LongitudinalRebarDatumType datum;
-   Float64 cover;
-   matRebar::Size barSize;
-   Int16 nBars;
-   Float64 spacing;
 };
 
 class txnEditPierData
@@ -56,61 +44,19 @@ class txnEditPierData
 public:
    txnEditPierData();
 
-   xbrTypes::PierConnectionType m_PierType;
-   Float64 m_DeckElevation;
-   Float64 m_CrownPointOffset;
-   Float64 m_BridgeLineOffset;
-   CString m_strOrientation;
-
-   pgsTypes::OffsetMeasurementType m_CurbLineDatum;
-   Float64 m_LeftCLO;
-   Float64 m_RightCLO;
-   Float64 m_SL;
-   Float64 m_SR;
-
-   Float64 m_DiaphragmHeight;
-   Float64 m_DiaphragmWidth;
-
-   IndexType m_nBearingLines;
-   std::vector<txnBearingData> m_BearingLines[2];
-   IndexType m_RefBearingIdx[2];
-   Float64 m_RefBearingLocation[2];
-   pgsTypes::OffsetMeasurementType m_RefBearingDatum[2];
-
-
-   Float64 m_Ec;
-   std::vector<txnLongutindalRebarData> m_Rebar;
-
-   ColumnIndexType m_nColumns;
-   ColumnIndexType m_RefColumnIdx;
-   Float64 m_TransverseOffset;
-   pgsTypes::OffsetMeasurementType m_TransverseOffsetMeasurement;
-   Float64 m_XBeamWidth;
-   Float64 m_XBeamHeight[2];
-   Float64 m_XBeamTaperHeight[2];
-   Float64 m_XBeamTaperLength[2];
-   Float64 m_XBeamOverhang[2];
-
-   CColumnData::ColumnHeightMeasurementType m_ColumnHeightMeasurementType;
-   Float64 m_ColumnHeight;
-   Float64 m_ColumnSpacing;
-
-   CColumnData::ColumnShapeType m_ColumnShape;
-   Float64 m_B;
-   Float64 m_D;
-
-   pgsTypes::ConditionFactorType m_ConditionFactorType;
-   Float64 m_ConditionFactor;
+   xbrPierData m_PierData;
 
    Float64 m_gDC;
    Float64 m_gDW;
    Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
-   txnLiveLoadData m_DesignLiveLoad;
-   txnLiveLoadData m_LegalRoutineLiveLoad;
-   txnLiveLoadData m_LegalSpecialLiveLoad;
-   txnLiveLoadData m_PermitRoutineLiveLoad;
-   txnLiveLoadData m_PermitSpecialLiveLoad;
+   std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2];
+
+   txnLiveLoadReactions m_DesignLiveLoad;
+   txnLiveLoadReactions m_LegalRoutineLiveLoad;
+   txnLiveLoadReactions m_LegalSpecialLiveLoad;
+   txnLiveLoadReactions m_PermitRoutineLiveLoad;
+   txnLiveLoadReactions m_PermitSpecialLiveLoad;
 };
 
 class txnEditPier :

@@ -1176,63 +1176,6 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Schema Files"
-			Filter="xsd"
-			>
-			<File
-				RelativePath=".\Schema\XBeamRate.xsd"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Debug|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile|Win32"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Profile|x64"
-					>
-					<Tool
-						Name="C++/Tree Mapping Rule"
-						AdditionalOptions="--cxx-prologue &quot;#include \&quot;stdafx.h\&quot;&quot;"
-					/>
-				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
 			Name="Generated Files"
 			Filter="hxx;cxx"
 			>

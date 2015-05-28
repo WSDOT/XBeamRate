@@ -158,7 +158,7 @@ Float64 CPierAgentImp::GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx)
    GET_IFACE(IXBRProject,pProject);
    Float64 leftBrgOffset    = GetLeftBearingOffset(brgLineIdx); // offset of left-most bearing from alignment
    Float64 leftColumnOffset = GetLeftColumnOffset();  // offset of left-most column from alignment
-   Float64 leftColumnOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft); // overhang from left-most column to left edge of cross beam
+   Float64 leftColumnOverhang = pProject->GetXBeamLeftOverhang(); // overhang from left-most column to left edge of cross beam
    Float64 leftBrgLocation  = leftColumnOverhang - leftColumnOffset + leftBrgOffset; // dist from left edge of cross beam to left most bearing
 
    for ( IndexType idx = 0; idx < brgIdx && 0 < brgIdx; idx++ )
@@ -179,11 +179,11 @@ IndexType CPierAgentImp::GetColumnCount()
 Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 columnLocation = pProject->GetXBeamOverhang(pgsTypes::pstLeft); // overhang from left-most column to left edge of cross beam
+   Float64 columnLocation = pProject->GetXBeamLeftOverhang(); // overhang from left-most column to left edge of cross beam
 
    for ( IndexType idx = 0; idx < colIdx && 0 < colIdx; idx++ )
    {
-      Float64 spacing = pProject->GetSpacing(idx);
+      Float64 spacing = pProject->GetColumnSpacing();
       columnLocation += spacing;
    }
 
@@ -193,7 +193,7 @@ Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
 Float64 CPierAgentImp::GetColumnHeight(IndexType colIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 h = pProject->GetColumnHeight(colIdx);
+   Float64 h = pProject->GetColumnHeight();
    CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType();
    if ( heightType == CColumnData::chtBottomElevation )
    {
@@ -306,10 +306,9 @@ void CPierAgentImp::GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d
    GET_IFACE(IXBRProject,pProject);
 
    Float64 H1, H2, X1;
-   pProject->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
-
    Float64 H3, H4, X2;
-   pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+   Float64 W;
+   pProject->GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&W);
 
    CComPtr<IPoint2d> uxbTL,uxbTC,uxbTR,uxbBL,uxbBC,uxbBR;
    GetUpperXBeamPoints(&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
@@ -402,8 +401,12 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
    {
       CColumnData::ColumnShapeType shapeType;
       Float64 D1, D2;
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+      Float64 H;
+
       GET_IFACE(IXBRProject,pProject);
-      pProject->GetColumnShape(&shapeType,&D1,&D2);
+      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+
       return D1;
    }
    else
@@ -465,7 +468,11 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
    {
       CColumnData::ColumnShapeType shapeType;
       Float64 D1, D2;
-      pProject->GetColumnShape(&shapeType,&D1,&D2);
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+      Float64 H;
+
+      GET_IFACE(IXBRProject,pProject);
+      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
       if (shapeType == CColumnData::cstCircle)
       {
          return M_PI*D1*D1/4;
@@ -552,7 +559,7 @@ IndexType CPierAgentImp::GetRebarCount(IndexType rowIdx)
    xbrTypes::LongitudinalRebarDatumType datum;
    Float64 cover;
    matRebar::Size barSize;
-   Int16 nBars;
+   IndexType nBars;
    Float64 spacing;
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
    return nBars;
@@ -563,7 +570,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
    matRebar::Size barSize;
-   Int16 nBars;
+   IndexType nBars;
    Float64 cover;
    Float64 spacing;
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
@@ -625,7 +632,7 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
    matRebar::Size barSize;
-   Int16 nBars;
+   IndexType nBars;
    Float64 cover;
    Float64 spacing;
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
@@ -665,7 +672,7 @@ void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
    matRebar::Size barSize;
-   Int16 nBars;
+   IndexType nBars;
    Float64 cover;
    Float64 spacing;
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
@@ -746,9 +753,10 @@ void CPierAgentImp::ValidatePointsOfInterest()
 
    PoiIDType id = 0;
 
-   Float64 H1, H2, H3, H4, X1, X2;
-   pProject->GetXBeamDimensions(pgsTypes::pstLeft, &H1,&H2,&X1);
-   pProject->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+   Float64 H1, H2, X1;
+   Float64 H3, H4, X2;
+   Float64 W;
+   pProject->GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&W);
 
    Float64 L = pProject->GetXBeamLength();
 
@@ -774,7 +782,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
    m_XBeamPoi.push_back(xbrPointOfInterest(id++,L,POI_SECTCHANGE));
 
    // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
-   Float64 LeftOH = pProject->GetXBeamOverhang(pgsTypes::pstLeft); 
+   Float64 LeftOH = pProject->GetXBeamLeftOverhang(); 
    ColumnIndexType nColumns = pProject->GetColumnCount();
    if ( 1 < nColumns )
    {
@@ -784,7 +792,7 @@ void CPierAgentImp::ValidatePointsOfInterest()
       Float64 X = LeftOH;
       for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
       {
-         Float64 space = pProject->GetSpacing(spaceIdx);
+         Float64 space = pProject->GetColumnSpacing();
          X += space;
          m_XBeamPoi.push_back(xbrPointOfInterest(id++,X,POI_COLUMN));
          m_XBeamPoi.push_back(xbrPointOfInterest(id++,X+0.001));
@@ -866,10 +874,12 @@ Float64 CPierAgentImp::GetLeftColumnOffset()
    // left of the alignment
 
    GET_IFACE(IXBRProject,pProject);
+   IndexType nColumns;
    ColumnIndexType refColIdx;
    Float64 refColumnOffset;
    pgsTypes::OffsetMeasurementType refColumnDatum;
-   pProject->GetTransverseLocation(&refColIdx,&refColumnOffset,&refColumnDatum);
+   Float64 X3, X4, S;
+   pProject->GetColumnLayout(&nColumns,&refColumnDatum,&refColIdx,&refColumnOffset,&X3,&X4,&S);
 
    if ( refColumnDatum == pgsTypes::omtBridge )
    {
@@ -884,8 +894,7 @@ Float64 CPierAgentImp::GetLeftColumnOffset()
       // make the reference column the first column
       for ( SpacingIndexType spaceIdx = refColIdx-1; 0 <= spaceIdx && spaceIdx != INVALID_INDEX; spaceIdx-- )
       {
-         Float64 space = pProject->GetSpacing(spaceIdx);
-         refColumnOffset -= space;
+         refColumnOffset -= S;
       }
    }
 
@@ -901,7 +910,7 @@ Float64 CPierAgentImp::GetCrownPointLocation()
 
    // X is the distance from the left edge of the cross beam to the crown point
    GET_IFACE(IXBRProject,pProject);
-   Float64 LOH = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
+   Float64 LOH = pProject->GetXBeamLeftOverhang();
    Float64 CPO = pProject->GetCrownPointOffset();
    Float64 skew = GetSkewAngle();
 

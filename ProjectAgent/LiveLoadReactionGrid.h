@@ -47,8 +47,8 @@ public:
    void AddVehicle();
    void RemoveSelectedVehicles();
 
-   void GetLiveLoadData(txnLiveLoadData& llimData);
-   void SetLiveLoadData(const txnLiveLoadData& llimData);
+   void GetLiveLoadData(txnLiveLoadReactions& llimData);
+   void SetLiveLoadData(const txnLiveLoadReactions& llimData);
 
 // Overrides
 	// ClassWizard generated virtual function overrides

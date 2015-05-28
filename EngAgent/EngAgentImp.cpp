@@ -247,7 +247,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(const xb
 
       xbrTypes::LongitudinalRebarDatumType datum;
       matRebar::Size barSize;
-      Int16 nBars;
+      IndexType nBars;
       Float64 cover;
       Float64 spacing;
       pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);

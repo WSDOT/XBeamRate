@@ -152,8 +152,8 @@ void CAnalysisAgentImp::Validate()
    GET_IFACE(IXBRProject,pProject);
 
    // some dummy dimensions
-   Float64 leftOverhang = pProject->GetXBeamOverhang(pgsTypes::pstLeft);
-   Float64 rightOverhang = pProject->GetXBeamOverhang(pgsTypes::pstRight);
+   Float64 leftOverhang = pProject->GetXBeamLeftOverhang();
+   Float64 rightOverhang = pProject->GetXBeamRightOverhang();
    IndexType nColumns = pProject->GetColumnCount();
 
 #pragma Reminder("UPDATE: get real material and section properties")
@@ -193,20 +193,24 @@ void CAnalysisAgentImp::Validate()
    capMbr.mbrID = xbeamMbrID-1;
    m_CapBeamMembers.push_back(capMbr);
 
+#pragma Reminder("UPDATE: BUG: This is not the correct column height")
+   // this is the raw input data... it could be the bottom elevation...
+   // use the IXBRPier interface to get the actual height
+   Float64 columnHeight = pProject->GetColumnHeight();
+   Float64 columnSpacing = pProject->GetColumnSpacing();
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 space = (colIdx < nColumns-1 ? pProject->GetSpacing(colIdx) : rightOverhang);
-      Float64 columnHeight = pProject->GetColumnHeight(colIdx);
+      Float64 space = (colIdx < nColumns-1 ? columnSpacing : rightOverhang);
 
       // create joint at bottom of column
       joint.Release();
       joints->Create(jntID++,Xe,-columnHeight,&joint);
 
       joint->Support(); // fully fixed
-      if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
-      {
-         joint->ReleaseDof(jrtMz); // pinned
-      }
+      //if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
+      //{
+      //   joint->ReleaseDof(jrtMz); // pinned
+      //}
 
       // create column member
       mbr.Release();

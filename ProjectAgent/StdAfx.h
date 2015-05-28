@@ -57,6 +57,7 @@ using namespace ATL;
 
 #include <WBFLDebug.h>
 #include <System\Transaction.h>
+#include <WBFLAtlExt.h>
 
 #include <WBFLCore.h>
 #include <AgentTools.h>

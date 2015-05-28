@@ -6,7 +6,7 @@
 #include "LiveLoadReactionsPage.h"
 #include "PierDlg.h"
 
-void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadData& llData)
+void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadReactions& llData)
 {
    if ( pDX->m_bSaveAndValidate )
    {

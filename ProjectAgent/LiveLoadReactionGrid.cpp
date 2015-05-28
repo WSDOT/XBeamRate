@@ -154,7 +154,7 @@ void CLiveLoadReactionGrid::RemoveSelectedVehicles()
 	GetParam( )->EnableUndo(TRUE);
 }
 
-void CLiveLoadReactionGrid::GetLiveLoadData(txnLiveLoadData& llimData)
+void CLiveLoadReactionGrid::GetLiveLoadData(txnLiveLoadReactions& llimData)
 {
    llimData.m_LLIM.clear();
    ROWCOL nRows = GetRowCount();
@@ -167,7 +167,7 @@ void CLiveLoadReactionGrid::GetLiveLoadData(txnLiveLoadData& llimData)
    }
 }
 
-void CLiveLoadReactionGrid::SetLiveLoadData(const txnLiveLoadData& llimData)
+void CLiveLoadReactionGrid::SetLiveLoadData(const txnLiveLoadReactions& llimData)
 {
    GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);

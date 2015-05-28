@@ -50,70 +50,19 @@ void CAgentCmdTarget::OnEditPier()
    CPierDlg dlg(_T("Edit Pier"));
 
    txnEditPierData oldPierData;
-   oldPierData.m_PierType = pProject->GetPierType();
-   oldPierData.m_DeckElevation = pProject->GetDeckElevation();
-   oldPierData.m_CrownPointOffset = pProject->GetCrownPointOffset();
-   oldPierData.m_BridgeLineOffset = pProject->GetBridgeLineOffset();
-   oldPierData.m_strOrientation = pProject->GetOrientation();
+   oldPierData.m_PierData = pProject->GetPierData();
 
-   oldPierData.m_CurbLineDatum = pProject->GetCurbLineDatum();
-   pProject->GetCurbLineOffset(&oldPierData.m_LeftCLO,&oldPierData.m_RightCLO);
-   pProject->GetCrownSlopes(&oldPierData.m_SL,&oldPierData.m_SR);
-
-   pProject->GetDiaphragmDimensions(&oldPierData.m_DiaphragmHeight,&oldPierData.m_DiaphragmWidth);
-
-   oldPierData.m_nBearingLines = pProject->GetBearingLineCount();
-   for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_nBearingLines; brgLineIdx++ )
+   for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_PierData.GetBearingLineCount(); brgLineIdx++ )
    {
-      oldPierData.m_BearingLines[brgLineIdx].clear();
-      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      IndexType nBearings = oldPierData.m_PierData.GetBearingCount(brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         txnBearingData brgData;
-         if ( brgIdx < nBearings-1 )
-         {
-            brgData.m_S = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
-         }
-         pProject->GetBearingReactions(brgLineIdx,brgIdx,&brgData.m_DC,&brgData.m_DW);
-         oldPierData.m_BearingLines[brgLineIdx].push_back(brgData);
-
-         IndexType refIdx;
-         Float64 refBearingOffset;
-         pgsTypes::OffsetMeasurementType refBearingDatum;
-         pProject->GetReferenceBearing(brgLineIdx,&refIdx,&refBearingOffset,&refBearingDatum);
-         oldPierData.m_RefBearingIdx[brgLineIdx]      = refIdx;
-         oldPierData.m_RefBearingLocation[brgLineIdx] = refBearingOffset;
-         oldPierData.m_RefBearingDatum[brgLineIdx]    = refBearingDatum;
+         txnDeadLoadReaction reaction;
+         pProject->GetBearingReactions(brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW);
+         oldPierData.m_DeadLoadReactions[brgLineIdx].push_back(reaction);
       }
    }
 
-   oldPierData.m_Ec = pProject->GetModE();
-
-   IndexType nRebarRows = pProject->GetRebarRowCount();
-   for ( IndexType rowIdx = 0; rowIdx < nRebarRows; rowIdx++ )
-   {
-      txnLongutindalRebarData rebarData;
-      pProject->GetRebarRow(rowIdx,&rebarData.datum,&rebarData.cover,&rebarData.barSize,&rebarData.nBars,&rebarData.spacing);
-      oldPierData.m_Rebar.push_back(rebarData);
-   }
-
-   for ( int i = 0; i < 2; i++ )
-   {
-      pgsTypes::PierSideType side = (pgsTypes::PierSideType)i;
-      pProject->GetXBeamDimensions(side,&oldPierData.m_XBeamHeight[side],&oldPierData.m_XBeamTaperHeight[side],&oldPierData.m_XBeamTaperLength[side]);
-      oldPierData.m_XBeamOverhang[side] = pProject->GetXBeamOverhang(side);
-   }
-   oldPierData.m_XBeamWidth = pProject->GetXBeamWidth();
-
-   oldPierData.m_nColumns = pProject->GetColumnCount();
-   oldPierData.m_ColumnHeight = pProject->GetColumnHeight(0);
-   oldPierData.m_ColumnHeightMeasurementType = pProject->GetColumnHeightMeasurementType();
-   oldPierData.m_ColumnSpacing = (oldPierData.m_nColumns == 1 ? 0 : pProject->GetSpacing(0));
-   pProject->GetColumnShape(&oldPierData.m_ColumnShape,&oldPierData.m_B,&oldPierData.m_D);
-
-   pProject->GetTransverseLocation(&oldPierData.m_RefColumnIdx,&oldPierData.m_TransverseOffset,&oldPierData.m_TransverseOffsetMeasurement);
-
-   pProject->GetConditionFactor(&oldPierData.m_ConditionFactorType,&oldPierData.m_ConditionFactor);
    oldPierData.m_gDC = pProject->GetDCLoadFactor();
    oldPierData.m_gDW = pProject->GetDWLoadFactor();
    for ( int i = 0; i < 6; i++ )
@@ -122,11 +71,11 @@ void CAgentCmdTarget::OnEditPier()
       oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(ratingType);
    }
 
-   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltDesign);
-   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Routine);
-   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltLegalRating_Special);
-   oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltPermitRating_Routine);
-   oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lltPermitRating_Special);
+   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrDesign_Inventory);
+   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrLegal_Routine);
+   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrLegal_Special);
+   oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrPermit_Routine);
+   oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrPermit_Special);
 
    dlg.SetPierData(oldPierData);
    if ( dlg.DoModal() == IDOK )
