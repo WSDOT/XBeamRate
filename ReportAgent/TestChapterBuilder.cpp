@@ -72,7 +72,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   *pPara << _T("Project Name = ") << pProject->GetProjectName() << rptNewLine;
+   //*pPara << _T("Project Name = ") << pProject->GetProjectName() << rptNewLine;
 
    rptRcTable* pTable = new rptRcTable(2,0);
    *pPara << pTable << rptNewLine;

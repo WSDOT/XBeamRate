@@ -28,6 +28,7 @@ public:
 
 // CEBrokerDocument over-rides
 public:
+   virtual BOOL Init();
    virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
 
 // Attributes
@@ -37,13 +38,15 @@ public:
 
 // Operations
 public:
+   void GetDocUnitSystem(IDocUnitSystem** ppDocUnitSystem);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateDoc)
 	public:
 	virtual BOOL OnNewDocument();
-	//}}AFX_VIRTUAL
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	//}}AFX_VIRTUAL	//}}AFX_VIRTUAL
 
    virtual void LoadToolbarState();
    virtual void SaveToolbarState();
@@ -76,8 +79,7 @@ protected:
    friend CXBeamRateDocProxyAgent;
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;
 
-   CComPtr<IUnitServer> m_DocUnitServer;
-   CComPtr<IUnitConvert2> m_DocConvert;
+   CComPtr<IDocUnitSystem> m_DocUnitSystem;
 
    bool m_bAutoCalcEnabled;
 

@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
+#include "XBeamRateAppPlugin.h"
 #include "XBeamRatePluginApp.h"
 #include "XBeamRateDoc.h"
 #include "XBeamRateDocProxyAgent.h"
@@ -10,6 +11,7 @@
 #include <XBeamRateCatCom.h>
 
 #include <EAF\EAFMainFrame.h>
+#include <EAF\EAFUnits.h>
 
 #include <WBFLReportManagerAgent.h>
 #include <WBFLGraphManagerAgent.h>
@@ -43,20 +45,6 @@ CXBeamRateDoc::CXBeamRateDoc()
    m_pMyDocProxyAgent = NULL;
    m_bAutoCalcEnabled = true;
 
-   // The reporting sub-system doesn't use the WBFLUnitServer implementation. It uses the old regular C++
-   // units sytem. That system is in kms units, so we will create a unit server here also in the kms system
-   // so that the data, after loading is in set of consistent base units we want.
-   // If the report system could handle the WBFLUnitServer, the <ConsistentUnits> declaration in the
-   // instance document would work throughout this program because we are working exclusively in
-   // consistent units.
-   m_DocUnitServer.CoCreateInstance(CLSID_UnitServer);
-   m_DocUnitServer->SetBaseUnits(CComBSTR(unitSysUnitsMgr::GetMassUnit().UnitTag().c_str()),
-                            CComBSTR(unitSysUnitsMgr::GetLengthUnit().UnitTag().c_str()),
-                            CComBSTR(unitSysUnitsMgr::GetTimeUnit().UnitTag().c_str()),
-                            CComBSTR(unitSysUnitsMgr::GetTemperatureUnit().UnitTag().c_str()),
-                            CComBSTR(unitSysUnitsMgr::GetAngleUnit().UnitTag().c_str()));  
-   m_DocUnitServer->QueryInterface(&m_DocConvert);
-
    CEAFAutoCalcDocMixin::SetDocument(this);
 }
 
@@ -77,6 +65,7 @@ void CXBeamRateDoc::EnableAutoCalc(bool bEnable)
       bool bWasDisabled = !IsAutoCalcEnabled();
       m_bAutoCalcEnabled = bEnable;
 
+#pragma Reminder("UPDATE: need our own status subclass to do the autocalc indicator")
       //CPGSuperStatusBar* pStatusBar = ((CPGSuperStatusBar*)EAFGetMainFrame()->GetStatusBar());
       //pStatusBar->AutoCalcEnabled( m_bAutoCalcEnabled );
 
@@ -87,6 +76,50 @@ void CXBeamRateDoc::EnableAutoCalc(bool bEnable)
         OnUpdateNow();
       }
    }
+}
+
+void CXBeamRateDoc::GetDocUnitSystem(IDocUnitSystem** ppDocUnitSystem)
+{
+   (*ppDocUnitSystem) = m_DocUnitSystem;
+   (*ppDocUnitSystem)->AddRef();
+}
+
+BOOL CXBeamRateDoc::Init()
+{
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRate = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
+
+   if ( !CEAFBrokerDocument::Init() )
+   {
+      return FALSE;
+   }
+
+   // Set up the document unit system
+   CComPtr<IAppUnitSystem> appUnitSystem;
+   pXBeamRate->GetAppUnitSystem(&appUnitSystem);
+   EAFCreateDocUnitSystem(appUnitSystem,&m_DocUnitSystem);
+
+   //// Transfer report favorites and custom reports data from CPGSuperBaseAppPlugin to CEAFBrokerDocument (this)
+   //bool doDisplayFavorites = pPGSuper->GetDoDisplayFavoriteReports();
+   //std::vector<std::_tstring> Favorites = pPGSuper->GetFavoriteReports();
+
+   //SetDoDisplayFavoriteReports(doDisplayFavorites);
+   //SetFavoriteReports(Favorites);
+
+   //CEAFCustomReports customs = pPGSuper->GetCustomReports();
+   //SetCustomReports(customs);
+
+   //// Put our icon on the main frame window
+   //CEAFMainFrame* pFrame = EAFGetMainFrame();
+   //m_hMainFrameBigIcon = pFrame->GetIcon(TRUE);
+   //m_hMainFrameSmallIcon = pFrame->GetIcon(FALSE);
+   //HICON hIcon = AfxGetApp()->LoadIcon(pTemplate->GetResourceID());
+   //pFrame->SetIcon(hIcon,TRUE);
+   //pFrame->SetIcon(hIcon,FALSE);
+
+   return TRUE;
 }
 
 BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
@@ -206,16 +239,21 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	return TRUE;
 }
 
+BOOL CXBeamRateDoc::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
+{
+   return CEAFBrokerDocument::OnCmdMsg(nID,nCode,pExtra,pHandlerInfo);
+}
+
 void CXBeamRateDoc::LoadToolbarState()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   __super::LoadToolbarState();
+   CEAFBrokerDocument::LoadToolbarState();
 }
 
 void CXBeamRateDoc::SaveToolbarState()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   __super::SaveToolbarState();
+   CEAFBrokerDocument::SaveToolbarState();
 }
 
 CString CXBeamRateDoc::GetToolbarSectionName()
@@ -226,13 +264,13 @@ CString CXBeamRateDoc::GetToolbarSectionName()
 BOOL CXBeamRateDoc::GetStatusBarMessageString(UINT nID,CString& rMessage) const
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return __super::GetStatusBarMessageString(nID,rMessage);
+   return CEAFBrokerDocument::GetStatusBarMessageString(nID,rMessage);
 }
 
 BOOL CXBeamRateDoc::GetToolTipMessageString(UINT nID, CString& rMessage) const
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return __super::GetToolTipMessageString(nID,rMessage);
+   return CEAFBrokerDocument::GetToolTipMessageString(nID,rMessage);
 }
 
 /////////////////////////////////////////////////////////////////////////////

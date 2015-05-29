@@ -3,6 +3,7 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
 #include <IFace\XBeamRateAgent.h>
+#include <EAF\EAFDisplayUnits.h>
 
 class CXBeamRateDoc;
 struct IBroker;
@@ -29,8 +30,8 @@ class CXBeamRateDocProxyAgent :
    public IAgentEx,
    public IAgentUIIntegration,
    public IXBRProjectEventSink,
-   public IXBeamRate
-   //public IEAFDisplayUnitsEventSink,
+   public IXBeamRate,
+   public IEAFDisplayUnitsEventSink
    //public IVersionInfo,
 {
 public:
@@ -44,7 +45,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
-   //COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
+   COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    //COM_INTERFACE_ENTRY(IVersionInfo)
 END_COM_MAP()
 
@@ -70,19 +71,17 @@ public:
 public:
    STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
 
-
 // IXBeamRate
 public:
    virtual void GetUnitServer(IUnitServer** ppUnitServer);
-   virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert);
 
 // IXBRProjectEventSink
 public:
    virtual HRESULT OnProjectChanged();
 
-//// IEAFDisplayUnitsEventSink
-//public:
-//   virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
+// IEAFDisplayUnitsEventSink
+public:
+   virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
 
 
 //// IVersionInfo
@@ -100,7 +99,7 @@ private:
    void AdviseEventSinks();
    void UnadviseEventSinks();
    DWORD m_dwProjectCookie;
-   //DWORD m_dwDisplayUnitsCookie;
+   DWORD m_dwDisplayUnitsCookie;
 
    void CreateToolBars();
    void RemoveToolBars();

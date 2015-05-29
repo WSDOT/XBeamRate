@@ -103,6 +103,12 @@ public:
    Float64& GetConditionFactor();
    void SetConditionFactor(Float64 conditionFactor);
 
+   // Material
+   void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade);
+   void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) const;
+   matRebar::Type& GetRebarType();
+   matRebar::Grade& GetRebarGrade();
+
    void SetEc(Float64 ec);
    Float64 GetEc() const;
    Float64& GetEc();
@@ -171,6 +177,8 @@ protected:
    Float64 m_ConditionFactor;
 
    // Materials
+   matRebar::Type m_RebarType;
+   matRebar::Grade m_RebarGrade;
    Float64 m_Ec;
    Float64 m_Fc;
 

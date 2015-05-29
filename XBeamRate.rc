@@ -171,6 +171,7 @@ BEGIN
     SEPARATOR
     BUTTON      EAFID_UNITS_SI
     BUTTON      EAFID_UNITS_US
+    SEPARATOR
 END
 
 
@@ -192,6 +193,17 @@ CAPTION "XBeam Reinforcement"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     LTEXT           "TODO: XBeam Rate Controls",IDC_STATIC,60,73,100,8
+END
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_XBEAMRATE ACCELERATORS 
+BEGIN
+    "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
 END
 
 

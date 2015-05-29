@@ -41,6 +41,8 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
+   DDX_Control(pDX,IDC_REBAR_MATERIAL,m_cbRebar);
+
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
@@ -48,7 +50,7 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
    DDX_UnitValueAndTag(pDX,IDC_EC,IDC_EC_UNIT,pParent->m_PierData.m_PierData.GetEc(),pDisplayUnits->GetModEUnit());
-
+   DDX_RebarMaterial(pDX,IDC_REBAR_MATERIAL,pParent->m_PierData.m_PierData.GetRebarType(),pParent->m_PierData.m_PierData.GetRebarGrade());
    DDX_RebarGrid(pDX,m_RebarGrid,pParent->m_PierData.m_PierData.GetLongitudinalRebar());
 }
 

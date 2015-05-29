@@ -2,6 +2,7 @@
 #include "resource.h"
 #include "XBeamRateDocProxyAgent.h"
 #include "XBeamRateDoc.h"
+#include "XBeamRateAppPlugin.h"
 
 #include <IFace\Project.h>
 
@@ -51,6 +52,12 @@ void CXBeamRateDocProxyAgent::AdviseEventSinks()
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+
+   hr = pBrokerInit->FindConnectionPoint( IID_IEAFDisplayUnitsEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Advise( GetUnknown(), &m_dwDisplayUnitsCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
 }
 
 void CXBeamRateDocProxyAgent::UnadviseEventSinks()
@@ -65,6 +72,12 @@ void CXBeamRateDocProxyAgent::UnadviseEventSinks()
    hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+
+   hr = pBrokerInit->FindConnectionPoint( IID_IEAFDisplayUnitsEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Unadvise( m_dwDisplayUnitsCookie );
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
 }
@@ -145,12 +158,15 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
 // IXBeamRate
 void CXBeamRateDocProxyAgent::GetUnitServer(IUnitServer** ppUnitServer)
 {
-   m_pMyDocument->m_DocUnitServer.CopyTo(ppUnitServer);
-}
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)(m_pMyDocument->GetDocTemplate());
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRate = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
 
-void CXBeamRateDocProxyAgent::GetUnitConverter(IUnitConvert2** ppUnitConvert)
-{
-   m_pMyDocument->m_DocConvert.CopyTo(ppUnitConvert);
+   CComPtr<IAppUnitSystem> appUnitSystem;
+   pXBeamRate->GetAppUnitSystem(&appUnitSystem);
+
+   appUnitSystem->get_UnitServer(ppUnitServer);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -169,21 +185,21 @@ HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
 
 ////////////////////////////////////////////////////////////////////
 // IEAFDisplayUnitsEventSink
-//HRESULT CXBeamRateDocProxyAgent::OnUnitsChanged(eafTypes::UnitMode newUnitMode)
-//{
-//   AFX_MANAGE_STATE(AfxGetAppModuleState());
-//   m_pMyDocument->SetModifiedFlag();
-//
-//   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-//
-//   CComPtr<IDocUnitSystem> pDocUnitSystem;
-//   m_pMyDocument->GetDocUnitSystem(&pDocUnitSystem);
-//   pDocUnitSystem->put_UnitMode(UnitModeType(pDisplayUnits->GetUnitMode()));
-//
-//   boost::shared_ptr<CObject> pnull;
-//   FireEvent( 0, HINT_UNITSCHANGED, pnull );
-//   return S_OK;
-//}
+HRESULT CXBeamRateDocProxyAgent::OnUnitsChanged(eafTypes::UnitMode newUnitMode)
+{
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   m_pMyDocument->SetModifiedFlag();
+
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+
+   CComPtr<IDocUnitSystem> pDocUnitSystem;
+   m_pMyDocument->GetDocUnitSystem(&pDocUnitSystem);
+   pDocUnitSystem->put_UnitMode(UnitModeType(pDisplayUnits->GetUnitMode()));
+
+#pragma Reminder("UPDATE: could use a hint that says the units changed")
+   m_pMyDocument->UpdateAllViews(0,0,0);
+   return S_OK;
+}
 
 ///////////////////////////////////////////////////////////////////////////////////
 // IVersionInfo

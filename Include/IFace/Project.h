@@ -5,6 +5,53 @@
 
 /*****************************************************************************
 INTERFACE
+   IXBRProjectProperties
+
+   Interface to edit project properties.
+
+DESCRIPTION
+   Interface to edit project properties.
+*****************************************************************************/
+// {E27FD663-261C-40de-BFAD-01B03D98324D}
+DEFINE_GUID(IID_IXBRProjectProperties, 
+0xe27fd663, 0x261c, 0x40de, 0xbf, 0xad, 0x1, 0xb0, 0x3d, 0x98, 0x32, 0x4d);
+interface IXBRProjectProperties : IUnknown
+{
+   virtual LPCTSTR GetBridgeName() const = 0;
+   virtual void SetBridgeName(LPCTSTR name) = 0;
+   virtual LPCTSTR GetBridgeID() const = 0;
+   virtual void SetBridgeID(LPCTSTR bid) = 0;
+   virtual PierIndexType GetPierIndex() = 0;
+   virtual void SetPierIndex(PierIndexType pierIdx) = 0;
+   virtual LPCTSTR GetJobNumber() const = 0;
+   virtual void SetJobNumber(LPCTSTR jid) = 0;
+   virtual LPCTSTR GetEngineer() const = 0;
+   virtual void SetEngineer(LPCTSTR eng) = 0;
+   virtual LPCTSTR GetCompany() const = 0;
+   virtual void SetCompany(LPCTSTR company) = 0;
+   virtual LPCTSTR GetComments() const = 0;
+   virtual void SetComments(LPCTSTR comments) = 0;
+};
+
+/*****************************************************************************
+INTERFACE
+   IProjectPropertiesEventSink
+
+   Callback interface for project properties.
+
+DESCRIPTION
+   Callback interface for project properties.
+*****************************************************************************/
+// {50C5E910-0941-4135-8603-A8D7192F19CB}
+DEFINE_GUID(IID_IXBRProjectPropertiesEventSink, 
+0x50c5e910, 0x941, 0x4135, 0x86, 0x3, 0xa8, 0xd7, 0x19, 0x2f, 0x19, 0xcb);
+interface IXBRProjectPropertiesEventSink : IUnknown
+{
+   virtual HRESULT OnProjectPropertiesChanged() = 0;
+};
+
+/*****************************************************************************
+INTERFACE
    IXBRProject
 
 DESCRIPTION
@@ -15,9 +62,6 @@ DEFINE_GUID(IID_IXBRProject,
 0x2600a729, 0xd7e6, 0x44f6, 0x9f, 0x9b, 0xdf, 0x8, 0x6f, 0xf9, 0xe5, 0x3b);
 interface IXBRProject : IUnknown
 {
-   virtual void SetProjectName(LPCTSTR strName) = 0;
-   virtual LPCTSTR GetProjectName() = 0;
-
    virtual void SetPierData(const xbrPierData& pierData) = 0;
    virtual const xbrPierData& GetPierData() = 0;
 

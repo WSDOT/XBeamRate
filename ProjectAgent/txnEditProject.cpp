@@ -51,13 +51,13 @@ void txnEditProject::Execute(int i)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   //GET_IFACE2(pBroker,IEvents, pEvents);
-   //pEvents->HoldEvents(); // don't fire any changed events until all changes are done
+   GET_IFACE2(pBroker,IXBREvents, pEvents);
+   pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   pProject->SetProjectName(m_ProjectName[i]);
+   //GET_IFACE2(pBroker,IXBRProject,pProject);
+   //pProject->SetProjectName(m_ProjectName[i]);
 
-   //pEvents->FirePendingEvents();
+   pEvents->FirePendingEvents();
 }
 
 txnTransaction* txnEditProject::CreateClone() const

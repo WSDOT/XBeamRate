@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "winres.h"
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -35,7 +35,7 @@ END
 
 2 TEXTINCLUDE 
 BEGIN
-    "#include ""winres.h""\r\n"
+    "#include ""afxres.h""\r\n"
     "\0"
 END
 
@@ -109,6 +109,9 @@ IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
 
 IDR_EDIT_MENU MENU 
 BEGIN
+    MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+    MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
+    MENUITEM SEPARATOR
     MENUITEM "Project Name",                ID_EDIT_PROJECT_NAME
     MENUITEM "Units",                       EAFID_EDIT_UNITS
     MENUITEM "Pier",                        ID_EDIT_PIER
@@ -284,6 +287,7 @@ BEGIN
     LTEXT           "Concrete Properties... need unit weight.. compute E?",IDC_STATIC,145,26,172,8
     PUSHBUTTON      "+",IDC_ADD_REBAR,332,84,23,14
     PUSHBUTTON      "-",IDC_REMOVE_REBAR,332,102,23,14
+    COMBOBOX        IDC_REBAR_MATERIAL,123,38,131,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 450

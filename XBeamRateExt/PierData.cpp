@@ -44,6 +44,8 @@ xbrPierData::xbrPierData()
    m_ConditionFactor = 1.0;
 
    // Materials
+   m_RebarType = matRebar::A615;
+   m_RebarGrade = matRebar::Grade60;
    m_Ec = ::ConvertToSysUnits(5,unitMeasure::KSI);
    m_Fc = ::ConvertToSysUnits(4,unitMeasure::KSI);
 
@@ -432,6 +434,28 @@ void xbrPierData::SetConditionFactor(Float64 conditionFactor)
    m_ConditionFactor = conditionFactor;
 }
 
+void xbrPierData::SetRebarMaterial(matRebar::Type type,matRebar::Grade grade)
+{
+   m_RebarType = type;
+   m_RebarGrade = grade;
+}
+
+void xbrPierData::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) const
+{
+   *pType = m_RebarType;
+   *pGrade = m_RebarGrade;
+}
+
+matRebar::Type& xbrPierData::GetRebarType()
+{
+   return m_RebarType;
+}
+
+matRebar::Grade& xbrPierData::GetRebarGrade()
+{
+   return m_RebarGrade;
+}
+
 void xbrPierData::SetEc(Float64 ec)
 {
    m_Ec = ec;
@@ -578,6 +602,8 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
    pStrSave->EndUnit(); // Columns
 
    pStrSave->BeginUnit(_T("Materials"),1.0);
+      pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
+      pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
       pStrSave->put_Property(_T("Fc"),CComVariant(m_Fc));
       pStrSave->put_Property(_T("Ec"),CComVariant(m_Ec));
    pStrSave->EndUnit(); // Materials
@@ -765,6 +791,13 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
       {
          hr = pStrLoad->BeginUnit(_T("Materials"));
 
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("RebarType"),&var);
+         m_RebarType = (matRebar::Type)(var.lVal);
+
+         hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
+         m_RebarGrade = (matRebar::Grade)(var.lVal);
+
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("Fc"),&var);
          m_Fc = var.dblVal;
@@ -861,6 +894,8 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_ColumnMeasurementType = rOther.m_ColumnMeasurementType;
    m_ColumnHeight = rOther.m_ColumnHeight;
 
+   m_RebarGrade = rOther.m_RebarGrade;
+   m_RebarType = rOther.m_RebarType;
    m_Ec = rOther.m_Ec;
    m_Fc = rOther.m_Fc;
 

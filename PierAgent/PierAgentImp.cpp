@@ -649,7 +649,6 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    {
       Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
       Ybar = Y - H + offset;
-
    }
    else if ( datum == xbrTypes::TopLowerXBeam )
    {

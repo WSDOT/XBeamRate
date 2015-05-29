@@ -45,12 +45,14 @@ class ATL_NO_VTABLE CProjectAgentImp :
    //public CComRefCountTracer<CProjectAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CProjectAgentImp, &CLSID_ProjectAgent>,
 	public IConnectionPointContainerImpl<CProjectAgentImp>,
+   public CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>,
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public CProxyIXBREventsEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
+   public IXBRProjectProperties,
    public IXBRProject,
    public IXBRRatingSpecification,
    public IXBRProjectEdit,
@@ -72,6 +74,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
+   COM_INTERFACE_ENTRY_IID(IID_IXBRProjectProperties,IXBRProjectProperties)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProject,IXBRProject)
    COM_INTERFACE_ENTRY_IID(IID_IXBRRatingSpecification,IXBRRatingSpecification)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
@@ -81,6 +84,7 @@ END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
    CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
+   CONNECTION_POINT_ENTRY( IID_IXBRProjectPropertiesEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBREventsSink )
 END_CONNECTION_POINT_MAP()
 
@@ -111,11 +115,25 @@ public:
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
 
+// IXBRProjectProperties
+public:
+   virtual LPCTSTR GetBridgeName() const;
+   virtual void SetBridgeName(LPCTSTR name);
+   virtual LPCTSTR GetBridgeID() const;
+   virtual void SetBridgeID(LPCTSTR bid);
+   virtual PierIndexType GetPierIndex();
+   virtual void SetPierIndex(PierIndexType pierIdx);
+   virtual LPCTSTR GetJobNumber() const;
+   virtual void SetJobNumber(LPCTSTR jid);
+   virtual LPCTSTR GetEngineer() const;
+   virtual void SetEngineer(LPCTSTR eng);
+   virtual LPCTSTR GetCompany() const;
+   virtual void SetCompany(LPCTSTR company);
+   virtual LPCTSTR GetComments() const;
+   virtual void SetComments(LPCTSTR comments);
+
 // IXBRProject
 public:
-   virtual void SetProjectName(LPCTSTR strName);
-   virtual LPCTSTR GetProjectName();
-
    virtual void SetPierData(const xbrPierData& pierData);
    virtual const xbrPierData& GetPierData();
 
@@ -275,7 +293,14 @@ private:
 
    CAgentCmdTarget m_CommandTarget;
 
-   std::_tstring m_strProjectName;
+   // Project Properties
+   CString m_strBridgeName;
+   CString m_strBridgeId;
+   PierIndexType m_PierIdx;
+   CString m_strJobNumber;
+   CString m_strEngineer;
+   CString m_strCompany;
+   CString m_strComments;
 
    // The raw data for this project
    xbrPierData m_PierData; // eventually this will be a vector supporting multiple piers
@@ -311,7 +336,9 @@ private:
 
    // Events
    int m_EventHoldCount;
+   Uint32 m_PendingEvents;
 
+   friend CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>;
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
 
    void CreateMenus();

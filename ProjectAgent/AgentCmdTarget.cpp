@@ -30,16 +30,16 @@ void CAgentCmdTarget::OnEditProjectName()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-   CString strOldProjectName, strNewProjectName;
-   GET_IFACE(IXBRProject,pProject);
-   strOldProjectName = pProject->GetProjectName();
+   //CString strOldProjectName, strNewProjectName;
+   //GET_IFACE(IXBRProject,pProject);
+   //strOldProjectName = pProject->GetProjectName();
 
-   if ( AfxQuestion(_T("Project Name"),_T("Enter project name"),strOldProjectName,strNewProjectName) )
-   {
-      txnEditProject txn(strOldProjectName,strNewProjectName);
-      GET_IFACE(IEAFTransactions,pTransactions);
-      pTransactions->Execute(txn);
-   }
+   //if ( AfxQuestion(_T("Project Name"),_T("Enter project name"),strOldProjectName,strNewProjectName) )
+   //{
+   //   txnEditProject txn(strOldProjectName,strNewProjectName);
+   //   GET_IFACE(IEAFTransactions,pTransactions);
+   //   pTransactions->Execute(txn);
+   //}
 }
 
 void CAgentCmdTarget::OnEditPier()

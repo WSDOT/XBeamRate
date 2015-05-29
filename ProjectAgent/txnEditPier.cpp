@@ -73,8 +73,17 @@ void txnEditPier::Execute(int i)
    GET_IFACE2(pBroker,IXBRProject,pProject);
    pProject->SetPierData(m_PierData[i].m_PierData);
 
-   //WORKING HERE... NEED TO SET DC/DW REACTIONS
-   //   NEED TO DEAL WITH CASE OF # OF REACTIONS INCREASING/DESCREASING
+   IndexType nBearingLines = m_PierData[i].m_PierData.GetBearingLineCount();
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++)
+   {
+      IndexType nBearings = m_PierData[i].m_PierData.GetBearingCount(brgLineIdx);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+      {
+         Float64 DC = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DC;
+         Float64 DW = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DW;
+         pProject->SetBearingReactions(brgLineIdx,brgIdx,DC,DW);
+      }
+   }
 
    pProject->SetDCLoadFactor(m_PierData[i].m_gDC);
    pProject->SetDWLoadFactor(m_PierData[i].m_gDW);

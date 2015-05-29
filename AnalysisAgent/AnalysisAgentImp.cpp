@@ -150,6 +150,7 @@ void CAnalysisAgentImp::Validate()
 
    // Build the frame model
    GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IXBRPier,pPier);
 
    // some dummy dimensions
    Float64 leftOverhang = pProject->GetXBeamLeftOverhang();
@@ -193,13 +194,10 @@ void CAnalysisAgentImp::Validate()
    capMbr.mbrID = xbeamMbrID-1;
    m_CapBeamMembers.push_back(capMbr);
 
-#pragma Reminder("UPDATE: BUG: This is not the correct column height")
-   // this is the raw input data... it could be the bottom elevation...
-   // use the IXBRPier interface to get the actual height
-   Float64 columnHeight = pProject->GetColumnHeight();
    Float64 columnSpacing = pProject->GetColumnSpacing();
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
+      Float64 columnHeight = pPier->GetColumnHeight(colIdx);
       Float64 space = (colIdx < nColumns-1 ? columnSpacing : rightOverhang);
 
       // create joint at bottom of column
@@ -207,10 +205,6 @@ void CAnalysisAgentImp::Validate()
       joints->Create(jntID++,Xe,-columnHeight,&joint);
 
       joint->Support(); // fully fixed
-      //if ( pProject->GetColumnBaseType(colIdx) == xbrTypes::cbtPinned )
-      //{
-      //   joint->ReleaseDof(jrtMz); // pinned
-      //}
 
       // create column member
       mbr.Release();
@@ -253,6 +247,7 @@ void CAnalysisAgentImp::Validate()
 
    ApplyDeadLoad();
 
+#if defined _DEBUG
    CComQIPtr<IStructuredStorage2> ss(m_Model);
    CComPtr<IStructuredSave2> save;
    save.CoCreateInstance(CLSID_StructuredSave2);
@@ -261,6 +256,7 @@ void CAnalysisAgentImp::Validate()
    save->Close();
    save.Release();
    ss.Release();
+#endif // _DEBUG
 }
 
 void CAnalysisAgentImp::ApplyDeadLoad()

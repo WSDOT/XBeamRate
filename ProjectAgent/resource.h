@@ -95,6 +95,8 @@
 #define IDC_LF_LEGAL_ROUTINE            269
 #define IDC_EDIT6                       270
 #define IDC_LF_PERMIT_SPECIAL           270
+#define IDC_COMBO1                      271
+#define IDC_REBAR_MATERIAL              271
 #define IDC_CONDITION_FACTOR            1260
 #define IDC_CONDITION_FACTOR_TYPE       1407
 #define IDC_X5_MEASUREMENT              1423
@@ -159,7 +161,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         271
+#define _APS_NEXT_CONTROL_VALUE         272
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

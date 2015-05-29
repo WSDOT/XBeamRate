@@ -1,12 +1,8 @@
+#include <EAF\EAFResources.h>
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by XBeamRate.rc
 //
-#define EAFID_INDICATOR_MODIFIED        1
-#define EAFID_INDICATOR_STATUS          2
-#define EAF_TOOLBAR_MENU_COUNT          40
-#define EAF_REPORT_MENU_COUNT           50
-#define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_XBEAMRATE                   102
 #define IDD_PROPPAGE_MEDIUM             106
@@ -18,11 +14,8 @@
 #define IDR_GRAPHING                    139
 #define IDI_ICON                        205
 #define IDR_TOOLBAR1                    206
-#define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
-#define EAFID_UNITS_SI                  32772
 #define ID_FILE_SAFE                    32772
-#define EAFID_UNITS_US                  32773
 #define ID_VIEW_REPORTS                 32773
 #define ID_REPORTS_THISISAPLACEHOLDER   32774
 #define ID_VIEW_GRAPHS                  32775

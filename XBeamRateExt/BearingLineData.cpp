@@ -80,7 +80,7 @@ void xbrBearingLineData::SetBearingCount(IndexType nBearings)
          // remove spacing
          std::vector<Float64>::iterator spaBegin = m_vSpacing.begin();
          std::vector<Float64>::iterator spaEnd   = m_vSpacing.end();
-         spaBegin += nBearings;
+         spaBegin += (nBearings-1);
          m_vSpacing.erase(spaBegin,spaEnd);
       }
       else

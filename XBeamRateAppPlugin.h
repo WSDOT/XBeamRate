@@ -4,7 +4,9 @@
 #define __PLUGIN_H_
 
 #include "resource.h"       // main symbols
+#include "XBeamRatePlugin_i.h"
 #include <EAF\EAFAppPlugIn.h>
+#include <WBFLUnitServer.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
@@ -23,6 +25,8 @@ public:
 
    LPCTSTR GetAppName() { return _T("XBeamRate"); }
 
+   void GetAppUnitSystem(IAppUnitSystem** ppAppUnitSystem);
+
 DECLARE_REGISTRY_RESOURCEID(IDR_XBEAMRATEAPP)
 
 DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -40,6 +44,9 @@ public:
    virtual HMENU GetSharedMenuHandle();
    virtual UINT GetDocumentResourceID();
    virtual CString GetName();
+
+private:
+   CComPtr<IAppUnitSystem> m_AppUnitSystem;
 };
 
 #endif //__PLUGIN_H_

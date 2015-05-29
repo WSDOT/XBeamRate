@@ -11,17 +11,28 @@
 #include "XBeamRateView.h"
 #include "XBeamRateChildFrame.h"
 
+#include <EAF\EAFUnits.h>
 #include <MFCTools\AutoRegistry.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
 HRESULT CXBeamRateAppPlugin::FinalConstruct()
 {
+   if ( !EAFCreateAppUnitSystem(&m_AppUnitSystem) )
+   {
+      return E_FAIL;
+   }
+
    return S_OK;
 }
 
 void CXBeamRateAppPlugin::FinalRelease()
 {
+}
+
+void CXBeamRateAppPlugin::GetAppUnitSystem(IAppUnitSystem** ppAppUnitSystem)
+{
+   m_AppUnitSystem.CopyTo(ppAppUnitSystem);
 }
 
 BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)

@@ -1,3 +1,41 @@
+#define EVT_PROJECTPROPERTIES    0x0001
+#define EVT_PROJECT              0x0002
+
+//////////////////////////////////////////////////////////////////////////////
+// CProxyIXBRProjectPropertiesEventSink
+template <class T>
+class CProxyIXBRProjectPropertiesEventSink : public IConnectionPointImpl<T, &IID_IXBRProjectPropertiesEventSink, CComDynamicUnkArray>
+{
+public:
+
+//IXBRProjectPropertiesEventSink : IUnknown
+public:
+	HRESULT Fire_OnProjectPropertiesChanged()
+	{
+		T* pT = (T*)this;
+
+      if ( 0 < pT->m_EventHoldCount )
+      {
+         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECTPROPERTIES);
+         return S_OK;
+      }
+
+      pT->Lock();
+		HRESULT ret = S_OK;
+		IUnknown** pp = m_vec.begin();
+		while (pp < m_vec.end())
+		{
+			if (*pp != NULL)
+			{
+				IXBRProjectPropertiesEventSink* pEventSink = reinterpret_cast<IXBRProjectPropertiesEventSink*>(*pp);
+				ret = pEventSink->OnProjectPropertiesChanged();
+			}
+			pp++;
+		}
+		pT->Unlock();
+		return ret;
+	}
+};
 
 //////////////////////////////////////////////////////////////////////////////
 // CProxyIXBRProjectEventSink
@@ -14,6 +52,7 @@ public:
 
       if ( 0 < pT->m_EventHoldCount )
       {
+         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECT);
          return S_OK;
       }
 

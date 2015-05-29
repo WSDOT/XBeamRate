@@ -286,6 +286,16 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
    pStrSave->BeginUnit(_T("ProjectData"),1.0);
 
+   pStrSave->BeginUnit(_T("ProjectProperties"),1.0);
+      pStrSave->put_Property(_T("BridgeName"), CComVariant(m_strBridgeName));
+      pStrSave->put_Property(_T("BridgeId"),CComVariant(m_strBridgeId));
+      pStrSave->put_Property(_T("Pier"),CComVariant(m_PierIdx));
+      pStrSave->put_Property(_T("JobNumber"),CComVariant(m_strJobNumber));
+      pStrSave->put_Property(_T("Engineer"),CComVariant(m_strEngineer));
+      pStrSave->put_Property(_T("Company"),CComVariant(m_strCompany));
+      pStrSave->put_Property(_T("Comments"),CComVariant(m_strComments));
+   pStrSave->EndUnit(); // ProjectProperties
+
    // Need to save stuff like units and project properties,system factors
    // Also, need to save/load this data per pier
    // when this is a PGSuper/PGSplice extension, there can be many piers
@@ -400,6 +410,37 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    try
    {
       hr = pStrLoad->BeginUnit(_T("ProjectData"));
+
+      {
+         hr = pStrLoad->BeginUnit(_T("ProjectProperties"));
+         var.vt = VT_BSTR;
+         hr = pStrLoad->get_Property(_T("BridgeName"), &var);
+         m_strBridgeName = OLE2T(var.bstrVal);
+
+         hr = pStrLoad->get_Property(_T("BridgeId"),&var);
+         m_strBridgeId = OLE2T(var.bstrVal);
+
+         var.vt = VT_INDEX;
+         hr = pStrLoad->get_Property(_T("Pier"),&var);
+         m_PierIdx = VARIANT2INDEX(var);
+
+         var.vt = VT_BSTR;
+         hr = pStrLoad->get_Property(_T("JobNumber"),&var);
+         m_strJobNumber = OLE2T(var.bstrVal);
+
+         hr = pStrLoad->get_Property(_T("Engineer"),&var);
+         m_strEngineer = OLE2T(var.bstrVal);
+
+         hr = pStrLoad->get_Property(_T("Company"),&var);
+         m_strCompany = OLE2T(var.bstrVal);
+
+         hr = pStrLoad->get_Property(_T("Comments"),&var);
+         m_strComments = OLE2T(var.bstrVal);
+
+         hr = pStrLoad->EndUnit(); // ProjectProperties
+      }
+
+
       hr = m_PierData.Load(pStrLoad);
       {
          hr = pStrLoad->BeginUnit(_T("LoadFactors"));
@@ -653,21 +694,106 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 }
 
 //////////////////////////////////////////////////////////////////////
+// IXBRProjectProperties
+LPCTSTR CProjectAgentImp::GetBridgeName() const
+{
+   return m_strBridgeName;
+}
+
+void CProjectAgentImp::SetBridgeName(LPCTSTR name)
+{
+   m_strBridgeName = name;
+   Fire_OnProjectPropertiesChanged();
+}
+
+LPCTSTR CProjectAgentImp::GetBridgeID() const
+{
+   return m_strBridgeId;
+}
+
+void CProjectAgentImp::SetBridgeID(LPCTSTR bid)
+{
+   m_strBridgeId = bid;
+   Fire_OnProjectPropertiesChanged();
+}
+
+PierIndexType CProjectAgentImp::GetPierIndex()
+{
+   return m_PierIdx;
+}
+
+void CProjectAgentImp::SetPierIndex(PierIndexType pierIdx)
+{
+   m_PierIdx = pierIdx;
+   Fire_OnProjectPropertiesChanged();
+}
+
+LPCTSTR CProjectAgentImp::GetJobNumber() const
+{
+   return m_strJobNumber;
+}
+
+void CProjectAgentImp::SetJobNumber(LPCTSTR jid)
+{
+   m_strJobNumber = jid;
+   Fire_OnProjectPropertiesChanged();
+}
+
+LPCTSTR CProjectAgentImp::GetEngineer() const
+{
+   return m_strEngineer;
+}
+
+void CProjectAgentImp::SetEngineer(LPCTSTR eng)
+{
+   m_strEngineer = eng;
+   Fire_OnProjectPropertiesChanged();
+}
+
+LPCTSTR CProjectAgentImp::GetCompany() const
+{
+   return m_strCompany;
+}
+
+void CProjectAgentImp::SetCompany(LPCTSTR company)
+{
+   m_strCompany = company;
+   Fire_OnProjectPropertiesChanged();
+}
+
+LPCTSTR CProjectAgentImp::GetComments() const
+{
+   return m_strComments;
+}
+
+void CProjectAgentImp::SetComments(LPCTSTR comments)
+{
+   m_strComments = comments;
+   Fire_OnProjectPropertiesChanged();
+}
+
+//////////////////////////////////////////////////////////////////////
 // IXBRProject
-void CProjectAgentImp::SetProjectName(LPCTSTR strName)
-{
-   m_strProjectName = strName;
-   Fire_OnProjectChanged();
-}
-
-LPCTSTR CProjectAgentImp::GetProjectName()
-{
-   return m_strProjectName.c_str();
-}
-
 void CProjectAgentImp::SetPierData(const xbrPierData& pierData)
 {
    m_PierData = pierData;
+
+   // Resize the dead load reaction containers to match the number of bearings
+   IndexType nBearingLines = m_PierData.GetBearingLineCount();
+   if ( m_vvBearingReactions.size() != nBearingLines )
+   {
+      m_vvBearingReactions.resize(nBearingLines);
+   }
+
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+   {
+      IndexType nBearings = m_PierData.GetBearingCount(brgLineIdx);
+      if ( m_vvBearingReactions[brgLineIdx].size() != nBearings )
+      {
+         m_vvBearingReactions[brgLineIdx].resize(nBearings);
+      }
+   }
+
    Fire_OnProjectChanged();
 }
 
@@ -1129,8 +1255,20 @@ void CProjectAgentImp::FirePendingEvents()
    if ( m_EventHoldCount == 1 )
    {
       m_EventHoldCount--;
-      Fire_OnProjectChanged(); // fire our event
-	   Fire_OnFirePendingEvents(); // tell event listeners that it is time to fire their events
+
+      // Fire our events
+	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECTPROPERTIES) )
+      {
+	      Fire_OnProjectPropertiesChanged();
+      }
+
+	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
+      {
+	      Fire_OnProjectChanged();
+      }
+
+      // tell event listeners that it is time to fire their events
+      Fire_OnFirePendingEvents(); 
    }
    else
    {
