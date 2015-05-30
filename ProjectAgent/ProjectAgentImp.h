@@ -181,6 +181,8 @@ public:
    virtual void SetLiveLoadReactions(pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LoadRatingType ratingType);
 
+   virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade);
+   virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade);
    virtual void SetModE(Float64 Ec);
    virtual Float64 GetModE();
    virtual void SetFc(Float64 fc);

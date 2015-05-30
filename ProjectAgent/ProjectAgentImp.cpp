@@ -988,6 +988,17 @@ std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReact
    return vReactions;
 }
 
+void CProjectAgentImp::SetRebarMaterial(matRebar::Type type,matRebar::Grade grade)
+{
+   m_PierData.SetRebarMaterial(type,grade);
+   Fire_OnProjectChanged();
+}
+
+void CProjectAgentImp::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade)
+{
+   m_PierData.GetRebarMaterial(pType,pGrade);
+}
+
 void CProjectAgentImp::SetModE(Float64 Ec)
 {
    m_PierData.SetEc(Ec);

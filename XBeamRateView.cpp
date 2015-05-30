@@ -517,6 +517,8 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    CComPtr<IBroker> pBroker;
    pDoc->GetBroker(&pBroker);
 
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
    Float64 X = pProject->GetXBeamLength();
 
@@ -537,11 +539,18 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
       doRebar->Commit();
       displayList->AddDisplayObject(doRebar);
 
+      Float64 Ytop = pPier->GetElevation(X);
+
       IndexType nBars = pRebar->GetRebarCount(rowIdx);
       for ( IndexType barIdx = 0; barIdx < nBars; barIdx++ )
       {
          CComPtr<IPoint2d> pntBar;
          pRebar->GetRebarLocation(X,rowIdx,barIdx,&pntBar);
+
+         Float64 Ybar;
+         pntBar->get_Y(&Ybar);
+         Float64 Y = Ytop - Ybar;
+         pntBar->put_Y(Y);
 
          pntBar->Offset(1.2*X,0);
 

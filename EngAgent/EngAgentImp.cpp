@@ -237,7 +237,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(const xb
    IndexType nRows = pRebar->GetRebarRowCount();
    for ( IndexType rowIdx = 0; rowIdx < nRows; rowIdx++ )
    {
-      Float64 Ybar = -pRebar->GetRebarRowLocation(poi.GetDistFromStart(),rowIdx);
+      Float64 Ybar = pRebar->GetRebarRowLocation(poi.GetDistFromStart(),rowIdx);
       if ( !bPositiveMoment )
       {
          Ybar = h - Ybar;
@@ -253,8 +253,9 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(const xb
       pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
       lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
-      matRebar::Type barType = matRebar::A615;
-      matRebar::Grade barGrade = matRebar::Grade60;
+      matRebar::Type barType;
+      matRebar::Grade barGrade;
+      pProject->GetRebarMaterial(&barType,&barGrade);
       const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
 
       Float64 as = pRebar->GetNominalArea();

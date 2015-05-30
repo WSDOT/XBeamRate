@@ -58,6 +58,8 @@ interface IXBRRebar : public IUnknown
    virtual IndexType GetRebarRowCount() = 0;
    virtual IndexType GetRebarCount(IndexType rowIdx) = 0;
    virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints) = 0;
+
+   // Returns the depth to a rebar row, measured from the top of the cross beam
    virtual Float64 GetRebarRowLocation(Float64 X,IndexType rowIdx) = 0;
    virtual void GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
 };

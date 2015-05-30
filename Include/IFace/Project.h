@@ -126,7 +126,9 @@ interface IXBRProject : IUnknown
    virtual void SetLiveLoadReactions(pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LoadRatingType ratingType) = 0;
 
-   // Material properties of the sub-structure concrete
+   // Material properties
+   virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade) = 0;
+   virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) = 0;
    virtual void SetModE(Float64 Ec) = 0;
    virtual Float64 GetModE() = 0;
    virtual void SetFc(Float64 fc) = 0;

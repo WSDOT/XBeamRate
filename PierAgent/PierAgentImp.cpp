@@ -197,9 +197,9 @@ Float64 CPierAgentImp::GetColumnHeight(IndexType colIdx)
    CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType();
    if ( heightType == CColumnData::chtBottomElevation )
    {
-#pragma Reminder("IMPLEMENT: compute column height from elevation")
-      // Also need methods to get top and bottom column elevations
-      ATLASSERT(false); // not implemented yet... need to compute height based on bottom elevation
+      Float64 elevBot = h;
+      Float64 elevTop = GetTopColumnElevation(colIdx);
+      h = elevTop - elevBot;
    }
 
    return h;
@@ -627,8 +627,6 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
 
 Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
 {
-   Float64 Y = GetElevation(X);
-
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
    matRebar::Size barSize;
@@ -638,8 +636,9 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
-   matRebar::Type barType = matRebar::A615;
-   matRebar::Grade barGrade = matRebar::Grade60;
+   matRebar::Type barType;
+   matRebar::Grade barGrade;
+   pProject->GetRebarMaterial(&barType,&barGrade);
    const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
    Float64 db = pRebar->GetNominalDimension();
 
@@ -648,17 +647,17 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    if ( datum == xbrTypes::Bottom )
    {
       Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
-      Ybar = Y - H + offset;
+      Ybar = H - offset;
    }
    else if ( datum == xbrTypes::TopLowerXBeam )
    {
       Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
       Float64 Hlower = GetDepth(xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,X));
-      Ybar = Y - H + Hlower - offset;
+      Ybar = H - Hlower + offset;
    }
    else 
    {
-      Ybar = Y - offset;
+      Ybar = offset;
    }
 
    return Ybar;
