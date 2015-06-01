@@ -32,6 +32,8 @@
 
 #include <Units\SysUnits.h>
 
+#include "LoadRater.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -70,7 +72,9 @@ STDMETHODIMP CEngAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface( IID_IXBRLoadRating,    this );
+   pBrokerInit->RegInterface( IID_IXBRMomentCapacity, this );
+   pBrokerInit->RegInterface( IID_IXBRShearCapacity,  this );
+   pBrokerInit->RegInterface( IID_IXBRArtifact,       this );
 
    return S_OK;
 };
@@ -130,15 +134,16 @@ STDMETHODIMP CEngAgentImp::ShutDown()
    return S_OK;
 }
 
-
 //////////////////////////////////////////////////////////////////////
-// IXBRLoadRating
+// IXBRMomentCapacity
 Float64 CEngAgentImp::GetMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    MomentCapacityDetails capacityDetails = GetMomentCapacityDetails(poi,bPositiveMoment);
    return capacityDetails.Mr;
 }
 
+//////////////////////////////////////////////////////////////////////
+// IXBRShearCapacity
 Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
 {
    // LRFD 5.8.3.4.1
@@ -146,14 +151,23 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
    Float64 theta = M_PI/4; // 45 deg
 
    GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IXBRSectionProperties,pSectProps);
 
    // LRFD 5.8.2.9
    // dv = Distance between C and T, but not less than Max(0.9de and 0.72h)
-#pragma Reminder("WORKING HERE: Need to finish shear capacity")
+   Float64 h = pSectProps->GetDepth(xbrTypes::Stage2,poi);
+   MomentCapacityDetails posCapacityDetails = GetMomentCapacityDetails(poi,true);
+   MomentCapacityDetails negCapacityDetails = GetMomentCapacityDetails(poi,false);
+   Float64 posMomentArm = posCapacityDetails.de - posCapacityDetails.dc;
+   Float64 posDv = Max(posMomentArm,0.9*posCapacityDetails.de,0.72*h);
+   Float64 negMomentArm = negCapacityDetails.de - negCapacityDetails.dc;
+   Float64 negDv = Max(negMomentArm,0.9*negCapacityDetails.de,0.72*h);
+
+#pragma Reminder("WORKING HERE: Need to finish shear capacity- need stirrup information")
    Float64 fc = pProject->GetConcrete().Fc;
    Float64 fy = 0;
    Float64 bv = pProject->GetXBeamWidth();
-   Float64 dv = 0;
+   Float64 dv = Min(posDv,negDv);
    Float64 Av = 0;
    Float64 s = 1;
    Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
@@ -167,21 +181,25 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
    return Min(Vn1,Vn2);
 }
 
-Float64 CEngAgentImp::GetRatingFactor()
+//////////////////////////////////////////////////////////////////////
+// IXBRArtifactCapacity
+const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
 {
-   GET_IFACE(IXBRProject,pProject);
-   Float64 conditionFactor = pProject->GetConditionFactor();
+   std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = m_RatingArtifacts[ratingType].find(vehicleIndex);
+   if ( found == m_RatingArtifacts[ratingType].end() )
+   {
+      CreateRatingArtifact(ratingType,vehicleIndex);
+      found = m_RatingArtifacts[ratingType].find(vehicleIndex);
+   }
 
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   Float64 sysFactorMoment = pRatingSpec->GetSystemFactorFlexure();
-   Float64 sysFactorShear  = pRatingSpec->GetSystemFactorShear();
-
-   //conditionFactor*sysFactor >= 0.85 // MBE Eqn 6A.4.2.1-3
-
-   // THERE IS ENOUGH BASIC INFORMATION TO COMPUTE RATING FACTORS!!!
-   // DO IT NEXT
-   
-   return 1.2;
+   if ( found == m_RatingArtifacts[ratingType].end() )
+   {
+      return NULL;
+   }
+   else
+   {
+      return &(found->second);
+   }
 }
 
 //////////////////////////////////////////////////
@@ -291,13 +309,35 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(const xb
    Float64 phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
    phi = ::ForceIntoRange(0.75,phi,0.9);
 
+   Float64 Cweb, Cflange, Yweb, Yflange;
+   solution->get_Cweb(&Cweb);
+   solution->get_Cflange(&Cflange);
+   solution->get_Yweb(&Yweb);
+   solution->get_Yflange(&Yflange);
+   Float64 dc = (Cweb*Yweb + Cflange*Yflange)/(Cweb + Cflange);
+
+   Float64 T;
+   solution->get_T(&T);
+   Float64 MomentArm = fabs(Mn/T);
+   Float64 de = dc + MomentArm;
+
    MomentCapacityDetails capacityDetails;
    capacityDetails.rcBeam = rcBeam;
    capacityDetails.solution = solution;
+   capacityDetails.dc = dc;
+   capacityDetails.de = de;
    capacityDetails.dt = dt;
    capacityDetails.phi = phi;
    capacityDetails.Mn = Mn;
    capacityDetails.Mr = phi*Mn;
 
    return capacityDetails;
+}
+
+void CEngAgentImp::CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
+{
+   xbrLoadRater loadRater(m_pBroker);
+   xbrRatingArtifact artifact = loadRater.RateXBeam(ratingType,vehicleIndex);
+   std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIndex,artifact));
+   ATLASSERT(result.second == true);
 }

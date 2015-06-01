@@ -613,6 +613,32 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbr
    return V;
 }
 
+std::vector<Float64> CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<Float64> vM;
+   vM.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 m = GetMoment(pfType,poi);
+      vM.push_back(m);
+   }
+
+   return vM;
+}
+
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<sysSectionValue> vV;
+   vV.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue v = GetShear(pfType,poi);
+      vV.push_back(v);
+   }
+
+   return vV;
+}
+
 Float64 CAnalysisAgentImp::GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
 {
    std::vector<XBRProductForceType> vPFTypes = GetLoads(lcType);
@@ -639,6 +665,30 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const xb
    return V;
 }
 
+std::vector<Float64> CAnalysisAgentImp::GetMoment(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<Float64> vM;
+   vM.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 m = GetMoment(lcType,poi);
+      vM.push_back(m);
+   }
+   return vM;
+}
+
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<sysSectionValue> vV;
+   vV.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue v = GetShear(lcType,poi);
+      vV.push_back(v);
+   }
+   return vV;
+}
+
 void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
    *pMin = 0;
@@ -651,6 +701,36 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleInde
    *pMax = 0;
 }
 
+void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 min,max;
+      GetMoment(ratingType,vehIdx,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
+}
+
+void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue min,max;
+      GetShear(ratingType,vehIdx,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
+}
+
 void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
    *pMin = 0;
@@ -661,6 +741,36 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const xbrPo
 {
    *pMin = 0;
    *pMax = 0;
+}
+
+void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 min,max;
+      GetMoment(ratingType,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
+}
+
+void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue min,max;
+      GetShear(ratingType,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
 }
 
 void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
@@ -725,6 +835,36 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const xbrPointO
 
    *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
+}
+
+void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 min,max;
+      GetMoment(limitState,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
+}
+
+void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+{
+   pvMin->clear();
+   pvMin->reserve(vPoi.size());
+   pvMax->clear();
+   pvMax->reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue min,max;
+      GetShear(limitState,poi,&min,&max);
+      pvMin->push_back(min);
+      pvMax->push_back(max);
+   }
 }
 
 std::vector<XBRProductForceType> CAnalysisAgentImp::GetLoads(XBRCombinedForceType lcType)

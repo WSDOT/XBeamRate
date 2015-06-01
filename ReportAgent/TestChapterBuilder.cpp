@@ -170,7 +170,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    (*pTable)(0,2) << COLHDR(_T("+Mn"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
    (*pTable)(0,3) << COLHDR(_T("-Mn"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
 
-   GET_IFACE2(pBroker,IXBRLoadRating,pLoadRating);
+   GET_IFACE2(pBroker,IXBRMomentCapacity,pLoadRating);
    row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {

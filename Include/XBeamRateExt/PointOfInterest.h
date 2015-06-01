@@ -13,7 +13,7 @@ class XBREXTCLASS xbrPointOfInterest
 {
 public:
    xbrPointOfInterest(PoiIDType id,ColumnIndexType colIdx,Float64 Xpoi,PoiAttributeType attribute=0);
-   xbrPointOfInterest(PoiIDType id,Float64 Xpoi,PoiAttributeType attribute=0);
+   xbrPointOfInterest(PoiIDType id=INVALID_ID,Float64 Xpoi=0,PoiAttributeType attribute=0);
 
    bool operator==(const xbrPointOfInterest& other) const;
    bool operator<(const xbrPointOfInterest& other) const;

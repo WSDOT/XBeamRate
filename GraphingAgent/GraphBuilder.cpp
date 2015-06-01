@@ -453,7 +453,8 @@ void CXBRGraphBuilder::BuildCapacityGraph(const std::vector<xbrPointOfInterest>&
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IXBRLoadRating,pCapacity);
+   GET_IFACE2_NOCHECK(pBroker,IXBRMomentCapacity,pMomentCapacity);
+   GET_IFACE2_NOCHECK(pBroker,IXBRShearCapacity,pShearCapacity);
 
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
@@ -462,19 +463,19 @@ void CXBRGraphBuilder::BuildCapacityGraph(const std::vector<xbrPointOfInterest>&
 
       if ( actionType == actionMoment )
       {
-         Float64 Mz = pCapacity->GetMomentCapacity(poi,true);
+         Float64 Mz = pMomentCapacity->GetMomentCapacity(poi,true);
          Mz = pVerticalAxisFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
          graph.AddPoint(positiveGraphIdx,point);
 
-         Mz = pCapacity->GetMomentCapacity(poi,false);
+         Mz = pMomentCapacity->GetMomentCapacity(poi,false);
          Mz = pVerticalAxisFormat->Convert(Mz);
          point.Y() = Mz;
          graph.AddPoint(negativeGraphIdx,point);
       }
       else
       {
-         Float64 V = pCapacity->GetShearCapacity(poi);
+         Float64 V = pShearCapacity->GetShearCapacity(poi);
          graph.AddPoint(positiveGraphIdx,gpPoint2d(X,V));
          graph.AddPoint(negativeGraphIdx,gpPoint2d(X,-V));
       }

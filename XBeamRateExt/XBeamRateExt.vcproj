@@ -558,11 +558,23 @@
 				>
 			</File>
 			<File
+				RelativePath=".\MomentRatingArtifact.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierData.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\PointOfInterest.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RatingArtifact.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ShearRatingArtifact.cpp"
 				>
 			</File>
 			<File
@@ -640,11 +652,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\XBeamRateExt\MomentRatingArtifact.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\XBeamRateExt\PierData.h"
 				>
 			</File>
 			<File
 				RelativePath="..\Include\XBeamRateExt\PointOfInterest.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\RatingArtifact.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\ShearRatingArtifact.h"
 				>
 			</File>
 			<File

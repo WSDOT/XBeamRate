@@ -43,7 +43,9 @@ class ATL_NO_VTABLE CEngAgentImp :
    //public CComRefCountTracer<CEngAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
 	public CComCoClass<CEngAgentImp, &CLSID_EngAgent>,
    public IAgentEx,
-   public IXBRLoadRating,
+   public IXBRMomentCapacity,
+   public IXBRShearCapacity,
+   public IXBRArtifact,
    public IXBRProjectEventSink
 {  
 public:
@@ -60,7 +62,9 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ENGAGENT)
 BEGIN_COM_MAP(CEngAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
-	COM_INTERFACE_ENTRY(IXBRLoadRating)
+	COM_INTERFACE_ENTRY(IXBRMomentCapacity)
+	COM_INTERFACE_ENTRY(IXBRShearCapacity)
+   COM_INTERFACE_ENTRY(IXBRArtifact)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
@@ -79,11 +83,17 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
-// IXBRLoadRating
+// IXBRMomentCapacity
 public:
    virtual Float64 GetMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
+
+// IXBRShearCapacity
+public:
    virtual Float64 GetShearCapacity(const xbrPointOfInterest& poi);
-   virtual Float64 GetRatingFactor();
+
+// IXBRArtifact
+public:
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
 
 // IXBRProjectEventSink
 public:
@@ -99,6 +109,8 @@ private:
       CComPtr<IRCBeam2> rcBeam;
       CComPtr<IRCSolutionEx> solution;
       Float64 dt; // distance from compression face to extreme tensile reinforcement
+      Float64 de; // distance from compression face to resultant tensile force
+      Float64 dc; // distance from compression face to resultant compression force
       Float64 phi; // capacity reduction factor
       Float64 Mn; // nominal capacity
       Float64 Mr; // nominal resistance (phi*Mn)
@@ -109,6 +121,10 @@ private:
 
    MomentCapacityDetails GetMomentCapacityDetails(const xbrPointOfInterest& poi,bool bPositiveMoment);
    MomentCapacityDetails ComputeMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
+
+
+   std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key
+   void CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)
