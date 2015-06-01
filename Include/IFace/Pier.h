@@ -38,6 +38,9 @@ interface IXBRSectionProperties : public IUnknown
 {
    virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+
    virtual void GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape) = 0;
    virtual void GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape) = 0;
 };
@@ -48,6 +51,8 @@ DEFINE_GUID(IID_IXBRMaterial,
 interface IXBRMaterial : public IUnknown
 {
    virtual Float64 GetXBeamDensity() = 0;
+   virtual Float64 GetXBeamEc() = 0;
+   virtual Float64 GetColumnEc(IndexType colIdx) = 0;
 };
 
 // {80B9F943-F0BF-4c4b-BCE9-70BBB3A55188}

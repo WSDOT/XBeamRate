@@ -149,10 +149,10 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
 
    // LRFD 5.8.2.9
    // dv = Distance between C and T, but not less than Max(0.9de and 0.72h)
-
-   Float64 fc = pProject->GetFc();
+#pragma Reminder("WORKING HERE: Need to finish shear capacity")
+   Float64 fc = pProject->GetConcrete().Fc;
    Float64 fy = 0;
-   Float64 bv = pProject->GetXBeamWidth();;
+   Float64 bv = pProject->GetXBeamWidth();
    Float64 dv = 0;
    Float64 Av = 0;
    Float64 s = 1;
@@ -227,9 +227,9 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(const xb
    rcBeam->put_b(w);
    rcBeam->put_bw(w);
 
-   Float64 fc = pProject->GetFc();
-   rcBeam->put_FcSlab(fc);
-   rcBeam->put_FcBeam(fc);
+   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   rcBeam->put_FcSlab(concrete.Fc);
+   rcBeam->put_FcBeam(concrete.Fc);
 
    Float64 dt = 0; // location of the extreme tension steel
 

@@ -46,8 +46,6 @@ xbrPierData::xbrPierData()
    // Materials
    m_RebarType = matRebar::A615;
    m_RebarGrade = matRebar::Grade60;
-   m_Ec = ::ConvertToSysUnits(5,unitMeasure::KSI);
-   m_Fc = ::ConvertToSysUnits(4,unitMeasure::KSI);
 
    // Rebar
    xbrLongitudinalRebarData::RebarRow row;
@@ -456,34 +454,19 @@ matRebar::Grade& xbrPierData::GetRebarGrade()
    return m_RebarGrade;
 }
 
-void xbrPierData::SetEc(Float64 ec)
+void xbrPierData::SetConcreteMaterial(const xbrConcreteMaterial& concrete)
 {
-   m_Ec = ec;
+   m_Concrete = concrete;
 }
 
-Float64 xbrPierData::GetEc() const
+xbrConcreteMaterial& xbrPierData::GetConcreteMaterial()
 {
-   return m_Ec;
+   return m_Concrete;
 }
 
-Float64& xbrPierData::GetEc()
+const xbrConcreteMaterial& xbrPierData::GetConcreteMaterial() const
 {
-   return m_Ec;
-}
-
-void xbrPierData::SetFc(Float64 fc)
-{
-   m_Fc = fc;
-}
-
-Float64 xbrPierData::GetFc() const
-{
-   return m_Fc;
-}
-
-Float64& xbrPierData::GetFc()
-{
-   return m_Fc;
+   return m_Concrete;
 }
 
 void xbrPierData::SetLongitudinalRebar(const xbrLongitudinalRebarData& rebarData)
@@ -606,14 +589,11 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
       pStrSave->put_Property(_T("Height"),CComVariant(m_ColumnHeight));
    pStrSave->EndUnit(); // Columns
 
-   pStrSave->BeginUnit(_T("Materials"),1.0);
-      pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
-      pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
-      pStrSave->put_Property(_T("Fc"),CComVariant(m_Fc));
-      pStrSave->put_Property(_T("Ec"),CComVariant(m_Ec));
-   pStrSave->EndUnit(); // Materials
+   m_Concrete.Save(pStrSave);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
+      pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
+      pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
       m_LongitudinalRebar.Save(pStrSave,NULL);
       //m_TransverseRebar.Save(pStrSave,NULL);
    pStrSave->EndUnit(); // Reinforcement
@@ -794,7 +774,11 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
       }
 
       {
-         hr = pStrLoad->BeginUnit(_T("Materials"));
+         hr = m_Concrete.Load(pStrLoad);
+      }
+
+      {
+         hr = pStrLoad->BeginUnit(_T("Reinforcement"));
 
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("RebarType"),&var);
@@ -803,19 +787,6 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
          hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
          m_RebarGrade = (matRebar::Grade)(var.lVal);
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("Fc"),&var);
-         m_Fc = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("Ec"),&var);
-         m_Ec = var.dblVal;
-
-         hr = pStrLoad->EndUnit(); // Materials
-      }
-
-      {
-         hr = pStrLoad->BeginUnit(_T("Reinforcement"));
          hr = m_LongitudinalRebar.Load(pStrLoad,NULL);
          //hr = m_TransverseRebar.Load(pStrLoad,NULL);
          hr = pStrLoad->EndUnit(); // Reinforcement
@@ -901,8 +872,8 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
 
    m_RebarGrade = rOther.m_RebarGrade;
    m_RebarType = rOther.m_RebarType;
-   m_Ec = rOther.m_Ec;
-   m_Fc = rOther.m_Fc;
+
+   m_Concrete = rOther.m_Concrete;
 
    m_ConditionFactorType = rOther.m_ConditionFactorType;
    m_ConditionFactor = rOther.m_ConditionFactor;

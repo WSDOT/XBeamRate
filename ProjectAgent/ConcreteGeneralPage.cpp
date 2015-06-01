@@ -46,37 +46,40 @@ void CConcreteGeneralPage::DoDataExchange(CDataExchange* pDX)
 	   DDX_Control(pDX, IDC_DS_TITLE, m_ctrlStrengthDensityTitle);
 	   //}}AFX_DATA_MAP
 
-      DDX_CBItemData(pDX, IDC_CONCRETE_TYPE, m_Type);
+      CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
 
 	   DDX_Control(pDX, IDC_EC,      m_ctrlEc);
 	   DDX_Control(pDX, IDC_MOD_E,   m_ctrlEcCheck);
 	   DDX_Control(pDX, IDC_FC,      m_ctrlFc);
 	   DDX_Control(pDX, IDC_DS,      m_ctrlStrengthDensity);
 
-      GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-      CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
-      DDX_UnitValueAndTag(pDX, IDC_FC, IDC_FC_UNIT, pParent->m_fc28, pDisplayUnits->GetStressUnit() );
-      DDV_UnitValueGreaterThanZero(pDX,IDC_FC, pParent->m_fc28, pDisplayUnits->GetStressUnit() );
+      DDX_CBItemData(pDX, IDC_CONCRETE_TYPE, pParent->Concrete.Type);
 
-      DDX_Check_Bool(pDX, IDC_MOD_E, pParent->m_bUserEc28);
-      if (pParent->m_bUserEc28 || !pDX->m_bSaveAndValidate)
+      DDX_UnitValueAndTag(pDX, IDC_FC, IDC_FC_UNIT, pParent->Concrete.Fc, pDisplayUnits->GetStressUnit() );
+      DDV_UnitValueGreaterThanZero(pDX,IDC_FC, pParent->Concrete.Fc, pDisplayUnits->GetStressUnit() );
+
+      DDX_Check_Bool(pDX, IDC_MOD_E, pParent->Concrete.bUserEc);
+      if (pParent->Concrete.bUserEc || !pDX->m_bSaveAndValidate)
       {
-         DDX_UnitValueAndTag(pDX, IDC_EC, IDC_EC_UNIT, pParent->m_Ec28, pDisplayUnits->GetModEUnit() );
-         DDV_UnitValueGreaterThanZero(pDX, IDC_EC, pParent->m_Ec28, pDisplayUnits->GetModEUnit() );
+         DDX_UnitValueAndTag(pDX, IDC_EC, IDC_EC_UNIT, pParent->Concrete.Ec, pDisplayUnits->GetModEUnit() );
+         DDV_UnitValueGreaterThanZero(pDX, IDC_EC, pParent->Concrete.Ec, pDisplayUnits->GetModEUnit() );
       }
 
-      DDX_UnitValueAndTag(pDX, IDC_DS, IDC_DS_UNIT, m_Ds, pDisplayUnits->GetDensityUnit() );
-      DDV_UnitValueGreaterThanZero(pDX, IDC_DS, m_Ds, pDisplayUnits->GetDensityUnit() );
+      DDX_UnitValueAndTag(pDX, IDC_DS, IDC_DS_UNIT, pParent->Concrete.StrengthDensity, pDisplayUnits->GetDensityUnit() );
+      DDV_UnitValueGreaterThanZero(pDX, IDC_DS, pParent->Concrete.StrengthDensity, pDisplayUnits->GetDensityUnit() );
 
-      DDX_UnitValueAndTag(pDX, IDC_DW, IDC_DW_UNIT, m_Dw, pDisplayUnits->GetDensityUnit() );
-      DDV_UnitValueGreaterThanZero(pDX, IDC_DW, m_Dw, pDisplayUnits->GetDensityUnit() );
+      DDX_UnitValueAndTag(pDX, IDC_DW, IDC_DW_UNIT, pParent->Concrete.WeightDensity, pDisplayUnits->GetDensityUnit() );
+      DDV_UnitValueGreaterThanZero(pDX, IDC_DW, pParent->Concrete.WeightDensity, pDisplayUnits->GetDensityUnit() );
 
       // Ds <= Dw
-      DDV_UnitValueLimitOrMore(pDX, IDC_DW, m_Dw, m_Ds, pDisplayUnits->GetDensityUnit() );
+      DDV_UnitValueLimitOrMore(pDX, IDC_DW, pParent->Concrete.WeightDensity, pParent->Concrete.StrengthDensity, pDisplayUnits->GetDensityUnit() );
 
-      DDX_UnitValueAndTag(pDX, IDC_AGG_SIZE, IDC_AGG_SIZE_UNIT, m_AggSize, pDisplayUnits->GetComponentDimUnit() );
-      DDV_UnitValueGreaterThanZero(pDX, IDC_AGG_SIZE, m_AggSize, pDisplayUnits->GetComponentDimUnit() );
+      DDX_UnitValueAndTag(pDX, IDC_AGG_SIZE, IDC_AGG_SIZE_UNIT, pParent->Concrete.MaxAggregateSize, pDisplayUnits->GetComponentDimUnit() );
+      DDV_UnitValueGreaterThanZero(pDX, IDC_AGG_SIZE, pParent->Concrete.MaxAggregateSize, pDisplayUnits->GetComponentDimUnit() );
       
       if ( pDX->m_bSaveAndValidate && m_ctrlEcCheck.GetCheck() == 1 )
       {
@@ -85,7 +88,7 @@ void CConcreteGeneralPage::DoDataExchange(CDataExchange* pDX)
 
       if (!pDX->m_bSaveAndValidate)
       {
-         ShowStrengthDensity(!pParent->m_bUserEc28);
+         ShowStrengthDensity(!pParent->Concrete.bUserEc);
       }
    }
    catch(...)
@@ -199,8 +202,8 @@ void CConcreteGeneralPage::UpdateEc()
 
       CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
 
-      strK1.Format(_T("%f"),pParent->m_AASHTO.m_EccK1);
-      strK2.Format(_T("%f"),pParent->m_AASHTO.m_EccK2);
+      strK1.Format(_T("%f"),pParent->Concrete.EcK1);
+      strK2.Format(_T("%f"),pParent->Concrete.EcK1);
 
       CString strEc = CConcreteDetailsDlg::UpdateEc(strFc,strDensity,strK1,strK2);
       m_ctrlEc.SetWindowText(strEc);
@@ -251,7 +254,9 @@ HBRUSH CConcreteGeneralPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
          {
             CDataExchange dx(this,TRUE);
 
-            GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+            CComPtr<IBroker> pBroker;
+            EAFGetBroker(&pBroker);
+            GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
             Float64 value;
             DDX_UnitValue(&dx, IDC_DS, value, pDisplayUnits->GetDensityUnit() );
 
@@ -273,9 +278,10 @@ void CConcreteGeneralPage::OnOK()
 {
    CPropertyPage::OnOK();
 
-   if ( !m_bErrorInDDX && !IsDensityInRange(m_Ds,m_Type) )
+   CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
+   if ( !m_bErrorInDDX && !IsDensityInRange(pParent->Concrete.StrengthDensity,pParent->Concrete.Type) )
    {
-      AfxMessageBox(m_Type == pgsTypes::Normal ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
+      AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
    }
 }
 

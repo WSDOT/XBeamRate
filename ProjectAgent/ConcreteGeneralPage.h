@@ -32,7 +32,6 @@ public:
 	CEdit	m_ctrlFc;
 	CEdit	m_ctrlStrengthDensity;
 
-   CComPtr<IBroker> m_pBroker;
    Float64 m_MinNWCDensity;
    Float64 m_MaxLWCDensity;
    bool m_bErrorInDDX;
@@ -41,10 +40,6 @@ public:
 
 public:
    CString m_strUserEc;
-   Float64 m_Ds;
-   Float64 m_Dw;
-   Float64 m_AggSize;
-   pgsTypes::ConcreteType m_Type;
 
    // Implementation
 protected:

@@ -492,6 +492,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ConcreteMaterial.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\dllmain.cpp"
 				>
 				<FileConfiguration
@@ -625,6 +629,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\XBeamRateExt\BearingLineData.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\ConcreteMaterial.h"
 				>
 			</File>
 			<File

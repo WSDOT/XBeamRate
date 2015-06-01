@@ -64,8 +64,12 @@ interface IXBRAnalysisResults : IUnknown
    virtual sysSectionValue GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
 
    // Live Load Results
-   // Min/Max moment due to a particular live load vehicle
-   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax) = 0;
-   // Min/Max moment due to a particular live load type (envelope of all vehicles for the load type)
-   virtual void GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
+   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
+
+   // Limit State Results
+   virtual void GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
 };

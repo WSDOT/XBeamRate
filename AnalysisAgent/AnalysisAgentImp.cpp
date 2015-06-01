@@ -151,17 +151,21 @@ void CAnalysisAgentImp::Validate()
    // Build the frame model
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRPier,pPier);
+   GET_IFACE(IXBRMaterial,pMaterial);
+   GET_IFACE(IXBRSectionProperties,pSectProp);
 
    // some dummy dimensions
    Float64 leftOverhang = pProject->GetXBeamLeftOverhang();
    Float64 rightOverhang = pProject->GetXBeamRightOverhang();
    IndexType nColumns = pProject->GetColumnCount();
 
-#pragma Reminder("UPDATE: get real material and section properties")
-   Float64 EAb = 1;
-   Float64 EIb = 1;
-   Float64 EAc = 1;
-   Float64 EIc = 1;
+   Float64 L = pProject->GetXBeamLength();
+
+   Float64 Exb = pMaterial->GetXBeamEc();
+   Float64 Axb = pSectProp->GetArea(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 Ixb = pSectProp->GetIxx(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 EAb = Exb*Axb;
+   Float64 EIb = Exb*Ixb;
 
    CComPtr<IFem2dJointCollection> joints;
    m_Model->get_Joints(&joints);
@@ -207,8 +211,11 @@ void CAnalysisAgentImp::Validate()
       joint->Support(); // fully fixed
 
       // create column member
+      Float64 Ecol = pMaterial->GetColumnEc(colIdx);
+      Float64 Acol = pSectProp->GetArea(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+      Float64 Icol = pSectProp->GetIyy(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
       mbr.Release();
-      members->Create(columnMbrID--,jntID-2,jntID-1,EAc,EIc,&mbr);
+      members->Create(columnMbrID--,jntID-2,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
 
       Xs = Xe;
       Xe += space;
@@ -632,28 +639,92 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const xb
    return V;
 }
 
-void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,VehicleIndexType vehIdx,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
-   ATLASSERT(liveLoadType == pgsTypes::lltDesign ||
-             liveLoadType == pgsTypes::lltLegalRating_Routine ||
-             liveLoadType == pgsTypes::lltLegalRating_Special ||
-             liveLoadType == pgsTypes::lltPermitRating_Routine ||
-             liveLoadType == pgsTypes::lltPermitRating_Special);
-
    *pMin = 0;
    *pMax = 0;
 }
 
-void CAnalysisAgentImp::GetMoment(const xbrPointOfInterest& poi,pgsTypes::LiveLoadType liveLoadType,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
 {
-   ATLASSERT(liveLoadType == pgsTypes::lltDesign ||
-             liveLoadType == pgsTypes::lltLegalRating_Routine ||
-             liveLoadType == pgsTypes::lltLegalRating_Special ||
-             liveLoadType == pgsTypes::lltPermitRating_Routine ||
-             liveLoadType == pgsTypes::lltPermitRating_Special);
-
    *pMin = 0;
    *pMax = 0;
+}
+
+void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+{
+   *pMin = 0;
+   *pMax = 0;
+}
+
+void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+{
+   *pMin = 0;
+   *pMax = 0;
+}
+
+void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+{
+   pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 gDC = pProject->GetDCLoadFactor();
+   Float64 gDW = pProject->GetDWLoadFactor();
+   Float64 gLL = pProject->GetLiveLoadFactor(ratingType);
+
+   Float64 DC = 0;
+   std::vector<XBRProductForceType> vDC = GetLoads(lcDC);
+   BOOST_FOREACH(XBRProductForceType pfType,vDC)
+   {
+      Float64 dc = GetMoment(pfType,poi);
+      DC += dc;
+   }
+
+   Float64 DW = 0;
+   std::vector<XBRProductForceType> vDW = GetLoads(lcDW);
+   BOOST_FOREACH(XBRProductForceType pfType,vDW)
+   {
+      Float64 dw = GetMoment(pfType,poi);
+      DW += dw;
+   }
+
+   Float64 LLIMmin, LLIMmax;
+   GetMoment(ratingType,poi,&LLIMmin,&LLIMmax);
+
+   *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
+   *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
+}
+
+void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+{
+   pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 gDC = pProject->GetDCLoadFactor();
+   Float64 gDW = pProject->GetDWLoadFactor();
+   Float64 gLL = pProject->GetLiveLoadFactor(ratingType);
+
+   sysSectionValue DC = 0;
+   std::vector<XBRProductForceType> vDC = GetLoads(lcDC);
+   BOOST_FOREACH(XBRProductForceType pfType,vDC)
+   {
+      sysSectionValue dc = GetShear(pfType,poi);
+      DC += dc;
+   }
+
+   sysSectionValue DW = 0;
+   std::vector<XBRProductForceType> vDW = GetLoads(lcDW);
+   BOOST_FOREACH(XBRProductForceType pfType,vDW)
+   {
+      sysSectionValue dw = GetShear(pfType,poi);
+      DW += dw;
+   }
+
+   sysSectionValue LLIMmin, LLIMmax;
+   GetShear(ratingType,poi,&LLIMmin,&LLIMmax);
+
+   *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
+   *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
 }
 
 std::vector<XBRProductForceType> CAnalysisAgentImp::GetLoads(XBRCombinedForceType lcType)

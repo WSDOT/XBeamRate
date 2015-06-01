@@ -111,12 +111,16 @@ public:
 public:
    virtual Float64 GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual void GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape);
    virtual void GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape);
 
 // IXBRMaterial
 public:
    virtual Float64 GetXBeamDensity();
+   virtual Float64 GetXBeamEc();
+   virtual Float64 GetColumnEc(IndexType colIdx);
 
 // IXBRRebar
 public:

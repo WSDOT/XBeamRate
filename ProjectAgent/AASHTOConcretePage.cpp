@@ -39,13 +39,15 @@ void CAASHTOConcretePage::DoDataExchange(CDataExchange* pDX)
    CEAFApp* pApp = EAFGetApp();
    const unitmgtIndirectMeasure* pDisplayUnits = pApp->GetDisplayUnits();
 
+   CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
+
    CPropertyPage::DoDataExchange(pDX);
 
    //{{AFX_DATA_MAP(CAASHTOConcretePage)
    //}}AFX_DATA_MAP
-   DDX_Check_Bool(pDX, IDC_HAS_AGG_STRENGTH, m_bHasFct );
-   DDX_UnitValueAndTag(pDX, IDC_AGG_STRENGTH, IDC_AGG_STRENGTH_T, m_Fct, pDisplayUnits->Stress );
-   if ( m_bHasFct || !pDX->m_bSaveAndValidate )
+   DDX_Check_Bool(pDX, IDC_HAS_AGG_STRENGTH, pParent->Concrete.bHasFct);
+   DDX_UnitValueAndTag(pDX, IDC_AGG_STRENGTH, IDC_AGG_STRENGTH_T, pParent->Concrete.Fct, pDisplayUnits->Stress );
+   if ( pParent->Concrete.bHasFct || !pDX->m_bSaveAndValidate )
    {
       if ( !pDX->m_bSaveAndValidate )
       {
@@ -54,23 +56,23 @@ void CAASHTOConcretePage::DoDataExchange(CDataExchange* pDX)
       }
    }
 
-   DDX_Text(pDX, IDC_EC_K1, m_EccK1 );
-   DDV_NonNegativeDouble(pDX,IDC_EC_K1,m_EccK1);
+   DDX_Text(pDX, IDC_EC_K1, pParent->Concrete.EcK1 );
+   DDV_NonNegativeDouble(pDX,IDC_EC_K1,pParent->Concrete.EcK1);
 
-   DDX_Text(pDX, IDC_EC_K2, m_EccK2 );
-   DDV_NonNegativeDouble(pDX,IDC_EC_K2,m_EccK2);
+   DDX_Text(pDX, IDC_EC_K2, pParent->Concrete.EcK2 );
+   DDV_NonNegativeDouble(pDX,IDC_EC_K2,pParent->Concrete.EcK2);
 
-   DDX_Text(pDX, IDC_CREEP_K1, m_CreepK1 );
-   DDV_NonNegativeDouble(pDX,IDC_CREEP_K1,m_CreepK1);
+   DDX_Text(pDX, IDC_CREEP_K1, pParent->Concrete.CreepK1);
+   DDV_NonNegativeDouble(pDX,IDC_CREEP_K1,pParent->Concrete.CreepK1);
 
-   DDX_Text(pDX, IDC_CREEP_K2, m_CreepK2 );
-   DDV_NonNegativeDouble(pDX,IDC_CREEP_K2,m_CreepK2);
+   DDX_Text(pDX, IDC_CREEP_K2, pParent->Concrete.CreepK2 );
+   DDV_NonNegativeDouble(pDX,IDC_CREEP_K2,pParent->Concrete.CreepK2);
 
-   DDX_Text(pDX, IDC_SHRINKAGE_K1, m_ShrinkageK1 );
-   DDV_NonNegativeDouble(pDX,IDC_SHRINKAGE_K1,m_ShrinkageK1);
+   DDX_Text(pDX, IDC_SHRINKAGE_K1, pParent->Concrete.ShrinkageK1 );
+   DDV_NonNegativeDouble(pDX,IDC_SHRINKAGE_K1,pParent->Concrete.ShrinkageK1);
 
-   DDX_Text(pDX, IDC_SHRINKAGE_K2, m_ShrinkageK2 );
-   DDV_NonNegativeDouble(pDX,IDC_SHRINKAGE_K2,m_ShrinkageK2);
+   DDX_Text(pDX, IDC_SHRINKAGE_K2, pParent->Concrete.ShrinkageK2 );
+   DDV_NonNegativeDouble(pDX,IDC_SHRINKAGE_K2,pParent->Concrete.ShrinkageK2);
 }
 
 
@@ -104,7 +106,7 @@ BOOL CAASHTOConcretePage::OnSetActive()
    CPropertyPage::OnSetActive();
 
    CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
-   BOOL bEnable = (pParent->m_General.m_Type == pgsTypes::Normal ? FALSE : TRUE);
+   BOOL bEnable = (pParent->Concrete.Type == pgsTypes::Normal ? FALSE : TRUE);
    GetDlgItem(IDC_HAS_AGG_STRENGTH)->EnableWindow(bEnable);
    GetDlgItem(IDC_AGG_STRENGTH)->EnableWindow(bEnable);
    GetDlgItem(IDC_AGG_STRENGTH_T)->EnableWindow(bEnable);

@@ -125,14 +125,15 @@ interface IXBRProject : IUnknown
    virtual IndexType GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType) = 0;
    virtual void SetLiveLoadReactions(pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual LPCTSTR GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
+   virtual Float64 GetLiveLoadReaction(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
 
    // Material properties
    virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade) = 0;
    virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) = 0;
-   virtual void SetModE(Float64 Ec) = 0;
-   virtual Float64 GetModE() = 0;
-   virtual void SetFc(Float64 fc) = 0;
-   virtual Float64 GetFc() = 0;
+
+   virtual void SetConcrete(const xbrConcreteMaterial& concrete) = 0;
+   virtual const xbrConcreteMaterial& GetConcrete() = 0;
 
    virtual void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w) = 0;
    virtual void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) = 0;

@@ -988,6 +988,16 @@ std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReact
    return vReactions;
 }
 
+LPCTSTR CProjectAgentImp::GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+{
+   return m_vLiveLoadReactions[ratingType][vehIdx].Name.c_str();
+}
+
+Float64 CProjectAgentImp::GetLiveLoadReaction(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+{
+   return m_vLiveLoadReactions[ratingType][vehIdx].LLIM;
+}
+
 void CProjectAgentImp::SetRebarMaterial(matRebar::Type type,matRebar::Grade grade)
 {
    m_PierData.SetRebarMaterial(type,grade);
@@ -999,26 +1009,15 @@ void CProjectAgentImp::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* p
    m_PierData.GetRebarMaterial(pType,pGrade);
 }
 
-void CProjectAgentImp::SetModE(Float64 Ec)
+void CProjectAgentImp::SetConcrete(const xbrConcreteMaterial& concrete)
 {
-   m_PierData.SetEc(Ec);
+   m_PierData.SetConcreteMaterial(concrete);
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetModE()
+const xbrConcreteMaterial& CProjectAgentImp::GetConcrete()
 {
-   return m_PierData.GetEc();
-}
-
-void CProjectAgentImp::SetFc(Float64 fc)
-{
-   m_PierData.SetFc(fc);
-   Fire_OnProjectChanged();
-}
-
-Float64 CProjectAgentImp::GetFc()
-{
-   return m_PierData.GetFc();
+   return m_PierData.GetConcreteMaterial();
 }
 
 void CProjectAgentImp::SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w)

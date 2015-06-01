@@ -34,6 +34,7 @@
 #include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
+#include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
@@ -123,6 +124,34 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
 
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   for ( int i = 1; i < 6; i++ )
+   {
+      pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(ratingType);
+      for ( VehicleIndexType vehIdx = 0; vehIdx < nVehicles; vehIdx++ )
+      {
+         LPCTSTR strName = pProject->GetLiveLoadName(ratingType,vehIdx);
+         m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,strName,ratingType,vehIdx));
+      }
+   }
+
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Inventory/Operating)"),pgsTypes::lrDesign_Inventory));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),pgsTypes::lrLegal_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Special)"),pgsTypes::lrLegal_Special));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),pgsTypes::lrPermit_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Special)"),pgsTypes::lrPermit_Special));
+
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Inventory)"),pgsTypes::StrengthI_Inventory));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Operating)"),pgsTypes::StrengthI_Operating));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),pgsTypes::StrengthI_LegalRoutine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Special)"),pgsTypes::StrengthI_LegalSpecial));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
+
+
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Capacity")));
 }
 
@@ -173,7 +202,11 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       CGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
 
       IndexType graphIdx, positiveGraphIdx, negativeGraphIdx;
-      if ( graphDef.m_GraphType == graphCapacity )
+      if ( graphDef.m_GraphType == graphCapacity ||
+           graphDef.m_GraphType == graphVehicularLiveLoad ||
+           graphDef.m_GraphType == graphLiveLoad ||
+           graphDef.m_GraphType == graphLimitState
+         )
       {
          positiveGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
          negativeGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,BLUE);
@@ -193,6 +226,18 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       else if ( graphDef.m_GraphType == graphCombined )
       {
          BuildCombinedForceGraph(vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else if ( graphDef.m_GraphType == graphVehicularLiveLoad )
+      {
+         BuildVehicularLiveLoadGraph(vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else if ( graphDef.m_GraphType == graphLiveLoad )
+      {
+         BuildLiveLoadGraph(vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else if ( graphDef.m_GraphType == graphLimitState )
+      {
+         BuildLimitStateGraph(vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else if ( graphDef.m_GraphType == graphCapacity )
       {
@@ -286,6 +331,120 @@ void CXBRGraphBuilder::BuildCombinedForceGraph(const std::vector<xbrPointOfInter
          Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
          graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
          graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+      }
+   }
+}
+
+void CXBRGraphBuilder::BuildVehicularLiveLoadGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mmin, Mmax;
+         pResults->GetMoment(ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax);
+         Mmin = pVerticalAxisFormat->Convert(Mmin);
+         Mmax = pVerticalAxisFormat->Convert(Mmax);
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+      }
+      else
+      {
+         sysSectionValue Vmin, Vmax;
+         pResults->GetShear(ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax);
+         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
+         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
+         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
+         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+      }
+   }
+}
+
+void CXBRGraphBuilder::BuildLiveLoadGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mmin, Mmax;
+         pResults->GetMoment(ratingType,poi,&Mmin,&Mmax);
+         Mmin = pVerticalAxisFormat->Convert(Mmin);
+         Mmax = pVerticalAxisFormat->Convert(Mmax);
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+      }
+      else
+      {
+         sysSectionValue Vmin, Vmax;
+         pResults->GetShear(ratingType,poi,&Vmin,&Vmax);
+         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
+         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
+         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
+         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+      }
+   }
+}
+
+void CXBRGraphBuilder::BuildLimitStateGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   pgsTypes::LimitState limitState = graphDef.m_LoadType.LimitStateType;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mmin, Mmax;
+         pResults->GetMoment(limitState,poi,&Mmin,&Mmax);
+         Mmin = pVerticalAxisFormat->Convert(Mmin);
+         Mmax = pVerticalAxisFormat->Convert(Mmax);
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+      }
+      else
+      {
+         sysSectionValue Vmin, Vmax;
+         pResults->GetShear(limitState,poi,&Vmin,&Vmax);
+         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
+         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
+         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
+         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
 }

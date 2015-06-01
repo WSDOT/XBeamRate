@@ -4,6 +4,8 @@
 #include "ConcreteGeneralPage.h"
 #include "AASHTOConcretePage.h"
 
+#include <XBeamRateExt\ConcreteMaterial.h>
+
 // ConcreteDetailsDlg.h : header file
 //
 
@@ -30,9 +32,7 @@ public:
 	//}}AFX_VIRTUAL
 
    // Common to all property pages
-   Float64 m_fc28; // 28 day strength (used if m_bFinalProperties is true)
-   Float64 m_Ec28; // modulus based on 28 day strength
-   bool m_bUserEc28;
+   xbrConcreteMaterial Concrete;
 
    CConcreteGeneralPage m_General;
    CAASHTOConcretePage m_AASHTO;

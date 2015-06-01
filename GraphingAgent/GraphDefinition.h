@@ -15,7 +15,7 @@ public:
       pgsTypes::LimitState         LimitStateType;
       XBRProductForceType          ProductLoadType;
       XBRCombinedForceType         CombinedLoadType;
-      pgsTypes::LiveLoadType       LiveLoadType;
+      pgsTypes::LoadRatingType     LiveLoadType;
    } m_LoadType;
 
    VehicleIndexType m_VehicleIndex;
@@ -23,28 +23,23 @@ public:
    CGraphDefinition();
    
    // constructor for limit states
-   //CGraphDefinition(IDType id,const std::_tstring& name,
-   //             pgsTypes::LimitState ls,
-   //             const std::vector<IntervalIndexType>& intervals,int actions);
-   //
+   CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LimitState ls);
+   
    // constructor for combinations
-   CGraphDefinition(IDType id,const std::_tstring& name,XBRCombinedForceType comb);
+   CGraphDefinition(IDType id,LPCTSTR name,XBRCombinedForceType comb);
    
    // constructor for product loads
-   CGraphDefinition(IDType id,const std::_tstring& name,XBRProductForceType type);
+   CGraphDefinition(IDType id,LPCTSTR name,XBRProductForceType type);
    
-   //// constructor for live loads
-   //CGraphDefinition(IDType id,const std::_tstring& name,
-   //             const std::vector<IntervalIndexType>& intervals,int actions);
-   //
-   //// constructor for demands
-   //CGraphDefinition(IDType id,const std::_tstring& name,pgsTypes::LimitState lstype,GraphType lctype,const std::vector<IntervalIndexType>& intervals);
+   // constructor for vehicular live loads
+   CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
 
-   //// constructor for vehicular live loads
-   //CGraphDefinition(IDType id,const std::_tstring& name,pgsTypes::LiveLoadType llType,VehicleIndexType vehicleIndex,const std::vector<IntervalIndexType>& intervals,int apaction);
+   // constructor for live loads
+   CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType);
+
 
    // constructor for capacity
-   CGraphDefinition(IDType id,const std::_tstring& name);
+   CGraphDefinition(IDType id,LPCTSTR name);
 
    bool operator< (const CGraphDefinition& rOther) const
    {

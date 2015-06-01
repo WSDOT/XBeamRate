@@ -180,13 +180,14 @@ public:
    virtual IndexType GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType);
    virtual void SetLiveLoadReactions(pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(pgsTypes::LoadRatingType ratingType);
+   virtual LPCTSTR GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
+   virtual Float64 GetLiveLoadReaction(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
 
    virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade);
    virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade);
-   virtual void SetModE(Float64 Ec);
-   virtual Float64 GetModE();
-   virtual void SetFc(Float64 fc);
-   virtual Float64 GetFc();
+
+   virtual void SetConcrete(const xbrConcreteMaterial& concrete);
+   virtual const xbrConcreteMaterial& GetConcrete();
 
    virtual void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
    virtual void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw);

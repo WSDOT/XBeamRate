@@ -11,24 +11,19 @@ static char THIS_FILE[] = __FILE__;
 CGraphDefinition::CGraphDefinition()
 {
 }
-//
-//CGraphDefinition::CGraphDefinition(
-//IDType id,
-//const std::_tstring& name,
-//pgsTypes::LimitState ls,
-//const std::vector<IntervalIndexType>& intervals,
-//int actions
-//): m_ID(id),m_Name(name)
-//{
-//   m_GraphType = graphLimitState;
-//   m_LoadType.LimitStateType = ls;
-//   m_IntervalApplicability.insert(intervals.begin(),intervals.end());
-//
-//   m_ApplicableActions = actions;
-//}
-//
+
+CGraphDefinition::CGraphDefinition(
+IDType id,
+LPCTSTR name,
+pgsTypes::LimitState ls
+): m_ID(id),m_Name(name)
+{
+   m_GraphType = graphLimitState;
+   m_LoadType.LimitStateType = ls;
+}
+
 // constructor for combinations
-CGraphDefinition::CGraphDefinition(IDType id,const std::_tstring& name,XBRCombinedForceType comb) :
+CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,XBRCombinedForceType comb) :
 m_ID(id), m_Name(name)
 {
    m_GraphType = graphCombined;
@@ -38,66 +33,37 @@ m_ID(id), m_Name(name)
 // constructor for product loads
 CGraphDefinition::CGraphDefinition(
 IDType id,
-const std::_tstring& name,
+LPCTSTR name,
 XBRProductForceType type
 ): m_ID(id),m_Name(name)
 {
    m_GraphType = graphProduct;
    m_LoadType.ProductLoadType = type;
 }
-//
-//// constructor for live loads
-//CGraphDefinition::CGraphDefinition(
-//IDType id,
-//const std::_tstring& name,
-//const std::vector<IntervalIndexType>& intervals,
-//int actions
-//): m_ID(id),m_Name(name)
-//{
-//   m_GraphType = graphLiveLoad;
-//   m_IntervalApplicability.insert(intervals.begin(),intervals.end());
-//
-//   m_ApplicableActions = actions;
-//}
-//
-//// constructor for demands
-//CGraphDefinition::CGraphDefinition(
-//IDType id,
-//const std::_tstring& name,
-//pgsTypes::LimitState lstype,
-//GraphType grtype,
-//const std::vector<IntervalIndexType>& intervals
-//): m_ID(id),m_Name(name)
-//{
-//   m_GraphType = grtype;
-//   m_LoadType.LimitStateType = lstype;
-//   m_IntervalApplicability.insert(intervals.begin(),intervals.end());
-//
-//   m_ApplicableActions = ACTIONS_STRESS_ONLY;
-//}
-//
-//// constructor for vehicular live loads
-//CGraphDefinition::CGraphDefinition(
-//IDType id,
-//const std::_tstring& name,
-//pgsTypes::LiveLoadType llType,
-//VehicleIndexType vehicleIndex,
-//const std::vector<IntervalIndexType>& intervals,
-//int apaction
-//): m_ID(id),m_Name(name)
-//{
-//   m_GraphType = graphVehicularLiveLoad;
-//   m_LoadType.LiveLoadType = llType;
-//   m_IntervalApplicability.insert(intervals.begin(),intervals.end());
-//
-//   m_ApplicableActions = apaction;
-//   m_VehicleIndex = vehicleIndex;
-//}
-//
+
+// constructor for vehicular live loads
+CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex) :
+m_ID(id),
+m_Name(name)
+{
+   m_GraphType = graphVehicularLiveLoad;
+   m_LoadType.LiveLoadType = ratingType;
+   m_VehicleIndex = vehicleIndex;
+}
+
+// constructor for live loads
+CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType) :
+m_ID(id),
+m_Name(name)
+{
+   m_GraphType = graphLiveLoad;
+   m_LoadType.LiveLoadType = ratingType;
+}
+
 // constructor for ultimate forces
 CGraphDefinition::CGraphDefinition(
 IDType id,
-const std::_tstring& name
+LPCTSTR name
 ): m_ID(id),m_Name(name)
 {
    m_GraphType = graphCapacity;

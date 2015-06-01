@@ -29,17 +29,6 @@ public:
 
    CString m_strFct;
 
-public:
-   Float64 m_EccK1;
-   Float64 m_EccK2;
-   Float64 m_CreepK1;
-   Float64 m_CreepK2;
-   Float64 m_ShrinkageK1;
-   Float64 m_ShrinkageK2;
-   bool m_bHasFct;
-   Float64 m_Fct;
-
-   // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CAASHTOConcretePage)

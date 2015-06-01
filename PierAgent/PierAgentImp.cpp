@@ -469,10 +469,10 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
       CColumnData::ColumnShapeType shapeType;
       Float64 D1, D2;
       CColumnData::ColumnHeightMeasurementType columnHeightType;
-      Float64 H;
 
-      GET_IFACE(IXBRProject,pProject);
+      Float64 H;
       pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+
       if (shapeType == CColumnData::cstCircle)
       {
          return M_PI*D1*D1/4;
@@ -488,6 +488,66 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
       Float64 H = GetDepth(stage,poi);
 
       return W*H;
+   }
+}
+
+Float64 CPierAgentImp::GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   GET_IFACE(IXBRProject,pProject);
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+
+      Float64 H;
+      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+
+      if (shapeType == CColumnData::cstCircle)
+      {
+         return M_PI*D1*D1*D1*D1/64;
+      }
+      else
+      {
+         return D1*D2*D2*D2/12;
+      }
+   }
+   else
+   {
+      Float64 W = pProject->GetXBeamWidth();
+      Float64 H = GetDepth(stage,poi);
+
+      return W*H*H*H/12;
+   }
+}
+
+Float64 CPierAgentImp::GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   GET_IFACE(IXBRProject,pProject);
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+
+      Float64 H;
+      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+
+      if (shapeType == CColumnData::cstCircle)
+      {
+         return M_PI*D1*D1*D1*D1/64;
+      }
+      else
+      {
+         return D1*D1*D1*D2/12;
+      }
+   }
+   else
+   {
+      Float64 W = pProject->GetXBeamWidth();
+      Float64 H = GetDepth(stage,poi);
+
+      return W*W*W*H/12;
    }
 }
 
@@ -541,9 +601,37 @@ void CPierAgentImp::GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** pp
 // IXBRMaterial
 Float64 CPierAgentImp::GetXBeamDensity()
 {
-#pragma Reminder("UPDATE: need material model")
-   return ::ConvertToSysUnits(150.,unitMeasure::PCF);
+   GET_IFACE(IXBRProject,pProject);
+   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   return concrete.WeightDensity;
 }
+
+Float64 CPierAgentImp::GetXBeamEc()
+{
+   GET_IFACE(IXBRProject,pProject);
+   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   Float64 Ec;
+   if ( concrete.bUserEc )
+   {
+      Ec = concrete.Ec;
+   }
+   else
+   {
+      Ec = lrfdConcreteUtil::ModE(concrete.Fc,concrete.StrengthDensity,false);
+      if ( lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion() )
+      {
+         Ec *= (concrete.EcK1*concrete.EcK2);
+      }
+   }
+   return Ec;
+}
+
+Float64 CPierAgentImp::GetColumnEc(IndexType colIdx)
+{
+   // right now, everything uses the same material
+   return GetXBeamEc();
+}
+
 
 //////////////////////////////////////////
 // IXBRRebar

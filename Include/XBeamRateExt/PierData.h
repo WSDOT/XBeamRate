@@ -4,6 +4,7 @@
 #include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\BearingLineData.h>
+#include <XBeamRateExt\ConcreteMaterial.h>
 
 class XBREXTCLASS xbrPierData
 {
@@ -109,13 +110,9 @@ public:
    matRebar::Type& GetRebarType();
    matRebar::Grade& GetRebarGrade();
 
-   void SetEc(Float64 ec);
-   Float64 GetEc() const;
-   Float64& GetEc();
-
-   void SetFc(Float64 fc);
-   Float64 GetFc() const;
-   Float64& GetFc();
+   void SetConcreteMaterial(const xbrConcreteMaterial& concrete);
+   xbrConcreteMaterial& GetConcreteMaterial();
+   const xbrConcreteMaterial& GetConcreteMaterial() const;
 
    void SetLongitudinalRebar(const xbrLongitudinalRebarData& rebarData);
    xbrLongitudinalRebarData& GetLongitudinalRebar();
@@ -180,8 +177,7 @@ protected:
    // Materials
    matRebar::Type m_RebarType;
    matRebar::Grade m_RebarGrade;
-   Float64 m_Ec;
-   Float64 m_Fc;
+   xbrConcreteMaterial m_Concrete;
 
    // Rebar
    xbrLongitudinalRebarData m_LongitudinalRebar;
