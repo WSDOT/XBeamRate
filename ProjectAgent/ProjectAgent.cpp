@@ -30,6 +30,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "dllmain.h"
+
 #include "initguid.h"
 #include "ProjectAgent.h"
 
@@ -38,15 +39,14 @@
 #include <WBFLCore_i.c>
 #include <WBFLUnitServer_i.c>
 
-#include "ProjectAgentImp.h"
-
 #include "XBeamRateCatCom.h"
 #include <System\ComCatMgr.h>
 
+#include <EAF\EAFUIIntegration.h>
 #include <EAF\EAFTransactions.h>
 #include <EAF\EAFDisplayUnits.h>
-#include <IFace\XBeamRateAgent.h>
 
+#include <IFace\XBeamRateAgent.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

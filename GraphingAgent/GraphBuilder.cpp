@@ -120,6 +120,9 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),pftDCReactions));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),pftDWReactions));
 
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
+
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Capacity")));
 }
 
@@ -187,6 +190,10 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       {
          BuildProductForceGraph(vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
+      else if ( graphDef.m_GraphType == graphCombined )
+      {
+         BuildCombinedForceGraph(vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
       else if ( graphDef.m_GraphType == graphCapacity )
       {
          BuildCapacityGraph(vPoi,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
@@ -244,6 +251,37 @@ void CXBRGraphBuilder::BuildProductForceGraph(const std::vector<xbrPointOfIntere
       else
       {
          sysSectionValue V = pResults->GetShear(pfType,poi);
+         Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
+         Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
+         graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+      }
+   }
+}
+
+void CXBRGraphBuilder::BuildCombinedForceGraph(const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   XBRCombinedForceType comboType = graphDef.m_LoadType.CombinedLoadType;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mz = pResults->GetMoment(comboType,poi);
+         Mz = pVerticalAxisFormat->Convert(Mz);
+         gpPoint2d point(X,Mz);
+         graph.AddPoint(graphIdx,point);
+      }
+      else
+      {
+         sysSectionValue V = pResults->GetShear(comboType,poi);
          Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
          Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
          graph.AddPoint(graphIdx,gpPoint2d(X,Vl));

@@ -9,7 +9,9 @@
 #define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_PROJECTAGENT                101
+#define IDS_NWC_MESSAGE                 101
 #define IDR_PROJECTAGENTMODULE          102
+#define IDS_LWC_MESSAGE                 102
 #define IDD_PIER_LAYOUT_PAGE            106
 #define IDD_REINFORCEMENT_PAGE          107
 #define IDR_EDIT_MENU                   201
@@ -97,13 +99,44 @@
 #define IDC_LF_PERMIT_SPECIAL           270
 #define IDC_COMBO1                      271
 #define IDC_REBAR_MATERIAL              271
+#define IDC_MORE_PROPERTIES             272
+#define IDC_EDIT1                       274
+#define IDC_CONCRETE_TYPE_LABEL         275
+#define IDD_CONCRETE_DETAILS            280
+#define IDC_CONCRETE_TYPE               281
+#define IDC_FC_LABEL                    282
+#define IDC_FC                          283
+#define IDC_FC_UNIT                     284
+#define IDC_DS_TITLE                    285
+#define IDC_DS                          286
+#define IDC_DS_UNIT                     287
+#define IDC_DW_UNIT                     289
+#define IDC_MOD_E                       290
+#define IDC_EC                          291
+#define IDC_EC_UNIT                     292
+#define IDC_AGG_SIZE                    293
+#define IDC_AGG_SIZE_UNIT               294
+#define IDD_AASHTO_CONCRETE             500
+#define IDC_EC_K1_LABEL                 501
+#define IDC_EC_K1                       502
+#define IDC_EC_K2_LABEL                 503
+#define IDC_EC_K2                       504
+#define IDC_CREEP_K1_LABEL              505
+#define IDC_CREEP_K1                    506
+#define IDC_CREEP_K2_LABEL              507
+#define IDC_CREEP_K2                    508
+#define IDC_SHRINKAGE_K1_LABEL          509
+#define IDC_SHRINKAGE_K1                510
+#define IDC_SHRINKAGE_K2_LABEL          511
+#define IDC_SHRINKAGE_K2                512
+#define IDC_HAS_AGG_STRENGTH            513
+#define IDC_AGG_STRENGTH                514
+#define IDC_AGG_STRENGTH_T              515
 #define IDC_CONDITION_FACTOR            1260
 #define IDC_CONDITION_FACTOR_TYPE       1407
 #define IDC_X5_MEASUREMENT              1423
 #define IDC_BACK_BEARING_GRID           1475
 #define IDC_AHEAD_BEARING_GRID          1476
-#define IDC_EC                          1483
-#define IDC_EC_UNIT                     1484
 #define IDC_REFCOLUMN                   1546
 #define IDC_S                           1594
 #define IDC_S_LABEL                     1595
@@ -161,7 +194,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         272
+#define _APS_NEXT_CONTROL_VALUE         276
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

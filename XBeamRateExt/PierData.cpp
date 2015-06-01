@@ -481,6 +481,11 @@ Float64 xbrPierData::GetFc() const
    return m_Fc;
 }
 
+Float64& xbrPierData::GetFc()
+{
+   return m_Fc;
+}
+
 void xbrPierData::SetLongitudinalRebar(const xbrLongitudinalRebarData& rebarData)
 {
    m_LongitudinalRebar = rebarData;

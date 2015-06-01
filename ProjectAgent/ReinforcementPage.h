@@ -20,6 +20,8 @@ protected:
 
 	//{{AFX_MSG(CPierLayoutPage)
 	virtual BOOL OnInitDialog();
+   afx_msg void OnMoreProperties();
+   afx_msg void OnBnClickedEc();
    afx_msg void OnAddRebar();
    afx_msg void OnRemoveRebar();
 	//}}AFX_MSG
@@ -27,4 +29,6 @@ protected:
 
    CRebarMaterialComboBox m_cbRebar;
    CLongitudinalRebarGrid m_RebarGrid;
+
+   void UpdateConcreteTypeLabel();
 };

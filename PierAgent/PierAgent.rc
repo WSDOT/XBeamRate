@@ -98,8 +98,8 @@ END
 // REGISTRY
 //
 
-IDR_PIERAGENT       REGISTRY                "PierAgent.rgs"
-IDR_PIERAGENTMODULE REGISTRY                "PierAgentModule.rgs"
+IDR_PIERAGENT           REGISTRY                "PierAgent.rgs"
+IDR_PIERAGENTMODULE     REGISTRY                "PierAgentModule.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -111,7 +111,7 @@ BEGIN
     IDS_PROJNAME            "PierAgent"
 END
 
-#endif    // Pierlish (U.S.) resources
+#endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

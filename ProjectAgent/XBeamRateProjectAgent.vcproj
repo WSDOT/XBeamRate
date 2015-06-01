@@ -723,6 +723,10 @@
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 			>
 			<File
+				RelativePath=".\AASHTOConcretePage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\AgentCmdTarget.cpp"
 				>
 			</File>
@@ -732,6 +736,14 @@
 			</File>
 			<File
 				RelativePath=".\BearingsPage.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ConcreteDetailsDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ConcreteGeneralPage.cpp"
 				>
 			</File>
 			<File
@@ -1014,6 +1026,10 @@
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
+				RelativePath=".\AASHTOConcretePage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\AgentCmdTarget.h"
 				>
 			</File>
@@ -1023,6 +1039,14 @@
 			</File>
 			<File
 				RelativePath=".\BearingsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConcreteDetailsDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ConcreteGeneralPage.h"
 				>
 			</File>
 			<File
@@ -1174,19 +1198,6 @@
 					>
 				</File>
 			</Filter>
-		</Filter>
-		<Filter
-			Name="Generated Files"
-			Filter="hxx;cxx"
-			>
-			<File
-				RelativePath=".\XBeamRate.cxx"
-				>
-			</File>
-			<File
-				RelativePath=".\XBeamRate.hxx"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

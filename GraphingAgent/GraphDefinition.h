@@ -14,7 +14,7 @@ public:
    {
       pgsTypes::LimitState         LimitStateType;
       XBRProductForceType          ProductLoadType;
-      //LoadingCombinationType       CombinedLoadType;
+      XBRCombinedForceType         CombinedLoadType;
       pgsTypes::LiveLoadType       LiveLoadType;
    } m_LoadType;
 
@@ -27,10 +27,8 @@ public:
    //             pgsTypes::LimitState ls,
    //             const std::vector<IntervalIndexType>& intervals,int actions);
    //
-   //// constructor for combinations
-   //CGraphDefinition(IDType id,const std::_tstring& name,
-   //             LoadingCombinationType comb,
-   //             const std::vector<IntervalIndexType>& intervals,int actions);
+   // constructor for combinations
+   CGraphDefinition(IDType id,const std::_tstring& name,XBRCombinedForceType comb);
    
    // constructor for product loads
    CGraphDefinition(IDType id,const std::_tstring& name,XBRProductForceType type);

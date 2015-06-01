@@ -45,6 +45,7 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
    DDX_Text(pDX,IDC_DC,pParent->m_PierData.m_gDC);

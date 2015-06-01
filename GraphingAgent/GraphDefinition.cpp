@@ -27,21 +27,13 @@ CGraphDefinition::CGraphDefinition()
 //   m_ApplicableActions = actions;
 //}
 //
-//// constructor for combinations
-//CGraphDefinition::CGraphDefinition(
-//IDType id,
-//const std::_tstring& name,
-//LoadingCombinationType comb,
-//const std::vector<IntervalIndexType>& intervals,
-//int actions
-//): m_ID(id),m_Name(name)
-//{
-//   m_GraphType = graphCombined;
-//   m_LoadType.CombinedLoadType = comb;
-//   m_IntervalApplicability.insert(intervals.begin(),intervals.end());
-//
-//   m_ApplicableActions = actions;
-//}
+// constructor for combinations
+CGraphDefinition::CGraphDefinition(IDType id,const std::_tstring& name,XBRCombinedForceType comb) :
+m_ID(id), m_Name(name)
+{
+   m_GraphType = graphCombined;
+   m_LoadType.CombinedLoadType = comb;
+}
 
 // constructor for product loads
 CGraphDefinition::CGraphDefinition(

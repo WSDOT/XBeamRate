@@ -276,18 +276,22 @@ STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Materials and Reinforcement"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
-    GROUPBOX        "Material Properties",IDC_STATIC,7,7,357,49
-    LTEXT           "Ec",IDC_EC_LABEL,17,20,8,8
-    EDITTEXT        IDC_EC,35,17,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_EC_UNIT,81,20,19,8
-    LTEXT           "Longitudinal Reinforcement",IDC_STATIC,7,74,88,8
-    LTEXT           "Transverse Reinforcement Definition Goes Here",IDC_STATIC,27,204,153,8
-    LTEXT           "Rebar Material Goes Here",IDC_STATIC,18,38,83,8
-    CONTROL         "Custom1",IDC_REBAR_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,84,321,107
-    LTEXT           "Concrete Properties... need unit weight.. compute E?",IDC_STATIC,145,26,172,8
-    PUSHBUTTON      "+",IDC_ADD_REBAR,332,84,23,14
-    PUSHBUTTON      "-",IDC_REMOVE_REBAR,332,102,23,14
-    COMBOBOX        IDC_REBAR_MATERIAL,123,38,131,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Material Properties",IDC_STATIC,7,7,357,77
+    LTEXT           "Concrete Type Label",IDC_CONCRETE_TYPE_LABEL,31,20,67,8
+    LTEXT           "f'c",IDC_FC_LABEL,27,36,8,8
+    EDITTEXT        IDC_FC,43,33,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_FC_UNIT,87,36,19,8
+    CONTROL         "Ec",IDC_EC_LABEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,50,22,10
+    EDITTEXT        IDC_EC,43,48,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_EC_UNIT,87,51,19,8
+    PUSHBUTTON      "More Properties...",IDC_MORE_PROPERTIES,24,65,84,14
+    LTEXT           "Reinforcement",IDC_STATIC,216,20,48,8
+    COMBOBOX        IDC_REBAR_MATERIAL,215,32,131,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Longitudinal Reinforcement",IDC_STATIC,7,87,88,8
+    CONTROL         "Custom1",IDC_REBAR_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,97,321,107
+    PUSHBUTTON      "+",IDC_ADD_REBAR,332,97,23,14
+    PUSHBUTTON      "-",IDC_REMOVE_REBAR,332,115,23,14
+    LTEXT           "Transverse Reinforcement Definition Goes Here",IDC_STATIC,27,217,153,8
 END
 
 IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 450
@@ -328,6 +332,56 @@ BEGIN
     CONTROL         "Custom1",IDC_PERMIT_ROUTINE_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,377,329,66
     PUSHBUTTON      "+",IDC_PERMIT_ROUTINE_ADD,340,376,23,14
     PUSHBUTTON      "-",IDC_PERMIT_ROUTINE_REMOVE,340,394,23,14
+END
+
+IDD_CONCRETE_DETAILS DIALOGEX 0, 0, 230, 137
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "General"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    COMBOBOX        IDC_CONCRETE_TYPE,113,6,77,99,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Strength - f'c",IDC_FC_LABEL,22,28,41,8
+    EDITTEXT        IDC_FC,135,22,55,14,ES_RIGHT | ES_AUTOHSCROLL,WS_EX_RIGHT
+    LTEXT           "Static",IDC_FC_UNIT,195,28,28,8
+    LTEXT           "Unit Weight\n(used to compute Ec)",IDC_DS_TITLE,22,41,122,18
+    EDITTEXT        IDC_DS,135,40,55,14,ES_RIGHT | ES_AUTOHSCROLL,WS_EX_RIGHT
+    LTEXT           "Static",IDC_DS_UNIT,195,46,28,8
+    LTEXT           "Unit Weight with Reinforcement\n(used to compute dead load)",IDC_STATIC,22,60,101,16
+    EDITTEXT        IDC_DW,135,59,55,14,ES_RIGHT | ES_AUTOHSCROLL,WS_EX_RIGHT
+    LTEXT           "Static",IDC_DW_UNIT,195,62,28,8
+    CONTROL         "Mod. Elasticity, Ec",IDC_MOD_E,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,9,81,74,10
+    EDITTEXT        IDC_EC,135,78,55,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_EC_UNIT,195,81,28,8
+    LTEXT           "Max. Aggregate Size",IDC_STATIC,22,96,66,8
+    EDITTEXT        IDC_AGG_SIZE,135,94,55,14,ES_RIGHT | ES_AUTOHSCROLL,WS_EX_RIGHT
+    LTEXT           "Static",IDC_AGG_SIZE_UNIT,195,98,28,8
+    LTEXT           "Type",IDC_STATIC,22,11,17,8
+END
+
+IDD_AASHTO_CONCRETE DIALOGEX 0, 0, 217, 146
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "AASHTO LRFD"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Averaging Factor, K1",IDC_EC_K1_LABEL,37,16,71,8
+    EDITTEXT        IDC_EC_K1,114,12,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Bounding Factor, K2",IDC_EC_K2_LABEL,37,33,71,8
+    EDITTEXT        IDC_EC_K2,114,29,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Creep",IDC_STATIC,9,47,20,8
+    LTEXT           "Averaging Factor, K1",IDC_CREEP_K1_LABEL,37,56,71,8
+    EDITTEXT        IDC_CREEP_K1,114,52,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Bounding Factor, K2",IDC_CREEP_K2_LABEL,37,72,71,8
+    EDITTEXT        IDC_CREEP_K2,114,69,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Shrinkage",IDC_STATIC,9,85,33,8
+    LTEXT           "Averaging Factor, K1",IDC_SHRINKAGE_K1_LABEL,37,95,71,8
+    EDITTEXT        IDC_SHRINKAGE_K1,114,91,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Bounding Factor, K2",IDC_SHRINKAGE_K2_LABEL,37,111,71,8
+    EDITTEXT        IDC_SHRINKAGE_K2,114,108,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Agg Splitting Strength, fct",IDC_HAS_AGG_STRENGTH,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,8,127,101,10
+    EDITTEXT        IDC_AGG_STRENGTH,113,125,53,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_AGG_STRENGTH_T,175,127,35,8
+    LTEXT           "Modulus of Elasticity",IDC_STATIC,7,4,66,8
 END
 
 
@@ -378,6 +432,22 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 443
     END
+
+    IDD_CONCRETE_DETAILS, DIALOG
+    BEGIN
+        LEFTMARGIN, 9
+        RIGHTMARGIN, 223
+        TOPMARGIN, 6
+        BOTTOMMARGIN, 129
+    END
+
+    IDD_AASHTO_CONCRETE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 210
+        TOPMARGIN, 4
+        BOTTOMMARGIN, 139
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -403,6 +473,8 @@ DIMENSIONS_BRIDGELINE_EXPANSION METAFILE                "res\\Dimensions_BridgeL
 STRINGTABLE 
 BEGIN
     IDS_PROJNAME            "ProjectAgent"
+    IDS_NWC_MESSAGE         """The concrete density is less than the minimum value for Normal Weight Concrete (See LRFD 5.2).\nThe concrete will be treated as Normal Weight."""
+    IDS_LWC_MESSAGE         """The concrete density is greater than the maximum value for Lightweight Concrete (See LRFD 5.2).\nThe concrete will be treated as Lightweight."""
 END
 
 STRINGTABLE 

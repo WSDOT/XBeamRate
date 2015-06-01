@@ -115,6 +115,7 @@ public:
 
    void SetFc(Float64 fc);
    Float64 GetFc() const;
+   Float64& GetFc();
 
    void SetLongitudinalRebar(const xbrLongitudinalRebarData& rebarData);
    xbrLongitudinalRebarData& GetLongitudinalRebar();
