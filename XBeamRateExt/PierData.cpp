@@ -484,6 +484,36 @@ const xbrLongitudinalRebarData& xbrPierData::GetLongitudinalRebar() const
    return m_LongitudinalRebar;
 }
 
+void xbrPierData::SetLowerXBeamStirrups(const xbrStirrupData& stirrupData)
+{
+   m_LowerXBeamStirrups = stirrupData;
+}
+
+xbrStirrupData& xbrPierData::GetLowerXBeamStirrups()
+{
+   return m_LowerXBeamStirrups;
+}
+
+const xbrStirrupData& xbrPierData::GetLowerXBeamStirrups() const
+{
+   return m_LowerXBeamStirrups;
+}
+
+void xbrPierData::SetFullDepthStirrups(const xbrStirrupData& stirrupData)
+{
+   m_FullDepthStirrups = stirrupData;
+}
+
+xbrStirrupData& xbrPierData::GetFullDepthStirrups()
+{
+   return m_FullDepthStirrups;
+}
+
+const xbrStirrupData& xbrPierData::GetFullDepthStirrups() const
+{
+   return m_FullDepthStirrups;
+}
+
 void xbrPierData::SetBearingLineCount(IndexType nBearingLines)
 {
    ATLASSERT(1 <= nBearingLines && nBearingLines <= 2);
@@ -595,7 +625,8 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
       pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
       pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
       m_LongitudinalRebar.Save(pStrSave,NULL);
-      //m_TransverseRebar.Save(pStrSave,NULL);
+      m_LowerXBeamStirrups.Save(pStrSave);
+      m_FullDepthStirrups.Save(pStrSave);
    pStrSave->EndUnit(); // Reinforcement
 
    pStrSave->BeginUnit(_T("Bearings"),1.0);
@@ -788,7 +819,8 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
          m_RebarGrade = (matRebar::Grade)(var.lVal);
 
          hr = m_LongitudinalRebar.Load(pStrLoad,NULL);
-         //hr = m_TransverseRebar.Load(pStrLoad,NULL);
+         hr = m_LowerXBeamStirrups.Load(pStrLoad);
+         hr = m_FullDepthStirrups.Load(pStrLoad);
          hr = pStrLoad->EndUnit(); // Reinforcement
       }
 
@@ -879,7 +911,8 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_ConditionFactor = rOther.m_ConditionFactor;
 
    m_LongitudinalRebar = rOther.m_LongitudinalRebar;
-   //m_TransverseRebar = rOther.m_TransverseRebar;
+   m_LowerXBeamStirrups = rOther.m_LowerXBeamStirrups;
+   m_FullDepthStirrups = rOther.m_FullDepthStirrups;
 
    m_vBearingLines = rOther.m_vBearingLines;
 }

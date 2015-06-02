@@ -260,8 +260,8 @@ public:
    //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
    //virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
 
-   //virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
-   //virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear);
+   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType);
 
    //// Per last paragraph in MBE 6A.4.4.2.1a, the lane load may be excluded and the 0.75 truck factor taken as 1.0
    //// for ADTT < 500 and in the Engineer's judgement it is warranted
@@ -310,6 +310,7 @@ private:
 
    Float64 m_SysFactorFlexure;
    Float64 m_SysFactorShear;
+   bool m_vbRateForShear[6]; // array index is pgsTypes::LoadRatingType
 
    // Load Factors
    Float64 m_gDC;

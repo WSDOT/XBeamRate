@@ -47,8 +47,8 @@ interface IXBRRatingSpecification : IUnknown
    //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
    //virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
 
-   //virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
-   //virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
+   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
 
    //// Per last paragraph in MBE 6A.4.4.2.1a, the lane load may be excluded and the 0.75 truck factor taken as 1.0
    //// for ADTT < 500 and in the Engineer's judgement it is warranted

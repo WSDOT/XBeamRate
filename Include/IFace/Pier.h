@@ -65,6 +65,6 @@ interface IXBRRebar : public IUnknown
    virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints) = 0;
 
    // Returns the depth to a rebar row, measured from the top of the cross beam
-   virtual Float64 GetRebarRowLocation(Float64 X,IndexType rowIdx) = 0;
-   virtual void GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
+   virtual Float64 GetRebarRowLocation(const xbrPointOfInterest& poi,IndexType rowIdx) = 0;
+   virtual void GetRebarLocation(const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
 };

@@ -35,7 +35,7 @@ public:
       Float64     BarSpacing;
 
       RebarRow():
-         Datum(xbrTypes::Bottom), BarSize(matRebar::bsNone), NumberOfBars(0), Cover(0), BarSpacing(0)
+         Datum(xbrTypes::Bottom), BarSize(matRebar::bs3), NumberOfBars(0), Cover(0), BarSpacing(0)
       {;}
 
       bool operator==(const RebarRow& other) const

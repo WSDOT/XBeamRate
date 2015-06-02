@@ -85,7 +85,7 @@ public:
 
 // IXBRMomentCapacity
 public:
-   virtual Float64 GetMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual Float64 GetMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
 
 // IXBRShearCapacity
 public:
@@ -116,11 +116,11 @@ private:
       Float64 Mr; // nominal resistance (phi*Mn)
    } MomentCapacityDetails;
 
-   std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity;
-   std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity;
+   std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity[2];
 
-   MomentCapacityDetails GetMomentCapacityDetails(const xbrPointOfInterest& poi,bool bPositiveMoment);
-   MomentCapacityDetails ComputeMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment);
+   MomentCapacityDetails GetMomentCapacityDetails(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   MomentCapacityDetails ComputeMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
 
 
    std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key

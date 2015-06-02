@@ -107,10 +107,10 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pPro
 
          RebarRows.push_back(rebar_row);
 
-         pStrLoad->EndUnit();
+         hr = pStrLoad->EndUnit();
       }
 
-      pStrLoad->EndUnit();
+      hr = pStrLoad->EndUnit();
    }
    catch (HRESULT)
    {

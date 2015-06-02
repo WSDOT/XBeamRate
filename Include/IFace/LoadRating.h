@@ -15,7 +15,7 @@ DEFINE_GUID(IID_IXBRMomentCapacity,
 0x15281829, 0x5f1e, 0x4a78, 0x9a, 0x9c, 0xe6, 0x19, 0xa7, 0xb1, 0xe0, 0xf6);
 interface IXBRMomentCapacity : IUnknown
 {
-   virtual Float64 GetMomentCapacity(const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual Float64 GetMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
 };
 
 /*****************************************************************************

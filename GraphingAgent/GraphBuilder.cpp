@@ -463,12 +463,12 @@ void CXBRGraphBuilder::BuildCapacityGraph(const std::vector<xbrPointOfInterest>&
 
       if ( actionType == actionMoment )
       {
-         Float64 Mz = pMomentCapacity->GetMomentCapacity(poi,true);
+         Float64 Mz = pMomentCapacity->GetMomentCapacity(xbrTypes::Stage2,poi,true);
          Mz = pVerticalAxisFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
          graph.AddPoint(positiveGraphIdx,point);
 
-         Mz = pMomentCapacity->GetMomentCapacity(poi,false);
+         Mz = pMomentCapacity->GetMomentCapacity(xbrTypes::Stage2,poi,false);
          Mz = pVerticalAxisFormat->Convert(Mz);
          point.Y() = Mz;
          graph.AddPoint(negativeGraphIdx,point);

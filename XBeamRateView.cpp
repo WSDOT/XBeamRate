@@ -545,7 +545,7 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
       for ( IndexType barIdx = 0; barIdx < nBars; barIdx++ )
       {
          CComPtr<IPoint2d> pntBar;
-         pRebar->GetRebarLocation(X,rowIdx,barIdx,&pntBar);
+         pRebar->GetRebarLocation(xbrPointOfInterest(INVALID_ID,X),rowIdx,barIdx,&pntBar);
 
          Float64 Ybar;
          pntBar->get_Y(&Ybar);

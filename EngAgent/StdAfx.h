@@ -61,3 +61,4 @@ using namespace ATL;
 #include <AgentTools.h>
 
 #include <LRFD\LRFD.h>
+#include <EAF\EAFAutoProgress.h>

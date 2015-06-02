@@ -15,21 +15,11 @@
 #define IDD_PIER_LAYOUT_PAGE            106
 #define IDD_REINFORCEMENT_PAGE          107
 #define IDR_EDIT_MENU                   201
-#define IDC_LEFT_OVERHANG               201
-#define IDC_LEFT_OVERHANG_UNIT          202
 #define IDD_BEARINGS_PAGE               202
-#define IDC_RIGHT_OVERHANG              203
-#define IDC_RIGHT_OVERHANG_UNIT         204
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDC_COLUMN_COUNT                205
 #define IDD_LIVE_LOAD_REACTIONS         205
-#define IDC_COLUMN_LENGTH               206
-#define IDC_COLUMN_LENGTH_UNIT          207
-#define IDC_EDIT5                       208
-#define IDC_COLUMN_SPACING              208
 #define IDC_LF_PERMIT_ROUTINE           208
-#define IDC_COLUMN_SPACING_UNIT         209
-#define IDC_TRANSVERSE_MEASUREMENT_TYPE 210
 #define IDC_DECK_ELEVATION              211
 #define IDC_DECK_ELEVATION_UNIT         212
 #define IDC_CPO                         213
@@ -67,11 +57,9 @@
 #define IDC_RCO_UNIT                    244
 #define IDC_SL                          245
 #define IDC_SL_UNIT                     246
-#define IDC_EDIT4                       247
 #define IDC_SR                          247
 #define IDC_LF_LEGAL_SPECIAL            247
 #define IDC_SR_UNIT                     248
-#define IDC_EDIT2                       250
 #define IDC_DW                          250
 #define IDC_LF_OPERATING                250
 #define IDC_DESIGN_GRID                 251
@@ -87,21 +75,29 @@
 #define IDC_REMOVE_REBAR                260
 #define IDC_LEGAL_ROUTINE_REMOVE        261
 #define IDC_DC                          261
+#define IDC_LOWER_XBEAM_STIRRUP_GRID    261
 #define IDC_LEGAL_SPECIAL_ADD           262
+#define IDC_FULL_DEPTH_STIRRUP_GRID     262
 #define IDC_LEGAL_SPECIAL_REMOVE        263
+#define IDC_ADD_LOWER_XBEAM             263
 #define IDC_PERMIT_ROUTINE_ADD          264
+#define IDC_REMOVE_LOWER_XBEAM          264
 #define IDC_PERMIT_ROUTINE_REMOVE       265
+#define IDC_ADD_FULL_DEPTH              265
 #define IDC_PERMIT_SPECIAL_ADD          266
+#define IDC_REMOVE_FULL_DEPTH           266
 #define IDC_PERMIT_SPECIAL_REMOVE       267
 #define IDC_LF_INVENTORY                268
 #define IDC_LF_LEGAL_ROUTINE            269
-#define IDC_EDIT6                       270
 #define IDC_LF_PERMIT_SPECIAL           270
-#define IDC_COMBO1                      271
 #define IDC_REBAR_MATERIAL              271
 #define IDC_MORE_PROPERTIES             272
-#define IDC_EDIT1                       274
 #define IDC_CONCRETE_TYPE_LABEL         275
+#define IDC_LOWER_XBEAM_LABEL           276
+#define IDC_FULL_DEPTH_LABEL            277
+#define IDC_LOWER_XBEAM_SYMMETRY        278
+#define IDC_LOWER_XBEAM_SYMMETRY2       279
+#define IDC_FULL_DEPTH_SYMMETRY         279
 #define IDD_CONCRETE_DETAILS            280
 #define IDC_CONCRETE_TYPE               281
 #define IDC_FC_LABEL                    282
@@ -181,11 +177,9 @@
 #define IDC_D                           1843
 #define IDC_D_UNIT                      1844
 #define IDC_EC_LABEL                    1846
-#define IDC_PIER_MODEL_LABEL            1849
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define EAFID_EDIT_UNITS                32774
 #define ID_EDIT_PROJECT_NAME            50000
-#define ID_PIER                         50001
 #define ID_EDIT_PIER                    50002
 
 // Next default values for new objects
@@ -194,7 +188,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         276
+#define _APS_NEXT_CONTROL_VALUE         279
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

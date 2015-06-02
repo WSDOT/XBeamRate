@@ -21,7 +21,7 @@ protected:
 
    pgsTypes::LimitState GetStrengthLimitStateType(pgsTypes::LoadRatingType ratingType);
 
-   void GetMoments(bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPOI, std::vector<Float64>& vDC,std::vector<Float64>& vDW, std::vector<Float64>& vLLIMmin, std::vector<VehicleIndexType>& vMinTruckIndex,std::vector<Float64>& vLLIMmax,std::vector<VehicleIndexType>& vMaxTruckIndex, std::vector<Float64>& vAdjLLIMmin, std::vector<VehicleIndexType>& vAdjMinTruckIndex,std::vector<Float64>& vAdjLLIMmax,std::vector<VehicleIndexType>& vAdjMaxTruckIndex);
+   void GetMoments(bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPOI, std::vector<Float64>& vDC,std::vector<Float64>& vDW, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax, std::vector<Float64>& vAdjLLIMmin, std::vector<Float64>& vAdjLLIMmax);
    //Float64 GetStrengthLiveLoadFactor(pgsTypes::LoadRatingType ratingType,AxleConfiguration& axleConfig);
    //Float64 GetServiceLiveLoadFactor(pgsTypes::LoadRatingType ratingType);
 };

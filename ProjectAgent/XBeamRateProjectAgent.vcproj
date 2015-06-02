@@ -1017,6 +1017,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\StirrupGrid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\SuperstructureLayoutPage.cpp"
 				>
 			</File>
@@ -1099,6 +1103,10 @@
 			</File>
 			<File
 				RelativePath="StdAfx.h"
+				>
+			</File>
+			<File
+				RelativePath=".\StirrupGrid.h"
 				>
 			</File>
 			<File

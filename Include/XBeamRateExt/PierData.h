@@ -3,6 +3,7 @@
 #include <XBeamRateExt\XBRExtExp.h>
 #include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\LongitudinalRebarData.h>
+#include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
 #include <XBeamRateExt\ConcreteMaterial.h>
 
@@ -118,6 +119,14 @@ public:
    xbrLongitudinalRebarData& GetLongitudinalRebar();
    const xbrLongitudinalRebarData& GetLongitudinalRebar() const;
 
+   void SetLowerXBeamStirrups(const xbrStirrupData& stirrupData);
+   xbrStirrupData& GetLowerXBeamStirrups();
+   const xbrStirrupData& GetLowerXBeamStirrups() const;
+
+   void SetFullDepthStirrups(const xbrStirrupData& stirrupData);
+   xbrStirrupData& GetFullDepthStirrups();
+   const xbrStirrupData& GetFullDepthStirrups() const;
+
    void SetBearingLineCount(IndexType nBearingLines);
    IndexType GetBearingLineCount() const;
 
@@ -181,7 +190,8 @@ protected:
 
    // Rebar
    xbrLongitudinalRebarData m_LongitudinalRebar;
-   //xbrTransverseRebarData m_TransverseRebar;// not implemented yet
+   xbrStirrupData m_LowerXBeamStirrups;
+   xbrStirrupData m_FullDepthStirrups;
 
    // Bearings
    std::vector<xbrBearingLineData> m_vBearingLines;

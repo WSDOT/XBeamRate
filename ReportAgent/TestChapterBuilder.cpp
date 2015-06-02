@@ -174,8 +174,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 pM = pLoadRating->GetMomentCapacity(poi,true);
-      Float64 nM = pLoadRating->GetMomentCapacity(poi,false);
+      Float64 pM = pLoadRating->GetMomentCapacity(xbrTypes::Stage2,poi,true);
+      Float64 nM = pLoadRating->GetMomentCapacity(xbrTypes::Stage2,poi,false);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(pM);

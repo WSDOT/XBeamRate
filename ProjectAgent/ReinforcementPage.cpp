@@ -25,6 +25,18 @@ void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,xbrLongitudin
    }
 }
 
+void DDX_StirrupGrid(CDataExchange* pDX,CStirrupGrid& grid,xbrStirrupData& stirrups)
+{
+   if ( pDX->m_bSaveAndValidate )
+   {
+      grid.GetStirrupData(stirrups);
+   }
+   else
+   {
+      grid.SetStirrupData(stirrups);
+   }
+}
+
 // CReinforcementPage dialog
 
 IMPLEMENT_DYNAMIC(CReinforcementPage, CPropertyPage)
@@ -37,6 +49,13 @@ CReinforcementPage::CReinforcementPage()
 
 CReinforcementPage::~CReinforcementPage()
 {
+}
+
+void CReinforcementPage::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade)
+{
+   // The grids use this method to get the rebar material
+   CPierDlg* pParent = (CPierDlg*)GetParent();
+   pParent->m_PierData.m_PierData.GetRebarMaterial(pType,pGrade);
 }
 
 void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
@@ -60,15 +79,26 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
    
    DDX_RebarMaterial(pDX,IDC_REBAR_MATERIAL,pParent->m_PierData.m_PierData.GetRebarType(),pParent->m_PierData.m_PierData.GetRebarGrade());
    DDX_RebarGrid(pDX,m_RebarGrid,pParent->m_PierData.m_PierData.GetLongitudinalRebar());
+   DDX_StirrupGrid(pDX,m_LowerXBeamGrid,pParent->m_PierData.m_PierData.GetLowerXBeamStirrups());
+   DDX_StirrupGrid(pDX,m_FullDepthGrid,pParent->m_PierData.m_PierData.GetFullDepthStirrups());
+
+   DDX_Check_Bool(pDX,IDC_LOWER_XBEAM_SYMMETRY,pParent->m_PierData.m_PierData.GetLowerXBeamStirrups().Symmetric);
+   DDX_Check_Bool(pDX,IDC_FULL_DEPTH_SYMMETRY, pParent->m_PierData.m_PierData.GetFullDepthStirrups().Symmetric);
 }
 
 
 BEGIN_MESSAGE_MAP(CReinforcementPage, CPropertyPage)
    ON_COMMAND(IDC_ADD_REBAR, OnAddRebar)
    ON_COMMAND(IDC_REMOVE_REBAR, OnRemoveRebar)
+   ON_COMMAND(IDC_ADD_LOWER_XBEAM, OnAddLowerXBeam)
+   ON_COMMAND(IDC_REMOVE_LOWER_XBEAM, OnRemoveLowerXBeam)
+   ON_COMMAND(IDC_ADD_FULL_DEPTH, OnAddFullDepth)
+   ON_COMMAND(IDC_REMOVE_FULL_DEPTH, OnRemoveFullDepth)
    ON_BN_CLICKED(IDC_MORE_PROPERTIES, &CReinforcementPage::OnMoreProperties)
    ON_BN_CLICKED(IDC_EC_LABEL, &CReinforcementPage::OnBnClickedEc)
 	ON_EN_CHANGE(IDC_FC, OnChangeFc)
+   ON_BN_CLICKED(IDC_LOWER_XBEAM_SYMMETRY,OnLowerXBeamSymmetry)
+   ON_BN_CLICKED(IDC_FULL_DEPTH_SYMMETRY,OnFullDepthSymmetry)
 END_MESSAGE_MAP()
 
 
@@ -78,6 +108,12 @@ BOOL CReinforcementPage::OnInitDialog()
 {
    m_RebarGrid.SubclassDlgItem(IDC_REBAR_GRID, this);
    m_RebarGrid.CustomInit();
+
+   m_LowerXBeamGrid.SubclassDlgItem(IDC_LOWER_XBEAM_STIRRUP_GRID,this);
+   m_LowerXBeamGrid.CustomInit();
+
+   m_FullDepthGrid.SubclassDlgItem(IDC_FULL_DEPTH_STIRRUP_GRID,this);
+   m_FullDepthGrid.CustomInit();
 
    CPropertyPage::OnInitDialog();
 
@@ -131,6 +167,26 @@ void CReinforcementPage::OnRemoveRebar()
    m_RebarGrid.RemoveSelectedBars();
 }
 
+void CReinforcementPage::OnAddLowerXBeam()
+{
+   m_LowerXBeamGrid.AddZone();
+}
+
+void CReinforcementPage::OnRemoveLowerXBeam()
+{
+   m_LowerXBeamGrid.RemoveSelectedZones();
+}
+
+void CReinforcementPage::OnAddFullDepth()
+{
+   m_FullDepthGrid.AddZone();
+}
+
+void CReinforcementPage::OnRemoveFullDepth()
+{
+   m_FullDepthGrid.RemoveSelectedZones();
+}
+
 void CReinforcementPage::OnBnClickedEc()
 {
    BOOL bEnable = m_ctrlEcCheck.GetCheck();
@@ -172,6 +228,18 @@ void CReinforcementPage::OnChangeFc()
    UpdateEc();
 }
 
+void CReinforcementPage::OnLowerXBeamSymmetry()
+{
+   bool bSymmetric = (IsDlgButtonChecked(IDC_LOWER_XBEAM_SYMMETRY) == BST_CHECKED ? true : false);
+   m_LowerXBeamGrid.SetSymmetry(bSymmetric);
+}
+
+void CReinforcementPage::OnFullDepthSymmetry()
+{
+   bool bSymmetric = (IsDlgButtonChecked(IDC_FULL_DEPTH_SYMMETRY) == BST_CHECKED ? true : false);
+   m_FullDepthGrid.SetSymmetry(bSymmetric);
+}
+
 void CReinforcementPage::UpdateEc()
 {
    CPierDlg* pParent = (CPierDlg*)GetParent();
@@ -198,4 +266,29 @@ void CReinforcementPage::UpdateEc()
       strEc = CConcreteDetailsDlg::UpdateEc(strFc,strDensity,strK1,strK2);
       m_ctrlEc.SetWindowText(strEc);
    }
+}
+
+void CReinforcementPage::UpdateStirrupGrids()
+{
+   CPierDlg* pParent = (CPierDlg*)GetParent();
+   int showWindow = (pParent->m_PierData.m_PierData.GetSuperstructureConnectionType() == xbrTypes::pctIntegral ? SW_SHOW : SW_HIDE);
+   GetDlgItem(IDC_FULL_DEPTH_LABEL)->ShowWindow(showWindow);
+   GetDlgItem(IDC_FULL_DEPTH_STIRRUP_GRID)->ShowWindow(showWindow);
+   GetDlgItem(IDC_ADD_FULL_DEPTH)->ShowWindow(showWindow);
+   GetDlgItem(IDC_REMOVE_FULL_DEPTH)->ShowWindow(showWindow);
+
+   if ( showWindow == SW_SHOW )
+   {
+      GetDlgItem(IDC_LOWER_XBEAM_LABEL)->SetWindowText(_T("Lower Cross Beam Stirrups"));
+   }
+   else
+   {
+      GetDlgItem(IDC_LOWER_XBEAM_LABEL)->SetWindowText(_T("Stirrups"));
+   }
+}
+
+BOOL CReinforcementPage::OnSetActive()
+{
+   UpdateStirrupGrids();
+   return CPropertyPage::OnSetActive();
 }

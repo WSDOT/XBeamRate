@@ -713,7 +713,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    points.CopyTo(ppPoints);
 }
 
-Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
+Float64 CPierAgentImp::GetRebarRowLocation(const xbrPointOfInterest& poi,IndexType rowIdx)
 {
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
@@ -734,13 +734,13 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    Float64 Ybar;
    if ( datum == xbrTypes::Bottom )
    {
-      Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
+      Float64 H = GetDepth(xbrTypes::Stage2,poi);
       Ybar = H - offset;
    }
    else if ( datum == xbrTypes::TopLowerXBeam )
    {
-      Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
-      Float64 Hlower = GetDepth(xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,X));
+      Float64 H = GetDepth(xbrTypes::Stage2,poi);
+      Float64 Hlower = GetDepth(xbrTypes::Stage1,poi);
       Ybar = H - Hlower + offset;
    }
    else 
@@ -751,9 +751,9 @@ Float64 CPierAgentImp::GetRebarRowLocation(Float64 X,IndexType rowIdx)
    return Ybar;
 }
 
-void CPierAgentImp::GetRebarLocation(Float64 X,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
 {
-   Float64 Ybar = GetRebarRowLocation(X,rowIdx);
+   Float64 Ybar = GetRebarRowLocation(poi,rowIdx);
 
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;

@@ -50,6 +50,7 @@
 #include <IFace\RatingSpecification.h>
 #include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

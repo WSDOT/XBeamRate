@@ -45,6 +45,12 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_SysFactorFlexure = 1.0;
    m_SysFactorShear = 1.0;
+   m_vbRateForShear[pgsTypes::lrDesign_Inventory] = true;
+   m_vbRateForShear[pgsTypes::lrDesign_Operating] = true;
+   m_vbRateForShear[pgsTypes::lrLegal_Routine]    = true;
+   m_vbRateForShear[pgsTypes::lrLegal_Special]    = true;
+   m_vbRateForShear[pgsTypes::lrPermit_Routine]   = true;
+   m_vbRateForShear[pgsTypes::lrPermit_Special]   = true;
 
    m_gDC = 1.25;
    m_gDW = 1.50;
@@ -300,6 +306,18 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    // Also, need to save/load this data per pier
    // when this is a PGSuper/PGSplice extension, there can be many piers
 
+   pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+      pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(m_SysFactorFlexure));
+      pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(m_SysFactorShear));
+      pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(m_vbRateForShear[pgsTypes::lrDesign_Inventory]));
+      pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(m_vbRateForShear[pgsTypes::lrDesign_Operating]));
+      pStrSave->put_Property(_T("RateForShear_Legal_Routine"),CComVariant(m_vbRateForShear[pgsTypes::lrLegal_Routine]));
+      pStrSave->put_Property(_T("RateForShear_Legal_Special"),CComVariant(m_vbRateForShear[pgsTypes::lrLegal_Special]));
+      pStrSave->put_Property(_T("RateForShear_Permit_Routine"),CComVariant(m_vbRateForShear[pgsTypes::lrPermit_Routine]));
+      pStrSave->put_Property(_T("RateForShear_Permit_Special"),CComVariant(m_vbRateForShear[pgsTypes::lrPermit_Special]));
+   pStrSave->EndUnit(); // RatingSpecification
+
+
    m_PierData.Save(pStrSave);
 
    pStrSave->BeginUnit(_T("LoadFactors"),1.0);
@@ -441,7 +459,39 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       }
 
 
+      {
+         hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("SystemFactorFlexure"),&var);
+         m_SysFactorFlexure = var.dblVal;
+
+         hr = pStrLoad->get_Property(_T("SystemFactorShear"),&var);
+         m_SysFactorShear = var.dblVal;
+
+         var.vt = VT_BOOL;
+         hr = pStrLoad->get_Property(_T("RateForShear_Design_Inventory"),&var);
+         m_vbRateForShear[pgsTypes::lrDesign_Inventory] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->get_Property(_T("RateForShear_Design_Operating"),&var);
+         m_vbRateForShear[pgsTypes::lrDesign_Operating] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->get_Property(_T("RateForShear_Legal_Routine"),&var);
+         m_vbRateForShear[pgsTypes::lrLegal_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->get_Property(_T("RateForShear_Legal_Special"),&var);
+         m_vbRateForShear[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->get_Property(_T("RateForShear_Permit_Routine"),&var);
+         m_vbRateForShear[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->get_Property(_T("RateForShear_Permit_Special"),&var);
+         m_vbRateForShear[pgsTypes::lrPermit_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+         hr = pStrLoad->EndUnit(); // RatingSpecification
+      }
+
       hr = m_PierData.Load(pStrLoad);
+
       {
          hr = pStrLoad->BeginUnit(_T("LoadFactors"));
          
@@ -1236,6 +1286,17 @@ void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 Float64 CProjectAgentImp::GetSystemFactorShear()
 {
    return m_SysFactorShear;
+}
+
+void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
+{
+   m_vbRateForShear[ratingType] = bRateForShear;
+   Fire_OnProjectChanged();
+}
+
+bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType)
+{
+   return m_vbRateForShear[ratingType];
 }
 
 //////////////////////////////////////////////////////////
