@@ -40,6 +40,7 @@ static char THIS_FILE[] = __FILE__;
 CPierAgentImp::CPierAgentImp()
 {
    m_pBroker = 0;
+   m_bStirrupZonesValid = false;
 }
 
 CPierAgentImp::~CPierAgentImp()
@@ -74,11 +75,12 @@ STDMETHODIMP CPierAgentImp::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
-   pBrokerInit->RegInterface(IID_IXBRPier, this);
+   pBrokerInit->RegInterface(IID_IXBRPier,              this);
    pBrokerInit->RegInterface(IID_IXBRSectionProperties, this);
-   pBrokerInit->RegInterface(IID_IXBRMaterial, this);
-   pBrokerInit->RegInterface(IID_IXBRRebar, this);
-   pBrokerInit->RegInterface(IID_IXBRPointOfInterest, this);
+   pBrokerInit->RegInterface(IID_IXBRMaterial,          this);
+   pBrokerInit->RegInterface(IID_IXBRRebar,             this);
+   pBrokerInit->RegInterface(IID_IXBRStirrups,          this);
+   pBrokerInit->RegInterface(IID_IXBRPointOfInterest,   this);
 
    return S_OK;
 };
@@ -363,7 +365,7 @@ void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
    shape.QueryInterface(ppShape);
 }
 
-Float64 CPierAgentImp::GetElevation(Float64 X)
+Float64 CPierAgentImp::GetElevation(Float64 distFromLeftEdge)
 {
    CComPtr<IPoint2d> pntTL, pntTC, pntTR;
    CComPtr<IPoint2d> pntBL, pntBC, pntBR;
@@ -378,7 +380,7 @@ Float64 CPierAgentImp::GetElevation(Float64 X)
    Float64 x3,y3;
    pntTR->Location(&x3,&y3);
 
-   X += x1;
+   Float64 X = distFromLeftEdge + x1;
 
    Float64 y;
    if ( ::InRange(x1,X,x2) )
@@ -774,6 +776,36 @@ void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType row
 }
 
 //////////////////////////////////////////
+// IXBRStirrups
+IndexType CPierAgentImp::GetStirrupZoneCount(xbrTypes::Stage stage)
+{
+   ValidateStirrupZones();
+   return m_StirrupZones[stage].size();
+}
+
+void CPierAgentImp::GetStirrupZoneBoundary(xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend)
+{
+   ValidateStirrupZones();
+   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   *pXstart = zone.Xstart;
+   *pXend   = zone.Xend;
+}
+
+Float64 CPierAgentImp::GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+{
+   ValidateStirrupZones();
+   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   return zone.S;
+}
+
+IndexType CPierAgentImp::GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+{
+   ValidateStirrupZones();
+   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   return zone.nStirrups;
+}
+
+//////////////////////////////////////////
 // IXBRointOfInterest
 std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PoiAttributeType attrib)
 {
@@ -818,6 +850,7 @@ void CPierAgentImp::Validate()
       // Build Pier Description using raw data from the project agent
    }
 
+   ValidateStirrupZones();
    ValidatePointsOfInterest();
 }
 
@@ -826,6 +859,157 @@ void CPierAgentImp::Invalidate()
    m_Pier.Release();
 
    m_XBeamPoi.clear();
+
+   m_StirrupZones[xbrTypes::Stage1].clear();
+   m_StirrupZones[xbrTypes::Stage2].clear();
+   m_bStirrupZonesValid = false;
+}
+
+void CPierAgentImp::ValidateStirrupZones()
+{
+   if ( m_bStirrupZonesValid )
+   {
+      return;
+   }
+
+   GET_IFACE(IXBRProject,pProject);
+   const xbrPierData& pierData = pProject->GetPierData();
+   ValidateStirrupZones(pierData.GetLowerXBeamStirrups(),&m_StirrupZones[xbrTypes::Stage1]);
+   ValidateStirrupZones(pierData.GetFullDepthStirrups(), &m_StirrupZones[xbrTypes::Stage2]);
+ 
+   m_bStirrupZonesValid = true;
+}
+
+void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones)
+{
+   // Map the input stirrup zones into actual stirrup zones
+   pvStirrupZones->clear();
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 L = pProject->GetXBeamLength();
+
+   matRebar::Type type;
+   matRebar::Grade grade;
+   pProject->GetRebarMaterial(&type,&grade);
+   lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
+
+   if ( stirrupData.Symmetric )
+   {
+      Float64 Xstart = 0;
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.begin());
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.end());
+      for ( ; iter != end; iter++ )
+      {
+         const xbrStirrupData::StirrupZone& zone(*iter);
+         const matRebar* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
+         Float64 av = pRebar->GetNominalArea();
+         Float64 Av = av*zone.nBars;
+         
+         ATLASSERT(!IsZero(zone.BarSpacing));// UI should have prevented this
+         Float64 Av_over_S = Av/zone.BarSpacing;
+
+         StirrupZone myZone;
+         myZone.Av_over_S = Av_over_S;
+         myZone.BarSize = zone.BarSize;
+         myZone.S = zone.BarSpacing;
+         myZone.nLegs = zone.nBars;
+
+         Float64 Xend = Xstart + zone.Length;
+         bool bDone = false;
+         if ( L/2 < Xend )
+         {
+            Xend = L/2;
+            bDone = true;
+         }
+         myZone.Xstart = Xstart;
+         myZone.Xend = Xend;
+         myZone.Length = Xend - Xstart;
+
+         pvStirrupZones->push_back(myZone);
+         Xstart = Xend;
+         if ( bDone )
+         {
+            break;
+         }
+      }
+
+      // make sure last zone goes to centerline of xbeam
+      if ( pvStirrupZones->back().Xend < L/2 )
+      {
+         pvStirrupZones->back().Xend = L/2;
+         pvStirrupZones->back().Length = pvStirrupZones->back().Xend - pvStirrupZones->back().Xstart;
+      }
+
+      // we've gone half-way... double the size of the last zone saved
+      // This is the zone that is symmetric about the centerline of the XBeam
+      pvStirrupZones->back().Length *= 2;
+      pvStirrupZones->back().Xend = pvStirrupZones->back().Xstart + pvStirrupZones->back().Length;
+
+      // fill this vector with all the previously define stirrup zones. fill in reverse
+      // order and skip the center zone
+      std::vector<StirrupZone> myZones;
+      myZones.insert(myZones.begin(),pvStirrupZones->rbegin()+1,pvStirrupZones->rend());
+      // Adjust the Start/End of the zone
+      BOOST_FOREACH(StirrupZone& myZone,myZones)
+      {
+         myZone.Xstart = L - myZone.Xstart;
+         myZone.Xend   = L - myZone.Xend;
+      }
+
+      // put the mirror zones into the target vector
+      pvStirrupZones->insert(pvStirrupZones->end(),myZones.begin(),myZones.end());
+   }
+   else
+   {
+      Float64 Xstart = 0;
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.begin());
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.end());
+      for ( ; iter != end; iter++ )
+      {
+         const xbrStirrupData::StirrupZone& zone(*iter);
+         const matRebar* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
+         Float64 av = pRebar->GetNominalArea();
+         Float64 Av = av*zone.nBars;
+         
+         ATLASSERT(!IsZero(zone.BarSpacing));// UI should have prevented this
+         Float64 Av_over_S = Av/zone.BarSpacing;
+
+         StirrupZone myZone;
+         myZone.Av_over_S = Av_over_S;
+         myZone.BarSize = zone.BarSize;
+         myZone.S = zone.BarSpacing;
+         myZone.nLegs = zone.nBars;
+
+         Float64 Xend = Xstart + zone.Length;
+         bool bDone = false;
+         if ( L < Xend )
+         {
+            Xend = L;
+            bDone = true;
+         }
+         myZone.Xstart = Xstart;
+         myZone.Xend = Xend;
+         myZone.Length = Xend - Xstart;
+
+         pvStirrupZones->push_back(myZone);
+         Xstart = Xend;
+         if ( bDone )
+         {
+            break;
+         }
+      }
+
+      // make sure the last zone ends at L
+      pvStirrupZones->back().Xend = L;
+      pvStirrupZones->back().Length = pvStirrupZones->back().Xstart - pvStirrupZones->back().Xend;
+   }
+
+   // Compute the number of stirrups in each zone
+   // This is a little inefficient because we are looping through all the zones again, but it is easier and more clear
+   BOOST_FOREACH(StirrupZone& zone,*pvStirrupZones)
+   {
+      zone.nStirrups = IndexType(zone.Length/zone.S);
+   }
 }
 
 void CPierAgentImp::ValidatePointsOfInterest()
@@ -985,6 +1169,15 @@ Float64 CPierAgentImp::GetLeftColumnOffset()
    }
 
    return refColumnOffset;
+}
+
+Float64 CPierAgentImp::GetLeftEdgeLocation()
+{
+   // returns the X coordinate of the left edge of the cross beam
+   GET_IFACE(IXBRProject,pProject);
+   Float64 CPO    = pProject->GetCrownPointOffset(); // distance from Alignment to Crown Point
+   Float64 Xcrown = GetCrownPointLocation();
+   return CPO - Xcrown;
 }
 
 Float64 CPierAgentImp::GetCrownPointLocation()

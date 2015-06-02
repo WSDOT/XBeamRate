@@ -53,6 +53,7 @@ protected:
    void UpdateColumnDisplayObjects();
    void UpdateBearingDisplayObjects();
    void UpdateRebarDisplayObjects();
+   void UpdateStirrupDisplayObjects();
    void UpdateDimensionsDisplayObjects();
 
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
@@ -61,6 +62,8 @@ protected:
 	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint);
 
    IDType m_DisplayObjectID; // used to generate display object IDs
+
+   Float64 m_LeftEdgeOffset;
 
 // Generated message map functions
 protected:

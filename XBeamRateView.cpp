@@ -17,14 +17,11 @@
 
 
 
-#include <Colors.h>
-#define SELECTED_OBJECT_LINE_COLOR     RED4
-#define SELECTED_OBJECT_FILL_COLOR     RED2
+#include <PGSuperColors.h>
 #define COLUMN_LINE_COLOR              GREY50
 #define COLUMN_FILL_COLOR              GREY70
 #define XBEAM_LINE_COLOR               GREY50
 #define XBEAM_FILL_COLOR               GREY70
-#define REBAR_COLOR                    GREEN
 
 #define COLUMN_LINE_WEIGHT             1
 //#define XBEAM_LINE_WEIGHT              3
@@ -35,6 +32,7 @@
 #define COLUMN_DISPLAY_LIST_ID         2
 #define DIMENSIONS_DISPLAY_LIST_ID     3
 #define REBAR_DISPLAY_LIST_ID          4
+#define STIRRUP_DISPLAY_LIST_ID        5
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -189,6 +187,11 @@ void CXBeamRateView::OnInitialUpdate()
 
    displayList.Release();
    ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   displayList->SetID(STIRRUP_DISPLAY_LIST_ID);
+   dispMgr->AddDisplayList(displayList);
+
+   displayList.Release();
+   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(BEARING_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
@@ -222,6 +225,7 @@ void CXBeamRateView::UpdateDisplayObjects()
    UpdateColumnDisplayObjects();
    UpdateBearingDisplayObjects();
    UpdateRebarDisplayObjects();
+   UpdateStirrupDisplayObjects();
    UpdateDimensionsDisplayObjects();
 }
 
@@ -308,6 +312,13 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    CComPtr<IShape> upperXBeamShape;
    pPier->GetUpperXBeamProfile(&upperXBeamShape);
 
+   // Capture the X coordinate of the left edge
+   // We'll need this for other display objects
+   CComQIPtr<IXYPosition> position(upperXBeamShape);
+   CComPtr<IPoint2d> pntTopLeft;
+   position->get_LocatorPoint(lpTopLeft,&pntTopLeft);
+   pntTopLeft->get_X(&m_LeftEdgeOffset);
+
    CComPtr<iShapeDrawStrategy> upperXBeamDrawStrategy;
    upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
    upperXBeamDrawStrategy->SetShape(upperXBeamShape);
@@ -333,7 +344,8 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    upperXBeamShape.Release();
    pSectProp->GetUpperXBeamShape(xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
-   CComQIPtr<IXYPosition> position(upperXBeamShape);
+   position.Release();
+   upperXBeamShape.QueryInterface(&position);
    position->Offset(1.2*Z,0);
 
    upperXBeamDrawStrategy.Release();
@@ -561,6 +573,118 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
          
 
          displayList->AddDisplayObject(doBar);
+      }
+   }
+}
+
+void CXBeamRateView::UpdateStirrupDisplayObjects()
+{
+   CWaitCursor wait;
+
+   CComPtr<iDisplayMgr> dispMgr;
+   GetDisplayMgr(&dispMgr);
+
+   CDManipClientDC dc(this);
+
+   CComPtr<iDisplayList> displayList;
+   dispMgr->FindDisplayList(STIRRUP_DISPLAY_LIST_ID,&displayList);
+
+   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
+   CComPtr<IBroker> pBroker;
+   pDoc->GetBroker(&pBroker);
+
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   GET_IFACE2(pBroker,IXBRSectionProperties,pSectProps);
+
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   Float64 H,W;
+   pProject->GetDiaphragmDimensions(&H,&W);
+
+   GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
+   for ( int i = 0; i < 2; i++ )
+   {
+      xbrTypes::Stage stage = (xbrTypes::Stage)i;
+      IndexType nStirrupZones = pStirrups->GetStirrupZoneCount(stage);
+      for ( IndexType zoneIdx = 0; zoneIdx < nStirrupZones; zoneIdx++ )
+      {
+         Float64 Xstart, Xend;
+         pStirrups->GetStirrupZoneBoundary(stage,zoneIdx,&Xstart,&Xend);
+         
+         IndexType nStirrups = pStirrups->GetStirrupCount(stage,zoneIdx);
+         Float64 S = pStirrups->GetStirrupZoneSpacing(stage,zoneIdx);
+
+         for ( IndexType stirrupIdx = 0; stirrupIdx < nStirrups; stirrupIdx++ )
+         {
+            Float64 distFromLeftEdge = Xstart + stirrupIdx*S;
+            Float64 Ytop = pPier->GetElevation(distFromLeftEdge);
+
+            Float64 D = pSectProps->GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,distFromLeftEdge));
+            Float64 Ybot = Ytop - D;
+
+            if ( stage == xbrTypes::Stage1 )
+            {
+               Ytop -= H;
+            }
+
+            CComPtr<IPoint2d> pntTop;
+            pntTop.CoCreateInstance(CLSID_Point2d);
+            pntTop->Move(distFromLeftEdge+m_LeftEdgeOffset,Ytop);
+
+            CComPtr<iPointDisplayObject> doTopPnt;
+            doTopPnt.CoCreateInstance(CLSID_PointDisplayObject);
+            doTopPnt->SetID(m_DisplayObjectID++);
+            doTopPnt->SetPosition(pntTop,FALSE,FALSE);
+
+            CComQIPtr<iConnectable> startConnectable(doTopPnt);
+            CComPtr<iSocket> startSocket;
+            startConnectable->AddSocket(0,pntTop,&startSocket);
+
+            CComPtr<iDrawPointStrategy> draw_point_strategy;
+            doTopPnt->GetDrawingStrategy(&draw_point_strategy);
+            CComQIPtr<iSimpleDrawPointStrategy> thePointDrawStrategy(draw_point_strategy);
+            thePointDrawStrategy->SetColor(STIRRUP_COLOR);
+            thePointDrawStrategy->SetPointType(ptNone);
+
+            CComPtr<IPoint2d> pntBottom;
+            pntBottom.CoCreateInstance(CLSID_Point2d);
+            pntBottom->Move(distFromLeftEdge+m_LeftEdgeOffset,Ybot);
+
+            CComPtr<iPointDisplayObject> doBottomPnt;
+            doBottomPnt.CoCreateInstance(CLSID_PointDisplayObject);
+            doBottomPnt->SetID(m_DisplayObjectID++);
+            doBottomPnt->SetPosition(pntBottom,FALSE,FALSE);
+
+            CComQIPtr<iConnectable> endConnectable(doBottomPnt);
+            CComPtr<iSocket> endSocket;
+            endConnectable->AddSocket(0,pntBottom,&endSocket);
+
+            draw_point_strategy.Release();
+            doBottomPnt->GetDrawingStrategy(&draw_point_strategy);
+            thePointDrawStrategy.Release();
+            draw_point_strategy.QueryInterface(&thePointDrawStrategy);
+            thePointDrawStrategy->SetColor(STIRRUP_COLOR);
+            thePointDrawStrategy->SetPointType(ptNone);
+
+            CComPtr<iLineDisplayObject> doLine;
+            doLine.CoCreateInstance(CLSID_LineDisplayObject);
+            doLine->SetID(m_DisplayObjectID++);
+            CComQIPtr<iConnector> connector(doLine);
+            CComPtr<iPlug> startPlug, endPlug;
+            connector->GetStartPlug(&startPlug);
+            connector->GetEndPlug(&endPlug);
+            startPlug->SetSocket(startSocket);
+            endPlug->SetSocket(endSocket);
+
+            CComPtr<iDrawLineStrategy> strategy;
+            doLine->GetDrawLineStrategy(&strategy);
+            CComQIPtr<iSimpleDrawLineStrategy> theStrategy(strategy);
+            theStrategy->SetColor(STIRRUP_COLOR);
+            theStrategy->SetEndType(leNone);
+
+            displayList->AddDisplayObject(doTopPnt);
+            displayList->AddDisplayObject(doBottomPnt);
+            displayList->AddDisplayObject(doLine);
+         }
       }
    }
 }

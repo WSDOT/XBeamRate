@@ -49,6 +49,7 @@ class ATL_NO_VTABLE CPierAgentImp :
    public IXBRSectionProperties,
    public IXBRMaterial,
    public IXBRRebar,
+   public IXBRStirrups,
    public IXBRPointOfInterest,
    public IXBRProjectEventSink
 {  
@@ -70,6 +71,7 @@ BEGIN_COM_MAP(CPierAgentImp)
    COM_INTERFACE_ENTRY(IXBRSectionProperties)
    COM_INTERFACE_ENTRY(IXBRMaterial)
    COM_INTERFACE_ENTRY(IXBRRebar)
+   COM_INTERFACE_ENTRY(IXBRStirrups)
    COM_INTERFACE_ENTRY(IXBRPointOfInterest)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
@@ -105,7 +107,7 @@ public:
    virtual void GetUpperXBeamProfile(IShape** ppShape);
    virtual void GetLowerXBeamProfile(IShape** ppShape);
 
-   virtual Float64 GetElevation(Float64 X);
+   virtual Float64 GetElevation(Float64 distFromLeftEdge);
 
 // IXBRSectionProperties
 public:
@@ -129,6 +131,13 @@ public:
    virtual void GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints);
    virtual Float64 GetRebarRowLocation(const xbrPointOfInterest& poi,IndexType rowIdx);
    virtual void GetRebarLocation(const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
+
+// IXBRStirrups
+public:
+   virtual IndexType GetStirrupZoneCount(xbrTypes::Stage stage);
+   virtual void GetStirrupZoneBoundary(xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend);
+   virtual Float64 GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType zoneIdx);
+   virtual IndexType GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx);
 
 // IXBRPointOfInterest
 public:
@@ -156,8 +165,25 @@ private:
 
    Float64 GetLeftBearingOffset(IndexType brgLineIdx);
    Float64 GetLeftColumnOffset();
+   Float64 GetLeftEdgeLocation();
    Float64 GetCrownPointLocation();
    Float64 GetSkewAngle();
+
+   typedef struct
+   {
+      Float64 Xstart;
+      Float64 Xend;
+      Float64 Length;
+      matRebar::Size BarSize;
+      Float64 S;
+      Float64 Av_over_S;
+      Float64 nLegs;
+      IndexType nStirrups;
+   } StirrupZone;
+   std::vector<StirrupZone> m_StirrupZones[2]; // use xbrTypes::Stage to access array
+   void ValidateStirrupZones();
+   void ValidateStirrupZones(const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones);
+   bool m_bStirrupZonesValid;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)

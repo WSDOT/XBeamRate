@@ -28,7 +28,7 @@ interface IXBRPier : public IUnknown
    virtual void GetUpperXBeamProfile(IShape** ppShape) = 0;
    virtual void GetLowerXBeamProfile(IShape** ppShape) = 0;
 
-   virtual Float64 GetElevation(Float64 X) = 0;
+   virtual Float64 GetElevation(Float64 distFromLeftEdge) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}
@@ -67,4 +67,18 @@ interface IXBRRebar : public IUnknown
    // Returns the depth to a rebar row, measured from the top of the cross beam
    virtual Float64 GetRebarRowLocation(const xbrPointOfInterest& poi,IndexType rowIdx) = 0;
    virtual void GetRebarLocation(const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
+};
+
+// {025A63FF-9FE0-4733-8AB9-B1B6B96E0F7B}
+DEFINE_GUID(IID_IXBRStirrups, 
+0x25a63ff, 0x9fe0, 0x4733, 0x8a, 0xb9, 0xb1, 0xb6, 0xb9, 0x6e, 0xf, 0x7b);
+interface IXBRStirrups : public IUnknown
+{
+   // Stage 1 = Lower cross beam
+   // Stage 2 = Full depth cross beam
+
+   virtual IndexType GetStirrupZoneCount(xbrTypes::Stage stage) = 0;
+   virtual void GetStirrupZoneBoundary(xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend) = 0;
+   virtual Float64 GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType zoneIdx) = 0;
+   virtual IndexType GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx) = 0;
 };
