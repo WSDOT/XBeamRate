@@ -1379,5 +1379,9 @@ void CProjectAgentImp::RemoveMenus()
 
    // remove the Edit menu
    UINT editPos = pMenu->FindMenuItem(_T("&Edit"));
+#if defined _DEBUG
+   UINT filePos = pMenu->FindMenuItem(_T("&File"));
+   ATLASSERT(filePos+1 == editPos);
+#endif
    VERIFY(pMenu->RemoveMenu(editPos,MF_BYPOSITION,this));
 }
