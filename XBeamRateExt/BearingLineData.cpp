@@ -128,7 +128,11 @@ HRESULT xbrBearingLineData::Load(IStructuredLoad* pStrLoad)
    try
    {
       CComVariant var;
-      hr = pStrLoad->BeginUnit(_T("BearingLine"));
+      HRESULT hRes = pStrLoad->BeginUnit(_T("BearingLine"));
+      if ( FAILED(hRes) )
+      {
+         return hRes;
+      }
 
       var.vt = VT_I4;
       hr = pStrLoad->get_Property(_T("RefBrgDatum"),&var);

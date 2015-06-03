@@ -544,8 +544,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      reaction.DW = var.dblVal;
 
                      vBearingReactions.push_back(reaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndOfStorage(); // Reaction
 
                   m_vvBearingReactions.push_back(vBearingReactions);
                }
@@ -570,8 +570,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Design_Inventory
 
                   hr = pStrLoad->BeginUnit(_T("Design_Operating"));
@@ -588,8 +588,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrDesign_Operating].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Design_Operating
 
                   hr = pStrLoad->BeginUnit(_T("Legal_Routine"));
@@ -606,8 +606,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Legal_Routine
 
                   hr = pStrLoad->BeginUnit(_T("Legal_Special"));
@@ -624,8 +624,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrLegal_Special].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Legal_Special
 
                   hr = pStrLoad->BeginUnit(_T("Permit_Routine"));
@@ -642,8 +642,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrPermit_Routine].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Permit_Routine
 
                   hr = pStrLoad->BeginUnit(_T("Permit_Special"));
@@ -660,8 +660,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      llReaction.LLIM = var.dblVal;
 
                      m_vLiveLoadReactions[pgsTypes::lrPermit_Special].push_back(llReaction);
+                     hr = pStrLoad->EndUnit(); // Reaction
                   }
-                  hr = pStrLoad->EndUnit(); // Reaction
                   hr = pStrLoad->EndUnit(); // Permit_Special
                }
                hr = pStrLoad->EndUnit(); // LiveLoad

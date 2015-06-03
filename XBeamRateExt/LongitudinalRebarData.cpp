@@ -82,7 +82,6 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pPro
       RebarRows.clear();
       while ( SUCCEEDED(pStrLoad->BeginUnit(_T("RebarRow"))) )
       {
-         hr = pStrLoad->BeginUnit(_T("RebarRow"));
          RebarRow rebar_row;
 
          var.vt = VT_I4;
