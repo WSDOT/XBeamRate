@@ -5,9 +5,9 @@
 
 typedef Uint32 PoiAttributeType; // NOTE: if more bits are needed use a 64-bit type
 
-#define POI_SECTCHANGE   0x00000001
-#define POI_COLUMN       0x00000002 // POI at in XBeam at CL of Column
-#define POI_BRG          0x00000004 // POI in XBeam at CL Girder Bearing Point
+#define POI_SECTIONCHANGE 0x00000001
+#define POI_COLUMN        0x00000002 // POI at in XBeam at CL of Column
+#define POI_BRG           0x00000004 // POI in XBeam at CL Girder Bearing Point
 
 class XBREXTCLASS xbrPointOfInterest
 {

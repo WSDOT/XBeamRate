@@ -448,7 +448,7 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
    }
 
    GET_IFACE(IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(POI_SECTCHANGE);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(POI_SECTIONCHANGE);
 
    GET_IFACE(IXBRSectionProperties,pSectProp);
    GET_IFACE(IXBRMaterial,pMaterial);

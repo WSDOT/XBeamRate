@@ -1048,25 +1048,25 @@ void CPierAgentImp::ValidatePointsOfInterest()
    Float64 L = pProject->GetXBeamLength();
 
    // Put a POI at every location the section changes depth
-   m_XBeamPoi.push_back(xbrPointOfInterest(id++,0.0,POI_SECTCHANGE));
+   m_XBeamPoi.push_back(xbrPointOfInterest(id++,0.0,POI_SECTIONCHANGE));
 
    if ( !IsZero(X1) )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,X1,POI_SECTCHANGE));
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,X1,POI_SECTIONCHANGE));
    }
 
    Float64 crownPoint = GetCrownPointLocation();
    if ( 0 < crownPoint && crownPoint < L )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,crownPoint,POI_SECTCHANGE));
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,crownPoint,POI_SECTIONCHANGE));
    }
 
    if ( !IsZero(X2) )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,L-X2,POI_SECTCHANGE));
+      m_XBeamPoi.push_back(xbrPointOfInterest(id++,L-X2,POI_SECTIONCHANGE));
    }
 
-   m_XBeamPoi.push_back(xbrPointOfInterest(id++,L,POI_SECTCHANGE));
+   m_XBeamPoi.push_back(xbrPointOfInterest(id++,L,POI_SECTIONCHANGE));
 
    // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
    Float64 LeftOH = pProject->GetXBeamLeftOverhang(); 

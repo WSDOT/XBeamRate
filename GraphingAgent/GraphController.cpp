@@ -26,6 +26,12 @@
 #include "GraphController.h"
 #include "GraphBuilder.h"
 
+#include <IFace\XBeamRateAgent.h>
+#include <\ARP\PGSuper\Include\IFace\Bridge.h>
+
+#include <PgsExt\GirderLabel.h>
+#include <EAF\EAFUtilities.h>
+
 IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
 
 CXBRGraphController::CXBRGraphController()
@@ -43,6 +49,36 @@ BOOL CXBRGraphController::OnInitDialog()
 
    CEAFGraphControlWindow::OnInitDialog();
    CheckRadioButton(IDC_MOMENT,IDC_SHEAR,IDC_MOMENT);
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   CComboBox* pcbPiers = (CComboBox*)GetDlgItem(IDC_PIERS);
+   CComPtr<IXBeamRateAgent> pXBR;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
+   if ( SUCCEEDED(hr) )
+   {
+      // We are extending PGSuper/PGSplice
+      // Fill the combo box with piers
+      GET_IFACE2(pBroker,IBridge,pBridge);
+      PierIndexType nPiers = pBridge->GetPierCount();
+      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      {
+         CString strPier;
+         strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+         int idx = pcbPiers->AddString(strPier);
+         pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+      }
+   }
+   else
+   {
+      int idx = pcbPiers->AddString(_T("Pier 2")); // put a dummy pier in the combo box
+      pcbPiers->SetItemData(idx,(DWORD_PTR)1);
+      // so when we get the pier index there is something to return
+      pcbPiers->ShowWindow(SW_HIDE);
+   }
+   pcbPiers->SetCurSel(0);
+
    return TRUE;
 }
 
@@ -89,6 +125,14 @@ ActionType CXBRGraphController::GetActionType()
       return actionMoment;
    else
       return actionShear;
+}
+
+PierIndexType CXBRGraphController::GetPier()
+{
+   CComboBox* pcbPier = (CComboBox*)GetDlgItem(IDC_PIERS);
+   int curSel = pcbPier->GetCurSel();
+   PierIndexType pierIdx = (PierIndexType)(pcbPier->GetItemData(curSel));
+   return pierIdx;
 }
 
 void CXBRGraphController::FillLoadingList()
