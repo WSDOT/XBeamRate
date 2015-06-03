@@ -476,6 +476,7 @@ void CXBRGraphBuilder::BuildCapacityGraph(const std::vector<xbrPointOfInterest>&
       else
       {
          Float64 V = pShearCapacity->GetShearCapacity(poi);
+         V = pVerticalAxisFormat->Convert(V);
          graph.AddPoint(positiveGraphIdx,gpPoint2d(X,V));
          graph.AddPoint(negativeGraphIdx,gpPoint2d(X,-V));
       }

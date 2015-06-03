@@ -77,8 +77,9 @@ interface IXBRStirrups : public IUnknown
    // Stage 1 = Lower cross beam
    // Stage 2 = Full depth cross beam
 
-   virtual IndexType GetStirrupZoneCount(xbrTypes::Stage stage) = 0;
+   virtual ZoneIndexType GetStirrupZoneCount(xbrTypes::Stage stage) = 0;
    virtual void GetStirrupZoneBoundary(xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend) = 0;
    virtual Float64 GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType zoneIdx) = 0;
+   virtual Float64 GetStirrupZoneReinforcement(xbrTypes::Stage stage,ZoneIndexType zoneIdx) = 0;
    virtual IndexType GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx) = 0;
 };

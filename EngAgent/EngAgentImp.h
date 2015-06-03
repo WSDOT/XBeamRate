@@ -122,6 +122,9 @@ private:
    MomentCapacityDetails GetMomentCapacityDetails(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    MomentCapacityDetails ComputeMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
 
+   Float64 GetDv(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   Float64 GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
+
 
    std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key
    void CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);

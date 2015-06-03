@@ -72,6 +72,7 @@ protected:
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CXBeamRateDoc)
+   afx_msg void OnAbout();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

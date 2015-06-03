@@ -151,45 +151,23 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
    Float64 theta = M_PI/4; // 45 deg
 
    GET_IFACE(IXBRProject,pProject);
-   GET_IFACE(IXBRSectionProperties,pSectProps);
 
-   // LRFD 5.8.2.9
-   // dv = Distance between C and T, but not less than Max(0.9de and 0.72h)
-   Float64 dv1 = 0;
-   Float64 dv2 = 0;
-   Float64 Av_over_S1 = 0;
-   Float64 Av_over_S2 = 0;
+   matRebar::Type type;
+   matRebar::Grade grade;
+   pProject->GetRebarMaterial(&type,&grade);
+   Float64 fy = matRebar::GetYieldStrength(type,grade);
 
-   Float64 h1 = pSectProps->GetDepth(xbrTypes::Stage1,poi);
-   MomentCapacityDetails posCapacityDetails1 = GetMomentCapacityDetails(xbrTypes::Stage1,poi,true);
-   MomentCapacityDetails negCapacityDetails1 = GetMomentCapacityDetails(xbrTypes::Stage1,poi,false);
-   Float64 posMomentArm1 = posCapacityDetails1.de - posCapacityDetails1.dc;
-   Float64 posDv1 = Max(posMomentArm1,0.9*posCapacityDetails1.de,0.72*h1);
-   Float64 negMomentArm1 = negCapacityDetails1.de - negCapacityDetails1.dc;
-   Float64 negDv1 = Max(negMomentArm1,0.9*negCapacityDetails1.de,0.72*h1);
-   dv1 = Min(posDv1,negDv1);
-   // Av_over_S1 = ?; // need to do the computation (need to do the averaging over the 45deg crack width)
 
-   if ( pProject->GetPierType() == xbrTypes::pctIntegral )
-   {
-      Float64 h2 = pSectProps->GetDepth(xbrTypes::Stage2,poi);
-      MomentCapacityDetails posCapacityDetails2 = GetMomentCapacityDetails(xbrTypes::Stage2,poi,true);
-      MomentCapacityDetails negCapacityDetails2 = GetMomentCapacityDetails(xbrTypes::Stage2,poi,false);
-      Float64 posMomentArm2 = posCapacityDetails2.de - posCapacityDetails2.dc;
-      Float64 posDv2 = Max(posMomentArm2,0.9*posCapacityDetails2.de,0.72*h2);
-      Float64 negMomentArm2 = negCapacityDetails2.de - negCapacityDetails2.dc;
-      Float64 negDv2 = Max(negMomentArm2,0.9*negCapacityDetails2.de,0.72*h2);
-      dv2 = Min(posDv2,negDv2);
-      // Av_over_S = ?; // need to do the computation (need to do the averaging over the 45deg crack width)
-   }
+   Float64 dv1 = GetDv(xbrTypes::Stage1,poi);
+   Float64 dv2 = GetDv(xbrTypes::Stage2,poi);
+   Float64 Av_over_S1 = GetAverageAvOverS(xbrTypes::Stage1,poi,theta);
+   Float64 Av_over_S2 = GetAverageAvOverS(xbrTypes::Stage2,poi,theta);
 
-#pragma Reminder("WORKING HERE: Need to finish shear capacity- need stirrup information")
    // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
    Float64 fc = pProject->GetConcrete().Fc;
-   Float64 fy = 0;
    Float64 bv = pProject->GetXBeamWidth();
    Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
-   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*Max(dv1,dv2);
+   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*Max(dv1,dv2); // if non-integral, dv2 is zero so dv1 will be max, otherwise dv2 should be max
    Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
    Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
    Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
@@ -367,6 +345,79 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
    return capacityDetails;
 }
 
+Float64 CEngAgentImp::GetDv(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   GET_IFACE(IXBRProject,pProject);
+   if ( pProject->GetPierType() != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
+   {
+      // there isn't stage 2 for non-integral cross beams
+      return 0;
+   }
+
+   GET_IFACE(IXBRSectionProperties,pSectProps);
+   Float64 h = pSectProps->GetDepth(stage,poi);
+   MomentCapacityDetails posCapacityDetails = GetMomentCapacityDetails(stage,poi,true);
+   MomentCapacityDetails negCapacityDetails = GetMomentCapacityDetails(stage,poi,false);
+   Float64 posMomentArm = posCapacityDetails.de - posCapacityDetails.dc;
+   Float64 posDv = Max(posMomentArm,0.9*posCapacityDetails.de,0.72*h);
+   Float64 negMomentArm = negCapacityDetails.de - negCapacityDetails.dc;
+   Float64 negDv = Max(negMomentArm,0.9*negCapacityDetails.de,0.72*h);
+   Float64 dv = Min(posDv,negDv);
+   return dv;
+}
+
+Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
+{
+   GET_IFACE(IXBRProject,pProject);
+   if ( pProject->GetPierType() != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
+   {
+      // there isn't stage 2 for non-integral cross beams
+      return 0;
+   }
+
+   Float64 L = pProject->GetXBeamLength();
+
+   // Get start/end of the shear failur plane at the poi
+   Float64 dv = GetDv(stage,poi);
+   Float64 sfpStart = poi.GetDistFromStart() - dv/tan(theta);
+   Float64 sfpEnd   = poi.GetDistFromStart() + dv/tan(theta);
+
+   Float64 Avg_Av_over_S = 0;
+   GET_IFACE(IXBRStirrups,pStirrups);
+   ZoneIndexType nZones = pStirrups->GetStirrupZoneCount(stage);
+   for ( ZoneIndexType zoneIdx = 0; zoneIdx < nZones; zoneIdx++ )
+   {
+      Float64 szStart, szEnd;
+      pStirrups->GetStirrupZoneBoundary(stage,zoneIdx,&szStart,&szEnd);
+
+      if ( szEnd <= sfpStart )
+      {
+         // The shear failure plane starts after this zone ends
+         // This zone does not contribute stirrups to average Av/S
+         // Continue with the next zone
+         continue;
+      }
+
+      if ( sfpEnd <= szStart )
+      {
+         // The shear failure plane ends before this zone starts
+         // This zone, and all zones that come after it, does not contribute stirrups to average Av/S
+         // Break here so we don't have to process the remaining zones
+         break;
+      }
+
+      Float64 start = Max(szStart,sfpStart,0.0);
+      Float64 end   = Min(szEnd,  sfpEnd,  L);
+      Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(stage,zoneIdx);
+
+      Avg_Av_over_S += Av_over_S*(end-start);
+   }
+
+   Avg_Av_over_S /= (dv/tan(theta));
+
+   return Avg_Av_over_S;
+}
+
 void CEngAgentImp::CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
 {
    xbrLoadRater loadRater(m_pBroker);
@@ -374,3 +425,4 @@ void CEngAgentImp::CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,Vehi
    std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIndex,artifact));
    ATLASSERT(result.second == true);
 }
+

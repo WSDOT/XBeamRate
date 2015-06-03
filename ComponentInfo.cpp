@@ -71,7 +71,7 @@ CString CXBeamRateComponentInfo::GetDescription()
 HICON CXBeamRateComponentInfo::GetIcon()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return AfxGetApp()->LoadIcon(IDI_ICON);
+   return AfxGetApp()->LoadIcon(IDR_XBEAMRATE);
 }
 
 bool CXBeamRateComponentInfo::HasMoreInfo()

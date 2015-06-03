@@ -8,6 +8,8 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateDocProxyAgent.h"
 
+#include "AboutDlg.h"
+
 #include <XBeamRateCatCom.h>
 
 #include <EAF\EAFMainFrame.h>
@@ -29,6 +31,7 @@ IMPLEMENT_DYNCREATE(CXBeamRateDoc, CEAFBrokerDocument)
 
 BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
 	//{{AFX_MSG_MAP(CXBeamRateDoc)
+   ON_COMMAND(ID_HELP_ABOUT, OnAbout)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -343,4 +346,15 @@ void CXBeamRateDoc::PopulateGraphMenu()
    ASSERT(pGraphMenu != NULL);
 
    CEAFBrokerDocument::PopulateGraphMenu(pGraphMenu);
+}
+
+void CXBeamRateDoc::OnAbout()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   UINT resourceID = pTemplate->GetResourceID();
+
+   CAboutDlg dlg(resourceID);
+   dlg.DoModal();
 }

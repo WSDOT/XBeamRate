@@ -218,7 +218,7 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
    matRebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
    CString strBarSizeChoiceList;
-   lrfdRebarIter rebarIter(grade,type,matRebar::bs9); // only want bars up to and including #9 (anything bigger isn't a stirrup)
+   lrfdRebarIter rebarIter(grade,type,true/*stirrup only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       const matRebar* pRebar = rebarIter.GetCurrentRebar();
@@ -311,7 +311,7 @@ matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
    matRebar::Type type;
    matRebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(grade,type);
+   lrfdRebarIter rebarIter(grade,type,true/*stirrups only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )

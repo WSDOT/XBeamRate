@@ -777,7 +777,7 @@ void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType row
 
 //////////////////////////////////////////
 // IXBRStirrups
-IndexType CPierAgentImp::GetStirrupZoneCount(xbrTypes::Stage stage)
+ZoneIndexType CPierAgentImp::GetStirrupZoneCount(xbrTypes::Stage stage)
 {
    ValidateStirrupZones();
    return m_StirrupZones[stage].size();
@@ -796,6 +796,13 @@ Float64 CPierAgentImp::GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType
    ValidateStirrupZones();
    const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
    return zone.S;
+}
+
+Float64 CPierAgentImp::GetStirrupZoneReinforcement(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+{
+   ValidateStirrupZones();
+   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   return zone.Av_over_S;
 }
 
 IndexType CPierAgentImp::GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
@@ -914,7 +921,7 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
          myZone.S = zone.BarSpacing;
          myZone.nLegs = zone.nBars;
 
-         Float64 Xend = Xstart + zone.Length;
+         Float64 Xend = (iter+1 == end ? Xstart + L/2 : Xstart + zone.Length);
          bool bDone = false;
          if ( L/2 < Xend )
          {
@@ -923,6 +930,7 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
          }
          myZone.Xstart = Xstart;
          myZone.Xend = Xend;
+         ATLASSERT(myZone.Xstart < myZone.Xend);
          myZone.Length = Xend - Xstart;
 
          pvStirrupZones->push_back(myZone);
@@ -952,8 +960,12 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
       // Adjust the Start/End of the zone
       BOOST_FOREACH(StirrupZone& myZone,myZones)
       {
-         myZone.Xstart = L - myZone.Xstart;
-         myZone.Xend   = L - myZone.Xend;
+         Float64 Xstart = myZone.Xstart;
+         Float64 Xend   = myZone.Xend;
+
+         myZone.Xstart = L - Xend;
+         myZone.Xend   = L - Xstart;
+         ATLASSERT(myZone.Xstart < myZone.Xend);
       }
 
       // put the mirror zones into the target vector
@@ -980,7 +992,7 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
          myZone.S = zone.BarSpacing;
          myZone.nLegs = zone.nBars;
 
-         Float64 Xend = Xstart + zone.Length;
+         Float64 Xend = (iter+1 == end ? Xstart + L : Xstart + zone.Length);
          bool bDone = false;
          if ( L < Xend )
          {
@@ -989,6 +1001,7 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
          }
          myZone.Xstart = Xstart;
          myZone.Xend = Xend;
+         ATLASSERT(myZone.Xstart < myZone.Xend);
          myZone.Length = Xend - Xstart;
 
          pvStirrupZones->push_back(myZone);
@@ -1008,6 +1021,10 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
    // This is a little inefficient because we are looping through all the zones again, but it is easier and more clear
    BOOST_FOREACH(StirrupZone& zone,*pvStirrupZones)
    {
+      ATLASSERT(0 <= zone.Xstart && zone.Xstart <= L);
+      ATLASSERT(0 <= zone.Xend   && zone.Xend   <= L);
+      ATLASSERT(zone.Xstart < zone.Xend);
+
       zone.nStirrups = IndexType(zone.Length/zone.S);
    }
 }
