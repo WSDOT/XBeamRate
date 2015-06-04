@@ -379,8 +379,8 @@ Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfIn
 
    // Get start/end of the shear failur plane at the poi
    Float64 dv = GetDv(stage,poi);
-   Float64 sfpStart = poi.GetDistFromStart() - dv/tan(theta);
-   Float64 sfpEnd   = poi.GetDistFromStart() + dv/tan(theta);
+   Float64 sfpStart = Max(poi.GetDistFromStart() - dv/(2*tan(theta)),0.0);
+   Float64 sfpEnd   = Min(poi.GetDistFromStart() + dv/(2*tan(theta)),L);
 
    Float64 Avg_Av_over_S = 0;
    GET_IFACE(IXBRStirrups,pStirrups);
@@ -413,7 +413,11 @@ Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfIn
       Avg_Av_over_S += Av_over_S*(end-start);
    }
 
-   Avg_Av_over_S /= (dv/tan(theta));
+   // average Av/S over the length of the shear failure plane
+   // (if we are near the ends, it can be less than dv)
+   Float64 Lsfp = sfpEnd - sfpStart;
+   ATLASSERT(::IsLE(Lsfp,dv/tan(theta)));
+   Avg_Av_over_S /= Lsfp;
 
    return Avg_Av_over_S;
 }
