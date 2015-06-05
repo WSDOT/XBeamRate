@@ -165,7 +165,7 @@ void CXBeamRateAgent::CreateMenus()
    GET_IFACE(IEAFMainMenu,pMainMenu);
    CEAFMenu* pMenu = pMainMenu->GetMainMenu();
 
-   UINT viewPos = pMenu->FindMenuItem(_T("&View"));
+   UINT viewPos = pMenu->FindMenuItem(_T("View"));
    CEAFMenu* pViewMenu = pMenu->GetSubMenu(viewPos);
    UINT graphsPos = pViewMenu->FindMenuItem(_T("Graphs"));
    pViewMenu->InsertMenu(graphsPos-1,ID_VIEW_PIER,_T("&Pier View"),this);
