@@ -1059,13 +1059,13 @@ void CProjectAgentImp::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* p
    m_PierData.GetRebarMaterial(pType,pGrade);
 }
 
-void CProjectAgentImp::SetConcrete(const xbrConcreteMaterial& concrete)
+void CProjectAgentImp::SetConcrete(const CConcreteMaterial& concrete)
 {
    m_PierData.SetConcreteMaterial(concrete);
    Fire_OnProjectChanged();
 }
 
-const xbrConcreteMaterial& CProjectAgentImp::GetConcrete()
+const CConcreteMaterial& CProjectAgentImp::GetConcrete()
 {
    return m_PierData.GetConcreteMaterial();
 }

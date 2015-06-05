@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "StirrupGrid.h"
-#include "ReinforcementPage.h"
+#include <XBeamRateExt\ReinforcementPage.h>
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFApp.h>
@@ -339,7 +339,6 @@ void CStirrupGrid::SetSymmetry(bool isSymmetrical)
       .SetEnabled(FALSE)
       .SetReadOnly(TRUE)
       .SetInterior(::GetSysColor(COLOR_BTNFACE))
-      //.SetTextColor(::GetSysColor(COLOR_BTNFACE))
       .SetValue(lastzlen)
       );
 

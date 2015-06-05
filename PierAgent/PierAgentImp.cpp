@@ -604,14 +604,14 @@ void CPierAgentImp::GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** pp
 Float64 CPierAgentImp::GetXBeamDensity()
 {
    GET_IFACE(IXBRProject,pProject);
-   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete();
    return concrete.WeightDensity;
 }
 
 Float64 CPierAgentImp::GetXBeamEc()
 {
    GET_IFACE(IXBRProject,pProject);
-   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete();
    Float64 Ec;
    if ( concrete.bUserEc )
    {

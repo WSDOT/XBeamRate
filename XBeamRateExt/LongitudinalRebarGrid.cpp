@@ -2,7 +2,7 @@
 // LongitudinalRebarGrid.cpp : implementation file
 //
 
-#pragma Reminder("Update all grids of PGSuper with the techniques for getting rebar information used here")
+#pragma Reminder("UPDATE: Update all grids of PGSuper with the techniques for getting rebar information used here")
 // rebar information is "discovered" rather than hard coded
 
 #include "stdafx.h"
@@ -10,8 +10,7 @@
 #include "LongitudinalRebarGrid.h"
 #include <EAF\EAFDisplayUnits.h>
 #include <LRFD\RebarPool.h>
-#include "ReinforcementPage.h"
-#include "PierDlg.h"
+#include <XBeamRateExt\ReinforcementPage.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -214,12 +213,10 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
 
    ROWCOL col = 1;
 
-   CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   CPierDlg* pDlg = (CPierDlg*)pParent->GetParent();
-   const txnEditPierData& pierData = pDlg->GetPierData();
+   IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
 
    CString strBeamFaceChoiceList;
-   if ( pierData.m_PierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+   if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
    {
       strBeamFaceChoiceList = _T("Top\nBottom\n");
    }
@@ -250,9 +247,8 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       );
 
    // Bar Size
-   matRebar::Type type;
-   matRebar::Grade grade;
-   pParent->GetRebarMaterial(&type,&grade);
+   matRebar::Type type = pParent->GetRebarType();
+   matRebar::Grade grade = pParent->GetRebarGrade();
    CString strBarSizeChoiceList;
    lrfdRebarIter rebarIter(grade,type);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
@@ -346,10 +342,8 @@ xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row
    CString strDatum = GetCellValue(row,col);
    if ( strDatum == _T("Top") )
    {
-      CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-      CPierDlg* pDlg = (CPierDlg*)pParent->GetParent();
-      const txnEditPierData& pierData = pDlg->GetPierData();
-      if ( pierData.m_PierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+      IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
+      if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
       {
          return xbrTypes::TopLowerXBeam;
       }

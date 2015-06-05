@@ -25,6 +25,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -99,6 +100,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -174,6 +176,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -251,6 +254,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -329,6 +333,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -406,6 +411,7 @@
 			IntermediateDirectory="$(PlatformName)\$(ConfigurationName)"
 			ConfigurationType="2"
 			UseOfMFC="2"
+			UseOfATL="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -492,10 +498,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ConcreteMaterial.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\dllmain.cpp"
 				>
 				<FileConfiguration
@@ -558,6 +560,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LongitudinalRebarGrid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MomentRatingArtifact.cpp"
 				>
 			</File>
@@ -571,6 +577,10 @@
 			</File>
 			<File
 				RelativePath=".\RatingArtifact.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ReinforcementPage.cpp"
 				>
 			</File>
 			<File
@@ -633,6 +643,10 @@
 				RelativePath=".\StirrupData.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\StirrupGrid.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -648,11 +662,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\Include\XBeamRateExt\ConcreteMaterial.h"
+				RelativePath="..\Include\XBeamRateExt\LongitudinalRebarData.h"
 				>
 			</File>
 			<File
-				RelativePath="..\Include\XBeamRateExt\LongitudinalRebarData.h"
+				RelativePath=".\LongitudinalRebarGrid.h"
 				>
 			</File>
 			<File
@@ -672,6 +686,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\XBeamRateExt\ReinforcementPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\resource.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\XBeamRateExt\ShearRatingArtifact.h"
 				>
 			</File>
@@ -684,6 +706,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StirrupGrid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\XBeamRateExt\XBRExtExp.h"
 				>
 			</File>
@@ -693,6 +719,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath=".\XBeamRateExt.rc"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\ReadMe.txt"

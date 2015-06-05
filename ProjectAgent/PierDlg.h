@@ -2,14 +2,14 @@
 
 #include "SuperstructureLayoutPage.h"
 #include "PierLayoutPage.h"
-#include "ReinforcementPage.h"
+#include <XBeamRateExt\ReinforcementPage.h>
 #include "BearingsPage.h"
 #include "LiveLoadReactionsPage.h"
 #include "txnEditPier.h"
 
 // CPierDlg
 
-class CPierDlg : public CPropertySheet
+class CPierDlg : public CPropertySheet, public IReinforcementPageParent
 {
 	DECLARE_DYNAMIC(CPierDlg)
 
@@ -18,8 +18,19 @@ public:
 	CPierDlg(LPCTSTR pszCaption, CWnd* pParentWnd = NULL, UINT iSelectPage = 0);
 	virtual ~CPierDlg();
 
-   void SetPierData(const txnEditPierData& pierData);
-   const txnEditPierData& GetPierData() const;
+   void SetEditPierData(const txnEditPierData& pierData);
+   const txnEditPierData& GetEditPierData() const;
+
+   // IReinforcementPageParent
+   virtual CPierData2* GetPierData();
+   virtual CConcreteMaterial& GetConcrete();
+   virtual xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType();
+   virtual matRebar::Type& GetRebarType();
+   virtual matRebar::Grade& GetRebarGrade();
+   virtual CConcreteMaterial& GetConcreteMaterial();
+   virtual xbrLongitudinalRebarData& GetLongitudinalRebar();
+   virtual xbrStirrupData& GetLowerXBeamStirrups();
+   virtual xbrStirrupData& GetFullDepthStirrups();
 
 protected:
 	DECLARE_MESSAGE_MAP()

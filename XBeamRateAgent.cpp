@@ -31,8 +31,10 @@
 
 #include <IFace\DocumentType.h>
 
-//#include <EAF\EAFOutputChildFrame.h>
-//#include "MyView.h"
+#include <XBeamRateExt\ReinforcementPage.h>
+
+#include <EAF\EAFChildFrame.h>
+#include "XBeamRateView.h"
 //
 //#include <IFace\Tools.h>
 //#include <IFace\EditByUI.h>
@@ -53,7 +55,21 @@
 //
 //#include <MFCTools\Prompts.h>
 
+#include <EAF\EAFResources.h>
+#define ID_VIEW_PIER EAF_FIRST_USER_COMMAND
+
+BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
+	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
+END_MESSAGE_MAP()
+
+void CMyCommandTarget::OnViewPier()
+{
+   m_pMyAgent->CreatePierView();
+}
+
+
 // CXBeamRateAgent
+
 
 HRESULT CXBeamRateAgent::FinalConstruct()
 {
@@ -107,24 +123,23 @@ HRESULT CXBeamRateAgent::FinalConstruct()
 	return S_OK;
 }
 
-//void CXBeamRateAgent::RegisterViews()
-//{
-//   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-//   int maxViewCount = 2; // only allow 2 instances of this view to be created at a time
-//   m_MyViewKey = pViewRegistrar->RegisterView(IDR_MENU,this,RUNTIME_CLASS(CEAFOutputChildFrame),RUNTIME_CLASS(CMyView),NULL,maxViewCount);
-//}
-//
-//void CXBeamRateAgent::UnregisterViews()
-//{
-//   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-//   pViewRegistrar->RemoveView(m_MyViewKey);
-//}
-//
-//void CXBeamRateAgent::CreateMyView()
-//{
-//   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-//   pViewRegistrar->CreateView(m_MyViewKey,this);
-//}
+void CXBeamRateAgent::RegisterViews()
+{
+   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
+   m_PierViewKey = pViewRegistrar->RegisterView(IDR_XBEAMRATE,this,RUNTIME_CLASS(CEAFChildFrame),RUNTIME_CLASS(CXBeamRateView));
+}
+
+void CXBeamRateAgent::UnregisterViews()
+{
+   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
+   pViewRegistrar->RemoveView(m_PierViewKey);
+}
+
+void CXBeamRateAgent::CreatePierView()
+{
+   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
+   pViewRegistrar->CreateView(m_PierViewKey,NULL);
+}
 //
 //void CXBeamRateAgent::RegisterGraphs()
 //{
@@ -143,28 +158,28 @@ HRESULT CXBeamRateAgent::FinalConstruct()
 //   pGraphMgr->AddGraphBuilder(pTestGraphBuilder3);
 //}
 //
-//void CXBeamRateAgent::CreateMenus()
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//
-//   GET_IFACE(IEAFMainMenu,pMainMenu);
-//   CEAFMenu* pMenu = pMainMenu->GetMainMenu();
-//
-//   INT nMenus = pMenu->GetMenuItemCount();
-//   if ( nMenus == 0 )
-//      return;
-//
-//   m_pMyMenu = pMenu->CreatePopupMenu(nMenus-1,_T("MyExtension")); // put the menu before the last menu (Help)
-//   m_pMyMenu->LoadMenu(IDR_MENU,this);
-//}
-//
-//void CXBeamRateAgent::RemoveMenus()
-//{
-//   GET_IFACE(IEAFMainMenu,pMainMenu);
-//   CEAFMenu* pMenu = pMainMenu->GetMainMenu();
-//   pMenu->DestroyMenu(m_pMyMenu);
-//}
-//
+void CXBeamRateAgent::CreateMenus()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   GET_IFACE(IEAFMainMenu,pMainMenu);
+   CEAFMenu* pMenu = pMainMenu->GetMainMenu();
+
+   UINT viewPos = pMenu->FindMenuItem(_T("&View"));
+   CEAFMenu* pViewMenu = pMenu->GetSubMenu(viewPos);
+   UINT graphsPos = pViewMenu->FindMenuItem(_T("Graphs"));
+   pViewMenu->InsertMenu(graphsPos-1,ID_VIEW_PIER,_T("&Pier View"),this);
+}
+
+void CXBeamRateAgent::RemoveMenus()
+{
+   GET_IFACE(IEAFMainMenu,pMainMenu);
+   CEAFMenu* pMenu = pMainMenu->GetMainMenu();
+   UINT viewPos = pMenu->FindMenuItem(_T("View"));
+   CEAFMenu* pViewMenu = pMenu->GetSubMenu(viewPos);
+   pViewMenu->RemoveMenu(ID_VIEW_PIER,MF_BYCOMMAND,this);
+}
+
 //void CXBeamRateAgent::CreateToolBar()
 //{
 //   AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -217,32 +232,16 @@ HRESULT CXBeamRateAgent::FinalConstruct()
 
 void CXBeamRateAgent::RegisterUIExtensions()
 {
-   GET_IFACE(IExtendPGSuperUI,pExtendPGSuperUI);
-   //m_EditBridgeCallbackID = pExtendPGSuperUI->RegisterEditBridgeCallback(this);
-   m_EditPierCallbackID = pExtendPGSuperUI->RegisterEditPierCallback(this);
-   //m_EditSpanCallbackID = pExtendPGSuperUI->RegisterEditSpanCallback(this);
-   //m_EditGirderCallbackID = pExtendPGSuperUI->RegisterEditGirderCallback(this);
-
-   //GET_IFACE(IExtendPGSpliceUI,pExtendPGSpliceUI);
-   //m_EditTemporarySupportCallbackID = pExtendPGSpliceUI->RegisterEditTemporarySupportCallback(this);
-   //m_EditSplicedGirderCallbackID = pExtendPGSpliceUI->RegisterEditSplicedGirderCallback(this);
-   //m_EditSegmentCallbackID = pExtendPGSpliceUI->RegisterEditSegmentCallback(this);
-   //m_EditClosureJointCallbackID = pExtendPGSpliceUI->RegisterEditClosureJointCallback(this);
+   // Tell PGSuper/PGSplice that we want to add stuff to the Edit Pier dialog
+   GET_IFACE(IExtendPGSuperUI,pExtendUI);
+   m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
 }
 
 void CXBeamRateAgent::UnregisterUIExtensions()
 {
-   GET_IFACE(IExtendPGSuperUI,pExtendPGSuperUI);
-   //pExtendPGSuperUI->UnregisterEditBridgeCallback(m_EditBridgeCallbackID);
-   pExtendPGSuperUI->UnregisterEditPierCallback(m_EditPierCallbackID);
-   //pExtendPGSuperUI->UnregisterEditSpanCallback(m_EditSpanCallbackID);
-   //pExtendPGSuperUI->UnregisterEditGirderCallback(m_EditGirderCallbackID);
-
-   //GET_IFACE(IExtendPGSpliceUI,pExtendPGSpliceUI);
-   //pExtendPGSpliceUI->UnregisterEditTemporarySupportCallback(m_EditTemporarySupportCallbackID);
-   //pExtendPGSpliceUI->UnregisterEditSplicedGirderCallback(m_EditSplicedGirderCallbackID);
-   //pExtendPGSpliceUI->UnregisterEditSegmentCallback(m_EditSegmentCallbackID);
-   //pExtendPGSpliceUI->UnregisterEditClosureJointCallback(m_EditClosureJointCallbackID);
+   // We are done adding stuff to the Edit Pier dialog
+   GET_IFACE(IExtendPGSuperUI,pExtendUI);
+   pExtendUI->UnregisterEditPierCallback(m_EditPierCallbackID);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -393,16 +392,16 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithUI(BOOL bIntegrate)
 {
    if ( bIntegrate )
    {
-   //   CreateMenus();
+      CreateMenus();
    //   CreateToolBar();
-   //   RegisterViews();
+      RegisterViews();
       RegisterUIExtensions();
    }
    else
    {
-   //   RemoveMenus();
+      RemoveMenus();
    //   RemoveToolBar();
-   //   UnregisterViews();
+      UnregisterViews();
       UnregisterUIExtensions();
    }
 
@@ -508,9 +507,11 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithGraphing(BOOL bIntegrate)
 //void CXBeamRateAgent::EditSpan_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pSpanPropertyPage)
 //{
 //}
-//
+
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
 {
+   // The PGSuper/PGSplice Edit Pier dialog is being displayed... here is our
+   // chance to add a property page to the dialog
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CPierData2* pPier = pIBridgeDesc->GetPier(pEditPierData->GetPier());
    if ( pPier->IsAbutment() )
@@ -519,8 +520,8 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
    }
    else
    {
-      AFX_MANAGE_STATE(AfxGetStaticModuleState());
-      return new CPropertyPage(IDD_PIER_PAGE);
+      m_ReinforcementPageParent.SetEditPierData(pEditPierData);
+      return new CReinforcementPage(&m_ReinforcementPageParent);
    }
 }
 
@@ -659,4 +660,50 @@ HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
    pProject->SetCompany(pProjectProps->GetCompany());
    pProject->SetComments(pProjectProps->GetComments());
    return S_OK;
+}
+
+// IEAFCommandCallback
+BOOL CXBeamRateAgent::OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo)
+{
+   return m_CommandTarget.OnCmdMsg(nID,nCode,pExtra,pHandlerInfo);
+}
+
+BOOL CXBeamRateAgent::GetStatusBarMessageString(UINT nID, CString& rMessage) const
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   // load appropriate string
+	if ( rMessage.LoadString(nID) )
+	{
+		// first newline terminates actual string
+      rMessage.Replace('\n','\0');
+	}
+	else
+	{
+		// not found
+		TRACE1("Warning (CXBeamRateAgent): no message line prompt for ID %d.\n", nID);
+	}
+
+   return TRUE;
+}
+
+BOOL CXBeamRateAgent::GetToolTipMessageString(UINT nID, CString& rMessage) const
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CString string;
+   // load appropriate string
+	if ( string.LoadString(nID) )
+	{
+		// tip is after first newline 
+      int pos = string.Find('\n');
+      if ( 0 < pos )
+         rMessage = string.Mid(pos+1);
+	}
+	else
+	{
+		// not found
+		TRACE1("Warning (CXBeamRateAgent): no tool tip for ID %d.\n", nID);
+	}
+
+   return TRUE;
 }

@@ -141,8 +141,8 @@ BEGIN
     BEGIN
         MENUITEM "&Help Topics",                ID_HELP_FINDER
         MENUITEM SEPARATOR
-        MENUITEM "&About BridgeLink...",                   ID_APP_ABOUT
-        MENUITEM "About &XBeam Rate..."         ID_HELP_ABOUT
+        MENUITEM "&About BridgeLink...",        ID_APP_ABOUT
+        MENUITEM "About &XBeam Rate...",        ID_HELP_ABOUT
     END
 END
 
@@ -154,8 +154,8 @@ END
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_REPORT              ICON                    "res\\ReportView.ico"
 IDR_XBEAMRATE           ICON                    "res\\XBeamRate.ico"
+IDR_REPORT              ICON                    "res\\ReportView.ico"
 IDR_GRAPHING            ICON                    "res\\GraphingView.ico"
 IDI_WSDOT               ICON                    "res\\Wsdot.ico"
 
@@ -208,12 +208,13 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,386,92,50,14,WS_GROUP
 END
 
-IDD_PIER_PAGE DIALOGEX 0, 0, 210, 154
+IDD_REINFORCEMENT_PAGE DIALOGEX 0, 0, 373, 247
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "XBeam Reinforcement"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
 BEGIN
     LTEXT           "TODO: XBeam Rate Controls",IDC_STATIC,60,73,100,8
+    LTEXT           "Idealized pier can't be modeled here",IDC_MESSAGE,7,7,359,8
 END
 
 
@@ -245,12 +246,12 @@ BEGIN
         BOTTOMMARGIN, 106
     END
 
-    IDD_PIER_PAGE, DIALOG
+    IDD_REINFORCEMENT_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 203
+        RIGHTMARGIN, 366
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 240
     END
 END
 #endif    // APSTUDIO_INVOKED

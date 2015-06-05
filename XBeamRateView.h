@@ -12,6 +12,8 @@
 #include <DManip\DManip.h>
 #include <DManipTools\DManipTools.h>
 
+class CXBeamRateDoc;
+
 class CXBeamRateView : public CDisplayView
 {
 protected: // create from serialization only
@@ -20,7 +22,6 @@ protected: // create from serialization only
 
 // Attributes
 public:
-	CXBeamRateDoc* GetDocument();
 
 // Operations
 public:
@@ -74,10 +75,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
-#ifndef _DEBUG  // debug version in XBeamRateView.cpp
-inline CXBeamRateDoc* CXBeamRateView::GetDocument()
-   { return (CXBeamRateDoc*)m_pDocument; }
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 

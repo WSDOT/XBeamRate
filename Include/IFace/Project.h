@@ -132,8 +132,8 @@ interface IXBRProject : IUnknown
    virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade) = 0;
    virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) = 0;
 
-   virtual void SetConcrete(const xbrConcreteMaterial& concrete) = 0;
-   virtual const xbrConcreteMaterial& GetConcrete() = 0;
+   virtual void SetConcrete(const CConcreteMaterial& concrete) = 0;
+   virtual const CConcreteMaterial& GetConcrete() = 0;
 
    virtual void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w) = 0;
    virtual void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) = 0;

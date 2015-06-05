@@ -12,13 +12,15 @@
 IMPLEMENT_DYNAMIC(CPierDlg, CPropertySheet)
 
 CPierDlg::CPierDlg(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
-	:CPropertySheet(nIDCaption, pParentWnd, iSelectPage)
+	:CPropertySheet(nIDCaption, pParentWnd, iSelectPage),
+   m_ReinforcementPage(this)
 {
    Init();
 }
 
 CPierDlg::CPierDlg(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
-	:CPropertySheet(pszCaption, pParentWnd, iSelectPage)
+	:CPropertySheet(pszCaption, pParentWnd, iSelectPage),
+   m_ReinforcementPage(this)
 {
    Init();
 }
@@ -27,16 +29,64 @@ CPierDlg::~CPierDlg()
 {
 }
 
-void CPierDlg::SetPierData(const txnEditPierData& pierData)
+void CPierDlg::SetEditPierData(const txnEditPierData& pierData)
 {
    m_PierData = pierData;
 }
 
-const txnEditPierData& CPierDlg::GetPierData() const
+const txnEditPierData& CPierDlg::GetEditPierData() const
 {
    return m_PierData;
 }
 
+//////////////////////////////////////////////////
+// IReinforcementPageParent
+CPierData2* CPierDlg::GetPierData()
+{
+   return NULL; // we are not associated with pier data for an entire bridge
+}
+
+CConcreteMaterial& CPierDlg::GetConcrete()
+{
+   return m_PierData.m_PierData.GetConcreteMaterial();
+}
+
+xbrTypes::SuperstructureConnectionType CPierDlg::GetSuperstructureConnectionType()
+{
+   return m_PierData.m_PierData.GetSuperstructureConnectionType();
+}
+
+matRebar::Type& CPierDlg::GetRebarType()
+{
+   return m_PierData.m_PierData.GetRebarType();
+}
+
+matRebar::Grade& CPierDlg::GetRebarGrade()
+{
+   return m_PierData.m_PierData.GetRebarGrade();
+}
+
+CConcreteMaterial& CPierDlg::GetConcreteMaterial()
+{
+   return m_PierData.m_PierData.GetConcreteMaterial();
+}
+
+xbrLongitudinalRebarData& CPierDlg::GetLongitudinalRebar()
+{
+   return m_PierData.m_PierData.GetLongitudinalRebar();
+}
+
+xbrStirrupData& CPierDlg::GetLowerXBeamStirrups()
+{
+   return m_PierData.m_PierData.GetLowerXBeamStirrups();
+}
+
+xbrStirrupData& CPierDlg::GetFullDepthStirrups()
+{
+   return m_PierData.m_PierData.GetFullDepthStirrups();
+}
+
+//////////////////////////////////////////////////
 void CPierDlg::Init()
 {
    m_psh.dwFlags |= PSH_HASHELP | PSH_NOAPPLYNOW;

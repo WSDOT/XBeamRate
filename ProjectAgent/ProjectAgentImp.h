@@ -186,8 +186,8 @@ public:
    virtual void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade);
    virtual void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade);
 
-   virtual void SetConcrete(const xbrConcreteMaterial& concrete);
-   virtual const xbrConcreteMaterial& GetConcrete();
+   virtual void SetConcrete(const CConcreteMaterial& concrete);
+   virtual const CConcreteMaterial& GetConcrete();
 
    virtual void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
    virtual void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw);

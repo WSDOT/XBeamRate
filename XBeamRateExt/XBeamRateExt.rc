@@ -1,0 +1,175 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "A member of the Alternate Route Project"
+            VALUE "CompanyName", "Washington State Department of Transportation"
+            VALUE "FileDescription", "XBeamRateExt Module"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "XBeamRateExt"
+            VALUE "LegalCopyright", "Copyright © 1999-2015, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "OriginalFilename", "XBeamRateExt.dll"
+            VALUE "ProductName", "XBeam Rate"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_REINFORCEMENT_PAGE DIALOGEX 0, 0, 371, 426
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Materials and Reinforcement"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Material Properties",IDC_STATIC,7,7,357,77
+    LTEXT           "Concrete Type Label",IDC_CONCRETE_TYPE_LABEL,185,20,67,8
+    LTEXT           "f'c",IDC_FC_LABEL,181,36,8,8
+    EDITTEXT        IDC_FC,197,33,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_FC_UNIT,241,36,19,8
+    CONTROL         "Ec",IDC_EC_LABEL,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,170,50,22,10
+    EDITTEXT        IDC_EC,197,48,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_EC_UNIT,241,51,19,8
+    PUSHBUTTON      "More Properties...",IDC_MORE_PROPERTIES,264,48,84,14
+    LTEXT           "Reinforcement",IDC_STATIC,19,20,48,8
+    COMBOBOX        IDC_REBAR_MATERIAL,18,32,131,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Longitudinal Reinforcement",IDC_STATIC,7,87,88,8
+    CONTROL         "Custom1",IDC_REBAR_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,97,321,58
+    PUSHBUTTON      "+",IDC_ADD_REBAR,332,97,23,14
+    PUSHBUTTON      "-",IDC_REMOVE_REBAR,332,115,23,14
+    LTEXT           "Lower Cross Beam Stirrups",IDC_LOWER_XBEAM_LABEL,7,156,86,8
+    CONTROL         "Symmetric about centerline",IDC_LOWER_XBEAM_SYMMETRY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,107,156,103,10
+    CONTROL         "Custom1",IDC_LOWER_XBEAM_STIRRUP_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,167,321,120
+    PUSHBUTTON      "+",IDC_ADD_LOWER_XBEAM,332,166,23,14
+    PUSHBUTTON      "-",IDC_REMOVE_LOWER_XBEAM,332,184,23,14
+    LTEXT           "Full Depth Stirrups",IDC_FULL_DEPTH_LABEL,7,290,60,8
+    CONTROL         "Symmetric about centerline",IDC_FULL_DEPTH_SYMMETRY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,107,288,103,10
+    CONTROL         "Custom1",IDC_FULL_DEPTH_STIRRUP_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,299,321,120
+    PUSHBUTTON      "+",IDC_ADD_FULL_DEPTH,332,298,23,14
+    PUSHBUTTON      "-",IDC_REMOVE_FULL_DEPTH,332,316,23,14
+    LTEXT           "Must have a physical pier description",IDC_MESSAGE,7,7,118,8,NOT WS_VISIBLE
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_REINFORCEMENT_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 364
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 419
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_STANDALONE_TITLE    "Materials and Reinforcement"
+    IDS_EXTENSION_TITLE     "XBeam Reinforcement"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

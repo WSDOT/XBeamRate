@@ -62,12 +62,16 @@ BOOL CXBRGraphController::OnInitDialog()
       // Fill the combo box with piers
       GET_IFACE2(pBroker,IBridge,pBridge);
       PierIndexType nPiers = pBridge->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ ) // skip abutments (pierIdx = 0 & nPiers-1)
       {
-         CString strPier;
-         strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
-         int idx = pcbPiers->AddString(strPier);
-         pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+         // Can only load rate piers with a physical description
+         if ( pBridge->GetPierModelType(pierIdx) == pgsTypes::pmtPhysical )
+         {
+            CString strPier;
+            strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+            int idx = pcbPiers->AddString(strPier);
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+         }
       }
    }
    else

@@ -5,7 +5,7 @@
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
-#include <XBeamRateExt\ConcreteMaterial.h>
+#include <PgsExt\ConcreteMaterial.h>
 
 class XBREXTCLASS xbrPierData
 {
@@ -111,9 +111,9 @@ public:
    matRebar::Type& GetRebarType();
    matRebar::Grade& GetRebarGrade();
 
-   void SetConcreteMaterial(const xbrConcreteMaterial& concrete);
-   xbrConcreteMaterial& GetConcreteMaterial();
-   const xbrConcreteMaterial& GetConcreteMaterial() const;
+   void SetConcreteMaterial(const CConcreteMaterial& concrete);
+   CConcreteMaterial& GetConcreteMaterial();
+   const CConcreteMaterial& GetConcreteMaterial() const;
 
    void SetLongitudinalRebar(const xbrLongitudinalRebarData& rebarData);
    xbrLongitudinalRebarData& GetLongitudinalRebar();
@@ -186,7 +186,7 @@ protected:
    // Materials
    matRebar::Type m_RebarType;
    matRebar::Grade m_RebarGrade;
-   xbrConcreteMaterial m_Concrete;
+   CConcreteMaterial m_Concrete;
 
    // Rebar
    xbrLongitudinalRebarData m_LongitudinalRebar;

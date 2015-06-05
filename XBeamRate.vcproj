@@ -631,6 +631,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReinforcementPageParent.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ReportViewChildFrame.cpp"
 				>
 			</File>
@@ -1073,6 +1077,10 @@
 			</File>
 			<File
 				RelativePath=".\GraphViewChildFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ReinforcementPageParent.h"
 				>
 			</File>
 			<File

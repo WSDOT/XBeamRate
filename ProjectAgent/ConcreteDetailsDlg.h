@@ -4,7 +4,7 @@
 #include "ConcreteGeneralPage.h"
 #include "AASHTOConcretePage.h"
 
-#include <XBeamRateExt\ConcreteMaterial.h>
+#include <PgsExt\ConcreteMaterial.h>
 
 // ConcreteDetailsDlg.h : header file
 //
@@ -32,7 +32,7 @@ public:
 	//}}AFX_VIRTUAL
 
    // Common to all property pages
-   xbrConcreteMaterial Concrete;
+   CConcreteMaterial Concrete;
 
    CConcreteGeneralPage m_General;
    CAASHTOConcretePage m_AASHTO;

@@ -152,11 +152,6 @@ void CXBeamRateView::Dump(CDumpContext& dc) const
 	CDisplayView::Dump(dc);
 }
 
-CXBeamRateDoc* CXBeamRateView::GetDocument() // non-debug version is inline
-{
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CXBeamRateDoc)));
-	return (CXBeamRateDoc*)m_pDocument;
-}
 #endif //_DEBUG
 
 /////////////////////////////////////////////////////////////////////////////
@@ -241,9 +236,8 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(XBEAM_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
@@ -432,9 +426,8 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(COLUMN_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
    GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -525,9 +518,8 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(REBAR_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
@@ -589,9 +581,8 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(STIRRUP_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProps);
@@ -701,9 +692,8 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(BEARING_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
@@ -761,9 +751,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    CComPtr<iDisplayList> displayList;
    dispMgr->FindDisplayList(DIMENSIONS_DISPLAY_LIST_ID,&displayList);
 
-   CXBeamRateDoc* pDoc = (CXBeamRateDoc*)GetDocument();
    CComPtr<IBroker> pBroker;
-   pDoc->GetBroker(&pBroker);
+   EAFGetBroker(&pBroker);
 
 
    GET_IFACE2(pBroker,IXBRPier,pPier);

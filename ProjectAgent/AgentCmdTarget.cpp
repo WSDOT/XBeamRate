@@ -77,10 +77,10 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrPermit_Routine);
    oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pgsTypes::lrPermit_Special);
 
-   dlg.SetPierData(oldPierData);
+   dlg.SetEditPierData(oldPierData);
    if ( dlg.DoModal() == IDOK )
    {
-      txnEditPierData newPierData = dlg.GetPierData();
+      txnEditPierData newPierData = dlg.GetEditPierData();
       txnEditPier txn(oldPierData,newPierData);
       GET_IFACE(IEAFTransactions,pTransactions);
       pTransactions->Execute(txn);

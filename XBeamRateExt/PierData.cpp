@@ -454,17 +454,17 @@ matRebar::Grade& xbrPierData::GetRebarGrade()
    return m_RebarGrade;
 }
 
-void xbrPierData::SetConcreteMaterial(const xbrConcreteMaterial& concrete)
+void xbrPierData::SetConcreteMaterial(const CConcreteMaterial& concrete)
 {
    m_Concrete = concrete;
 }
 
-xbrConcreteMaterial& xbrPierData::GetConcreteMaterial()
+CConcreteMaterial& xbrPierData::GetConcreteMaterial()
 {
    return m_Concrete;
 }
 
-const xbrConcreteMaterial& xbrPierData::GetConcreteMaterial() const
+const CConcreteMaterial& xbrPierData::GetConcreteMaterial() const
 {
    return m_Concrete;
 }
@@ -619,7 +619,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
       pStrSave->put_Property(_T("Height"),CComVariant(m_ColumnHeight));
    pStrSave->EndUnit(); // Columns
 
-   m_Concrete.Save(pStrSave);
+   m_Concrete.Save(pStrSave,NULL);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
       pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
@@ -805,7 +805,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
       }
 
       {
-         hr = m_Concrete.Load(pStrLoad);
+         hr = m_Concrete.Load(pStrLoad,NULL);
       }
 
       {

@@ -249,7 +249,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
 
    xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType();
 
-   const xbrConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete();
    rcBeam->put_FcSlab(concrete.Fc);
    rcBeam->put_FcBeam(concrete.Fc);
 

@@ -19,4 +19,5 @@ extern CComModule _Module;
 #include <XBeamRateTypes.h>
 
 #include <WBFLCore.h>
+#include <WBFLDebug.h>
 #include <AgentTools.h>

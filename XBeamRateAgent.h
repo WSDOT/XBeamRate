@@ -27,7 +27,10 @@
 #pragma once
 #include "resource.h"       // main symbols
 #include "XBeamRatePlugin_i.h"
+#include "ReinforcementPageParent.h"
+
 #include <EAF\EAFInterfaceCache.h>
+#include <EAF\EAFUIIntegration.h>
 
 #include <IFace\XBeamRateAgent.h>
 
@@ -37,6 +40,20 @@
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
+
+class CXBeamRateAgent;
+
+class CMyCommandTarget : public CCmdTarget
+{
+public:
+   CMyCommandTarget(CXBeamRateAgent* pMyAgent) {m_pMyAgent = pMyAgent;}
+
+   afx_msg void OnViewPier();
+   
+   CXBeamRateAgent* m_pMyAgent;
+
+   DECLARE_MESSAGE_MAP()
+};
 
 // CXBeamRateAgent
 
@@ -59,10 +76,12 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    //public IEditGirderCallback,
    //public IExtendUIEventSink,
    public IProjectPropertiesEventSink,
-   public IXBeamRate
+   public IXBeamRate,
+   public IEAFCommandCallback
 {
 public:
-   CXBeamRateAgent()
+   CXBeamRateAgent() :
+      m_CommandTarget(this)
 	{
 	}
 
@@ -81,6 +100,7 @@ BEGIN_COM_MAP(CXBeamRateAgent)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
+   COM_INTERFACE_ENTRY(IEAFCommandCallback)
 END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -202,8 +222,27 @@ public:
 public:
    virtual HRESULT OnProjectPropertiesChanged();
 
+// IEAFCommandCallback
+public:
+   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
+   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
+   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
+
 private:
    DWORD m_dwProjectPropertiesCookie;
+
+   CReinforcementPageParent m_ReinforcementPageParent;
+
+   CMyCommandTarget m_CommandTarget;
+   friend CMyCommandTarget;
+
+   void CreateMenus();
+   void RemoveMenus();
+
+   void RegisterViews();
+   void UnregisterViews();
+   void CreatePierView();
+   long m_PierViewKey;
 
    void RegisterUIExtensions();
    void UnregisterUIExtensions();

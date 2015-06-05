@@ -16,9 +16,10 @@
 #include <WBFLReportManagerAgent.h>
 #include <WBFLGraphManagerAgent.h>
 
+#include "XBeamRatePlugin_i.h"
+
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
-#include "XBeamRatePlugin_i.h"
 #include "XBeamRatePlugin_i.c"
 
 // EAF Common Interfaces
