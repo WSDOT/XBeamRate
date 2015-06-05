@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include <EAF\EAFResources.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -217,6 +218,13 @@ BEGIN
     LTEXT           "Idealized pier can't be modeled here",IDC_MESSAGE,7,7,359,8
 END
 
+IDD_PIER_VIEW_CONTROLS DIALOGEX 0, 0, 330, 16
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    COMBOBOX        IDC_PIERS,7,1,78,30,CBS_DROPDOWNLIST | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -252,6 +260,14 @@ BEGIN
         RIGHTMARGIN, 366
         TOPMARGIN, 7
         BOTTOMMARGIN, 240
+    END
+
+    IDD_PIER_VIEW_CONTROLS, DIALOG
+    BEGIN
+        LEFTMARGIN, 6
+        RIGHTMARGIN, 323
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 9
     END
 END
 #endif    // APSTUDIO_INVOKED

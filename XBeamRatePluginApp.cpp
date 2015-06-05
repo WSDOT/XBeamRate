@@ -36,6 +36,9 @@
 #include <IFace\ExtendUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <\ARP\PGSuper\Include\IFace\DocumentType.h>
+#include <IFace\EditByUI.h>
+#include <IFace\Bridge.h>
+#include <IFace\Selection.h>
 
 
 #include <WBFLCore_i.c>

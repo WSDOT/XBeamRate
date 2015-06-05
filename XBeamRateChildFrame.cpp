@@ -1,5 +1,12 @@
 #include "stdafx.h"
+#include "resource.h"
 #include <XBeamRateChildFrame.h>
+
+#include <IFace\XBeamRateAgent.h>
+#include <IFace\Bridge.h>
+#include <IFace\Selection.h>
+
+#include <PgsExt\GirderLabel.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -40,6 +47,7 @@ BEGIN_MESSAGE_MAP(CXBeamRateChildFrame, CEAFChildFrame)
 	//{{AFX_MSG_MAP(CXBeamRateChildFrame)
 	//}}AFX_MSG_MAP
    ON_WM_CREATE()
+   ON_CBN_SELCHANGE(IDC_PIERS,OnPierChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -83,7 +91,44 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
    if ( !CEAFChildFrame::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, pContext) )
       return FALSE;
 
-   // we can create more stuff here
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   if ( pBroker != NULL )
+   {
+      // we only get a broker at this point if we a stand alone app
+
+      // we are a PGSuper/PGSplice plugin... add the control bar
+      if ( !m_ControlBar.Create(this,IDD_PIER_VIEW_CONTROLS,CBRS_TOP,100) )
+      {
+         return FALSE;
+      }
+
+      GET_IFACE2(pBroker,ISelection,pSelection);
+      PierIndexType selPierIdx = pSelection->GetSelectedPier();
+
+      CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
+      GET_IFACE2(pBroker,IBridge,pBridge);
+      PierIndexType nPiers = pBridge->GetPierCount();
+      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      {
+         CString strPierLabel;
+         strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+         int idx = pcbPiers->AddString(strPierLabel);
+         pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+
+         if ( pierIdx == selPierIdx )
+         {
+            pcbPiers->SetCurSel(idx);
+         }
+      }
+
+      if ( selPierIdx == INVALID_INDEX || selPierIdx == 0 || selPierIdx == nPiers-1 )
+      {
+         pcbPiers->SetCurSel(0);
+      }
+     
+
+   }
 
    return TRUE;
 }
@@ -106,4 +151,14 @@ BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs)
    cs.style |= WS_MAXIMIZE | WS_VISIBLE;
 	
 	return CEAFChildFrame::PreCreateWindow(cs);
+}
+
+void CXBeamRateChildFrame::OnPierChanged()
+{
+   CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
+   int curSel = pcbPiers->GetCurSel();
+   PierIndexType pierIdx = (PierIndexType)pcbPiers->GetItemData(curSel);
+   CString strMsg;
+   strMsg.Format(_T("Pier %d was selected"),LABEL_PIER(pierIdx));
+   AfxMessageBox(strMsg);
 }

@@ -6,10 +6,13 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
 
+#include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
+
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 #include <IFace\Pier.h>
+#include <IFace\EditByUI.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
@@ -924,6 +927,19 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
-   pProjectEdit->EditPier(0);
+   CComPtr<IXBeamRateAgent> pAgent;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   if ( SUCCEEDED(hr) )
+   {
+      GET_IFACE2(pBroker,IEditByUI,pEditByUI);
+#pragma Reminder("UPDATE: Need to get index of pier that is being viewed")
+      // also need to get page index for our extension page
+      pEditByUI->EditPierDescription(1/*pierIdx*/,0/*pageIdx*/);
+
+   }
+   else
+   {
+      GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
+      pProjectEdit->EditPier(0);
+   }
 }

@@ -30,10 +30,11 @@
 #include <PgsExt\PierData2.h>
 
 #include <IFace\DocumentType.h>
+#include <IFace\Bridge.h>
 
 #include <XBeamRateExt\ReinforcementPage.h>
 
-#include <EAF\EAFChildFrame.h>
+#include "XBeamRateChildFrame.h"
 #include "XBeamRateView.h"
 //
 //#include <IFace\Tools.h>
@@ -60,6 +61,7 @@
 
 BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
 	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
+   ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnViewPierUpdate)
 END_MESSAGE_MAP()
 
 void CMyCommandTarget::OnViewPier()
@@ -67,6 +69,14 @@ void CMyCommandTarget::OnViewPier()
    m_pMyAgent->CreatePierView();
 }
 
+void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IBridge,pBridge);
+   PierIndexType nPiers = pBridge->GetPierCount();
+   pCmdUI->Enable(nPiers < 3 ? FALSE : TRUE);
+}
 
 // CXBeamRateAgent
 
@@ -126,7 +136,7 @@ HRESULT CXBeamRateAgent::FinalConstruct()
 void CXBeamRateAgent::RegisterViews()
 {
    GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-   m_PierViewKey = pViewRegistrar->RegisterView(IDR_XBEAMRATE,this,RUNTIME_CLASS(CEAFChildFrame),RUNTIME_CLASS(CXBeamRateView));
+   m_PierViewKey = pViewRegistrar->RegisterView(IDR_XBEAMRATE,this,RUNTIME_CLASS(CXBeamRateChildFrame),RUNTIME_CLASS(CXBeamRateView));
 }
 
 void CXBeamRateAgent::UnregisterViews()

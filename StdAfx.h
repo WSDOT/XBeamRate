@@ -21,3 +21,5 @@ extern CComModule _Module;
 #include <WBFLCore.h>
 #include <WBFLDebug.h>
 #include <AgentTools.h>
+
+#include <EAF\EAFUtilities.h>

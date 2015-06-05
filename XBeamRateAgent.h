@@ -49,6 +49,7 @@ public:
    CMyCommandTarget(CXBeamRateAgent* pMyAgent) {m_pMyAgent = pMyAgent;}
 
    afx_msg void OnViewPier();
+   afx_msg void OnViewPierUpdate(CCmdUI* pCmdUI);
    
    CXBeamRateAgent* m_pMyAgent;
 

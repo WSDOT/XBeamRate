@@ -34,8 +34,11 @@ protected:
 	virtual void Dump(CDumpContext& dc) const;
 #endif
 
+   CDialogBar m_ControlBar;
+
 	// Generated message map functions
 	//{{AFX_MSG(CXBeamRateChildFrame)
+   afx_msg void OnPierChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
