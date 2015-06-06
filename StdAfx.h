@@ -23,3 +23,4 @@ extern CComModule _Module;
 #include <AgentTools.h>
 
 #include <EAF\EAFUtilities.h>
+#include <System\Transaction.h>

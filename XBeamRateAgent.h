@@ -37,20 +37,36 @@
 #include <IFace\ExtendUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 
+#include <IFace\ViewEvents.h>
+
 #if defined(_WIN32_WCE) && !defined(_CE_DCOM) && !defined(_CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA)
 #error "Single-threaded COM objects are not properly supported on Windows CE platform, such as the Windows Mobile platforms that do not include full DCOM support. Define _CE_ALLOW_SINGLE_THREADED_OBJECTS_IN_MTA to force ATL to support creating single-thread COM object's and allow use of it's single-threaded COM object implementations. The threading model in your rgs file was set to 'Free' as that is the only threading model supported in non DCOM Windows CE platforms."
 #endif
 
 class CXBeamRateAgent;
 
-class CMyCommandTarget : public CCmdTarget
+class CMyCommandTarget : public CCmdTarget, public IBridgePlanViewEventCallback
 {
 public:
    CMyCommandTarget(CXBeamRateAgent* pMyAgent) {m_pMyAgent = pMyAgent;}
 
    afx_msg void OnViewPier();
    afx_msg void OnViewPierUpdate(CCmdUI* pCmdUI);
-   
+
+
+   // IBridgePlanViewEventCallback
+   virtual void OnBackgroundContextMenu(CEAFMenu* pMenu);
+   virtual void OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu);
+   virtual void OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu);
+   virtual void OnDeckContextMenu(CEAFMenu* pMenu);
+   virtual void OnAlignmentContextMenu(CEAFMenu* pMenu);
+   virtual void OnSectionCutContextMenu(CEAFMenu* pMenu);
+   virtual void OnGirderContextMenu(const CSpanKey& spanKey,CEAFMenu* pMenu);
+   virtual void OnGirderContextMenu(const CGirderKey& girderKey,CEAFMenu* pMenu);
+   virtual void OnTemporarySupportContextMenu(SupportIDType tsID,CEAFMenu* pMenu);
+   virtual void OnGirderSegmentContextMenu(const CSegmentKey& segmentKey,CEAFMenu* pMenu);
+   virtual void OnClosureJointContextMenu(const CSegmentKey& closureKey,CEAFMenu* pMenu);
+
    CXBeamRateAgent* m_pMyAgent;
 
    DECLARE_MESSAGE_MAP()
@@ -229,6 +245,7 @@ public:
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
 
+
 private:
    DWORD m_dwProjectPropertiesCookie;
 
@@ -236,6 +253,7 @@ private:
 
    CMyCommandTarget m_CommandTarget;
    friend CMyCommandTarget;
+   IDType m_BridgePlanViewCallbackID;
 
    void CreateMenus();
    void RemoveMenus();

@@ -1186,6 +1186,28 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="Transactions"
+			>
+			<Filter
+				Name="Header Files"
+				Filter="*.h"
+				>
+				<File
+					RelativePath=".\txnEditReinforcement.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="Source Files"
+				Filter="*.cpp"
+				>
+				<File
+					RelativePath=".\txnEditReinforcement.cpp"
+					>
+				</File>
+			</Filter>
+		</Filter>
 		<File
 			RelativePath=".\XBeamRate.tip"
 			>

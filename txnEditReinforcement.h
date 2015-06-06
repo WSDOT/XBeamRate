@@ -3,12 +3,16 @@
 
 #include <WBFLCore.h>
 
-class txnEditProject :
+struct xbrEditReinforcementData
+{
+};
+
+class txnEditReinforcement :
    public txnTransaction
 {
 public:
-   txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName);
-   ~txnEditProject(void);
+   txnEditReinforcement(const xbrEditReinforcementData& oldReinforcement,const xbrEditReinforcementData& newReinforcement);
+   ~txnEditReinforcement(void);
 
    virtual bool Execute();
    virtual void Undo();
@@ -20,5 +24,5 @@ public:
 private:
    void Execute(int i);
 
-	CString m_ProjectName[2];
+	xbrEditReinforcementData m_Reinforcement[2];
 };

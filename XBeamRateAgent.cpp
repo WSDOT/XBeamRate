@@ -31,11 +31,15 @@
 
 #include <IFace\DocumentType.h>
 #include <IFace\Bridge.h>
+#include <IFace\Selection.h>
 
 #include <XBeamRateExt\ReinforcementPage.h>
 
 #include "XBeamRateChildFrame.h"
 #include "XBeamRateView.h"
+
+#include "txnEditReinforcement.h"
+
 //
 //#include <IFace\Tools.h>
 //#include <IFace\EditByUI.h>
@@ -75,8 +79,43 @@ void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IBridge,pBridge);
    PierIndexType nPiers = pBridge->GetPierCount();
-   pCmdUI->Enable(nPiers < 3 ? FALSE : TRUE);
+
+   GET_IFACE2(pBroker,ISelection,pSelection);
+   PierIndexType selPierIdx = pSelection->GetSelectedPier();
+   if ( selPierIdx == 0 || selPierIdx == nPiers-1 || nPiers < 3 )
+   {
+      pCmdUI->Enable(FALSE);
+   }
+   else
+   {
+      pCmdUI->Enable(TRUE);
+   }
 }
+
+// IBridgePlanViewEventCallback
+void CMyCommandTarget::OnBackgroundContextMenu(CEAFMenu* pMenu) {}
+
+void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IBridge,pBridge);
+   PierIndexType nPiers = pBridge->GetPierCount();
+   if ( 0 < pierIdx && pierIdx < nPiers-1 )
+   {
+      pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
+   }
+}
+
+void CMyCommandTarget::OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnDeckContextMenu(CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnAlignmentContextMenu(CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnSectionCutContextMenu(CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnGirderContextMenu(const CSpanKey& spanKey,CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnGirderContextMenu(const CGirderKey& girderKey,CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnTemporarySupportContextMenu(SupportIDType tsID,CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnGirderSegmentContextMenu(const CSegmentKey& segmentKey,CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnClosureJointContextMenu(const CSegmentKey& closureKey,CEAFMenu* pMenu) {}
 
 // CXBeamRateAgent
 
@@ -245,6 +284,9 @@ void CXBeamRateAgent::RegisterUIExtensions()
    // Tell PGSuper/PGSplice that we want to add stuff to the Edit Pier dialog
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
    m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
+
+   GET_IFACE(IRegisterViewEvents,pBridgeViewEvents);
+   m_BridgePlanViewCallbackID = pBridgeViewEvents->RegisterBridgePlanViewCallback(&m_CommandTarget);
 }
 
 void CXBeamRateAgent::UnregisterUIExtensions()
@@ -252,6 +294,9 @@ void CXBeamRateAgent::UnregisterUIExtensions()
    // We are done adding stuff to the Edit Pier dialog
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
    pExtendUI->UnregisterEditPierCallback(m_EditPierCallbackID);
+
+   GET_IFACE(IRegisterViewEvents,pBridgeViewEvents);
+   pBridgeViewEvents->UnregisterBridgePlanViewCallback(m_BridgePlanViewCallbackID);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -544,7 +589,10 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,
 txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
 #pragma Reminder("UPDATE: need to add a transaction here")
-   return NULL;
+   xbrEditReinforcementData oldReinforcement;
+   xbrEditReinforcementData newReinforcement;
+   txnEditReinforcement* pTxn = new txnEditReinforcement(oldReinforcement,newReinforcement);
+   return pTxn;
 }
 
 IDType CXBeamRateAgent::GetEditBridgeCallbackID()

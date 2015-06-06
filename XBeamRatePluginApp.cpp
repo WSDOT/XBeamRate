@@ -39,6 +39,7 @@
 #include <IFace\EditByUI.h>
 #include <IFace\Bridge.h>
 #include <IFace\Selection.h>
+#include <IFace\ViewEvents.h>
 
 
 #include <WBFLCore_i.c>
