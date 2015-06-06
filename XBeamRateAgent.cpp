@@ -543,6 +543,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,
 
 txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
+#pragma Reminder("UPDATE: need to add a transaction here")
    return NULL;
 }
 
