@@ -49,6 +49,8 @@ public:
 
    void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade);
 
+   void OnEnableDelete(UINT nIDC,bool bEnableDelete);
+
 protected:
    IReinforcementPageParent* m_pParent;
 

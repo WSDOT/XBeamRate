@@ -27,9 +27,10 @@
 #include "GraphBuilder.h"
 
 #include <IFace\XBeamRateAgent.h>
-#include <\ARP\PGSuper\Include\IFace\Bridge.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
 
 #include <PgsExt\GirderLabel.h>
+#include <PgsExt\BridgeDescription2.h>
 #include <EAF\EAFUtilities.h>
 
 IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
@@ -60,17 +61,20 @@ BOOL CXBRGraphController::OnInitDialog()
    {
       // We are extending PGSuper/PGSplice
       // Fill the combo box with piers
-      GET_IFACE2(pBroker,IBridge,pBridge);
-      PierIndexType nPiers = pBridge->GetPierCount();
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      PierIndexType nPiers = pBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ ) // skip abutments (pierIdx = 0 & nPiers-1)
       {
          // Can only load rate piers with a physical description
-         if ( pBridge->GetPierModelType(pierIdx) == pgsTypes::pmtPhysical )
+         const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
+         if ( pPierData->GetPierModelType() == pgsTypes::pmtPhysical )
          {
+            PierIDType pierID = pPierData->GetID();
             CString strPier;
             strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
             int idx = pcbPiers->AddString(strPier);
-            pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
          }
       }
    }
@@ -126,17 +130,21 @@ ActionType CXBRGraphController::GetActionType()
 #pragma Reminder("UPDATE: need to add load rating graph action")
    int graphType = GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR);
    if(  graphType == IDC_MOMENT )
+   {
       return actionMoment;
+   }
    else
+   {
       return actionShear;
+   }
 }
 
-PierIndexType CXBRGraphController::GetPier()
+PierIDType CXBRGraphController::GetPierID()
 {
    CComboBox* pcbPier = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPier->GetCurSel();
-   PierIndexType pierIdx = (PierIndexType)(pcbPier->GetItemData(curSel));
-   return pierIdx;
+   PierIDType pierID = (PierIDType)(pcbPier->GetItemData(curSel));
+   return pierID;
 }
 
 void CXBRGraphController::FillLoadingList()

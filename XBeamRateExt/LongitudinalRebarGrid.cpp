@@ -205,14 +205,8 @@ void CLongitudinalRebarGrid::SetRebarData(const xbrLongitudinalRebarData& rebars
    GetParam()->EnableUndo(TRUE);
 }
 
-void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData)
+CString CLongitudinalRebarGrid::GetDatumOptions()
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-
-   ROWCOL col = 1;
-
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
 
    CString strBeamFaceChoiceList;
@@ -224,9 +218,39 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
    {
       strBeamFaceChoiceList = _T("Top\nTop Lower XBeam\nBottom\n");
    }
+   return strBeamFaceChoiceList;
+}
+
+CString CLongitudinalRebarGrid::GetDatum(xbrTypes::LongitudinalRebarDatumType datum)
+{
+   if ( datum == xbrTypes::Bottom )
+   {
+      return _T("Bottom");
+   }
+
+   IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
+   if ( pParent->GetSuperstructureConnectionType() != xbrTypes::pctIntegral && datum == xbrTypes::TopLowerXBeam )
+   {
+      return _T("Top");
+   }
+
+   return _T("Top Lower XBeam");
+}
+
+void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   ROWCOL col = 1;
+
+   IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
+
+   CString strBeamFaceChoiceList = GetDatumOptions();
+   CString strDatum = GetDatum(rebarData.Datum);
 
    // Datum
-   CString strDatum = (rebarData.Datum == xbrTypes::Top ? _T("Top") : (rebarData.Datum == xbrTypes::TopLowerXBeam ? _T("Top Lower XBeam") : _T("Bottom")));
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -343,13 +367,13 @@ xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row
    if ( strDatum == _T("Top") )
    {
       IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
-      if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+      if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral )
       {
-         return xbrTypes::TopLowerXBeam;
+         return xbrTypes::Top;
       }
       else
       {
-         return xbrTypes::Top;
+         return xbrTypes::TopLowerXBeam;
       }
    }
    else if ( strDatum == _T("Bottom") )

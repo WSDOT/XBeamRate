@@ -567,15 +567,15 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
 {
    // The PGSuper/PGSplice Edit Pier dialog is being displayed... here is our
    // chance to add a property page to the dialog
-   GET_IFACE(IBridgeDescription,pIBridgeDesc);
-   const CPierData2* pPier = pIBridgeDesc->GetPier(pEditPierData->GetPier());
+   const CPierData2* pPier = pEditPierData->GetPierData();
    if ( pPier->IsAbutment() )
    {
       return NULL;
    }
    else
    {
-      m_ReinforcementPageParent.SetEditPierData(pEditPierData);
+      GET_IFACE(IXBRProject,pProject);
+      m_ReinforcementPageParent.SetEditPierData(pEditPierData,pProject->GetPierData(pPier->GetID()));
       return new CReinforcementPage(&m_ReinforcementPageParent);
    }
 }
@@ -588,10 +588,25 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,
 
 txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
-#pragma Reminder("UPDATE: need to add a transaction here")
    xbrEditReinforcementData oldReinforcement;
+   GET_IFACE(IXBRProject,pProject);
+   const xbrPierData& pierData = pProject->GetPierData(pEditPierData->GetPierData()->GetID());
+   pierData.GetRebarMaterial(&oldReinforcement.Type,&oldReinforcement.Grade);
+   oldReinforcement.LongitudinalRebar  = pierData.GetLongitudinalRebar();
+   oldReinforcement.LowerXBeamStirrups = pierData.GetLowerXBeamStirrups();
+   oldReinforcement.FullDepthStirrups  = pierData.GetFullDepthStirrups();
+
+   CReinforcementPage* pReinforcementPage = (CReinforcementPage*)pPage;
    xbrEditReinforcementData newReinforcement;
-   txnEditReinforcement* pTxn = new txnEditReinforcement(oldReinforcement,newReinforcement);
+
+   IReinforcementPageParent* pParent  = pReinforcementPage->GetPageParent();
+   newReinforcement.Type               = pParent->GetRebarType();
+   newReinforcement.Grade              = pParent->GetRebarGrade();
+   newReinforcement.LongitudinalRebar  = pParent->GetLongitudinalRebar();
+   newReinforcement.LowerXBeamStirrups = pParent->GetLowerXBeamStirrups();
+   newReinforcement.FullDepthStirrups  = pParent->GetFullDepthStirrups();
+
+   txnEditReinforcement* pTxn = new txnEditReinforcement(pEditPierData->GetPierData()->GetID(),oldReinforcement,newReinforcement);
    return pTxn;
 }
 

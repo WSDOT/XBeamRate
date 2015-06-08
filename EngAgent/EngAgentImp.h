@@ -85,15 +85,15 @@ public:
 
 // IXBRMomentCapacity
 public:
-   virtual Float64 GetMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
 
 // IXBRShearCapacity
 public:
-   virtual Float64 GetShearCapacity(const xbrPointOfInterest& poi);
+   virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi);
 
 // IXBRArtifact
 public:
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
 
 // IXBRProjectEventSink
 public:
@@ -116,18 +116,24 @@ private:
       Float64 Mr; // nominal resistance (phi*Mn)
    } MomentCapacityDetails;
 
+   // PierID is not used to store moment capacity because the POI ID is sufficent
+   // POI IDs are not duplicated between piers
    std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
    std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity[2];
 
-   MomentCapacityDetails GetMomentCapacityDetails(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
-   MomentCapacityDetails ComputeMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+#pragma Reminder("UPDATE: need to have shear capacity by pier")
+   // need to cache shear capacity
 
-   Float64 GetDv(xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   Float64 GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
+   MomentCapacityDetails GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   MomentCapacityDetails ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+
+   Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   Float64 GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
 
 
+#pragma Reminder("UPDATE: need to have rating artifacts by pier")
    std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key
-   void CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
+   void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)

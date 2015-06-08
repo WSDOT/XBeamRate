@@ -13,6 +13,7 @@ public:
 
 // Operations
 public:
+   PierIDType GetPierID();
 
 // Overrides
 	// ClassWizard generated virtual function overrides

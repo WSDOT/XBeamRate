@@ -143,6 +143,45 @@ void CStirrupGrid::AddZone()
 	GetParam( )->EnableUndo(TRUE);
 }
 
+BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState)
+{
+   if ( sysFlags<WORD>::IsSet(nHitState,GX_HITEND) )
+   {
+      CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
+
+      ROWCOL nRows = GetRowCount();
+
+      CDWordArray selRows;
+      ROWCOL nSelRows = GetSelectedRows(selRows);
+      ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
+
+      if (nDragRow != 0 && lastSelectedRow != nRows)
+         pParent->OnEnableDelete(GetDlgCtrlID(),true);
+      else
+         pParent->OnEnableDelete(GetDlgCtrlID(),false);
+   }
+
+   return CGXGridWnd::OnLButtonHitRowCol(nHitRow,nHitCol,nDragRow,nDragCol,point,flags,nHitState);
+}
+
+BOOL CStirrupGrid::OnLButtonClickedRowCol(ROWCOL nRow, ROWCOL nCol, UINT nFlags, CPoint pt)
+{
+   CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
+
+   ROWCOL nRows = GetRowCount();
+
+   CDWordArray selRows;
+   ROWCOL nSelRows = GetSelectedRows(selRows);
+   ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
+
+   if (nCol == 0 && (nRow != 0 && lastSelectedRow != nRows))
+      pParent->OnEnableDelete(GetDlgCtrlID(),true);
+   else
+      pParent->OnEnableDelete(GetDlgCtrlID(),false);
+
+   return TRUE;
+}
+
 void CStirrupGrid::RemoveSelectedZones()
 {
 	GetParam( )->EnableUndo(FALSE);

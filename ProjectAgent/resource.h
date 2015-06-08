@@ -13,7 +13,6 @@
 #define IDR_PROJECTAGENTMODULE          102
 #define IDS_LWC_MESSAGE                 102
 #define IDD_PIER_LAYOUT_PAGE            106
-#define IDD_REINFORCEMENT_PAGE          107
 #define IDR_EDIT_MENU                   201
 #define IDD_BEARINGS_PAGE               202
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204

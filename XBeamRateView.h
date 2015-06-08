@@ -39,6 +39,8 @@ public:
 
    virtual void OnInitialUpdate();
 
+   PierIDType GetPierID();
+
 // Implementation
 public:
 	virtual ~CXBeamRateView();

@@ -38,8 +38,8 @@ DEFINE_GUID(IID_IXBRProductForces,
 0x7ecab28c, 0x6887, 0x4170, 0x83, 0xf4, 0xba, 0x5d, 0xca, 0xa5, 0x33, 0x5);
 interface IXBRProductForces : public IUnknown
 {
-   virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading() = 0;
-   virtual Float64 GetUpperCrossBeamLoading() = 0;
+   virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading(PierIDType pierID) = 0;
+   virtual Float64 GetUpperCrossBeamLoading(PierIDType pierID) = 0;
 };
 
 
@@ -56,31 +56,31 @@ DEFINE_GUID(IID_IXBRAnalysisResults,
 interface IXBRAnalysisResults : IUnknown
 {
    // Product Load Results
-   virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
-   virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
-   virtual std::vector<Float64> GetMoment(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
-   virtual std::vector<sysSectionValue> GetShear(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual Float64 GetMoment(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
+   virtual sysSectionValue GetShear(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi) = 0;
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
 
    // Combined Load Results
-   virtual Float64 GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
-   virtual sysSectionValue GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
-   virtual std::vector<Float64> GetMoment(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
-   virtual std::vector<sysSectionValue> GetShear(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual Float64 GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
+   virtual sysSectionValue GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
 
    // Live Load Results
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
 
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
 
    // Limit State Results
-   virtual void GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
-   virtual void GetShear(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
-   virtual void GetMoment(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
-   virtual void GetShear(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) = 0;
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) = 0;
+   virtual void GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) = 0;
 };

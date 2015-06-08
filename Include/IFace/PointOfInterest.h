@@ -7,6 +7,6 @@ DEFINE_GUID(IID_IXBRPointOfInterest,
 0xdc508193, 0x9c4a, 0x4047, 0x9b, 0x5e, 0x7e, 0xef, 0xec, 0x1e, 0x18, 0xb0);
 interface IXBRPointOfInterest : public IUnknown
 {
-   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PoiAttributeType attrib = 0) = 0;
-   virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(ColumnIndexType colIdx) = 0;
+   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib = 0) = 0;
+   virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx) = 0;
 };

@@ -32,31 +32,31 @@ void xbrLoadRater::SetBroker(IBroker* pBroker)
    m_pBroker = pBroker;
 }
 
-xbrRatingArtifact xbrLoadRater::RateXBeam(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
+xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
 
    GET_IFACE(IXBRPointOfInterest,pPOI);
-   std::vector<xbrPointOfInterest> vPoi( pPOI->GetXBeamPointsOfInterest() );
+   std::vector<xbrPointOfInterest> vPoi( pPOI->GetXBeamPointsOfInterest(pierID) );
 
    xbrRatingArtifact ratingArtifact;
 
    // Rate for positive moment - flexure
-   MomentRating(vPoi,true,ratingType,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vPoi,true,ratingType,vehicleIdx,ratingArtifact);
 
    // Rate for negative moment - flexure
-   MomentRating(vPoi,false,ratingType,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vPoi,false,ratingType,vehicleIdx,ratingArtifact);
 
    // Rate for shear if applicable
    if ( pRatingSpec->RateForShear(ratingType) )
    {
-      ShearRating(vPoi,ratingType,vehicleIdx,ratingArtifact);
+      ShearRating(pierID,vPoi,ratingType,vehicleIdx,ratingArtifact);
    }
 
    return ratingArtifact;
 }
 
-void xbrLoadRater::MomentRating(const std::vector<xbrPointOfInterest>& vPoi,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    std::vector<Float64> vDC, vDW;
    std::vector<Float64> vLLIMmin,vLLIMmax;
@@ -67,7 +67,7 @@ void xbrLoadRater::MomentRating(const std::vector<xbrPointOfInterest>& vPoi,bool
    CEAFAutoProgress ap(pProgress);
    pProgress->UpdateMessage(_T("Load rating for moment"));
 
-   GetMoments(bPositiveMoment, ratingType, vehicleIdx, vPoi, vDC, vDW, vLLIMmin, vLLIMmax, vAdjLLIMmin, vAdjLLIMmax);
+   GetMoments(pierID, bPositiveMoment, ratingType, vehicleIdx, vPoi, vDC, vDW, vLLIMmin, vLLIMmax, vAdjLLIMmin, vAdjLLIMmax);
 
    //GET_IFACE(IMomentCapacity,pMomentCapacity);
    //std::vector<MOMENTCAPACITYDETAILS> vM = pMomentCapacity->GetMomentCapacityDetails(loadRatingIntervalIdx,vPoi,bPositiveMoment);
@@ -208,7 +208,7 @@ void xbrLoadRater::MomentRating(const std::vector<xbrPointOfInterest>& vPoi,bool
    //}
 }
 
-void xbrLoadRater::ShearRating(const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    //GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    //GET_IFACE(IProgress, pProgress);
@@ -483,27 +483,27 @@ pgsTypes::LimitState xbrLoadRater::GetStrengthLimitStateType(pgsTypes::LoadRatin
    return ls;
 }
 
-void xbrLoadRater::GetMoments(bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax, std::vector<Float64>& vAdjLLIMmin, std::vector<Float64>& vAdjLLIMmax)
+void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax, std::vector<Float64>& vAdjLLIMmin, std::vector<Float64>& vAdjLLIMmax)
 {
    pgsTypes::LiveLoadType llType = GetLiveLoadType(ratingType);
 
    GET_IFACE(IXBRAnalysisResults,pResults);
-   vDC = pResults->GetMoment(lcDC,vPoi);
-   vDW = pResults->GetMoment(lcDW,vPoi);
+   vDC = pResults->GetMoment(pierID,lcDC,vPoi);
+   vDW = pResults->GetMoment(pierID,lcDW,vPoi);
 
    if ( vehicleIdx == INVALID_INDEX )
    {
-      pResults->GetMoment(ratingType,vPoi,&vLLIMmin,&vLLIMmax);
+      pResults->GetMoment(pierID,ratingType,vPoi,&vLLIMmin,&vLLIMmax);
    }
    else
    {
-      pResults->GetMoment(ratingType,vehicleIdx,vPoi,&vLLIMmin,&vLLIMmax);
+      pResults->GetMoment(pierID,ratingType,vehicleIdx,vPoi,&vLLIMmin,&vLLIMmax);
    }
 
    if ( ::IsPermitRatingType(ratingType) )
    {
       pgsTypes::LoadRatingType legalRatingType = (ratingType == pgsTypes::lrPermit_Routine ? pgsTypes::lrLegal_Routine : pgsTypes::lrLegal_Special);
-      pResults->GetMoment(legalRatingType,vPoi,&vAdjLLIMmin,&vAdjLLIMmax);
+      pResults->GetMoment(pierID,legalRatingType,vPoi,&vAdjLLIMmin,&vAdjLLIMmax);
    }
    else
    {

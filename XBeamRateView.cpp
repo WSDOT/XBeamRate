@@ -5,6 +5,7 @@
 
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
+#include "XBeamRateChildFrame.h"
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
@@ -13,12 +14,13 @@
 #include <IFace\LoadRating.h>
 #include <IFace\Pier.h>
 #include <IFace\EditByUI.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\WsdotCalculationSheet.h>
 
-
+#include <PgsExt\BridgeDescription2.h>
 
 #include <PGSuperColors.h>
 #define COLUMN_LINE_COLOR              GREY50
@@ -206,6 +208,12 @@ void CXBeamRateView::OnInitialUpdate()
    CDisplayView::OnInitialUpdate();
 }
 
+PierIDType CXBeamRateView::GetPierID()
+{
+   CXBeamRateChildFrame* pFrame = (CXBeamRateChildFrame*)GetParentFrame();
+   return pFrame->GetPierID();
+}
+
 void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
 {
    CDisplayView::OnUpdate(pSender,lHint,pHint);
@@ -242,13 +250,15 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
+   PierIDType pierID = GetPierID();
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
 
    // Model a vertical line for the alignment
    // Let X = 0 be at the alignment and Y = the alignment elevation
    Float64 X = 0;
-   Float64 Y = pProject->GetDeckElevation() + ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   Float64 Y = pProject->GetDeckElevation(pierID) + ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    CComPtr<IPoint2d> pnt1;
    pnt1.CoCreateInstance(CLSID_Point2d);
    pnt1->Move(X,Y);
@@ -261,7 +271,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    connectable1->AddSocket(0,pnt1,&socket1);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   Y -= pPier->GetMaxColumnHeight();
+   Y -= pPier->GetMaxColumnHeight(pierID);
    CComPtr<IPoint2d> pnt2;
    pnt2.CoCreateInstance(CLSID_Point2d);
    pnt2->Move(X,Y);
@@ -294,7 +304,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    displayList->AddDisplayObject(doAlignment);
 
    // Model Upper Cross Beam (Elevation)
-   Float64 Z = pProject->GetXBeamLength();
+   Float64 Z = pProject->GetXBeamLength(pierID);
 
    CComPtr<IPoint2d> point;
    point.CoCreateInstance(CLSID_Point2d);
@@ -307,7 +317,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doUpperXBeam->SetSelectionType(stAll);
 
    CComPtr<IShape> upperXBeamShape;
-   pPier->GetUpperXBeamProfile(&upperXBeamShape);
+   pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
 
    // Capture the X coordinate of the left edge
    // We'll need this for other display objects
@@ -340,7 +350,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doUpperXBeam->SetSelectionType(stAll);
 
    upperXBeamShape.Release();
-   pSectProp->GetUpperXBeamShape(xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
+   pSectProp->GetUpperXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
    position.Release();
    upperXBeamShape.QueryInterface(&position);
    position->Offset(1.2*Z,0);
@@ -369,7 +379,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doLowerXBeam->SetSelectionType(stAll);
 
    CComPtr<IShape> lowerXBeamShape;
-   pPier->GetLowerXBeamProfile(&lowerXBeamShape);
+   pPier->GetLowerXBeamProfile(pierID,&lowerXBeamShape);
 
    CComPtr<iShapeDrawStrategy> lowerXBeamDrawStrategy;
    lowerXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
@@ -395,7 +405,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doLowerXBeam->SetSelectionType(stAll);
 
    lowerXBeamShape.Release();
-   pSectProp->GetLowerXBeamShape(xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
+   pSectProp->GetLowerXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
    position.Release();
    lowerXBeamShape->QueryInterface(&position);
    position->Offset(1.2*Z,0);
@@ -435,24 +445,26 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    GET_IFACE2(pBroker,IXBRPier,pPier);
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
+   PierIDType pierID = GetPierID();
+
    CComPtr<IPoint2d> pntTL, pntTC, pntTR;
    CComPtr<IPoint2d> pntBL, pntBC, pntBR;
-   pPier->GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+   pPier->GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
 
    Float64 Xoffset;
    pntTL->get_X(&Xoffset);
 
-   IndexType nColumns = pPier->GetColumnCount();
+   IndexType nColumns = pPier->GetColumnCount(pierID);
    for (IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 X = pPier->GetColumnLocation(colIdx);
-      Float64 Ytop = pPier->GetTopColumnElevation(colIdx);
-      Float64 Ybot = pPier->GetBottomColumnElevation(colIdx);
+      Float64 X = pPier->GetColumnLocation(pierID,colIdx);
+      Float64 Ytop = pPier->GetTopColumnElevation(pierID,colIdx);
+      Float64 Ybot = pPier->GetBottomColumnElevation(pierID,colIdx);
       CColumnData::ColumnShapeType colShapeType;
       Float64 d1, d2;
       CColumnData::ColumnHeightMeasurementType columnHeightType;
       Float64 H;
-      pProject->GetColumnProperties(&colShapeType,&d1,&d2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,&colShapeType,&d1,&d2,&columnHeightType,&H);
 
       CComPtr<IPoint2d> pntTop, pntBot;
       pntTop.CoCreateInstance(CLSID_Point2d);
@@ -526,15 +538,17 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
+   PierIDType pierID = GetPierID();
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   Float64 X = pProject->GetXBeamLength();
+   Float64 X = pProject->GetXBeamLength(pierID);
 
    GET_IFACE2(pBroker,IXBRRebar,pRebar);
-   IndexType nRebarRows = pRebar->GetRebarRowCount();
+   IndexType nRebarRows = pRebar->GetRebarRowCount(pierID);
    for ( IndexType rowIdx = 0; rowIdx < nRebarRows; rowIdx++ )
    {
       CComPtr<IPoint2dCollection> points;
-      pRebar->GetRebarProfile(rowIdx,&points);
+      pRebar->GetRebarProfile(pierID,rowIdx,&points);
 
       CComPtr<iPolyLineDisplayObject> doRebar;
       doRebar.CoCreateInstance(CLSID_PolyLineDisplayObject);
@@ -546,13 +560,13 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
       doRebar->Commit();
       displayList->AddDisplayObject(doRebar);
 
-      Float64 Ytop = pPier->GetElevation(X);
+      Float64 Ytop = pPier->GetElevation(pierID,X);
 
-      IndexType nBars = pRebar->GetRebarCount(rowIdx);
+      IndexType nBars = pRebar->GetRebarCount(pierID,rowIdx);
       for ( IndexType barIdx = 0; barIdx < nBars; barIdx++ )
       {
          CComPtr<IPoint2d> pntBar;
-         pRebar->GetRebarLocation(xbrPointOfInterest(INVALID_ID,X),rowIdx,barIdx,&pntBar);
+         pRebar->GetRebarLocation(pierID,xbrPointOfInterest(INVALID_ID,X),rowIdx,barIdx,&pntBar);
 
          Float64 Ybar;
          pntBar->get_Y(&Ybar);
@@ -590,29 +604,31 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    GET_IFACE2(pBroker,IXBRPier,pPier);
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProps);
 
+   PierIDType pierID = GetPierID();
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
    Float64 H,W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
    GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
    for ( int i = 0; i < 2; i++ )
    {
       xbrTypes::Stage stage = (xbrTypes::Stage)i;
-      IndexType nStirrupZones = pStirrups->GetStirrupZoneCount(stage);
+      IndexType nStirrupZones = pStirrups->GetStirrupZoneCount(pierID,stage);
       for ( IndexType zoneIdx = 0; zoneIdx < nStirrupZones; zoneIdx++ )
       {
          Float64 Xstart, Xend;
-         pStirrups->GetStirrupZoneBoundary(stage,zoneIdx,&Xstart,&Xend);
+         pStirrups->GetStirrupZoneBoundary(pierID,stage,zoneIdx,&Xstart,&Xend);
          
-         IndexType nStirrups = pStirrups->GetStirrupCount(stage,zoneIdx);
-         Float64 S = pStirrups->GetStirrupZoneSpacing(stage,zoneIdx);
+         IndexType nStirrups = pStirrups->GetStirrupCount(pierID,stage,zoneIdx);
+         Float64 S = pStirrups->GetStirrupZoneSpacing(pierID,stage,zoneIdx);
 
          for ( IndexType stirrupIdx = 0; stirrupIdx < nStirrups; stirrupIdx++ )
          {
             Float64 distFromLeftEdge = Xstart + stirrupIdx*S;
-            Float64 Ytop = pPier->GetElevation(distFromLeftEdge);
+            Float64 Ytop = pPier->GetElevation(pierID,distFromLeftEdge);
 
-            Float64 D = pSectProps->GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,distFromLeftEdge));
+            Float64 D = pSectProps->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,distFromLeftEdge));
             Float64 Ybot = Ytop - D;
 
             if ( stage == xbrTypes::Stage1 )
@@ -700,26 +716,28 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
+   PierIDType pierID = GetPierID();
+
    Float64 H,W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
    CComPtr<IPoint2d> pntTL, pntTC, pntTR;
    CComPtr<IPoint2d> pntBL, pntBC, pntBR;
-   pPier->GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+   pPier->GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
 
    Float64 Xoffset;
    pntTL->get_X(&Xoffset);
 
-   IndexType nBearingLines = pPier->GetBearingLineCount();
+   IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
-      IndexType nBearings = pPier->GetBearingCount(brgLineIdx);
+      IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         Float64 Xbrg = pPier->GetBearingLocation(brgLineIdx,brgIdx);
-         Float64 Y    = pPier->GetElevation(Xbrg);
+         Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+         Float64 Y    = pPier->GetElevation(pierID,Xbrg);
 
          CComPtr<IPoint2d> pnt;
          pnt.CoCreateInstance(CLSID_Point2d);
@@ -757,15 +775,17 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
+   PierIDType pierID = GetPierID();
+
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
    CComPtr<IPoint2d> uxbTL, uxbTC, uxbTR;
    CComPtr<IPoint2d> uxbBL, uxbBC, uxbBR;
-   pPier->GetUpperXBeamPoints(&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
+   pPier->GetUpperXBeamPoints(pierID,&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
 
    CComPtr<IPoint2d> lxbTL, lxbTC, lxbTR;
    CComPtr<IPoint2d> lxbBL, lxbBL2, lxbBR2, lxbBR;
-   pPier->GetLowerXBeamPoints(&lxbTL,&lxbTC,&lxbTR,&lxbBL,&lxbBL2,&lxbBR2,&lxbBR);
+   pPier->GetLowerXBeamPoints(pierID,&lxbTL,&lxbTC,&lxbTR,&lxbBL,&lxbBL2,&lxbBR2,&lxbBR);
 
    CComPtr<IPoint2d> uxbTLC, uxbTRC;
    uxbTLC.CoCreateInstance(CLSID_Point2d);
@@ -808,9 +828,9 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    BuildDimensionLine(displayList,lxbBR,lxbBRC);
 
    // Column Dimensions
-   ColumnIndexType nColumns = pPier->GetColumnCount();
+   ColumnIndexType nColumns = pPier->GetColumnCount(pierID);
    lxbBRC->get_X(&x);
-   Float64 Ycol = pPier->GetBottomColumnElevation(nColumns-1);
+   Float64 Ycol = pPier->GetBottomColumnElevation(pierID,nColumns-1);
 
    CComPtr<IPoint2d> pntBC;
    pntBC.CoCreateInstance(CLSID_Point2d);
@@ -824,7 +844,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pntLeft->Move(Xoffset,Ycol);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 Xcol = pPier->GetColumnLocation(colIdx);
+      Float64 Xcol = pPier->GetColumnLocation(pierID,colIdx);
       Xcol += Xoffset;
 
       CComPtr<IPoint2d> pntRight;
@@ -932,14 +952,16 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
    if ( SUCCEEDED(hr) )
    {
       GET_IFACE2(pBroker,IEditByUI,pEditByUI);
-#pragma Reminder("UPDATE: Need to get index of pier that is being viewed")
-      // also need to get page index for our extension page
-      pEditByUI->EditPierDescription(1/*pierIdx*/,0/*pageIdx*/);
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      PierIDType pierID = GetPierID();
+      const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
+      pEditByUI->EditPierDescription(pPier->GetIndex(),0/*pageIdx*/);
 
    }
    else
    {
       GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
-      pProjectEdit->EditPier(0);
+      pProjectEdit->EditPier(INVALID_ID);
    }
 }

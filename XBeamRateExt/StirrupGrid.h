@@ -47,6 +47,9 @@ public:
    // custom stuff for grid
    void CustomInit();
 
+   BOOL OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState);
+   BOOL OnLButtonClickedRowCol(ROWCOL nRow, ROWCOL nCol, UINT nFlags, CPoint pt);
+
 private:
    void AddZoneData(const xbrStirrupData::StirrupZone& zoneData);
    void SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zoneData);

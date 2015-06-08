@@ -652,7 +652,14 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
    try
    {
       CComVariant var;
-      hr = pStrLoad->BeginUnit(_T("Pier"));
+      HRESULT hres = pStrLoad->BeginUnit(_T("Pier"));
+      // don't want to throw an exception if this fails... let the caller deal with the failure
+      // (we want to loop over pier objects until fail.. fail indicates there aren't any more pier objects
+      if (FAILED(hres) )
+      {
+         return hres;
+      }
+
       var.vt = VT_ID;
       hr = pStrLoad->get_Property(_T("ID"),&var);
       m_ID = VARIANT2ID(var);

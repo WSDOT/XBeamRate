@@ -6,54 +6,10 @@ CReinforcementPageParent::CReinforcementPageParent()
    m_pEditPierData = NULL;
 }
 
-void CReinforcementPageParent::SetEditPierData(IEditPierData* pEditPierData)
+void CReinforcementPageParent::SetEditPierData(IEditPierData* pEditPierData,const xbrPierData& pierData)
 {
    m_pEditPierData = pEditPierData;
-
-   // Initialize the cross beam pier data from the PGSuper/PGSplice pier data
-
-   if ( m_pEditPierData->GetPierData()->IsBoundaryPier() )
-   {
-      switch( m_pEditPierData->GetPierData()->GetBoundaryConditionType() )
-      {
-      case pgsTypes::bctHinge:
-      case pgsTypes::bctRoller:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctExpansion);
-         break;
-
-      case pgsTypes::bctContinuousAfterDeck:
-      case pgsTypes::bctContinuousBeforeDeck:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctContinuous);
-         break;
-
-      case pgsTypes::bctIntegralAfterDeck:
-      case pgsTypes::bctIntegralBeforeDeck:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctIntegral);
-         break;
-
-      case pgsTypes::bctIntegralAfterDeckHingeBack:
-      case pgsTypes::bctIntegralBeforeDeckHingeBack:
-      case pgsTypes::bctIntegralAfterDeckHingeAhead:
-      case pgsTypes::bctIntegralBeforeDeckHingeAhead:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctIntegral);
-         break;
-      }
-   }
-   else
-   {
-      switch ( m_pEditPierData->GetPierData()->GetSegmentConnectionType() )
-      {
-      case pgsTypes::psctContinousClosureJoint:
-      case pgsTypes::psctContinuousSegment:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctContinuous);
-         break;
-
-      case pgsTypes::psctIntegralClosureJoint:
-      case pgsTypes::psctIntegralSegment:
-         m_PierData.SetSuperstructureConnectionType(xbrTypes::pctIntegral);
-         break;
-      }
-   }
+   m_PierData = pierData;
 }
 
 CPierData2* CReinforcementPageParent::GetPierData()
@@ -68,7 +24,45 @@ CConcreteMaterial& CReinforcementPageParent::GetConcrete()
 
 xbrTypes::SuperstructureConnectionType CReinforcementPageParent::GetSuperstructureConnectionType()
 {
-   return m_PierData.GetSuperstructureConnectionType();
+   if ( m_pEditPierData->GetPierData()->IsBoundaryPier() )
+   {
+      switch( m_pEditPierData->GetPierData()->GetBoundaryConditionType() )
+      {
+      case pgsTypes::bctHinge:
+      case pgsTypes::bctRoller:
+         return xbrTypes::pctExpansion;
+
+      case pgsTypes::bctContinuousAfterDeck:
+      case pgsTypes::bctContinuousBeforeDeck:
+         return xbrTypes::pctContinuous;
+
+      case pgsTypes::bctIntegralAfterDeck:
+      case pgsTypes::bctIntegralBeforeDeck:
+         return xbrTypes::pctIntegral;
+
+      case pgsTypes::bctIntegralAfterDeckHingeBack:
+      case pgsTypes::bctIntegralBeforeDeckHingeBack:
+      case pgsTypes::bctIntegralAfterDeckHingeAhead:
+      case pgsTypes::bctIntegralBeforeDeckHingeAhead:
+         return xbrTypes::pctIntegral;
+      }
+   }
+   else
+   {
+      switch ( m_pEditPierData->GetPierData()->GetSegmentConnectionType() )
+      {
+      case pgsTypes::psctContinousClosureJoint:
+      case pgsTypes::psctContinuousSegment:
+         return xbrTypes::pctContinuous;
+
+      case pgsTypes::psctIntegralClosureJoint:
+      case pgsTypes::psctIntegralSegment:
+         return xbrTypes::pctIntegral;
+      }
+   }
+
+   ATLASSERT(false); // should never get here
+   return xbrTypes::pctIntegral;
 }
 
 matRebar::Type& CReinforcementPageParent::GetRebarType()

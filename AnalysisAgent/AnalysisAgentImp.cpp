@@ -137,16 +137,34 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    return S_OK;
 }
 
-//////////////////////////////////////////////////////////////////////
-void CAnalysisAgentImp::Validate()
+CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID)
 {
-   if ( m_Model != NULL )
+   BuildModel(pierID); // builds or updates the model if necessary
+   std::map<PierIDType,ModelData>::iterator found = m_ModelData.find(pierID);
+   ATLASSERT( found != m_ModelData.end() ); // should always find it!
+   ModelData* pModelData = &(*found).second;
+   return pModelData;
+}
+
+void CAnalysisAgentImp::BuildModel(PierIDType pierID)
+{
+   std::map<PierIDType,ModelData>::iterator found = m_ModelData.find(pierID);
+   if ( found == m_ModelData.end() )
+   {
+      ModelData model_data;
+      m_ModelData.insert( std::make_pair(pierID,model_data) );
+      found = m_ModelData.find(pierID);
+   }
+
+   ModelData* pModelData = &(found->second);
+
+   if ( pModelData->m_Model != NULL )
    {
       return;
    }
 
-   m_Model.CoCreateInstance(CLSID_Fem2dModel);
-   m_Model->put_Name(CComBSTR(_T("XBeamRate")));
+   pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
+   pModelData->m_Model->put_Name(CComBSTR(_T("XBeamRate")));
 
    // Build the frame model
    GET_IFACE(IXBRProject,pProject);
@@ -155,23 +173,23 @@ void CAnalysisAgentImp::Validate()
    GET_IFACE(IXBRSectionProperties,pSectProp);
 
    // some dummy dimensions
-   Float64 leftOverhang = pProject->GetXBeamLeftOverhang();
-   Float64 rightOverhang = pProject->GetXBeamRightOverhang();
-   IndexType nColumns = pProject->GetColumnCount();
+   Float64 leftOverhang = pProject->GetXBeamLeftOverhang(pierID);
+   Float64 rightOverhang = pProject->GetXBeamRightOverhang(pierID);
+   IndexType nColumns = pProject->GetColumnCount(pierID);
 
-   Float64 L = pProject->GetXBeamLength();
+   Float64 L = pProject->GetXBeamLength(pierID);
 
-   Float64 Exb = pMaterial->GetXBeamEc();
-   Float64 Axb = pSectProp->GetArea(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-   Float64 Ixb = pSectProp->GetIxx(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 Exb = pMaterial->GetXBeamEc(pierID);
+   Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
    Float64 EAb = Exb*Axb;
    Float64 EIb = Exb*Ixb;
 
    CComPtr<IFem2dJointCollection> joints;
-   m_Model->get_Joints(&joints);
+   pModelData->m_Model->get_Joints(&joints);
 
    CComPtr<IFem2dMemberCollection> members;
-   m_Model->get_Members(&members);
+   pModelData->m_Model->get_Members(&members);
 
    JointIDType jntID = 0;
 
@@ -196,12 +214,12 @@ void CAnalysisAgentImp::Validate()
    capMbr.Xs = Xs;
    capMbr.Xe = Xe;
    capMbr.mbrID = xbeamMbrID-1;
-   m_CapBeamMembers.push_back(capMbr);
+   pModelData->m_CapBeamMembers.push_back(capMbr);
 
-   Float64 columnSpacing = pProject->GetColumnSpacing();
+   Float64 columnSpacing = pProject->GetColumnSpacing(pierID);
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 columnHeight = pPier->GetColumnHeight(colIdx);
+      Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
       Float64 space = (colIdx < nColumns-1 ? columnSpacing : rightOverhang);
 
       // create joint at bottom of column
@@ -211,9 +229,9 @@ void CAnalysisAgentImp::Validate()
       joint->Support(); // fully fixed
 
       // create column member
-      Float64 Ecol = pMaterial->GetColumnEc(colIdx);
-      Float64 Acol = pSectProp->GetArea(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
-      Float64 Icol = pSectProp->GetIyy(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+      Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
+      Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+      Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
       mbr.Release();
       members->Create(columnMbrID--,jntID-2,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
 
@@ -231,31 +249,31 @@ void CAnalysisAgentImp::Validate()
       capMbr.Xs = Xs;
       capMbr.Xe = Xe;
       capMbr.mbrID = xbeamMbrID-1;
-      m_CapBeamMembers.push_back(capMbr);
+      pModelData->m_CapBeamMembers.push_back(capMbr);
    }
 
    // Assign POIs
    CComPtr<IFem2dPOICollection> femPois;
-   m_Model->get_POIs(&femPois);
+   pModelData->m_Model->get_POIs(&femPois);
    PoiIDType femPoiID = 0;
    GET_IFACE(IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
       MemberIDType mbrID;
       Float64 mbrLocation;
-      GetFemModelLocation(poi,&mbrID,&mbrLocation);
+      GetFemModelLocation(pModelData,poi,&mbrID,&mbrLocation);
 
       CComPtr<IFem2dPOI> femPoi;
       femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
-      m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
+      pModelData->m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
       femPoiID++;
    }
 
-   ApplyDeadLoad();
+   ApplyDeadLoad(pierID,pModelData);
 
 #if defined _DEBUG
-   CComQIPtr<IStructuredStorage2> ss(m_Model);
+   CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
    CComPtr<IStructuredSave2> save;
    save.CoCreateInstance(CLSID_StructuredSave2);
    save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
@@ -266,19 +284,19 @@ void CAnalysisAgentImp::Validate()
 #endif // _DEBUG
 }
 
-void CAnalysisAgentImp::ApplyDeadLoad()
+void CAnalysisAgentImp::ApplyDeadLoad(PierIDType pierID,ModelData* pModelData)
 {
-   ApplyLowerXBeamDeadLoad();
-   ApplyUpperXBeamDeadLoad();
-   ApplySuperstructureDeadLoadReactions();
+   ApplyLowerXBeamDeadLoad(pierID,pModelData);
+   ApplyUpperXBeamDeadLoad(pierID,pModelData);
+   ApplySuperstructureDeadLoadReactions(pierID,pModelData);
 }
 
-void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
+void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
 {
-   ValidateLowerXBeamDeadLoad();
+   ValidateLowerXBeamDeadLoad(pierID,pModelData);
 
    CComPtr<IFem2dLoadingCollection> loadings;
-   m_Model->get_Loadings(&loadings);
+   pModelData->m_Model->get_Loadings(&loadings);
 
    LoadCaseIDType loadCaseID = GetLoadCaseID(pftLowerXBeam);
    CComPtr<IFem2dLoading> loading;
@@ -288,16 +306,16 @@ void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
    loading->get_DistributedLoads(&distLoads);
 
    LoadIDType loadID = 0;
-   std::vector<LowerXBeamLoad>::iterator iter(m_LowerXBeamLoads.begin());
-   std::vector<LowerXBeamLoad>::iterator end(m_LowerXBeamLoads.end());
+   std::vector<LowerXBeamLoad>::iterator iter(pModelData->m_LowerXBeamLoads.begin());
+   std::vector<LowerXBeamLoad>::iterator end(pModelData->m_LowerXBeamLoads.end());
    for ( ; iter != end; iter++ )
    {
       LowerXBeamLoad& load(*iter);
 
       MemberIDType startMbrID, endMbrID;
       Float64 startMbrLocation , endMbrLocation;
-      GetFemModelLocation(xbrPointOfInterest(INVALID_ID,load.Xs),&startMbrID,&startMbrLocation);
-      GetFemModelLocation(xbrPointOfInterest(INVALID_ID,load.Xe),&endMbrID,  &endMbrLocation);
+      GetFemModelLocation(pModelData,xbrPointOfInterest(INVALID_ID,load.Xs),&startMbrID,&startMbrLocation);
+      GetFemModelLocation(pModelData,xbrPointOfInterest(INVALID_ID,load.Xe),&endMbrID,  &endMbrLocation);
 
       if ( startMbrID == endMbrID )
       {
@@ -307,10 +325,10 @@ void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
       else
       {
          CComPtr<IFem2dMemberCollection> members;
-         m_Model->get_Members(&members);
+         pModelData->m_Model->get_Members(&members);
 
          CComPtr<IFem2dJointCollection> joints;
-         m_Model->get_Joints(&joints);
+         pModelData->m_Model->get_Joints(&joints);
 
          // load from start to end of first member
          CComPtr<IFem2dMember> mbr;
@@ -368,10 +386,10 @@ void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad()
    }
 }
 
-void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
+void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
 {
    CComPtr<IFem2dLoadingCollection> loadings;
-   m_Model->get_Loadings(&loadings);
+   pModelData->m_Model->get_Loadings(&loadings);
 
    LoadCaseIDType loadCaseID = GetLoadCaseID(pftUpperXBeam);
    CComPtr<IFem2dLoading> loading;
@@ -382,15 +400,15 @@ void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad()
 
    LoadIDType loadID = 0;
 
-   Float64 w = GetUpperCrossBeamLoading();
-   BOOST_FOREACH(CapBeamMember& capMbr,m_CapBeamMembers)
+   Float64 w = GetUpperCrossBeamLoading(pierID);
+   BOOST_FOREACH(CapBeamMember& capMbr,pModelData->m_CapBeamMembers)
    {
       CComPtr<IFem2dDistributedLoad> distLoad;
       distLoads->Create(loadID++,capMbr.mbrID,loadDirFy,0,-1,-w,-w,lotMember,&distLoad);
    }
 }
 
-void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions()
+void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData)
 {
    GET_IFACE(IXBRPier,pPier);
    GET_IFACE(IXBRProject,pProject);
@@ -402,7 +420,7 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions()
    LoadIDType dwLoadID = 0;
 
    CComPtr<IFem2dLoadingCollection> loadings;
-   m_Model->get_Loadings(&loadings);
+   pModelData->m_Model->get_Loadings(&loadings);
 
    CComPtr<IFem2dLoading> dcLoading;
    loadings->Create(dcLoadCaseID,&dcLoading);
@@ -416,20 +434,20 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions()
    CComPtr<IFem2dPointLoadCollection> dwPointLoads;
    dwLoading->get_PointLoads(&dwPointLoads);
 
-   IndexType nBearingLines = pProject->GetBearingLineCount();
+   IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
-      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      IndexType nBearings = pProject->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         Float64 Xbrg = pPier->GetBearingLocation(brgLineIdx,brgIdx);
+         Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
 
          MemberIDType mbrID;
          Float64 mbrLocation;
-         GetCapBeamFemModelLocation(Xbrg,&mbrID,&mbrLocation);
+         GetCapBeamFemModelLocation(pModelData,Xbrg,&mbrID,&mbrLocation);
 
          Float64 DC, DW;
-         pProject->GetBearingReactions(brgLineIdx,brgIdx,&DC,&DW);
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW);
 
          CComPtr<IFem2dPointLoad> dcLoad;
          dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
@@ -440,32 +458,32 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions()
    }
 }
 
-void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
+void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
 {
-   if ( 0 < m_LowerXBeamLoads.size() )
+   if ( 0 < pModelData->m_LowerXBeamLoads.size() )
    {
       return;
    }
 
    GET_IFACE(IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(POI_SECTIONCHANGE);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_SECTIONCHANGE);
 
    GET_IFACE(IXBRSectionProperties,pSectProp);
    GET_IFACE(IXBRMaterial,pMaterial);
 
-   Float64 density = pMaterial->GetXBeamDensity();
+   Float64 density = pMaterial->GetXBeamDensity(pierID);
    Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
 
    std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
    std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   Float64 Astart = pSectProp->GetArea(xbrTypes::Stage1,*iter);
+   Float64 Astart = pSectProp->GetArea(pierID,xbrTypes::Stage1,*iter);
    Float64 Wstart = unitWeight*Astart;
    Float64 Xstart = (*iter).GetDistFromStart();
 
    iter++;
    for ( ; iter != end; iter++ )
    {
-      Float64 Aend = pSectProp->GetArea(xbrTypes::Stage1,*iter);
+      Float64 Aend = pSectProp->GetArea(pierID,xbrTypes::Stage1,*iter);
       Float64 Wend = unitWeight*Aend;
       Float64 Xend = (*iter).GetDistFromStart();
 
@@ -474,7 +492,7 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
       load.Xe = Xend;
       load.Ws = Wstart;
       load.We = Wend;
-      m_LowerXBeamLoads.push_back(load);
+      pModelData->m_LowerXBeamLoads.push_back(load);
 
       Xstart = Xend;
       Astart = Aend;
@@ -482,18 +500,18 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad()
    }
 }
 
-void CAnalysisAgentImp::GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation)
+void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation)
 {
    ATLASSERT(!poi.IsColumnPOI()); // not supporting POIs on the columns yet
 
    Float64 Xpoi = poi.GetDistFromStart();
-   GetCapBeamFemModelLocation(Xpoi,pMbrID,pMbrLocation);
+   GetCapBeamFemModelLocation(pModelData,Xpoi,pMbrID,pMbrLocation);
 }
 
-void CAnalysisAgentImp::GetCapBeamFemModelLocation(Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation)
+void CAnalysisAgentImp::GetCapBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation)
 {
-   std::vector<CapBeamMember>::iterator iter(m_CapBeamMembers.begin());
-   std::vector<CapBeamMember>::iterator end(m_CapBeamMembers.end());
+   std::vector<CapBeamMember>::iterator iter(pModelData->m_CapBeamMembers.begin());
+   std::vector<CapBeamMember>::iterator end(pModelData->m_CapBeamMembers.end());
    for ( ; iter != end; iter++ )
    {
       CapBeamMember& capMbr(*iter);
@@ -532,10 +550,7 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(XBRProductForceType pfType)
 
 void CAnalysisAgentImp::Invalidate()
 {
-   m_Model.Release();
-   m_CapBeamMembers.clear();
-   m_PoiMap.clear();
-   m_LowerXBeamLoads.clear();
+   m_ModelData.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -548,25 +563,25 @@ HRESULT CAnalysisAgentImp::OnProjectChanged()
 
 //////////////////////////////////////////////////////////////////////
 // IXBRProductForces
-const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading()
+const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading(PierIDType pierID)
 {
-   ValidateLowerXBeamDeadLoad();
-   return m_LowerXBeamLoads;
+   ModelData* pModelData = GetModelData(pierID);
+   return pModelData->m_LowerXBeamLoads;
 }
 
-Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading()
+Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
    Float64 H, W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
-   if ( pProject->GetPierType() == xbrTypes::pctExpansion )
+   if ( pProject->GetPierType(pierID) == xbrTypes::pctExpansion )
    {
       W *= 2;
    }
 
    GET_IFACE(IXBRMaterial,pMaterial);
-   Float64 density = pMaterial->GetXBeamDensity();
+   Float64 density = pMaterial->GetXBeamDensity(pierID);
    Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
 
    Float64 w = H*W*unitWeight;
@@ -575,15 +590,15 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading()
 
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
-Float64 CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi)
 {
-   Validate();
+   ModelData* pModelData = GetModelData(pierID);
 
-   std::map<PoiIDType,PoiIDType>::iterator found = m_PoiMap.find(poi.GetID());
-   ATLASSERT(found != m_PoiMap.end());
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
    PoiIDType femPoiID = found->second;
 
-   CComQIPtr<IFem2dModelResults> results(m_Model);
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
 
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
@@ -593,15 +608,15 @@ Float64 CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const xbrPointOf
    return Mz;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi)
 {
-   Validate();
+   ModelData* pModelData = GetModelData(pierID);
 
-   std::map<PoiIDType,PoiIDType>::iterator found = m_PoiMap.find(poi.GetID());
-   ATLASSERT(found != m_PoiMap.end());
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
    PoiIDType femPoiID = found->second;
 
-   CComQIPtr<IFem2dModelResults> results(m_Model);
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
 
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
@@ -613,95 +628,95 @@ sysSectionValue CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const xbr
    return V;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      Float64 m = GetMoment(pfType,poi);
+      Float64 m = GetMoment(pierID,pfType,poi);
       vM.push_back(m);
    }
 
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      sysSectionValue v = GetShear(pfType,poi);
+      sysSectionValue v = GetShear(pierID,pfType,poi);
       vV.push_back(v);
    }
 
    return vV;
 }
 
-Float64 CAnalysisAgentImp::GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
 {
    std::vector<XBRProductForceType> vPFTypes = GetLoads(lcType);
    Float64 M = 0;
    BOOST_FOREACH(XBRProductForceType pfType,vPFTypes)
    {
-      Float64 m = GetMoment(pfType,poi);
+      Float64 m = GetMoment(pierID,pfType,poi);
       M += m;
    }
 
    return M;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
 {
    std::vector<XBRProductForceType> vPFTypes = GetLoads(lcType);
    sysSectionValue V(0,0);
    BOOST_FOREACH(XBRProductForceType pfType,vPFTypes)
    {
-      sysSectionValue v = GetShear(pfType,poi);
+      sysSectionValue v = GetShear(pierID,pfType,poi);
       V += v;
    }
 
    return V;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      Float64 m = GetMoment(lcType,poi);
+      Float64 m = GetMoment(pierID,lcType,poi);
       vM.push_back(m);
    }
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      sysSectionValue v = GetShear(lcType,poi);
+      sysSectionValue v = GetShear(pierID,lcType,poi);
       vV.push_back(v);
    }
    return vV;
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
    *pMin = 0;
    *pMax = 0;
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
 {
    *pMin = 0;
    *pMax = 0;
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -710,13 +725,13 @@ void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,VehicleInd
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 min,max;
-      GetMoment(ratingType,vehIdx,poi,&min,&max);
+      GetMoment(pierID,ratingType,vehIdx,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -725,25 +740,25 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,VehicleInde
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       sysSectionValue min,max;
-      GetShear(ratingType,vehIdx,poi,&min,&max);
+      GetShear(pierID,ratingType,vehIdx,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
    *pMin = 0;
    *pMax = 0;
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
 {
    *pMin = 0;
    *pMax = 0;
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -752,13 +767,13 @@ void CAnalysisAgentImp::GetMoment(pgsTypes::LoadRatingType ratingType,const std:
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 min,max;
-      GetMoment(ratingType,poi,&min,&max);
+      GetMoment(pierID,ratingType,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -767,13 +782,13 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LoadRatingType ratingType,const std::
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       sysSectionValue min,max;
-      GetShear(ratingType,poi,&min,&max);
+      GetShear(pierID,ratingType,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
 {
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
@@ -786,7 +801,7 @@ void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const xbrPoint
    std::vector<XBRProductForceType> vDC = GetLoads(lcDC);
    BOOST_FOREACH(XBRProductForceType pfType,vDC)
    {
-      Float64 dc = GetMoment(pfType,poi);
+      Float64 dc = GetMoment(pierID,pfType,poi);
       DC += dc;
    }
 
@@ -794,18 +809,18 @@ void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const xbrPoint
    std::vector<XBRProductForceType> vDW = GetLoads(lcDW);
    BOOST_FOREACH(XBRProductForceType pfType,vDW)
    {
-      Float64 dw = GetMoment(pfType,poi);
+      Float64 dw = GetMoment(pierID,pfType,poi);
       DW += dw;
    }
 
    Float64 LLIMmin, LLIMmax;
-   GetMoment(ratingType,poi,&LLIMmin,&LLIMmax);
+   GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax);
 
    *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
 {
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
@@ -818,7 +833,7 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const xbrPointO
    std::vector<XBRProductForceType> vDC = GetLoads(lcDC);
    BOOST_FOREACH(XBRProductForceType pfType,vDC)
    {
-      sysSectionValue dc = GetShear(pfType,poi);
+      sysSectionValue dc = GetShear(pierID,pfType,poi);
       DC += dc;
    }
 
@@ -826,18 +841,18 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const xbrPointO
    std::vector<XBRProductForceType> vDW = GetLoads(lcDW);
    BOOST_FOREACH(XBRProductForceType pfType,vDW)
    {
-      sysSectionValue dw = GetShear(pfType,poi);
+      sysSectionValue dw = GetShear(pierID,pfType,poi);
       DW += dw;
    }
 
    sysSectionValue LLIMmin, LLIMmax;
-   GetShear(ratingType,poi,&LLIMmin,&LLIMmax);
+   GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax);
 
    *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
 }
 
-void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -846,13 +861,13 @@ void CAnalysisAgentImp::GetMoment(pgsTypes::LimitState limitState,const std::vec
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 min,max;
-      GetMoment(limitState,poi,&min,&max);
+      GetMoment(pierID,limitState,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }
 }
 
-void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -861,7 +876,7 @@ void CAnalysisAgentImp::GetShear(pgsTypes::LimitState limitState,const std::vect
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       sysSectionValue min,max;
-      GetShear(limitState,poi,&min,&max);
+      GetShear(pierID,limitState,poi,&min,&max);
       pvMin->push_back(min);
       pvMax->push_back(max);
    }

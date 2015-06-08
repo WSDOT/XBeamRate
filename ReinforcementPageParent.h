@@ -9,7 +9,7 @@ class CReinforcementPageParent : public IReinforcementPageParent
 {
 public:
    CReinforcementPageParent();
-   void SetEditPierData(IEditPierData* pEditPierData);
+   void SetEditPierData(IEditPierData* pEditPierData,const xbrPierData& pierData);
 
 // IReinforcementPageParent
    virtual CPierData2* GetPierData();

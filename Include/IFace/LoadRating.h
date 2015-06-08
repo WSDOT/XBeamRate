@@ -15,7 +15,7 @@ DEFINE_GUID(IID_IXBRMomentCapacity,
 0x15281829, 0x5f1e, 0x4a78, 0x9a, 0x9c, 0xe6, 0x19, 0xa7, 0xb1, 0xe0, 0xf6);
 interface IXBRMomentCapacity : IUnknown
 {
-   virtual Float64 GetMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
 };
 
 /*****************************************************************************
@@ -30,7 +30,7 @@ DEFINE_GUID(IID_IXBRShearCapacity,
 0xbd0d6dbc, 0x2127, 0x4413, 0xbb, 0x1d, 0x16, 0xbb, 0xd3, 0x3b, 0x5, 0x4d);
 interface IXBRShearCapacity : IUnknown
 {
-   virtual Float64 GetShearCapacity(const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi) = 0;
 };
 
 /*****************************************************************************
@@ -45,5 +45,5 @@ DEFINE_GUID(IID_IXBRArtifact,
 0xe7b694b8, 0x1b81, 0x4b53, 0xa7, 0x37, 0xf2, 0x15, 0x3c, 0xcc, 0xb5, 0xca);
 interface IXBRArtifact : IUnknown
 {
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex) = 0;
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex) = 0;
 };

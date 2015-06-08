@@ -40,7 +40,7 @@ static char THIS_FILE[] = __FILE__;
 CPierAgentImp::CPierAgentImp()
 {
    m_pBroker = 0;
-   m_bStirrupZonesValid = false;
+   m_NextPoiID = 0;
 }
 
 CPierAgentImp::~CPierAgentImp()
@@ -143,113 +143,113 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 
 //////////////////////////////////////////
 // IXBRPier
-IndexType CPierAgentImp::GetBearingLineCount()
+IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   return pProject->GetBearingLineCount();
+   return pProject->GetBearingLineCount(pierID);
 }
 
-IndexType CPierAgentImp::GetBearingCount(IndexType brgLineIdx)
+IndexType CPierAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   return pProject->GetBearingCount(brgLineIdx);
+   return pProject->GetBearingCount(pierID,brgLineIdx);
 }
 
-Float64 CPierAgentImp::GetBearingLocation(IndexType brgLineIdx,IndexType brgIdx)
+Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 leftBrgOffset    = GetLeftBearingOffset(brgLineIdx); // offset of left-most bearing from alignment
-   Float64 leftColumnOffset = GetLeftColumnOffset();  // offset of left-most column from alignment
-   Float64 leftColumnOverhang = pProject->GetXBeamLeftOverhang(); // overhang from left-most column to left edge of cross beam
+   Float64 leftBrgOffset    = GetLeftBearingOffset(pierID,brgLineIdx); // offset of left-most bearing from alignment
+   Float64 leftColumnOffset = GetLeftColumnOffset(pierID);  // offset of left-most column from alignment
+   Float64 leftColumnOverhang = pProject->GetXBeamLeftOverhang(pierID); // overhang from left-most column to left edge of cross beam
    Float64 leftBrgLocation  = leftColumnOverhang - leftColumnOffset + leftBrgOffset; // dist from left edge of cross beam to left most bearing
 
    for ( IndexType idx = 0; idx < brgIdx && 0 < brgIdx; idx++ )
    {
-      Float64 spacing = pProject->GetBearingSpacing(brgLineIdx,idx);
+      Float64 spacing = pProject->GetBearingSpacing(pierID,brgLineIdx,idx);
       leftBrgLocation += spacing;
    }
 
    return leftBrgLocation;
 }
 
-IndexType CPierAgentImp::GetColumnCount()
+IndexType CPierAgentImp::GetColumnCount(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   return pProject->GetColumnCount();
+   return pProject->GetColumnCount(pierID);
 }
 
-Float64 CPierAgentImp::GetColumnLocation(IndexType colIdx)
+Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 columnLocation = pProject->GetXBeamLeftOverhang(); // overhang from left-most column to left edge of cross beam
+   Float64 columnLocation = pProject->GetXBeamLeftOverhang(pierID); // overhang from left-most column to left edge of cross beam
 
    for ( IndexType idx = 0; idx < colIdx && 0 < colIdx; idx++ )
    {
-      Float64 spacing = pProject->GetColumnSpacing();
+      Float64 spacing = pProject->GetColumnSpacing(pierID);
       columnLocation += spacing;
    }
 
    return columnLocation;
 }
 
-Float64 CPierAgentImp::GetColumnHeight(IndexType colIdx)
+Float64 CPierAgentImp::GetColumnHeight(PierIDType pierID,IndexType colIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 h = pProject->GetColumnHeight();
-   CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType();
+   Float64 h = pProject->GetColumnHeight(pierID);
+   CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType(pierID);
    if ( heightType == CColumnData::chtBottomElevation )
    {
       Float64 elevBot = h;
-      Float64 elevTop = GetTopColumnElevation(colIdx);
+      Float64 elevTop = GetTopColumnElevation(pierID,colIdx);
       h = elevTop - elevBot;
    }
 
    return h;
 }
 
-Float64 CPierAgentImp::GetTopColumnElevation(IndexType colIdx)
+Float64 CPierAgentImp::GetTopColumnElevation(PierIDType pierID,IndexType colIdx)
 {
-   Float64 Xcol = GetColumnLocation(colIdx);
-   Float64 elev = GetElevation(Xcol);
-   Float64 H = GetDepth(xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xcol));
+   Float64 Xcol = GetColumnLocation(pierID,colIdx);
+   Float64 elev = GetElevation(pierID,Xcol);
+   Float64 H = GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xcol));
    elev -= H;
    return elev;
 }
 
-Float64 CPierAgentImp::GetBottomColumnElevation(IndexType colIdx)
+Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colIdx)
 {
-   Float64 Ytop = GetTopColumnElevation(colIdx);
-   Float64 Hcol = GetColumnHeight(colIdx);
+   Float64 Ytop = GetTopColumnElevation(pierID,colIdx);
+   Float64 Hcol = GetColumnHeight(pierID,colIdx);
    return Ytop - Hcol;
 }
 
-Float64 CPierAgentImp::GetMaxColumnHeight()
+Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID)
 {
-   IndexType nColumns = GetColumnCount();
+   IndexType nColumns = GetColumnCount(pierID);
    Float64 Hmax = 0;
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      Float64 h = GetColumnHeight(colIdx);
+      Float64 h = GetColumnHeight(pierID,colIdx);
       Hmax = Max(Hmax,h);
    }
 
    return Hmax;
 }
 
-void CPierAgentImp::GetUpperXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR)
+void CPierAgentImp::GetUpperXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR)
 {
    GET_IFACE(IXBRProject,pProject);
 
    // get the key dimensions
-   Float64 Ydeck = pProject->GetDeckElevation();
-   Float64 CPO    = pProject->GetCrownPointOffset(); // distance from Alignment to Crown Point
-   Float64 Xcrown = GetCrownPointLocation();
-   Float64 L = pProject->GetXBeamLength();
+   Float64 Ydeck = pProject->GetDeckElevation(pierID);
+   Float64 CPO    = pProject->GetCrownPointOffset(pierID); // distance from Alignment to Crown Point
+   Float64 Xcrown = GetCrownPointLocation(pierID);
+   Float64 L = pProject->GetXBeamLength(pierID);
    Float64 SL, SR;
-   pProject->GetCrownSlopes(&SL,&SR);
+   pProject->GetCrownSlopes(pierID,&SL,&SR);
 
    Float64 H, W;
-   pProject->GetDiaphragmDimensions(&H,&W);
+   pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
    // Create the points
    ::CoCreateInstance(CLSID_Point2d,NULL,CLSCTX_ALL,IID_IPoint2d,(LPVOID*)ppTL);
@@ -303,17 +303,17 @@ void CPierAgentImp::GetUpperXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d
    }
 }
 
-void CPierAgentImp::GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR)
+void CPierAgentImp::GetLowerXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR)
 {
    GET_IFACE(IXBRProject,pProject);
 
    Float64 H1, H2, X1;
    Float64 H3, H4, X2;
    Float64 W;
-   pProject->GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&W);
+   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&W);
 
    CComPtr<IPoint2d> uxbTL,uxbTC,uxbTR,uxbBL,uxbBC,uxbBR;
-   GetUpperXBeamPoints(&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
+   GetUpperXBeamPoints(pierID,&uxbTL,&uxbTC,&uxbTR,&uxbBL,&uxbBC,&uxbBR);
 
    uxbBL.CopyTo(ppTL);
    uxbBC.CopyTo(ppTC);
@@ -329,11 +329,11 @@ void CPierAgentImp::GetLowerXBeamPoints(IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d
    (*ppBR)->Offset(0,-H3);
 }
 
-void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)
+void CPierAgentImp::GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape)
 {
    CComPtr<IPoint2d> pntTL, pntTC, pntTR;
    CComPtr<IPoint2d> pntBL, pntBC, pntBR;
-   GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+   GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
 
    CComPtr<IPolyShape> shape;
    shape.CoCreateInstance(CLSID_PolyShape);
@@ -347,10 +347,10 @@ void CPierAgentImp::GetUpperXBeamProfile(IShape** ppShape)
    shape.QueryInterface(ppShape);
 }
 
-void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
+void CPierAgentImp::GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape)
 {
    CComPtr<IPoint2d> pntTL,pntTC,pntTR,pntBL,pntBL2,pntBR2,pntBR;
-   GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+   GetLowerXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
 
    CComPtr<IPolyShape> shape;
    shape.CoCreateInstance(CLSID_PolyShape);
@@ -365,11 +365,11 @@ void CPierAgentImp::GetLowerXBeamProfile(IShape** ppShape)
    shape.QueryInterface(ppShape);
 }
 
-Float64 CPierAgentImp::GetElevation(Float64 distFromLeftEdge)
+Float64 CPierAgentImp::GetElevation(PierIDType pierID,Float64 distFromLeftEdge)
 {
    CComPtr<IPoint2d> pntTL, pntTC, pntTR;
    CComPtr<IPoint2d> pntBL, pntBC, pntBR;
-   GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+   GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
 
    Float64 x1,y1;
    pntTL->Location(&x1,&y1);
@@ -397,7 +397,7 @@ Float64 CPierAgentImp::GetElevation(Float64 distFromLeftEdge)
 
 //////////////////////////////////////////
 // IXBRSectionProperties
-Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    if ( poi.IsColumnPOI() )
    {
@@ -407,7 +407,7 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
       Float64 H;
 
       GET_IFACE(IXBRProject,pProject);
-      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
 
       return D1;
    }
@@ -417,7 +417,7 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
       mathPwLinearFunction2dUsingPoints fnTop;
 
       CComPtr<IPoint2d> pntTL,pntTC,pntTR,pntBL,pntBL2,pntBR2,pntBR;
-      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+      GetLowerXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
 
       Float64 Xoffset;
       Float64 x,y;
@@ -456,14 +456,14 @@ Float64 CPierAgentImp::GetDepth(xbrTypes::Stage stage,const xbrPointOfInterest& 
 
       Float64 D,W;
       GET_IFACE(IXBRProject,pProject);
-      pProject->GetDiaphragmDimensions(&D,&W);
+      pProject->GetDiaphragmDimensions(pierID,&D,&W);
       H += D;
 
       return H;
    }
 }
 
-Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
    if ( poi.IsColumnPOI() )
@@ -473,7 +473,7 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -486,14 +486,14 @@ Float64 CPierAgentImp::GetArea(xbrTypes::Stage stage,const xbrPointOfInterest& p
    }
    else
    {
-      Float64 W = pProject->GetXBeamWidth();
-      Float64 H = GetDepth(stage,poi);
+      Float64 W = pProject->GetXBeamWidth(pierID);
+      Float64 H = GetDepth(pierID,stage,poi);
 
       return W*H;
    }
 }
 
-Float64 CPierAgentImp::GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
    if ( poi.IsColumnPOI() )
@@ -503,7 +503,7 @@ Float64 CPierAgentImp::GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& po
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -516,14 +516,14 @@ Float64 CPierAgentImp::GetIxx(xbrTypes::Stage stage,const xbrPointOfInterest& po
    }
    else
    {
-      Float64 W = pProject->GetXBeamWidth();
-      Float64 H = GetDepth(stage,poi);
+      Float64 W = pProject->GetXBeamWidth(pierID);
+      Float64 H = GetDepth(pierID,stage,poi);
 
       return W*H*H*H/12;
    }
 }
 
-Float64 CPierAgentImp::GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
    if ( poi.IsColumnPOI() )
@@ -533,7 +533,7 @@ Float64 CPierAgentImp::GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& po
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -546,20 +546,20 @@ Float64 CPierAgentImp::GetIyy(xbrTypes::Stage stage,const xbrPointOfInterest& po
    }
    else
    {
-      Float64 W = pProject->GetXBeamWidth();
-      Float64 H = GetDepth(stage,poi);
+      Float64 W = pProject->GetXBeamWidth(pierID);
+      Float64 H = GetDepth(pierID,stage,poi);
 
       return W*W*W*H/12;
    }
 }
 
-void CPierAgentImp::GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape)
+void CPierAgentImp::GetUpperXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
 {
-   Float64 Y = GetElevation(poi.GetDistFromStart());
+   Float64 Y = GetElevation(pierID,poi.GetDistFromStart());
 
    Float64 D,W;
    GET_IFACE(IXBRProject,pProject);
-   pProject->GetDiaphragmDimensions(&D,&W);
+   pProject->GetDiaphragmDimensions(pierID,&D,&W);
 
    CComPtr<IRectangle> rect;
    rect.CoCreateInstance(CLSID_Rect);
@@ -575,20 +575,20 @@ void CPierAgentImp::GetUpperXBeamShape(const xbrPointOfInterest& poi,IShape** pp
    rect->get_Shape(ppShape);
 }
 
-void CPierAgentImp::GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** ppShape)
+void CPierAgentImp::GetLowerXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
 {
-   Float64 Y = GetElevation(poi.GetDistFromStart());
+   Float64 Y = GetElevation(pierID,poi.GetDistFromStart());
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 W = pProject->GetXBeamWidth();
-   Float64 D = GetDepth(xbrTypes::Stage1,poi);
+   Float64 W = pProject->GetXBeamWidth(pierID);
+   Float64 D = GetDepth(pierID,xbrTypes::Stage1,poi);
 
    CComPtr<IRectangle> rect;
    rect.CoCreateInstance(CLSID_Rect);
    rect->put_Height(D);
    rect->put_Width(W);
 
-   pProject->GetDiaphragmDimensions(&D,&W);
+   pProject->GetDiaphragmDimensions(pierID,&D,&W);
 
    CComQIPtr<IXYPosition> position(rect);
    CComPtr<IPoint2d> pnt;
@@ -601,17 +601,17 @@ void CPierAgentImp::GetLowerXBeamShape(const xbrPointOfInterest& poi,IShape** pp
 
 //////////////////////////////////////////
 // IXBRMaterial
-Float64 CPierAgentImp::GetXBeamDensity()
+Float64 CPierAgentImp::GetXBeamDensity(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   const CConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    return concrete.WeightDensity;
 }
 
-Float64 CPierAgentImp::GetXBeamEc()
+Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   const CConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    Float64 Ec;
    if ( concrete.bUserEc )
    {
@@ -628,22 +628,22 @@ Float64 CPierAgentImp::GetXBeamEc()
    return Ec;
 }
 
-Float64 CPierAgentImp::GetColumnEc(IndexType colIdx)
+Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx)
 {
    // right now, everything uses the same material
-   return GetXBeamEc();
+   return GetXBeamEc(pierID);
 }
 
 
 //////////////////////////////////////////
 // IXBRRebar
-IndexType CPierAgentImp::GetRebarRowCount()
+IndexType CPierAgentImp::GetRebarRowCount(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   return pProject->GetRebarRowCount();
+   return pProject->GetRebarRowCount(pierID);
 }
 
-IndexType CPierAgentImp::GetRebarCount(IndexType rowIdx)
+IndexType CPierAgentImp::GetRebarCount(PierIDType pierID,IndexType rowIdx)
 {
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
@@ -651,11 +651,11 @@ IndexType CPierAgentImp::GetRebarCount(IndexType rowIdx)
    matRebar::Size barSize;
    IndexType nBars;
    Float64 spacing;
-   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+   pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
    return nBars;
 }
 
-void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoints)
+void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints)
 {
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
@@ -663,7 +663,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    IndexType nBars;
    Float64 cover;
    Float64 spacing;
-   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+   pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
    matRebar::Type barType = matRebar::A615;
@@ -679,7 +679,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    if ( datum == xbrTypes::Bottom )
    {
       CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBL2, pntBR2, pntBR;
-      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+      GetLowerXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
       pntBL->Offset(0,offset);
       pntBL2->Offset(0,offset);
       pntBR2->Offset(0,offset);
@@ -692,7 +692,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    else if ( datum == xbrTypes::TopLowerXBeam )
    {
       CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBL2, pntBR2, pntBR;
-      GetLowerXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
+      GetLowerXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBL2,&pntBR2,&pntBR);
       pntTL->Offset(0,-offset);
       pntTC->Offset(0,-offset);
       pntTR->Offset(0,-offset);
@@ -703,7 +703,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    else 
    {
       CComPtr<IPoint2d> pntTL, pntTC, pntTR, pntBL, pntBC, pntBR;
-      GetUpperXBeamPoints(&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+      GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
       pntTL->Offset(0,-offset);
       pntTC->Offset(0,-offset);
       pntTR->Offset(0,-offset);
@@ -715,7 +715,7 @@ void CPierAgentImp::GetRebarProfile(IndexType rowIdx,IPoint2dCollection** ppPoin
    points.CopyTo(ppPoints);
 }
 
-Float64 CPierAgentImp::GetRebarRowLocation(const xbrPointOfInterest& poi,IndexType rowIdx)
+Float64 CPierAgentImp::GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx)
 {
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
@@ -723,12 +723,12 @@ Float64 CPierAgentImp::GetRebarRowLocation(const xbrPointOfInterest& poi,IndexTy
    IndexType nBars;
    Float64 cover;
    Float64 spacing;
-   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+   pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
    matRebar::Type barType;
    matRebar::Grade barGrade;
-   pProject->GetRebarMaterial(&barType,&barGrade);
+   pProject->GetRebarMaterial(pierID,&barType,&barGrade);
    const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
    Float64 db = pRebar->GetNominalDimension();
 
@@ -736,13 +736,13 @@ Float64 CPierAgentImp::GetRebarRowLocation(const xbrPointOfInterest& poi,IndexTy
    Float64 Ybar;
    if ( datum == xbrTypes::Bottom )
    {
-      Float64 H = GetDepth(xbrTypes::Stage2,poi);
+      Float64 H = GetDepth(pierID,xbrTypes::Stage2,poi);
       Ybar = H - offset;
    }
    else if ( datum == xbrTypes::TopLowerXBeam )
    {
-      Float64 H = GetDepth(xbrTypes::Stage2,poi);
-      Float64 Hlower = GetDepth(xbrTypes::Stage1,poi);
+      Float64 H = GetDepth(pierID,xbrTypes::Stage2,poi);
+      Float64 Hlower = GetDepth(pierID,xbrTypes::Stage1,poi);
       Ybar = H - Hlower + offset;
    }
    else 
@@ -753,9 +753,9 @@ Float64 CPierAgentImp::GetRebarRowLocation(const xbrPointOfInterest& poi,IndexTy
    return Ybar;
 }
 
-void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
 {
-   Float64 Ybar = GetRebarRowLocation(poi,rowIdx);
+   Float64 Ybar = GetRebarRowLocation(pierID,poi,rowIdx);
 
    GET_IFACE(IXBRProject,pProject);
    xbrTypes::LongitudinalRebarDatumType datum;
@@ -763,7 +763,7 @@ void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType row
    IndexType nBars;
    Float64 cover;
    Float64 spacing;
-   pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+   pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
    // horizontal position of bar, assuming bar row is centered on cross beam
    Float64 barSpacingWidth = spacing*(nBars - 1);
@@ -777,64 +777,64 @@ void CPierAgentImp::GetRebarLocation(const xbrPointOfInterest& poi,IndexType row
 
 //////////////////////////////////////////
 // IXBRStirrups
-ZoneIndexType CPierAgentImp::GetStirrupZoneCount(xbrTypes::Stage stage)
+ZoneIndexType CPierAgentImp::GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage)
 {
-   ValidateStirrupZones();
-   return m_StirrupZones[stage].size();
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   return vStirrupZones.size();
 }
 
-void CPierAgentImp::GetStirrupZoneBoundary(xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend)
+void CPierAgentImp::GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend)
 {
-   ValidateStirrupZones();
-   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const StirrupZone& zone = vStirrupZones[zoneIdx];
    *pXstart = zone.Xstart;
    *pXend   = zone.Xend;
 }
 
-Float64 CPierAgentImp::GetStirrupZoneSpacing(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
 {
-   ValidateStirrupZones();
-   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const StirrupZone& zone = vStirrupZones[zoneIdx];
    return zone.S;
 }
 
-Float64 CPierAgentImp::GetStirrupZoneReinforcement(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
 {
-   ValidateStirrupZones();
-   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const StirrupZone& zone = vStirrupZones[zoneIdx];
    return zone.Av_over_S;
 }
 
-IndexType CPierAgentImp::GetStirrupCount(xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+IndexType CPierAgentImp::GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
 {
-   ValidateStirrupZones();
-   const StirrupZone& zone = m_StirrupZones[stage][zoneIdx];
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const StirrupZone& zone = vStirrupZones[zoneIdx];
    return zone.nStirrups;
 }
 
 //////////////////////////////////////////
 // IXBRointOfInterest
-std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PoiAttributeType attrib)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib)
 {
-   Validate();
+   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
    if ( attrib == 0 )
    {
-      return m_XBeamPoi;
+      return vPoi;
    }
 
-   std::vector<xbrPointOfInterest> vPoi;
-   BOOST_FOREACH(xbrPointOfInterest& poi,m_XBeamPoi)
+   std::vector<xbrPointOfInterest> vFilteredPoi;
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
       if ( poi.HasAttribute(attrib) )
       {
-         vPoi.push_back(poi);
+         vFilteredPoi.push_back(poi);
       }
    }
 
-   return vPoi;
+   return vFilteredPoi;
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(ColumnIndexType colIdx)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx)
 {
    ATLASSERT(false); // not really using column POI just yet
    return std::vector<xbrPointOfInterest>();
@@ -849,55 +849,54 @@ HRESULT CPierAgentImp::OnProjectChanged()
 }
 
 //////////////////////////////////////////
-void CPierAgentImp::Validate()
-{
-   if ( m_Pier == NULL )
-   {
-      m_Pier.CoCreateInstance(CLSID_TransversePierDescription);
-      // Build Pier Description using raw data from the project agent
-   }
-
-   ValidateStirrupZones();
-   ValidatePointsOfInterest();
-}
-
 void CPierAgentImp::Invalidate()
 {
-   m_Pier.Release();
-
+   m_NextPoiID = 0;
    m_XBeamPoi.clear();
-
    m_StirrupZones[xbrTypes::Stage1].clear();
    m_StirrupZones[xbrTypes::Stage2].clear();
-   m_bStirrupZonesValid = false;
 }
 
-void CPierAgentImp::ValidateStirrupZones()
+std::vector<CPierAgentImp::StirrupZone>& CPierAgentImp::GetStirrupZones(PierIDType pierID,xbrTypes::Stage stage)
 {
-   if ( m_bStirrupZonesValid )
+   std::map<PierIDType,std::vector<StirrupZone>>::iterator found(m_StirrupZones[stage].find(pierID));
+   if ( found == m_StirrupZones[stage].end() )
    {
-      return;
+      ValidateStirrupZones(pierID,stage);
+      found = m_StirrupZones[stage].find(pierID);
    }
 
-   GET_IFACE(IXBRProject,pProject);
-   const xbrPierData& pierData = pProject->GetPierData();
-   ValidateStirrupZones(pierData.GetLowerXBeamStirrups(),&m_StirrupZones[xbrTypes::Stage1]);
-   ValidateStirrupZones(pierData.GetFullDepthStirrups(), &m_StirrupZones[xbrTypes::Stage2]);
- 
-   m_bStirrupZonesValid = true;
+   return found->second;
 }
 
-void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones)
+void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage)
+{
+   GET_IFACE(IXBRProject,pProject);
+   const xbrPierData& pierData = pProject->GetPierData(pierID);
+   std::vector<StirrupZone> vStirrupZones;
+   if ( stage == xbrTypes::Stage1 )
+   {
+      ValidateStirrupZones(pierID,pierData.GetLowerXBeamStirrups(),&vStirrupZones);
+   }
+   else
+   {
+      ValidateStirrupZones(pierID,pierData.GetFullDepthStirrups(), &vStirrupZones);
+   }
+
+   m_StirrupZones[stage].insert(std::make_pair(pierID,vStirrupZones));
+}
+
+void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones)
 {
    // Map the input stirrup zones into actual stirrup zones
    pvStirrupZones->clear();
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 L = pProject->GetXBeamLength();
+   Float64 L = pProject->GetXBeamLength(pierID);
 
    matRebar::Type type;
    matRebar::Grade grade;
-   pProject->GetRebarMaterial(&type,&grade);
+   pProject->GetRebarMaterial(pierID,&type,&grade);
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
 
    if ( stirrupData.Symmetric )
@@ -1029,74 +1028,82 @@ void CPierAgentImp::ValidateStirrupZones(const xbrStirrupData& stirrupData,std::
    }
 }
 
-void CPierAgentImp::ValidatePointsOfInterest()
+std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType pierID)
 {
-   if ( 0 < m_XBeamPoi.size() )
+   std::map<PierIDType,std::vector<xbrPointOfInterest>>::iterator found(m_XBeamPoi.find(pierID));
+   if ( found == m_XBeamPoi.end() )
    {
-      return;
+      ValidatePointsOfInterest(pierID);
+      found = m_XBeamPoi.find(pierID);
+      ATLASSERT(found != m_XBeamPoi.end());
    }
 
-   GET_IFACE(IXBRProject,pProject);
+   return found->second;
+}
 
-   PoiIDType id = 0;
+void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
+{
+   GET_IFACE(IXBRProject,pProject);
 
    Float64 H1, H2, X1;
    Float64 H3, H4, X2;
    Float64 W;
-   pProject->GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&W);
+   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&W);
 
-   Float64 L = pProject->GetXBeamLength();
+   Float64 L = pProject->GetXBeamLength(pierID);
+
+   std::vector<xbrPointOfInterest> vPoi;
 
    // Put a POI at every location the section changes depth
-   m_XBeamPoi.push_back(xbrPointOfInterest(id++,0.0,POI_SECTIONCHANGE));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,0.0,POI_SECTIONCHANGE));
 
    if ( !IsZero(X1) )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,X1,POI_SECTIONCHANGE));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X1,POI_SECTIONCHANGE));
    }
 
-   Float64 crownPoint = GetCrownPointLocation();
+   Float64 crownPoint = GetCrownPointLocation(pierID);
    if ( 0 < crownPoint && crownPoint < L )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,crownPoint,POI_SECTIONCHANGE));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,crownPoint,POI_SECTIONCHANGE));
    }
 
    if ( !IsZero(X2) )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,L-X2,POI_SECTIONCHANGE));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-X2,POI_SECTIONCHANGE));
    }
 
-   m_XBeamPoi.push_back(xbrPointOfInterest(id++,L,POI_SECTIONCHANGE));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L,POI_SECTIONCHANGE));
 
    // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
-   Float64 LeftOH = pProject->GetXBeamLeftOverhang(); 
-   ColumnIndexType nColumns = pProject->GetColumnCount();
+   Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID); 
+   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    if ( 1 < nColumns )
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH,POI_COLUMN));
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,LeftOH+0.001));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+0.001));
       SpacingIndexType nSpaces = nColumns - 1;
       Float64 X = LeftOH;
       for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
       {
-         Float64 space = pProject->GetColumnSpacing();
+         Float64 space = pProject->GetColumnSpacing(pierID);
          X += space;
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X,POI_COLUMN));
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,X+0.001));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+0.001));
       }
    }
 
    // need to pick up shear jumps at points of concentrated load
    // put POI at at bearing locations
-   IndexType nBrgLines = pProject->GetBearingLineCount();
+   IndexType nBrgLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBrgLines; brgLineIdx++ )
    {
-      IndexType nBearings = pProject->GetBearingCount(brgLineIdx);
+      IndexType nBearings = pProject->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         Float64 Xbrg = GetBearingLocation(brgLineIdx,brgIdx);
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg,POI_BRG));
-         m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xbrg+0.001));
+         Float64 Xbrg = GetBearingLocation(pierID,brgLineIdx,brgIdx);
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+0.001));
       }
    }
 
@@ -1105,39 +1112,41 @@ void CPierAgentImp::ValidatePointsOfInterest()
    Float64 Xpoi = 0;
    while ( Xpoi < L/2 - step)
    {
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,Xpoi));
-      m_XBeamPoi.push_back(xbrPointOfInterest(id++,L-Xpoi));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xpoi));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-Xpoi));
 
       Xpoi += step;
    }
-   m_XBeamPoi.push_back(xbrPointOfInterest(id++,L/2));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L/2));
 
    // put POI in left-to-right sorted order
-   std::sort(m_XBeamPoi.begin(),m_XBeamPoi.end());
+   std::sort(vPoi.begin(),vPoi.end());
 
    // remove any duplicates
-   m_XBeamPoi.erase(std::unique(m_XBeamPoi.begin(),m_XBeamPoi.end()),m_XBeamPoi.end());
+   vPoi.erase(std::unique(vPoi.begin(),vPoi.end()),vPoi.end());
+
+   m_XBeamPoi.insert(std::make_pair(pierID,vPoi));
 }
 
-Float64 CPierAgentImp::GetLeftBearingOffset(IndexType brgLineIdx)
+Float64 CPierAgentImp::GetLeftBearingOffset(PierIDType pierID,IndexType brgLineIdx)
 {
    // returns the offset from the alignment to the left-most bearing
    // values less than zero indicate the left-most bearing is to the
    // left ofthe alignment
 
    GET_IFACE(IXBRProject,pProject);
-   ATLASSERT(brgLineIdx < pProject->GetBearingLineCount());
+   ATLASSERT(brgLineIdx < pProject->GetBearingLineCount(pierID));
 
    IndexType refBrgIdx;
    Float64 refBearingOffset;
    pgsTypes::OffsetMeasurementType refBearingDatum;
-   pProject->GetReferenceBearing(brgLineIdx,&refBrgIdx,&refBearingOffset,&refBearingDatum);
+   pProject->GetReferenceBearing(pierID,brgLineIdx,&refBrgIdx,&refBearingOffset,&refBearingDatum);
 
    if ( refBearingDatum == pgsTypes::omtBridge )
    {
       // reference bearing is located from the bridge line... adjust its location
       // so that it is measured from the alignment
-      Float64 blo = pProject->GetBridgeLineOffset();
+      Float64 blo = pProject->GetBridgeLineOffset(pierID);
       refBearingOffset += blo;
    }
 
@@ -1146,7 +1155,7 @@ Float64 CPierAgentImp::GetLeftBearingOffset(IndexType brgLineIdx)
       // make the reference bearing the first bearing
       for ( IndexType brgIdx = refBrgIdx-1; 0 <= brgIdx && brgIdx != INVALID_INDEX; brgIdx-- )
       {
-         Float64 space = pProject->GetBearingSpacing(brgLineIdx,brgIdx);
+         Float64 space = pProject->GetBearingSpacing(pierID,brgLineIdx,brgIdx);
          refBearingOffset -= space;
       }
    }
@@ -1154,7 +1163,7 @@ Float64 CPierAgentImp::GetLeftBearingOffset(IndexType brgLineIdx)
    return refBearingOffset;
 }
 
-Float64 CPierAgentImp::GetLeftColumnOffset()
+Float64 CPierAgentImp::GetLeftColumnOffset(PierIDType pierID)
 {
    // returns the offset from the alignment to the left-most column
    // values less than zero indicate the left-most column is to the 
@@ -1166,13 +1175,13 @@ Float64 CPierAgentImp::GetLeftColumnOffset()
    Float64 refColumnOffset;
    pgsTypes::OffsetMeasurementType refColumnDatum;
    Float64 X3, X4, S;
-   pProject->GetColumnLayout(&nColumns,&refColumnDatum,&refColIdx,&refColumnOffset,&X3,&X4,&S);
+   pProject->GetColumnLayout(pierID,&nColumns,&refColumnDatum,&refColIdx,&refColumnOffset,&X3,&X4,&S);
 
    if ( refColumnDatum == pgsTypes::omtBridge )
    {
       // reference column is located from the bridge line... adjust its location
       // so that it is measured from the alignment
-      Float64 blo = pProject->GetBridgeLineOffset();
+      Float64 blo = pProject->GetBridgeLineOffset(pierID);
       refColumnOffset += blo;
    }
 
@@ -1188,36 +1197,36 @@ Float64 CPierAgentImp::GetLeftColumnOffset()
    return refColumnOffset;
 }
 
-Float64 CPierAgentImp::GetLeftEdgeLocation()
+Float64 CPierAgentImp::GetLeftEdgeLocation(PierIDType pierID)
 {
    // returns the X coordinate of the left edge of the cross beam
    GET_IFACE(IXBRProject,pProject);
-   Float64 CPO    = pProject->GetCrownPointOffset(); // distance from Alignment to Crown Point
-   Float64 Xcrown = GetCrownPointLocation();
+   Float64 CPO    = pProject->GetCrownPointOffset(pierID); // distance from Alignment to Crown Point
+   Float64 Xcrown = GetCrownPointLocation(pierID);
    return CPO - Xcrown;
 }
 
-Float64 CPierAgentImp::GetCrownPointLocation()
+Float64 CPierAgentImp::GetCrownPointLocation(PierIDType pierID)
 {
    // returns the location of the crown point, measured from the left edge
    // of the cross beam
 
-   Float64 refColumnOffset = GetLeftColumnOffset();
+   Float64 refColumnOffset = GetLeftColumnOffset(pierID);
 
    // X is the distance from the left edge of the cross beam to the crown point
    GET_IFACE(IXBRProject,pProject);
-   Float64 LOH = pProject->GetXBeamLeftOverhang();
-   Float64 CPO = pProject->GetCrownPointOffset();
-   Float64 skew = GetSkewAngle();
+   Float64 LOH = pProject->GetXBeamLeftOverhang(pierID);
+   Float64 CPO = pProject->GetCrownPointOffset(pierID);
+   Float64 skew = GetSkewAngle(pierID);
 
    Float64 X = LOH - refColumnOffset + CPO/cos(skew); // negative because of refColumnOffset sign convension
    return X;
 }
 
-Float64 CPierAgentImp::GetSkewAngle()
+Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
-   LPCTSTR lpszSkew = pProject->GetOrientation();
+   LPCTSTR lpszSkew = pProject->GetOrientation(pierID);
    CComPtr<IAngle> objSkew;
    objSkew.CoCreateInstance(CLSID_Angle);
    HRESULT hr = objSkew->FromString(CComBSTR(lpszSkew));

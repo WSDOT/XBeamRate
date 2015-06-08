@@ -136,15 +136,15 @@ STDMETHODIMP CEngAgentImp::ShutDown()
 
 //////////////////////////////////////////////////////////////////////
 // IXBRMomentCapacity
-Float64 CEngAgentImp::GetMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+Float64 CEngAgentImp::GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
-   MomentCapacityDetails capacityDetails = GetMomentCapacityDetails(stage,poi,bPositiveMoment);
+   MomentCapacityDetails capacityDetails = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    return capacityDetails.Mr;
 }
 
 //////////////////////////////////////////////////////////////////////
 // IXBRShearCapacity
-Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
+Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi)
 {
    // LRFD 5.8.3.4.1
    Float64 beta = 2.0;
@@ -154,18 +154,18 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
 
    matRebar::Type type;
    matRebar::Grade grade;
-   pProject->GetRebarMaterial(&type,&grade);
+   pProject->GetRebarMaterial(pierID,&type,&grade);
    Float64 fy = matRebar::GetYieldStrength(type,grade);
 
 
-   Float64 dv1 = GetDv(xbrTypes::Stage1,poi);
-   Float64 dv2 = GetDv(xbrTypes::Stage2,poi);
-   Float64 Av_over_S1 = GetAverageAvOverS(xbrTypes::Stage1,poi,theta);
-   Float64 Av_over_S2 = GetAverageAvOverS(xbrTypes::Stage2,poi,theta);
+   Float64 dv1 = GetDv(pierID,xbrTypes::Stage1,poi);
+   Float64 dv2 = GetDv(pierID,xbrTypes::Stage2,poi);
+   Float64 Av_over_S1 = GetAverageAvOverS(pierID,xbrTypes::Stage1,poi,theta);
+   Float64 Av_over_S2 = GetAverageAvOverS(pierID,xbrTypes::Stage2,poi,theta);
 
    // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
-   Float64 fc = pProject->GetConcrete().Fc;
-   Float64 bv = pProject->GetXBeamWidth();
+   Float64 fc = pProject->GetConcrete(pierID).Fc;
+   Float64 bv = pProject->GetXBeamWidth(pierID);
    Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
    Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*Max(dv1,dv2); // if non-integral, dv2 is zero so dv1 will be max, otherwise dv2 should be max
    Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
@@ -181,12 +181,13 @@ Float64 CEngAgentImp::GetShearCapacity(const xbrPointOfInterest& poi)
 
 //////////////////////////////////////////////////////////////////////
 // IXBRArtifactCapacity
-const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
+const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
 {
+#pragma Reminder("UPDATE: need rating artifacts for each pier")
    std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = m_RatingArtifacts[ratingType].find(vehicleIndex);
    if ( found == m_RatingArtifacts[ratingType].end() )
    {
-      CreateRatingArtifact(ratingType,vehicleIndex);
+      CreateRatingArtifact(pierID,ratingType,vehicleIndex);
       found = m_RatingArtifacts[ratingType].find(vehicleIndex);
    }
 
@@ -212,7 +213,7 @@ HRESULT CEngAgentImp::OnProjectChanged()
 }
 
 //////////////////////////////////////////////////
-CEngAgentImp::MomentCapacityDetails CEngAgentImp::GetMomentCapacityDetails(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+CEngAgentImp::MomentCapacityDetails CEngAgentImp::GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    std::map<IDType,MomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMomentCapacity[stage] : &m_NegativeMomentCapacity[stage]);
    std::map<IDType,MomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
@@ -221,7 +222,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::GetMomentCapacityDetails(xbrTy
       return found->second;
    }
 
-   MomentCapacityDetails capacityDetails = ComputeMomentCapacity(stage,poi,bPositiveMoment);
+   MomentCapacityDetails capacityDetails = ComputeMomentCapacity(pierID,stage,poi,bPositiveMoment);
    if ( poi.GetID() != INVALID_ID )
    {
       std::pair<std::map<IDType,MomentCapacityDetails>::iterator,bool> result = pCapacity->insert(std::make_pair(poi.GetID(),capacityDetails));
@@ -231,32 +232,32 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::GetMomentCapacityDetails(xbrTy
    return capacityDetails;
 }
 
-CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    CComPtr<IRCBeam2> rcBeam;
    HRESULT hr = rcBeam.CoCreateInstance(CLSID_RCBeam2);
    ATLASSERT(SUCCEEDED(hr));
 
    GET_IFACE(IXBRSectionProperties,pSectProps);
-   Float64 h = pSectProps->GetDepth(stage,poi);
+   Float64 h = pSectProps->GetDepth(pierID,stage,poi);
    rcBeam->put_h(h);
    rcBeam->put_hf(0);
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 w = pProject->GetXBeamWidth();
+   Float64 w = pProject->GetXBeamWidth(pierID);
    rcBeam->put_b(w);
    rcBeam->put_bw(w);
 
-   xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType();
+   xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
 
-   const CConcreteMaterial& concrete = pProject->GetConcrete();
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    rcBeam->put_FcSlab(concrete.Fc);
    rcBeam->put_FcBeam(concrete.Fc);
 
    Float64 dt = 0; // location of the extreme tension steel
 
    GET_IFACE(IXBRRebar,pRebar);
-   IndexType nRows = pRebar->GetRebarRowCount();
+   IndexType nRows = pRebar->GetRebarRowCount(pierID);
    for ( IndexType rowIdx = 0; rowIdx < nRows; rowIdx++ )
    {
       xbrTypes::LongitudinalRebarDatumType datum;
@@ -264,7 +265,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
       IndexType nBars;
       Float64 cover;
       Float64 spacing;
-      pProject->GetRebarRow(rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+      pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
 
       if ( datum == xbrTypes::Top && (connectionType == xbrTypes::pctIntegral && stage == xbrTypes::Stage1) )
       {
@@ -272,7 +273,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
          continue;
       }
 
-      Float64 Ybar = pRebar->GetRebarRowLocation(poi,rowIdx);
+      Float64 Ybar = pRebar->GetRebarRowLocation(pierID,poi,rowIdx);
       if ( !bPositiveMoment )
       {
          Ybar = h - Ybar;
@@ -284,7 +285,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
       lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
       matRebar::Type barType;
       matRebar::Grade barGrade;
-      pProject->GetRebarMaterial(&barType,&barGrade);
+      pProject->GetRebarMaterial(pierID,&barType,&barGrade);
       const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
 
       Float64 as = pRebar->GetNominalArea();
@@ -345,19 +346,19 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(xbrTypes
    return capacityDetails;
 }
 
-Float64 CEngAgentImp::GetDv(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
-   if ( pProject->GetPierType() != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
+   if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {
       // there isn't stage 2 for non-integral cross beams
       return 0;
    }
 
    GET_IFACE(IXBRSectionProperties,pSectProps);
-   Float64 h = pSectProps->GetDepth(stage,poi);
-   MomentCapacityDetails posCapacityDetails = GetMomentCapacityDetails(stage,poi,true);
-   MomentCapacityDetails negCapacityDetails = GetMomentCapacityDetails(stage,poi,false);
+   Float64 h = pSectProps->GetDepth(pierID,stage,poi);
+   MomentCapacityDetails posCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,true);
+   MomentCapacityDetails negCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,false);
    Float64 posMomentArm = posCapacityDetails.de - posCapacityDetails.dc;
    Float64 posDv = Max(posMomentArm,0.9*posCapacityDetails.de,0.72*h);
    Float64 negMomentArm = negCapacityDetails.de - negCapacityDetails.dc;
@@ -366,29 +367,29 @@ Float64 CEngAgentImp::GetDv(xbrTypes::Stage stage,const xbrPointOfInterest& poi)
    return dv;
 }
 
-Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
+Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
 {
    GET_IFACE(IXBRProject,pProject);
-   if ( pProject->GetPierType() != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
+   if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {
       // there isn't stage 2 for non-integral cross beams
       return 0;
    }
 
-   Float64 L = pProject->GetXBeamLength();
+   Float64 L = pProject->GetXBeamLength(pierID);
 
    // Get start/end of the shear failur plane at the poi
-   Float64 dv = GetDv(stage,poi);
+   Float64 dv = GetDv(pierID,stage,poi);
    Float64 sfpStart = Max(poi.GetDistFromStart() - dv/(2*tan(theta)),0.0);
    Float64 sfpEnd   = Min(poi.GetDistFromStart() + dv/(2*tan(theta)),L);
 
    Float64 Avg_Av_over_S = 0;
    GET_IFACE(IXBRStirrups,pStirrups);
-   ZoneIndexType nZones = pStirrups->GetStirrupZoneCount(stage);
+   ZoneIndexType nZones = pStirrups->GetStirrupZoneCount(pierID,stage);
    for ( ZoneIndexType zoneIdx = 0; zoneIdx < nZones; zoneIdx++ )
    {
       Float64 szStart, szEnd;
-      pStirrups->GetStirrupZoneBoundary(stage,zoneIdx,&szStart,&szEnd);
+      pStirrups->GetStirrupZoneBoundary(pierID,stage,zoneIdx,&szStart,&szEnd);
 
       if ( szEnd <= sfpStart )
       {
@@ -408,7 +409,7 @@ Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfIn
 
       Float64 start = Max(szStart,sfpStart,0.0);
       Float64 end   = Min(szEnd,  sfpEnd,  L);
-      Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(stage,zoneIdx);
+      Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(pierID,stage,zoneIdx);
 
       Avg_Av_over_S += Av_over_S*(end-start);
    }
@@ -422,10 +423,11 @@ Float64 CEngAgentImp::GetAverageAvOverS(xbrTypes::Stage stage,const xbrPointOfIn
    return Avg_Av_over_S;
 }
 
-void CEngAgentImp::CreateRatingArtifact(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
+void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
 {
+#pragma Reminder("UPDATE: need to have rating artifacts by pier")
    xbrLoadRater loadRater(m_pBroker);
-   xbrRatingArtifact artifact = loadRater.RateXBeam(ratingType,vehicleIndex);
+   xbrRatingArtifact artifact = loadRater.RateXBeam(pierID,ratingType,vehicleIndex);
    std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIndex,artifact));
    ATLASSERT(result.second == true);
 }

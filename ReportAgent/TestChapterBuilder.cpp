@@ -80,12 +80,14 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    (*pTable)(0,0) << _T("Column");
    (*pTable)(0,1) << COLHDR(_T("Height"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
 
+   PierIDType pierID = INVALID_ID;
+
    RowIndexType tableRowIdx = 1;
-   ColumnIndexType nColumns = pProject->GetColumnCount();
+   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++, tableRowIdx++ )
    {
       ColumnIndexType tableColIdx = 0;
-      Float64 height = pProject->GetColumnHeight();
+      Float64 height = pProject->GetColumnHeight(pierID);
       (*pTable)(tableRowIdx,tableColIdx++) << colIdx;
       (*pTable)(tableRowIdx,tableColIdx++) << length.SetValue(height);
    }
@@ -101,12 +103,12 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
 
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest();
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
    RowIndexType row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mz = pResults->GetMoment(pftLowerXBeam,poi);
-      sysSectionValue V = pResults->GetShear(pftLowerXBeam,poi);
+      Float64 Mz = pResults->GetMoment(pierID,pftLowerXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pierID,pftLowerXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);
@@ -127,8 +129,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mz = pResults->GetMoment(pftUpperXBeam,poi);
-      sysSectionValue V = pResults->GetShear(pftUpperXBeam,poi);
+      Float64 Mz = pResults->GetMoment(pierID,pftUpperXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pierID,pftUpperXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);
@@ -138,7 +140,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    }
 
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
-   const std::vector<LowerXBeamLoad>& loads = pProductForces->GetLowerCrossBeamLoading();
+   const std::vector<LowerXBeamLoad>& loads = pProductForces->GetLowerCrossBeamLoading(pierID);
    pTable = new rptRcTable(4,0);
    pTable->TableCaption() << _T("Lower XBeam Dead Load");
    *pPara << pTable << rptNewLine;
@@ -158,7 +160,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    }
 
    fpl.ShowUnitTag(true);
-   *pPara << _T("Upper XBeam Dead Load, w = ") << fpl.SetValue(pProductForces->GetUpperCrossBeamLoading()) << rptNewLine;
+   *pPara << _T("Upper XBeam Dead Load, w = ") << fpl.SetValue(pProductForces->GetUpperCrossBeamLoading(pierID)) << rptNewLine;
    *pPara << rptNewLine;
 
    pTable = new rptRcTable(4,0);
@@ -174,8 +176,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 pM = pLoadRating->GetMomentCapacity(xbrTypes::Stage2,poi,true);
-      Float64 nM = pLoadRating->GetMomentCapacity(xbrTypes::Stage2,poi,false);
+      Float64 pM = pLoadRating->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,true);
+      Float64 nM = pLoadRating->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,false);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(pM);

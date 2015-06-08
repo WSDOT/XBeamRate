@@ -3,10 +3,11 @@
 #include <XBeamRateChildFrame.h>
 
 #include <IFace\XBeamRateAgent.h>
-#include <IFace\Bridge.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
 #include <PgsExt\GirderLabel.h>
+#include <PgsExt\BridgeDescription2.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -86,6 +87,23 @@ END_MESSAGE_MAP()
 //   }
 //}
 
+PierIDType CXBeamRateChildFrame::GetPierID()
+{
+   if ( m_ControlBar.GetSafeHwnd() == 0 )
+   {
+      return INVALID_ID;
+   }
+
+   CComboBox* pcb = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
+   int curSel = pcb->GetCurSel();
+   if ( curSel == CB_ERR )
+   {
+      return INVALID_ID;
+   }
+
+   return (PierIDType)(pcb->GetItemData(curSel));
+}
+
 BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CMDIFrameWnd* pParentWnd, CCreateContext* pContext)
 {
    if ( !CEAFChildFrame::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, pContext) )
@@ -107,14 +125,17 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
       PierIndexType selPierIdx = pSelection->GetSelectedPier();
 
       CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
-      GET_IFACE2(pBroker,IBridge,pBridge);
-      PierIndexType nPiers = pBridge->GetPierCount();
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      PierIndexType nPiers = pBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
       {
          CString strPierLabel;
          strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
          int idx = pcbPiers->AddString(strPierLabel);
-         pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
+
+         PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
+         pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
 
          if ( pierIdx == selPierIdx )
          {
@@ -158,7 +179,9 @@ void CXBeamRateChildFrame::OnPierChanged()
    CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
    int curSel = pcbPiers->GetCurSel();
    PierIndexType pierIdx = (PierIndexType)pcbPiers->GetItemData(curSel);
-   CString strMsg;
-   strMsg.Format(_T("Pier %d was selected"),LABEL_PIER(pierIdx));
-   AfxMessageBox(strMsg);
+   CView* pView = GetActiveView();
+   if ( pView )
+   {
+      pView->OnInitialUpdate();
+   }
 }

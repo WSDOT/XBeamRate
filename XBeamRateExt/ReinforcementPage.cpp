@@ -89,6 +89,18 @@ void CReinforcementPage::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade*
    *pGrade = m_pParent->GetRebarGrade();
 }
 
+void CReinforcementPage::OnEnableDelete(UINT nIDC,bool bEnableDelete)
+{
+   if (nIDC == IDC_LOWER_XBEAM_STIRRUP_GRID )
+   {
+      GetDlgItem(IDC_REMOVE_LOWER_XBEAM)->EnableWindow(bEnableDelete ? TRUE : FALSE);
+   }
+   else
+   {
+      GetDlgItem(IDC_REMOVE_FULL_DEPTH)->EnableWindow(bEnableDelete ? TRUE : FALSE);
+   }
+}
+
 void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
@@ -146,6 +158,9 @@ BOOL CReinforcementPage::OnInitDialog()
    m_pFullDepthGrid->CustomInit();
 
    CPropertyPage::OnInitDialog();
+
+   OnEnableDelete(IDC_LOWER_XBEAM_STIRRUP_GRID,false);
+   OnEnableDelete(IDC_FULL_DEPTH_STIRRUP_GRID,false);
 
    if ( m_strUserEc == _T("") )
    {

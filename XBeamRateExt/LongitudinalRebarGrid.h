@@ -70,6 +70,8 @@ public:
    void CustomInit();
 
 private:
+   CString GetDatumOptions();
+   CString GetDatum(xbrTypes::LongitudinalRebarDatumType datum);
    void AddRebarRow(const xbrLongitudinalRebarData::RebarRow& rebarData);
    void SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData);
    void GetRebarData(ROWCOL row,xbrLongitudinalRebarData::RebarRow& rebarData);

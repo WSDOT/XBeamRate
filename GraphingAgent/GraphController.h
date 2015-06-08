@@ -36,7 +36,7 @@ public:
 
    CGraphDefinitions GetSelectedGraphDefinitions();
    ActionType GetActionType();
-   PierIndexType GetPier();
+   PierIDType GetPierID();
 
 protected:
 

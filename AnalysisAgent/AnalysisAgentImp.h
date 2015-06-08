@@ -87,35 +87,35 @@ public:
 
 // IXBRProductForces
 public:
-   virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading();
-   virtual Float64 GetUpperCrossBeamLoading();
+   virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading(PierIDType pierID);
+   virtual Float64 GetUpperCrossBeamLoading(PierIDType pierID);
 
 // IXBRAnalysisResults
 public:
-   virtual Float64 GetMoment(XBRProductForceType pfType,const xbrPointOfInterest& poi);
-   virtual sysSectionValue GetShear(XBRProductForceType pfType,const xbrPointOfInterest& poi);
-   virtual std::vector<Float64> GetMoment(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
-   virtual std::vector<sysSectionValue> GetShear(XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual Float64 GetMoment(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
 
-   virtual Float64 GetMoment(XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
-   virtual sysSectionValue GetShear(XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
-   virtual std::vector<Float64> GetMoment(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
-   virtual std::vector<sysSectionValue> GetShear(XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual Float64 GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
 
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
 
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
-   virtual void GetMoment(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
-   virtual void GetShear(pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
 
-   virtual void GetMoment(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
-   virtual void GetShear(pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
-   virtual void GetMoment(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
-   virtual void GetShear(pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
 
 // IXBRProjectEventSink
 public:
@@ -128,25 +128,12 @@ public:
 private:
    DECLARE_EAF_AGENT_DATA;
 
-   void Validate();
    void Invalidate();
 
-   void ApplyDeadLoad();
-   void ApplyLowerXBeamDeadLoad();
-   void ApplyUpperXBeamDeadLoad();
-   void ApplySuperstructureDeadLoadReactions();
-
-   void ValidateLowerXBeamDeadLoad();
-
-   void GetFemModelLocation(const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
-   void GetCapBeamFemModelLocation(Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
    LoadCaseIDType GetLoadCaseID(XBRProductForceType pfType);
-
    std::vector<XBRProductForceType> GetLoads(XBRCombinedForceType lcType);
 
    DWORD m_dwProjectCookie;
-
-   CComPtr<IFem2dModel> m_Model;
 
    struct CapBeamMember
    {
@@ -154,13 +141,27 @@ private:
       Float64 Xe;
       MemberIDType mbrID;
    };
-   std::vector<CapBeamMember> m_CapBeamMembers;
 
-   std::vector<LowerXBeamLoad> m_LowerXBeamLoads;
+   typedef struct ModelData
+   {
+      CComPtr<IFem2dModel> m_Model;
+      std::vector<CapBeamMember> m_CapBeamMembers;
+      std::vector<LowerXBeamLoad> m_LowerXBeamLoads;
+      // key is the product model poi ID
+      // value is the FEM model poi ID
+      std::map<PoiIDType,PoiIDType> m_PoiMap;
+   } ModelData;
+   std::map<PierIDType,ModelData> m_ModelData;
+   ModelData* GetModelData(PierIDType pierID);
+   void BuildModel(PierIDType pierID);
+   void GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
+   void GetCapBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
 
-   // key is the product model poi ID
-   // value is the FEM model poi ID
-   std::map<PoiIDType,PoiIDType> m_PoiMap;
+   void ApplyDeadLoad(PierIDType pierID,ModelData* pModelData);
+   void ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
+   void ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
+   void ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData);
+   void ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)

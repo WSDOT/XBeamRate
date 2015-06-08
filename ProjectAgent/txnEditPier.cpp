@@ -50,7 +50,10 @@ void txnEditPier::Execute(int i)
    GET_IFACE2(pBroker,IXBREvents, pEvents);
    pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
+   PierIDType pierID = INVALID_ID;
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
+   ATLASSERT(m_PierData[i].m_PierData.GetID() == pierID);
    pProject->SetPierData(m_PierData[i].m_PierData);
 
    IndexType nBearingLines = m_PierData[i].m_PierData.GetBearingLineCount();
@@ -61,7 +64,7 @@ void txnEditPier::Execute(int i)
       {
          Float64 DC = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DC;
          Float64 DW = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DW;
-         pProject->SetBearingReactions(brgLineIdx,brgIdx,DC,DW);
+         pProject->SetBearingReactions(pierID,brgLineIdx,brgIdx,DC,DW);
       }
    }
 
@@ -73,12 +76,12 @@ void txnEditPier::Execute(int i)
       pProject->SetLiveLoadFactor(ratingType,m_PierData[i].m_gLL[ratingType]);
    }
 
-   pProject->SetLiveLoadReactions(pgsTypes::lrDesign_Inventory,m_PierData[i].m_DesignLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pgsTypes::lrDesign_Operating,m_PierData[i].m_DesignLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pgsTypes::lrLegal_Routine,m_PierData[i].m_LegalRoutineLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pgsTypes::lrLegal_Special,m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pgsTypes::lrPermit_Routine,m_PierData[i].m_PermitRoutineLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pgsTypes::lrPermit_Special,m_PierData[i].m_PermitSpecialLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory,m_PierData[i].m_DesignLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Operating,m_PierData[i].m_DesignLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine,m_PierData[i].m_LegalRoutineLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special,m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrPermit_Routine,m_PierData[i].m_PermitRoutineLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrPermit_Special,m_PierData[i].m_PermitSpecialLiveLoad.m_LLIM);
 
    pEvents->FirePendingEvents();
 }

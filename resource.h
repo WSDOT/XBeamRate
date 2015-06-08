@@ -9,8 +9,7 @@
 #define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_XBEAMRATE                   102
-#define IDD_PIER_VIEW_CONTROLS                   103
-#define IDD_REINFORCEMENT_PAGE          106
+#define IDD_PIER_VIEW_CONTROLS          103
 #define IDD_ABOUTBOX                    107
 #define IDR_XBEAMRATEAPP                129
 #define IDR_COMPONENTINFO               130
@@ -18,7 +17,6 @@
 #define IDR_REPORT                      132
 #define IDR_GRAPHING                    139
 #define IDC_APPICON                     140
-#define IDC_MESSAGE                     201
 #define IDC_COMBO1                      202
 #define IDC_PIERS                       202
 #define IDI_ICON                        205
@@ -28,7 +26,6 @@
 #define IDI_WSDOT                       209
 #define IDC_WSDOT                       210
 #define ID_HELP_ABOUT                   211
-#define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
 #define ID_FILE_SAFE                    32772
 #define ID_VIEW_REPORTS                 32773
