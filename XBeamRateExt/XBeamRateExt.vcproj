@@ -647,6 +647,10 @@
 				RelativePath=".\StirrupGrid.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\XBeamRateUtilities.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -707,6 +711,10 @@
 			</File>
 			<File
 				RelativePath=".\StirrupGrid.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\XBeamRateUtilities.h"
 				>
 			</File>
 			<File

@@ -3,6 +3,9 @@
 
 xbrBearingLineData::xbrBearingLineData()
 {
+   m_RefBearingDatum = pgsTypes::omtAlignment;
+   m_RefBearingIndex = 0;
+   m_RefBearingOffset = 0;
 }
 
 xbrBearingLineData::xbrBearingLineData(const xbrBearingLineData& rOther)

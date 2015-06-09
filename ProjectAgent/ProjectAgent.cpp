@@ -38,6 +38,7 @@
 
 #include <WBFLCore_i.c>
 #include <WBFLUnitServer_i.c>
+#include <WBFLCogo_i.c>
 
 #include "XBeamRateCatCom.h"
 #include <System\ComCatMgr.h>
@@ -45,8 +46,13 @@
 #include <EAF\EAFUIIntegration.h>
 #include <EAF\EAFTransactions.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFStatusCenter.h>
 
 #include <IFace\XBeamRateAgent.h>
+
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <IFace\Bridge.h>
+#include <IFace\Alignment.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

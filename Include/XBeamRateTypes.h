@@ -36,4 +36,12 @@ typedef struct xbrTypes
       Bottom,
    } LongitudinalRebarDatumType;
 
+   typedef enum ProductForceType
+   {
+      pftLowerXBeam,
+      pftUpperXBeam,
+      pftDCReactions,
+      pftDWReactions
+   } ProductForceType;
+
 } xbrTypes;

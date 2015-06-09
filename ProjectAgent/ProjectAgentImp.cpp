@@ -25,10 +25,17 @@
 #include "ProjectAgent.h"
 #include "ProjectAgentImp.h"
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
 
 #include <WBFLUnitServer\OpenBridgeML.h>
+
+#include <PgsExt\BridgeDescription2.h>
+
+#include <IFace\Bridge.h>
+#include <IFace\Alignment.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -136,117 +143,38 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 
 STDMETHODIMP CProjectAgentImp::Init()
 {
-   //EAF_AGENT_INIT;
+   EAF_AGENT_INIT; // this macro defines pStatusCenter
+   m_XBeamRateID = pStatusCenter->CreateStatusGroupID();
 
-   ////
-   //// Attach to connection points for interfaces this agent depends on
-   ////
-   //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   //CComPtr<IConnectionPoint> pCP;
-   //HRESULT hr = S_OK;
+   //// Register status callbacks that we want to use
+   //m_scidInformationalError       = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusError)); 
+   //m_scidInformationalWarning     = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusWarning)); 
 
-#pragma Reminder("WORKING HERE - Need better default values")
+   return AGENT_S_SECONDPASSINIT;
+}
 
-   //// Create default data model
-   //XBeamRate::ApplicationSettings settings(XBeamRate::UnitModeEnum::US,_T("XBeam Rating Project"));
+STDMETHODIMP CProjectAgentImp::Init2()
+{
+   //
+   // Attach to connection points for interfaces this agent depends on
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
 
-   //XBeamRate::PierTypeEnum pierType = XBeamRate::PierTypeEnum::Integral;
-
-   //OpenBridgeML::Pier::CapBeamType capBeam(::ConvertToSysUnits(5.0,unitMeasure::Feet),
-   //   ::ConvertToSysUnits(5.0,unitMeasure::Feet),
-   //   ::ConvertToSysUnits(5.0,unitMeasure::Feet),
-   //   ::ConvertToSysUnits(5.0,unitMeasure::Feet),::ConvertToSysUnits(1.0,unitMeasure::Feet),::ConvertToSysUnits(3.0,unitMeasure::Feet),
-   //   ::ConvertToSysUnits(5.0,unitMeasure::Feet),::ConvertToSysUnits(1.0,unitMeasure::Feet),::ConvertToSysUnits(3.0,unitMeasure::Feet));
-
-   //OpenBridgeML::Pier::FoundationType foundation(OpenBridgeML::Pier::IdealizedFoundationEnum::Fixed);
-   //OpenBridgeML::Pier::PrismaticColumnType column(foundation);
-   //OpenBridgeML::Pier::CicularColumnSectionType circularSection(::ConvertToSysUnits(3.0,unitMeasure::Feet));
-   //column.CircularSection().set(circularSection);
-   //column.Height() = ::ConvertToSysUnits(30.0,unitMeasure::Feet);
-
-   //ColumnIndexType refColIdx = 0;
-   //OpenBridgeML::Pier::PierLocationType pierLocation(::ConvertToSysUnits(-5.0,unitMeasure::Feet),OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,refColIdx);
-
-   //OpenBridgeML::Pier::ColumnsType columns;
-   //columns.PrismaticColumn().push_back( column );
-   //columns.Spacing().push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
-   //columns.PrismaticColumn().push_back(column);
-
-   //OpenBridgeML::Pier::PierType pier(pierLocation,capBeam,columns);
-
-
-   //Float64 modE = ::ConvertToSysUnits(5000,unitMeasure::PSI);
-   //Float64 fc = ::ConvertToSysUnits(4000,unitMeasure::PSI);
-
-
-   //Float64 deckElevation = 0;
-   //Float64 bridgeLineOffset = 0;
-   //Float64 crownPointOffset = 0;
-   //OpenBridgeML::Types::OffsetMeasurementEnum curbLineDatum = OpenBridgeML::Types::OffsetMeasurementEnum::Alignment;
-   //Float64 LCO = ::ConvertToSysUnits(10,unitMeasure::Feet);
-   //Float64 RCO = ::ConvertToSysUnits(10,unitMeasure::Feet);
-   //Float64 SL = -0.02;
-   //Float64 SR = -0.02;
-
-   //Float64 diaphragmWidth = capBeam.Width();
-   //Float64 diaphragmHeight = ::ConvertToSysUnits(8,unitMeasure::Feet);
-
-   //LPCTSTR strOrientation = _T("00 00 0.0 L");
-
-   //XBeamRate::LiveLoadReactionsType designLiveLoad;
-   //designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Design Truck + Lane"),0));
-   //designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Design Tandem + Lane"),0));
-   //designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   //designLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
-
-   //XBeamRate::LiveLoadReactionsType legalRoutineLiveLoad;
-   //legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3"),0));
-   //legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3S2"),0));
-   //legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Type 3-3"),0));
-   ////legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("0.75(Type 3-3) + Lane Load"),0)); // spans must be greater than 200 feet for this loading
-   //legalRoutineLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0));
-
-   //XBeamRate::LiveLoadReactionsType legalSpecialLiveLoad;
-   //legalSpecialLiveLoad.Reactions().push_back(XBeamRate::LiveLoadReactionType(_T("Notional Rating Load (NRL)"),0));
-
-   //XBeamRate::LiveLoadReactionsType permitRoutineLiveLoad;
-   //XBeamRate::LiveLoadReactionsType permitSpecialLiveLoad;
-
-   //XBeamRate::SystemFactor systemFactor(1.0,1.0);
-   //XBeamRate::ConditionFactorType conditionFactor(1.0,XBeamRate::ConditionFactorEnum::Good);
-   //XBeamRate::DeadLoadFactors deadLoadFactors(1.25,1.5);
-   //XBeamRate::LiveLoadFactors liveLoadFactors(1.75,1.35,1.80,1.60,1.30,1.15);
-   //m_XBeamRateXML = std::auto_ptr<XBeamRate::XBeamRate>(new XBeamRate::XBeamRate(settings,systemFactor,conditionFactor,deadLoadFactors,liveLoadFactors,pierType,deckElevation,bridgeLineOffset,crownPointOffset,strOrientation,curbLineDatum,LCO,RCO,SL,SR,diaphragmHeight,diaphragmWidth,designLiveLoad,legalRoutineLiveLoad,legalSpecialLiveLoad,permitRoutineLiveLoad,permitSpecialLiveLoad,modE,fc,pier));
-
-   //// Start off with one bearing line that has one bearing
-   //XBeamRate::BearingLocatorType bearingLocator(0,OpenBridgeML::Types::OffsetMeasurementEnum::Alignment,::ConvertToSysUnits(-6.0,unitMeasure::Feet));
-   //XBeamRate::BearingLineType backBearingLine(bearingLocator);
-   //XBeamRate::BearingType bearing1(0,0,0);
-   //XBeamRate::BearingType bearing2(0,0,0);
-   //XBeamRate::BearingType bearing3(0,0,0);
-   //Float64 S = ::ConvertToSysUnits(6.0,unitMeasure::Feet);
-
-   //backBearingLine.Bearing().push_back(bearing1);
-   //backBearingLine.Spacing().push_back(S);
-   //backBearingLine.Bearing().push_back(bearing2);
-   //backBearingLine.Spacing().push_back(S);
-   //backBearingLine.Bearing().push_back(bearing3);
-
-   //m_XBeamRateXML->BearingLine().push_back(backBearingLine);
-
-   //// create a dummy rebar row
-   //XBeamRate::LongitudinalRebarRowType rebarRow(XBeamRate::LongitudinalRebarDatumEnum::Bottom,::ConvertToSysUnits(2.0,unitMeasure::Inch),OpenBridgeML::StandardReinforcement::USBarEnum::US11,5,::ConvertToSysUnits(6.0,unitMeasure::Inch));
-   //m_XBeamRateXML->LongitudinalRebar().push_back(rebarRow);
+   // Connection point for the bridge description
+   hr = pBrokerInit->FindConnectionPoint( IID_IBridgeDescriptionEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwBridgeDescCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
 
    return S_OK;
 }
 
 STDMETHODIMP CProjectAgentImp::Reset()
-{
-   return S_OK;
-}
-
-STDMETHODIMP CProjectAgentImp::Init2()
 {
    return S_OK;
 }
@@ -259,7 +187,20 @@ STDMETHODIMP CProjectAgentImp::GetClassID(CLSID* pCLSID)
 
 STDMETHODIMP CProjectAgentImp::ShutDown()
 {
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   hr = pBrokerInit->FindConnectionPoint(IID_IBridgeDescriptionEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwBridgeDescCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the connection point
+   }
+
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
+
    return S_OK;
 }
 
@@ -1440,6 +1381,39 @@ void CProjectAgentImp::CancelPendingEvents()
 }
 
 //////////////////////////////////////////////////////////
+// IBridgeDescriptionEventSink
+HRESULT CProjectAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
+{
+   UpdatePier();
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnGirderFamilyChanged()
+{
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint)
+{
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnLiveLoadChanged()
+{
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName)
+{
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnConstructionLoadChanged()
+{
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////
 void CProjectAgentImp::CreateMenus()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -1478,4 +1452,149 @@ xbrPierData& CProjectAgentImp::GetPrivatePierData(PierIDType id)
       m_PierData.insert(std::make_pair(id,pierData));
    }
    return m_PierData[id];
+}
+
+void CProjectAgentImp::UpdatePier()
+{
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+   PierIndexType nPiers = pBridgeDesc->GetPierCount();
+   for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+   {
+      const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
+      PierIDType pierID = pPier->GetID();
+      xbrPierData& pierData = m_PierData[pierID];
+      UpdatePierData(pPier,pierData);
+   }
+}
+
+void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierData)
+{
+   // Updates our internal pier data with the pier data from the bridge model
+   USES_CONVERSION;
+
+   if ( pPier->IsBoundaryPier() )
+   {
+      pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetBoundaryConditionType()) );
+   }
+   else
+   {
+      pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetSegmentConnectionType()) );
+   }
+
+   PierIndexType pierIdx = pPier->GetIndex();
+
+   GET_IFACE(IBridge,pBridge);
+   Float64 pierStation = pBridge->GetPierStation(pierIdx);
+
+   GET_IFACE(IRoadway,pRoadway);
+   Float64 elevation = pRoadway->GetElevation(pierStation,0);
+   pierData.SetDeckElevation(elevation);
+
+   // Skew angle
+   CComPtr<IAngle> objSkew;
+   pBridge->GetPierSkew(pPier->GetIndex(),&objSkew);
+   Float64 skewAngle;
+   objSkew->get_Value(&skewAngle);
+
+   CComPtr<IAngleDisplayUnitFormatter> angle_formatter;
+   angle_formatter.CoCreateInstance(CLSID_AngleDisplayUnitFormatter);
+   angle_formatter->put_Signed(VARIANT_TRUE);
+   CComBSTR bstrSkew;
+   angle_formatter->Format(skewAngle,CComBSTR(),&bstrSkew);
+   pierData.SetSkew(OLE2T(bstrSkew));
+
+
+   // Lower Cross Beam
+   Float64 H1, H2, H3, H4;
+   Float64 X1, X2, W;
+   pPier->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
+   pPier->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+   W = pPier->GetXBeamWidth();
+   pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,W);
+
+   // Upper Cross Beam Diaphragm
+   Float64 H = Max(pPier->GetDiaphragmHeight(pgsTypes::Back),pPier->GetDiaphragmHeight(pgsTypes::Ahead));
+   GroupIndexType backGrpIdx, aheadGrpIdx;
+   pBridge->GetGirderGroupIndex(pierIdx,&backGrpIdx,&aheadGrpIdx);
+   Float64 Aback  = pBridge->GetSlabOffset(backGrpIdx,pierIdx,0);
+   Float64 Aahead = pBridge->GetSlabOffset(aheadGrpIdx,pierIdx,0);
+   H += Max(Aback,Aahead);
+
+   W = pPier->GetDiaphragmWidth(pgsTypes::Back) + pPier->GetDiaphragmWidth(pgsTypes::Ahead);
+   pierData.SetDiaphragmDimensions(H,W);
+
+   // Column Layout
+   ColumnIndexType refColIdx;
+   Float64 refColOffset;
+   pgsTypes::OffsetMeasurementType refColMeasure;
+   pPier->GetTransverseOffset(&refColIdx,&refColOffset,&refColMeasure);
+
+   Float64 X3, X4;
+   pPier->GetXBeamOverhangs(&X3,&X4);
+
+   ColumnIndexType nColumns = pPier->GetColumnCount();
+
+   Float64 S = (1 < nColumns ? pPier->GetColumnSpacing(0) : 0);
+   
+   pierData.SetColumnLayout(nColumns,refColMeasure,refColIdx,refColOffset,X3,X4,S);
+
+   // Column Properties
+   const CColumnData& columnData = pPier->GetColumnData(0);
+   Float64 D1,D2;
+   columnData.GetColumnDimensions(&D1,&D2);
+   pierData.SetColumnProperties(columnData.GetColumnShape(),D1,D2,columnData.GetColumnHeightMeasurementType(),columnData.GetColumnHeight());
+
+   // Materials
+   pierData.SetConcreteMaterial(pPier->GetConcrete());
+
+   // Bearing Lines and Bearing Locations
+   if ( pierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+   {
+      // two bearing lines
+      pierData.SetBearingLineCount(2);
+      m_vvBearingReactions.resize(2);
+
+      GirderIndexType gdrIdx = 0;
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+
+      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      xbrBearingLineData backBrgLine;
+      backBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
+      backBrgLine.SetBearingCount(vBackSpacing.size()+1);
+      backBrgLine.SetSpacing(vBackSpacing);
+      pierData.SetBearingLineData(0,backBrgLine);
+
+      m_vvBearingReactions[0].resize(backBrgLine.GetBearingCount());
+
+      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
+      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      xbrBearingLineData aheadBrgLine;
+      aheadBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
+      aheadBrgLine.SetBearingCount(vAheadSpacing.size()+1);
+      aheadBrgLine.SetSpacing(vAheadSpacing);
+      pierData.SetBearingLineData(1,aheadBrgLine);
+
+      m_vvBearingReactions[1].resize(aheadBrgLine.GetBearingCount());
+   }
+   else
+   {
+      // one bearing line
+      pierData.SetBearingLineCount(1);
+      m_vvBearingReactions.resize(1);
+
+      GirderIndexType gdrIdx = 0;
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+
+      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      xbrBearingLineData brgLine;
+      brgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
+      brgLine.SetBearingCount(vSpacing.size()+1);
+      brgLine.SetSpacing(vSpacing);
+      pierData.SetBearingLineData(0,brgLine);
+
+      m_vvBearingReactions[0].resize(brgLine.GetBearingCount());
+   }
+
+   Fire_OnProjectChanged();
 }

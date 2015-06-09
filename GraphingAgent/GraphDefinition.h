@@ -13,7 +13,7 @@ public:
    union LoadType 
    {
       pgsTypes::LimitState         LimitStateType;
-      XBRProductForceType          ProductLoadType;
+      xbrTypes::ProductForceType          ProductLoadType;
       XBRCombinedForceType         CombinedLoadType;
       pgsTypes::LoadRatingType     LiveLoadType;
    } m_LoadType;
@@ -29,7 +29,7 @@ public:
    CGraphDefinition(IDType id,LPCTSTR name,XBRCombinedForceType comb);
    
    // constructor for product loads
-   CGraphDefinition(IDType id,LPCTSTR name,XBRProductForceType type);
+   CGraphDefinition(IDType id,LPCTSTR name,xbrTypes::ProductForceType type);
    
    // constructor for vehicular live loads
    CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);

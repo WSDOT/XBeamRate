@@ -107,8 +107,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    RowIndexType row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mz = pResults->GetMoment(pierID,pftLowerXBeam,poi);
-      sysSectionValue V = pResults->GetShear(pierID,pftLowerXBeam,poi);
+      Float64 Mz = pResults->GetMoment(pierID,xbrTypes::pftLowerXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pierID,xbrTypes::pftLowerXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);
@@ -129,8 +129,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    row = pTable->GetNumberOfHeaderRows();
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mz = pResults->GetMoment(pierID,pftUpperXBeam,poi);
-      sysSectionValue V = pResults->GetShear(pierID,pftUpperXBeam,poi);
+      Float64 Mz = pResults->GetMoment(pierID,xbrTypes::pftUpperXBeam,poi);
+      sysSectionValue V = pResults->GetShear(pierID,xbrTypes::pftUpperXBeam,poi);
       (*pTable)(row,0) << poi.GetID();
       (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
       (*pTable)(row,2) << moment.SetValue(Mz);

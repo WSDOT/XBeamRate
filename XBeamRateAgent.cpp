@@ -33,6 +33,8 @@
 #include <IFace\Bridge.h>
 #include <IFace\Selection.h>
 
+#include <EAF\EAFDocument.h>
+
 #include <XBeamRateExt\ReinforcementPage.h>
 
 #include "XBeamRateChildFrame.h"
@@ -343,6 +345,14 @@ STDMETHODIMP CXBeamRateAgent::Init()
       pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
+
    return S_OK;
 }
 
@@ -372,6 +382,14 @@ STDMETHODIMP CXBeamRateAgent::ShutDown()
       hr = pCP->Unadvise( m_dwProjectPropertiesCookie );
       ATLASSERT( SUCCEEDED(hr) );
       pCP.Release(); // Recycle the connection point
+   }
+
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwProjectCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
    return S_OK;
@@ -733,6 +751,16 @@ HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
    pProject->SetEngineer(pProjectProps->GetEngineer());
    pProject->SetCompany(pProjectProps->GetCompany());
    pProject->SetComments(pProjectProps->GetComments());
+   return S_OK;
+}
+
+// IXBRProjectEventSink
+HRESULT CXBeamRateAgent::OnProjectChanged()
+{
+   CEAFDocument* pDoc = EAFGetDocument();
+   pDoc->SetModifiedFlag();
+   pDoc->UpdateRegisteredView(m_PierViewKey,0,0,0);
+
    return S_OK;
 }
 

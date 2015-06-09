@@ -40,6 +40,8 @@
 #include <IFace\Bridge.h>
 #include <IFace\Selection.h>
 #include <IFace\ViewEvents.h>
+#include <IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 
 
 #include <WBFLCore_i.c>

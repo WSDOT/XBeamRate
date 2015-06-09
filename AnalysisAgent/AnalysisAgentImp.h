@@ -92,10 +92,10 @@ public:
 
 // IXBRAnalysisResults
 public:
-   virtual Float64 GetMoment(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi);
-   virtual sysSectionValue GetShear(PierIDType pierID,XBRProductForceType pfType,const xbrPointOfInterest& poi);
-   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
-   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual Float64 GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi);
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
 
    virtual Float64 GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
    virtual sysSectionValue GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
@@ -130,8 +130,8 @@ private:
 
    void Invalidate();
 
-   LoadCaseIDType GetLoadCaseID(XBRProductForceType pfType);
-   std::vector<XBRProductForceType> GetLoads(XBRCombinedForceType lcType);
+   LoadCaseIDType GetLoadCaseID(xbrTypes::ProductForceType pfType);
+   std::vector<xbrTypes::ProductForceType> GetLoads(XBRCombinedForceType lcType);
 
    DWORD m_dwProjectCookie;
 

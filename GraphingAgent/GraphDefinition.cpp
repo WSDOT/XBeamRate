@@ -34,7 +34,7 @@ m_ID(id), m_Name(name)
 CGraphDefinition::CGraphDefinition(
 IDType id,
 LPCTSTR name,
-XBRProductForceType type
+xbrTypes::ProductForceType type
 ): m_ID(id),m_Name(name)
 {
    m_GraphType = graphProduct;

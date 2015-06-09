@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "ReinforcementPageParent.h"
+#include <XBeamRateExt\XBeamRateUtilities.h>
 
 CReinforcementPageParent::CReinforcementPageParent()
 {
@@ -26,43 +27,12 @@ xbrTypes::SuperstructureConnectionType CReinforcementPageParent::GetSuperstructu
 {
    if ( m_pEditPierData->GetPierData()->IsBoundaryPier() )
    {
-      switch( m_pEditPierData->GetPierData()->GetBoundaryConditionType() )
-      {
-      case pgsTypes::bctHinge:
-      case pgsTypes::bctRoller:
-         return xbrTypes::pctExpansion;
-
-      case pgsTypes::bctContinuousAfterDeck:
-      case pgsTypes::bctContinuousBeforeDeck:
-         return xbrTypes::pctContinuous;
-
-      case pgsTypes::bctIntegralAfterDeck:
-      case pgsTypes::bctIntegralBeforeDeck:
-         return xbrTypes::pctIntegral;
-
-      case pgsTypes::bctIntegralAfterDeckHingeBack:
-      case pgsTypes::bctIntegralBeforeDeckHingeBack:
-      case pgsTypes::bctIntegralAfterDeckHingeAhead:
-      case pgsTypes::bctIntegralBeforeDeckHingeAhead:
-         return xbrTypes::pctIntegral;
-      }
+      return ::GetSuperstructureConnectionType(m_pEditPierData->GetPierData()->GetBoundaryConditionType());
    }
    else
    {
-      switch ( m_pEditPierData->GetPierData()->GetSegmentConnectionType() )
-      {
-      case pgsTypes::psctContinousClosureJoint:
-      case pgsTypes::psctContinuousSegment:
-         return xbrTypes::pctContinuous;
-
-      case pgsTypes::psctIntegralClosureJoint:
-      case pgsTypes::psctIntegralSegment:
-         return xbrTypes::pctIntegral;
-      }
+      return ::GetSuperstructureConnectionType(m_pEditPierData->GetPierData()->GetSegmentConnectionType());
    }
-
-   ATLASSERT(false); // should never get here
-   return xbrTypes::pctIntegral;
 }
 
 matRebar::Type& CReinforcementPageParent::GetRebarType()

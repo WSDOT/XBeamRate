@@ -38,6 +38,8 @@
 #include <EAF\EAFUIIntegration.h>
 #include <XBeamRateExt\PierData.h>
 
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CProjectAgentImp
 class ATL_NO_VTABLE CProjectAgentImp : 
@@ -56,7 +58,8 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IXBRProject,
    public IXBRRatingSpecification,
    public IXBRProjectEdit,
-   public IXBREvents
+   public IXBREvents,
+   public IBridgeDescriptionEventSink
 {  
 public:
 	CProjectAgentImp(); 
@@ -79,6 +82,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY_IID(IID_IXBRRatingSpecification,IXBRRatingSpecification)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
    COM_INTERFACE_ENTRY_IID(IID_IXBREvents,IXBREvents)
+   COM_INTERFACE_ENTRY(IBridgeDescriptionEventSink)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -291,6 +295,15 @@ public:
    virtual void FirePendingEvents();
    virtual void CancelPendingEvents();
 
+// IBridgeDescriptionEventSink
+public:
+   virtual HRESULT OnBridgeChanged(CBridgeChangedHint* pHint);
+   virtual HRESULT OnGirderFamilyChanged();
+   virtual HRESULT OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint);
+   virtual HRESULT OnLiveLoadChanged();
+   virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName);
+   virtual HRESULT OnConstructionLoadChanged();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -299,6 +312,9 @@ private:
    DECLARE_EAF_AGENT_DATA;
 
    CAgentCmdTarget m_CommandTarget;
+
+   DWORD m_dwBridgeDescCookie;
+   StatusGroupIDType m_XBeamRateID; // ID used to identify status items created by this agent
 
    // Project Properties
    CString m_strBridgeName;
@@ -354,6 +370,9 @@ private:
 
    void CreateMenus();
    void RemoveMenus();
+
+   void UpdatePier();
+   void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

@@ -33,6 +33,7 @@
 #include <EAF\EAFUIIntegration.h>
 
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\Project.h>
 
 #include <IFace\ExtendUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
@@ -93,6 +94,7 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    //public IEditGirderCallback,
    //public IExtendUIEventSink,
    public IProjectPropertiesEventSink,
+   public IXBRProjectEventSink,
    public IXBeamRate,
    public IEAFCommandCallback
 {
@@ -116,6 +118,7 @@ BEGIN_COM_MAP(CXBeamRateAgent)
    COM_INTERFACE_ENTRY(IAgentGraphingIntegration)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
    COM_INTERFACE_ENTRY(IEAFCommandCallback)
 END_COM_MAP()
@@ -239,6 +242,10 @@ public:
 public:
    virtual HRESULT OnProjectPropertiesChanged();
 
+// IXBRProjectEventSink
+public:
+   virtual HRESULT OnProjectChanged();
+
 // IEAFCommandCallback
 public:
    virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
@@ -248,6 +255,7 @@ public:
 
 private:
    DWORD m_dwProjectPropertiesCookie;
+   DWORD m_dwProjectCookie;
 
    CReinforcementPageParent m_ReinforcementPageParent;
 

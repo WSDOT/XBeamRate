@@ -40,6 +40,7 @@ public:
    virtual void OnInitialUpdate();
 
    PierIDType GetPierID();
+   PierIndexType GetPierIndex();
 
 // Implementation
 public:
@@ -55,6 +56,7 @@ protected:
    void UpdateXBeamDisplayObjects();
    void UpdateColumnDisplayObjects();
    void UpdateBearingDisplayObjects();
+   void UpdateGirderDisplayObjects();
    void UpdateRebarDisplayObjects();
    void UpdateStirrupDisplayObjects();
    void UpdateDimensionsDisplayObjects();
@@ -73,6 +75,7 @@ protected:
 	//{{AFX_MSG(CXBeamRateView)
 		// NOTE - the ClassWizard will add and remove member functions here.
 		//    DO NOT EDIT what you see in these blocks of generated code !
+   afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

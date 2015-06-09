@@ -104,6 +104,24 @@ PierIDType CXBeamRateChildFrame::GetPierID()
    return (PierIDType)(pcb->GetItemData(curSel));
 }
 
+PierIndexType CXBeamRateChildFrame::GetPierIndex()
+{
+   PierIDType pierID = GetPierID();
+   if ( pierID == INVALID_ID )
+   {
+      return INVALID_INDEX;
+   }
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+   const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+   const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
+   ATLASSERT(pPier);
+   return pPier->GetIndex();
+}
+
 BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CMDIFrameWnd* pParentWnd, CCreateContext* pContext)
 {
    if ( !CEAFChildFrame::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, pContext) )

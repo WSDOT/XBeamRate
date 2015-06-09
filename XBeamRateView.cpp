@@ -15,6 +15,9 @@
 #include <IFace\Pier.h>
 #include <IFace\EditByUI.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <\ARP\PGSuper\Include\IFace\Bridge.h>
+#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <\ARP\PGSuper\Include\IFace\Intervals.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
@@ -32,12 +35,13 @@
 //#define XBEAM_LINE_WEIGHT              3
 #define REBAR_LINE_WEIGHT              1
 
-#define BEARING_DISPLAY_LIST_ID        0
-#define XBEAM_DISPLAY_LIST_ID          1
-#define COLUMN_DISPLAY_LIST_ID         2
-#define DIMENSIONS_DISPLAY_LIST_ID     3
-#define REBAR_DISPLAY_LIST_ID          4
-#define STIRRUP_DISPLAY_LIST_ID        5
+#define GIRDER_DISPLAY_LIST_ID         0
+#define BEARING_DISPLAY_LIST_ID        1
+#define XBEAM_DISPLAY_LIST_ID          2
+#define COLUMN_DISPLAY_LIST_ID         3
+#define DIMENSIONS_DISPLAY_LIST_ID     4
+#define REBAR_DISPLAY_LIST_ID          5
+#define STIRRUP_DISPLAY_LIST_ID        6
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -54,6 +58,7 @@ BEGIN_MESSAGE_MAP(CXBeamRateView, CDisplayView)
 	//{{AFX_MSG_MAP(CXBeamRateView)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 		//    DO NOT EDIT what you see in these blocks of generated code!
+	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 	// Standard printing commands
 	ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
@@ -149,7 +154,8 @@ void CXBeamRateView::OnSize(UINT nType, int cx, int cy)
 #ifdef _DEBUG
 void CXBeamRateView::AssertValid() const
 {
-	CDisplayView::AssertValid();
+ //  AFX_MANAGE_STATE(AfxGetStaticModuleState());
+	//CDisplayView::AssertValid();
 }
 
 void CXBeamRateView::Dump(CDumpContext& dc) const
@@ -161,8 +167,13 @@ void CXBeamRateView::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateView message handlers
-void CXBeamRateView::OnInitialUpdate()
+int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+   if ( CDisplayView::OnCreate(lpCreateStruct) == -1 )
+   {
+      return -1;
+   }
+
    EnableToolTips();
 
    CComPtr<iDisplayMgr> dispMgr;
@@ -197,6 +208,11 @@ void CXBeamRateView::OnInitialUpdate()
 
    displayList.Release();
    ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   displayList->SetID(GIRDER_DISPLAY_LIST_ID);
+   dispMgr->AddDisplayList(displayList);
+
+   displayList.Release();
+   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(XBEAM_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
@@ -205,13 +221,26 @@ void CXBeamRateView::OnInitialUpdate()
    displayList->SetID(COLUMN_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
+   return 0;
+}
+
+void CXBeamRateView::OnInitialUpdate()
+{
    CDisplayView::OnInitialUpdate();
 }
 
 PierIDType CXBeamRateView::GetPierID()
 {
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
    CXBeamRateChildFrame* pFrame = (CXBeamRateChildFrame*)GetParentFrame();
    return pFrame->GetPierID();
+}
+
+PierIndexType CXBeamRateView::GetPierIndex()
+{
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   CXBeamRateChildFrame* pFrame = (CXBeamRateChildFrame*)GetParentFrame();
+   return pFrame->GetPierIndex();
 }
 
 void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
@@ -230,6 +259,7 @@ void CXBeamRateView::UpdateDisplayObjects()
    UpdateXBeamDisplayObjects();
    UpdateColumnDisplayObjects();
    UpdateBearingDisplayObjects();
+   UpdateGirderDisplayObjects();
    UpdateRebarDisplayObjects();
    UpdateStirrupDisplayObjects();
    UpdateDimensionsDisplayObjects();
@@ -756,6 +786,89 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
          theStrategy->SetColor(BLACK);
 
          displayList->AddDisplayObject(doPnt);
+      }
+   }
+}
+
+void CXBeamRateView::UpdateGirderDisplayObjects()
+{
+   CWaitCursor wait;
+
+   CComPtr<iDisplayMgr> dispMgr;
+   GetDisplayMgr(&dispMgr);
+
+   CDManipClientDC dc(this);
+
+   CComPtr<iDisplayList> displayList;
+   dispMgr->FindDisplayList(GIRDER_DISPLAY_LIST_ID,&displayList);
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   CComPtr<IXBeamRateAgent> pAgent;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   if ( FAILED(hr) )
+   {
+      // not in PGSuper/PGSplice so we don't know anything about the shape of the girder
+      return;
+   }
+
+   PierIndexType pierIdx = GetPierIndex();
+   GET_IFACE2(pBroker,IBridge,pBridge);
+   GroupIndexType backGroupIdx,aheadGroupIdx;
+   pBridge->GetGirderGroupIndex(pierIdx,&backGroupIdx,&aheadGroupIdx);
+
+   GET_IFACE2(pBroker,IShapes,pShapes);
+   GET_IFACE2(pBroker,IPointOfInterest,pPoi);
+   GET_IFACE2(pBroker,IIntervals,pIntervals);
+
+   for ( GroupIndexType grpIdx = aheadGroupIdx; backGroupIdx <= grpIdx && grpIdx != INVALID_INDEX; grpIdx-- ) // draw in reverse order so back side girders cover ahead side girders
+   {
+      GirderIndexType nGirders = pBridge->GetGirderCount(grpIdx);
+      for ( GirderIndexType gdrIdx = 0; gdrIdx < nGirders; gdrIdx++ )
+      {
+         CGirderKey girderKey(grpIdx,gdrIdx);
+         pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(girderKey,pierIdx);
+
+         IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(poi.GetSegmentKey());
+
+         CComPtr<IShape> shape;
+         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,&shape);
+
+         CComPtr<iPointDisplayObject> dispObj;
+         dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+
+         CComQIPtr<IXYPosition> position(shape);
+         CComPtr<IPoint2d> topCenter;
+         position->get_LocatorPoint(lpTopCenter,&topCenter);
+         dispObj->SetPosition(topCenter,FALSE,FALSE);
+
+         CComPtr<iShapeDrawStrategy> strategy;
+         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+         strategy->SetShape(shape);
+         strategy->SetSolidLineColor(SEGMENT_BORDER_COLOR);
+         strategy->SetSolidFillColor(SEGMENT_FILL_COLOR);
+         strategy->SetVoidLineColor(VOID_BORDER_COLOR);
+         strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
+         if ( grpIdx == backGroupIdx )
+         {
+            strategy->SetSolidLineStyle(lsSolid);
+            strategy->SetVoidLineStyle(lsSolid);
+         }
+         else
+         {
+            strategy->SetSolidLineStyle(lsDash);
+            strategy->SetVoidLineStyle(lsDash);
+         }
+         strategy->DoFill(true);
+
+         dispObj->SetDrawingStrategy(strategy);
+
+         dispObj->SetSelectionType(stAll);
+
+         dispObj->SetID(m_DisplayObjectID++);
+
+         displayList->AddDisplayObject(dispObj);
       }
    }
 }

@@ -122,10 +122,10 @@ void CXBRGraphBuilder::OnPierChanged()
 void CXBRGraphBuilder::UpdateGraphDefinitions()
 {
    IDType graphID = 0;
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),pftLowerXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Upper Cross Beam Dead Load"),pftUpperXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),pftDCReactions));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),pftDWReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),xbrTypes::pftLowerXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Upper Cross Beam Dead Load"),xbrTypes::pftUpperXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),xbrTypes::pftDCReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),xbrTypes::pftDWReactions));
 
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
@@ -283,7 +283,7 @@ LPCTSTR CXBRGraphBuilder::GetGraphTitle(ActionType actionType)
 
 void CXBRGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
-   XBRProductForceType pfType = graphDef.m_LoadType.ProductLoadType;
+   xbrTypes::ProductForceType pfType = graphDef.m_LoadType.ProductLoadType;
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
