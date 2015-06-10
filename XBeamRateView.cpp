@@ -43,6 +43,8 @@
 #define REBAR_DISPLAY_LIST_ID          5
 #define STIRRUP_DISPLAY_LIST_ID        6
 
+const Float64 EndOffset = 1.1;
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -316,50 +318,53 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    // Model a vertical line for the alignment
    // Let X = 0 be at the alignment and Y = the alignment elevation
    Float64 X = 0;
-   Float64 Y = pProject->GetDeckElevation(pierID) + ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   Float64 Yt = pProject->GetDeckElevation(pierID) + ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    CComPtr<IPoint2d> pnt1;
    pnt1.CoCreateInstance(CLSID_Point2d);
-   pnt1->Move(X,Y);
-   CComPtr<iPointDisplayObject> doPnt1;
-   doPnt1.CoCreateInstance(CLSID_PointDisplayObject);
-   doPnt1->Visible(FALSE);
-   doPnt1->SetPosition(pnt1,FALSE,FALSE);
-   CComQIPtr<iConnectable> connectable1(doPnt1);
-   CComPtr<iSocket> socket1;
-   connectable1->AddSocket(0,pnt1,&socket1);
+   pnt1->Move(X,Yt);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   Y -= pPier->GetMaxColumnHeight(pierID);
+   Float64 Yb = Yt - pPier->GetMaxColumnHeight(pierID);
    CComPtr<IPoint2d> pnt2;
    pnt2.CoCreateInstance(CLSID_Point2d);
-   pnt2->Move(X,Y);
-   CComPtr<iPointDisplayObject> doPnt2;
-   doPnt2.CoCreateInstance(CLSID_PointDisplayObject);
-   doPnt2->Visible(FALSE);
-   doPnt2->SetPosition(pnt2,FALSE,FALSE);
-   CComQIPtr<iConnectable> connectable2(doPnt2);
-   CComPtr<iSocket> socket2;
-   connectable2->AddSocket(0,pnt2,&socket2);
+   pnt2->Move(X,Yb);
 
    CComPtr<iLineDisplayObject> doAlignment;
-   doAlignment.CoCreateInstance(CLSID_LineDisplayObject);
+   CreateLineDisplayObject(pnt1,pnt2,&doAlignment);
    CComPtr<iDrawLineStrategy> drawStrategy;
    doAlignment->GetDrawLineStrategy(&drawStrategy);
    CComQIPtr<iSimpleDrawLineStrategy> drawAlignmentStrategy(drawStrategy);
    drawAlignmentStrategy->SetWidth(3);
-   drawAlignmentStrategy->SetColor(RED);
+   drawAlignmentStrategy->SetColor(ALIGNMENT_COLOR);
    drawAlignmentStrategy->SetLineStyle(lsCenterline);
 
-
-   CComQIPtr<iConnector> connector(doAlignment);
-   CComPtr<iPlug> startPlug, endPlug;
-   connector->GetStartPlug(&startPlug);
-   connector->GetEndPlug(&endPlug);
-   DWORD dwCookie;
-   connectable1->Connect(0,atByID,startPlug,&dwCookie);
-   connectable2->Connect(0,atByID,endPlug,  &dwCookie);
-
    displayList->AddDisplayObject(doAlignment);
+
+   Float64 BLO = pProject->GetBridgeLineOffset(pierID);
+   if ( !IsZero(BLO) )
+   {
+      // Model a vertical line for the bridge line
+      // Let X = BLO be at the alignment and Y = the alignment elevation
+      Float64 X = BLO;
+      pnt1.Release();
+      pnt1.CoCreateInstance(CLSID_Point2d);
+      pnt1->Move(X,Yt);
+
+      pnt2.Release();
+      pnt2.CoCreateInstance(CLSID_Point2d);
+      pnt2->Move(X,Yb);
+
+      CComPtr<iLineDisplayObject> doBridgeLine;
+      CreateLineDisplayObject(pnt1,pnt2,&doBridgeLine);
+      CComPtr<iDrawLineStrategy> drawStrategy;
+      doBridgeLine->GetDrawLineStrategy(&drawStrategy);
+      CComQIPtr<iSimpleDrawLineStrategy> drawBridgeLineStrategy(drawStrategy);
+      drawBridgeLineStrategy->SetWidth(3);
+      drawBridgeLineStrategy->SetColor(BRIDGE_COLOR);
+      drawBridgeLineStrategy->SetLineStyle(lsCenterline);
+
+      displayList->AddDisplayObject(doBridgeLine);
+   }
 
    // Model Upper Cross Beam (Elevation)
    Float64 Z = pProject->GetXBeamLength(pierID);
@@ -411,7 +416,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    pSectProp->GetUpperXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
    position.Release();
    upperXBeamShape.QueryInterface(&position);
-   position->Offset(1.2*Z,0);
+   position->Offset(EndOffset*Z,0);
 
    upperXBeamDrawStrategy.Release();
    upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
@@ -466,7 +471,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    pSectProp->GetLowerXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
    position.Release();
    lowerXBeamShape->QueryInterface(&position);
-   position->Offset(1.2*Z,0);
+   position->Offset(EndOffset*Z,0);
 
    lowerXBeamDrawStrategy.Release();
    lowerXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
@@ -631,7 +636,7 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
          Float64 Y = Ytop - Ybar;
          pntBar->put_Y(Y);
 
-         pntBar->Offset(1.2*X,0);
+         pntBar->Offset(EndOffset*X,0);
 
          CComPtr<iPointDisplayObject> doBar;
          doBar.CoCreateInstance(CLSID_PointDisplayObject);
@@ -1105,4 +1110,36 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
       GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
       pProjectEdit->EditPier(INVALID_ID);
    }
+}
+
+void CXBeamRateView::CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO)
+{
+   CComPtr<iPointDisplayObject> doPntStart;
+   doPntStart.CoCreateInstance(CLSID_PointDisplayObject);
+   doPntStart->Visible(FALSE);
+   doPntStart->SetPosition(pntStart,FALSE,FALSE);
+   CComQIPtr<iConnectable> connectable1(doPntStart);
+   CComPtr<iSocket> socket1;
+   connectable1->AddSocket(0,pntStart,&socket1);
+
+   CComPtr<iPointDisplayObject> doPntEnd;
+   doPntEnd.CoCreateInstance(CLSID_PointDisplayObject);
+   doPntEnd->Visible(FALSE);
+   doPntEnd->SetPosition(pntEnd,FALSE,FALSE);
+   CComQIPtr<iConnectable> connectable2(doPntEnd);
+   CComPtr<iSocket> socket2;
+   connectable2->AddSocket(0,pntEnd,&socket2);
+
+   CComPtr<iLineDisplayObject> doLine;
+   doLine.CoCreateInstance(CLSID_LineDisplayObject);
+
+   CComQIPtr<iConnector> connector(doLine);
+   CComPtr<iPlug> startPlug, endPlug;
+   connector->GetStartPlug(&startPlug);
+   connector->GetEndPlug(&endPlug);
+   DWORD dwCookie;
+   connectable1->Connect(0,atByID,startPlug,&dwCookie);
+   connectable2->Connect(0,atByID,endPlug,  &dwCookie);
+
+   doLine.CopyTo(ppLineDO);
 }
