@@ -748,13 +748,13 @@ IDType CXBeamRateAgent::GetEditBridgeCallbackID()
 HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
 {
    GET_IFACE(IProjectProperties,pProjectProps);
-   GET_IFACE(IXBRProjectProperties, pProject);
-   pProject->SetBridgeName(pProjectProps->GetBridgeName());
-   pProject->SetBridgeID(pProjectProps->GetBridgeID());
-   pProject->SetJobNumber(pProjectProps->GetJobNumber());
-   pProject->SetEngineer(pProjectProps->GetEngineer());
-   pProject->SetCompany(pProjectProps->GetCompany());
-   pProject->SetComments(pProjectProps->GetComments());
+   GET_IFACE(IXBRProjectProperties, pXBRProjectProps);
+   pXBRProjectProps->SetBridgeName(pProjectProps->GetBridgeName());
+   pXBRProjectProps->SetBridgeID(pProjectProps->GetBridgeID());
+   pXBRProjectProps->SetJobNumber(pProjectProps->GetJobNumber());
+   pXBRProjectProps->SetEngineer(pProjectProps->GetEngineer());
+   pXBRProjectProps->SetCompany(pProjectProps->GetCompany());
+   pXBRProjectProps->SetComments(pProjectProps->GetComments());
    return S_OK;
 }
 
