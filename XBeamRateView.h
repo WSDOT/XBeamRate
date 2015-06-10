@@ -32,6 +32,7 @@ public:
 	public:
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	protected:
+	virtual void OnDraw(CDC* pDC);      // overridden to draw this view
 	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
 	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -69,6 +70,8 @@ protected:
    IDType m_DisplayObjectID; // used to generate display object IDs
 
    Float64 m_LeftEdgeOffset;
+
+   bool m_bIsIdealized;
 
 // Generated message map functions
 protected:

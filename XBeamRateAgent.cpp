@@ -79,8 +79,8 @@ void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IBridge,pBridge);
-   PierIndexType nPiers = pBridge->GetPierCount();
+   GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+   PierIndexType nPiers = pIBridgeDesc->GetPierCount();
 
    GET_IFACE2(pBroker,ISelection,pSelection);
    PierIndexType selPierIdx = pSelection->GetSelectedPier();
@@ -90,7 +90,11 @@ void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
    }
    else
    {
-      pCmdUI->Enable(TRUE);
+      const CPierData2* pPier = pIBridgeDesc->GetPier(selPierIdx);
+      if ( pPier == NULL || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
+         pCmdUI->Enable(TRUE);
+      else
+         pCmdUI->Enable(FALSE);
    }
 }
 

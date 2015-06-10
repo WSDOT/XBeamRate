@@ -90,6 +90,17 @@ BOOL CXBeamRateView::PreCreateWindow(CREATESTRUCT& cs)
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateView printing
+void CXBeamRateView::OnDraw(CDC* pDC)
+{
+   if ( m_bIsIdealized )
+   {
+      pDC->TextOut(0,0,_T("Pier is idealized"));
+   }
+   else
+   {
+      CDisplayView::OnDraw(pDC);
+   }
+}
 
 BOOL CXBeamRateView::OnPreparePrinting(CPrintInfo* pInfo)
 {
@@ -252,6 +263,23 @@ void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
 
 void CXBeamRateView::UpdateDisplayObjects()
 {
+   CWaitCursor wait;
+
+   m_bIsIdealized = false;
+   PierIndexType pierIdx = GetPierIndex();
+   if ( pierIdx != INVALID_INDEX )
+   {
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
+      if ( pPier->GetPierModelType() == pgsTypes::pmtIdealized )
+      {
+         m_bIsIdealized = true;
+      }
+   }
+
+
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
    dispMgr->ClearDisplayObjects();
