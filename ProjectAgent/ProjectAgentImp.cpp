@@ -380,6 +380,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          }
 
          xbrPierData& pierData(iter->second);
+         ATLASSERT(pierData.GetID() != INVALID_ID);
          pierData.Save(pStrSave);
       }
    }

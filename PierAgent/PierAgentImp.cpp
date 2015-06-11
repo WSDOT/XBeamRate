@@ -880,7 +880,11 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage
    }
    else
    {
-      ValidateStirrupZones(pierID,pierData.GetFullDepthStirrups(), &vStirrupZones);
+      if ( pProject->GetPierType(pierID) == xbrTypes::pctIntegral )
+      {
+         // there are only full depth stirrups for integral piers
+         ValidateStirrupZones(pierID,pierData.GetFullDepthStirrups(), &vStirrupZones);
+      }
    }
 
    m_StirrupZones[stage].insert(std::make_pair(pierID,vStirrupZones));

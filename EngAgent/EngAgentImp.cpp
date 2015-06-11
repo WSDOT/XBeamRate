@@ -163,18 +163,22 @@ Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInteres
    Float64 Av_over_S1 = GetAverageAvOverS(pierID,xbrTypes::Stage1,poi,theta);
    Float64 Av_over_S2 = GetAverageAvOverS(pierID,xbrTypes::Stage2,poi,theta);
 
+   // if non-integralpier, dv2 is zero so dv1 will be the max, 
+   // otherwise dv2 will be the max
+   Float64 dv = Max(dv1,dv2);
+
    // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
    Float64 fc = pProject->GetConcrete(pierID).Fc;
    Float64 bv = pProject->GetXBeamWidth(pierID);
    Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
-   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*Max(dv1,dv2); // if non-integral, dv2 is zero so dv1 will be max, otherwise dv2 should be max
+   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*dv;
    Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
    Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
    Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
    Float64 Vs = Vs1 + Vs2; // total capacity due to reinforcement
 
    Float64 Vn1 = Vc + Vs;
-   Float64 Vn2 = 0.25*fc*bv*dv2;
+   Float64 Vn2 = 0.25*fc*bv*dv;
 
    return Min(Vn1,Vn2);
 }

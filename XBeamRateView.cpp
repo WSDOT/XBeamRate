@@ -373,66 +373,69 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    point.CoCreateInstance(CLSID_Point2d);
    point->Move(0,0);
 
-   CComPtr<iPointDisplayObject> doUpperXBeam;
-   doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
-   doUpperXBeam->SetID(m_DisplayObjectID++);
-   doUpperXBeam->SetPosition(point,FALSE,FALSE);
-   doUpperXBeam->SetSelectionType(stAll);
+   if ( pProject->GetPierType(pierID) != xbrTypes::pctExpansion )
+   {
+      CComPtr<iPointDisplayObject> doUpperXBeam;
+      doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
+      doUpperXBeam->SetID(m_DisplayObjectID++);
+      doUpperXBeam->SetPosition(point,FALSE,FALSE);
+      doUpperXBeam->SetSelectionType(stAll);
 
-   CComPtr<IShape> upperXBeamShape;
-   pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
+      CComPtr<IShape> upperXBeamShape;
+      pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
 
-   // Capture the X coordinate of the left edge
-   // We'll need this for other display objects
-   CComQIPtr<IXYPosition> position(upperXBeamShape);
-   CComPtr<IPoint2d> pntTopLeft;
-   position->get_LocatorPoint(lpTopLeft,&pntTopLeft);
-   pntTopLeft->get_X(&m_LeftEdgeOffset);
+      // Capture the X coordinate of the left edge
+      // We'll need this for other display objects
+      CComQIPtr<IXYPosition> position(upperXBeamShape);
+      CComPtr<IPoint2d> pntTopLeft;
+      position->get_LocatorPoint(lpTopLeft,&pntTopLeft);
+      pntTopLeft->get_X(&m_LeftEdgeOffset);
 
-   CComPtr<iShapeDrawStrategy> upperXBeamDrawStrategy;
-   upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-   upperXBeamDrawStrategy->SetShape(upperXBeamShape);
-   upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
-   upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
-   upperXBeamDrawStrategy->DoFill(TRUE);
+      CComPtr<iShapeDrawStrategy> upperXBeamDrawStrategy;
+      upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+      upperXBeamDrawStrategy->SetShape(upperXBeamShape);
+      upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
+      upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
+      upperXBeamDrawStrategy->DoFill(TRUE);
 
-   doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
+      doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
 
-   CComPtr<iShapeGravityWellStrategy> upper_xbeam_gravity_well;
-   upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-   upper_xbeam_gravity_well->SetShape(upperXBeamShape);
-   doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
+      CComPtr<iShapeGravityWellStrategy> upper_xbeam_gravity_well;
+      upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+      upper_xbeam_gravity_well->SetShape(upperXBeamShape);
+      doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
 
-   displayList->AddDisplayObject(doUpperXBeam);
+      displayList->AddDisplayObject(doUpperXBeam);
 
-   // Model Upper XBeam (End View)
-   doUpperXBeam.Release();
-   doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
-   doUpperXBeam->SetID(m_DisplayObjectID++);
-   doUpperXBeam->SetPosition(point,FALSE,FALSE);
-   doUpperXBeam->SetSelectionType(stAll);
+      // Model Upper XBeam (End View)
+      doUpperXBeam.Release();
+      doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
+      doUpperXBeam->SetID(m_DisplayObjectID++);
+      doUpperXBeam->SetPosition(point,FALSE,FALSE);
+      doUpperXBeam->SetSelectionType(stAll);
 
-   upperXBeamShape.Release();
-   pSectProp->GetUpperXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
-   position.Release();
-   upperXBeamShape.QueryInterface(&position);
-   position->Offset(EndOffset*Z,0);
+      upperXBeamShape.Release();
+      pSectProp->GetUpperXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
+      position.Release();
+      upperXBeamShape.QueryInterface(&position);
+      position->Offset(EndOffset*Z,0);
 
-   upperXBeamDrawStrategy.Release();
-   upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-   upperXBeamDrawStrategy->SetShape(upperXBeamShape);
-   upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
-   upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
-   upperXBeamDrawStrategy->DoFill(TRUE);
+      upperXBeamDrawStrategy.Release();
+      upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+      upperXBeamDrawStrategy->SetShape(upperXBeamShape);
+      upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
+      upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
+      upperXBeamDrawStrategy->DoFill(TRUE);
 
-   doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
+      doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
 
-   upper_xbeam_gravity_well.Release();
-   upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-   upper_xbeam_gravity_well->SetShape(upperXBeamShape);
-   doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
+      upper_xbeam_gravity_well.Release();
+      upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+      upper_xbeam_gravity_well->SetShape(upperXBeamShape);
+      doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
 
-   displayList->AddDisplayObject(doUpperXBeam);
+      displayList->AddDisplayObject(doUpperXBeam);
+   }
 
    // Model Lower Cross Beam (Elevation)
    CComPtr<iPointDisplayObject> doLowerXBeam;
@@ -469,8 +472,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    lowerXBeamShape.Release();
    pSectProp->GetLowerXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
-   position.Release();
-   lowerXBeamShape->QueryInterface(&position);
+   CComQIPtr<IXYPosition> position(lowerXBeamShape);
    position->Offset(EndOffset*Z,0);
 
    lowerXBeamDrawStrategy.Release();
