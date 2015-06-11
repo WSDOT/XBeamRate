@@ -23,6 +23,7 @@
 // ExampleExtensionAgent.cpp : Implementation of CXBeamRateAgent
 
 #include "stdafx.h"
+#include "resource.h"
 #include "XBeamRateAgent.h"
 #include <XBeamRateCatCom.h>
 
@@ -32,6 +33,7 @@
 #include <IFace\DocumentType.h>
 #include <IFace\Bridge.h>
 #include <IFace\Selection.h>
+#include <IFace\EditByUI.h>
 
 #include <EAF\EAFDocument.h>
 
@@ -62,9 +64,6 @@
 //
 //#include <MFCTools\Prompts.h>
 
-#include <EAF\EAFResources.h>
-#define ID_VIEW_PIER EAF_FIRST_USER_COMMAND
-
 BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
 	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
    ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnViewPierUpdate)
@@ -92,14 +91,20 @@ void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
    {
       const CPierData2* pPier = pIBridgeDesc->GetPier(selPierIdx);
       if ( pPier == NULL || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
+      {
          pCmdUI->Enable(TRUE);
+      }
       else
+      {
          pCmdUI->Enable(FALSE);
+      }
    }
 }
 
 // IBridgePlanViewEventCallback
-void CMyCommandTarget::OnBackgroundContextMenu(CEAFMenu* pMenu) {}
+void CMyCommandTarget::OnBackgroundContextMenu(CEAFMenu* pMenu)
+{
+}
 
 void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
 {
@@ -235,36 +240,32 @@ void CXBeamRateAgent::RemoveMenus()
    pViewMenu->RemoveMenu(ID_VIEW_PIER,MF_BYCOMMAND,this);
 }
 
-//void CXBeamRateAgent::CreateToolBar()
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   GET_IFACE(IEAFToolbars,pToolBars);
-//   m_ToolBarID = pToolBars->CreateToolBar(_T("Extension Agent Toolbar"));
-//#if defined _EAF_USING_MFC_FEATURE_PACK
-//   CEAFToolBar* pToolBar = pToolBars->GetToolBarByID(m_ToolBarID);
-//#else
-//   CEAFToolBar* pToolBar = pToolBars->GetToolBar(m_ToolBarID);
-//#endif
-//   pToolBar->LoadToolBar(IDR_TOOLBAR,this);
-//
-//   //GET_IFACE(IEditByUI,pEditUI);
-//   //UINT stdID = pEditUI->GetStdToolBarID();
-//   //CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
-//   //UINT cmdID = ID_COMMAND1;
-//   //pStdToolBar->InsertButton(-1,cmdID,-1,_T("Extension Command"),this);
-//}
-//
-//void CXBeamRateAgent::RemoveToolBar()
-//{
-//   GET_IFACE(IEAFToolbars,pToolBars);
-//   pToolBars->DestroyToolBar(m_ToolBarID);
-//
-//   //GET_IFACE(IEditByUI,pEditUI);
-//   //UINT stdID = pEditUI->GetStdToolBarID();
-//   //CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
-//   //pStdToolBar->RemoveButtons(this);
-//}
-//
+void CXBeamRateAgent::CreateToolbar()
+{
+   // add a button to the standard PGSuper/PGSplice toolbar to view a pier
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   GET_IFACE(IEAFToolbars,pToolBars);
+   GET_IFACE(IEditByUI,pEditUI);
+   UINT stdID = pEditUI->GetStdToolBarID();
+   CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
+
+   // Put the button to the right of PGSuper/PGSplice view girder button
+   // The IDs from PGSuper/PGSplice aren't available to plugins so we'll just
+   // hard code the command ID.
+   int idx = pStdToolBar->CommandToIndex(36896/*ID_VIEW_GIRDEREDITOR*/,NULL); 
+   pStdToolBar->InsertButton(idx+1,ID_VIEW_PIER,IDB_VIEW_PIER,NULL,this);
+}
+
+void CXBeamRateAgent::RemoveToolbar()
+{
+   // Remove all the buttons we added to the standard toolbar
+   GET_IFACE(IEAFToolbars,pToolBars);
+   GET_IFACE(IEditByUI,pEditUI);
+   UINT stdID = pEditUI->GetStdToolBarID();
+   CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
+   pStdToolBar->RemoveButtons(this);
+}
+
 //void CXBeamRateAgent::RegisterReports()
 //{
 //   // Register our reports
@@ -470,14 +471,14 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithUI(BOOL bIntegrate)
    if ( bIntegrate )
    {
       CreateMenus();
-   //   CreateToolBar();
+      CreateToolbar();
       RegisterViews();
       RegisterUIExtensions();
    }
    else
    {
       RemoveMenus();
-   //   RemoveToolBar();
+      RemoveToolbar();
       UnregisterViews();
       UnregisterUIExtensions();
    }

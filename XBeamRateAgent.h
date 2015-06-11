@@ -266,6 +266,9 @@ private:
    void CreateMenus();
    void RemoveMenus();
 
+   void CreateToolbar();
+   void RemoveToolbar();
+
    void RegisterViews();
    void UnregisterViews();
    void CreatePierView();

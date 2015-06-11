@@ -1,7 +1,6 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
-#include <EAF\EAFResources.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -186,6 +185,7 @@ END
 //
 
 IDR_XBEAMRATE           BITMAP                  "res\\toolbar.bmp"
+IDB_VIEW_PIER           BITMAP                  "res\\ViewPier.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -301,6 +301,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_EDIT_PROJECTNAME     "Edit the Project Name\nEdit the project name"
+    ID_VIEW_PIER            "View Pier\nView Pier"
 END
 
 STRINGTABLE 
