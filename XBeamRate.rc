@@ -158,6 +158,7 @@ IDR_XBEAMRATE           ICON                    "res\\XBeamRate.ico"
 IDR_REPORT              ICON                    "res\\ReportView.ico"
 IDR_GRAPHING            ICON                    "res\\GraphingView.ico"
 IDI_WSDOT               ICON                    "res\\Wsdot.ico"
+IDI_PIERVIEW               ICON                    "res\\PierView.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -264,7 +265,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PROJNAME            "XBeam Rate"
-    IDR_XBEAMRATE           "Main Window\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
+    IDR_XBEAMRATE           "Pier View\nXBeam Rate\nXBeam Rate\nXBeam Rate Files (*.xbr)\n.xbr\nXBeamRate.Document\nXBeam Rate Document"
 END
 
 STRINGTABLE 
@@ -301,6 +302,10 @@ END
 STRINGTABLE 
 BEGIN
     ID_EDIT_PROJECTNAME     "Edit the Project Name\nEdit the project name"
+END
+
+STRINGTABLE 
+BEGIN
     ID_VIEW_PIER            "View Pier\nView Pier"
 END
 

@@ -114,13 +114,14 @@ BOOL CXBeamRateDoc::Init()
    //CEAFCustomReports customs = pPGSuper->GetCustomReports();
    //SetCustomReports(customs);
 
-   //// Put our icon on the main frame window
-   //CEAFMainFrame* pFrame = EAFGetMainFrame();
-   //m_hMainFrameBigIcon = pFrame->GetIcon(TRUE);
-   //m_hMainFrameSmallIcon = pFrame->GetIcon(FALSE);
-   //HICON hIcon = AfxGetApp()->LoadIcon(pTemplate->GetResourceID());
-   //pFrame->SetIcon(hIcon,TRUE);
-   //pFrame->SetIcon(hIcon,FALSE);
+   // Put our icon on the main frame window
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CEAFMainFrame* pFrame = EAFGetMainFrame();
+   m_hMainFrameBigIcon = pFrame->GetIcon(TRUE);
+   m_hMainFrameSmallIcon = pFrame->GetIcon(FALSE);
+   HICON hIcon = AfxGetApp()->LoadIcon(pTemplate->GetResourceID());
+   pFrame->SetIcon(hIcon,TRUE);
+   pFrame->SetIcon(hIcon,FALSE);
 
    return TRUE;
 }
@@ -240,6 +241,16 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	// (SDI documents will reuse this document)
 
 	return TRUE;
+}
+
+void CXBeamRateDoc::OnCloseDocument()
+{
+   // Put the main frame icon back the way it was
+   CEAFMainFrame* pFrame = EAFGetMainFrame();
+   pFrame->SetIcon(m_hMainFrameBigIcon,TRUE);
+   pFrame->SetIcon(m_hMainFrameSmallIcon,FALSE);
+
+   CEAFBrokerDocument::OnCloseDocument();
 }
 
 BOOL CXBeamRateDoc::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)

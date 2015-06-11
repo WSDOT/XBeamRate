@@ -44,5 +44,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   //virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
+   virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
 };

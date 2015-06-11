@@ -53,39 +53,29 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateChildFrame message handlers
-//void CXBeamRateChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
-//{
-//	if (bAddToTitle && (GetStyle() & FWS_ADDTOTITLE) == 0)
-//   {
-//      // By turning off the default MFC-defined FWS_ADDTOTITLE style,
-//      // the framework will use first string in the document template
-//      // STRINGTABLE resource instead of the document name. We want
-//      // to append a view count to the end of the window title.  
-//		TCHAR szText[256+_MAX_PATH];
-//      CString window_text;
-//      CString window_title;
-//      GetWindowText(window_text);
-//
-//      // Look for the last :
-//      // The text to the left of the last : is the window title
-//      int idx = window_text.ReverseFind(':');
-//      if (idx != -1) // -1 meams : was not found
-//         window_title = window_text.Left(idx);
-//      else
-//         window_title = window_text;
-//
-//		lstrcpy(szText,window_title);
-////		if (m_nWindow > 0)
-////			wsprintf(szText + lstrlen(szText), _T(":%d"), m_nWindow);
-//
-//		// set title if changed, but don't remove completely
-//		AfxSetWindowText(m_hWnd, szText);
-//   }
-//   else
-//   {
-//      CMDIChildWnd::OnUpdateFrameTitle(bAddToTitle);
-//   }
-//}
+void CXBeamRateChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
+{
+	if (bAddToTitle)
+   {
+      PierIndexType pierIdx = GetPierIndex();
+      CString strTitle;
+      if ( pierIdx == INVALID_INDEX )
+      {
+         strTitle = _T("Pier View");
+      }
+      else
+      {
+         strTitle.Format(_T("Pier View - Pier %d"),LABEL_PIER(pierIdx));
+      }
+
+      // set our title
+      SetWindowText(strTitle);
+   }
+   else
+   {
+      CEAFChildFrame::OnUpdateFrameTitle(bAddToTitle);
+   }
+}
 
 PierIDType CXBeamRateChildFrame::GetPierID()
 {
@@ -127,6 +117,10 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
    if ( !CEAFChildFrame::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, pContext) )
       return FALSE;
 
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   HICON hIcon = AfxGetApp()->LoadIcon(IDI_PIERVIEW);
+   SetIcon(hIcon,TRUE);
+
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    if ( pBroker != NULL )
@@ -165,8 +159,6 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
       {
          pcbPiers->SetCurSel(0);
       }
-     
-
    }
 
    return TRUE;
@@ -202,4 +194,6 @@ void CXBeamRateChildFrame::OnPierChanged()
    {
       pView->OnInitialUpdate();
    }
+
+   OnUpdateFrameTitle(TRUE);
 }

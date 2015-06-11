@@ -45,6 +45,7 @@ public:
 	//{{AFX_VIRTUAL(CXBeamRateDoc)
 	public:
 	virtual BOOL OnNewDocument();
+   virtual void OnCloseDocument();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	//}}AFX_VIRTUAL	//}}AFX_VIRTUAL
 
@@ -76,6 +77,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
+   HICON m_hMainFrameBigIcon;
+   HICON m_hMainFrameSmallIcon;
 
    friend CXBeamRateDocProxyAgent;
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;

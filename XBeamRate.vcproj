@@ -1141,6 +1141,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\res\PierView.ico"
+				>
+			</File>
+			<File
 				RelativePath=".\res\ReportView.ico"
 				>
 			</File>
