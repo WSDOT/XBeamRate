@@ -1496,6 +1496,15 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 elevation = pRoadway->GetElevation(pierStation,0);
    pierData.SetDeckElevation(elevation);
 
+   Float64 leftCLO  = pBridge->GetLeftCurbOffset(pierIdx);
+   Float64 rightCLO = pBridge->GetRightCurbOffset(pierIdx);
+   pierData.SetCurbLineDatum(pgsTypes::omtAlignment);
+   pierData.SetCurbLineOffset(leftCLO,rightCLO);
+
+   Float64 sLeft  = pRoadway->GetSlope(pierStation,leftCLO);
+   Float64 sRight = pRoadway->GetSlope(pierStation,rightCLO);
+   pierData.SetCrownSlope(sLeft,sRight);
+
    // Skew angle
    CComPtr<IAngle> objSkew;
    pBridge->GetPierSkew(pPier->GetIndex(),&objSkew);
