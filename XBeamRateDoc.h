@@ -45,7 +45,6 @@ public:
 	//{{AFX_VIRTUAL(CXBeamRateDoc)
 	public:
 	virtual BOOL OnNewDocument();
-   virtual void OnCloseDocument();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	//}}AFX_VIRTUAL	//}}AFX_VIRTUAL
 
@@ -65,6 +64,7 @@ public:
 
 protected:
    virtual CATID GetAgentCategoryID();
+   virtual HINSTANCE GetResourceInstance();
    virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
    virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPrompt);
@@ -76,9 +76,6 @@ protected:
    afx_msg void OnAbout();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
-
-   HICON m_hMainFrameBigIcon;
-   HICON m_hMainFrameSmallIcon;
 
    friend CXBeamRateDocProxyAgent;
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;
