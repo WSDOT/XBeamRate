@@ -1484,6 +1484,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    }
 
    PierIndexType pierIdx = pPier->GetIndex();
+   pierData.SetID(pPier->GetID());
 
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    Float64 alignment_offset = pIBridgeDesc->GetBridgeDescription()->GetAlignmentOffset();
