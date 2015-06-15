@@ -80,8 +80,8 @@ BOOL CXBRGraphController::OnInitDialog()
    }
    else
    {
-      int idx = pcbPiers->AddString(_T("Pier 2")); // put a dummy pier in the combo box
-      pcbPiers->SetItemData(idx,(DWORD_PTR)1);
+      int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
+      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
       // so when we get the pier index there is something to return
       pcbPiers->ShowWindow(SW_HIDE);
    }
