@@ -38,6 +38,10 @@ public:
    ActionType GetActionType();
    PierIDType GetPierID();
 
+   void EnableControls(BOOL bEnable);
+
+   virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+
 protected:
 
    virtual BOOL OnInitDialog();
@@ -47,6 +51,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+   void FillPierList();
    void FillLoadingList();
 
 #ifdef _DEBUG

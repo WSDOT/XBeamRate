@@ -34,10 +34,14 @@
 #include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
+#include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <PgsExt\PierData2.h>
 
 #include <Colors.h>
 #define GRAPH_BACKGROUND WHITE //RGB(220,255,220)
@@ -117,6 +121,35 @@ void CXBRGraphBuilder::OnLbnSelChanged()
 void CXBRGraphBuilder::OnPierChanged()
 {
    OnGraphTypeChanged();
+}
+
+bool CXBRGraphBuilder::UpdateNow()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   CComPtr<IXBeamRateAgent> pAgent;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   if ( SUCCEEDED(hr) )
+   {
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      PierIndexType nPiers = pIBridgeDesc->GetPierCount();
+      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      {
+         const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
+         if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
+         {
+            m_GraphController.EnableControls(TRUE);
+            return true;
+         }
+      }
+      m_GraphController.EnableControls(FALSE);
+      m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
+      return false;
+   }
+   else
+   {
+      return true;
+   }
 }
 
 void CXBRGraphBuilder::UpdateGraphDefinitions()

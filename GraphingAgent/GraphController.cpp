@@ -46,46 +46,11 @@ END_MESSAGE_MAP()
 
 BOOL CXBRGraphController::OnInitDialog()
 {
+   FillPierList();
    FillLoadingList();
-
+   
    CEAFGraphControlWindow::OnInitDialog();
    CheckRadioButton(IDC_MOMENT,IDC_SHEAR,IDC_MOMENT);
-
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   CComboBox* pcbPiers = (CComboBox*)GetDlgItem(IDC_PIERS);
-   CComPtr<IXBeamRateAgent> pXBR;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-   if ( SUCCEEDED(hr) )
-   {
-      // We are extending PGSuper/PGSplice
-      // Fill the combo box with piers
-      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
-      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
-      PierIndexType nPiers = pBridgeDesc->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ ) // skip abutments (pierIdx = 0 & nPiers-1)
-      {
-         // Can only load rate piers with a physical description
-         const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
-         if ( pPierData->GetPierModelType() == pgsTypes::pmtPhysical )
-         {
-            PierIDType pierID = pPierData->GetID();
-            CString strPier;
-            strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
-            int idx = pcbPiers->AddString(strPier);
-            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
-         }
-      }
-   }
-   else
-   {
-      int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
-      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
-      // so when we get the pier index there is something to return
-      pcbPiers->ShowWindow(SW_HIDE);
-   }
-   pcbPiers->SetCurSel(0);
 
    return TRUE;
 }
@@ -145,6 +110,65 @@ PierIDType CXBRGraphController::GetPierID()
    int curSel = pcbPier->GetCurSel();
    PierIDType pierID = (PierIDType)(pcbPier->GetItemData(curSel));
    return pierID;
+}
+
+BOOL CALLBACK EnableChildWindow(HWND hwnd,LPARAM lParam)
+{
+   ::EnableWindow(hwnd,(int)lParam);
+   return TRUE;
+}
+
+void CXBRGraphController::EnableControls(BOOL bEnable)
+{
+   EnumChildWindows(GetSafeHwnd(),EnableChildWindow,bEnable);
+}
+
+void CXBRGraphController::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+{
+   FillPierList();
+}
+
+void CXBRGraphController::FillPierList()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   CComboBox* pcbPiers = (CComboBox*)GetDlgItem(IDC_PIERS);
+   int curSel = pcbPiers->GetCurSel();
+   pcbPiers->ResetContent();
+
+   CComPtr<IXBeamRateAgent> pXBR;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
+   if ( SUCCEEDED(hr) )
+   {
+      // We are extending PGSuper/PGSplice
+      // Fill the combo box with piers
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      PierIndexType nPiers = pBridgeDesc->GetPierCount();
+      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ ) // skip abutments (pierIdx = 0 & nPiers-1)
+      {
+         // Can only load rate piers with a physical description
+         const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
+         if ( pPierData->GetPierModelType() == pgsTypes::pmtPhysical )
+         {
+            PierIDType pierID = pPierData->GetID();
+            CString strPier;
+            strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+            int idx = pcbPiers->AddString(strPier);
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
+         }
+      }
+   }
+   else
+   {
+      int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
+      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
+      // so when we get the pier index there is something to return
+      pcbPiers->ShowWindow(SW_HIDE);
+   }
+
+   pcbPiers->SetCurSel(curSel == CB_ERR ? 0 : curSel);
 }
 
 void CXBRGraphController::FillLoadingList()
