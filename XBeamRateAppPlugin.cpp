@@ -7,6 +7,8 @@
 
 #include "XBeamRatePluginApp.h"
 
+#include "XBeamRateDocTemplate.h"
+
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
 #include "XBeamRateChildFrame.h"
@@ -67,8 +69,8 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
 
    std::vector<CEAFDocTemplate*> templates;
 
-   CEAFDocTemplate* pDocTemplate;
-	pDocTemplate = new CEAFDocTemplate(
+   CXBeamRateDocTemplate* pDocTemplate;
+	pDocTemplate = new CXBeamRateDocTemplate(
       IDR_XBEAMRATE,
       NULL,
 		RUNTIME_CLASS(CXBeamRateDoc),
@@ -77,7 +79,6 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
       NULL,1);
 
    pDocTemplate->SetPlugin(this);
-   pDocTemplate->CreateDefaultItem(AfxGetApp()->LoadStandardIcon(IDI_WINLOGO));
 
    templates.push_back(pDocTemplate);
    return templates;

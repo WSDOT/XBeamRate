@@ -863,6 +863,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateDocTemplate.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateGraphView.cpp"
 				>
 			</File>
@@ -1101,6 +1105,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateDocProxyAgent.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateDocTemplate.h"
 				>
 			</File>
 			<File
