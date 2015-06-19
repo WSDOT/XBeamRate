@@ -63,3 +63,4 @@ using namespace ATL;
 #include <WBFLGeometry.h>
 #include <Units\Units.h>
 #include <LRFD\LRFD.h>
+#include <WBFLAll.h>

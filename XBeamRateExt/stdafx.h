@@ -16,6 +16,7 @@
 #include <AgentTools.h>
 #include <grid\gxall.h>
 
+#include <WBFLAll.h>
 
 
 // TODO: reference additional headers your program requires here

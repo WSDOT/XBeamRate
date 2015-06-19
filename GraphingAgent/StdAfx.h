@@ -61,3 +61,4 @@ using namespace ATL;
 #include <AgentTools.h>
 #include <GraphManager\GraphManager.h>
 
+#include <WBFLAll.h>

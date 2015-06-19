@@ -24,3 +24,5 @@ extern CComModule _Module;
 
 #include <EAF\EAFUtilities.h>
 #include <System\Transaction.h>
+
+#include <WBFLAll.h>

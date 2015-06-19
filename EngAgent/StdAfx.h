@@ -52,6 +52,7 @@
 
 using namespace ATL;
 
+#include <WBFLAll.h>
 #include <XBeamRateTypes.h>
 
 #include <WBFLDebug.h>

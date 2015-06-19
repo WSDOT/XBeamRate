@@ -68,3 +68,4 @@ using namespace ATL;
 #include <MFCTools\MFCTools.h>
 
 #include <grid\gxall.h>
+#include <WBFLAll.h>
