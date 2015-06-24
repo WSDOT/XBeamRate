@@ -527,19 +527,35 @@ IndexType xbrPierData::GetBearingLineCount() const
 
 void xbrPierData::SetBearingLineData(IndexType brgLineIdx,const xbrBearingLineData& bearingLineData)
 {
-   ATLASSERT(brgLineIdx < m_vBearingLines.size());
+   ATLASSERT(brgLineIdx < 2);
+   if ( m_vBearingLines.size() <= brgLineIdx )
+   {
+      xbrBearingLineData brgLineData;
+      m_vBearingLines.push_back(brgLineData);
+   }
+
    m_vBearingLines[brgLineIdx] = bearingLineData;
 }
 
 xbrBearingLineData& xbrPierData::GetBearingLineData(IndexType brgLineIdx)
 {
-   ATLASSERT(brgLineIdx < m_vBearingLines.size());
+   ATLASSERT(brgLineIdx < 2);
+   if ( m_vBearingLines.size() <= brgLineIdx )
+   {
+      xbrBearingLineData brgLineData;
+      m_vBearingLines.push_back(brgLineData);
+   }
    return m_vBearingLines[brgLineIdx];
 }
 
 const xbrBearingLineData& xbrPierData::GetBearingLineData(IndexType brgLineIdx) const
 {
-   ATLASSERT(brgLineIdx < m_vBearingLines.size());
+   ATLASSERT(brgLineIdx < 2);
+   if ( m_vBearingLines.size() <= brgLineIdx )
+   {
+      xbrBearingLineData brgLineData;
+      m_vBearingLines.push_back(brgLineData);
+   }
    return m_vBearingLines[brgLineIdx];
 }
    

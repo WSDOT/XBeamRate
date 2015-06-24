@@ -199,9 +199,9 @@ void CPierLayoutPage::FillHeightMeasureComboBox()
 {
    CComboBox* pcbHeightMeasure = (CComboBox*)GetDlgItem(IDC_HEIGHT_MEASURE);
    pcbHeightMeasure->ResetContent();
-   int idx = pcbHeightMeasure->AddString(_T("Column Height (H)"));
+   int idx = pcbHeightMeasure->AddString(_T("Height (H)"));
    pcbHeightMeasure->SetItemData(idx,(DWORD_PTR)CColumnData::chtHeight);
-   idx = pcbHeightMeasure->AddString(_T("Bottom Elevation"));
+   idx = pcbHeightMeasure->AddString(_T("Btm Elev"));
    pcbHeightMeasure->SetItemData(idx,(DWORD_PTR)CColumnData::chtBottomElevation);
 }
 

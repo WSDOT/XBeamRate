@@ -98,7 +98,9 @@
 #define IDC_LOWER_XBEAM_SYMMETRY2       279
 #define IDC_FULL_DEPTH_SYMMETRY         279
 #define IDD_CONCRETE_DETAILS            280
+#define IDC_COLUMN_LAYOUT_DETAILS       280
 #define IDC_CONCRETE_TYPE               281
+#define IDC_BUTTON1                     281
 #define IDC_FC_LABEL                    282
 #define IDC_FC                          283
 #define IDC_FC_UNIT                     284
@@ -187,7 +189,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         279
+#define _APS_NEXT_CONTROL_VALUE         282
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

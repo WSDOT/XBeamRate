@@ -138,20 +138,18 @@ void CBearingsPage::OnRemoveAhead()
 
 void CBearingsPage::OnCopyAhead()
 {
-   //std::vector<txnBearingData> brgData;
-   //m_Grid[0].GetBearingData(brgData);
-   //m_Grid[1].SetBearingData(brgData);
-
-#pragma Reminder("Need to copy the transverse location also")
+   xbrBearingLineData brgLineData;
+   std::vector<txnDeadLoadReaction> deadLoadReactions;
+   m_Grid[0].GetBearingData(brgLineData,deadLoadReactions);
+   m_Grid[1].SetBearingData(brgLineData,deadLoadReactions);
 }
 
 void CBearingsPage::OnCopyBack()
 {
-   //std::vector<txnBearingData> brgData;
-   //m_Grid[1].GetBearingData(brgData);
-   //m_Grid[0].SetBearingData(brgData);
-
-#pragma Reminder("Need to copy the transverse location also")
+   xbrBearingLineData brgLineData;
+   std::vector<txnDeadLoadReaction> deadLoadReactions;
+   m_Grid[1].GetBearingData(brgLineData,deadLoadReactions);
+   m_Grid[0].SetBearingData(brgLineData,deadLoadReactions);
 }
 
 void CBearingsPage::OnBearingLineCountChanged()

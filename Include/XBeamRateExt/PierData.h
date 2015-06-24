@@ -194,5 +194,5 @@ protected:
    xbrStirrupData m_FullDepthStirrups;
 
    // Bearings
-   std::vector<xbrBearingLineData> m_vBearingLines;
+   mutable std::vector<xbrBearingLineData> m_vBearingLines;
 };
