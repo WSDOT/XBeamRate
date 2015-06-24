@@ -108,6 +108,7 @@ public:
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape);
 
    virtual Float64 GetElevation(PierIDType pierID,Float64 distFromLeftEdge);
+   virtual Float64 GetPierCoordinate(PierIDType pierID,Float64 distFromLeftEdge);
 
 // IXBRSectionProperties
 public:

@@ -43,7 +43,9 @@
 #define REBAR_DISPLAY_LIST_ID          5
 #define STIRRUP_DISPLAY_LIST_ID        6
 
-const Float64 EndOffset = ::ConvertToSysUnits(6,unitMeasure::Feet);
+// The End/Section view of the pier is offset from the Elevation
+// view by this amount.
+const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -263,6 +265,7 @@ void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
    CDisplayView::OnUpdate(pSender,lHint,pHint);
    UpdateDisplayObjects();
    ScaleToFit();
+   Invalidate();
 }
 
 void CXBeamRateView::UpdateDisplayObjects()
@@ -370,7 +373,8 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    }
 
    // Model Upper Cross Beam (Elevation)
-   Float64 Z = pProject->GetXBeamLength(pierID);
+   Float64 Lxb = pProject->GetXBeamLength(pierID);
+   Float64 Z = pPier->GetPierCoordinate(pierID,Lxb);
 
    CComPtr<IPoint2d> point;
    point.CoCreateInstance(CLSID_Point2d);
@@ -609,7 +613,8 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    PierIDType pierID = GetPierID();
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   Float64 X = pProject->GetXBeamLength(pierID);
+   Float64 Lxb = pProject->GetXBeamLength(pierID);
+   Float64 X = pPier->GetPierCoordinate(pierID,Lxb);
 
    GET_IFACE2(pBroker,IXBRRebar,pRebar);
    IndexType nRebarRows = pRebar->GetRebarRowCount(pierID);
@@ -1014,7 +1019,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    BuildDimensionLine(displayList,pntRight,pntLeft);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   Float64 Z = pProject->GetXBeamLength(pierID);
+   Float64 Lxb = pProject->GetXBeamLength(pierID);
+   Float64 Z = pPier->GetPierCoordinate(pierID,Lxb);
 
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
    if ( pProject->GetPierType(pierID) != xbrTypes::pctExpansion )
