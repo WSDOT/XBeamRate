@@ -43,6 +43,7 @@
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 
+#include "PGSComponentInfo.h"
 
 #include <WBFLCore_i.c>
 #include <WBFLUnitServer_i.c>
@@ -167,6 +168,10 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 
 void RegisterComponents(bool bRegister)
 {
+   // Component information objects
+   sysComCatMgr::RegWithCategory(CLSID_PGSuperComponentInfo,CATID_PGSuperComponentInfo,bRegister);
+   sysComCatMgr::RegWithCategory(CLSID_PGSpliceComponentInfo,CATID_PGSpliceComponentInfo,bRegister);
+
    // These components are for the "stand alone" XBeam Rate application
    sysComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin,    CATID_BridgeLinkAppPlugin, bRegister);
    sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,bRegister);

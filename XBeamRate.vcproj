@@ -619,6 +619,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PGSpliceComponentInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSuperComponentInfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ReinforcementPageParent.cpp"
 				>
 			</File>
@@ -1072,6 +1080,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PGSpliceComponentInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSuperComponentInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ReinforcementPageParent.h"
 				>
 			</File>
@@ -1146,6 +1162,14 @@
 			</File>
 			<File
 				RelativePath=".\res\GraphingView.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSpliceComponentInfo.rgs"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSuperComponentInfo.rgs"
 				>
 			</File>
 			<File

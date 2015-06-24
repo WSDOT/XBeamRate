@@ -37,6 +37,8 @@
 #define ID_VIEW_GRAPHS                  32775
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
 #define ID_VIEW_PIER                    33030
+#define IDR_PGSUPERCOMPONENTINFO       300
+#define IDR_PGSPLICECOMPONENTINFO      301
 
 // Next default values for new objects
 // 

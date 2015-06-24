@@ -46,4 +46,22 @@ library XBeamRateLibrary
 	{
 		[default] interface IAgentEx;
 	};
+
+
+   [
+      uuid(DA6D93DF-1907-4e12-A649-30E2078FFC8A)
+   ]
+   coclass PGSuperComponentInfo
+   {
+		[default] interface IUnknown;
+   };
+
+   [
+      uuid(D9B7C5C6-0233-48cb-89F5-C85AD9A82E2D)
+   ]
+   coclass PGSpliceComponentInfo
+   {
+		[default] interface IUnknown;
+   };
+
 };
