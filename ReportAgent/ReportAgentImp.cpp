@@ -138,6 +138,9 @@ void CReportAgentImp::InitReportBuilders()
 
 
    CReportBuilder* pReportBuilder = new CReportBuilder(_T("XBeam Rate Test Report"));
+#if defined _DEBUG || defined _BETA_VERSION
+   pReportBuilder->IncludeTimingChapter();
+#endif
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
    pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CTestChapterBuilder()));

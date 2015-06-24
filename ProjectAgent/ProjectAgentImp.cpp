@@ -1504,7 +1504,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
    Float64 sLeft  = pRoadway->GetSlope(pierStation,leftCLO);
    Float64 sRight = pRoadway->GetSlope(pierStation,rightCLO);
-   pierData.SetCrownSlope(sLeft,sRight);
+   pierData.SetCrownSlope(-sLeft,sRight);
 
    // Skew angle
    CComPtr<IAngle> objSkew;

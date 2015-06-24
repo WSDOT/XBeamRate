@@ -210,13 +210,13 @@ CString CLongitudinalRebarGrid::GetDatumOptions()
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
 
    CString strBeamFaceChoiceList;
-   if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+   if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral )
    {
-      strBeamFaceChoiceList = _T("Top\nBottom\n");
+      strBeamFaceChoiceList = _T("Top\nTop Lower XBeam\nBottom\n");
    }
    else
    {
-      strBeamFaceChoiceList = _T("Top\nTop Lower XBeam\nBottom\n");
+      strBeamFaceChoiceList = _T("Top\nBottom\n");
    }
    return strBeamFaceChoiceList;
 }
@@ -230,6 +230,12 @@ CString CLongitudinalRebarGrid::GetDatum(xbrTypes::LongitudinalRebarDatumType da
 
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
    if ( pParent->GetSuperstructureConnectionType() != xbrTypes::pctIntegral && datum == xbrTypes::TopLowerXBeam )
+   {
+      // For non-integral superstructure connections, map TopLowerXBeam into Top.
+      return _T("Top");
+   }
+
+   if ( datum == xbrTypes::Top )
    {
       return _T("Top");
    }
@@ -274,7 +280,7 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
    matRebar::Type type = pParent->GetRebarType();
    matRebar::Grade grade = pParent->GetRebarGrade();
    CString strBarSizeChoiceList;
-   lrfdRebarIter rebarIter(grade,type);
+   lrfdRebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       const matRebar* pRebar = rebarIter.GetCurrentRebar();
@@ -393,7 +399,7 @@ matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
    matRebar::Type type;
    matRebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(grade,type);
+   lrfdRebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )
