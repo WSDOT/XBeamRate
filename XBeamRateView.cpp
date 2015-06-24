@@ -391,13 +391,6 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
       CComPtr<IShape> upperXBeamShape;
       pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
 
-      // Capture the X coordinate of the left edge
-      // We'll need this for other display objects
-      CComQIPtr<IXYPosition> position(upperXBeamShape);
-      CComPtr<IPoint2d> pntTopLeft;
-      position->get_LocatorPoint(lpTopLeft,&pntTopLeft);
-      pntTopLeft->get_X(&m_LeftEdgeOffset);
-
       CComPtr<iShapeDrawStrategy> upperXBeamDrawStrategy;
       upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
       upperXBeamDrawStrategy->SetShape(upperXBeamShape);
@@ -423,8 +416,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
       upperXBeamShape.Release();
       pSectProp->GetUpperXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
-      position.Release();
-      upperXBeamShape.QueryInterface(&position);
+      CComQIPtr<IXYPosition> position(upperXBeamShape);
       position->Offset(EndOffset+Z,0);
 
       upperXBeamDrawStrategy.Release();
@@ -711,7 +703,8 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
             CComPtr<IPoint2d> pntTop;
             pntTop.CoCreateInstance(CLSID_Point2d);
-            pntTop->Move(distFromLeftEdge+m_LeftEdgeOffset,Ytop);
+            Float64 X = pPier->GetPierCoordinate(pierID,distFromLeftEdge);
+            pntTop->Move(X,Ytop);
 
             CComPtr<iPointDisplayObject> doTopPnt;
             doTopPnt.CoCreateInstance(CLSID_PointDisplayObject);
@@ -730,7 +723,7 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
             CComPtr<IPoint2d> pntBottom;
             pntBottom.CoCreateInstance(CLSID_Point2d);
-            pntBottom->Move(distFromLeftEdge+m_LeftEdgeOffset,Ybot);
+            pntBottom->Move(X,Ybot);
 
             CComPtr<iPointDisplayObject> doBottomPnt;
             doBottomPnt.CoCreateInstance(CLSID_PointDisplayObject);

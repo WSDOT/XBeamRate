@@ -70,8 +70,6 @@ protected:
 
    IDType m_DisplayObjectID; // used to generate display object IDs
 
-   Float64 m_LeftEdgeOffset;
-
    bool m_bIsIdealized;
 
 // Generated message map functions
