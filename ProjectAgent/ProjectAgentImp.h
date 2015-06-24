@@ -181,10 +181,10 @@ public:
    virtual void GetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
 
-   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType);
+   virtual IndexType GetLiveLoadReactionCount(PierIDType id,pgsTypes::LoadRatingType ratingType);
    virtual void SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType);
-   virtual LPCTSTR GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
+   virtual LPCTSTR GetLiveLoadName(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
    virtual Float64 GetLiveLoadReaction(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
 
    virtual void SetRebarMaterial(PierIDType id,matRebar::Type type,matRebar::Grade grade);
@@ -232,8 +232,8 @@ public:
    virtual void SetDWLoadFactor(Float64 dw);
    virtual Float64 GetDWLoadFactor();
 
-   virtual void SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll);
-   virtual Float64 GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType);
+   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll);
+   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
 
 // IXBRRatingSpecification
 public:
@@ -338,17 +338,15 @@ private:
    // Load Factors
    Float64 m_gDC;
    Float64 m_gDW;
-   Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
+   std::map<PierIDType,Float64> m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
    // Bearing Reactions
    typedef struct
    {
       Float64 DC, DW;
    } BearingReactions;
-   std::vector<std::vector<BearingReactions>> m_vvBearingReactions;
-   // outer vector is for number of bearing lines
-   // inner vector is for number of bearings on a bearing line
-   // m_vvBearingReactions[brgLineIdx][brgIdx].DC/DW
+   std::map<PierIDType,std::vector<BearingReactions>> m_BearingReactions[2];
+   std::vector<BearingReactions>& GetPrivateBearingReactions(PierIDType id,IndexType brgLineIdx);
 
    // Live Load Reactions
    class LiveLoadReaction
@@ -359,7 +357,7 @@ private:
       LiveLoadReaction() {;}
       LiveLoadReaction(LPCTSTR name,Float64 llim) : Name(name), LLIM(llim) {;}
    };
-   std::vector<LiveLoadReaction> m_vLiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
+   std::map<PierIDType,std::vector<LiveLoadReaction>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
 
    // Events
    int m_EventHoldCount;

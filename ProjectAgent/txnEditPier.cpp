@@ -73,7 +73,7 @@ void txnEditPier::Execute(int i)
    for ( int j = 0; j < 6; j++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)j;
-      pProject->SetLiveLoadFactor(ratingType,m_PierData[i].m_gLL[ratingType]);
+      pProject->SetLiveLoadFactor(pierID,ratingType,m_PierData[i].m_gLL[ratingType]);
    }
 
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory,m_PierData[i].m_DesignLiveLoad.m_LLIM);

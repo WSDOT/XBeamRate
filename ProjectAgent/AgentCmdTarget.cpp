@@ -70,7 +70,7 @@ void CAgentCmdTarget::OnEditPier()
    for ( int i = 0; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
-      oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(ratingType);
+      oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(id,ratingType);
    }
 
    oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrDesign_Inventory);

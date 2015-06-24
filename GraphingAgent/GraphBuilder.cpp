@@ -67,13 +67,11 @@ END_MESSAGE_MAP()
 CXBRGraphBuilder::CXBRGraphBuilder()
 {
    SetName(_T("Analysis Results"));
-   UpdateGraphDefinitions();
 }
 
 CXBRGraphBuilder::CXBRGraphBuilder(const CXBRGraphBuilder& other) :
 CEAFGraphBuilderBase(other)
 {
-   UpdateGraphDefinitions();
 }
 
 CEAFGraphControlWindow* CXBRGraphBuilder::GetGraphControlWindow()
@@ -102,6 +100,8 @@ BOOL CXBRGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
       TRACE0("Failed to create control bar\n");
       return FALSE; // failed to create
    }
+
+   UpdateGraphDefinitions();
 
    return TRUE;
 }
@@ -154,6 +154,8 @@ bool CXBRGraphBuilder::UpdateNow()
 
 void CXBRGraphBuilder::UpdateGraphDefinitions()
 {
+   PierIDType pierID = m_GraphController.GetPierID();
+
    IDType graphID = 0;
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),xbrTypes::pftLowerXBeam));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Upper Cross Beam Dead Load"),xbrTypes::pftUpperXBeam));
@@ -169,10 +171,10 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    for ( int i = 1; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
-      IndexType nVehicles = pProject->GetLiveLoadReactionCount(ratingType);
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
       for ( VehicleIndexType vehIdx = 0; vehIdx < nVehicles; vehIdx++ )
       {
-         LPCTSTR strName = pProject->GetLiveLoadName(ratingType,vehIdx);
+         LPCTSTR strName = pProject->GetLiveLoadName(pierID,ratingType,vehIdx);
          m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,strName,ratingType,vehIdx));
       }
    }
@@ -190,8 +192,9 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
 
-
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Capacity")));
+
+   m_GraphController.FillLoadingList();
 }
 
 void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)

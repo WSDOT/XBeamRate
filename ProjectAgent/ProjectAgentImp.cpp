@@ -61,41 +61,43 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_gDC = 1.25;
    m_gDW = 1.50;
-   m_gLL[pgsTypes::lrDesign_Inventory] = 1.75;
-   m_gLL[pgsTypes::lrDesign_Operating] = 1.35;
-   m_gLL[pgsTypes::lrLegal_Routine]    = 1.80;
-   m_gLL[pgsTypes::lrLegal_Special]    = 1.60;
-   m_gLL[pgsTypes::lrPermit_Routine]   = 1.15;
-   m_gLL[pgsTypes::lrPermit_Special]   = 1.30;
+   m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = 1.75;
+   m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID] = 1.35;
+   m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]    = 1.80;
+   m_gLL[pgsTypes::lrLegal_Special][INVALID_ID]    = 1.60;
+   m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID]   = 1.15;
+   m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]   = 1.30;
 
-   m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
-   m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
-   m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
 
-   m_vLiveLoadReactions[pgsTypes::lrDesign_Operating] = m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory];
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID] = m_LiveLoadReactions[INVALID_ID][pgsTypes::lrDesign_Inventory];
 
-   m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(LiveLoadReaction(_T("Type 3"),0));
-   m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(LiveLoadReaction(_T("Type 3S2"),0));
-   m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(LiveLoadReaction(_T("Type 3-3"),0));
-   m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(LiveLoadReaction(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3S2"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3-3"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0));
 
-   m_vLiveLoadReactions[pgsTypes::lrLegal_Special].push_back(LiveLoadReaction(_T("Notional Rating Load (NRL)"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(LiveLoadReaction(_T("Notional Rating Load (NRL)"),0));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
-   m_vvBearingReactions.resize(nBearingLines);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
+      std::vector<BearingReactions> vBearingReactions;
       IndexType nBearings = pierData.GetBearingCount(brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          BearingReactions reactions;
          reactions.DC = 0;
          reactions.DW = 0;
-         m_vvBearingReactions[brgLineIdx].push_back(reactions);
+         vBearingReactions.push_back(reactions);
       }
+      m_BearingReactions[brgLineIdx].insert(std::make_pair(INVALID_ID,vBearingReactions));
    }
+
    // pier data for the stand alone case
    m_PierData.insert(std::make_pair(INVALID_ID,pierData));
 }
@@ -271,21 +273,20 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
          pStrSave->put_Property(_T("DC"),CComVariant(m_gDC));
          pStrSave->put_Property(_T("DW"),CComVariant(m_gDW));
-         pStrSave->put_Property(_T("LL_Design_Inventory"),CComVariant(m_gLL[pgsTypes::lrDesign_Inventory]));
-         pStrSave->put_Property(_T("LL_Design_Operating"),CComVariant(m_gLL[pgsTypes::lrDesign_Operating]));
-         pStrSave->put_Property(_T("LL_Legal_Routine"),CComVariant(m_gLL[pgsTypes::lrLegal_Routine]));
-         pStrSave->put_Property(_T("LL_Legal_Special"),CComVariant(m_gLL[pgsTypes::lrLegal_Special]));
-         pStrSave->put_Property(_T("LL_Permit_Routine"),CComVariant(m_gLL[pgsTypes::lrPermit_Routine]));
-         pStrSave->put_Property(_T("LL_Permit_Special"),CComVariant(m_gLL[pgsTypes::lrPermit_Special]));
+         pStrSave->put_Property(_T("LL_Design_Inventory"),CComVariant(m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_Design_Operating"),CComVariant(m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_Legal_Routine"),CComVariant(m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_Legal_Special"),CComVariant(m_gLL[pgsTypes::lrLegal_Special][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_Permit_Routine"),CComVariant(m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_Permit_Special"),CComVariant(m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]));
       pStrSave->EndUnit(); // LoadFactors
 
       pStrSave->BeginUnit(_T("Reactions"),1.0);
          pStrSave->BeginUnit(_T("DeadLoad"),1.0);
-         std::vector<std::vector<BearingReactions>>::iterator brgLineIter(m_vvBearingReactions.begin());
-         std::vector<std::vector<BearingReactions>>::iterator brgLineIterEnd(m_vvBearingReactions.end());
-         for ( ; brgLineIter != brgLineIterEnd; brgLineIter++ )
+         IndexType nBearingLines = m_PierData[INVALID_ID].GetBearingLineCount();
+         for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
          {
-            std::vector<BearingReactions>& vBearingReactions(*brgLineIter);
+            std::vector<BearingReactions>& vBearingReactions = m_BearingReactions[brgLineIdx][INVALID_ID];
             pStrSave->BeginUnit(_T("BearingLine"),1.0);
             BOOST_FOREACH(BearingReactions& brgReaction,vBearingReactions)
             {
@@ -300,7 +301,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          pStrSave->BeginUnit(_T("LiveLoad"),1.0);
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -310,7 +311,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->EndUnit(); // Design_Inventory
 
             pStrSave->BeginUnit(_T("Design_Operating"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrDesign_Operating])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -320,7 +321,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->EndUnit(); // Design_Operating
 
             pStrSave->BeginUnit(_T("Legal_Routine"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrLegal_Routine])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -330,7 +331,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->EndUnit(); // Legal_Routine
 
             pStrSave->BeginUnit(_T("Legal_Special"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrLegal_Special])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -340,7 +341,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->EndUnit(); // Legal_Special
 
             pStrSave->BeginUnit(_T("Permit_Routine"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrPermit_Routine])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -350,7 +351,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->EndUnit(); // Permit_Routine
 
             pStrSave->BeginUnit(_T("Permit_Special"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_vLiveLoadReactions[pgsTypes::lrPermit_Special])
+            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
@@ -480,22 +481,22 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             m_gDW = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Design_Inventory"),&var);
-            m_gLL[pgsTypes::lrDesign_Inventory] = var.dblVal;
+            m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Design_Operating"),&var);
-            m_gLL[pgsTypes::lrDesign_Operating] = var.dblVal;
+            m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Legal_Routine"),&var);
-            m_gLL[pgsTypes::lrLegal_Routine] = var.dblVal;
+            m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Legal_Special"),&var);
-            m_gLL[pgsTypes::lrLegal_Special] = var.dblVal;
+            m_gLL[pgsTypes::lrLegal_Special][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Permit_Routine"),&var);
-            m_gLL[pgsTypes::lrPermit_Routine] = var.dblVal;
+            m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_Permit_Special"),&var);
-            m_gLL[pgsTypes::lrPermit_Special] = var.dblVal;
+            m_gLL[pgsTypes::lrPermit_Special][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->EndUnit(); // LoadFactors
          }
@@ -505,7 +506,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             {
                {
                   hr = pStrLoad->BeginUnit(_T("DeadLoad"));
-                  m_vvBearingReactions.clear();
+                  m_BearingReactions[0].clear();
+                  m_BearingReactions[1].clear();
+                  IndexType brgLineIdx = 0;
                   while ( SUCCEEDED(pStrLoad->BeginUnit(_T("BearingLine"))) )
                   {
                      std::vector<BearingReactions> vBearingReactions;
@@ -524,7 +527,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
 
-                     m_vvBearingReactions.push_back(vBearingReactions);
+                     m_BearingReactions[brgLineIdx].insert(std::make_pair(INVALID_ID,vBearingReactions));
+                     brgLineIdx++;
                   }
                   hr = pStrLoad->EndUnit(); // BearingLine
                   hr = pStrLoad->EndUnit(); // DeadLoad
@@ -534,7 +538,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                   hr = pStrLoad->BeginUnit(_T("LiveLoad"));
                   {
                      hr = pStrLoad->BeginUnit(_T("Design_Inventory"));
-                     m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].clear();
+                     m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -546,13 +550,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrDesign_Inventory].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Design_Inventory
 
                      hr = pStrLoad->BeginUnit(_T("Design_Operating"));
-                     m_vLiveLoadReactions[pgsTypes::lrDesign_Operating].clear();
+                     m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -564,13 +568,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrDesign_Operating].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Design_Operating
 
                      hr = pStrLoad->BeginUnit(_T("Legal_Routine"));
-                     m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].clear();
+                     m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -582,13 +586,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrLegal_Routine].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Legal_Routine
 
                      hr = pStrLoad->BeginUnit(_T("Legal_Special"));
-                     m_vLiveLoadReactions[pgsTypes::lrLegal_Special].clear();
+                     m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -600,13 +604,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrLegal_Special].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Legal_Special
 
                      hr = pStrLoad->BeginUnit(_T("Permit_Routine"));
-                     m_vLiveLoadReactions[pgsTypes::lrPermit_Routine].clear();
+                     m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -618,13 +622,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrPermit_Routine].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Permit_Routine
 
                      hr = pStrLoad->BeginUnit(_T("Permit_Special"));
-                     m_vLiveLoadReactions[pgsTypes::lrPermit_Special].clear();
+                     m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
                         LiveLoadReaction llReaction;
@@ -636,7 +640,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
 
-                        m_vLiveLoadReactions[pgsTypes::lrPermit_Special].push_back(llReaction);
+                        m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
                      }
                      hr = pStrLoad->EndUnit(); // Permit_Special
@@ -673,6 +677,29 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    {
       ATLASSERT(false);
       THROW_LOAD(InvalidFileFormat,pStrLoad);
+   }
+
+   if ( !bIsStandAlone )
+   {
+      // since reactions are stored/loaded, need to resize the bearing reaction structure
+      // so that it is the correct size
+      m_BearingReactions[0].clear();
+      m_BearingReactions[1].clear();
+      std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
+      std::map<PierIDType,xbrPierData>::iterator end(m_PierData.end());
+      for ( ; iter != end; iter++ )
+      {
+         PierIDType pierID = iter->first;
+         xbrPierData& pierData(iter->second);
+         IndexType nBearingLines = pierData.GetBearingLineCount();
+         for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+         {
+            std::vector<BearingReactions> vBearingReactions;
+            xbrBearingLineData& brgLineData = pierData.GetBearingLineData(brgLineIdx);
+            vBearingReactions.resize(brgLineData.GetBearingCount());
+            m_BearingReactions[brgLineIdx].insert(std::make_pair(pierID,vBearingReactions));
+         }
+      }
    }
 
 #pragma Reminder("FINISH - Set units")
@@ -836,17 +863,22 @@ void CProjectAgentImp::SetPierData(const xbrPierData& pierData)
 
    // Resize the dead load reaction containers to match the number of bearings
    IndexType nBearingLines = pierData.GetBearingLineCount();
-   if ( m_vvBearingReactions.size() != nBearingLines )
-   {
-      m_vvBearingReactions.resize(nBearingLines);
-   }
-
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
-      IndexType nBearings = pierData.GetBearingCount(brgLineIdx);
-      if ( m_vvBearingReactions[brgLineIdx].size() != nBearings )
+      std::map<PierIDType,std::vector<BearingReactions>>::iterator foundReactions(m_BearingReactions[brgLineIdx].find(pierData.GetID()));
+      if ( foundReactions == m_BearingReactions[brgLineIdx].end() )
       {
-         m_vvBearingReactions[brgLineIdx].resize(nBearings);
+         ATLASSERT(pierData.GetID() != INVALID_ID);
+         std::vector<BearingReactions> vBearingReactions;
+         m_BearingReactions[brgLineIdx].insert(std::make_pair(pierData.GetID(),vBearingReactions));
+         foundReactions = m_BearingReactions[brgLineIdx].find(pierData.GetID());
+      }
+
+      std::vector<BearingReactions>& vBearingReactions = foundReactions->second;
+      IndexType nBearings = pierData.GetBearingCount(brgLineIdx);
+      if ( vBearingReactions.size() != nBearings )
+      {
+         vBearingReactions.resize(nBearings);
       }
    }
 
@@ -991,15 +1023,17 @@ void CProjectAgentImp::SetBearingSpacing(PierIDType id,IndexType brgLineIdx,Inde
 
 void CProjectAgentImp::SetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW)
 {
-   m_vvBearingReactions[brgLineIdx][brgIdx].DC = DC;
-   m_vvBearingReactions[brgLineIdx][brgIdx].DW = DW;
+   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(id,brgLineIdx);
+   vReactions[brgIdx].DC = DC;
+   vReactions[brgIdx].DW = DW;
    Fire_OnProjectChanged();
 }
 
 void CProjectAgentImp::GetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
 {
-   *pDC = m_vvBearingReactions[brgLineIdx][brgIdx].DC;
-   *pDW = m_vvBearingReactions[brgLineIdx][brgIdx].DW;
+   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(id,brgLineIdx);
+   *pDC = vReactions[brgIdx].DC;
+   *pDW = vReactions[brgIdx].DW;
 }
 
 void CProjectAgentImp::GetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
@@ -1013,14 +1047,14 @@ void CProjectAgentImp::SetReferenceBearing(PierIDType id,IndexType brgLineIdx,In
    Fire_OnProjectChanged();
 }
 
-IndexType CProjectAgentImp::GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType)
+IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType id,pgsTypes::LoadRatingType ratingType)
 {
-   return m_vLiveLoadReactions[ratingType].size();
+   return m_LiveLoadReactions[ratingType][id].size();
 }
 
 void CProjectAgentImp::SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
 {
-   m_vLiveLoadReactions[ratingType].clear();
+   m_LiveLoadReactions[ratingType][id].clear();
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(vLLIM.begin());
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iterEnd(vLLIM.end());
    for ( ; iter != iterEnd; iter++ )
@@ -1028,7 +1062,7 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingTy
       LiveLoadReaction ll;
       ll.Name = iter->first;
       ll.LLIM = iter->second;
-      m_vLiveLoadReactions[ratingType].push_back(ll);
+      m_LiveLoadReactions[ratingType][id].push_back(ll);
    }
 
    Fire_OnProjectChanged();
@@ -1037,21 +1071,21 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingTy
 std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType)
 {
    std::vector<std::pair<std::_tstring,Float64>> vReactions;
-   BOOST_FOREACH(LiveLoadReaction& ll,m_vLiveLoadReactions[ratingType])
+   BOOST_FOREACH(LiveLoadReaction& ll,m_LiveLoadReactions[ratingType][id])
    {
       vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
    }
    return vReactions;
 }
 
-LPCTSTR CProjectAgentImp::GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+LPCTSTR CProjectAgentImp::GetLiveLoadName(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_vLiveLoadReactions[ratingType][vehIdx].Name.c_str();
+   return m_LiveLoadReactions[ratingType][id][vehIdx].Name.c_str();
 }
 
 Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_vLiveLoadReactions[ratingType][vehIdx].LLIM;
+   return m_LiveLoadReactions[ratingType][id][vehIdx].LLIM;
 }
 
 void CProjectAgentImp::SetRebarMaterial(PierIDType id,matRebar::Type type,matRebar::Grade grade)
@@ -1277,15 +1311,15 @@ Float64 CProjectAgentImp::GetDWLoadFactor()
    return m_gDW;
 }
 
-void CProjectAgentImp::SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll)
+void CProjectAgentImp::SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll)
 {
-   m_gLL[ratingType] = ll;
+   m_gLL[ratingType][pierID] = ll;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType)
+Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   return m_gLL[ratingType];
+   return m_gLL[ratingType][pierID];
 }
 
 //////////////////////////////////////////////////////////
@@ -1455,6 +1489,24 @@ xbrPierData& CProjectAgentImp::GetPrivatePierData(PierIDType id)
    return m_PierData[id];
 }
 
+std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBearingReactions(PierIDType id,IndexType brgLineIdx)
+{
+   std::map<PierIDType,std::vector<BearingReactions>>::const_iterator found(m_BearingReactions[brgLineIdx].find(id));
+   if ( found == m_BearingReactions[brgLineIdx].end() )
+   {
+      xbrPierData& pierData = GetPrivatePierData(id);
+      IndexType nBearingLines = pierData.GetBearingLineCount();
+      for ( IndexType i = 0; i < nBearingLines; i++ )
+      {
+         std::vector<BearingReactions> vBearingReactions;
+         vBearingReactions.resize(pierData.GetBearingCount(i));
+         m_BearingReactions[i].insert(std::make_pair(id,vBearingReactions));
+      }
+   }
+
+   return m_BearingReactions[brgLineIdx][id];
+}
+
 void CProjectAgentImp::UpdatePier()
 {
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
@@ -1484,7 +1536,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    }
 
    PierIndexType pierIdx = pPier->GetIndex();
-   pierData.SetID(pPier->GetID());
+   PierIDType pierID = pPier->GetID();
+   
+   pierData.SetID(pierID);
 
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    Float64 alignment_offset = pIBridgeDesc->GetBridgeDescription()->GetAlignmentOffset();
@@ -1568,7 +1622,6 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    {
       // two bearing lines
       pierData.SetBearingLineCount(2);
-      m_vvBearingReactions.resize(2);
 
       GirderIndexType gdrIdx = 0;
       Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
@@ -1580,7 +1633,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       backBrgLine.SetSpacing(vBackSpacing);
       pierData.SetBearingLineData(0,backBrgLine);
 
-      m_vvBearingReactions[0].resize(backBrgLine.GetBearingCount());
+      m_BearingReactions[pierID][0].resize(backBrgLine.GetBearingCount());
 
       refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
       std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
@@ -1590,13 +1643,12 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       aheadBrgLine.SetSpacing(vAheadSpacing);
       pierData.SetBearingLineData(1,aheadBrgLine);
 
-      m_vvBearingReactions[1].resize(aheadBrgLine.GetBearingCount());
+      m_BearingReactions[pierID][1].resize(backBrgLine.GetBearingCount());
    }
    else
    {
       // one bearing line
       pierData.SetBearingLineCount(1);
-      m_vvBearingReactions.resize(1);
 
       GirderIndexType gdrIdx = 0;
       Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
@@ -1608,7 +1660,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       brgLine.SetSpacing(vSpacing);
       pierData.SetBearingLineData(0,brgLine);
 
-      m_vvBearingReactions[0].resize(brgLine.GetBearingCount());
+      m_BearingReactions[pierID][0].resize(brgLine.GetBearingCount());
    }
 
    Fire_OnProjectChanged();

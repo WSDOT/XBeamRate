@@ -795,7 +795,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    GET_IFACE(IXBRProject,pProject);
    Float64 gDC = pProject->GetDCLoadFactor();
    Float64 gDW = pProject->GetDWLoadFactor();
-   Float64 gLL = pProject->GetLiveLoadFactor(ratingType);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    Float64 DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(lcDC);
@@ -827,7 +827,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    GET_IFACE(IXBRProject,pProject);
    Float64 gDC = pProject->GetDCLoadFactor();
    Float64 gDW = pProject->GetDWLoadFactor();
-   Float64 gLL = pProject->GetLiveLoadFactor(ratingType);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    sysSectionValue DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(lcDC);

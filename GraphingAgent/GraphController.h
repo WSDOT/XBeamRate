@@ -42,6 +42,8 @@ public:
 
    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 
+   void FillLoadingList();
+
 protected:
 
    virtual BOOL OnInitDialog();
@@ -52,7 +54,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
    void FillPierList();
-   void FillLoadingList();
 
 #ifdef _DEBUG
 public:

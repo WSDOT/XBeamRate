@@ -123,10 +123,10 @@ interface IXBRProject : IUnknown
    virtual void SetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
 
    // Live Load Reactions per lane
-   virtual IndexType GetLiveLoadReactionCount(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual IndexType GetLiveLoadReactionCount(PierIDType id,pgsTypes::LoadRatingType ratingType) = 0;
    virtual void SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType) = 0;
-   virtual LPCTSTR GetLiveLoadName(pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
+   virtual LPCTSTR GetLiveLoadName(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
    virtual Float64 GetLiveLoadReaction(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
 
    // Material properties
@@ -177,8 +177,8 @@ interface IXBRProject : IUnknown
    virtual void SetDWLoadFactor(Float64 dw) = 0;
    virtual Float64 GetDWLoadFactor() = 0;
 
-   virtual void SetLiveLoadFactor(pgsTypes::LoadRatingType ratingType,Float64 ll) = 0;
-   virtual Float64 GetLiveLoadFactor(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll) = 0;
+   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
 };
 
 /*****************************************************************************
