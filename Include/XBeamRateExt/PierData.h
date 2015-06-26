@@ -1,7 +1,7 @@
 #pragma once
 
 #include <XBeamRateExt\XBRExtExp.h>
-#include <PgsExt\ColumnData.h>
+#include <XBeamRateExt\ColumnData.h>
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
@@ -79,24 +79,31 @@ public:
    Float64& GetX2();
    Float64& GetW();
 
-   void SetColumnLayout(IndexType nColumns,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset,Float64 x3,Float64 x4,Float64 s);
-   void GetColumnLayout(IndexType* pnColumns,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset,Float64* px3,Float64* px4,Float64* ps);
-   IndexType& GetColumnCount();
+   // Establishes the location of the columns with respect to the alignment/bridgeline.
+   void SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset);
+   void GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset);
    pgsTypes::OffsetMeasurementType& GetColumnLayoutDatum();
    IndexType& GetRefColumnIndex();
    Float64& GetRefColumnOffset();
+
+   void SetColumnCount(ColumnIndexType nColumns);
+   ColumnIndexType GetColumnCount() const;
+   void AddColumn(const xbrColumnData& columnData,Float64 spacing);
+   void RemoveColumn(ColumnIndexType colIdx);
+   void SetColumnData(ColumnIndexType colIdx,const xbrColumnData& columnData);
+   const xbrColumnData& GetColumnData(ColumnIndexType colIdx) const;
+   xbrColumnData& GetColumnData(ColumnIndexType colIdx);
+   void SetColumnSpacing(SpacingIndexType spaceIdx,Float64 S);
+   Float64 GetColumnSpacing(SpacingIndexType spaceIdx) const;
+   Float64& GetColumnSpacing(SpacingIndexType spaceIdx);
+
+   // Cross beam overhangs
+   void SetXBeamOverhangs(Float64 X3,Float64 X4);
+   void GetXBeamOverhangs(Float64* pX3,Float64* pX4) const;
    Float64& GetX3();
    Float64& GetX4();
-   Float64& GetColumnSpacing();
 
-   void SetColumnProperties(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H);
-   void GetColumnProperties(CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH);
-   CColumnData::ColumnShapeType& GetColumnShape();
-   Float64& GetD1();
-   Float64& GetD2();
-   CColumnData::ColumnHeightMeasurementType& GetColumnHeightMeasure();
-   Float64& GetColumnHeight();
-   
+   // Cross beam condition information
    pgsTypes::ConditionFactorType GetConditionFactorType() const;
    pgsTypes::ConditionFactorType& GetConditionFactorType();
    void SetConditionFactorType(pgsTypes::ConditionFactorType conditionFactorType);
@@ -142,8 +149,8 @@ public:
 
    Float64 GetXBeamLength() const;
 
-   HRESULT Load(IStructuredLoad* pStrLoad);
-	HRESULT Save(IStructuredSave* pStrSave);
+   HRESULT Load(IStructuredLoad* pStrLoad,IProgress* pProgress);
+	HRESULT Save(IStructuredSave* pStrSave,IProgress* pProgress);
 
 protected:
    void MakeCopy(const xbrPierData& rOther);
@@ -167,17 +174,13 @@ protected:
    Float64 m_XW;
 
    // Column Layout
-   IndexType m_nColumns;
+   std::vector<xbrColumnData> m_vColumnData;
+   std::vector<Float64> m_vColumnSpacing;
+
    IndexType m_RefColumnIdx;
    Float64 m_RefColumnOffset;
    pgsTypes::OffsetMeasurementType m_RefColumnDatum;
    Float64 m_X3, m_X4;
-   Float64 m_S;
-   CColumnData::ColumnHeightMeasurementType m_ColumnMeasurementType;
-   Float64 m_ColumnHeight; // height or bottom elevation, depending on m_ColumnMeasurementType
-   CColumnData::ColumnShapeType m_ColumnShape;
-   Float64 m_D1; // Radius if circle, width in plane of pier if rectangular
-   Float64 m_D2; // Ignored if circle, thickness normal to plane of pier if rectangular
 
    // Load Rating Condition
    pgsTypes::ConditionFactorType m_ConditionFactorType;

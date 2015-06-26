@@ -11,12 +11,6 @@ typedef struct xbrTypes
       pctExpansion   // no moment connectivity at pier
    } SuperstructureConnectionType;
 
-   typedef enum ColumnBaseType
-   {
-      cbtFixed,
-      cbtPinned
-   } ColumnBaseType;
-
    typedef enum TransverseDimensionMeasurementType
    {
       tdmNormalToAlignment, // transverse dimensions are normal to the alignment

@@ -6,6 +6,7 @@
 
 #include "resource.h"
 #include <PgsExt\ColumnData.h>
+#include "ColumnLayoutGrid.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPierLayoutPage dialog
@@ -39,21 +40,19 @@ protected:
 	//{{AFX_MSG(CPierLayoutPage)
 	virtual BOOL OnInitDialog();
    afx_msg void OnHelp();
-   afx_msg void OnColumnShapeChanged();
-   afx_msg void OnColumnCountChanged(NMHDR* pNMHDR, LRESULT* pResult);
    afx_msg void OnConditionFactorTypeChanged();
+   afx_msg void OnHeightMeasureChanged();
+   afx_msg void OnAddColumn();
+   afx_msg void OnRemoveColumns();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
    CMetaFileStatic m_LayoutPicture;
-   CCacheEdit m_SpacingControl;
+   CColumnLayoutGrid m_ColumnLayoutGrid;
 
    void FillRefColumnComboBox();
    void FillHeightMeasureComboBox();
-   void FillColumnShapeComboBox();
    void FillTransverseLocationComboBox();
-
-   void UpdateColumnSpacingControls();
 };
 
 //{{AFX_INSERT_LOCATION}}

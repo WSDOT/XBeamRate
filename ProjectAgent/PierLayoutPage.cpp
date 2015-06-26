@@ -21,6 +21,30 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+void DDX_ColumnGrid(CDataExchange* pDX,CColumnLayoutGrid& grid,xbrPierData& pier)
+{
+   if ( pDX->m_bSaveAndValidate )
+   {
+      grid.GetColumnData(pier);
+   }
+   else
+   {
+      grid.SetColumnData(pier);
+   }
+}
+
+void DDV_ColumnGrid(CDataExchange* pDX,CColumnLayoutGrid& grid)
+{
+   if ( pDX->m_bSaveAndValidate )
+   {
+      if ( grid.GetRowCount() == 0 )
+      {
+         AfxMessageBox(_T("The pier must have at least one column"),MB_OK | MB_ICONEXCLAMATION);
+         pDX->Fail();
+      }
+   }
+}
+
 /////////////////////////////////////////////////////////////////////////////
 // CPierLayoutPage property page
 
@@ -37,13 +61,6 @@ CPierLayoutPage::~CPierLayoutPage()
 {
 }
 
-//void CPierLayoutPage::Init(CPierData2* pPier)
-//{
-//   m_pPier = pPier;
-//
-//   m_PierIdx = pPier->GetIndex();
-//}
-
 void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
 {
   
@@ -59,7 +76,6 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
    DDX_MetaFileStatic(pDX, IDC_PIER_LAYOUT, m_LayoutPicture,_T("PIERLAYOUT"), _T("Metafile") );
-   DDX_Control(pDX, IDC_S, m_SpacingControl);
 
    // Transverse location of the pier
    DDX_CBIndex(pDX,IDC_REFCOLUMN,pParent->m_PierData.m_PierData.GetRefColumnIndex());
@@ -79,14 +95,24 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_UnitValueAndTag(pDX,IDC_X3,IDC_X3_UNIT,pParent->m_PierData.m_PierData.GetX3(),pDisplayUnits->GetSpanLengthUnit() );
    DDX_UnitValueAndTag(pDX,IDC_X4,IDC_X4_UNIT,pParent->m_PierData.m_PierData.GetX4(),pDisplayUnits->GetSpanLengthUnit() );
 
-   DDX_Text(pDX,IDC_COLUMN_COUNT,pParent->m_PierData.m_PierData.GetColumnCount());
-   DDX_UnitValueAndTag(pDX,IDC_S,IDC_S_UNIT,pParent->m_PierData.m_PierData.GetColumnSpacing(),pDisplayUnits->GetSpanLengthUnit());
-   DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_PierData.GetColumnHeight(),pDisplayUnits->GetSpanLengthUnit());
-   DDX_CBItemData(pDX,IDC_HEIGHT_MEASURE,pParent->m_PierData.m_PierData.GetColumnHeightMeasure());
+   DDV_ColumnGrid(pDX,m_ColumnLayoutGrid);
+   DDX_ColumnGrid(pDX,m_ColumnLayoutGrid,pParent->m_PierData.m_PierData);
 
-   DDX_CBItemData(pDX,IDC_COLUMN_SHAPE,pParent->m_PierData.m_PierData.GetColumnShape());
-   DDX_UnitValueAndTag(pDX,IDC_B,IDC_B_UNIT,pParent->m_PierData.m_PierData.GetD1(),pDisplayUnits->GetSpanLengthUnit() );
-   DDX_UnitValueAndTag(pDX,IDC_D,IDC_D_UNIT,pParent->m_PierData.m_PierData.GetD2(),pDisplayUnits->GetSpanLengthUnit() );
+   if ( pDX->m_bSaveAndValidate )
+   {
+      CColumnData::ColumnHeightMeasurementType measure;
+      DDX_CBItemData(pDX,IDC_HEIGHT_MEASURE,measure);
+      ColumnIndexType nColumns = pParent->m_PierData.m_PierData.GetColumnCount();
+      for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+      {
+         pParent->m_PierData.m_PierData.GetColumnData(colIdx).SetColumnHeightMeasurementType(measure);
+      }
+   }
+   else
+   {
+      CColumnData::ColumnHeightMeasurementType measure = pParent->m_PierData.m_PierData.GetColumnData(0).GetColumnHeightMeasurementType();
+      DDX_CBItemData(pDX,IDC_HEIGHT_MEASURE,measure);
+   }
 
    DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, pParent->m_PierData.m_PierData.GetConditionFactorType());
    DDX_Text(pDX,   IDC_CONDITION_FACTOR,      pParent->m_PierData.m_PierData.GetConditionFactor());
@@ -102,11 +128,12 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CPierLayoutPage, CPropertyPage)
 	//{{AFX_MSG_MAP(CPierLayoutPage)
-   ON_CBN_SELCHANGE(IDC_COLUMN_SHAPE, OnColumnShapeChanged)
-   ON_NOTIFY(UDN_DELTAPOS, IDC_COLUMN_COUNT_SPINNER, OnColumnCountChanged)
 	ON_COMMAND(ID_HELP, OnHelp)
    ON_CBN_SELCHANGE(IDC_CONDITION_FACTOR_TYPE, OnConditionFactorTypeChanged)
+   ON_CBN_SELCHANGE(IDC_HEIGHT_MEASURE, OnHeightMeasureChanged)
 	//}}AFX_MSG_MAP
+   ON_BN_CLICKED(IDC_ADD_COLUMN, &CPierLayoutPage::OnAddColumn)
+   ON_BN_CLICKED(IDC_REMOVE_COLUMN, &CPierLayoutPage::OnRemoveColumns)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -114,13 +141,12 @@ END_MESSAGE_MAP()
 
 BOOL CPierLayoutPage::OnInitDialog() 
 {
-   FillTransverseLocationComboBox();
-   FillRefColumnComboBox();
-   FillHeightMeasureComboBox();
-   FillColumnShapeComboBox();
+   m_ColumnLayoutGrid.SubclassDlgItem(IDC_COLUMN_GRID, this);
+   m_ColumnLayoutGrid.CustomInit();
 
-   CSpinButtonCtrl* pSpinner = (CSpinButtonCtrl*)GetDlgItem(IDC_COLUMN_COUNT_SPINNER);
-   pSpinner->SetRange(1,UD_MAXVAL);
+   FillRefColumnComboBox();
+   FillTransverseLocationComboBox();
+   FillHeightMeasureComboBox();
 
    CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
    pcbConditionFactor->AddString(_T("Good or Satisfactory (Structure condition rating 6 or higher)"));
@@ -132,9 +158,7 @@ BOOL CPierLayoutPage::OnInitDialog()
    CPropertyPage::OnInitDialog();
 
    OnConditionFactorTypeChanged();
-
-   OnColumnShapeChanged();
-   UpdateColumnSpacingControls();
+   OnHeightMeasureChanged();
 
    return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -178,11 +202,11 @@ void CPierLayoutPage::FillTransverseLocationComboBox()
 
 void CPierLayoutPage::FillRefColumnComboBox()
 {
-   CPierDlg* pParent = (CPierDlg*)GetParent();
    CComboBox* pcbRefColumn = (CComboBox*)GetDlgItem(IDC_REFCOLUMN);
    int curSel = pcbRefColumn->GetCurSel();
    pcbRefColumn->ResetContent();
-   for ( ColumnIndexType colIdx = 0; colIdx < pParent->m_PierData.m_PierData.GetColumnCount(); colIdx++ )
+   ColumnIndexType nColumns = (ColumnIndexType)m_ColumnLayoutGrid.GetRowCount();
+   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       CString strLabel;
       strLabel.Format(_T("Column %d"),LABEL_COLUMN(colIdx));
@@ -201,18 +225,16 @@ void CPierLayoutPage::FillHeightMeasureComboBox()
    pcbHeightMeasure->ResetContent();
    int idx = pcbHeightMeasure->AddString(_T("Height (H)"));
    pcbHeightMeasure->SetItemData(idx,(DWORD_PTR)CColumnData::chtHeight);
-   idx = pcbHeightMeasure->AddString(_T("Btm Elev"));
+   idx = pcbHeightMeasure->AddString(_T("Bottom Elevation"));
    pcbHeightMeasure->SetItemData(idx,(DWORD_PTR)CColumnData::chtBottomElevation);
 }
 
-void CPierLayoutPage::FillColumnShapeComboBox()
+void CPierLayoutPage::OnHeightMeasureChanged()
 {
-   CComboBox* pcbColumnShape = (CComboBox*)GetDlgItem(IDC_COLUMN_SHAPE);
-   pcbColumnShape->ResetContent();
-   int idx = pcbColumnShape->AddString(_T("Circle"));
-   pcbColumnShape->SetItemData(idx,(DWORD_PTR)CColumnData::cstCircle);
-   idx = pcbColumnShape->AddString(_T("Rectangle"));
-   pcbColumnShape->SetItemData(idx,(DWORD_PTR)CColumnData::cstRectangle);
+   CComboBox* pcbHeightMeasure = (CComboBox*)GetDlgItem(IDC_HEIGHT_MEASURE);
+   int curSel = pcbHeightMeasure->GetCurSel();
+   CColumnData::ColumnHeightMeasurementType measure = (CColumnData::ColumnHeightMeasurementType)(pcbHeightMeasure->GetItemData(curSel));
+   m_ColumnLayoutGrid.SetHeightMeasurementType(measure);
 }
 
 void CPierLayoutPage::OnHelp() 
@@ -221,48 +243,14 @@ void CPierLayoutPage::OnHelp()
    //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PIERDETAILS_CONNECTIONS );
 }
 
-void CPierLayoutPage::OnColumnShapeChanged()
+void CPierLayoutPage::OnAddColumn()
 {
-   CComboBox* pcbColumnShape = (CComboBox*)GetDlgItem(IDC_COLUMN_SHAPE);
-   int curSel = pcbColumnShape->GetCurSel();
-   CColumnData::ColumnShapeType shapeType = (CColumnData::ColumnShapeType)pcbColumnShape->GetItemData(curSel);
-   if ( shapeType == CColumnData::cstCircle )
-   {
-      GetDlgItem(IDC_B_LABEL)->SetWindowText(_T("R"));
-      GetDlgItem(IDC_D_LABEL)->ShowWindow(SW_HIDE);
-      GetDlgItem(IDC_D)->ShowWindow(SW_HIDE);
-      GetDlgItem(IDC_D_UNIT)->ShowWindow(SW_HIDE);
-   }
-   else
-   {
-      GetDlgItem(IDC_B_LABEL)->SetWindowText(_T("B"));
-      GetDlgItem(IDC_D_LABEL)->ShowWindow(SW_SHOW);
-      GetDlgItem(IDC_D)->ShowWindow(SW_SHOW);
-      GetDlgItem(IDC_D_UNIT)->ShowWindow(SW_SHOW);
-   }
-}
-
-void CPierLayoutPage::OnColumnCountChanged(NMHDR* pNMHDR, LRESULT* pResult) 
-{
-	NM_UPDOWN* pNMUpDown = (NM_UPDOWN*)pNMHDR;
-
-   // this is what the count will be
-   int new_count = pNMUpDown->iPos + pNMUpDown->iDelta;
-
-   CPierDlg* pParent = (CPierDlg*)GetParent();
-   pParent->m_PierData.m_PierData.GetColumnCount() = new_count;
-
-   *pResult = 0;
-
+   m_ColumnLayoutGrid.AddColumn();
    FillRefColumnComboBox();
-   UpdateColumnSpacingControls();
 }
 
-void CPierLayoutPage::UpdateColumnSpacingControls()
+void CPierLayoutPage::OnRemoveColumns()
 {
-   CPierDlg* pParent = (CPierDlg*)GetParent();
-   BOOL bEnable = (1 < pParent->m_PierData.m_PierData.GetColumnCount() ? TRUE : FALSE);
-   GetDlgItem(IDC_S_LABEL)->EnableWindow(bEnable);
-   m_SpacingControl.EnableWindow(bEnable);
-   GetDlgItem(IDC_S_UNIT)->EnableWindow(bEnable);
+   m_ColumnLayoutGrid.RemoveSelectedColumns();
+   FillRefColumnComboBox();
 }

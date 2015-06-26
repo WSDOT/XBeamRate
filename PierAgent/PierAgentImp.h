@@ -101,6 +101,7 @@ public:
    virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx);
    virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx);
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx);
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx);
    virtual Float64 GetMaxColumnHeight(PierIDType pierID);
    virtual void GetUpperXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR);
    virtual void GetLowerXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR);

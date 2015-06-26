@@ -216,17 +216,21 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID)
    capMbr.mbrID = xbeamMbrID-1;
    pModelData->m_CapBeamMembers.push_back(capMbr);
 
-   Float64 columnSpacing = pProject->GetColumnSpacing(pierID);
    for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
-      Float64 space = (colIdx < nColumns-1 ? columnSpacing : rightOverhang);
+      Float64 space = (colIdx < nColumns-1 ? pProject->GetColumnSpacing(pierID,colIdx) : rightOverhang);
 
       // create joint at bottom of column
       joint.Release();
       joints->Create(jntID++,Xe,-columnHeight,&joint);
 
+      pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
       joint->Support(); // fully fixed
+      if ( columnFixity == pgsTypes::cftPinned )
+      {
+         joint->ReleaseDof(jrtMz);
+      }
 
       // create column member
       Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);

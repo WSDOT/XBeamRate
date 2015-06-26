@@ -142,15 +142,16 @@ interface IXBRProject : IUnknown
    virtual Float64 GetXBeamRightOverhang(PierIDType id) = 0;
    virtual Float64 GetXBeamWidth(PierIDType id) = 0;
 
-   virtual void SetColumnLayout(PierIDType id,IndexType nColumns,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset,Float64 x3,Float64 x4,Float64 s) = 0;
-   virtual void GetColumnLayout(PierIDType id,IndexType* pnColumns,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset,Float64* px3,Float64* px4,Float64* ps) = 0;
+   virtual void SetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset) = 0;
+   virtual void GetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) = 0;
    virtual IndexType GetColumnCount(PierIDType id) = 0;
-   virtual Float64 GetColumnHeight(PierIDType id) = 0;
-   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType id) = 0;
-   virtual Float64 GetColumnSpacing(PierIDType id) = 0;
+   virtual Float64 GetColumnHeight(PierIDType id,ColumnIndexType colIdx) = 0;
+   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType id,ColumnIndexType colIdx) = 0;
+   virtual Float64 GetColumnSpacing(PierIDType id,SpacingIndexType spaceIdx) = 0;
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType id,ColumnIndexType colIdx) = 0;
 
-   virtual void SetColumnProperties(PierIDType id,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) = 0;
-   virtual void GetColumnProperties(PierIDType id,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) = 0;
+   virtual void SetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) = 0;
+   virtual void GetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) = 0;
 
    virtual Float64 GetXBeamLength(PierIDType id) = 0;
 

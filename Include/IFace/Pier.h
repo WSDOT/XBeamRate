@@ -21,6 +21,7 @@ interface IXBRPier : public IUnknown
    virtual Float64 GetMaxColumnHeight(PierIDType pierID) = 0;
    virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx) = 0;
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) = 0;
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) = 0;
 
    virtual void GetUpperXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR) = 0;
    virtual void GetLowerXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR) = 0;

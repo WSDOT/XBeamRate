@@ -739,6 +739,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ColumnLayoutGrid.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ConcreteDetailsDlg.cpp"
 				>
 			</File>
@@ -1031,6 +1035,10 @@
 			</File>
 			<File
 				RelativePath=".\BearingsPage.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ColumnLayoutGrid.h"
 				>
 			</File>
 			<File

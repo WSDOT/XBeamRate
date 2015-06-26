@@ -26,18 +26,15 @@ xbrPierData::xbrPierData()
    m_X2 = ::ConvertToSysUnits(3,unitMeasure::Feet);
    m_XW = ::ConvertToSysUnits(5,unitMeasure::Feet);
 
-   m_nColumns = 2;
+   xbrColumnData column;
+   m_vColumnData.push_back(column);
+
    m_RefColumnIdx = 0;
    m_RefColumnOffset = -::ConvertToSysUnits(5,unitMeasure::Feet);
    m_RefColumnDatum = pgsTypes::omtAlignment;
+
    m_X3 = ::ConvertToSysUnits(5,unitMeasure::Feet);
    m_X4 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_S = ::ConvertToSysUnits(10,unitMeasure::Feet);
-   m_ColumnMeasurementType = CColumnData::chtHeight;
-   m_ColumnHeight = ::ConvertToSysUnits(30,unitMeasure::Feet);
-   m_ColumnShape = CColumnData::cstCircle;
-   m_D1 = ::ConvertToSysUnits(3,unitMeasure::Feet);
-   m_D2 = ::ConvertToSysUnits(3,unitMeasure::Feet);
 
    // Load Rating Condition
    m_ConditionFactorType = pgsTypes::cfGood;
@@ -302,31 +299,18 @@ Float64& xbrPierData::GetW()
    return m_XW;
 }
 
-void xbrPierData::SetColumnLayout(IndexType nColumns,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset,Float64 x3,Float64 x4,Float64 s)
+void xbrPierData::SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset)
 {
-   m_nColumns        = nColumns;
    m_RefColumnDatum  = refColumnDatum;
    m_RefColumnIdx    = refColumnIdx;
    m_RefColumnOffset = refColumnOffset;
-   m_X3              = x3;
-   m_X4              = x4;
-   m_S               = s;
 }
 
-void xbrPierData::GetColumnLayout(IndexType* pnColumns,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset,Float64* px3,Float64* px4,Float64* ps)
+void xbrPierData::GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset)
 {
-   *pnColumns        = m_nColumns;
    *prefColumnDatum  = m_RefColumnDatum;
    *prefColumnIdx    = m_RefColumnIdx;
    *prefColumnOffset = m_RefColumnOffset;
-   *px3              = m_X3;
-   *px4              = m_X4;
-   *ps               = m_S;
-}
-
-IndexType& xbrPierData::GetColumnCount()
-{
-   return m_nColumns;
 }
 
 pgsTypes::OffsetMeasurementType& xbrPierData::GetColumnLayoutDatum()
@@ -344,6 +328,93 @@ Float64& xbrPierData::GetRefColumnOffset()
    return m_RefColumnOffset;
 }
 
+void xbrPierData::SetColumnCount(ColumnIndexType nColumns)
+{
+   ATLASSERT(0 < nColumns && nColumns != INVALID_INDEX);
+   if ( m_vColumnData.size() != nColumns )
+   {
+      m_vColumnData.resize(nColumns,m_vColumnData.back());
+      if ( m_vColumnSpacing.size() == 0 && nColumns != 1)
+      {
+         m_vColumnSpacing.push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
+      }
+      m_vColumnSpacing.resize(nColumns-1,m_vColumnSpacing.back());
+   }
+   ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
+}
+
+ColumnIndexType xbrPierData::GetColumnCount() const
+{
+   return m_vColumnData.size();
+}
+
+void xbrPierData::AddColumn(const xbrColumnData& columnData,Float64 spacing)
+{
+   m_vColumnData.push_back(columnData);
+   m_vColumnSpacing.push_back(spacing);
+   ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
+}
+
+void xbrPierData::RemoveColumn(ColumnIndexType colIdx)
+{
+   // always remove the spacing to the right of the column, unless
+   // this is the last column. If this is the last column remove
+   // the left spacing
+   if ( colIdx == m_vColumnData.size()-1 )
+   {
+      m_vColumnSpacing.pop_back();
+   }
+   else
+   {
+      m_vColumnSpacing.erase(m_vColumnSpacing.begin()+colIdx);
+   }
+
+   m_vColumnData.erase(m_vColumnData.begin()+colIdx);
+   ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
+}
+
+void xbrPierData::SetColumnData(ColumnIndexType colIdx,const xbrColumnData& columnData)
+{
+   m_vColumnData[colIdx] = columnData;
+}
+
+const xbrColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx) const
+{
+   return m_vColumnData[colIdx];
+}
+
+xbrColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx)
+{
+   return m_vColumnData[colIdx];
+}
+
+void xbrPierData::SetColumnSpacing(SpacingIndexType spaceIdx,Float64 S)
+{
+   m_vColumnSpacing[spaceIdx] = S;
+}
+
+Float64 xbrPierData::GetColumnSpacing(SpacingIndexType spaceIdx) const
+{
+   return m_vColumnSpacing[spaceIdx];
+}
+
+Float64& xbrPierData::GetColumnSpacing(SpacingIndexType spaceIdx)
+{
+   return m_vColumnSpacing[spaceIdx];
+}
+
+void xbrPierData::SetXBeamOverhangs(Float64 X3,Float64 X4)
+{
+   m_X3 = X3;
+   m_X4 = X4;
+}
+
+void xbrPierData::GetXBeamOverhangs(Float64* pX3,Float64* pX4) const
+{
+   *pX3 = m_X3;
+   *pX4 = m_X4;
+}
+
 Float64& xbrPierData::GetX3()
 {
    return m_X3;
@@ -352,54 +423,6 @@ Float64& xbrPierData::GetX3()
 Float64& xbrPierData::GetX4()
 {
    return m_X4;
-}
-
-Float64& xbrPierData::GetColumnSpacing()
-{
-   return m_S;
-}
-
-void xbrPierData::SetColumnProperties(CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
-{
-   m_ColumnShape = shapeType;
-   m_D1 = D1;
-   m_D2 = D2;
-   m_ColumnMeasurementType = heightType;
-   m_ColumnHeight = H;
-}
-
-void xbrPierData::GetColumnProperties(CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
-{
-   *pshapeType = m_ColumnShape;
-   *pD1 = m_D1;
-   *pD2 = m_D2;
-   *pheightType = m_ColumnMeasurementType;
-   *pH = m_ColumnHeight;
-}
-
-CColumnData::ColumnShapeType& xbrPierData::GetColumnShape()
-{
-   return m_ColumnShape;
-}
-
-Float64& xbrPierData::GetD1()
-{
-   return m_D1;
-}
-
-Float64& xbrPierData::GetD2()
-{
-   return m_D2;
-}
-
-CColumnData::ColumnHeightMeasurementType& xbrPierData::GetColumnHeightMeasure()
-{
-   return m_ColumnMeasurementType;
-}
-
-Float64& xbrPierData::GetColumnHeight()
-{
-   return m_ColumnHeight;
 }
 
 pgsTypes::ConditionFactorType xbrPierData::GetConditionFactorType() const
@@ -581,10 +604,16 @@ IndexType xbrPierData::GetBearingCount(IndexType brgLineIdx) const
 
 Float64 xbrPierData::GetXBeamLength() const
 {
-   return m_X3 + (m_nColumns-1)*m_S + m_X4;
+   Float64 L = 0;
+   BOOST_FOREACH(Float64 s,m_vColumnSpacing)
+   {
+      L += s;
+   }
+   L += m_X3 + m_X4;
+   return L;
 }
 
-HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
+HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
 {
    pStrSave->BeginUnit(_T("Pier"),1.0);
    pStrSave->put_Property(_T("ID"),CComVariant(m_ID));
@@ -621,18 +650,21 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
    pStrSave->EndUnit(); // LowerCrossBeam
 
    pStrSave->BeginUnit(_T("Columns"),1.0);
-      pStrSave->put_Property(_T("ColumnCount"),CComVariant(m_nColumns));
-      pStrSave->put_Property(_T("RefColumDatum"),CComVariant(m_RefColumnDatum));
-      pStrSave->put_Property(_T("RefColumn"),CComVariant(m_RefColumnIdx));
-      pStrSave->put_Property(_T("RefColumnOffset"),CComVariant(m_RefColumnOffset));
-      pStrSave->put_Property(_T("X3"),CComVariant(m_X3));
-      pStrSave->put_Property(_T("X4"),CComVariant(m_X4));
-      pStrSave->put_Property(_T("S"),CComVariant(m_S));
-      pStrSave->put_Property(_T("Shape"),CComVariant(m_ColumnShape));
-      pStrSave->put_Property(_T("D1"),CComVariant(m_D1));
-      pStrSave->put_Property(_T("D2"),CComVariant(m_D2));
-      pStrSave->put_Property(_T("HeightType"),CComVariant(m_ColumnMeasurementType));
-      pStrSave->put_Property(_T("Height"),CComVariant(m_ColumnHeight));
+      std::vector<Float64>::iterator spacingIter = m_vColumnSpacing.begin();
+      std::vector<xbrColumnData>::iterator columnIterBegin = m_vColumnData.begin();
+      std::vector<xbrColumnData>::iterator columnIter = columnIterBegin;
+      std::vector<xbrColumnData>::iterator columnIterEnd = m_vColumnData.end();
+      for ( ; columnIter != columnIterEnd; columnIter++ )
+      {
+         if ( columnIter != columnIterBegin )
+         {
+            Float64 spacing = *spacingIter;
+            pStrSave->put_Property(_T("Spacing"),CComVariant(spacing));
+            spacingIter++;
+         }
+         xbrColumnData& columnData = *columnIter;
+         columnData.Save(pStrSave,pProgress);
+      }
    pStrSave->EndUnit(); // Columns
 
    m_Concrete.Save(pStrSave,NULL);
@@ -661,7 +693,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave)
    return S_OK;
 }
 
-HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
+HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
 {
    USES_CONVERSION;
    CHRException hr;
@@ -775,54 +807,35 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad)
 
       {
          hr = pStrLoad->BeginUnit(_T("Columns"));
+         m_vColumnData.clear();
+         m_vColumnSpacing.clear();
+         int i = 0;
+         HRESULT hrSpacing = S_OK;
+         // Reading Column-Spacing-Column-Spacing-Column....
+         do
+         {
+            if ( i != 0 )
+            {
+               // don't read spacing first time through because we start with column
+               var.vt = VT_R8;
+               hrSpacing = pStrLoad->get_Property(_T("Spacing"),&var);
+               if ( SUCCEEDED(hrSpacing) )
+               {
+                  Float64 spacing = var.dblVal;
+                  m_vColumnSpacing.push_back(spacing);
+               }
+            }
 
-         var.vt = VT_INDEX;
-         hr = pStrLoad->get_Property(_T("ColumnCount"),&var);
-         m_nColumns = VARIANT2INDEX(var);
-
-         var.vt = VT_I4;
-         hr = pStrLoad->get_Property(_T("RefColumDatum"),&var);
-         m_RefColumnDatum = (pgsTypes::OffsetMeasurementType)(var.lVal);
-
-         var.vt = VT_INDEX;
-         hr = pStrLoad->get_Property(_T("RefColumn"),&var);
-         m_RefColumnIdx = VARIANT2INDEX(var);
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("RefColumnOffset"),&var);
-         m_RefColumnOffset = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X3"),&var);
-         m_X3 = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X4"),&var);
-         m_X4 = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("S"),&var);
-         m_S = var.dblVal;
-
-         var.vt = VT_I4;
-         hr = pStrLoad->get_Property(_T("Shape"),&var);
-         m_ColumnShape = (CColumnData::ColumnShapeType)var.lVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("D1"),&var);
-         m_D1 = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("D2"),&var);
-         m_D2 = var.dblVal;
-
-         var.vt = VT_I4;
-         hr = pStrLoad->get_Property(_T("HeightType"),&var);
-         m_ColumnMeasurementType = (CColumnData::ColumnHeightMeasurementType)var.lVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("Height"),&var);
-         m_ColumnHeight = var.dblVal;
+            if ( SUCCEEDED(hrSpacing) )
+            {
+               // only read the column data if the spacing data was successfully read
+               xbrColumnData columnData;
+               hr = columnData.Load(pStrLoad,pProgress);
+               m_vColumnData.push_back(columnData);
+            }
+            i++;
+         } while (SUCCEEDED(hrSpacing)); // read data until we don't get the spacing data we expect
+         ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 
          hr = pStrLoad->EndUnit(); // Columns
       }
@@ -911,19 +924,15 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_X2 = rOther.m_X2;
    m_XW = rOther.m_XW;
 
-   m_nColumns        = rOther.m_nColumns;
+   m_vColumnData = rOther.m_vColumnData;
+   m_vColumnSpacing = rOther.m_vColumnSpacing;
+
    m_RefColumnDatum  = rOther.m_RefColumnDatum;
    m_RefColumnIdx    = rOther.m_RefColumnIdx;
    m_RefColumnOffset = rOther.m_RefColumnOffset;
+
    m_X3              = rOther.m_X3;
    m_X4              = rOther.m_X4;
-   m_S               = rOther.m_S;
-
-   m_ColumnShape = rOther.m_ColumnShape;
-   m_D1 = rOther.m_D1;
-   m_D2 = rOther.m_D2;
-   m_ColumnMeasurementType = rOther.m_ColumnMeasurementType;
-   m_ColumnHeight = rOther.m_ColumnHeight;
 
    m_RebarGrade = rOther.m_RebarGrade;
    m_RebarType = rOther.m_RebarType;

@@ -367,7 +367,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    // Save the pier description information
    if ( bIsStandAlone )
    {
-      m_PierData[INVALID_ID].Save(pStrSave);
+      m_PierData[INVALID_ID].Save(pStrSave,NULL);
    }
    else
    {
@@ -382,7 +382,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          xbrPierData& pierData(iter->second);
          ATLASSERT(pierData.GetID() != INVALID_ID);
-         pierData.Save(pStrSave);
+         pierData.Save(pStrSave,NULL);
       }
    }
 
@@ -655,12 +655,12 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       // Load the basic pier information
       if ( bIsStandAlone )
       {
-         hr = m_PierData[INVALID_ID].Load(pStrLoad);
+         hr = m_PierData[INVALID_ID].Load(pStrLoad,NULL);
       }
       else
       {
          xbrPierData pierData;
-         while ( SUCCEEDED(pierData.Load(pStrLoad)) )
+         while ( SUCCEEDED(pierData.Load(pStrLoad,NULL)) )
          {
             PierIDType id = pierData.GetID();
             ATLASSERT(id != INVALID_ID);
@@ -1136,15 +1136,15 @@ Float64 CProjectAgentImp::GetXBeamWidth(PierIDType id)
    return GetPrivatePierData(id).GetW();
 }
 
-void CProjectAgentImp::SetColumnLayout(PierIDType id,IndexType nColumns,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset,Float64 x3,Float64 x4,Float64 s)
+void CProjectAgentImp::SetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset)
 {
-   GetPrivatePierData(id).SetColumnLayout(nColumns,refColumnDatum,refColumnIdx,refColumnOffset,x3,x4,s);
+   GetPrivatePierData(id).SetRefColumnLocation(refColumnDatum,refColumnIdx,refColumnOffset);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetColumnLayout(PierIDType id,IndexType* pnColumns,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset,Float64* px3,Float64* px4,Float64* ps)
+void CProjectAgentImp::GetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset)
 {
-   GetPrivatePierData(id).GetColumnLayout(pnColumns,prefColumnDatum,prefColumnIdx,prefColumnOffset,px3,px4,ps);
+   GetPrivatePierData(id).GetRefColumnLocation(prefColumnDatum,prefColumnIdx,prefColumnOffset);
 }
 
 IndexType CProjectAgentImp::GetColumnCount(PierIDType id)
@@ -1152,30 +1152,45 @@ IndexType CProjectAgentImp::GetColumnCount(PierIDType id)
    return GetPrivatePierData(id).GetColumnCount();
 }
 
-Float64 CProjectAgentImp::GetColumnHeight(PierIDType id)
+Float64 CProjectAgentImp::GetColumnHeight(PierIDType id,ColumnIndexType colIdx)
 {
-   return GetPrivatePierData(id).GetColumnHeight();
+   return GetPrivatePierData(id).GetColumnData(colIdx).GetColumnHeight();
 }
 
-CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType(PierIDType id)
+CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType(PierIDType id,ColumnIndexType colIdx)
 {
-   return GetPrivatePierData(id).GetColumnHeightMeasure();
+   return GetPrivatePierData(id).GetColumnData(colIdx).GetColumnHeightMeasurementType();
 }
 
-Float64 CProjectAgentImp::GetColumnSpacing(PierIDType id)
+Float64 CProjectAgentImp::GetColumnSpacing(PierIDType id,SpacingIndexType spaceIdx)
 {
-   return GetPrivatePierData(id).GetColumnSpacing();
+   return GetPrivatePierData(id).GetColumnSpacing(spaceIdx);
 }
 
-void CProjectAgentImp::SetColumnProperties(PierIDType id,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
+void CProjectAgentImp::SetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
 {
-   GetPrivatePierData(id).SetColumnProperties(shapeType,D1,D2,heightType,H);
+   xbrColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+   
+   columnData.SetColumnHeight(H,heightType);
+   columnData.SetColumnShape(shapeType);
+   columnData.SetColumnDimensions(D1,D2);
+
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetColumnProperties(PierIDType id,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
+void CProjectAgentImp::GetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
 {
-   GetPrivatePierData(id).GetColumnProperties(pshapeType,pD1,pD2,pheightType,pH);
+   xbrColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+
+   *pshapeType = columnData.GetColumnShape();
+   columnData.GetColumnDimensions(pD1,pD2);
+   *pH = columnData.GetColumnHeight();
+   *pheightType = columnData.GetColumnHeightMeasurementType();
+}
+
+pgsTypes::ColumnFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx)
+{
+   return GetPrivatePierData(pierID).GetColumnData(colIdx).GetTransverseFixity();
 }
 
 Float64 CProjectAgentImp::GetXBeamLength(PierIDType id)
@@ -1598,21 +1613,26 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 refColOffset;
    pgsTypes::OffsetMeasurementType refColMeasure;
    pPier->GetTransverseOffset(&refColIdx,&refColOffset,&refColMeasure);
+   pierData.SetRefColumnLocation(refColMeasure,refColIdx,refColOffset);
 
    Float64 X3, X4;
    pPier->GetXBeamOverhangs(&X3,&X4);
-
-   ColumnIndexType nColumns = pPier->GetColumnCount();
-
-   Float64 S = (1 < nColumns ? pPier->GetColumnSpacing(0) : 0);
-   
-   pierData.SetColumnLayout(nColumns,refColMeasure,refColIdx,refColOffset,X3,X4,S);
+   pierData.SetXBeamOverhangs(X3,X4);
 
    // Column Properties
-   const CColumnData& columnData = pPier->GetColumnData(0);
-   Float64 D1,D2;
-   columnData.GetColumnDimensions(&D1,&D2);
-   pierData.SetColumnProperties(columnData.GetColumnShape(),D1,D2,columnData.GetColumnHeightMeasurementType(),columnData.GetColumnHeight());
+   ColumnIndexType nColumns = pPier->GetColumnCount();
+   pierData.SetColumnCount(nColumns);
+   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   {
+      if ( colIdx < nColumns-1 )
+      {
+         Float64 S = pPier->GetColumnSpacing(colIdx);
+         pierData.GetColumnSpacing(colIdx) = S;
+      }
+   
+      const CColumnData& columnData = pPier->GetColumnData(colIdx);
+      pierData.GetColumnData(colIdx) = columnData;
+   }
 
    // Materials
    pierData.SetConcreteMaterial(pPier->GetConcrete());

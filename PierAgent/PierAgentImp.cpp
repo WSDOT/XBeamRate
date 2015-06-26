@@ -183,9 +183,10 @@ Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx)
    GET_IFACE(IXBRProject,pProject);
    Float64 columnLocation = pProject->GetXBeamLeftOverhang(pierID); // overhang from left-most column to left edge of cross beam
 
-   for ( IndexType idx = 0; idx < colIdx && 0 < colIdx; idx++ )
+   IndexType nSpaces = (colIdx == 0 ? 0 : colIdx);
+   for ( IndexType idx = 0; idx < nSpaces; idx++ )
    {
-      Float64 spacing = pProject->GetColumnSpacing(pierID);
+      Float64 spacing = pProject->GetColumnSpacing(pierID,idx);
       columnLocation += spacing;
    }
 
@@ -195,8 +196,8 @@ Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx)
 Float64 CPierAgentImp::GetColumnHeight(PierIDType pierID,IndexType colIdx)
 {
    GET_IFACE(IXBRProject,pProject);
-   Float64 h = pProject->GetColumnHeight(pierID);
-   CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType(pierID);
+   Float64 h = pProject->GetColumnHeight(pierID,colIdx);
+   CColumnData::ColumnHeightMeasurementType heightType = pProject->GetColumnHeightMeasurementType(pierID,colIdx);
    if ( heightType == CColumnData::chtBottomElevation )
    {
       Float64 elevBot = h;
@@ -221,6 +222,12 @@ Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colI
    Float64 Ytop = GetTopColumnElevation(pierID,colIdx);
    Float64 Hcol = GetColumnHeight(pierID,colIdx);
    return Ytop - Hcol;
+}
+
+pgsTypes::ColumnFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   return pProject->GetColumnFixity(pierID,colIdx);
 }
 
 Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID)
@@ -420,7 +427,7 @@ Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xb
       Float64 H;
 
       GET_IFACE(IXBRProject,pProject);
-      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
 
       return D1;
    }
@@ -486,7 +493,7 @@ Float64 CPierAgentImp::GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbr
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -516,7 +523,7 @@ Float64 CPierAgentImp::GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrP
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -546,7 +553,7 @@ Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrP
       CColumnData::ColumnHeightMeasurementType columnHeightType;
 
       Float64 H;
-      pProject->GetColumnProperties(pierID,&shapeType,&D1,&D2,&columnHeightType,&H);
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
 
       if (shapeType == CColumnData::cstCircle)
       {
@@ -1103,7 +1110,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
       Float64 X = LeftOH;
       for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
       {
-         Float64 space = pProject->GetColumnSpacing(pierID);
+         Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
          X += space;
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+0.001));
@@ -1187,12 +1194,13 @@ Float64 CPierAgentImp::GetLeftColumnOffset(PierIDType pierID)
    // left of the alignment
 
    GET_IFACE(IXBRProject,pProject);
-   IndexType nColumns;
    ColumnIndexType refColIdx;
    Float64 refColumnOffset;
    pgsTypes::OffsetMeasurementType refColumnDatum;
-   Float64 X3, X4, S;
-   pProject->GetColumnLayout(pierID,&nColumns,&refColumnDatum,&refColIdx,&refColumnOffset,&X3,&X4,&S);
+   pProject->GetRefColumnLocation(pierID,&refColumnDatum,&refColIdx,&refColumnOffset);
+
+   Float64 X3 = pProject->GetXBeamLeftOverhang(pierID);
+   Float64 X4 = pProject->GetXBeamRightOverhang(pierID);
 
    if ( refColumnDatum == pgsTypes::omtBridge )
    {
@@ -1207,6 +1215,7 @@ Float64 CPierAgentImp::GetLeftColumnOffset(PierIDType pierID)
       // make the reference column the first column
       for ( SpacingIndexType spaceIdx = refColIdx-1; 0 <= spaceIdx && spaceIdx != INVALID_INDEX; spaceIdx-- )
       {
+         Float64 S = pProject->GetColumnSpacing(pierID,spaceIdx);
          refColumnOffset -= S;
       }
    }
