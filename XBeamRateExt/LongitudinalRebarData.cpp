@@ -57,10 +57,15 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pPro
    {
       pStrSave->BeginUnit(_T("RebarRow"),1.0);
       pStrSave->put_Property(_T("Datum"),        CComVariant(rebar_row.Datum));
+      pStrSave->put_Property(_T("LayoutType"),   CComVariant(rebar_row.LayoutType));
+      pStrSave->put_Property(_T("Start"),        CComVariant(rebar_row.Start));
+      pStrSave->put_Property(_T("Length"),       CComVariant(rebar_row.Length));
       pStrSave->put_Property(_T("Cover"),        CComVariant(rebar_row.Cover));
       pStrSave->put_Property(_T("NumberOfBars"), CComVariant(rebar_row.NumberOfBars));
       pStrSave->put_Property(_T("BarSize"),      CComVariant(rebar_row.BarSize));
       pStrSave->put_Property(_T("BarSpacing"),   CComVariant(rebar_row.BarSpacing));
+      pStrSave->put_Property(_T("StartHook"),    CComVariant(rebar_row.bHookStart));
+      pStrSave->put_Property(_T("EndHook"),      CComVariant(rebar_row.bHookEnd));
       pStrSave->EndUnit();
    }
 
@@ -88,6 +93,18 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pPro
          hr = pStrLoad->get_Property(_T("Datum"),         &var);
          rebar_row.Datum = (xbrTypes::LongitudinalRebarDatumType)(var.lVal);
 
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("LayoutType"),&var);
+         rebar_row.LayoutType = (xbrTypes::LongitudinalRebarLayoutType)(var.lVal);
+
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("Start"), &var);
+         rebar_row.Start = var.dblVal;
+
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("Length"), &var);
+         rebar_row.Length = var.dblVal;
+
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("Cover"), &var);
          rebar_row.Cover = var.dblVal;
@@ -103,6 +120,14 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pPro
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("BarSpacing"), &var);
          rebar_row.BarSpacing = var.dblVal;
+      
+         var.vt = VT_BOOL;
+         hr = pStrLoad->get_Property(_T("StartHook"), &var);
+         rebar_row.bHookStart = (var.boolVal == VARIANT_TRUE ? true : false);
+      
+         var.vt = VT_BOOL;
+         hr = pStrLoad->get_Property(_T("EndHook"), &var);
+         rebar_row.bHookEnd = (var.boolVal == VARIANT_TRUE ? true : false);
 
          RebarRows.push_back(rebar_row);
 

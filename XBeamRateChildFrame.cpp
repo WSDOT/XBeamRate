@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include <XBeamRateChildFrame.h>
+#include <XBeamRateView.h>
 
 #include <IFace\XBeamRateAgent.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
@@ -22,6 +23,7 @@ IMPLEMENT_DYNCREATE(CXBeamRateChildFrame,CEAFChildFrame)
 
 CXBeamRateChildFrame::CXBeamRateChildFrame()
 {
+   m_CutLocation = 0;
 }
 
 CXBeamRateChildFrame::~CXBeamRateChildFrame()
@@ -182,6 +184,43 @@ BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs)
    cs.style |= WS_MAXIMIZE | WS_VISIBLE;
 	
 	return CEAFChildFrame::PreCreateWindow(cs);
+}
+
+// iCutLocation
+#pragma Reminder("WORKING HERE - implment iCutLocation")
+Float64 CXBeamRateChildFrame::GetCurrentCutLocation()
+{
+   return m_CutLocation;
+}
+
+void CXBeamRateChildFrame::CutAt(Float64 Xgl)
+{
+   m_CutLocation = Xgl;
+
+   CXBeamRateView* pView = (CXBeamRateView*)GetActiveView();
+   pView->OnUpdate(0,0,0);
+}
+
+void CXBeamRateChildFrame::CutAtNext()
+{
+}
+
+void CXBeamRateChildFrame::CutAtPrev()
+{
+}
+
+void CXBeamRateChildFrame::ShowCutDlg()
+{
+}
+
+Float64 CXBeamRateChildFrame::GetMinCutLocation()
+{
+   return -10;
+}
+
+Float64 CXBeamRateChildFrame::GetMaxCutLocation()
+{
+   return 10;
 }
 
 void CXBeamRateChildFrame::OnPierChanged()

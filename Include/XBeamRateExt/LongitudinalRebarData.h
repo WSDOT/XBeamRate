@@ -29,22 +29,41 @@ public:
    {
    public:
       xbrTypes::LongitudinalRebarDatumType Datum;
+      xbrTypes::LongitudinalRebarLayoutType LayoutType;
+      Float64 Start;
+      Float64 Length;
       matRebar::Size BarSize;
       CollectionIndexType NumberOfBars;
       Float64     Cover;
       Float64     BarSpacing;
+      bool bHookStart;
+      bool bHookEnd;
 
       RebarRow():
-         Datum(xbrTypes::Bottom), BarSize(matRebar::bs3), NumberOfBars(0), Cover(0), BarSpacing(0)
+         Datum(xbrTypes::Bottom), 
+         LayoutType(xbrTypes::blLeftEnd), 
+         Start(0), 
+         Length(0), 
+         BarSize(matRebar::bs3), 
+         NumberOfBars(0), 
+         Cover(0), 
+         BarSpacing(0),
+         bHookStart(false),
+         bHookEnd(false)
       {;}
 
-      bool operator==(const RebarRow& other) const
+      bool operator==(const RebarRow& rOther) const
       {
-         if(Datum != other.Datum) return false;
-         if(BarSize != other.BarSize) return false;
-         if ( !IsEqual(Cover,  other.Cover) ) return false;
-         if ( !IsEqual(BarSpacing,  other.BarSpacing) ) return false;
-         if ( NumberOfBars != other.NumberOfBars ) return false;
+         if(Datum != rOther.Datum) return false;
+         if(LayoutType != rOther.LayoutType) return false;
+         if ( !IsEqual(Start,rOther.Start) ) return false;
+         if ( !IsEqual(Length,rOther.Length) ) return false;
+         if(BarSize != rOther.BarSize) return false;
+         if ( !IsEqual(Cover,  rOther.Cover) ) return false;
+         if ( !IsEqual(BarSpacing,  rOther.BarSpacing) ) return false;
+         if ( NumberOfBars != rOther.NumberOfBars ) return false;
+         if ( bHookStart != rOther.bHookStart) return false;
+         if ( bHookEnd   != rOther.bHookEnd) return false;
 
          return true;
       };

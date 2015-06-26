@@ -21,6 +21,7 @@
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
 #include "XBeamRatePlugin_i.c"
+#include "SectionCut.h"
 
 // EAF Common Interfaces
 #include <EAF\EAFDisplayUnits.h>

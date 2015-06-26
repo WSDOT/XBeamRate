@@ -55,10 +55,8 @@ xbrPierData::xbrPierData()
 
    // Bearings
    xbrBearingLineData bearingLine;
-   bearingLine.SetReferenceBearing(pgsTypes::omtAlignment,0,-::ConvertToSysUnits(6,unitMeasure::Feet));
-   bearingLine.SetBearingCount(3);
-   bearingLine.SetSpacing(0,::ConvertToSysUnits(6,unitMeasure::Feet));
-   bearingLine.SetSpacing(1,::ConvertToSysUnits(6,unitMeasure::Feet));
+   bearingLine.SetReferenceBearing(pgsTypes::omtAlignment,0,::ConvertToSysUnits(0,unitMeasure::Feet));
+   bearingLine.SetBearingCount(1);
    m_vBearingLines.push_back(bearingLine);
 }
 

@@ -13,9 +13,12 @@
 #include <DManipTools\DManipTools.h>
 
 class CXBeamRateDoc;
+class CXBeamRateChildFrame;
 
 class CXBeamRateView : public CDisplayView
 {
+   friend CXBeamRateChildFrame;
+
 protected: // create from serialization only
 	CXBeamRateView();
 	DECLARE_DYNCREATE(CXBeamRateView)
@@ -40,6 +43,9 @@ public:
 
    virtual void OnInitialUpdate();
 
+   virtual DROPEFFECT CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point);
+   virtual void OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point);
+
    PierIDType GetPierID();
    PierIndexType GetPierIndex();
 
@@ -61,6 +67,7 @@ protected:
    void UpdateRebarDisplayObjects();
    void UpdateStirrupDisplayObjects();
    void UpdateDimensionsDisplayObjects();
+   void UpdateSectionCutDisplayObjects();
 
    void CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO);
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
@@ -71,6 +78,8 @@ protected:
    IDType m_DisplayObjectID; // used to generate display object IDs
 
    bool m_bIsIdealized;
+
+   CXBeamRateChildFrame* m_pFrame;
 
 // Generated message map functions
 protected:

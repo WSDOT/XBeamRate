@@ -1,8 +1,9 @@
 #pragma once
 
 #include <EAF\EAFChildFrame.h>
+#include "SectionCut.h"
 
-class CXBeamRateChildFrame : public CEAFChildFrame
+class CXBeamRateChildFrame : public CEAFChildFrame, public iCutLocation
 {
 	DECLARE_DYNCREATE(CXBeamRateChildFrame)
 protected:
@@ -27,6 +28,14 @@ public:
 	//}}AFX_VIRTUAL
 
 public:
+   // iCutLocation
+   virtual Float64 GetCurrentCutLocation();
+   virtual void CutAt(Float64 Xgl);
+   virtual void CutAtNext();
+   virtual void CutAtPrev();
+   virtual void ShowCutDlg();
+   virtual Float64 GetMinCutLocation();
+   virtual Float64 GetMaxCutLocation();
 
 // Implementation
 protected:
@@ -37,6 +46,8 @@ protected:
 #endif
 
    CDialogBar m_ControlBar;
+
+   Float64 m_CutLocation;
 
 	// Generated message map functions
 	//{{AFX_MSG(CXBeamRateChildFrame)

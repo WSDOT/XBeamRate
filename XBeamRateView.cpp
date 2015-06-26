@@ -6,6 +6,8 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
 #include "XBeamRateChildFrame.h"
+#include "SectionCut.h"
+#include "DisplayObjectFactory.h"
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
@@ -42,6 +44,10 @@
 #define DIMENSIONS_DISPLAY_LIST_ID     4
 #define REBAR_DISPLAY_LIST_ID          5
 #define STIRRUP_DISPLAY_LIST_ID        6
+#define SECTION_CUT_DISPLAY_LIST       7
+
+
+#define SECTION_CUT_ID                500
 
 // The End/Section view of the pier is offset from the Elevation
 // view by this amount.
@@ -194,6 +200,11 @@ int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
+   CDisplayObjectFactory* factory = new CDisplayObjectFactory();
+   CComPtr<iDisplayObjectFactory> doFactory;
+   doFactory.Attach((iDisplayObjectFactory*)factory->GetInterface(&IID_iDisplayObjectFactory));
+   dispMgr->AddDisplayObjectFactory(doFactory);
+
    // Uncomment these lines if we want the display objects to be selectable
    //dispMgr->EnableLBtnSelect(TRUE);
    //dispMgr->EnableRBtnSelect(TRUE);
@@ -238,6 +249,15 @@ int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
    displayList->SetID(COLUMN_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
+   displayList.Release();
+   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   displayList->SetID(SECTION_CUT_DISPLAY_LIST);
+   dispMgr->AddDisplayList(displayList);
+
+   m_pFrame = (CXBeamRateChildFrame*)GetParent();
+   ASSERT( m_pFrame != 0 );
+   ASSERT( m_pFrame->IsKindOf( RUNTIME_CLASS( CXBeamRateChildFrame ) ) );
+
    return 0;
 }
 
@@ -263,6 +283,8 @@ PierIndexType CXBeamRateView::GetPierIndex()
 void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
 {
    CDisplayView::OnUpdate(pSender,lHint,pHint);
+
+   CDManipClientDC dc2(this);
    UpdateDisplayObjects();
    ScaleToFit();
    Invalidate();
@@ -299,6 +321,7 @@ void CXBeamRateView::UpdateDisplayObjects()
    UpdateRebarDisplayObjects();
    UpdateStirrupDisplayObjects();
    UpdateDimensionsDisplayObjects();
+   UpdateSectionCutDisplayObjects();
 }
 
 void CXBeamRateView::UpdateXBeamDisplayObjects()
@@ -909,6 +932,58 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
    }
 }
 
+void CXBeamRateView::UpdateSectionCutDisplayObjects()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   CComPtr<iDisplayMgr> dispMgr;
+   GetDisplayMgr(&dispMgr);
+
+   CComPtr<iDisplayList> display_list;
+   dispMgr->FindDisplayList(SECTION_CUT_DISPLAY_LIST,&display_list);
+
+   CComPtr<iDisplayObjectFactory> factory;
+   dispMgr->GetDisplayObjectFactory(0, &factory);
+
+   CComPtr<iDisplayObject> disp_obj;
+   factory->Create(CSectionCutDisplayImpl::ms_Format,NULL,&disp_obj);
+
+   CComPtr<iDisplayObjectEvents> sink;
+   disp_obj->GetEventSink(&sink);
+
+   disp_obj->SetSelectionType(stAll);
+
+   CComQIPtr<iPointDisplayObject,&IID_iPointDisplayObject> point_disp(disp_obj);
+   point_disp->SetMaxTipWidth(TOOLTIP_WIDTH);
+   point_disp->SetToolTipText(_T("Drag me along the alignment to move section cut.\r\nDouble click to enter the cut station\r\nPress CTRL + -> to move ahead\r\nPress CTRL + <- to move back"));
+   point_disp->SetTipDisplayTime(TOOLTIP_DURATION);
+
+   //GET_IFACE2_NOCHECK(pBroker,IRoadway,pRoadway); // this interface is simply stored in the section_cut_strategy object.. no usage here
+   //GET_IFACE2(pBroker,IBridge,pBridge);
+   CComQIPtr<iSectionCutDrawStrategy,&IID_iSectionCutDrawStrategy> section_cut_strategy(sink);
+   section_cut_strategy->Init(point_disp, m_pFrame);
+   section_cut_strategy->SetColor(CUT_COLOR);
+
+   point_disp->SetID(SECTION_CUT_ID);
+
+   display_list->Clear();
+//   UpdateSectionCut(point_disp,FALSE);
+   display_list->AddDisplayObject(disp_obj);
+
+   //PierIndexType startPierIdx = (PierIndexType)m_StartSpanIdx;
+   //PierIndexType endPierIdx   = (PierIndexType)(m_EndSpanIdx+1);
+   //Float64 first_station = pBridge->GetPierStation(startPierIdx);
+   //Float64 last_station  = pBridge->GetPierStation(endPierIdx);
+   //Float64 cut_station = m_pFrame->GetCurrentCutLocation();
+
+   //if ( !InRange(first_station,cut_station,last_station) )
+   //{
+   //   m_pFrame->InvalidateCutLocation();
+   //   UpdateSectionCut();
+   //}
+}
+
 void CXBeamRateView::UpdateDimensionsDisplayObjects()
 {
    CWaitCursor wait;
@@ -1181,4 +1256,45 @@ void CXBeamRateView::CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd
    connectable2->Connect(0,atByID,endPlug,  &dwCookie);
 
    doLine.CopyTo(ppLineDO);
+}
+
+DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point)
+{
+   // This override has to determine if the thing being dragged over it can
+   // be dropped. In order to do that, it must unpackage the OleDataObject.
+   //
+   // The stuff in the data object is just from the display object. The display
+   // objects need to be updated so that the client can attach an object to it
+   // that knows how to package up domain specific information. At the same
+   // time, this view needs to be able to get some domain specific hint 
+   // as to the type of data that is going to be dropped.
+
+   if ( pDataObject->IsDataAvailable(CSectionCutDisplayImpl::ms_Format) )
+   {
+      // need to peek at our object first and make sure it's coming from the local process
+      // this is ugly because it breaks encapsulation of CBridgeSectionCutDisplayImpl
+      CComPtr<iDragDataSource> source;               
+      ::CoCreateInstance(CLSID_DragDataSource,NULL,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
+      source->SetDataObject(pDataObject);
+      source->PrepareFormat(CSectionCutDisplayImpl::ms_Format);
+
+      CWinThread* thread = ::AfxGetThread( );
+      DWORD threadid = thread->m_nThreadID;
+
+      DWORD threadl;
+      // know (by voodoo) that the first member of this data source is the thread id
+      source->Read(CSectionCutDisplayImpl::ms_Format,&threadl,sizeof(DWORD));
+
+      if (threadl == threadid)
+      {
+        return DROPEFFECT_MOVE;
+      }
+   }
+
+   return DROPEFFECT_NONE;
+}
+
+void CXBeamRateView::OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point)
+{
+   AfxMessageBox(_T("CBridgePlanView::OnDropped"));
 }

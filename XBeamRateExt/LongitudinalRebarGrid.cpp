@@ -54,7 +54,7 @@ void CLongitudinalRebarGrid::CustomInit()
    SetMergeCellsMode(gxnMergeDelayEval);
 
    const int num_rows = 0;
-   const int num_cols = 5;
+   const int num_cols = 10;
 
 	SetRowCount(num_rows);
 	SetColCount(num_cols);
@@ -94,7 +94,33 @@ void CLongitudinalRebarGrid::CustomInit()
 			.SetEnabled(FALSE)          // disables usage as current cell
 		);
 
+   SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+         .SetValue(_T("Measured\nFrom"))
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetEnabled(FALSE)          // disables usage as current cell
+		);
+
    CString cv;
+   cv.Format(_T("Start\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   cv.Format(_T("Length\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
    cv.Format(_T("Cover\n(%s)"),pDisplayUnits->GetComponentDimUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
@@ -127,6 +153,22 @@ void CLongitudinalRebarGrid::CustomInit()
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(cv)
+		);
+
+   SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+         .SetValue(_T("Start\nHook"))
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetEnabled(FALSE)          // disables usage as current cell
+		);
+
+   SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+         .SetValue(_T("End\nHook"))
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetEnabled(FALSE)          // disables usage as current cell
 		);
 
    // make it so that text fits correctly in header row
@@ -267,8 +309,34 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetValue(strDatum)
       );
 
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
+      .SetChoiceList(_T("Left\nRight"))
+      .SetValue(rebarData.LayoutType == xbrTypes::blLeftEnd ? _T("Left") : _T("Right"))
+      );
+
+   Float64 value = ::ConvertFromSysUnits(rebarData.Start,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   value = ::ConvertFromSysUnits(rebarData.Length,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
    // Cover
-   Float64 value = ::ConvertFromSysUnits(rebarData.Cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = ::ConvertFromSysUnits(rebarData.Cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -314,6 +382,22 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetValue(value)
       );
 
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_CENTER)
+      .SetControl(GX_IDS_CTRL_CHECKBOX3D)
+      .SetValue((UINT)rebarData.bHookStart)
+      );
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_CENTER)
+      .SetControl(GX_IDS_CTRL_CHECKBOX3D)
+      .SetValue((UINT)rebarData.bHookEnd)
+      );
+
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
@@ -336,6 +420,15 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::R
    // Beam Face
    rebarData.Datum = GetDatum(row,col++);
 
+   CString strLayout = GetCellValue(row,col++);
+   rebarData.LayoutType = (strLayout == _T("Left") ? xbrTypes::blLeftEnd : xbrTypes::blRightEnd);
+
+   Float64 start = _tstof(GetCellValue(row,col++));
+   rebarData.Start = ::ConvertToSysUnits(start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+
+   Float64 length = _tstof(GetCellValue(row,col++));
+   rebarData.Length = ::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+
    // Cover
    Float64 cover = _tstof(GetCellValue(row,col++));
    rebarData.Cover = ::ConvertToSysUnits(cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
@@ -350,6 +443,12 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::R
    // Spacing;
    Float64 spacing = _tstof(GetCellValue(row,col++));
    rebarData.BarSpacing = ::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+
+   CString strCheck = GetCellValue(row,col++);
+   rebarData.bHookStart = (strCheck == _T("1") ? true : false);
+
+   strCheck = GetCellValue(row,col++);
+   rebarData.bHookEnd = (strCheck == _T("1") ? true : false);
 }
 
 CString CLongitudinalRebarGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)

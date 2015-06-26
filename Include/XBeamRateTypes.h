@@ -25,10 +25,16 @@ typedef struct xbrTypes
 
    typedef enum LongitudinalRebarDatumType
    {
-      Top,
-      TopLowerXBeam,
-      Bottom,
+      Top,           // rebar cover is measured from top of upper cross beam
+      TopLowerXBeam, // rebar cover is measured from top of lower cross beam
+      Bottom,        // rebar cover is measured from bottom of cross beam
    } LongitudinalRebarDatumType;
+
+   typedef enum LongitudinalRebarLayoutType
+   {
+      blLeftEnd,  // start location is measured from left end of cross beam
+      blRightEnd  // start location is measured from right end of cross beam
+   } LongitudinalRebarLayoutType;
 
    typedef enum ProductForceType
    {

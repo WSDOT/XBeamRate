@@ -615,7 +615,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DisplayObjectFactory.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphViewChildFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\mfcdual.cpp"
 				>
 			</File>
 			<File
@@ -632,6 +640,10 @@
 			</File>
 			<File
 				RelativePath=".\ReportViewChildFrame.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\SectionCut.cpp"
 				>
 			</File>
 			<File
@@ -1076,7 +1088,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\DisplayObjectFactory.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GraphViewChildFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\mfcdual.h"
 				>
 			</File>
 			<File
@@ -1097,6 +1117,10 @@
 			</File>
 			<File
 				RelativePath="Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SectionCut.h"
 				>
 			</File>
 			<File
