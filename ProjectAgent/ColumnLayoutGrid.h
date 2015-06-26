@@ -51,9 +51,9 @@ protected:
    virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol);
 
 private:
-   void AddColumn(const xbrColumnData& column,Float64 S);
-   void SetColumnData(ROWCOL row,const xbrColumnData& column,Float64 S);
-   void GetColumnData(ROWCOL row,xbrColumnData* pColumn,Float64* pS);
+   void AddColumn(const CColumnData& column,Float64 S);
+   void SetColumnData(ROWCOL row,const CColumnData& column,Float64 S);
+   void GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* pS);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };
 

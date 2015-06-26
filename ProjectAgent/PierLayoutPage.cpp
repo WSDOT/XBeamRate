@@ -144,7 +144,8 @@ BOOL CPierLayoutPage::OnInitDialog()
    m_ColumnLayoutGrid.SubclassDlgItem(IDC_COLUMN_GRID, this);
    m_ColumnLayoutGrid.CustomInit();
 
-   FillRefColumnComboBox();
+   CPierDlg* pParent = (CPierDlg*)GetParent();
+   FillRefColumnComboBox(pParent->m_PierData.m_PierData.GetColumnCount());
    FillTransverseLocationComboBox();
    FillHeightMeasureComboBox();
 
@@ -200,12 +201,16 @@ void CPierLayoutPage::FillTransverseLocationComboBox()
    pcbMeasure->SetItemData(idx,(DWORD_PTR)pgsTypes::omtBridge);
 }
 
-void CPierLayoutPage::FillRefColumnComboBox()
+void CPierLayoutPage::FillRefColumnComboBox(ColumnIndexType nColumns)
 {
    CComboBox* pcbRefColumn = (CComboBox*)GetDlgItem(IDC_REFCOLUMN);
    int curSel = pcbRefColumn->GetCurSel();
    pcbRefColumn->ResetContent();
-   ColumnIndexType nColumns = (ColumnIndexType)m_ColumnLayoutGrid.GetRowCount();
+   if ( nColumns == INVALID_INDEX )
+   {
+      nColumns = (ColumnIndexType)m_ColumnLayoutGrid.GetRowCount();
+   }
+
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       CString strLabel;

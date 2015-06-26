@@ -76,7 +76,7 @@ void CColumnLayoutGrid::CustomInit()
 			.SetEnabled(FALSE)          // disables usage as current cell
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
-			.SetValue(_T(""))
+			.SetValue(_T("Col"))
 		);
 
    CString cv;
@@ -168,7 +168,7 @@ void CColumnLayoutGrid::AddColumn()
 {
    ROWCOL nRows = GetRowCount();
 
-   xbrColumnData columnData;
+   CColumnData columnData;
    Float64 S;
 
    if ( 0 < nRows )
@@ -180,7 +180,7 @@ void CColumnLayoutGrid::AddColumn()
    if ( 1 < nRows )
    {
       // get the spacing between the last two columns
-      xbrColumnData columnData1;
+      CColumnData columnData1;
       Float64 S1;
       GetColumnData(nRows-1,&columnData1,&S1);
       S = S1;
@@ -241,7 +241,7 @@ void CColumnLayoutGrid::GetColumnData(xbrPierData& pier)
    for ( ROWCOL row = 1; row <= nRows; row++ )
    {
       ColumnIndexType colIdx = (ColumnIndexType)(row-1);
-      xbrColumnData column;
+      CColumnData column;
       Float64 S;
       GetColumnData(row,&column,&S);
       pier.SetColumnData(colIdx,column);
@@ -266,7 +266,7 @@ void CColumnLayoutGrid::SetColumnData(const xbrPierData& pier)
    if ( pier.GetColumnCount() == 0 )
    {
       // Always have one column
-      xbrColumnData column;
+      CColumnData column;
       AddColumn(column,0);
    }
    else
@@ -274,7 +274,7 @@ void CColumnLayoutGrid::SetColumnData(const xbrPierData& pier)
       IndexType nColumns = pier.GetColumnCount();
       for ( IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
       {
-         const xbrColumnData& column = pier.GetColumnData(colIdx);
+         const CColumnData& column = pier.GetColumnData(colIdx);
          Float64 S = (colIdx != nColumns-1 ? pier.GetColumnSpacing(colIdx) : 0);
          AddColumn(column,S);
       }
@@ -284,7 +284,7 @@ void CColumnLayoutGrid::SetColumnData(const xbrPierData& pier)
    GetParam()->EnableUndo(TRUE);
 }
 
-void CColumnLayoutGrid::SetColumnData(ROWCOL row,const xbrColumnData& column,Float64 S)
+void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float64 S)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -376,14 +376,14 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const xbrColumnData& column,Flo
    col++;
 }
 
-void CColumnLayoutGrid::AddColumn(const xbrColumnData& column,Float64 S)
+void CColumnLayoutGrid::AddColumn(const CColumnData& column,Float64 S)
 {
    InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
    SetColumnData(row,column,S);
 }
 
-void CColumnLayoutGrid::GetColumnData(ROWCOL row,xbrColumnData* pColumn,Float64* pS)
+void CColumnLayoutGrid::GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* pS)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);

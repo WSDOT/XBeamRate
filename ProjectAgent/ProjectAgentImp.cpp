@@ -1169,7 +1169,7 @@ Float64 CProjectAgentImp::GetColumnSpacing(PierIDType id,SpacingIndexType spaceI
 
 void CProjectAgentImp::SetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
 {
-   xbrColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+   CColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
    
    columnData.SetColumnHeight(H,heightType);
    columnData.SetColumnShape(shapeType);
@@ -1180,7 +1180,7 @@ void CProjectAgentImp::SetColumnProperties(PierIDType id,ColumnIndexType colIdx,
 
 void CProjectAgentImp::GetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
 {
-   xbrColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+   CColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
 
    *pshapeType = columnData.GetColumnShape();
    columnData.GetColumnDimensions(pD1,pD2);

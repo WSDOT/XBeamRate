@@ -498,10 +498,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\ColumnData.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\dllmain.cpp"
 				>
 				<FileConfiguration
@@ -667,10 +663,6 @@
 			</File>
 			<File
 				RelativePath="..\Include\XBeamRateExt\BearingLineData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\Include\XBeamRateExt\ColumnData.h"
 				>
 			</File>
 			<File

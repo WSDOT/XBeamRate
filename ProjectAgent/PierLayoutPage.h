@@ -50,7 +50,7 @@ protected:
    CMetaFileStatic m_LayoutPicture;
    CColumnLayoutGrid m_ColumnLayoutGrid;
 
-   void FillRefColumnComboBox();
+   void FillRefColumnComboBox(ColumnIndexType nColumns = INVALID_INDEX);
    void FillHeightMeasureComboBox();
    void FillTransverseLocationComboBox();
 };

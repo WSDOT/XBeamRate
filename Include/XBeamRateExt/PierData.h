@@ -1,7 +1,7 @@
 #pragma once
 
 #include <XBeamRateExt\XBRExtExp.h>
-#include <XBeamRateExt\ColumnData.h>
+#include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
@@ -88,11 +88,11 @@ public:
 
    void SetColumnCount(ColumnIndexType nColumns);
    ColumnIndexType GetColumnCount() const;
-   void AddColumn(const xbrColumnData& columnData,Float64 spacing);
+   void AddColumn(const CColumnData& columnData,Float64 spacing);
    void RemoveColumn(ColumnIndexType colIdx);
-   void SetColumnData(ColumnIndexType colIdx,const xbrColumnData& columnData);
-   const xbrColumnData& GetColumnData(ColumnIndexType colIdx) const;
-   xbrColumnData& GetColumnData(ColumnIndexType colIdx);
+   void SetColumnData(ColumnIndexType colIdx,const CColumnData& columnData);
+   const CColumnData& GetColumnData(ColumnIndexType colIdx) const;
+   CColumnData& GetColumnData(ColumnIndexType colIdx);
    void SetColumnSpacing(SpacingIndexType spaceIdx,Float64 S);
    Float64 GetColumnSpacing(SpacingIndexType spaceIdx) const;
    Float64& GetColumnSpacing(SpacingIndexType spaceIdx);
@@ -174,7 +174,7 @@ protected:
    Float64 m_XW;
 
    // Column Layout
-   std::vector<xbrColumnData> m_vColumnData;
+   std::vector<CColumnData> m_vColumnData;
    std::vector<Float64> m_vColumnSpacing;
 
    IndexType m_RefColumnIdx;

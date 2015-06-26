@@ -26,7 +26,7 @@ xbrPierData::xbrPierData()
    m_X2 = ::ConvertToSysUnits(3,unitMeasure::Feet);
    m_XW = ::ConvertToSysUnits(5,unitMeasure::Feet);
 
-   xbrColumnData column;
+   CColumnData column;
    m_vColumnData.push_back(column);
 
    m_RefColumnIdx = 0;
@@ -348,7 +348,7 @@ ColumnIndexType xbrPierData::GetColumnCount() const
    return m_vColumnData.size();
 }
 
-void xbrPierData::AddColumn(const xbrColumnData& columnData,Float64 spacing)
+void xbrPierData::AddColumn(const CColumnData& columnData,Float64 spacing)
 {
    m_vColumnData.push_back(columnData);
    m_vColumnSpacing.push_back(spacing);
@@ -373,17 +373,17 @@ void xbrPierData::RemoveColumn(ColumnIndexType colIdx)
    ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 }
 
-void xbrPierData::SetColumnData(ColumnIndexType colIdx,const xbrColumnData& columnData)
+void xbrPierData::SetColumnData(ColumnIndexType colIdx,const CColumnData& columnData)
 {
    m_vColumnData[colIdx] = columnData;
 }
 
-const xbrColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx) const
+const CColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx) const
 {
    return m_vColumnData[colIdx];
 }
 
-xbrColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx)
+CColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx)
 {
    return m_vColumnData[colIdx];
 }
@@ -651,9 +651,9 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
 
    pStrSave->BeginUnit(_T("Columns"),1.0);
       std::vector<Float64>::iterator spacingIter = m_vColumnSpacing.begin();
-      std::vector<xbrColumnData>::iterator columnIterBegin = m_vColumnData.begin();
-      std::vector<xbrColumnData>::iterator columnIter = columnIterBegin;
-      std::vector<xbrColumnData>::iterator columnIterEnd = m_vColumnData.end();
+      std::vector<CColumnData>::iterator columnIterBegin = m_vColumnData.begin();
+      std::vector<CColumnData>::iterator columnIter = columnIterBegin;
+      std::vector<CColumnData>::iterator columnIterEnd = m_vColumnData.end();
       for ( ; columnIter != columnIterEnd; columnIter++ )
       {
          if ( columnIter != columnIterBegin )
@@ -662,7 +662,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
             pStrSave->put_Property(_T("Spacing"),CComVariant(spacing));
             spacingIter++;
          }
-         xbrColumnData& columnData = *columnIter;
+         CColumnData& columnData = *columnIter;
          columnData.Save(pStrSave,pProgress);
       }
    pStrSave->EndUnit(); // Columns
@@ -829,7 +829,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
             if ( SUCCEEDED(hrSpacing) )
             {
                // only read the column data if the spacing data was successfully read
-               xbrColumnData columnData;
+               CColumnData columnData;
                hr = columnData.Load(pStrLoad,pProgress);
                m_vColumnData.push_back(columnData);
             }
