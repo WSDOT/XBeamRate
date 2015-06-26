@@ -105,7 +105,7 @@ void CColumnLayoutGrid::CustomInit()
 			.SetValue(_T("Shape"))
 		);
 
-   cv.Format(_T("Diameter\nWidth\n(%s)"),pDisplayUnits->GetComponentDimUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("Diameter\nWidth\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -114,7 +114,7 @@ void CColumnLayoutGrid::CustomInit()
 			.SetValue(cv)
 		);
 
-   cv.Format(_T(" \nDepth\n(%s)"),pDisplayUnits->GetComponentDimUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T(" \nDepth\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -321,7 +321,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
 
    Float64 D1, D2;
    column.GetColumnDimensions(&D1,&D2);
-   value = ::ConvertFromSysUnits(D1,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = ::ConvertFromSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++),CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -329,7 +329,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
       .SetValue(value)
       );
 
-   value = ::ConvertFromSysUnits(D2,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = ::ConvertFromSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++),CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -418,9 +418,9 @@ void CColumnLayoutGrid::GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* p
    }
 
    Float64 D1 = _tstof(GetCellValue(row,col++));
-   D1 = ::ConvertToSysUnits(D1,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   D1 = ::ConvertToSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    Float64 D2 = _tstof(GetCellValue(row,col++));
-   D2 = ::ConvertToSysUnits(D2,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   D2 = ::ConvertToSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    pColumn->SetColumnDimensions(D1,D2);
    
    // Spacing
