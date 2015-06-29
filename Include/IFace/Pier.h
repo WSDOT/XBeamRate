@@ -31,6 +31,7 @@ interface IXBRPier : public IUnknown
 
    virtual Float64 GetElevation(PierIDType pierID,Float64 distFromLeftEdge) = 0;
    virtual Float64 GetPierCoordinate(PierIDType pierID,Float64 distFromLeftEdge) = 0;
+   virtual Float64 GetDistFromStart(PierIDType pierID,Float64 Xxb) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}

@@ -37,6 +37,8 @@ public:
    virtual Float64 GetMinCutLocation();
    virtual Float64 GetMaxCutLocation();
 
+   void UpdateSectionCutExtents();
+
 // Implementation
 protected:
 	virtual ~CXBeamRateChildFrame();
@@ -48,6 +50,8 @@ protected:
    CDialogBar m_ControlBar;
 
    Float64 m_CutLocation;
+   Float64 m_Xmin;
+   Float64 m_Xmax;
 
 	// Generated message map functions
 	//{{AFX_MSG(CXBeamRateChildFrame)

@@ -370,7 +370,7 @@ private:
    void CreateMenus();
    void RemoveMenus();
 
-   void UpdatePier();
+   void UpdatePiers();
    void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);
 };
 

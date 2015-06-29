@@ -700,6 +700,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             m_BearingReactions[brgLineIdx].insert(std::make_pair(pierID,vBearingReactions));
          }
       }
+
+      UpdatePiers();
    }
 
 #pragma Reminder("FINISH - Set units")
@@ -1434,7 +1436,7 @@ void CProjectAgentImp::CancelPendingEvents()
 // IBridgeDescriptionEventSink
 HRESULT CProjectAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
 {
-   UpdatePier();
+   UpdatePiers();
    return S_OK;
 }
 
@@ -1522,7 +1524,7 @@ std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBea
    return m_BearingReactions[brgLineIdx][id];
 }
 
-void CProjectAgentImp::UpdatePier()
+void CProjectAgentImp::UpdatePiers()
 {
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
@@ -1565,6 +1567,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    GET_IFACE(IRoadway,pRoadway);
    Float64 elevation = pRoadway->GetElevation(pierStation,0);
    pierData.SetDeckElevation(elevation);
+
+   Float64 CPO = pRoadway->GetCrownPointOffset(pierStation);
+   pierData.SetCrownPointOffset(CPO);
 
    Float64 leftCLO  = pBridge->GetLeftCurbOffset(pierIdx);
    Float64 rightCLO = pBridge->GetRightCurbOffset(pierIdx);

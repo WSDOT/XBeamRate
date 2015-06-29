@@ -3,6 +3,8 @@
 
 #include <DManip\DManip.h>
 
+class CXBeamRateChildFrame;
+
 class iCutLocation
 {
 public:
@@ -22,7 +24,7 @@ DEFINE_GUID(IID_iSectionCutDrawStrategy,
 0xc5245b3c, 0x7d15, 0x41bd, 0xae, 0x85, 0x96, 0x9f, 0x85, 0xf4, 0x42, 0xf3);
 interface iSectionCutDrawStrategy : public IUnknown
 {
-	STDMETHOD_(void,Init)(iPointDisplayObject* pDO, iCutLocation* pCutLoc) PURE;
+	STDMETHOD_(void,Init)(CXBeamRateChildFrame* pFrame,iPointDisplayObject* pDO, iCutLocation* pCutLoc) PURE;
 	STDMETHOD_(void,SetColor)(COLORREF color) PURE;
 };
 
@@ -38,8 +40,8 @@ public:
    DECLARE_INTERFACE_MAP()
 
    BEGIN_INTERFACE_PART(Strategy,iSectionCutDrawStrategy)
-	STDMETHOD_(void,Init)(iPointDisplayObject* pDO, iCutLocation* pCutLoc);
-   STDMETHOD_(void,SetColor)(COLORREF color);
+	   STDMETHOD_(void,Init)(CXBeamRateChildFrame* pFrame,iPointDisplayObject* pDO, iCutLocation* pCutLoc);
+      STDMETHOD_(void,SetColor)(COLORREF color);
  //  STDMETHOD_(pgsPointOfInterest,GetCutPOI)(Float64 Xgl);
    END_INTERFACE_PART(Strategy)
 
@@ -95,6 +97,8 @@ private:
    void GetBoundingBox(iPointDisplayObject* pDO, Float64 Xgl, 
                        Float64* top, Float64* left, Float64* right, Float64* bottom);
    //Float64 GetGirderHeight(Float64 Xgl);
+
+   CXBeamRateChildFrame* m_pFrame;
 
    COLORREF           m_Color;
    //CGirderKey         m_GirderKey;

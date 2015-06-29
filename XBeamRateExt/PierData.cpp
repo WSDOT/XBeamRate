@@ -30,7 +30,7 @@ xbrPierData::xbrPierData()
    m_vColumnData.push_back(column);
 
    m_RefColumnIdx = 0;
-   m_RefColumnOffset = -::ConvertToSysUnits(5,unitMeasure::Feet);
+   m_RefColumnOffset = 0;
    m_RefColumnDatum = pgsTypes::omtAlignment;
 
    m_X3 = ::ConvertToSysUnits(5,unitMeasure::Feet);

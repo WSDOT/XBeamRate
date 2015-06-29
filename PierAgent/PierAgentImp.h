@@ -110,6 +110,7 @@ public:
 
    virtual Float64 GetElevation(PierIDType pierID,Float64 distFromLeftEdge);
    virtual Float64 GetPierCoordinate(PierIDType pierID,Float64 distFromLeftEdge);
+   virtual Float64 GetDistFromStart(PierIDType pierID,Float64 Xxb);
 
 // IXBRSectionProperties
 public:

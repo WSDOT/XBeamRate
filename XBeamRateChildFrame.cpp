@@ -4,6 +4,8 @@
 #include <XBeamRateView.h>
 
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\Project.h>
+#include <IFace\Pier.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
@@ -127,9 +129,9 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
    EAFGetBroker(&pBroker);
    if ( pBroker != NULL )
    {
-      // we only get a broker at this point if we a stand alone app
+      // we only get a broker at this point if we a PGSuper/PGSplice plugin
 
-      // we are a PGSuper/PGSplice plugin... add the control bar
+      // add the control bar
       if ( !m_ControlBar.Create(this,IDD_PIER_VIEW_CONTROLS,CBRS_TOP,100) )
       {
          return FALSE;
@@ -161,6 +163,8 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
       {
          pcbPiers->SetCurSel(0);
       }
+
+      OnPierChanged();
    }
 
    return TRUE;
@@ -195,39 +199,64 @@ Float64 CXBeamRateChildFrame::GetCurrentCutLocation()
 
 void CXBeamRateChildFrame::CutAt(Float64 Xgl)
 {
-   m_CutLocation = Xgl;
+   m_CutLocation = ::ForceIntoRange(m_Xmin,Xgl,m_Xmax);
 
    CXBeamRateView* pView = (CXBeamRateView*)GetActiveView();
-   pView->OnUpdate(0,0,0);
+   pView->OnUpdate(0,HINT_SECTION_CUT_MOVED,0);
 }
 
 void CXBeamRateChildFrame::CutAtNext()
 {
+   Float64 delta = (m_Xmax - m_Xmin)/10;
+   CutAt(m_CutLocation + delta);
 }
 
 void CXBeamRateChildFrame::CutAtPrev()
 {
+   Float64 delta = (m_Xmax - m_Xmin)/10;
+   CutAt(m_CutLocation - delta);
 }
 
 void CXBeamRateChildFrame::ShowCutDlg()
 {
+   AfxMessageBox(_T("CutDlg"));
 }
 
 Float64 CXBeamRateChildFrame::GetMinCutLocation()
 {
-   return -10;
+   return m_Xmin;
 }
 
 Float64 CXBeamRateChildFrame::GetMaxCutLocation()
 {
-   return 10;
+   return m_Xmax;
+}
+
+void CXBeamRateChildFrame::UpdateSectionCutExtents()
+{
+   PierIDType pierID = GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   Float64 Lxb = pProject->GetXBeamLength(pierID);
+
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   m_Xmin = pPier->GetPierCoordinate(pierID,0);
+   m_Xmax = pPier->GetPierCoordinate(pierID,Lxb);
+
+   m_CutLocation = ::ForceIntoRange(m_Xmin,m_CutLocation,m_Xmax);
 }
 
 void CXBeamRateChildFrame::OnPierChanged()
 {
+   UpdateSectionCutExtents();
+   m_CutLocation = 0.5*(m_Xmin + m_Xmax);
+
    CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
    int curSel = pcbPiers->GetCurSel();
-   PierIndexType pierIdx = (PierIndexType)pcbPiers->GetItemData(curSel);
+   PierIDType pierID = (PierIDType)pcbPiers->GetItemData(curSel);
+
    CView* pView = GetActiveView();
    if ( pView )
    {

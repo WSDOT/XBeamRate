@@ -415,6 +415,19 @@ Float64 CPierAgentImp::GetPierCoordinate(PierIDType pierID,Float64 distFromLeftE
    return X;
 }
 
+Float64 CPierAgentImp::GetDistFromStart(PierIDType pierID,Float64 Xxb)
+{
+   CComPtr<IPoint2d> pntTL, pntTC, pntTR;
+   CComPtr<IPoint2d> pntBL, pntBC, pntBR;
+   GetUpperXBeamPoints(pierID,&pntTL,&pntTC,&pntTR,&pntBL,&pntBC,&pntBR);
+
+   Float64 x1,y1;
+   pntTL->Location(&x1,&y1);
+
+   Float64 distFromLeftEdge = Xxb - x1;
+   return distFromLeftEdge;
+}
+
 //////////////////////////////////////////
 // IXBRSectionProperties
 Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)

@@ -102,6 +102,7 @@ public:
    CXBeamRateAgent() :
       m_CommandTarget(this)
 	{
+      m_PierViewKey = -1;
 	}
 
 DECLARE_REGISTRY_RESOURCEID(IDR_XBEAMRATEAGENT)

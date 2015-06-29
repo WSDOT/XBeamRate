@@ -762,9 +762,12 @@ HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
 // IXBRProjectEventSink
 HRESULT CXBeamRateAgent::OnProjectChanged()
 {
-   CEAFDocument* pDoc = EAFGetDocument();
-   pDoc->SetModifiedFlag();
-   pDoc->UpdateRegisteredView(m_PierViewKey,0,0,0);
+   if ( 0 <= m_PierViewKey )
+   {
+      CEAFDocument* pDoc = EAFGetDocument();
+      pDoc->SetModifiedFlag();
+      pDoc->UpdateRegisteredView(m_PierViewKey,0,0,0);
+   }
 
    return S_OK;
 }

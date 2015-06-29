@@ -15,6 +15,8 @@
 class CXBeamRateDoc;
 class CXBeamRateChildFrame;
 
+#define HINT_SECTION_CUT_MOVED 1
+
 class CXBeamRateView : public CDisplayView
 {
    friend CXBeamRateChildFrame;
