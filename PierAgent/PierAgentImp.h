@@ -103,14 +103,19 @@ public:
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx);
    virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx);
    virtual Float64 GetMaxColumnHeight(PierIDType pierID);
-   virtual void GetUpperXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR);
-   virtual void GetLowerXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR);
+   virtual Float64 GetXBeamLength(PierIDType pierID);
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape);
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape);
 
-   virtual Float64 GetElevation(PierIDType pierID,Float64 distFromLeftEdge);
-   virtual Float64 GetPierCoordinate(PierIDType pierID,Float64 distFromLeftEdge);
-   virtual Float64 GetDistFromStart(PierIDType pierID,Float64 Xxb);
+   virtual Float64 GetCrownPointOffset(PierIDType pierID);
+   virtual Float64 GetCrownPointLocation(PierIDType pierID);
+
+   virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl);
+
+   virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb);
+   virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl);
+   virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier);
+   virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb);
 
 // IXBRSectionProperties
 public:
@@ -118,8 +123,7 @@ public:
    virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual void GetUpperXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
-   virtual void GetLowerXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
+   virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape);
 
 // IXBRMaterial
 public:
@@ -129,6 +133,7 @@ public:
 
 // IXBRRebar
 public:
+   virtual void GetRebarSection(PierIDType pierIdx,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection);
    virtual IndexType GetRebarRowCount(PierIDType pierID);
    virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx);
    virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints);
@@ -147,6 +152,11 @@ public:
 public:
    virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib);
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx);
+   virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi);
+   virtual xbrPointOfInterest ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp);
+   virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi);
+   virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID);
+   virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID);
 
 // IXBRProjectEventSink
 public:
@@ -160,17 +170,20 @@ private:
    DECLARE_EAF_AGENT_DATA;
    DWORD m_dwProjectCookie;
 
+   std::map<PierIDType,CComPtr<IPier>> m_PierModels;
+   void ValidatePierModel(PierIDType pierID);
+   void GetPierModel(PierIDType pierID,IPier** ppPierModel);
+
    void Invalidate();
 
    PoiIDType m_NextPoiID;
    void ValidatePointsOfInterest(PierIDType pierID);
    std::vector<xbrPointOfInterest>& GetPointsOfInterest(PierIDType pierID);
    std::map<PierIDType,std::vector<xbrPointOfInterest>> m_XBeamPoi;
+   bool FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi);
 
    Float64 GetLeftBearingOffset(PierIDType pierID,IndexType brgLineIdx);
    Float64 GetLeftColumnOffset(PierIDType pierID);
-   Float64 GetLeftEdgeLocation(PierIDType pierID);
-   Float64 GetCrownPointLocation(PierIDType pierID);
    Float64 GetSkewAngle(PierIDType pierID);
 
    typedef struct

@@ -46,8 +46,8 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
    pParent->m_PierData.m_PierData.SetSkew(strSkew);
 
    DDX_CBEnum(pDX,IDC_CURB_LINE_MEASUREMENT,pParent->m_PierData.m_PierData.GetCurbLineDatum());
-   DDX_UnitValueAndTag(pDX,IDC_LCO,IDC_LCO_UNIT,pParent->m_PierData.m_PierData.GetLeftCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
-   DDX_UnitValueAndTag(pDX,IDC_RCO,IDC_RCO_UNIT,pParent->m_PierData.m_PierData.GetRightCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_LCO,IDC_LCO_UNIT,pParent->m_PierData.m_PierData.GetLeftCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_OffsetAndTag(pDX,IDC_RCO,IDC_RCO_UNIT,pParent->m_PierData.m_PierData.GetRightCurbLineOffset(),pDisplayUnits->GetSpanLengthUnit());
    DDX_Text(pDX,IDC_SL,pParent->m_PierData.m_PierData.GetLeftCrownSlope());
    DDX_Text(pDX,IDC_SR,pParent->m_PierData.m_PierData.GetRightCrownSlope());
 

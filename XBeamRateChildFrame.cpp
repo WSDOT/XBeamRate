@@ -2,10 +2,12 @@
 #include "resource.h"
 #include <XBeamRateChildFrame.h>
 #include <XBeamRateView.h>
+#include <SectionCutDlg.h>
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
 #include <IFace\Pier.h>
+#include <IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
@@ -191,35 +193,89 @@ BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 }
 
 // iCutLocation
-#pragma Reminder("WORKING HERE - implment iCutLocation")
+
+xbrPointOfInterest CXBeamRateChildFrame::GetCutLocation()
+{
+   CXBeamRateView* pView = (CXBeamRateView*)GetActiveView();
+   return pView->GetCutLocation();
+}
+
 Float64 CXBeamRateChildFrame::GetCurrentCutLocation()
 {
    return m_CutLocation;
 }
 
-void CXBeamRateChildFrame::CutAt(Float64 Xgl)
+void CXBeamRateChildFrame::UpdateCutLocation(const xbrPointOfInterest& poi)
 {
-   m_CutLocation = ::ForceIntoRange(m_Xmin,Xgl,m_Xmax);
+   PierIDType pierID = GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   m_CutLocation = pPoi->ConvertPoiToPierCoordinate(pierID,poi);
 
    CXBeamRateView* pView = (CXBeamRateView*)GetActiveView();
    pView->OnUpdate(0,HINT_SECTION_CUT_MOVED,0);
 }
 
+void CXBeamRateChildFrame::CutAt(Float64 Xp)
+{
+   PierIDType pierID = GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   xbrPointOfInterest poi = pPoi->ConvertPierCoordinateToPoi(pierID,Xp);
+   if ( poi.GetID() == INVALID_ID )
+   {
+      // make sure we are at an actual poi
+      poi = pPoi->GetNearestPointOfInterest(pierID,poi);
+   }
+
+   UpdateCutLocation(poi);
+}
+
 void CXBeamRateChildFrame::CutAtNext()
 {
-   Float64 delta = (m_Xmax - m_Xmin)/10;
-   CutAt(m_CutLocation + delta);
+   PierIDType pierID = GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   xbrPointOfInterest currentPoi = GetCutLocation();
+   xbrPointOfInterest poi = pPoi->GetNextPointOfInterest(pierID,currentPoi.GetID());
+   if ( poi.GetID() != INVALID_ID )
+   {
+      Float64 Xp = pPoi->ConvertPoiToPierCoordinate(pierID,poi);
+      CutAt(Xp);
+   }
 }
 
 void CXBeamRateChildFrame::CutAtPrev()
 {
-   Float64 delta = (m_Xmax - m_Xmin)/10;
-   CutAt(m_CutLocation - delta);
+   PierIDType pierID = GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   xbrPointOfInterest currentPoi = GetCutLocation();
+   xbrPointOfInterest poi = pPoi->GetPrevPointOfInterest(pierID,currentPoi.GetID());
+   if ( poi.GetID() != INVALID_ID )
+   {
+      Float64 Xp = pPoi->ConvertPoiToPierCoordinate(pierID,poi);
+      CutAt(Xp);
+   }
 }
 
 void CXBeamRateChildFrame::ShowCutDlg()
 {
-   AfxMessageBox(_T("CutDlg"));
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CSectionCutDlg dlg(GetPierID(),GetCutLocation());
+   if ( dlg.DoModal() == IDOK )
+   {
+      UpdateCutLocation(dlg.GetPOI());
+   }
 }
 
 Float64 CXBeamRateChildFrame::GetMinCutLocation()
@@ -238,12 +294,10 @@ void CXBeamRateChildFrame::UpdateSectionCutExtents()
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-   Float64 Lxb = pProject->GetXBeamLength(pierID);
-
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   m_Xmin = pPier->GetPierCoordinate(pierID,0);
-   m_Xmax = pPier->GetPierCoordinate(pierID,Lxb);
+   Float64 Lxb = pPier->GetXBeamLength(pierID);
+   m_Xmin = pPier->ConvertCrossBeamToPierCoordinate(pierID,0);
+   m_Xmax = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
 
    m_CutLocation = ::ForceIntoRange(m_Xmin,m_CutLocation,m_Xmax);
 }

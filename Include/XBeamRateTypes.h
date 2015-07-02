@@ -33,7 +33,8 @@ typedef struct xbrTypes
    typedef enum LongitudinalRebarLayoutType
    {
       blLeftEnd,  // start location is measured from left end of cross beam
-      blRightEnd  // start location is measured from right end of cross beam
+      blRightEnd,  // start location is measured from right end of cross beam
+      blFullLength // bar is full length of cross beam (start and length parameters ignored)
    } LongitudinalRebarLayoutType;
 
    typedef enum ProductForceType

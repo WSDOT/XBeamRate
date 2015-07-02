@@ -65,12 +65,12 @@ public:
    // w = width of the diaphragm. at expansion piers, w is the sum of the left and right diaphragm
    // h = height of the diaphragm from the top of deck to the top of the lower cross beam
    void SetDiaphragmDimensions(Float64 h,Float64 w);
-   void GetDiaphragmDimensions(Float64* ph,Float64* pw);
+   void GetDiaphragmDimensions(Float64* ph,Float64* pw) const;
    Float64& GetDiaphragmHeight();
    Float64& GetDiaphragmWidth();
 
    void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
-   void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw);
+   void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) const;
    Float64& GetH1();
    Float64& GetH2();
    Float64& GetH3();
@@ -81,7 +81,7 @@ public:
 
    // Establishes the location of the columns with respect to the alignment/bridgeline.
    void SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset);
-   void GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset);
+   void GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) const;
    pgsTypes::OffsetMeasurementType& GetColumnLayoutDatum();
    IndexType& GetRefColumnIndex();
    Float64& GetRefColumnOffset();

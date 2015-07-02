@@ -647,6 +647,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\SectionCutDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -1121,6 +1125,10 @@
 			</File>
 			<File
 				RelativePath=".\SectionCut.h"
+				>
+			</File>
+			<File
+				RelativePath=".\SectionCutDlg.h"
 				>
 			</File>
 			<File

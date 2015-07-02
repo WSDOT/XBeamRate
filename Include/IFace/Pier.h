@@ -5,6 +5,7 @@
 interface IShape;
 interface IPoint2d;
 interface IPoint2dCollection;
+interface IRebarSection;
 
 // {7F04A0B9-FD4E-4965-8F26-8BE78B063803}
 DEFINE_GUID(IID_IXBRPier, 
@@ -15,23 +16,35 @@ interface IXBRPier : public IUnknown
    virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) = 0;
    virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
 
+   // Returns the number of columns in the pier
    virtual IndexType GetColumnCount(PierIDType pierID) = 0;
+
+   // Returns the location of the column in Cross Beam Coordinates
    virtual Float64 GetColumnLocation(PierIDType pierID,IndexType colIdx) = 0;
+
    virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx) = 0;
    virtual Float64 GetMaxColumnHeight(PierIDType pierID) = 0;
    virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx) = 0;
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) = 0;
    virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) = 0;
 
-   virtual void GetUpperXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBC,IPoint2d** ppBR) = 0;
-   virtual void GetLowerXBeamPoints(PierIDType pierID,IPoint2d** ppTL,IPoint2d** ppTC,IPoint2d** ppTR,IPoint2d** ppBL,IPoint2d** ppBL2,IPoint2d** ppBR2,IPoint2d** ppBR) = 0;
+   // Returns the length of the cross beam measured at the bottom face.
+   virtual Float64 GetXBeamLength(PierIDType pierID) = 0;
 
+   // Returns the cross beam profile in Pier Coordinates
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) = 0;
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape) = 0;
 
-   virtual Float64 GetElevation(PierIDType pierID,Float64 distFromLeftEdge) = 0;
-   virtual Float64 GetPierCoordinate(PierIDType pierID,Float64 distFromLeftEdge) = 0;
-   virtual Float64 GetDistFromStart(PierIDType pierID,Float64 Xxb) = 0;
+   virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;
+   virtual Float64 GetCrownPointLocation(PierIDType pierID) = 0;
+
+   // Returns the deck elevation at the specified location in curb line coordinates
+   virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl) = 0;
+
+   virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb) = 0;
+   virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl) = 0;
+   virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier) = 0;
+   virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}
@@ -44,8 +57,7 @@ interface IXBRSectionProperties : public IUnknown
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 
-   virtual void GetUpperXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape) = 0;
-   virtual void GetLowerXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape) = 0;
+   virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape) = 0;
 };
 
 // {BE372349-0F8D-48e4-90F2-536AC90BEBBE}
@@ -63,6 +75,8 @@ DEFINE_GUID(IID_IXBRRebar,
 0x80b9f943, 0xf0bf, 0x4c4b, 0xbc, 0xe9, 0x70, 0xbb, 0xb3, 0xa5, 0x51, 0x88);
 interface IXBRRebar : public IUnknown
 {
+   virtual void GetRebarSection(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection) = 0;
+
    virtual IndexType GetRebarRowCount(PierIDType pierID) = 0;
    virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx) = 0;
    virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints) = 0;

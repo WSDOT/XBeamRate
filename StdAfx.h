@@ -9,6 +9,7 @@
 #include <afxwin.h>
 #include <afxdisp.h>
 #include <afxext.h>
+#include <afxcmn.h>
 
 #include <atlbase.h>
 //You may derive a class from CComModule and use it if you want to override

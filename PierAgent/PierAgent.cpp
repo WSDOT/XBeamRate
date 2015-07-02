@@ -36,6 +36,7 @@
 #include "PierAgentCLSID.h"
 
 #include <WBFLCore_i.c>
+#include <WBFLUnitServer_i.c>
 #include <WBFLGeometry_i.c>
 #include <WBFLGenericBridge_i.c>
 #include <WBFLCogo_i.c>

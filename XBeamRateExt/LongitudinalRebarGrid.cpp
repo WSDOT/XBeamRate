@@ -96,7 +96,7 @@ void CLongitudinalRebarGrid::CustomInit()
 
    SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
-         .SetValue(_T("Measured\nFrom"))
+         .SetValue(_T("Datum"))
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -285,6 +285,37 @@ CString CLongitudinalRebarGrid::GetDatum(xbrTypes::LongitudinalRebarDatumType da
    return _T("Top Lower XBeam");
 }
 
+LPCTSTR CLongitudinalRebarGrid::GetRebarLayoutType(xbrTypes::LongitudinalRebarLayoutType layoutType)
+{
+   switch(layoutType)
+   {
+   case xbrTypes::blLeftEnd:
+      return _T("Left End");
+
+   case xbrTypes::blRightEnd:
+      return _T("Right End");
+
+   case xbrTypes::blFullLength:
+      return _T("None");
+   }
+   ATLASSERT(false);
+   return _T("None");
+}
+
+xbrTypes::LongitudinalRebarLayoutType CLongitudinalRebarGrid::GetRebarLayoutType(LPCTSTR lpszLayoutType)
+{
+   CString str(lpszLayoutType);
+   if ( str == _T("Left End") )
+      return xbrTypes::blLeftEnd;
+   else if ( str == _T("Right End") )
+      return xbrTypes::blRightEnd;
+   else if ( str == _T("None") )
+      return xbrTypes::blFullLength;
+
+   ATLASSERT(false);
+   return xbrTypes::blFullLength;
+}
+
 void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData)
 {
    CComPtr<IBroker> pBroker;
@@ -315,11 +346,11 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
-      .SetChoiceList(_T("Left\nRight"))
-      .SetValue(rebarData.LayoutType == xbrTypes::blLeftEnd ? _T("Left") : _T("Right"))
+      .SetChoiceList(_T("Left End\nRight End\nNone"))
+      .SetValue(GetRebarLayoutType(rebarData.LayoutType))
       );
 
-   Float64 value = ::ConvertFromSysUnits(rebarData.Start,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   Float64 value = ::ConvertFromSysUnits(rebarData.Start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -327,13 +358,25 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetValue(value)
       );
 
-   value = ::ConvertFromSysUnits(rebarData.Length,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = ::ConvertFromSysUnits(rebarData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetHorizontalAlignment(DT_RIGHT)
       .SetValue(value)
       );
+
+   // grey out the Start and Length fields if rebar layout is full length
+   if ( rebarData.LayoutType == xbrTypes::blFullLength )
+   {
+      SetStyleRange(CGXRange(row,col-2,row,col-1),CGXStyle()
+         .SetEnabled(FALSE)
+         .SetReadOnly(TRUE)
+         .SetInterior(::GetSysColor(COLOR_BTNFACE))
+         .SetTextColor(::GetSysColor(COLOR_BTNFACE))
+         .SetHorizontalAlignment(DT_RIGHT)
+         );   
+   }
 
    // Cover
    value = ::ConvertFromSysUnits(rebarData.Cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
@@ -421,7 +464,7 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::R
    rebarData.Datum = GetDatum(row,col++);
 
    CString strLayout = GetCellValue(row,col++);
-   rebarData.LayoutType = (strLayout == _T("Left") ? xbrTypes::blLeftEnd : xbrTypes::blRightEnd);
+   rebarData.LayoutType = GetRebarLayoutType(strLayout);
 
    Float64 start = _tstof(GetCellValue(row,col++));
    rebarData.Start = ::ConvertToSysUnits(start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
@@ -509,4 +552,41 @@ matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
 
    ATLASSERT(false); // should never get here
    return matRebar::bs3;
+}
+
+void CLongitudinalRebarGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)
+{
+   CGXGridCore::OnModifyCell(nRow,nCol);
+
+   if ( nCol == 2 )
+   {
+      GetParam()->EnableUndo(FALSE);
+      GetParam()->SetLockReadOnly(FALSE);
+
+      CString str = GetCellValue(nRow,nCol);
+      xbrTypes::LongitudinalRebarLayoutType layoutType = GetRebarLayoutType(str);
+      if ( layoutType == xbrTypes::blFullLength )
+      {
+         SetStyleRange(CGXRange(nRow,nCol+1,nRow,nCol+2),CGXStyle()
+            .SetEnabled(FALSE)
+            .SetReadOnly(TRUE)
+            .SetInterior(::GetSysColor(COLOR_BTNFACE))
+            .SetTextColor(::GetSysColor(COLOR_BTNFACE))
+            .SetHorizontalAlignment(DT_RIGHT)
+            );
+      }
+      else
+      {
+         SetStyleRange(CGXRange(nRow,nCol+1,nRow,nCol+2),CGXStyle()
+            .SetEnabled(TRUE)
+            .SetReadOnly(FALSE)
+            .SetInterior(::GetSysColor(COLOR_WINDOW))
+            .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
+            .SetHorizontalAlignment(DT_RIGHT)
+            );
+      }
+
+      GetParam()->SetLockReadOnly(TRUE);
+      GetParam()->EnableUndo(TRUE);
+   }
 }

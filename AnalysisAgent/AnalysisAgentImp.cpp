@@ -177,7 +177,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID)
    Float64 rightOverhang = pProject->GetXBeamRightOverhang(pierID);
    IndexType nColumns = pProject->GetColumnCount(pierID);
 
-   Float64 L = pProject->GetXBeamLength(pierID);
+   Float64 L = pPier->GetXBeamLength(pierID);
 
    Float64 Exb = pMaterial->GetXBeamEc(pierID);
    Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));

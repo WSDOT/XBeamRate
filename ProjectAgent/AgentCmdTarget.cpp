@@ -49,10 +49,10 @@ void CAgentCmdTarget::OnEditPier()
    GET_IFACE(IXBRProject,pProject);
    CPierDlg dlg(_T("Edit Pier"));
 
-   PierIDType id = INVALID_ID;
+   PierIDType pierID = INVALID_ID;
 
    txnEditPierData oldPierData;
-   oldPierData.m_PierData = pProject->GetPierData(id);
+   oldPierData.m_PierData = pProject->GetPierData(pierID);
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_PierData.GetBearingLineCount(); brgLineIdx++ )
    {
@@ -60,7 +60,7 @@ void CAgentCmdTarget::OnEditPier()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          txnDeadLoadReaction reaction;
-         pProject->GetBearingReactions(id,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW);
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW);
          oldPierData.m_DeadLoadReactions[brgLineIdx].push_back(reaction);
       }
    }
@@ -70,14 +70,14 @@ void CAgentCmdTarget::OnEditPier()
    for ( int i = 0; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
-      oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(id,ratingType);
+      oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(pierID,ratingType);
    }
 
-   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrDesign_Inventory);
-   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrLegal_Routine);
-   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrLegal_Special);
-   oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrPermit_Routine);
-   oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(id,pgsTypes::lrPermit_Special);
+   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);
+   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine);
+   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special);
+   oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Routine);
+   oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Special);
 
    dlg.SetEditPierData(oldPierData);
    if ( dlg.DoModal() == IDOK )

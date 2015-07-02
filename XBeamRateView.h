@@ -11,6 +11,7 @@
 
 #include <DManip\DManip.h>
 #include <DManipTools\DManipTools.h>
+#include <XBeamRateExt\PointOfInterest.h>
 
 class CXBeamRateDoc;
 class CXBeamRateChildFrame;
@@ -50,6 +51,8 @@ public:
 
    PierIDType GetPierID();
    PierIndexType GetPierIndex();
+
+   xbrPointOfInterest GetCutLocation();
 
 // Implementation
 public:

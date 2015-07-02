@@ -2,6 +2,7 @@
 
 #include <EAF\EAFChildFrame.h>
 #include "SectionCut.h"
+#include <XBeamRateExt\PointOfInterest.h>
 
 class CXBeamRateChildFrame : public CEAFChildFrame, public iCutLocation
 {
@@ -30,7 +31,7 @@ public:
 public:
    // iCutLocation
    virtual Float64 GetCurrentCutLocation();
-   virtual void CutAt(Float64 Xgl);
+   virtual void CutAt(Float64 Xp);
    virtual void CutAtNext();
    virtual void CutAtPrev();
    virtual void ShowCutDlg();
@@ -38,6 +39,8 @@ public:
    virtual Float64 GetMaxCutLocation();
 
    void UpdateSectionCutExtents();
+   xbrPointOfInterest GetCutLocation();
+
 
 // Implementation
 protected:
@@ -53,7 +56,9 @@ protected:
    Float64 m_Xmin;
    Float64 m_Xmax;
 
-	// Generated message map functions
+   void UpdateCutLocation(const xbrPointOfInterest& poi);
+
+   // Generated message map functions
 	//{{AFX_MSG(CXBeamRateChildFrame)
    afx_msg void OnPierChanged();
 	//}}AFX_MSG

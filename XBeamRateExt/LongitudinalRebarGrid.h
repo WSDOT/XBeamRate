@@ -70,6 +70,8 @@ public:
    void CustomInit();
 
 private:
+   virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol);
+
    CString GetDatumOptions();
    CString GetDatum(xbrTypes::LongitudinalRebarDatumType datum);
    void AddRebarRow(const xbrLongitudinalRebarData::RebarRow& rebarData);
@@ -78,6 +80,8 @@ private:
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
    xbrTypes::LongitudinalRebarDatumType GetDatum(ROWCOL row,ROWCOL col);
    matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
+   LPCTSTR GetRebarLayoutType(xbrTypes::LongitudinalRebarLayoutType layoutType);
+   xbrTypes::LongitudinalRebarLayoutType GetRebarLayoutType(LPCTSTR lpszLayoutType);
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -662,9 +662,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          xbrPierData pierData;
          while ( SUCCEEDED(pierData.Load(pStrLoad,NULL)) )
          {
-            PierIDType id = pierData.GetID();
-            ATLASSERT(id != INVALID_ID);
-            m_PierData.insert(std::make_pair(id,pierData));
+            PierIDType pierID = pierData.GetID();
+            ATLASSERT(pierID != INVALID_ID);
+            m_PierData.insert(std::make_pair(pierID,pierData));
          }
       }
 
@@ -887,176 +887,176 @@ void CProjectAgentImp::SetPierData(const xbrPierData& pierData)
    Fire_OnProjectChanged();
 }
 
-const xbrPierData& CProjectAgentImp::GetPierData(PierIDType id)
+const xbrPierData& CProjectAgentImp::GetPierData(PierIDType pierID)
 {
-   return GetPrivatePierData(id);
+   return GetPrivatePierData(pierID);
 }
 
-xbrTypes::SuperstructureConnectionType CProjectAgentImp::GetPierType(PierIDType id)
+xbrTypes::SuperstructureConnectionType CProjectAgentImp::GetPierType(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetSuperstructureConnectionType();
+   return GetPrivatePierData(pierID).GetSuperstructureConnectionType();
 }
 
-void CProjectAgentImp::SetPierType(PierIDType id,xbrTypes::SuperstructureConnectionType pierType)
+void CProjectAgentImp::SetPierType(PierIDType pierID,xbrTypes::SuperstructureConnectionType pierType)
 {
-   GetPrivatePierData(id).SetSuperstructureConnectionType(pierType);
+   GetPrivatePierData(pierID).SetSuperstructureConnectionType(pierType);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetDeckElevation(PierIDType id,Float64 deckElevation)
+void CProjectAgentImp::SetDeckElevation(PierIDType pierID,Float64 deckElevation)
 {
-   GetPrivatePierData(id).SetDeckElevation(deckElevation);
+   GetPrivatePierData(pierID).SetDeckElevation(deckElevation);
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetDeckElevation(PierIDType id)
+Float64 CProjectAgentImp::GetDeckElevation(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetDeckElevation();
+   return GetPrivatePierData(pierID).GetDeckElevation();
 }
 
-void CProjectAgentImp::SetCrownPointOffset(PierIDType id,Float64 cpo)
+void CProjectAgentImp::SetCrownPointOffset(PierIDType pierID,Float64 cpo)
 {
-   GetPrivatePierData(id).SetCrownPointOffset(cpo);
+   GetPrivatePierData(pierID).SetCrownPointOffset(cpo);
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetCrownPointOffset(PierIDType id)
+Float64 CProjectAgentImp::GetCrownPointOffset(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetCrownPointOffset();
+   return GetPrivatePierData(pierID).GetCrownPointOffset();
 }
 
-void CProjectAgentImp::SetBridgeLineOffset(PierIDType id,Float64 blo)
+void CProjectAgentImp::SetBridgeLineOffset(PierIDType pierID,Float64 blo)
 {
-   GetPrivatePierData(id).SetBridgeLineOffset(blo);
+   GetPrivatePierData(pierID).SetBridgeLineOffset(blo);
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetBridgeLineOffset(PierIDType id)
+Float64 CProjectAgentImp::GetBridgeLineOffset(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetBridgeLineOffset();
+   return GetPrivatePierData(pierID).GetBridgeLineOffset();
 }
 
-void CProjectAgentImp::SetOrientation(PierIDType id,LPCTSTR strOrientation)
+void CProjectAgentImp::SetOrientation(PierIDType pierID,LPCTSTR strOrientation)
 {
-   GetPrivatePierData(id).SetSkew(strOrientation);
+   GetPrivatePierData(pierID).SetSkew(strOrientation);
    Fire_OnProjectChanged();
 }
 
-LPCTSTR CProjectAgentImp::GetOrientation(PierIDType id)
+LPCTSTR CProjectAgentImp::GetOrientation(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetSkew();
+   return GetPrivatePierData(pierID).GetSkew();
 }
 
-pgsTypes::OffsetMeasurementType CProjectAgentImp::GetCurbLineDatum(PierIDType id)
+pgsTypes::OffsetMeasurementType CProjectAgentImp::GetCurbLineDatum(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetCurbLineDatum();
+   return GetPrivatePierData(pierID).GetCurbLineDatum();
 }
 
-void CProjectAgentImp::SetCurbLineDatum(PierIDType id,pgsTypes::OffsetMeasurementType datumType)
+void CProjectAgentImp::SetCurbLineDatum(PierIDType pierID,pgsTypes::OffsetMeasurementType datumType)
 {
-   GetPrivatePierData(id).SetCurbLineDatum(datumType);
+   GetPrivatePierData(pierID).SetCurbLineDatum(datumType);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetCurbLineOffset(PierIDType id,Float64 leftCLO,Float64 rightCLO)
+void CProjectAgentImp::SetCurbLineOffset(PierIDType pierID,Float64 leftCLO,Float64 rightCLO)
 {
-   GetPrivatePierData(id).SetCurbLineOffset(leftCLO,rightCLO);
+   GetPrivatePierData(pierID).SetCurbLineOffset(leftCLO,rightCLO);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetCurbLineOffset(PierIDType id,Float64* pLeftCLO,Float64* pRightCLO)
+void CProjectAgentImp::GetCurbLineOffset(PierIDType pierID,Float64* pLeftCLO,Float64* pRightCLO)
 {
-   GetPrivatePierData(id).GetCurbLineOffset(pLeftCLO,pRightCLO);
+   GetPrivatePierData(pierID).GetCurbLineOffset(pLeftCLO,pRightCLO);
 }
 
-void CProjectAgentImp::SetCrownSlopes(PierIDType id,Float64 sl,Float64 sr)
+void CProjectAgentImp::SetCrownSlopes(PierIDType pierID,Float64 sl,Float64 sr)
 {
-   GetPrivatePierData(id).SetCrownSlope(sl,sr);
+   GetPrivatePierData(pierID).SetCrownSlope(sl,sr);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetCrownSlopes(PierIDType id,Float64* psl,Float64* psr)
+void CProjectAgentImp::GetCrownSlopes(PierIDType pierID,Float64* psl,Float64* psr)
 {
-   GetPrivatePierData(id).GetCrownSlope(psl,psr);
+   GetPrivatePierData(pierID).GetCrownSlope(psl,psr);
 }
 
-void CProjectAgentImp::GetDiaphragmDimensions(PierIDType id,Float64* pH,Float64* pW)
+void CProjectAgentImp::GetDiaphragmDimensions(PierIDType pierID,Float64* pH,Float64* pW)
 {
-   GetPrivatePierData(id).GetDiaphragmDimensions(pH,pW);
+   GetPrivatePierData(pierID).GetDiaphragmDimensions(pH,pW);
 }
 
-void CProjectAgentImp::SetDiaphragmDimensions(PierIDType id,Float64 H,Float64 W)
+void CProjectAgentImp::SetDiaphragmDimensions(PierIDType pierID,Float64 H,Float64 W)
 {
-   GetPrivatePierData(id).SetDiaphragmDimensions(H,W);
+   GetPrivatePierData(pierID).SetDiaphragmDimensions(H,W);
    Fire_OnProjectChanged();
 }
 
-IndexType CProjectAgentImp::GetBearingLineCount(PierIDType id)
+IndexType CProjectAgentImp::GetBearingLineCount(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetBearingLineCount();
+   return GetPrivatePierData(pierID).GetBearingLineCount();
 }
 
-void CProjectAgentImp::SetBearingLineCount(PierIDType id,IndexType nBearingLines)
+void CProjectAgentImp::SetBearingLineCount(PierIDType pierID,IndexType nBearingLines)
 {
-   GetPrivatePierData(id).SetBearingLineCount(nBearingLines);
+   GetPrivatePierData(pierID).SetBearingLineCount(nBearingLines);
 }
 
-IndexType CProjectAgentImp::GetBearingCount(PierIDType id,IndexType brgLineIdx)
+IndexType CProjectAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx)
 {
-   return GetPrivatePierData(id).GetBearingCount(brgLineIdx);
+   return GetPrivatePierData(pierID).GetBearingCount(brgLineIdx);
 }
 
-void CProjectAgentImp::SetBearingCount(PierIDType id,IndexType brgLineIdx,IndexType nBearings)
+void CProjectAgentImp::SetBearingCount(PierIDType pierID,IndexType brgLineIdx,IndexType nBearings)
 {
-   GetPrivatePierData(id).SetBearingCount(brgLineIdx,nBearings);
+   GetPrivatePierData(pierID).SetBearingCount(brgLineIdx,nBearings);
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetBearingSpacing(PierIDType id,IndexType brgLineIdx,IndexType brgIdx)
+Float64 CProjectAgentImp::GetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
 {
-   return GetPrivatePierData(id).GetBearingSpacing(brgLineIdx,brgIdx);
+   return GetPrivatePierData(pierID).GetBearingSpacing(brgLineIdx,brgIdx);
 }
 
-void CProjectAgentImp::SetBearingSpacing(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing)
+void CProjectAgentImp::SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing)
 {
-   GetPrivatePierData(id).SetBearingSpacing(brgLineIdx,brgIdx,spacing);
+   GetPrivatePierData(pierID).SetBearingSpacing(brgLineIdx,brgIdx,spacing);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW)
+void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW)
 {
-   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(id,brgLineIdx);
+   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    vReactions[brgIdx].DC = DC;
    vReactions[brgIdx].DW = DW;
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
+void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
 {
-   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(id,brgLineIdx);
+   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    *pDC = vReactions[brgIdx].DC;
    *pDW = vReactions[brgIdx].DW;
 }
 
-void CProjectAgentImp::GetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
+void CProjectAgentImp::GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
 {
-   GetPrivatePierData(id).GetBearingLineData(brgLineIdx).GetReferenceBearing(pRefBearingDatum,pRefIdx,pRefBearingOffset);
+   GetPrivatePierData(pierID).GetBearingLineData(brgLineIdx).GetReferenceBearing(pRefBearingDatum,pRefIdx,pRefBearingOffset);
 }
 
-void CProjectAgentImp::SetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum)
+void CProjectAgentImp::SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum)
 {
-   GetPrivatePierData(id).GetBearingLineData(brgLineIdx).SetReferenceBearing(refBearingDatum,refIdx,refBearingOffset);
+   GetPrivatePierData(pierID).GetBearingLineData(brgLineIdx).SetReferenceBearing(refBearingDatum,refIdx,refBearingOffset);
    Fire_OnProjectChanged();
 }
 
-IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType id,pgsTypes::LoadRatingType ratingType)
+IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   return m_LiveLoadReactions[ratingType][id].size();
+   return m_LiveLoadReactions[ratingType][pierID].size();
 }
 
-void CProjectAgentImp::SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
+void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
 {
-   m_LiveLoadReactions[ratingType][id].clear();
+   m_LiveLoadReactions[ratingType][pierID].clear();
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(vLLIM.begin());
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iterEnd(vLLIM.end());
    for ( ; iter != iterEnd; iter++ )
@@ -1064,114 +1064,114 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingTy
       LiveLoadReaction ll;
       ll.Name = iter->first;
       ll.LLIM = iter->second;
-      m_LiveLoadReactions[ratingType][id].push_back(ll);
+      m_LiveLoadReactions[ratingType][pierID].push_back(ll);
    }
 
    Fire_OnProjectChanged();
 }
 
-std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType)
+std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
    std::vector<std::pair<std::_tstring,Float64>> vReactions;
-   BOOST_FOREACH(LiveLoadReaction& ll,m_LiveLoadReactions[ratingType][id])
+   BOOST_FOREACH(LiveLoadReaction& ll,m_LiveLoadReactions[ratingType][pierID])
    {
       vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
    }
    return vReactions;
 }
 
-LPCTSTR CProjectAgentImp::GetLiveLoadName(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+LPCTSTR CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_LiveLoadReactions[ratingType][id][vehIdx].Name.c_str();
+   return m_LiveLoadReactions[ratingType][pierID][vehIdx].Name.c_str();
 }
 
-Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_LiveLoadReactions[ratingType][id][vehIdx].LLIM;
+   return m_LiveLoadReactions[ratingType][pierID][vehIdx].LLIM;
 }
 
-void CProjectAgentImp::SetRebarMaterial(PierIDType id,matRebar::Type type,matRebar::Grade grade)
+void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade)
 {
-   GetPrivatePierData(id).SetRebarMaterial(type,grade);
+   GetPrivatePierData(pierID).SetRebarMaterial(type,grade);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRebarMaterial(PierIDType id,matRebar::Type* pType,matRebar::Grade* pGrade)
+void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade)
 {
-   GetPrivatePierData(id).GetRebarMaterial(pType,pGrade);
+   GetPrivatePierData(pierID).GetRebarMaterial(pType,pGrade);
 }
 
-void CProjectAgentImp::SetConcrete(PierIDType id,const CConcreteMaterial& concrete)
+void CProjectAgentImp::SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete)
 {
-   GetPrivatePierData(id).SetConcreteMaterial(concrete);
+   GetPrivatePierData(pierID).SetConcreteMaterial(concrete);
    Fire_OnProjectChanged();
 }
 
-const CConcreteMaterial& CProjectAgentImp::GetConcrete(PierIDType id)
+const CConcreteMaterial& CProjectAgentImp::GetConcrete(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetConcreteMaterial();
+   return GetPrivatePierData(pierID).GetConcreteMaterial();
 }
 
-void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType id,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w)
+void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w)
 {
-   GetPrivatePierData(id).SetLowerXBeamDimensions(h1,h2,h3,h4,x1,x2,w);
+   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1,h2,h3,h4,x1,x2,w);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType id,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw)
+void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw)
 {
-   GetPrivatePierData(id).GetLowerXBeamDimensions(ph1,ph2,ph3,ph4,px1,px2,pw);
+   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1,ph2,ph3,ph4,px1,px2,pw);
 }
 
-Float64 CProjectAgentImp::GetXBeamLeftOverhang(PierIDType id)
+Float64 CProjectAgentImp::GetXBeamLeftOverhang(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetX3();
+   return GetPrivatePierData(pierID).GetX3();
 }
 
-Float64 CProjectAgentImp::GetXBeamRightOverhang(PierIDType id)
+Float64 CProjectAgentImp::GetXBeamRightOverhang(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetX4();
+   return GetPrivatePierData(pierID).GetX4();
 }
 
-Float64 CProjectAgentImp::GetXBeamWidth(PierIDType id)
+Float64 CProjectAgentImp::GetXBeamWidth(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetW();
+   return GetPrivatePierData(pierID).GetW();
 }
 
-void CProjectAgentImp::SetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset)
+void CProjectAgentImp::SetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset)
 {
-   GetPrivatePierData(id).SetRefColumnLocation(refColumnDatum,refColumnIdx,refColumnOffset);
+   GetPrivatePierData(pierID).SetRefColumnLocation(refColumnDatum,refColumnIdx,refColumnOffset);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset)
+void CProjectAgentImp::GetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset)
 {
-   GetPrivatePierData(id).GetRefColumnLocation(prefColumnDatum,prefColumnIdx,prefColumnOffset);
+   GetPrivatePierData(pierID).GetRefColumnLocation(prefColumnDatum,prefColumnIdx,prefColumnOffset);
 }
 
-IndexType CProjectAgentImp::GetColumnCount(PierIDType id)
+IndexType CProjectAgentImp::GetColumnCount(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetColumnCount();
+   return GetPrivatePierData(pierID).GetColumnCount();
 }
 
-Float64 CProjectAgentImp::GetColumnHeight(PierIDType id,ColumnIndexType colIdx)
+Float64 CProjectAgentImp::GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx)
 {
-   return GetPrivatePierData(id).GetColumnData(colIdx).GetColumnHeight();
+   return GetPrivatePierData(pierID).GetColumnData(colIdx).GetColumnHeight();
 }
 
-CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType(PierIDType id,ColumnIndexType colIdx)
+CColumnData::ColumnHeightMeasurementType CProjectAgentImp::GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx)
 {
-   return GetPrivatePierData(id).GetColumnData(colIdx).GetColumnHeightMeasurementType();
+   return GetPrivatePierData(pierID).GetColumnData(colIdx).GetColumnHeightMeasurementType();
 }
 
-Float64 CProjectAgentImp::GetColumnSpacing(PierIDType id,SpacingIndexType spaceIdx)
+Float64 CProjectAgentImp::GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx)
 {
-   return GetPrivatePierData(id).GetColumnSpacing(spaceIdx);
+   return GetPrivatePierData(pierID).GetColumnSpacing(spaceIdx);
 }
 
-void CProjectAgentImp::SetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
+void CProjectAgentImp::SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H)
 {
-   CColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+   CColumnData& columnData = GetPrivatePierData(pierID).GetColumnData(colIdx);
    
    columnData.SetColumnHeight(H,heightType);
    columnData.SetColumnShape(shapeType);
@@ -1180,9 +1180,9 @@ void CProjectAgentImp::SetColumnProperties(PierIDType id,ColumnIndexType colIdx,
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
+void CProjectAgentImp::GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH)
 {
-   CColumnData& columnData = GetPrivatePierData(id).GetColumnData(colIdx);
+   CColumnData& columnData = GetPrivatePierData(pierID).GetColumnData(colIdx);
 
    *pshapeType = columnData.GetColumnShape();
    columnData.GetColumnDimensions(pD1,pD2);
@@ -1195,97 +1195,57 @@ pgsTypes::ColumnFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,C
    return GetPrivatePierData(pierID).GetColumnData(colIdx).GetTransverseFixity();
 }
 
-Float64 CProjectAgentImp::GetXBeamLength(PierIDType id)
+const xbrLongitudinalRebarData& CProjectAgentImp::GetLongitudinalRebar(PierIDType pierID)
 {
-   return GetPrivatePierData(id).GetXBeamLength();
+   return GetPrivatePierData(pierID).GetLongitudinalRebar();
 }
 
-IndexType CProjectAgentImp::GetRebarRowCount(PierIDType id)
+void CProjectAgentImp::SetLongitudinalRebar(PierIDType pierID,const xbrLongitudinalRebarData& rebar)
 {
-   return GetPrivatePierData(id).GetLongitudinalRebar().RebarRows.size();
-}
-
-void CProjectAgentImp::AddRebarRow(PierIDType id,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing)
-{
-   xbrLongitudinalRebarData::RebarRow row;
-   row.Datum = datum;
-   row.Cover = cover;
-   row.BarSize = barSize;
-   row.BarSpacing = spacing;
-   row.NumberOfBars = nBars;
-   GetPrivatePierData(id).GetLongitudinalRebar().RebarRows.push_back(row);
+   GetPrivatePierData(pierID).SetLongitudinalRebar(rebar);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetRebarRow(PierIDType id,IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing)
+void CProjectAgentImp::SetLowerXBeamStirrups(PierIDType pierID,const xbrStirrupData& stirrups)
 {
-   xbrLongitudinalRebarData::RebarRow row;
-   row.Datum = datum;
-   row.Cover = cover;
-   row.BarSize = barSize;
-   row.BarSpacing = spacing;
-   row.NumberOfBars = nBars;
-   GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx] = row;
+   GetPrivatePierData(pierID).SetLowerXBeamStirrups(stirrups);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRebarRow(PierIDType id,IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,IndexType* pnBars,Float64* pSpacing)
+const xbrStirrupData& CProjectAgentImp::GetLowerXBeamStirrups(PierIDType pierID)
 {
-   *pDatum   = GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx].Datum;
-   *pCover   = GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx].Cover;
-   *pBarSize = GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx].BarSize;
-   *pnBars   = GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx].NumberOfBars;
-   *pSpacing = GetPrivatePierData(id).GetLongitudinalRebar().RebarRows[rowIdx].BarSpacing;
+   return GetPrivatePierData(pierID).GetLowerXBeamStirrups();
 }
 
-void CProjectAgentImp::RemoveRebarRow(PierIDType id,IndexType rowIdx)
+void CProjectAgentImp::SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups)
 {
-   GetPrivatePierData(id).GetLongitudinalRebar().RebarRows.erase(GetPrivatePierData(id).GetLongitudinalRebar().RebarRows.begin()+rowIdx);
+   GetPrivatePierData(pierID).SetFullDepthStirrups(stirrups);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::RemoveRebarRows(PierIDType id)
+const xbrStirrupData& CProjectAgentImp::GetFullDepthStirrups(PierIDType pierID)
 {
-   GetPrivatePierData(id).GetLongitudinalRebar().RebarRows.clear();
+   return GetPrivatePierData(pierID).GetFullDepthStirrups();
+}
+
+void CProjectAgentImp::SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
+{
+   GetPrivatePierData(pierID).SetConditionFactorType(conditionFactorType);
+   GetPrivatePierData(pierID).SetConditionFactor(conditionFactor);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetLongitudinalRebar(PierIDType id,const xbrLongitudinalRebarData& rebar)
+void CProjectAgentImp::GetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor)
 {
-   GetPrivatePierData(id).SetLongitudinalRebar(rebar);
-   Fire_OnProjectChanged();
+   *pConditionFactorType = GetPrivatePierData(pierID).GetConditionFactorType();
+   *pConditionFactor = GetPrivatePierData(pierID).GetConditionFactor();
 }
 
-void CProjectAgentImp::SetLowerXBeamStirrups(PierIDType id,const xbrStirrupData& stirrups)
-{
-   GetPrivatePierData(id).SetLowerXBeamStirrups(stirrups);
-   Fire_OnProjectChanged();
-}
-
-void CProjectAgentImp::SetFullDepthStirrups(PierIDType id,const xbrStirrupData& stirrups)
-{
-   GetPrivatePierData(id).SetFullDepthStirrups(stirrups);
-   Fire_OnProjectChanged();
-}
-
-void CProjectAgentImp::SetConditionFactor(PierIDType id,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
-{
-   GetPrivatePierData(id).SetConditionFactorType(conditionFactorType);
-   GetPrivatePierData(id).SetConditionFactor(conditionFactor);
-   Fire_OnProjectChanged();
-}
-
-void CProjectAgentImp::GetConditionFactor(PierIDType id,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor)
-{
-   *pConditionFactorType = GetPrivatePierData(id).GetConditionFactorType();
-   *pConditionFactor = GetPrivatePierData(id).GetConditionFactor();
-}
-
-Float64 CProjectAgentImp::GetConditionFactor(PierIDType id)
+Float64 CProjectAgentImp::GetConditionFactor(PierIDType pierID)
 {
    pgsTypes::ConditionFactorType cfType;
    Float64 CF;
-   GetConditionFactor(id,&cfType,&CF);
+   GetConditionFactor(pierID,&cfType,&CF);
 
    // MBE 6A.4.2.3
    switch(cfType)
@@ -1494,34 +1454,34 @@ void CProjectAgentImp::RemoveMenus()
    VERIFY(pMenu->RemoveMenu(editPos,MF_BYPOSITION,this));
 }
 
-xbrPierData& CProjectAgentImp::GetPrivatePierData(PierIDType id)
+xbrPierData& CProjectAgentImp::GetPrivatePierData(PierIDType pierID)
 {
-   std::map<PierIDType,xbrPierData>::const_iterator found(m_PierData.find(id));
+   std::map<PierIDType,xbrPierData>::const_iterator found(m_PierData.find(pierID));
    if ( found == m_PierData.end() )
    {
       xbrPierData pierData;
-      pierData.SetID(id);
-      m_PierData.insert(std::make_pair(id,pierData));
+      pierData.SetID(pierID);
+      m_PierData.insert(std::make_pair(pierID,pierData));
    }
-   return m_PierData[id];
+   return m_PierData[pierID];
 }
 
-std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBearingReactions(PierIDType id,IndexType brgLineIdx)
+std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBearingReactions(PierIDType pierID,IndexType brgLineIdx)
 {
-   std::map<PierIDType,std::vector<BearingReactions>>::const_iterator found(m_BearingReactions[brgLineIdx].find(id));
+   std::map<PierIDType,std::vector<BearingReactions>>::const_iterator found(m_BearingReactions[brgLineIdx].find(pierID));
    if ( found == m_BearingReactions[brgLineIdx].end() )
    {
-      xbrPierData& pierData = GetPrivatePierData(id);
+      xbrPierData& pierData = GetPrivatePierData(pierID);
       IndexType nBearingLines = pierData.GetBearingLineCount();
       for ( IndexType i = 0; i < nBearingLines; i++ )
       {
          std::vector<BearingReactions> vBearingReactions;
          vBearingReactions.resize(pierData.GetBearingCount(i));
-         m_BearingReactions[i].insert(std::make_pair(id,vBearingReactions));
+         m_BearingReactions[i].insert(std::make_pair(pierID,vBearingReactions));
       }
    }
 
-   return m_BearingReactions[brgLineIdx][id];
+   return m_BearingReactions[brgLineIdx][pierID];
 }
 
 void CProjectAgentImp::UpdatePiers()

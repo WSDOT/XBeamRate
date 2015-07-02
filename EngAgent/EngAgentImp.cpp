@@ -34,6 +34,8 @@
 
 #include "LoadRater.h"
 
+#include <WBFLGenericBridge.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -253,6 +255,12 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    rcBeam->put_bw(w);
 
    xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
+   if ( connectionType != xbrTypes::pctIntegral )
+   {
+      Float64 d,w;
+      pProject->GetDiaphragmDimensions(pierID,&d,&w);
+      h += d;
+   }
 
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    rcBeam->put_FcSlab(concrete.Fc);
@@ -264,39 +272,43 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    IndexType nRows = pRebar->GetRebarRowCount(pierID);
    for ( IndexType rowIdx = 0; rowIdx < nRows; rowIdx++ )
    {
-      xbrTypes::LongitudinalRebarDatumType datum;
-      matRebar::Size barSize;
-      IndexType nBars;
-      Float64 cover;
-      Float64 spacing;
-      pProject->GetRebarRow(pierID,rowIdx,&datum,&cover,&barSize,&nBars,&spacing);
+      CComPtr<IRebarSection> rebarSection;
+      pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
 
-      if ( datum == xbrTypes::Top && (connectionType == xbrTypes::pctIntegral && stage == xbrTypes::Stage1) )
+      CComPtr<IEnumRebarSectionItem> enumRebar;
+      rebarSection->get__EnumRebarSectionItem(&enumRebar);
+
+      CComPtr<IRebarSectionItem> rebarSectionItem;
+      while ( enumRebar->Next(1,&rebarSectionItem,NULL) != S_FALSE )
       {
-         // top rebar in integral piers is not included in stage 1 capacity
-         continue;
+         CComPtr<IPoint2d> pntRebar;
+         rebarSectionItem->get_Location(&pntRebar);
+
+         Float64 Ybar;
+         pntRebar->get_Y(&Ybar);
+         ATLASSERT(Ybar < 0); // bars are in section coordinates so they should be below the X-axis
+
+         Ybar *= -1; // Ybar is now measured from the top down with Y being positive downwards
+
+         if ( !bPositiveMoment )
+         {
+            Ybar = h - Ybar; // Ybar is measured from the bottom up for negative moment
+         }
+
+         dt = Max(dt,Ybar);
+
+         CComPtr<IRebar> rebar;
+         rebarSectionItem->get_Rebar(&rebar);
+
+         Float64 As;
+         rebar->get_NominalArea(&As);
+
+#pragma Reminder("WORKING HERE - need to adjust bar area for development")
+         Float64 devFactor = 1.0; // assuming fully developed
+         rcBeam->AddRebarLayer(Ybar,As,devFactor);
+
+         rebarSectionItem.Release();
       }
-
-      Float64 Ybar = pRebar->GetRebarRowLocation(pierID,poi,rowIdx);
-      if ( !bPositiveMoment )
-      {
-         Ybar = h - Ybar;
-      }
-
-      dt = Max(dt,Ybar);
-
-
-      lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
-      matRebar::Type barType;
-      matRebar::Grade barGrade;
-      pProject->GetRebarMaterial(pierID,&barType,&barGrade);
-      const matRebar* pRebar = pRebarPool->GetRebar(barType,barGrade,barSize);
-
-      Float64 as = pRebar->GetNominalArea();
-      Float64 As = nBars*as;
-
-      Float64 devFactor = 1.0; // assuming fully developed
-      rcBeam->AddRebarLayer(Ybar,As,devFactor);
    }
 
 
@@ -319,9 +331,13 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    Float64 c;
    solution->get_NeutralAxisDepth(&c);
 
+   matRebar::Type rebarType;
+   matRebar::Grade rebarGrade;
+   pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
+
    Float64 et = (dt - c)*0.003/c;
-   Float64 ecl = 0.002;
-   Float64 etl = 0.005;
+   Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
+   Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
    Float64 phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
    phi = ::ForceIntoRange(0.75,phi,0.9);
 
@@ -380,7 +396,8 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
       return 0;
    }
 
-   Float64 L = pProject->GetXBeamLength(pierID);
+   GET_IFACE(IXBRPier,pPier);
+   Float64 L = pPier->GetXBeamLength(pierID);
 
    // Get start/end of the shear failur plane at the poi
    Float64 dv = GetDv(pierID,stage,poi);

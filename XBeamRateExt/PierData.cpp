@@ -11,7 +11,7 @@ xbrPierData::xbrPierData()
    m_ConnectionType = xbrTypes::pctIntegral;
 
    m_CurbLineDatum = pgsTypes::omtAlignment;
-   m_LeftCurbOffset = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
+   m_LeftCurbOffset  = -::ConvertToSysUnits(10.0,unitMeasure::Feet);
    m_RightCurbOffset = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
    m_LeftCrownSlope = -0.02;
    m_RightCrownSlope = -0.02;
@@ -47,6 +47,7 @@ xbrPierData::xbrPierData()
    // Rebar
    xbrLongitudinalRebarData::RebarRow row;
    row.Datum = xbrTypes::Bottom;
+   row.LayoutType = xbrTypes::blFullLength;
    row.BarSize = matRebar::bs11;
    row.BarSpacing = ::ConvertToSysUnits(6,unitMeasure::Inch);
    row.Cover = ::ConvertToSysUnits(2,unitMeasure::Inch);
@@ -224,7 +225,7 @@ void xbrPierData::SetDiaphragmDimensions(Float64 h,Float64 w)
    m_W = w;
 }
 
-void xbrPierData::GetDiaphragmDimensions(Float64* ph,Float64* pw)
+void xbrPierData::GetDiaphragmDimensions(Float64* ph,Float64* pw) const
 {
    *ph = m_H;
    *pw = m_W;
@@ -251,7 +252,7 @@ void xbrPierData::SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float
    m_XW = w;
 }
 
-void xbrPierData::GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw)
+void xbrPierData::GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) const
 {
    *ph1 = m_H1;
    *ph2 = m_H2;
@@ -304,7 +305,7 @@ void xbrPierData::SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumn
    m_RefColumnOffset = refColumnOffset;
 }
 
-void xbrPierData::GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset)
+void xbrPierData::GetRefColumnLocation(pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) const
 {
    *prefColumnDatum  = m_RefColumnDatum;
    *prefColumnIdx    = m_RefColumnIdx;

@@ -6,6 +6,8 @@
 #include <PGSuperColors.h>
 #include "XBeamRateChildFrame.h"
 #include <IFace\Pier.h>
+#include <IFace\Project.h>
+#include <IFace\PointOfInterest.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -92,11 +94,11 @@ STDMETHODIMP_(void) CSectionCutDisplayImpl::XStrategy::SetColor(COLORREF color)
 }
 
 
-//STDMETHODIMP_(pgsPointOfInterest) CSectionCutDisplayImpl::XStrategy::GetCutPOI(Float64 Xgl)
-//{
-//   METHOD_PROLOGUE(CSectionCutDisplayImpl,Strategy);
-//   return pThis->GetCutPOI(Xgl);
-//}
+STDMETHODIMP_(xbrPointOfInterest) CSectionCutDisplayImpl::XStrategy::GetCutPOI(Float64 Xp)
+{
+   METHOD_PROLOGUE(CSectionCutDisplayImpl,Strategy);
+   return pThis->GetCutPOI(Xp);
+}
 
 STDMETHODIMP_(void) CSectionCutDisplayImpl::XDrawPointStrategy::Draw(iPointDisplayObject* pDO,CDC* pDC)
 {
@@ -170,7 +172,7 @@ STDMETHODIMP_(void) CSectionCutDisplayImpl::XDrawPointStrategy::GetBoundingBox(i
    (*rect)->AddRef();
 }
 
-void CSectionCutDisplayImpl::GetBoundingBox(iPointDisplayObject* pDO, Float64 Xgl, 
+void CSectionCutDisplayImpl::GetBoundingBox(iPointDisplayObject* pDO, Float64 Xpier, 
                                             Float64* top, Float64* left, Float64* right, Float64* bottom)
 {
    CComPtr<iDisplayList> pDL;
@@ -192,14 +194,24 @@ void CSectionCutDisplayImpl::GetBoundingBox(iPointDisplayObject* pDO, Float64 Xg
    PierIDType pierID = m_pFrame->GetPierID();
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
+   
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   Float64 X = pPier->GetDistFromStart(pierID,Xgl);
+   Float64 Xxb = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);
+
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
-   Float64 H = pSectProp->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,X));
+   Float64 H = pSectProp->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
+
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral )
+   {
+      Float64 d,w;
+      pProject->GetDiaphragmDimensions(pierID,&d,&w);
+      H += d;
+   }
 
    *top    = height;
    *bottom = -(H + height);
-   *left   = Xgl;
+   *left   = Xpier;
    *right  = *left + width;
 }
 
@@ -263,12 +275,15 @@ void CSectionCutDisplayImpl::Draw(iPointDisplayObject* pDO,CDC* pDC,COLORREF col
    pDC->SelectObject(old_brush);
 }
 
-//pgsPointOfInterest CSectionCutDisplayImpl::GetCutPOI(Float64 Xgl)
-//{
-//   GET_IFACE(IPointOfInterest,pPoi);
-//   return pPoi->ConvertGirderlineCoordinateToPoi(m_GirderKey.girderIndex,Xgl);
-//}
-//
+xbrPointOfInterest CSectionCutDisplayImpl::GetCutPOI(Float64 Xp)
+{
+   PierIDType pierID = m_pFrame->GetPierID();
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   return pPoi->ConvertPierCoordinateToPoi(pierID,Xp);
+}
+
 //Float64 CSectionCutDisplayImpl::GetGirderHeight(Float64 Xgl)
 //{
 //   pgsPointOfInterest poi = GetCutPOI(Xgl);
@@ -287,11 +302,11 @@ STDMETHODIMP_(void) CSectionCutDisplayImpl::XDisplayObjectEvents::OnChanged(iDis
 
    if (pPointDO)
    {
-      Float64 Xgl = pThis->m_pCutLocation->GetCurrentCutLocation();
+      Float64 Xp = pThis->m_pCutLocation->GetCurrentCutLocation();
    
       CComPtr<IPoint2d> pnt;
       pnt.CoCreateInstance(CLSID_Point2d);
-      pnt->put_X(Xgl);
+      pnt->put_X(Xp);
       pnt->put_Y(0.0);
       pPointDO->SetPosition(pnt, TRUE, FALSE);
    }
@@ -302,14 +317,14 @@ STDMETHODIMP_(void) CSectionCutDisplayImpl::XDisplayObjectEvents::OnDragMoved(iD
 {
    METHOD_PROLOGUE(CSectionCutDisplayImpl,DisplayObjectEvents);
 
-   Float64 Xxb =  pThis->m_pCutLocation->GetCurrentCutLocation();
+   Float64 Xp =  pThis->m_pCutLocation->GetCurrentCutLocation();
 
    Float64 xOffset;
    offset->get_Dx(&xOffset);
  
-   Xxb += xOffset;
+   Xp += xOffset;
 
-   pThis->PutPosition(Xxb);
+   pThis->PutPosition(Xp);
 }
 
 STDMETHODIMP_(void) CSectionCutDisplayImpl::XDisplayObjectEvents::OnMoved(iDisplayObject* pDO)
@@ -468,10 +483,10 @@ STDMETHODIMP_(bool) CSectionCutDisplayImpl::XDisplayObjectEvents::OnContextMenu(
    return false;
 }
 
-void CSectionCutDisplayImpl::PutPosition(Float64 Xxb)
+void CSectionCutDisplayImpl::PutPosition(Float64 Xp)
 {
-   Xxb = ::ForceIntoRange(m_MinCutLocation,Xxb,m_MaxCutLocation);
-   m_pCutLocation->CutAt(Xxb);
+   Xp = ::ForceIntoRange(m_MinCutLocation,Xp,m_MaxCutLocation);
+   m_pCutLocation->CutAt(Xp);
 }
 
 

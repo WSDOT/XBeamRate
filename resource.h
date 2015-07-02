@@ -26,8 +26,13 @@
 #define IDB_VIEW_PIER                   208
 #define IDI_WSDOT                       209
 #define IDC_WSDOT                       210
-#define IDI_PIERVIEW                       210
+#define IDI_PIERVIEW                    210
 #define ID_HELP_ABOUT                   211
+#define IDD_SECTION_CUT                 211
+#define IDR_PGSUPERCOMPONENTINFO        300
+#define IDR_PGSPLICECOMPONENTINFO       301
+#define IDC_LOCATION                    1260
+#define IDC_SLIDER                      1807
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
 #define EAFID_UNITS_SI                  32772
@@ -37,14 +42,12 @@
 #define ID_VIEW_GRAPHS                  32775
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
 #define ID_VIEW_PIER                    33030
-#define IDR_PGSUPERCOMPONENTINFO       300
-#define IDR_PGSPLICECOMPONENTINFO      301
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        211
+#define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         32780
 #define _APS_NEXT_CONTROL_VALUE         203
 #define _APS_NEXT_SYMED_VALUE           103

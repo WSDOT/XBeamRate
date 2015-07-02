@@ -56,7 +56,7 @@ INTERFACE
 
 DESCRIPTION
    Interface for getting this application going.
-   PierIDType id is the pier identifier. For stand alone use INVALID_ID
+   PierIDType pierID is the pier identifier. For stand alone use INVALID_ID
 *****************************************************************************/
 // {2600A729-D7E6-44f6-9F9B-DF086FF9E53B}
 DEFINE_GUID(IID_IXBRProject, 
@@ -64,113 +64,109 @@ DEFINE_GUID(IID_IXBRProject,
 interface IXBRProject : IUnknown
 {
    virtual void SetPierData(const xbrPierData& pierData) = 0;
-   virtual const xbrPierData& GetPierData(PierIDType id) = 0;
+   virtual const xbrPierData& GetPierData(PierIDType pierID) = 0;
 
-   virtual xbrTypes::SuperstructureConnectionType GetPierType(PierIDType id) = 0;
-   virtual void SetPierType(PierIDType id,xbrTypes::SuperstructureConnectionType pierType) = 0;
+   virtual xbrTypes::SuperstructureConnectionType GetPierType(PierIDType pierID) = 0;
+   virtual void SetPierType(PierIDType pierID,xbrTypes::SuperstructureConnectionType pierType) = 0;
 
    // Elevation of the deck on the alignment at the CL Pier
-   virtual void SetDeckElevation(PierIDType id,Float64 deckElevation) = 0;
-   virtual Float64 GetDeckElevation(PierIDType id) = 0;
+   virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation) = 0;
+   virtual Float64 GetDeckElevation(PierIDType pierID) = 0;
 
    // Distance from alignment to crown point.
-   virtual void SetCrownPointOffset(PierIDType id,Float64 cpo) = 0;
-   virtual Float64 GetCrownPointOffset(PierIDType id) = 0;
+   virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo) = 0;
+   virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;
 
    // Distance form alignemnt to bridge line
-   virtual void SetBridgeLineOffset(PierIDType id,Float64 blo) = 0;
-   virtual Float64 GetBridgeLineOffset(PierIDType id) = 0;
+   virtual void SetBridgeLineOffset(PierIDType pierID,Float64 blo) = 0;
+   virtual Float64 GetBridgeLineOffset(PierIDType pierID) = 0;
 
    // Orientation of the pier
-   virtual void SetOrientation(PierIDType id,LPCTSTR strOrientation) = 0;
-   virtual LPCTSTR GetOrientation(PierIDType id) = 0;
+   virtual void SetOrientation(PierIDType pierID,LPCTSTR strOrientation) = 0;
+   virtual LPCTSTR GetOrientation(PierIDType pierID) = 0;
 
    // Sets the basis for the curb lines
-   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum(PierIDType id) = 0;
-   virtual void SetCurbLineDatum(PierIDType id,pgsTypes::OffsetMeasurementType datumType) = 0;
+   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum(PierIDType pierID) = 0;
+   virtual void SetCurbLineDatum(PierIDType pierID,pgsTypes::OffsetMeasurementType datumType) = 0;
 
-   virtual void SetCurbLineOffset(PierIDType id,Float64 leftCLO,Float64 rightCLO) = 0;
-   virtual void GetCurbLineOffset(PierIDType id,Float64* pLeftCLO,Float64* pRightCLO) = 0;
+   virtual void SetCurbLineOffset(PierIDType pierID,Float64 leftCLO,Float64 rightCLO) = 0;
+   virtual void GetCurbLineOffset(PierIDType pierID,Float64* pLeftCLO,Float64* pRightCLO) = 0;
 
-   virtual void SetCrownSlopes(PierIDType id,Float64 sl,Float64 sr) = 0;
-   virtual void GetCrownSlopes(PierIDType id,Float64* psl,Float64* psr) = 0;
+   virtual void SetCrownSlopes(PierIDType pierID,Float64 sl,Float64 sr) = 0;
+   virtual void GetCrownSlopes(PierIDType pierID,Float64* psl,Float64* psr) = 0;
 
-   virtual void GetDiaphragmDimensions(PierIDType id,Float64* pH,Float64* pW) = 0;
-   virtual void SetDiaphragmDimensions(PierIDType id,Float64 H,Float64 W) = 0;
+   virtual void GetDiaphragmDimensions(PierIDType pierID,Float64* pH,Float64* pW) = 0;
+   virtual void SetDiaphragmDimensions(PierIDType pierID,Float64 H,Float64 W) = 0;
 
    // Number of bearing lines at the pier. Valid values are 1 and 2.
    // Use 1 when girders are continuous (e.g. spliced girder, steel girders, etc)
    // Use 2 when simple span girders are made continuous (or are just simple spans)
-   virtual IndexType GetBearingLineCount(PierIDType id) = 0;
-   virtual void SetBearingLineCount(PierIDType id,IndexType nBearingLines) = 0;
+   virtual IndexType GetBearingLineCount(PierIDType pierID) = 0;
+   virtual void SetBearingLineCount(PierIDType pierID,IndexType nBearingLines) = 0;
 
    // Number of bearings on a bearing line. Some beam types, such as U-beams, use two
    // bearings and others, such as I-beams, use one bearing. This is the total number
    // of points of bearing along the bearing line
-   virtual IndexType GetBearingCount(PierIDType id,IndexType brgLineIdx) = 0;
-   virtual void SetBearingCount(PierIDType id,IndexType brgLineIdx,IndexType nBearings) = 0;
+   virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) = 0;
+   virtual void SetBearingCount(PierIDType pierID,IndexType brgLineIdx,IndexType nBearings) = 0;
 
    // Spacing between the specified bearing and the bearing to its right
-   virtual Float64 GetBearingSpacing(PierIDType id,IndexType brgLineIdx,IndexType brgIdx) = 0;
-   virtual void SetBearingSpacing(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) = 0;
+   virtual Float64 GetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
+   virtual void SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) = 0;
 
    // Bearing reactions
-   virtual void SetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW) = 0;
-   virtual void GetBearingReactions(PierIDType id,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW) = 0;
+   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW) = 0;
+   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW) = 0;
 
    // Reference bearing
-   virtual void GetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
-   virtual void SetReferenceBearing(PierIDType id,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
+   virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
+   virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
 
    // Live Load Reactions per lane
-   virtual IndexType GetLiveLoadReactionCount(PierIDType id,pgsTypes::LoadRatingType ratingType) = 0;
-   virtual void SetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
-   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType id,pgsTypes::LoadRatingType ratingType) = 0;
-   virtual LPCTSTR GetLiveLoadName(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
-   virtual Float64 GetLiveLoadReaction(PierIDType id,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
+   virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
+   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
+   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
+   virtual LPCTSTR GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
+   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
 
    // Material properties
-   virtual void SetRebarMaterial(PierIDType id,matRebar::Type type,matRebar::Grade grade) = 0;
-   virtual void GetRebarMaterial(PierIDType id,matRebar::Type* pType,matRebar::Grade* pGrade) = 0;
+   virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade) = 0;
+   virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade) = 0;
 
-   virtual void SetConcrete(PierIDType id,const CConcreteMaterial& concrete) = 0;
-   virtual const CConcreteMaterial& GetConcrete(PierIDType id) = 0;
+   virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete) = 0;
+   virtual const CConcreteMaterial& GetConcrete(PierIDType pierID) = 0;
 
-   virtual void SetLowerXBeamDimensions(PierIDType id,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w) = 0;
-   virtual void GetLowerXBeamDimensions(PierIDType id,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) = 0;
-   virtual Float64 GetXBeamLeftOverhang(PierIDType id) = 0;
-   virtual Float64 GetXBeamRightOverhang(PierIDType id) = 0;
-   virtual Float64 GetXBeamWidth(PierIDType id) = 0;
+   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w) = 0;
+   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) = 0;
+   virtual Float64 GetXBeamLeftOverhang(PierIDType pierID) = 0;
+   virtual Float64 GetXBeamRightOverhang(PierIDType pierID) = 0;
+   virtual Float64 GetXBeamWidth(PierIDType pierID) = 0;
 
-   virtual void SetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset) = 0;
-   virtual void GetRefColumnLocation(PierIDType id,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) = 0;
-   virtual IndexType GetColumnCount(PierIDType id) = 0;
-   virtual Float64 GetColumnHeight(PierIDType id,ColumnIndexType colIdx) = 0;
-   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType id,ColumnIndexType colIdx) = 0;
-   virtual Float64 GetColumnSpacing(PierIDType id,SpacingIndexType spaceIdx) = 0;
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType id,ColumnIndexType colIdx) = 0;
+   virtual void SetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset) = 0;
+   virtual void GetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) = 0;
+   virtual IndexType GetColumnCount(PierIDType pierID) = 0;
+   virtual Float64 GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx) = 0;
+   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx) = 0;
+   virtual Float64 GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx) = 0;
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) = 0;
 
-   virtual void SetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) = 0;
-   virtual void GetColumnProperties(PierIDType id,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) = 0;
-
-   virtual Float64 GetXBeamLength(PierIDType id) = 0;
+   virtual void SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) = 0;
+   virtual void GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) = 0;
 
    // Longitudinal Rebar
-   virtual IndexType GetRebarRowCount(PierIDType id) = 0;
-   virtual void AddRebarRow(PierIDType id,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing) = 0;
-   virtual void SetRebarRow(PierIDType id,IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType datum,Float64 cover,matRebar::Size barSize,IndexType nBars,Float64 spacing) = 0;
-   virtual void GetRebarRow(PierIDType id,IndexType rowIdx,xbrTypes::LongitudinalRebarDatumType* pDatum,Float64* pCover,matRebar::Size* pBarSize,IndexType* pnBars,Float64* pSpacing) = 0;
-   virtual void RemoveRebarRow(PierIDType id,IndexType rowIdx) = 0;
-   virtual void RemoveRebarRows(PierIDType id) = 0;
+   virtual const xbrLongitudinalRebarData& GetLongitudinalRebar(PierIDType pierID) = 0;
+   virtual void SetLongitudinalRebar(PierIDType pierID,const xbrLongitudinalRebarData& rebar) = 0;
 
-   virtual void SetLongitudinalRebar(PierIDType id,const xbrLongitudinalRebarData& rebar) = 0;
-   virtual void SetLowerXBeamStirrups(PierIDType id,const xbrStirrupData& stirrups) = 0;
-   virtual void SetFullDepthStirrups(PierIDType id,const xbrStirrupData& stirrups) = 0;
+   // Stirrups
+   virtual void SetLowerXBeamStirrups(PierIDType pierID,const xbrStirrupData& stirrups) = 0;
+   virtual const xbrStirrupData& GetLowerXBeamStirrups(PierIDType pierID) = 0;
+   virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups) = 0;
+   virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID) = 0;
 
 
-   virtual void SetConditionFactor(PierIDType id,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor) = 0;
-   virtual void GetConditionFactor(PierIDType id,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor) = 0;
-   virtual Float64 GetConditionFactor(PierIDType id) = 0;
+   virtual void SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor) = 0;
+   virtual void GetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor) = 0;
+   virtual Float64 GetConditionFactor(PierIDType pierID) = 0;
 
    virtual void SetDCLoadFactor(Float64 dc) = 0;
    virtual Float64 GetDCLoadFactor() = 0;

@@ -2,6 +2,7 @@
 #pragma once
 
 #include <DManip\DManip.h>
+#include <XBeamRateExt\PointOfInterest.h>
 
 class CXBeamRateChildFrame;
 
@@ -26,6 +27,7 @@ interface iSectionCutDrawStrategy : public IUnknown
 {
 	STDMETHOD_(void,Init)(CXBeamRateChildFrame* pFrame,iPointDisplayObject* pDO, iCutLocation* pCutLoc) PURE;
 	STDMETHOD_(void,SetColor)(COLORREF color) PURE;
+   STDMETHOD_(xbrPointOfInterest,GetCutPOI)(Float64 Xp) PURE;
 };
 
 
@@ -35,14 +37,14 @@ public:
    CSectionCutDisplayImpl();
    ~CSectionCutDisplayImpl();
 
-   //pgsPointOfInterest GetCutPOI(Float64 Xgl);
+   xbrPointOfInterest GetCutPOI(Float64 Xp);
 
    DECLARE_INTERFACE_MAP()
 
    BEGIN_INTERFACE_PART(Strategy,iSectionCutDrawStrategy)
 	   STDMETHOD_(void,Init)(CXBeamRateChildFrame* pFrame,iPointDisplayObject* pDO, iCutLocation* pCutLoc);
       STDMETHOD_(void,SetColor)(COLORREF color);
- //  STDMETHOD_(pgsPointOfInterest,GetCutPOI)(Float64 Xgl);
+      STDMETHOD_(xbrPointOfInterest,GetCutPOI)(Float64 Xp);
    END_INTERFACE_PART(Strategy)
 
 //   BEGIN_INTERFACE_PART(Events,iSectionCutEvents)
@@ -109,7 +111,7 @@ private:
    
    CComPtr<IPoint2d> m_CachePoint;
 
-   void PutPosition(Float64 Xgl);
+   void PutPosition(Float64 Xp);
 };
 
 
