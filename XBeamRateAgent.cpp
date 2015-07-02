@@ -611,6 +611,12 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,
 
 txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
+   if ( pPage == NULL )
+   {
+      // we aren't extending the dialog for this pier
+      return NULL;
+   }
+
    xbrEditReinforcementData oldReinforcement;
    GET_IFACE(IXBRProject,pProject);
    const xbrPierData& pierData = pProject->GetPierData(pEditPierData->GetPierData()->GetID());
