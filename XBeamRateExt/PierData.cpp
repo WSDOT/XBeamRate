@@ -649,6 +649,10 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
    pStrSave->EndUnit(); // LowerCrossBeam
 
    pStrSave->BeginUnit(_T("Columns"),1.0);
+      pStrSave->put_Property(_T("RefColumn"),CComVariant(m_RefColumnIdx));
+      pStrSave->put_Property(_T("RefColumnOffset"),CComVariant(m_RefColumnOffset));
+      pStrSave->put_Property(_T("RefColumnDatum"),CComVariant(m_RefColumnDatum));
+
       std::vector<Float64>::iterator spacingIter = m_vColumnSpacing.begin();
       std::vector<CColumnData>::iterator columnIterBegin = m_vColumnData.begin();
       std::vector<CColumnData>::iterator columnIter = columnIterBegin;
@@ -806,6 +810,16 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
 
       {
          hr = pStrLoad->BeginUnit(_T("Columns"));
+         var.vt = VT_INDEX;
+         hr = pStrLoad->get_Property(_T("RefColumn"),&var);
+         m_RefColumnIdx = VARIANT2INDEX(var);
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("RefColumnOffset"),&var);
+         m_RefColumnOffset = var.dblVal;
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("RefColumnDatum"),&var);
+         m_RefColumnDatum = (pgsTypes::OffsetMeasurementType)var.lVal;
+
          m_vColumnData.clear();
          m_vColumnSpacing.clear();
          int i = 0;
