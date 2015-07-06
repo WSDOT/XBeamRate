@@ -93,6 +93,7 @@ public:
 
 // IXBRPier
 public:
+   virtual Float64 GetSkewAngle(PierIDType pierID);
    virtual IndexType GetBearingLineCount(PierIDType pierID);
    virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx);
    virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
@@ -116,6 +117,8 @@ public:
    virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl);
    virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier);
    virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb);
+   virtual Float64 ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier);
+   virtual Float64 ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl);
 
 // IXBRSectionProperties
 public:
@@ -137,6 +140,7 @@ public:
    virtual IndexType GetRebarRowCount(PierIDType pierID);
    virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx);
    virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints);
+   virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem);
    virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx);
    virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
 
@@ -184,7 +188,6 @@ private:
 
    Float64 GetLeftBearingOffset(PierIDType pierID,IndexType brgLineIdx);
    Float64 GetLeftColumnOffset(PierIDType pierID);
-   Float64 GetSkewAngle(PierIDType pierID);
 
    typedef struct
    {

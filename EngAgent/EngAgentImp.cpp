@@ -303,8 +303,8 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
          Float64 As;
          rebar->get_NominalArea(&As);
 
-#pragma Reminder("WORKING HERE - need to adjust bar area for development")
-         Float64 devFactor = 1.0; // assuming fully developed
+         Float64 devFactor = pRebar->GetDevLengthFactor(pierID,poi,rebarSectionItem);
+         ATLASSERT(::InRange(0.0,devFactor,1.0));
          rcBeam->AddRebarLayer(Ybar,As,devFactor);
 
          rebarSectionItem.Release();

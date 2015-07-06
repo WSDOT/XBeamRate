@@ -239,6 +239,20 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 
 //////////////////////////////////////////
 // IXBRPier
+Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<IAngle> objAngle;
+   pier->get_SkewAngle(&objAngle);
+
+   Float64 skew;
+   objAngle->get_Value(&skew);
+
+   return skew;
+}
+
 IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID)
 {
 #pragma Reminder("WORKING HERE - add bearings to generic pier model")
@@ -460,6 +474,20 @@ Float64 CPierAgentImp::ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float6
 
    Float64 Xpier;
    pier->ConvertCrossBeamToPierCoordinate(Xxb,&Xpier);
+   return Xpier;
+}
+
+Float64 CPierAgentImp::ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier)
+{
+   Float64 Xxb = ConvertPierToCrossBeamCoordinate(pierID,Xpier);
+   Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
+   return Xcl;
+}
+
+Float64 CPierAgentImp::ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl)
+{
+   Float64 Xxb = ConvertCurbLineToCrossBeamCoordinate(pierID,Xcl);
+   Float64 Xpier = ConvertCrossBeamToPierCoordinate(pierID,Xxb);
    return Xpier;
 }
 
@@ -764,6 +792,76 @@ void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dC
    pier->ConvertCrossBeamToPierCoordinate(XxbStart,&XpStart);
 
    (*ppPoints)->Offset(XxbStart,0);
+}
+
+Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem)
+{
+   CComPtr<IRebar> rebar;
+   pRebarSectionItem->get_Rebar(&rebar);
+   USES_CONVERSION;
+   CComBSTR name;
+   rebar->get_Name(&name);
+
+   matRebar::Size size = lrfdRebarPool::GetBarSize(OLE2CT(name));
+
+   Float64 Ab, db, fy;
+   rebar->get_NominalArea(&Ab);
+   rebar->get_NominalDiameter(&db);
+   rebar->get_YieldStrength(&fy);
+
+   GET_IFACE(IXBRProject,pProject);
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
+   Float64 fc = concrete.Fc;
+
+   matConcrete::Type type = matConcrete::Normal;
+   bool hasFct = false;
+   Float64 Fct = 0.0;
+
+   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (matConcrete::Type)type, fc, hasFct, Fct);
+
+
+   // Get distances from section cut to ends of bar
+   Float64 fra = 1.0;
+
+   Float64 start,end;
+   pRebarSectionItem->get_LeftExtension(&start);
+   pRebarSectionItem->get_RightExtension(&end);
+
+   if ( start < end )
+   {
+      // closer to the left end... check for hook... if hooked, consider fully developed
+      HookType ht;
+      pRebarSectionItem->get_LeftHook(&ht);
+      if ( ht != htNone )
+      {
+         return 1.0;
+      }
+   }
+   else if ( end < start )
+   {
+      // closer to the right end... check for hook... if hooked, consider fully developed
+      HookType ht;
+      pRebarSectionItem->get_RightHook(&ht);
+      if ( ht != htNone )
+      {
+         return 1.0;
+      }
+   }
+
+   // Not a hooked bar... 
+   Float64 cut_length = Min(start, end);
+   if (0.0 < cut_length)
+   {
+      Float64 fra = cut_length/details.ldb;
+      fra = Min(fra, 1.0);
+
+      return fra;
+   }
+   else
+   {
+      ATLASSERT(cut_length == 0.0); // sections shouldn't be cutting bars that don't exist
+      return 0.0;
+   }
 }
 
 Float64 CPierAgentImp::GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx)
@@ -1185,23 +1283,14 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
       rebarPattern->put_Spacing(row.BarSpacing);
 
       // Assuming 90 degree hooks
-      Float64 hookExt = lrfdRebar::GetHookExtension(row.BarSize,db,lrfdRebar::Longitudinal,lrfdRebar::hook90);
-      Float64 hookDia = lrfdRebar::GetBendDiameter(row.BarSize,db,lrfdRebar::Longitudinal,false);
-      Float64 hookAngle = PI_OVER_2;
       if ( row.bHookStart )
       {
-         rebarPattern->put_Hooked(qcbLeft,VARIANT_TRUE);
-         rebarPattern->put_HookExtension(qcbLeft,hookExt);
-         rebarPattern->put_HookAngle(qcbLeft,hookAngle);
-         rebarPattern->put_HookDiameter(qcbLeft,hookDia);
+         rebarPattern->put_Hook(qcbLeft,ht90);
       }
 
       if ( row.bHookEnd )
       {
-         rebarPattern->put_Hooked(qcbRight,VARIANT_TRUE);
-         rebarPattern->put_HookExtension(qcbRight,hookExt);
-         rebarPattern->put_HookAngle(qcbRight,hookAngle);
-         rebarPattern->put_HookDiameter(qcbRight,hookDia);
+         rebarPattern->put_Hook(qcbRight,ht90);
       }
 
       rebarLayoutItem->AddRebarPattern(rebarPattern);
@@ -1553,20 +1642,6 @@ Float64 CPierAgentImp::GetLeftColumnOffset(PierIDType pierID)
    Float64 offset;
    columnLayout->get_ColumnOffset(0,&offset);
    return offset;
-}
-
-Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
-{
-   CComPtr<IPier> pier;
-   GetPierModel(pierID,&pier);
-
-   CComPtr<IAngle> angle;
-   pier->get_SkewAngle(&angle);
-
-   Float64 value;
-   angle->get_Value(&value);
-
-   return value;
 }
 
 bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)

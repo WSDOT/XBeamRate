@@ -6,12 +6,15 @@ interface IShape;
 interface IPoint2d;
 interface IPoint2dCollection;
 interface IRebarSection;
+interface IRebarSectionItem;
 
 // {7F04A0B9-FD4E-4965-8F26-8BE78B063803}
 DEFINE_GUID(IID_IXBRPier, 
 0x7f04a0b9, 0xfd4e, 0x4965, 0x8f, 0x26, 0x8b, 0xe7, 0x8b, 0x6, 0x38, 0x3);
 interface IXBRPier : public IUnknown
 {
+   virtual Float64 GetSkewAngle(PierIDType pierID) = 0;
+
    virtual IndexType GetBearingLineCount(PierIDType pierID) = 0;
    virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) = 0;
    virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
@@ -45,6 +48,8 @@ interface IXBRPier : public IUnknown
    virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl) = 0;
    virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier) = 0;
    virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb) = 0;
+   virtual Float64 ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier) = 0;
+   virtual Float64 ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl) = 0;
 };
 
 // {7F260544-5BBC-4be3-87E7-5DF89A45F35D}
@@ -80,6 +85,8 @@ interface IXBRRebar : public IUnknown
    virtual IndexType GetRebarRowCount(PierIDType pierID) = 0;
    virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx) = 0;
    virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints) = 0;
+
+   virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem) = 0;
 
    // Returns the depth to a rebar row, measured from the top of the cross beam
    virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx) = 0;
