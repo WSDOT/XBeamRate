@@ -293,10 +293,8 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       }
    }
 
-
-   CRect wndRect;
-   pGraphWnd->GetClientRect(&wndRect);
-   graph.SetOutputRect(wndRect);
+   CRect rect = GetView()->GetDrawingRect();
+   graph.SetOutputRect(rect);
    graph.Draw(pDC->GetSafeHdc());
 
    delete pVerticalAxisFormat;

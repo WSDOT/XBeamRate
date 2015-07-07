@@ -1534,9 +1534,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,crownPoint,POI_SECTIONCHANGE));
    }
 
-   if ( !IsZero(X2) )
+   if ( !IsZero(X3) )
    {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-X2,POI_SECTIONCHANGE));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-X3,POI_SECTIONCHANGE));
    }
 
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L,POI_SECTIONCHANGE));
@@ -1576,7 +1576,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    Float64 Xpoi = 0;
-   while ( Xpoi < L/2 - step)
+   while ( Xpoi < (L/2 - step))
    {
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xpoi));
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-Xpoi));
