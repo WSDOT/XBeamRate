@@ -193,8 +193,8 @@ public:
    virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete);
    virtual const CConcreteMaterial& GetConcrete(PierIDType pierID);
 
-   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
-   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw);
+   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w);
+   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw);
    virtual Float64 GetXBeamLeftOverhang(PierIDType pierID);
    virtual Float64 GetXBeamRightOverhang(PierIDType pierID);
    virtual Float64 GetXBeamWidth(PierIDType pierID);

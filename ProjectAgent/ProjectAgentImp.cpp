@@ -1112,25 +1112,25 @@ const CConcreteMaterial& CProjectAgentImp::GetConcrete(PierIDType pierID)
    return GetPrivatePierData(pierID).GetConcreteMaterial();
 }
 
-void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w)
+void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w)
 {
-   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1,h2,h3,h4,x1,x2,w);
+   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1,h2,h3,h4,x1,x2,x3,x4,w);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw)
+void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw)
 {
-   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1,ph2,ph3,ph4,px1,px2,pw);
+   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1,ph2,ph3,ph4,px1,px2,px3,px4,pw);
 }
 
 Float64 CProjectAgentImp::GetXBeamLeftOverhang(PierIDType pierID)
 {
-   return GetPrivatePierData(pierID).GetX3();
+   return GetPrivatePierData(pierID).GetX5();
 }
 
 Float64 CProjectAgentImp::GetXBeamRightOverhang(PierIDType pierID)
 {
-   return GetPrivatePierData(pierID).GetX4();
+   return GetPrivatePierData(pierID).GetX6();
 }
 
 Float64 CProjectAgentImp::GetXBeamWidth(PierIDType pierID)
@@ -1556,11 +1556,11 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
    // Lower Cross Beam
    Float64 H1, H2, H3, H4;
-   Float64 X1, X2, W;
-   pPier->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1);
-   pPier->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X2);
+   Float64 X1, X2, X3, X4, W;
+   pPier->GetXBeamDimensions(pgsTypes::pstLeft,&H1,&H2,&X1,&X2);
+   pPier->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X3,&X4);
    W = pPier->GetXBeamWidth();
-   pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,W);
+   pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,X3,X4,W);
 
    // Upper Cross Beam Diaphragm
    Float64 H = Max(pPier->GetDiaphragmHeight(pgsTypes::Back),pPier->GetDiaphragmHeight(pgsTypes::Ahead));
@@ -1580,9 +1580,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pPier->GetTransverseOffset(&refColIdx,&refColOffset,&refColMeasure);
    pierData.SetRefColumnLocation(refColMeasure,refColIdx,refColOffset);
 
-   Float64 X3, X4;
-   pPier->GetXBeamOverhangs(&X3,&X4);
-   pierData.SetXBeamOverhangs(X3,X4);
+   Float64 X5, X6;
+   pPier->GetXBeamOverhangs(&X5,&X6);
+   pierData.SetXBeamOverhangs(X5,X6);
 
    // Column Properties
    ColumnIndexType nColumns = pPier->GetColumnCount();

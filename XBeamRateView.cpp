@@ -1113,6 +1113,12 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Xcrown = pPier->ConvertCurbLineToCrossBeamCoordinate(pierID,Xcrown);
    Float64 Xoffset = CPO - Xcrown;
 
+   Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
+   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W);
+
+   Float64 D, Hu;
+   pProject->GetDiaphragmDimensions(pierID,&Hu,&D);
+
    // Upper Cross Beam - Top Left
    Float64 Xxb = 0;
    Float64 Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
@@ -1120,26 +1126,17 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 Y   = pPier->GetElevation(pierID,Xcl);
    CComPtr<IPoint2d> uxbTL;
    uxbTL.CoCreateInstance(CLSID_Point2d);
-   uxbTL->Move(Xp,Y);
-
-   Float64 H1, H2, H3, H4, X1, X2, W;
-   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&W);
-
-   Float64 D, Hu;
-   pProject->GetDiaphragmDimensions(pierID,&Hu,&D);
-   //Float64 H1 = pSectProp->GetDepth(pierID,xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xxb));
-   //Float64 H2 = pSectProp->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
-   //Float64 Hu = H2-H1;
+   uxbTL->Move(Xp-X2,Y);
 
    // Upper Cross Beam - Bottom Left (Lower Cross Beam - Top Left)
    CComPtr<IPoint2d> uxbBL;
    uxbBL.CoCreateInstance(CLSID_Point2d);
-   uxbBL->Move(Xp,Y-Hu);
+   uxbBL->Move(Xp-X2,Y-Hu);
 
    // Lower Cross Beam - Bottom Left
    CComPtr<IPoint2d> lxbBL;
    lxbBL.CoCreateInstance(CLSID_Point2d);
-   lxbBL->Move(Xp,Y-Hu-H1);
+   lxbBL->Move(Xp-X2,Y-Hu-H1);
 
    // Upper Cross Beam - Top Right
    Xxb = pPier->GetXBeamLength(pierID);
@@ -1148,17 +1145,17 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Y   = pPier->GetElevation(pierID,Xcl);
    CComPtr<IPoint2d> uxbTR;
    uxbTR.CoCreateInstance(CLSID_Point2d);
-   uxbTR->Move(Xp,Y);
+   uxbTR->Move(Xp+X4,Y);
    
    // Upper Cross Beam - Bottom Right (Lower Cross Beam - Top Right)
    CComPtr<IPoint2d> uxbBR;
    uxbBR.CoCreateInstance(CLSID_Point2d);
-   uxbBR->Move(Xp,Y-Hu);
+   uxbBR->Move(Xp+X4,Y-Hu);
 
    // Lower Cross Beam - Bottom Right
    CComPtr<IPoint2d> lxbBR;
    lxbBR.CoCreateInstance(CLSID_Point2d);
-   lxbBR->Move(Xp,Y-Hu-H1);
+   lxbBR->Move(Xp+X4,Y-Hu-H1);
 
    CComPtr<IPoint2d> lxbBLC, lxbBRC;
    CComPtr<IPoint2d> lxbBL2, lxbBR2;
@@ -1173,7 +1170,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    lxbBR->Location(&x,&y);
    lxbBRC->Move(x,y-H4);
-   lxbBR2->Move(x-X2,y-H4);
+   lxbBR2->Move(x-X3,y-H4);
 
    // Horizontal Cross Beam Dimensions
    if ( pierType == xbrTypes::pctExpansion )

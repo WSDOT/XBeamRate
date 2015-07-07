@@ -135,7 +135,9 @@
 #define IDC_AGG_STRENGTH_T              515
 #define IDC_CONDITION_FACTOR            1260
 #define IDC_CONDITION_FACTOR_TYPE       1407
-#define IDC_X5_MEASUREMENT              1423
+#define IDC_REFCOLUMN_MEASUREMENT       1423
+#define IDC_REFCOLUMN_OFFSET            1424
+#define IDC_REFCOLUMN_OFFSET_UNIT       1425
 #define IDC_BACK_BEARING_GRID           1475
 #define IDC_AHEAD_BEARING_GRID          1476
 #define IDC_REFCOLUMN                   1546
@@ -150,6 +152,8 @@
 #define IDC_X1                          1751
 #define IDC_X2                          1752
 #define IDC_W                           1753
+#define IDC_X6                          1754
+#define IDC_X7                          1755
 #define IDC_COLUMN_COUNT_SPINNER        1810
 #define IDC_PIER_LAYOUT                 1811
 #define IDC_H1_UNIT                     1812
@@ -165,6 +169,7 @@
 #define IDC_X2_LABEL                    1822
 #define IDC_X2_UNIT                     1823
 #define IDC_W_UNIT                      1824
+#define IDC_X4_LABEL                    1825
 #define IDC_X5_UNIT                     1828
 #define IDC_W_LABEL                     1829
 #define IDC_X3                          1830
@@ -182,6 +187,9 @@
 #define IDC_D                           1843
 #define IDC_D_UNIT                      1844
 #define IDC_EC_LABEL                    1846
+#define IDC_X5_LABEL                    1847
+#define IDC_X6_UNIT                     1848
+#define IDC_X6_LABEL                    1849
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define EAFID_EDIT_UNITS                32774
 #define ID_EDIT_PROJECT_NAME            50000

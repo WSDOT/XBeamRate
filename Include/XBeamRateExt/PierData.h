@@ -69,14 +69,16 @@ public:
    Float64& GetDiaphragmHeight();
    Float64& GetDiaphragmWidth();
 
-   void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w);
-   void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) const;
+   void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w);
+   void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) const;
    Float64& GetH1();
    Float64& GetH2();
    Float64& GetH3();
    Float64& GetH4();
    Float64& GetX1();
    Float64& GetX2();
+   Float64& GetX3();
+   Float64& GetX4();
    Float64& GetW();
 
    // Establishes the location of the columns with respect to the alignment/bridgeline.
@@ -98,10 +100,10 @@ public:
    Float64& GetColumnSpacing(SpacingIndexType spaceIdx);
 
    // Cross beam overhangs
-   void SetXBeamOverhangs(Float64 X3,Float64 X4);
-   void GetXBeamOverhangs(Float64* pX3,Float64* pX4) const;
-   Float64& GetX3();
-   Float64& GetX4();
+   void SetXBeamOverhangs(Float64 X5,Float64 X6);
+   void GetXBeamOverhangs(Float64* pX5,Float64* pX6) const;
+   Float64& GetX5();
+   Float64& GetX6();
 
    // Cross beam condition information
    pgsTypes::ConditionFactorType GetConditionFactorType() const;
@@ -170,7 +172,7 @@ protected:
 
    // Lower X-Beam Dimensions
    Float64 m_H1, m_H2, m_H3, m_H4;
-   Float64 m_X1, m_X2;
+   Float64 m_X1, m_X2, m_X3, m_X4;
    Float64 m_XW;
 
    // Column Layout
@@ -180,7 +182,7 @@ protected:
    IndexType m_RefColumnIdx;
    Float64 m_RefColumnOffset;
    pgsTypes::OffsetMeasurementType m_RefColumnDatum;
-   Float64 m_X3, m_X4;
+   Float64 m_X5, m_X6;
 
    // Load Rating Condition
    pgsTypes::ConditionFactorType m_ConditionFactorType;

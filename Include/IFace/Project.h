@@ -136,8 +136,9 @@ interface IXBRProject : IUnknown
    virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete) = 0;
    virtual const CConcreteMaterial& GetConcrete(PierIDType pierID) = 0;
 
-   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 w) = 0;
-   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* pw) = 0;
+   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w) = 0;
+   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) = 0;
+
    virtual Float64 GetXBeamLeftOverhang(PierIDType pierID) = 0;
    virtual Float64 GetXBeamRightOverhang(PierIDType pierID) = 0;
    virtual Float64 GetXBeamWidth(PierIDType pierID) = 0;

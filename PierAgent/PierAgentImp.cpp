@@ -1137,14 +1137,16 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    CComPtr<ILinearCrossBeam> xbeam;
    xbeam.CoCreateInstance(CLSID_LinearCrossBeam);
 
-   Float64 H1, H2, H3, H4, X1, X2, W1;
-   pierData.GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&W1);
+   Float64 H1, H2, H3, H4, X1, X2, X3, X4, W1;
+   pierData.GetLowerXBeamDimensions(&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W1);
    xbeam->put_H1(H1);
    xbeam->put_H2(H2);
    xbeam->put_H3(H3);
    xbeam->put_H4(H4);
    xbeam->put_X1(X1);
    xbeam->put_X2(X2);
+   xbeam->put_X3(X3);
+   xbeam->put_X4(X4);
    xbeam->put_W1(W1);
 
    Float64 H5, W2;
@@ -1152,7 +1154,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    xbeam->put_H5(H5);
    xbeam->put_W2(W2);
 
-   // Create Column Layout;
+   // Create Column Layout
    CComPtr<IColumnLayout> columnLayout;
    columnLayout.CoCreateInstance(CLSID_ColumnLayout);
 
@@ -1166,10 +1168,10 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
       columnLayout->put_Spacing(spaceIdx,space);
    }
 
-   Float64 X3 = pProject->GetXBeamLeftOverhang(pierID);
-   Float64 X4 = pProject->GetXBeamRightOverhang(pierID);
-   columnLayout->put_Overhang(qcbLeft,X3);
-   columnLayout->put_Overhang(qcbRight,X4);
+   Float64 X5 = pProject->GetXBeamLeftOverhang(pierID);
+   Float64 X6 = pProject->GetXBeamRightOverhang(pierID);
+   columnLayout->put_Overhang(qcbLeft, X5);
+   columnLayout->put_Overhang(qcbRight,X6);
 
 
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
@@ -1488,7 +1490,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       ATLASSERT(0 <= zone.Xend   && zone.Xend   <= L);
       ATLASSERT(zone.Xstart < zone.Xend);
 
-      zone.nStirrups = IndexType(zone.Length/zone.S);
+      zone.nStirrups = IndexType(zone.Length/zone.S) + 1;
    }
 }
 
@@ -1509,10 +1511,10 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
 
-   Float64 H1, H2, X1;
-   Float64 H3, H4, X2;
+   Float64 H1, H2, X1, X2;
+   Float64 H3, H4, X3, X4;
    Float64 W;
-   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&W);
+   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W);
 
    Float64 L = GetXBeamLength(pierID);
 
