@@ -29,6 +29,8 @@
 #include "GraphBuilder.h"
 
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\Views.h>
+#include <EAF\EAFUIIntegration.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -93,11 +95,25 @@ STDMETHODIMP CGraphingAgentImp::Init()
 
    InitGraphBuilders();
 
-   return S_OK;
+   return AGENT_S_SECONDPASSINIT;
 }
 
 STDMETHODIMP CGraphingAgentImp::Init2()
 {
+   //
+   // Attach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   // Connection point for the bridge description
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+
    return S_OK;
 }
 
@@ -114,6 +130,19 @@ STDMETHODIMP CGraphingAgentImp::GetClassID(CLSID* pCLSID)
 
 STDMETHODIMP CGraphingAgentImp::ShutDown()
 {
+   //
+   // Detach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
+   ATLASSERT( SUCCEEDED(hr) );
+   hr = pCP->Unadvise( m_dwProjectCookie );
+   ATLASSERT( SUCCEEDED(hr) );
+   pCP.Release(); // Recycle the connection point
+
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
@@ -134,6 +163,34 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
    }
 
    VERIFY(pGraphMgr->AddGraphBuilder( pGraphBuilder ));
+
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////////////////
+// IProjectEventSink
+HRESULT CGraphingAgentImp::OnProjectChanged()
+{
+   CComPtr<IXBeamRateAgent> pAgent;
+   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   if ( FAILED(hr) )
+   {
+      // not in PGSuper/PGSplice so we don't need to update PGSuper/PGSplice's graph view
+      return S_OK;
+   }
+
+   GET_IFACE(IViews,pViews);
+   long graphingViewKey = pViews->GetGraphingViewKey();
+
+   if ( graphingViewKey < 0 )
+   {
+      // view doesn't exist
+      return S_OK;
+   }
+
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
+   pViewRegistrar->UpdateRegisteredView(graphingViewKey,NULL,0,NULL);
 
    return S_OK;
 }

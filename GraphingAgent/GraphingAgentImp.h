@@ -32,6 +32,7 @@
 #include "GraphingAgentCLSID.h"
 
 #include <EAF\EAFInterfaceCache.h>
+#include <IFace\Project.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CGraphingAgentImp
@@ -41,7 +42,8 @@ class ATL_NO_VTABLE CGraphingAgentImp :
 	public CComCoClass<CGraphingAgentImp, &CLSID_GraphingAgent>,
 	public IConnectionPointContainerImpl<CGraphingAgentImp>,
    //public CProxyIProjectEventSink<CGraphingAgentImp>,
-   public IAgentEx
+   public IAgentEx,
+   public IXBRProjectEventSink
 {  
 public:
 	CGraphingAgentImp(); 
@@ -57,6 +59,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_GRAPHINGAGENT)
 BEGIN_COM_MAP(CGraphingAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -74,12 +77,18 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IXBRProjectEventSink
+public:
+   HRESULT OnProjectChanged();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
 
 private:
    DECLARE_EAF_AGENT_DATA;
+
+   DWORD m_dwProjectCookie;
 
    HRESULT InitGraphBuilders();
 };

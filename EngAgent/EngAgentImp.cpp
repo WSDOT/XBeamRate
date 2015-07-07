@@ -255,12 +255,12 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    rcBeam->put_bw(w);
 
    xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
-   if ( connectionType != xbrTypes::pctIntegral )
-   {
-      Float64 d,w;
-      pProject->GetDiaphragmDimensions(pierID,&d,&w);
-      h += d;
-   }
+   Float64 d;
+   pProject->GetDiaphragmDimensions(pierID,&d,&w);
+   //if ( connectionType != xbrTypes::pctIntegral )
+   //{
+   //   h += d;
+   //}
 
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    rcBeam->put_FcSlab(concrete.Fc);
@@ -289,6 +289,15 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
          ATLASSERT(Ybar < 0); // bars are in section coordinates so they should be below the X-axis
 
          Ybar *= -1; // Ybar is now measured from the top down with Y being positive downwards
+
+         // if continous or expansion pier, the upper cross beam doesn't contribute
+         // to capacity. but the rebar are measured from the top down of the entire
+         // section. deduct the height of the upper cross beam to get the depth of
+         // the rebar relative to the top of the lower cross beam
+         if ( connectionType != xbrTypes::pctIntegral )
+         {
+            Ybar -= d;
+         }
 
          if ( !bPositiveMoment )
          {

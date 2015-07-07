@@ -52,6 +52,8 @@
 #include <IFace\LoadRating.h>
 #include <IFace\XBeamRateAgent.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <IFace\Views.h>
+#include <EAF\EAFUIIntegration.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE
