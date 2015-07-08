@@ -105,8 +105,8 @@ private:
    COLORREF           m_Color;
    //CGirderKey         m_GirderKey;
    //IBroker*           m_pBroker;
-   Float64            m_MinCutLocation;  // in girder line coordinates
-   Float64            m_MaxCutLocation;  // in girder line coordinates
+   Float64            m_MinCutLocation;  // in Pier coordinates
+   Float64            m_MaxCutLocation;  // in Pier coordinates
    iCutLocation*      m_pCutLocation;
    
    CComPtr<IPoint2d> m_CachePoint;

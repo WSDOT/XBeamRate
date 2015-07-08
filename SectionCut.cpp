@@ -197,6 +197,9 @@ void CSectionCutDisplayImpl::GetBoundingBox(iPointDisplayObject* pDO, Float64 Xp
    
    GET_IFACE2(pBroker,IXBRPier,pPier);
    Float64 Xxb = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);
+   Float64 Xcl = pPier->ConvertPierToCurbLineCoordinate(pierID,Xpier);
+
+   Float64 Ytop = pPier->GetElevation(pierID,Xcl);
 
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
    Float64 H = pSectProp->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
@@ -209,20 +212,20 @@ void CSectionCutDisplayImpl::GetBoundingBox(iPointDisplayObject* pDO, Float64 Xp
       H += d;
    }
 
-   *top    = height;
-   *bottom = -(H + height);
+   *top    = Ytop + height;
+   *bottom = Ytop -(H + height);
    *left   = Xpier;
    *right  = *left + width;
 }
 
 void CSectionCutDisplayImpl::Draw(iPointDisplayObject* pDO,CDC* pDC,COLORREF color,IPoint2d* userLoc)
 {
-   Float64 Xgl;
-   userLoc->get_X(&Xgl); // userLoc is in view coordinates... this has something to do with why we can't draw a section cut in the start cantilever
-   Xgl = ::ForceIntoRange(m_MinCutLocation,Xgl,m_MaxCutLocation);
+   Float64 Xp;
+   userLoc->get_X(&Xp); // in Pier Coordinates
+   Xp = ::ForceIntoRange(m_MinCutLocation,Xp,m_MaxCutLocation);
 
    Float64 wtop, wleft, wright, wbottom;
-   GetBoundingBox(pDO, Xgl, &wtop, &wleft, &wright, &wbottom);
+   GetBoundingBox(pDO, Xp, &wtop, &wleft, &wright, &wbottom);
 
    CComPtr<iDisplayList> pDL;
    pDO->GetDisplayList(&pDL);
