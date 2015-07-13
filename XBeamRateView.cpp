@@ -913,12 +913,7 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   GET_IFACE2(pBroker,IXBRProject,pProject);
-
    PierIDType pierID = GetPierID();
-
-   Float64 H,W;
-   pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
@@ -929,13 +924,12 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
-         Float64 Xcl  = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xbrg);
-         Float64 Y    = pPier->GetElevation(pierID,Xcl);
          Float64 Xp   = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xbrg);
+         Float64 Y    = pPier->GetBearingElevation(pierID,brgLineIdx,brgIdx);
 
          CComPtr<IPoint2d> pnt;
          pnt.CoCreateInstance(CLSID_Point2d);
-         pnt->Move(Xp,Y-H);
+         pnt->Move(Xp,Y);
 
          CComPtr<iPointDisplayObject> doPnt;
          doPnt.CoCreateInstance(CLSID_PointDisplayObject);

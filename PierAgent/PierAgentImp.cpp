@@ -255,34 +255,54 @@ Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
 
 IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID)
 {
-#pragma Reminder("WORKING HERE - add bearings to generic pier model")
-   GET_IFACE(IXBRProject,pProject);
-   return pProject->GetBearingLineCount(pierID);
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<IBearingLayout> bearingLayout;
+   pier->get_BearingLayout(&bearingLayout);
+
+   IndexType nBearingLines;
+   bearingLayout->get_BearingLineCount(&nBearingLines);
+   return nBearingLines;
 }
 
 IndexType CPierAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx)
 {
-#pragma Reminder("WORKING HERE - add bearings to generic pier model")
-   GET_IFACE(IXBRProject,pProject);
-   return pProject->GetBearingCount(pierID,brgLineIdx);
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<IBearingLayout> bearingLayout;
+   pier->get_BearingLayout(&bearingLayout);
+
+   IndexType nBearings;
+   bearingLayout->get_BearingCount(brgLineIdx,&nBearings);
+   return nBearings;
 }
 
 Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
 {
-#pragma Reminder("WORKING HERE - add bearings to generic pier model")
-   GET_IFACE(IXBRProject,pProject);
-   Float64 leftBrgOffset    = GetLeftBearingOffset(pierID,brgLineIdx); // offset of left-most bearing from alignment
-   Float64 leftColumnOffset = GetLeftColumnOffset(pierID);  // offset of left-most column from alignment
-   Float64 leftColumnOverhang = pProject->GetXBeamLeftOverhang(pierID); // overhang from left-most column to left edge of cross beam
-   Float64 leftBrgLocation  = leftColumnOverhang - leftColumnOffset + leftBrgOffset; // dist from left edge of cross beam to left most bearing
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
 
-   for ( IndexType idx = 0; idx < brgIdx && 0 < brgIdx; idx++ )
-   {
-      Float64 spacing = pProject->GetBearingSpacing(pierID,brgLineIdx,idx);
-      leftBrgLocation += spacing;
-   }
+   CComPtr<IBearingLayout> bearingLayout;
+   pier->get_BearingLayout(&bearingLayout);
 
-   return leftBrgLocation;
+   Float64 Xxb;
+   bearingLayout->get_BearingLocation(brgLineIdx,brgIdx,&Xxb);
+   return Xxb;
+}
+
+Float64 CPierAgentImp::GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<IBearingLayout> bearingLayout;
+   pier->get_BearingLayout(&bearingLayout);
+
+   Float64 Y;
+   bearingLayout->get_BearingElevation(brgLineIdx,brgIdx,&Y);
+   return Y;
 }
 
 IndexType CPierAgentImp::GetColumnCount(PierIDType pierID)
@@ -1206,8 +1226,42 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    }
    columnLayout->SetReferenceColumn(refColIdx,refColOffset);
 
+   //
+   // Create the bearing layout
+   //
+   CComPtr<IBearingLayout> bearingLayout;
+   bearingLayout.CoCreateInstance(CLSID_BearingLayout);
+   IndexType nBearingLines = pierData.GetBearingLineCount();
+   bearingLayout->put_BearingLineCount(nBearingLines);
+   for (IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+   {
+      const xbrBearingLineData& brgLineData = pierData.GetBearingLineData(brgLineIdx);
+
+      pgsTypes::OffsetMeasurementType datum;
+      IndexType refBrgIdx;
+      Float64 refBrgOffset;
+      brgLineData.GetReferenceBearing(&datum,&refBrgIdx,&refBrgOffset);
+
+      if ( datum == pgsTypes::omtBridge )
+      {
+         // the reference bearing needs to be measured from the alignment
+         // for the product model
+         refBrgOffset += pierData.GetBridgeLineOffset();
+      }
+      bearingLayout->SetReferenceBearing(brgLineIdx,refBrgIdx,refBrgOffset);
+
+      IndexType nBearings = brgLineData.GetBearingCount();
+      bearingLayout->put_BearingCount(brgLineIdx,nBearings);
+      for ( IndexType spaceIdx = 0; spaceIdx < nBearings-1; spaceIdx++ )
+      {
+         Float64 s = brgLineData.GetSpacing(spaceIdx);
+         bearingLayout->put_Spacing(brgLineIdx,spaceIdx,s);
+      }
+   }
+
    // finish the pier model (need pier to be complete because we need its geometry to layout the rebar)
    pierModel->putref_CrossBeam(xbeam);
+   pierModel->putref_BearingLayout(bearingLayout);
    pierModel->putref_ColumnLayout(columnLayout);
 
    // XBeam Rebar Layout
@@ -1592,58 +1646,6 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    vPoi.erase(std::unique(vPoi.begin(),vPoi.end(),ComparePoiLocation),vPoi.end());
 
    m_XBeamPoi.insert(std::make_pair(pierID,vPoi));
-}
-
-Float64 CPierAgentImp::GetLeftBearingOffset(PierIDType pierID,IndexType brgLineIdx)
-{
-   // returns the offset from the alignment to the left-most bearing
-   // values less than zero indicate the left-most bearing is to the
-   // left ofthe alignment
-
-   GET_IFACE(IXBRProject,pProject);
-   ATLASSERT(brgLineIdx < pProject->GetBearingLineCount(pierID));
-
-   IndexType refBrgIdx;
-   Float64 refBearingOffset;
-   pgsTypes::OffsetMeasurementType refBearingDatum;
-   pProject->GetReferenceBearing(pierID,brgLineIdx,&refBrgIdx,&refBearingOffset,&refBearingDatum);
-
-   if ( refBearingDatum == pgsTypes::omtBridge )
-   {
-      // reference bearing is located from the bridge line... adjust its location
-      // so that it is measured from the alignment
-      Float64 blo = pProject->GetBridgeLineOffset(pierID);
-      refBearingOffset += blo;
-   }
-
-   if ( 0 < refBrgIdx )
-   {
-      // make the reference bearing the first bearing
-      for ( IndexType brgIdx = refBrgIdx-1; 0 <= brgIdx && brgIdx != INVALID_INDEX; brgIdx-- )
-      {
-         Float64 space = pProject->GetBearingSpacing(pierID,brgLineIdx,brgIdx);
-         refBearingOffset -= space;
-      }
-   }
-
-   return refBearingOffset;
-}
-
-Float64 CPierAgentImp::GetLeftColumnOffset(PierIDType pierID)
-{
-   // returns the offset from the alignment to the left-most column
-   // values less than zero indicate the left-most column is to the 
-   // left of the alignment
-
-   CComPtr<IPier> pier;
-   GetPierModel(pierID,&pier);
-
-   CComPtr<IColumnLayout> columnLayout;
-   pier->get_ColumnLayout(&columnLayout);
-
-   Float64 offset;
-   columnLayout->get_ColumnOffset(0,&offset);
-   return offset;
 }
 
 bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)

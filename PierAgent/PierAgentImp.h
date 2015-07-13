@@ -97,6 +97,7 @@ public:
    virtual IndexType GetBearingLineCount(PierIDType pierID);
    virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx);
    virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
+   virtual Float64 GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
    virtual IndexType GetColumnCount(PierIDType pierID);
    virtual Float64 GetColumnLocation(PierIDType pierID,IndexType colIdx);
    virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx);
@@ -185,9 +186,6 @@ private:
    std::vector<xbrPointOfInterest>& GetPointsOfInterest(PierIDType pierID);
    std::map<PierIDType,std::vector<xbrPointOfInterest>> m_XBeamPoi;
    bool FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi);
-
-   Float64 GetLeftBearingOffset(PierIDType pierID,IndexType brgLineIdx);
-   Float64 GetLeftColumnOffset(PierIDType pierID);
 
    typedef struct
    {

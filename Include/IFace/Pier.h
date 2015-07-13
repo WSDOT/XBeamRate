@@ -18,6 +18,7 @@ interface IXBRPier : public IUnknown
    virtual IndexType GetBearingLineCount(PierIDType pierID) = 0;
    virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) = 0;
    virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
+   virtual Float64 GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
 
    // Returns the number of columns in the pier
    virtual IndexType GetColumnCount(PierIDType pierID) = 0;
