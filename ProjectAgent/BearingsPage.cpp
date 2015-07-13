@@ -54,9 +54,16 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);
 
+   // NOTE: you are going to want to combine these 2 loops into one loop.. DONT DO IT
+   // The first loop only goes nBearingLines times... the second loop goes the maximum
+   // number of bearing line times (2)
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
       DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx),pParent->m_PierData.m_DeadLoadReactions[brgLineIdx]);
+   }
+
+   for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
+   {
       DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingIndex());
       DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingOffset(),pDisplayUnits->GetSpanLengthUnit());
       DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingDatum());
@@ -93,12 +100,15 @@ BOOL CBearingsPage::OnInitDialog()
       str.Format(_T("%d"),brgLineIdx+1);
       int idx = pcb->AddString(str);
       pcb->SetItemData(idx,(DWORD_PTR)(brgLineIdx+1));
-
-      FillRefBearingComboBox(brgLineIdx);
-      FillRefBearingDatumComboBox(brgLineIdx);
    }
 
    CPropertyPage::OnInitDialog();
+
+   FillRefBearingComboBox(0);
+   FillRefBearingComboBox(1);
+
+   FillRefBearingDatumComboBox(0);
+   FillRefBearingDatumComboBox(1);
 
    OnBearingLineCountChanged();
 
@@ -142,6 +152,21 @@ void CBearingsPage::OnCopyAhead()
    std::vector<txnDeadLoadReaction> deadLoadReactions;
    m_Grid[0].GetBearingData(brgLineData,deadLoadReactions);
    m_Grid[1].SetBearingData(brgLineData,deadLoadReactions);
+   FillRefBearingComboBox(1);
+
+   CComboBox* pcbRefBearing = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_LIST);
+   int curSel = pcbRefBearing->GetCurSel();
+   pcbRefBearing = (CComboBox*)GetDlgItem(IDC_AHEAD_REF_BEARING_LIST);
+   pcbRefBearing->SetCurSel(curSel);
+
+   CString str;
+   GetDlgItem(IDC_BACK_REF_BEARING_LOCATION)->GetWindowText(str);
+   GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION)->SetWindowText(str);
+
+   CComboBox* pcbDatum = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_DATUM);
+   curSel = pcbDatum->GetCurSel();
+   pcbDatum = (CComboBox*)GetDlgItem(IDC_AHEAD_REF_BEARING_DATUM);
+   pcbDatum->SetCurSel(curSel);
 }
 
 void CBearingsPage::OnCopyBack()
@@ -150,6 +175,21 @@ void CBearingsPage::OnCopyBack()
    std::vector<txnDeadLoadReaction> deadLoadReactions;
    m_Grid[1].GetBearingData(brgLineData,deadLoadReactions);
    m_Grid[0].SetBearingData(brgLineData,deadLoadReactions);
+   FillRefBearingComboBox(0);
+
+   CComboBox* pcbRefBearing = (CComboBox*)GetDlgItem(IDC_AHEAD_REF_BEARING_LIST);
+   int curSel = pcbRefBearing->GetCurSel();
+   pcbRefBearing = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_LIST);
+   pcbRefBearing->SetCurSel(curSel);
+
+   CString str;
+   GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION)->GetWindowText(str);
+   GetDlgItem(IDC_BACK_REF_BEARING_LOCATION)->SetWindowText(str);
+
+   CComboBox* pcbDatum = (CComboBox*)GetDlgItem(IDC_AHEAD_REF_BEARING_DATUM);
+   curSel = pcbDatum->GetCurSel();
+   pcbDatum = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_DATUM);
+   pcbDatum->SetCurSel(curSel);
 }
 
 void CBearingsPage::OnBearingLineCountChanged()
@@ -183,8 +223,9 @@ void CBearingsPage::FillRefBearingComboBox(IndexType brgLineIdx)
    pcbRefBearing->ResetContent();
 
    CString strLabel;
-   CPierDlg* pParent = (CPierDlg*)GetParent();
-   IndexType nBearings = pParent->m_PierData.m_PierData.GetBearingLineCount();
+   //CPierDlg* pParent = (CPierDlg*)GetParent();
+   //IndexType nBearings = pParent->m_PierData.m_PierData.GetBearingLineCount();
+   IndexType nBearings = m_Grid[brgLineIdx].GetBearingCount();
    nBearings = Max((IndexType)1,nBearings); // there is always one bearing minimum
    for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
    {

@@ -228,6 +228,11 @@ void CBearingLayoutGrid::SetBearingData(xbrBearingLineData& brgLineData,std::vec
    GetParam()->EnableUndo(TRUE);
 }
 
+IndexType CBearingLayoutGrid::GetBearingCount()
+{
+   return (IndexType)GetRowCount();
+}
+
 void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 S)
 {
    CComPtr<IBroker> pBroker;
