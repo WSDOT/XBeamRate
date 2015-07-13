@@ -30,7 +30,7 @@ public:
    Float64 m_gDW;
    Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
-   std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2];
+   std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2]; // use bearing line index to access array
 
    txnLiveLoadReactions m_DesignLiveLoad;
    txnLiveLoadReactions m_LegalRoutineLiveLoad;
