@@ -54,20 +54,17 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);
 
-   // NOTE: you are going to want to combine these 2 loops into one loop.. DONT DO IT
-   // The first loop only goes nBearingLines times... the second loop goes the maximum
-   // number of bearing line times (2)
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
       DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx),pParent->m_PierData.m_DeadLoadReactions[brgLineIdx]);
-   }
-
-   for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
-   {
       DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingIndex());
       DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingOffset(),pDisplayUnits->GetSpanLengthUnit());
       DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingDatum());
    }
+
+   // make sure the unit labels are set for both bearing lines (one bearing line could be missed in the loop above)
+   DDX_Tag(pDX,IDC_BACK_REF_BEARING_LOCATION_UNIT,pDisplayUnits->GetSpanLengthUnit());
+   DDX_Tag(pDX,IDC_AHEAD_REF_BEARING_LOCATION_UNIT,pDisplayUnits->GetSpanLengthUnit());
 }
 
 
