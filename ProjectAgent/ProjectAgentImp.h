@@ -175,8 +175,11 @@ public:
    virtual Float64 GetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
    virtual void SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing);
 
-   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW);
-   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW);
+   virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType);
+   virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
+
+   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 W);
+   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pW);
 
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
@@ -336,12 +339,17 @@ private:
    std::map<PierIDType,Float64> m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
    // Bearing Reactions
-   typedef struct
+   typedef struct BearingReactions
    {
+      BearingReactions() { DC = 0, DW = 0; W = 0; }
       Float64 DC, DW;
+      Float64 W; // width of reaction (only used of reaction type is rltUniform
    } BearingReactions;
    std::map<PierIDType,std::vector<BearingReactions>> m_BearingReactions[2];
    std::vector<BearingReactions>& GetPrivateBearingReactions(PierIDType pierID,IndexType brgLineIdx);
+
+   std::map<PierIDType,xbrTypes::ReactionLoadType> m_BearingReactionType[2];
+   xbrTypes::ReactionLoadType& GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
 
    // Live Load Reactions
    class LiveLoadReaction

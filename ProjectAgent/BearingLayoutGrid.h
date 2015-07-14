@@ -23,6 +23,8 @@ public:
 
 // Operations
 public:
+   void SetReactionLoadType(xbrTypes::ReactionLoadType reactionLoadType);
+
    void AddBearing();
    void RemoveSelectedBearings();
 
@@ -48,12 +50,15 @@ public:
 
 public:
    // custom stuff for grid
-   void CustomInit();
+   void CustomInit(xbrTypes::ReactionLoadType reactionLoadType);
 
 private:
-   void AddBearingRow(Float64 DC,Float64 DW,Float64 S);
-   void SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 S);
-   void GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pS);
+   xbrTypes::ReactionLoadType m_ReactionLoadType;
+   void OnReactionLoadTypeChanged();
+
+   void AddBearingRow(Float64 DC,Float64 DW,Float64 W,Float64 S);
+   void SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 W,Float64 S);
+   void GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pW,Float64* pS);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };
 

@@ -10,6 +10,7 @@ public:
    txnDeadLoadReaction();
    Float64 m_DC;
    Float64 m_DW;
+   Float64 m_W; // width of the reaction force if DC/DW are uniform loads
 };
 
 class txnLiveLoadReactions
@@ -30,6 +31,7 @@ public:
    Float64 m_gDW;
    Float64 m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
+   xbrTypes::ReactionLoadType m_DeadLoadReactionType[2];
    std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2]; // use bearing line index to access array
 
    txnLiveLoadReactions m_DesignLiveLoad;

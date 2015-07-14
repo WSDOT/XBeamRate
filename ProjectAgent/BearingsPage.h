@@ -30,9 +30,12 @@ protected:
    afx_msg void OnCopyAhead();
    afx_msg void OnCopyBack();
    afx_msg void OnBearingLineCountChanged();
+   afx_msg void OnBackReactionTypeChanged();
+   afx_msg void OnAheadReactionTypeChanged();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   void FillRefBearingComboBox(IndexType brgLineIdx);
+   void FillRefBearingComboBox(IndexType brgLineIdx,bool bInitialFill=false);
    void FillRefBearingDatumComboBox(IndexType brgLineIdx);
+   void FillReactionTypeComboBox(IndexType brgLineIdx);
 };

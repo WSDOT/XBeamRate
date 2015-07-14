@@ -1618,12 +1618,27 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    IndexType nBrgLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBrgLines; brgLineIdx++ )
    {
+      xbrTypes::ReactionLoadType reactionType = pProject->GetBearingReactionType(pierID,brgLineIdx);
+
       IndexType nBearings = pProject->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = GetBearingLocation(pierID,brgLineIdx,brgIdx);
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+0.001));
+
+         if ( reactionType == xbrTypes::rltConcentrated )
+         {
+            // POI at CL Bearing
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+0.001));
+         }
+         else
+         {
+            // POI at start/end of distributed load
+            Float64 DC, DW, W;
+            pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&W);
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-W/2));
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+W/2));
+         }
       }
    }
 
@@ -1641,6 +1656,23 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());
+
+   // Merge the attributes of two POI at the same location so when we remove
+   // duplicates the attributes don't get lost
+   std::vector<xbrPointOfInterest>::iterator iter1(vPoi.begin());
+   std::vector<xbrPointOfInterest>::iterator iter2(iter1+1);
+   std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
+   for ( ; iter2 != end; iter1++, iter2++ )
+   {
+      if ( ComparePoiLocation(*iter1,*iter2) )
+      {
+         PoiAttributeType attribute = iter1->GetAttributes();
+         attribute |= iter2->GetAttributes();
+
+         iter1->SetAttributes(attribute);
+         iter2->SetAttributes(attribute);
+      }
+   }
 
    // remove any duplicates
    vPoi.erase(std::unique(vPoi.begin(),vPoi.end(),ComparePoiLocation),vPoi.end());

@@ -9,6 +9,7 @@ txnDeadLoadReaction::txnDeadLoadReaction()
 {
    m_DC = 0;
    m_DW = 0;
+   m_W  = 0;
 }
 
 txnLiveLoadReactions::txnLiveLoadReactions()
@@ -59,12 +60,15 @@ void txnEditPier::Execute(int i)
    IndexType nBearingLines = m_PierData[i].m_PierData.GetBearingLineCount();
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++)
    {
+      xbrTypes::ReactionLoadType brgReactionType = m_PierData[i].m_DeadLoadReactionType[brgLineIdx];
+      pProject->SetBearingReactionType(pierID,brgLineIdx,brgReactionType);
       IndexType nBearings = m_PierData[i].m_PierData.GetBearingCount(brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 DC = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DC;
          Float64 DW = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DW;
-         pProject->SetBearingReactions(pierID,brgLineIdx,brgIdx,DC,DW);
+         Float64 W  = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_W;
+         pProject->SetBearingReactions(pierID,brgLineIdx,brgIdx,DC,DW,W);
       }
    }
 

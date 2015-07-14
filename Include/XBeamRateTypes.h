@@ -45,4 +45,10 @@ typedef struct xbrTypes
       pftDWReactions
    } ProductForceType;
 
+   typedef enum ReactionLoadType
+   {
+      rltConcentrated, // DC/DW reaction values are concentrated forces
+      rltUniform // DC/DW are uniform load forces (FORCE/LENGTH) centered about the CL Bearing
+   } ReactionLoadType;
+
 } xbrTypes;

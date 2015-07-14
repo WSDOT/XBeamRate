@@ -73,7 +73,10 @@ CProjectAgentImp::CProjectAgentImp()
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
 
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID] = m_LiveLoadReactions[INVALID_ID][pgsTypes::lrDesign_Inventory];
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
 
    m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3"),0));
    m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3S2"),0));
@@ -288,11 +291,13 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          {
             std::vector<BearingReactions>& vBearingReactions = m_BearingReactions[brgLineIdx][INVALID_ID];
             pStrSave->BeginUnit(_T("BearingLine"),1.0);
+            pStrSave->put_Property(_T("ReactionType"),CComVariant(m_BearingReactionType[brgLineIdx][INVALID_ID]));
             BOOST_FOREACH(BearingReactions& brgReaction,vBearingReactions)
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("DC"),CComVariant(brgReaction.DC));
                   pStrSave->put_Property(_T("DW"),CComVariant(brgReaction.DW));
+                  pStrSave->put_Property(_T("W"), CComVariant(brgReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // BearingLine
@@ -511,6 +516,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                   IndexType brgLineIdx = 0;
                   while ( SUCCEEDED(pStrLoad->BeginUnit(_T("BearingLine"))) )
                   {
+                     var.vt = VT_I4;
+                     hr = pStrLoad->get_Property(_T("ReactionType"),&var);
+                     m_BearingReactionType[brgLineIdx][INVALID_ID] = (xbrTypes::ReactionLoadType)var.lVal;
                      std::vector<BearingReactions> vBearingReactions;
                      while( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
@@ -522,6 +530,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("DW"),&var);
                         reaction.DW = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        reaction.W = var.dblVal;
 
                         vBearingReactions.push_back(reaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -1023,19 +1035,32 @@ void CProjectAgentImp::SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW)
+void CProjectAgentImp::SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType)
+{
+   GetPrivateBearingReactionType(pierID,brgLineIdx) = brgReactionType;
+   Fire_OnProjectChanged();
+}
+
+xbrTypes::ReactionLoadType CProjectAgentImp::GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx)
+{
+   return GetPrivateBearingReactionType(pierID,brgLineIdx);
+}
+
+void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 W)
 {
    std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    vReactions[brgIdx].DC = DC;
    vReactions[brgIdx].DW = DW;
+   vReactions[brgIdx].W  = W;
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW)
+void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pW)
 {
    std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    *pDC = vReactions[brgIdx].DC;
    *pDW = vReactions[brgIdx].DW;
+   *pW  = vReactions[brgIdx].W;
 }
 
 void CProjectAgentImp::GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
@@ -1482,6 +1507,22 @@ std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBea
    }
 
    return m_BearingReactions[brgLineIdx][pierID];
+}
+
+xbrTypes::ReactionLoadType& CProjectAgentImp::GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx)
+{
+   std::map<PierIDType,xbrTypes::ReactionLoadType>::const_iterator found(m_BearingReactionType[brgLineIdx].find(pierID));
+   if ( found == m_BearingReactionType[brgLineIdx].end() )
+   {
+      xbrPierData& pierData = GetPrivatePierData(pierID);
+      IndexType nBearingLines = pierData.GetBearingLineCount();
+      for ( IndexType i = 0; i < nBearingLines; i++ )
+      {
+         m_BearingReactions[i].insert(std::make_pair(pierID,xbrTypes::rltConcentrated));
+      }
+   }
+
+   return m_BearingReactionType[brgLineIdx][pierID];
 }
 
 void CProjectAgentImp::UpdatePiers()

@@ -257,10 +257,6 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
    Float64 d;
    pProject->GetDiaphragmDimensions(pierID,&d,&w);
-   //if ( connectionType != xbrTypes::pctIntegral )
-   //{
-   //   h += d;
-   //}
 
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    rcBeam->put_FcSlab(concrete.Fc);
@@ -337,30 +333,36 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    }
 
    // Still need phi-factor
-   Float64 c;
-   solution->get_NeutralAxisDepth(&c);
+   Float64 dc = 0;
+   Float64 de = 0;
+   Float64 phi = 0;
+   if ( !IsZero(Mn) )
+   {
+      Float64 c;
+      solution->get_NeutralAxisDepth(&c);
 
-   matRebar::Type rebarType;
-   matRebar::Grade rebarGrade;
-   pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
+      matRebar::Type rebarType;
+      matRebar::Grade rebarGrade;
+      pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
-   Float64 et = (dt - c)*0.003/c;
-   Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
-   Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
-   Float64 phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
-   phi = ::ForceIntoRange(0.75,phi,0.9);
+      Float64 et = (dt - c)*0.003/c;
+      Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
+      Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
+      phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
+      phi = ::ForceIntoRange(0.75,phi,0.9);
 
-   Float64 Cweb, Cflange, Yweb, Yflange;
-   solution->get_Cweb(&Cweb);
-   solution->get_Cflange(&Cflange);
-   solution->get_Yweb(&Yweb);
-   solution->get_Yflange(&Yflange);
-   Float64 dc = (Cweb*Yweb + Cflange*Yflange)/(Cweb + Cflange);
+      Float64 Cweb, Cflange, Yweb, Yflange;
+      solution->get_Cweb(&Cweb);
+      solution->get_Cflange(&Cflange);
+      solution->get_Yweb(&Yweb);
+      solution->get_Yflange(&Yflange);
+      dc = (Cweb*Yweb + Cflange*Yflange)/(Cweb + Cflange);
 
-   Float64 T;
-   solution->get_T(&T);
-   Float64 MomentArm = fabs(Mn/T);
-   Float64 de = dc + MomentArm;
+      Float64 T;
+      solution->get_T(&T);
+      Float64 MomentArm = fabs(Mn/T);
+      de = dc + MomentArm;
+   }
 
    MomentCapacityDetails capacityDetails;
    capacityDetails.rcBeam = rcBeam;

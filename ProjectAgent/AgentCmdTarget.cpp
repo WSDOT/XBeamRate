@@ -56,11 +56,12 @@ void CAgentCmdTarget::OnEditPier()
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_PierData.GetBearingLineCount(); brgLineIdx++ )
    {
+      oldPierData.m_DeadLoadReactionType[brgLineIdx] = pProject->GetBearingReactionType(pierID,brgLineIdx);
       IndexType nBearings = oldPierData.m_PierData.GetBearingCount(brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          txnDeadLoadReaction reaction;
-         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW);
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW,&reaction.m_W);
          oldPierData.m_DeadLoadReactions[brgLineIdx].push_back(reaction);
       }
    }
@@ -73,9 +74,9 @@ void CAgentCmdTarget::OnEditPier()
       oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(pierID,ratingType);
    }
 
-   oldPierData.m_DesignLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);
-   oldPierData.m_LegalRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine);
-   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special);
+   oldPierData.m_DesignLiveLoad.m_LLIM        = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);
+   oldPierData.m_LegalRoutineLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine);
+   oldPierData.m_LegalSpecialLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special);
    oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Routine);
    oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Special);
 

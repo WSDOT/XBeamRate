@@ -438,26 +438,84 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
    CComPtr<IFem2dPointLoadCollection> dwPointLoads;
    dwLoading->get_PointLoads(&dwPointLoads);
 
+   CComPtr<IFem2dDistributedLoadCollection> dcDistLoads;
+   dcLoading->get_DistributedLoads(&dcDistLoads);
+
+   CComPtr<IFem2dDistributedLoadCollection> dwDistLoads;
+   dwLoading->get_DistributedLoads(&dwDistLoads);
+
    IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
+      xbrTypes::ReactionLoadType reactionType = pProject->GetBearingReactionType(pierID,brgLineIdx);
+
       IndexType nBearings = pProject->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
 
-         MemberIDType mbrID;
-         Float64 mbrLocation;
-         GetCapBeamFemModelLocation(pModelData,Xbrg,&mbrID,&mbrLocation);
+         Float64 DC, DW, W;
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&W);
 
-         Float64 DC, DW;
-         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW);
+         if ( reactionType == xbrTypes::rltConcentrated || IsZero(W) )
+         {
+            // Concentrated load (or uniform load, but W is zero so treat as concentrated load)
+            MemberIDType mbrID;
+            Float64 mbrLocation;
+            GetCapBeamFemModelLocation(pModelData,Xbrg,&mbrID,&mbrLocation);
 
-         CComPtr<IFem2dPointLoad> dcLoad;
-         dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
+            CComPtr<IFem2dPointLoad> dcLoad;
+            dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
 
-         CComPtr<IFem2dPointLoad> dwLoad;
-         dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+            CComPtr<IFem2dPointLoad> dwLoad;
+            dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+         }
+         else
+         {
+            // Distributed load
+            MemberIDType startMbrID, endMbrID;
+            Float64 startLocation, endLocation;
+            GetCapBeamFemModelLocation(pModelData,Xbrg-W/2,&startMbrID,&startLocation);
+            GetCapBeamFemModelLocation(pModelData,Xbrg+W/2,&endMbrID,&endLocation);
+
+            if ( startMbrID == endMbrID )
+            {
+               // distributed load is contained within a single FEM member
+               CComPtr<IFem2dDistributedLoad> dcLoad;
+               dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
+
+               CComPtr<IFem2dDistributedLoad> dwLoad;
+               dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+            }
+            else
+            {
+               // distributed loads span over multiple FEM members
+
+               // apply loads to first member
+               CComPtr<IFem2dDistributedLoad> dcLoad;
+               dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
+
+               CComPtr<IFem2dDistributedLoad> dwLoad;
+               dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+
+               // apply loads to intermediate members
+               for ( MemberIDType mbrID = startMbrID+1; mbrID < endMbrID-1; mbrID++ )
+               {
+                  dcLoad.Release();
+                  dwLoad.Release();
+
+                  dcDistLoads->Create(dcLoadID++,mbrID,loadDirFy,0.0,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
+                  dwDistLoads->Create(dwLoadID++,mbrID,loadDirFy,0.0,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+               }
+
+               // apply loads to last member
+               dcLoad.Release();
+               dwLoad.Release();
+
+               dcDistLoads->Create(dcLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
+               dwDistLoads->Create(dwLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+            }
+         }
       }
    }
 }

@@ -92,7 +92,11 @@
 #define IDC_DW_UNIT                     289
 #define IDC_REMOVE_COLUMN               289
 #define IDC_MOD_E                       290
+#define IDC_BACK_REACTION_TYPE          290
+#define IDC_AHEAD_REACTION_TYPE         291
 #define IDC_EC                          291
+#define IDC_BACK_REACTION_TYPE_LABEL    292
+#define IDC_AHEAD_REACTION_TYPE_LABEL   293
 #define IDC_EC_UNIT                     292
 #define IDC_AGG_SIZE                    293
 #define IDC_AGG_SIZE_UNIT               294
@@ -166,7 +170,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         290
+#define _APS_NEXT_CONTROL_VALUE         292
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

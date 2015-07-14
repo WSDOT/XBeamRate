@@ -56,6 +56,7 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
 
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
+      DDX_CBEnum(pDX,IDC_BACK_REACTION_TYPE+brgLineIdx,pParent->m_PierData.m_DeadLoadReactionType[brgLineIdx]);
       DDX_BearingGrid(pDX,m_Grid[brgLineIdx],pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx),pParent->m_PierData.m_DeadLoadReactions[brgLineIdx]);
       DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingIndex());
       DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingOffset(),pDisplayUnits->GetSpanLengthUnit());
@@ -77,19 +78,22 @@ BEGIN_MESSAGE_MAP(CBearingsPage, CPropertyPage)
    ON_COMMAND(IDC_COPY_AHEAD, OnCopyAhead)
    ON_COMMAND(IDC_COPY_BACK, OnCopyBack)
    ON_CBN_SELCHANGE(IDC_BEARING_LINE_COUNT, OnBearingLineCountChanged)
+   ON_CBN_SELCHANGE(IDC_BACK_REACTION_TYPE, OnBackReactionTypeChanged)
+   ON_CBN_SELCHANGE(IDC_AHEAD_REACTION_TYPE, OnAheadReactionTypeChanged)
 END_MESSAGE_MAP()
 
 
 // CBearingsPage message handlers
 BOOL CBearingsPage::OnInitDialog()
 {
+   CPierDlg* pParent = (CPierDlg*)GetParent();
+
    m_Grid[0].SubclassDlgItem(IDC_BACK_BEARING_GRID, this);
-   m_Grid[0].CustomInit();
+   m_Grid[0].CustomInit(pParent->m_PierData.m_DeadLoadReactionType[0]);
 
    m_Grid[1].SubclassDlgItem(IDC_AHEAD_BEARING_GRID, this);
-   m_Grid[1].CustomInit();
+   m_Grid[1].CustomInit(pParent->m_PierData.m_DeadLoadReactionType[0]);
 
-   CPierDlg* pParent = (CPierDlg*)GetParent();
    CComboBox* pcb = (CComboBox*)GetDlgItem(IDC_BEARING_LINE_COUNT);
    for ( IndexType brgLineIdx = 0; brgLineIdx < 2; brgLineIdx++ )
    {
@@ -99,13 +103,16 @@ BOOL CBearingsPage::OnInitDialog()
       pcb->SetItemData(idx,(DWORD_PTR)(brgLineIdx+1));
    }
 
-   CPropertyPage::OnInitDialog();
-
-   FillRefBearingComboBox(0);
-   FillRefBearingComboBox(1);
+   FillRefBearingComboBox(0,true);
+   FillRefBearingComboBox(1,true);
 
    FillRefBearingDatumComboBox(0);
    FillRefBearingDatumComboBox(1);
+
+   FillReactionTypeComboBox(0);
+   FillReactionTypeComboBox(1);
+
+   CPropertyPage::OnInitDialog();
 
    OnBearingLineCountChanged();
 
@@ -164,6 +171,12 @@ void CBearingsPage::OnCopyAhead()
    curSel = pcbDatum->GetCurSel();
    pcbDatum = (CComboBox*)GetDlgItem(IDC_AHEAD_REF_BEARING_DATUM);
    pcbDatum->SetCurSel(curSel);
+
+   CComboBox* pcbReaction = (CComboBox*)GetDlgItem(IDC_BACK_REACTION_TYPE);
+   curSel = pcbReaction->GetCurSel();
+   pcbReaction = (CComboBox*)GetDlgItem(IDC_AHEAD_REACTION_TYPE);
+   pcbReaction->SetCurSel(curSel);
+   OnAheadReactionTypeChanged();
 }
 
 void CBearingsPage::OnCopyBack()
@@ -187,6 +200,12 @@ void CBearingsPage::OnCopyBack()
    curSel = pcbDatum->GetCurSel();
    pcbDatum = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_DATUM);
    pcbDatum->SetCurSel(curSel);
+
+   CComboBox* pcbReaction = (CComboBox*)GetDlgItem(IDC_AHEAD_REACTION_TYPE);
+   curSel = pcbReaction->GetCurSel();
+   pcbReaction = (CComboBox*)GetDlgItem(IDC_BACK_REACTION_TYPE);
+   pcbReaction->SetCurSel(curSel);
+   OnBackReactionTypeChanged();
 }
 
 void CBearingsPage::OnBearingLineCountChanged()
@@ -203,6 +222,8 @@ void CBearingsPage::OnBearingLineCountChanged()
    GetDlgItem(IDC_ADD_AHEAD)->ShowWindow(show);
    GetDlgItem(IDC_REMOVE_AHEAD)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_LABEL)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_REACTION_TYPE_LABEL)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_REACTION_TYPE)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_REF_BEARING_LIST)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_REF_BEARING_LOCATION_UNIT)->ShowWindow(show);
@@ -213,17 +234,49 @@ void CBearingsPage::OnBearingLineCountChanged()
    GetDlgItem(IDC_AHEAD_BEARING_LABEL3)->ShowWindow(show);
 }
 
-void CBearingsPage::FillRefBearingComboBox(IndexType brgLineIdx)
+void CBearingsPage::OnBackReactionTypeChanged()
+{
+   CComboBox* pcbReactionType = (CComboBox*)GetDlgItem(IDC_BACK_REACTION_TYPE);
+   int curSel = pcbReactionType->GetCurSel();
+   xbrTypes::ReactionLoadType reactionLoadType = (xbrTypes::ReactionLoadType)(pcbReactionType->GetItemData(curSel));
+   m_Grid[0].SetReactionLoadType(reactionLoadType);
+}
+
+void CBearingsPage::OnAheadReactionTypeChanged()
+{
+   CComboBox* pcbReactionType = (CComboBox*)GetDlgItem(IDC_AHEAD_REACTION_TYPE);
+   int curSel = pcbReactionType->GetCurSel();
+   xbrTypes::ReactionLoadType reactionLoadType = (xbrTypes::ReactionLoadType)(pcbReactionType->GetItemData(curSel));
+   m_Grid[1].SetReactionLoadType(reactionLoadType);
+}
+
+void CBearingsPage::FillRefBearingComboBox(IndexType brgLineIdx,bool bInitialFill)
 {
    CComboBox* pcbRefBearing = (CComboBox*)GetDlgItem(IDC_BACK_REF_BEARING_LIST+brgLineIdx);
    int curSel = pcbRefBearing->GetCurSel();
    pcbRefBearing->ResetContent();
 
    CString strLabel;
-   //CPierDlg* pParent = (CPierDlg*)GetParent();
-   //IndexType nBearings = pParent->m_PierData.m_PierData.GetBearingLineCount();
-   IndexType nBearings = m_Grid[brgLineIdx].GetBearingCount();
+   IndexType nBearings;
+   if ( bInitialFill )
+   {
+      CPierDlg* pParent = (CPierDlg*)GetParent();
+      if ( brgLineIdx < pParent->m_PierData.m_PierData.GetBearingLineCount() )
+      {
+         nBearings = pParent->m_PierData.m_PierData.GetBearingCount(brgLineIdx);
+      }
+      else
+      {
+         nBearings = 1;
+      }
+   }
+   else
+   {
+      nBearings = m_Grid[brgLineIdx].GetBearingCount();
+   }
+
    nBearings = Max((IndexType)1,nBearings); // there is always one bearing minimum
+
    for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
    {
       strLabel.Format(_T("%d"),(brgIdx+1));
@@ -252,5 +305,23 @@ void CBearingsPage::FillRefBearingDatumComboBox(IndexType brgLineIdx)
    if ( pcbRefBearingDatum->SetCurSel(curSel) == CB_ERR )
    {
       pcbRefBearingDatum->SetCurSel(0);
+   }
+}
+
+void CBearingsPage::FillReactionTypeComboBox(IndexType brgLineIdx)
+{
+   CComboBox* pcbReactionType = (CComboBox*)GetDlgItem(IDC_BACK_REACTION_TYPE+brgLineIdx);
+   int curSel = pcbReactionType->GetCurSel();
+   pcbReactionType->ResetContent();
+
+   int idx = pcbReactionType->AddString(_T("Concentrated"));
+   pcbReactionType->SetItemData(idx,(DWORD_PTR)xbrTypes::rltConcentrated);
+
+   idx = pcbReactionType->AddString(_T("Uniform"));
+   pcbReactionType->SetItemData(idx,(DWORD_PTR)xbrTypes::rltUniform);
+
+   if ( pcbReactionType->SetCurSel(curSel) == CB_ERR )
+   {
+      pcbReactionType->SetCurSel(0);
    }
 }
