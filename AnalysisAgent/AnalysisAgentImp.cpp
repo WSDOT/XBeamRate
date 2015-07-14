@@ -419,9 +419,17 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
 
    LoadCaseIDType dcLoadCaseID = GetLoadCaseID(xbrTypes::pftDCReactions);
    LoadCaseIDType dwLoadCaseID = GetLoadCaseID(xbrTypes::pftDWReactions);
+   LoadCaseIDType crLoadCaseID = GetLoadCaseID(xbrTypes::pftCRReactions);
+   LoadCaseIDType shLoadCaseID = GetLoadCaseID(xbrTypes::pftSHReactions);
+   LoadCaseIDType psLoadCaseID = GetLoadCaseID(xbrTypes::pftPSReactions);
+   LoadCaseIDType reLoadCaseID = GetLoadCaseID(xbrTypes::pftREReactions);
 
    LoadIDType dcLoadID = 0;
    LoadIDType dwLoadID = 0;
+   LoadIDType shLoadID = 0;
+   LoadIDType crLoadID = 0;
+   LoadIDType psLoadID = 0;
+   LoadIDType reLoadID = 0;
 
    CComPtr<IFem2dLoadingCollection> loadings;
    pModelData->m_Model->get_Loadings(&loadings);
@@ -432,17 +440,56 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
    CComPtr<IFem2dLoading> dwLoading;
    loadings->Create(dwLoadCaseID,&dwLoading);
 
+   CComPtr<IFem2dLoading> shLoading;
+   loadings->Create(shLoadCaseID,&shLoading);
+
+   CComPtr<IFem2dLoading> crLoading;
+   loadings->Create(crLoadCaseID,&crLoading);
+
+   CComPtr<IFem2dLoading> psLoading;
+   loadings->Create(psLoadCaseID,&psLoading);
+
+   CComPtr<IFem2dLoading> reLoading;
+   loadings->Create(reLoadCaseID,&reLoading);
+
+
    CComPtr<IFem2dPointLoadCollection> dcPointLoads;
    dcLoading->get_PointLoads(&dcPointLoads);
 
    CComPtr<IFem2dPointLoadCollection> dwPointLoads;
    dwLoading->get_PointLoads(&dwPointLoads);
 
+   CComPtr<IFem2dPointLoadCollection> shPointLoads;
+   shLoading->get_PointLoads(&shPointLoads);
+
+   CComPtr<IFem2dPointLoadCollection> crPointLoads;
+   crLoading->get_PointLoads(&crPointLoads);
+
+   CComPtr<IFem2dPointLoadCollection> psPointLoads;
+   psLoading->get_PointLoads(&psPointLoads);
+
+   CComPtr<IFem2dPointLoadCollection> rePointLoads;
+   reLoading->get_PointLoads(&rePointLoads);
+
+
    CComPtr<IFem2dDistributedLoadCollection> dcDistLoads;
    dcLoading->get_DistributedLoads(&dcDistLoads);
 
    CComPtr<IFem2dDistributedLoadCollection> dwDistLoads;
    dwLoading->get_DistributedLoads(&dwDistLoads);
+
+   CComPtr<IFem2dDistributedLoadCollection> shDistLoads;
+   shLoading->get_DistributedLoads(&shDistLoads);
+
+   CComPtr<IFem2dDistributedLoadCollection> crDistLoads;
+   crLoading->get_DistributedLoads(&crDistLoads);
+
+   CComPtr<IFem2dDistributedLoadCollection> psDistLoads;
+   psLoading->get_DistributedLoads(&psDistLoads);
+
+   CComPtr<IFem2dDistributedLoadCollection> reDistLoads;
+   reLoading->get_DistributedLoads(&reDistLoads);
+
 
    IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
@@ -454,8 +501,8 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
       {
          Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
 
-         Float64 DC, DW, W;
-         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&W);
+         Float64 DC, DW, CR, SH, PS, RE, W;
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
 
          if ( reactionType == xbrTypes::rltConcentrated || IsZero(W) )
          {
@@ -469,6 +516,18 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
 
             CComPtr<IFem2dPointLoad> dwLoad;
             dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+
+            CComPtr<IFem2dPointLoad> shLoad;
+            shPointLoads->Create(shLoadID++,mbrID,mbrLocation,0.0,-SH,0.0,lotGlobal,&shLoad);
+
+            CComPtr<IFem2dPointLoad> crLoad;
+            crPointLoads->Create(crLoadID++,mbrID,mbrLocation,0.0,-CR,0.0,lotGlobal,&crLoad);
+
+            CComPtr<IFem2dPointLoad> psLoad;
+            psPointLoads->Create(psLoadID++,mbrID,mbrLocation,0.0,-PS,0.0,lotGlobal,&psLoad);
+
+            CComPtr<IFem2dPointLoad> reLoad;
+            rePointLoads->Create(reLoadID++,mbrID,mbrLocation,0.0,-RE,0.0,lotGlobal,&reLoad);
          }
          else
          {
@@ -486,6 +545,18 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
 
                CComPtr<IFem2dDistributedLoad> dwLoad;
                dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+
+               CComPtr<IFem2dDistributedLoad> shLoad;
+               shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
+
+               CComPtr<IFem2dDistributedLoad> crLoad;
+               crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
+
+               CComPtr<IFem2dDistributedLoad> psLoad;
+               psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
+
+               CComPtr<IFem2dDistributedLoad> reLoad;
+               reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
             }
             else
             {
@@ -498,22 +569,50 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
                CComPtr<IFem2dDistributedLoad> dwLoad;
                dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
 
+               CComPtr<IFem2dDistributedLoad> shLoad;
+               shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
+
+               CComPtr<IFem2dDistributedLoad> crLoad;
+               crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
+
+               CComPtr<IFem2dDistributedLoad> psLoad;
+               psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
+
+               CComPtr<IFem2dDistributedLoad> reLoad;
+               reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
+
                // apply loads to intermediate members
                for ( MemberIDType mbrID = startMbrID+1; mbrID < endMbrID-1; mbrID++ )
                {
                   dcLoad.Release();
                   dwLoad.Release();
+                  shLoad.Release();
+                  crLoad.Release();
+                  psLoad.Release();
+                  reLoad.Release();
 
                   dcDistLoads->Create(dcLoadID++,mbrID,loadDirFy,0.0,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
                   dwDistLoads->Create(dwLoadID++,mbrID,loadDirFy,0.0,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+                  shDistLoads->Create(shLoadID++,mbrID,loadDirFy,0.0,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
+                  crDistLoads->Create(crLoadID++,mbrID,loadDirFy,0.0,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
+                  psDistLoads->Create(psLoadID++,mbrID,loadDirFy,0.0,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
+                  reDistLoads->Create(reLoadID++,mbrID,loadDirFy,0.0,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
                }
 
                // apply loads to last member
                dcLoad.Release();
                dwLoad.Release();
+               shLoad.Release();
+               crLoad.Release();
+               psLoad.Release();
+               reLoad.Release();
 
                dcDistLoads->Create(dcLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
                dwDistLoads->Create(dwLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+               shDistLoads->Create(shLoadID++,endMbrID,loadDirFy,0.0,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
+               crDistLoads->Create(crLoadID++,endMbrID,loadDirFy,0.0,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
+               psDistLoads->Create(psLoadID++,endMbrID,loadDirFy,0.0,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
+               reDistLoads->Create(reLoadID++,endMbrID,loadDirFy,0.0,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
             }
          }
       }
@@ -602,6 +701,18 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfTyp
 
    case xbrTypes::pftDWReactions:
       return 3;
+
+   case xbrTypes::pftCRReactions:
+      return 4;
+
+   case xbrTypes::pftSHReactions:
+      return 5;
+
+   case xbrTypes::pftPSReactions:
+      return 6;
+
+   case xbrTypes::pftREReactions:
+      return 7;
 
    default:
       ATLASSERT(false);
@@ -857,6 +968,10 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    GET_IFACE(IXBRProject,pProject);
    Float64 gDC = pProject->GetDCLoadFactor();
    Float64 gDW = pProject->GetDWLoadFactor();
+   Float64 gCR = pProject->GetCRLoadFactor();
+   Float64 gSH = pProject->GetSHLoadFactor();
+   Float64 gPS = pProject->GetPSLoadFactor();
+   Float64 gRE = pProject->GetRELoadFactor();
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    Float64 DC = 0;
@@ -875,11 +990,43 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
       DW += dw;
    }
 
+   Float64 CR = 0;
+   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(lcCR);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
+   {
+      Float64 cr = GetMoment(pierID,pfType,poi);
+      CR += cr;
+   }
+
+   Float64 SH = 0;
+   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(lcSH);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
+   {
+      Float64 sh = GetMoment(pierID,pfType,poi);
+      SH += sh;
+   }
+
+   Float64 PS = 0;
+   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(lcPS);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
+   {
+      Float64 ps = GetMoment(pierID,pfType,poi);
+      PS += ps;
+   }
+
+   Float64 RE = 0;
+   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(lcRE);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
+   {
+      Float64 re = GetMoment(pierID,pfType,poi);
+      RE += re;
+   }
+
    Float64 LLIMmin, LLIMmax;
    GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax);
 
-   *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
-   *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
+   *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
+   *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
 
 void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
@@ -889,6 +1036,10 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    GET_IFACE(IXBRProject,pProject);
    Float64 gDC = pProject->GetDCLoadFactor();
    Float64 gDW = pProject->GetDWLoadFactor();
+   Float64 gCR = pProject->GetCRLoadFactor();
+   Float64 gSH = pProject->GetSHLoadFactor();
+   Float64 gPS = pProject->GetPSLoadFactor();
+   Float64 gRE = pProject->GetRELoadFactor();
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    sysSectionValue DC = 0;
@@ -907,11 +1058,43 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
       DW += dw;
    }
 
+   sysSectionValue CR = 0;
+   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(lcCR);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
+   {
+      sysSectionValue cr = GetShear(pierID,pfType,poi);
+      CR += cr;
+   }
+
+   sysSectionValue SH = 0;
+   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(lcSH);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
+   {
+      sysSectionValue sh = GetShear(pierID,pfType,poi);
+      SH += sh;
+   }
+
+   sysSectionValue PS = 0;
+   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(lcPS);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
+   {
+      sysSectionValue ps = GetShear(pierID,pfType,poi);
+      PS += ps;
+   }
+
+   sysSectionValue RE = 0;
+   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(lcRE);
+   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
+   {
+      sysSectionValue re = GetShear(pierID,pfType,poi);
+      RE += re;
+   }
+
    sysSectionValue LLIMmin, LLIMmax;
    GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax);
 
-   *pMin = gDC*DC + gDW*DW + gLL*LLIMmin;
-   *pMax = gDC*DC + gDW*DW + gLL*LLIMmax;
+   *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
+   *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
 
 void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
@@ -947,15 +1130,36 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(XBRCombinedForceType lcType)
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes;
-   if ( lcType == lcDC )
+   switch(lcType)
    {
+   case lcDC:
       vPFTypes.push_back(xbrTypes::pftLowerXBeam);
       vPFTypes.push_back(xbrTypes::pftUpperXBeam);
       vPFTypes.push_back(xbrTypes::pftDCReactions);
-   }
-   else
-   {
+      break;
+
+   case lcDW:
       vPFTypes.push_back(xbrTypes::pftDWReactions);
+      break;
+
+   case lcSH:
+      vPFTypes.push_back(xbrTypes::pftSHReactions);
+      break;
+
+   case lcCR:
+      vPFTypes.push_back(xbrTypes::pftCRReactions);
+      break;
+
+   case lcPS:
+      vPFTypes.push_back(xbrTypes::pftPSReactions);
+      break;
+
+   case lcRE:
+      vPFTypes.push_back(xbrTypes::pftREReactions);
+      break;
+
+   default:
+      ATLASSERT(false);
    }
 
    return vPFTypes;

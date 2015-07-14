@@ -61,13 +61,17 @@ void CAgentCmdTarget::OnEditPier()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          txnDeadLoadReaction reaction;
-         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW,&reaction.m_W);
+         pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&reaction.m_DC,&reaction.m_DW,&reaction.m_CR,&reaction.m_SH,&reaction.m_PS,&reaction.m_RE,&reaction.m_W);
          oldPierData.m_DeadLoadReactions[brgLineIdx].push_back(reaction);
       }
    }
 
    oldPierData.m_gDC = pProject->GetDCLoadFactor();
    oldPierData.m_gDW = pProject->GetDWLoadFactor();
+   oldPierData.m_gCR = pProject->GetCRLoadFactor();
+   oldPierData.m_gSH = pProject->GetSHLoadFactor();
+   oldPierData.m_gPS = pProject->GetPSLoadFactor();
+
    for ( int i = 0; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;

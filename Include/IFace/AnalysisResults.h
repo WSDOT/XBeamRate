@@ -14,7 +14,11 @@ struct LowerXBeamLoad
 typedef enum XBRCombinedForceType
 {
    lcDC,
-   lcDW
+   lcDW,
+   lcSH,
+   lcCR,
+   lcPS,
+   lcRE
 } XBRCombinedForceType;
 
 

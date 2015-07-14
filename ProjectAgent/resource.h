@@ -96,10 +96,14 @@
 #define IDC_AHEAD_REACTION_TYPE         291
 #define IDC_EC                          291
 #define IDC_BACK_REACTION_TYPE_LABEL    292
-#define IDC_AHEAD_REACTION_TYPE_LABEL   293
 #define IDC_EC_UNIT                     292
+#define IDC_AHEAD_REACTION_TYPE_LABEL   293
 #define IDC_AGG_SIZE                    293
 #define IDC_AGG_SIZE_UNIT               294
+#define IDC_CR                          294
+#define IDC_SH                          295
+#define IDC_EDIT3                       296
+#define IDC_PS                          296
 #define IDD_AASHTO_CONCRETE             500
 #define IDC_EC_K1_LABEL                 501
 #define IDC_EC_K1                       502
@@ -170,7 +174,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         292
+#define _APS_NEXT_CONTROL_VALUE         297
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

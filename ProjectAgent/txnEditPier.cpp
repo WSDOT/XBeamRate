@@ -9,6 +9,10 @@ txnDeadLoadReaction::txnDeadLoadReaction()
 {
    m_DC = 0;
    m_DW = 0;
+   m_CR = 0;
+   m_SH = 0;
+   m_PS = 0;
+   m_RE = 0;
    m_W  = 0;
 }
 
@@ -67,13 +71,22 @@ void txnEditPier::Execute(int i)
       {
          Float64 DC = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DC;
          Float64 DW = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_DW;
+         Float64 CR = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_CR;
+         Float64 SH = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_SH;
+         Float64 PS = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_PS;
+         Float64 RE = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_RE;
          Float64 W  = m_PierData[i].m_DeadLoadReactions[brgLineIdx][brgIdx].m_W;
-         pProject->SetBearingReactions(pierID,brgLineIdx,brgIdx,DC,DW,W);
+         pProject->SetBearingReactions(pierID,brgLineIdx,brgIdx,DC,DW,CR,SH,PS,RE,W);
       }
    }
 
    pProject->SetDCLoadFactor(m_PierData[i].m_gDC);
    pProject->SetDWLoadFactor(m_PierData[i].m_gDW);
+   pProject->SetCRLoadFactor(m_PierData[i].m_gCR);
+   pProject->SetSHLoadFactor(m_PierData[i].m_gSH);
+   pProject->SetPSLoadFactor(m_PierData[i].m_gPS);
+   pProject->SetRELoadFactor(m_PierData[i].m_gCR); // using creep factor for relaxation
+
    for ( int j = 0; j < 6; j++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)j;

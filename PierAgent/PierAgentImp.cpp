@@ -1634,8 +1634,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          else
          {
             // POI at start/end of distributed load
-            Float64 DC, DW, W;
-            pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&W);
+            Float64 DC, DW, CR, SH, PS, RE, W;
+            pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-W/2));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+W/2));
          }

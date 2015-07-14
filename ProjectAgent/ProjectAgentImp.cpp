@@ -51,7 +51,7 @@ CProjectAgentImp::CProjectAgentImp()
    m_EventHoldCount = 0;
 
    m_SysFactorFlexure = 1.0;
-   m_SysFactorShear = 1.0;
+   m_SysFactorShear   = 1.0;
    m_vbRateForShear[pgsTypes::lrDesign_Inventory] = true;
    m_vbRateForShear[pgsTypes::lrDesign_Operating] = true;
    m_vbRateForShear[pgsTypes::lrLegal_Routine]    = true;
@@ -61,6 +61,11 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_gDC = 1.25;
    m_gDW = 1.50;
+   m_gCR = 1.00;
+   m_gSH = 1.00;
+   m_gPS = 1.00;
+   m_gRE = 1.00;
+
    m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = 1.75;
    m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID] = 1.35;
    m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]    = 1.80;
@@ -94,8 +99,6 @@ CProjectAgentImp::CProjectAgentImp()
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          BearingReactions reactions;
-         reactions.DC = 0;
-         reactions.DW = 0;
          vBearingReactions.push_back(reactions);
       }
       m_BearingReactions[brgLineIdx].insert(std::make_pair(INVALID_ID,vBearingReactions));
@@ -276,6 +279,10 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
          pStrSave->put_Property(_T("DC"),CComVariant(m_gDC));
          pStrSave->put_Property(_T("DW"),CComVariant(m_gDW));
+         pStrSave->put_Property(_T("CR"),CComVariant(m_gCR));
+         pStrSave->put_Property(_T("SH"),CComVariant(m_gSH));
+         pStrSave->put_Property(_T("PS"),CComVariant(m_gPS));
+         pStrSave->put_Property(_T("RE"),CComVariant(m_gRE));
          pStrSave->put_Property(_T("LL_Design_Inventory"),CComVariant(m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID]));
          pStrSave->put_Property(_T("LL_Design_Operating"),CComVariant(m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID]));
          pStrSave->put_Property(_T("LL_Legal_Routine"),CComVariant(m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]));
@@ -297,6 +304,10 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("DC"),CComVariant(brgReaction.DC));
                   pStrSave->put_Property(_T("DW"),CComVariant(brgReaction.DW));
+                  pStrSave->put_Property(_T("CR"),CComVariant(brgReaction.CR));
+                  pStrSave->put_Property(_T("SH"),CComVariant(brgReaction.SH));
+                  pStrSave->put_Property(_T("PS"),CComVariant(brgReaction.PS));
+                  pStrSave->put_Property(_T("RE"),CComVariant(brgReaction.RE));
                   pStrSave->put_Property(_T("W"), CComVariant(brgReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
@@ -485,6 +496,18 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("DW"),&var);
             m_gDW = var.dblVal;
 
+            hr = pStrLoad->get_Property(_T("CR"),&var);
+            m_gCR = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("SH"),&var);
+            m_gSH = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PS"),&var);
+            m_gPS = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("RE"),&var);
+            m_gRE = var.dblVal;
+
             hr = pStrLoad->get_Property(_T("LL_Design_Inventory"),&var);
             m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = var.dblVal;
 
@@ -530,6 +553,22 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("DW"),&var);
                         reaction.DW = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("CR"),&var);
+                        reaction.CR = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("SH"),&var);
+                        reaction.SH = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("PS"),&var);
+                        reaction.PS = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("RE"),&var);
+                        reaction.RE = var.dblVal;
 
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("W"),&var);
@@ -1046,20 +1085,28 @@ xbrTypes::ReactionLoadType CProjectAgentImp::GetBearingReactionType(PierIDType p
    return GetPrivateBearingReactionType(pierID,brgLineIdx);
 }
 
-void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 W)
+void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W)
 {
    std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    vReactions[brgIdx].DC = DC;
    vReactions[brgIdx].DW = DW;
+   vReactions[brgIdx].CR = CR;
+   vReactions[brgIdx].SH = SH;
+   vReactions[brgIdx].PS = PS;
+   vReactions[brgIdx].RE = RE;
    vReactions[brgIdx].W  = W;
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pW)
+void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW)
 {
    std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
    *pDC = vReactions[brgIdx].DC;
    *pDW = vReactions[brgIdx].DW;
+   *pCR = vReactions[brgIdx].CR;
+   *pSH = vReactions[brgIdx].SH;
+   *pPS = vReactions[brgIdx].PS;
+   *pRE = vReactions[brgIdx].RE;
    *pW  = vReactions[brgIdx].W;
 }
 
@@ -1311,6 +1358,50 @@ void CProjectAgentImp::SetDWLoadFactor(Float64 dw)
 Float64 CProjectAgentImp::GetDWLoadFactor()
 {
    return m_gDW;
+}
+
+void CProjectAgentImp::SetCRLoadFactor(Float64 cr)
+{
+   m_gCR = cr;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetCRLoadFactor()
+{
+   return m_gCR;
+}
+
+void CProjectAgentImp::SetSHLoadFactor(Float64 sh)
+{
+   m_gSH = sh;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetSHLoadFactor()
+{
+   return m_gSH;
+}
+
+void CProjectAgentImp::SetPSLoadFactor(Float64 ps)
+{
+   m_gPS = ps;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetPSLoadFactor()
+{
+   return m_gPS;
+}
+
+void CProjectAgentImp::SetRELoadFactor(Float64 re)
+{
+   m_gRE = re;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetRELoadFactor()
+{
+   return m_gRE;
 }
 
 void CProjectAgentImp::SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll)

@@ -117,8 +117,8 @@ interface IXBRProject : IUnknown
    // Bearing reactions
    virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType) = 0;
    virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx) = 0;
-   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 W) = 0;
-   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pW) = 0;
+   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W) = 0;
+   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) = 0;
 
    // Reference bearing
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
@@ -176,6 +176,18 @@ interface IXBRProject : IUnknown
 
    virtual void SetDWLoadFactor(Float64 dw) = 0;
    virtual Float64 GetDWLoadFactor() = 0;
+
+   virtual void SetCRLoadFactor(Float64 cr) = 0;
+   virtual Float64 GetCRLoadFactor() = 0;
+
+   virtual void SetSHLoadFactor(Float64 sh) = 0;
+   virtual Float64 GetSHLoadFactor() = 0;
+
+   virtual void SetPSLoadFactor(Float64 ps) = 0;
+   virtual Float64 GetPSLoadFactor() = 0;
+
+   virtual void SetRELoadFactor(Float64 re) = 0;
+   virtual Float64 GetRELoadFactor() = 0;
 
    virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll) = 0;
    virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;

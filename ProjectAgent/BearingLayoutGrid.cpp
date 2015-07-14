@@ -47,7 +47,7 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
    SetMergeCellsMode(gxnMergeDelayEval);
 
    const int num_rows = 0;
-   const int num_cols = 4;
+   const int num_cols = 8;
 
 	SetRowCount(num_rows);
 	SetColCount(num_cols);
@@ -80,7 +80,7 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 		);
 
    CString cv;
-   cv.Format(_T("DC (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("DC\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -89,7 +89,7 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 			.SetValue(cv)
 		);
 
-   cv.Format(_T("DW (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("DW\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -98,7 +98,7 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 			.SetValue(cv)
 		);
 
-   cv.Format(_T("W (%s)"),pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("CR\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -107,7 +107,43 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 			.SetValue(cv)
 		);
 
-   cv.Format(_T("S (%s)"),pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("SH\n%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   cv.Format(_T("PS\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   cv.Format(_T("RE\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   cv.Format(_T("W\n(%s)"),pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   cv.Format(_T("S\n(%s)"),pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -119,6 +155,7 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 
    // make it so that text fits correctly in header row
 	ResizeRowHeightsToFit(CGXRange(0,0,0,num_cols));
+   ResizeColWidthsToFit(CGXRange(0,0,0,num_cols));
 
    // don't allow users to resize grids
    GetParam( )->EnableTrackColWidth(0); 
@@ -133,6 +170,12 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 	GetParam( )->EnableUndo(TRUE);
 }
 
+BOOL CBearingLayoutGrid::OnEndEditing(ROWCOL nRow,ROWCOL nCol)
+{
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
+   return CGXGridWnd::OnEndEditing(nRow,nCol);
+}
+
 void CBearingLayoutGrid::SetReactionLoadType(xbrTypes::ReactionLoadType reactionLoadType)
 {
    m_ReactionLoadType = reactionLoadType;
@@ -143,16 +186,16 @@ void CBearingLayoutGrid::AddBearing()
 {
    ROWCOL nRows = GetRowCount();
 
-   Float64 DC, DW, W, S;
-   GetBearingData(nRows,&DC,&DW,&W,&S); // bearing data in the last row (we want DC and DW)
+   Float64 DC, DW, CR, SH, PS, RE, W, S;
+   GetBearingData(nRows,&DC,&DW,&CR,&SH,&PS,&RE,&W,&S); // bearing data in the last row (we want DC and DW)
 
    Float64 Sdefault = ::ConvertToSysUnits(6.0,unitMeasure::Feet); // default spacing
    Float64 Wdefault = Sdefault;
    if ( 1 < nRows )
    {
       // get the spacing between the last two bearings
-      Float64 DC1, DW1, W1, S1;
-      GetBearingData(nRows-1,&DC1,&DW1,&W1,&S1);
+      Float64 DC1, DW1, CR1, SH1, PS1, RE1, W1, S1;
+      GetBearingData(nRows-1,&DC1,&DW1,&CR1,&SH1,&PS1,&RE1,&W1,&S1);
       Wdefault = W1;
       Sdefault = S1;
    }
@@ -161,10 +204,10 @@ void CBearingLayoutGrid::AddBearing()
    GetParam()->SetLockReadOnly(FALSE);
 
    // set the default spacing in the last row
-   SetBearingData(nRows,DC,DW,Wdefault,Sdefault);
+   SetBearingData(nRows,DC,DW,CR,SH,PS,RE,Wdefault,Sdefault);
 
    // add the new bearing (adds row to the grid)
-   AddBearingRow(DC,DW,Wdefault,0);
+   AddBearingRow(DC,DW,CR,SH,PS,RE,Wdefault,0);
 
    GetParam()->SetLockReadOnly(TRUE);
    GetParam( )->EnableUndo(TRUE);
@@ -184,7 +227,7 @@ void CBearingLayoutGrid::RemoveSelectedBearings()
    }
 
    ROWCOL nRows = GetRowCount();
-   SetStyleRange(CGXRange(nRows,4), CGXStyle()
+   SetStyleRange(CGXRange(nRows,8), CGXStyle()
       .SetEnabled(FALSE)
       .SetReadOnly(TRUE)
       .SetInterior(::GetSysColor(COLOR_BTNFACE))
@@ -203,8 +246,8 @@ void CBearingLayoutGrid::GetBearingData(xbrBearingLineData& brgLineData,std::vec
    brgLineData.SetBearingCount(nRows);
    for ( ROWCOL row = 1; row <= nRows; row++ )
    {
-      Float64 DC, DW, W, S;
-      GetBearingData(row,&DC,&DW,&W,&S);
+      Float64 DC, DW, CR, SH, PS, RE, W, S;
+      GetBearingData(row,&DC,&DW,&CR,&SH,&PS,&RE,&W,&S);
       if ( row < nRows )
       {
          brgLineData.SetSpacing(row-1,S);
@@ -212,6 +255,10 @@ void CBearingLayoutGrid::GetBearingData(xbrBearingLineData& brgLineData,std::vec
       txnDeadLoadReaction reaction;
       reaction.m_DC = DC;
       reaction.m_DW = DW;
+      reaction.m_CR = CR;
+      reaction.m_SH = SH;
+      reaction.m_PS = PS;
+      reaction.m_RE = RE;
       reaction.m_W  = W;
       deadLoadReactions.push_back(reaction);
    }
@@ -231,7 +278,7 @@ void CBearingLayoutGrid::SetBearingData(xbrBearingLineData& brgLineData,std::vec
    if ( brgLineData.GetBearingCount() == 0 )
    {
       // Always have one bearing
-      AddBearingRow(0,0,0,0);
+      AddBearingRow(0,0,0,0,0,0,0,0);
    }
    else
    {
@@ -241,8 +288,12 @@ void CBearingLayoutGrid::SetBearingData(xbrBearingLineData& brgLineData,std::vec
          Float64 S = (brgIdx != nBearings-1 ? brgLineData.GetSpacing(brgIdx) : 0);
          Float64 DC = deadLoadReactions[brgIdx].m_DC;
          Float64 DW = deadLoadReactions[brgIdx].m_DW;
+         Float64 CR = deadLoadReactions[brgIdx].m_CR;
+         Float64 SH = deadLoadReactions[brgIdx].m_SH;
+         Float64 PS = deadLoadReactions[brgIdx].m_PS;
+         Float64 RE = deadLoadReactions[brgIdx].m_RE;
          Float64 W  = deadLoadReactions[brgIdx].m_W;
-         AddBearingRow(DC,DW,W,S);
+         AddBearingRow(DC,DW,CR,SH,PS,RE,W,S);
       }
    }
 
@@ -255,7 +306,7 @@ IndexType CBearingLayoutGrid::GetBearingCount()
    return (IndexType)GetRowCount();
 }
 
-void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 W,Float64 S)
+void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W,Float64 S)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -289,6 +340,74 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    else
    {
       value = ::ConvertFromSysUnits(DW,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // CR
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      value = ::ConvertFromSysUnits(CR,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      value = ::ConvertFromSysUnits(CR,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // SH
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      value = ::ConvertFromSysUnits(SH,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      value = ::ConvertFromSysUnits(SH,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // PS
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      value = ::ConvertFromSysUnits(PS,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      value = ::ConvertFromSysUnits(PS,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      .SetValue(value)
+      );
+
+   // RE
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      value = ::ConvertFromSysUnits(RE,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      value = ::ConvertFromSysUnits(RE,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -341,16 +460,24 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   CString strDC,strDW;
+   CString strDC,strDW,strCR,strSH,strPS,strRE;
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      strDC.Format(_T("DC (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
-      strDW.Format(_T("DW (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strDC.Format(_T("DC\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strDW.Format(_T("DW\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strCR.Format(_T("CR\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strSH.Format(_T("SH\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strPS.Format(_T("PS\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+      strRE.Format(_T("RE\n(%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
    }
    else
    {
-      strDC.Format(_T("DC (%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
-      strDW.Format(_T("DW (%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strDC.Format(_T("DC\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strDW.Format(_T("DW\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strCR.Format(_T("CR\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strSH.Format(_T("SH\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strPS.Format(_T("PS\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
+      strRE.Format(_T("RE\n(%s)"),pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure.UnitTag().c_str());
    }
 
    ROWCOL col = 1;
@@ -370,19 +497,55 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
 			.SetValue(strDW)
 		);
 
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(strCR)
+		);
+
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(strSH)
+		);
+
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(strPS)
+		);
+
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(strRE)
+		);
+
    // Hide/Show the "W" column
    BOOL bHide = (m_ReactionLoadType == xbrTypes::rltConcentrated ? TRUE : FALSE);
    HideCols(col,col++,bHide);
+
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
-void CBearingLayoutGrid::AddBearingRow(Float64 DC,Float64 DW,Float64 W,Float64 S)
+void CBearingLayoutGrid::AddBearingRow(Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W,Float64 S)
 {
    InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
-   SetBearingData(row,DC,DW,W,S);
+   SetBearingData(row,DC,DW,CR,SH,PS,RE,W,S);
+
+   ResizeColWidthsToFit(CGXRange(0,0,0,GetColCount()));
 }
 
-void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pW,Float64* pS)
+void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW,Float64* pS)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -408,6 +571,46 @@ void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Flo
    else
    {
       *pDW = ::ConvertToSysUnits(DW,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   Float64 CR = _tstof(GetCellValue(row,col++));
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      *pCR = ::ConvertToSysUnits(CR,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      *pCR = ::ConvertToSysUnits(CR,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   Float64 SH = _tstof(GetCellValue(row,col++));
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      *pSH = ::ConvertToSysUnits(SH,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      *pSH = ::ConvertToSysUnits(SH,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   Float64 PS = _tstof(GetCellValue(row,col++));
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      *pPS = ::ConvertToSysUnits(PS,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      *pPS = ::ConvertToSysUnits(PS,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+   }
+
+   Float64 RE = _tstof(GetCellValue(row,col++));
+   if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
+   {
+      *pRE = ::ConvertToSysUnits(RE,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   }
+   else
+   {
+      *pRE = ::ConvertToSysUnits(RE,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 W = _tstof(GetCellValue(row,col++));

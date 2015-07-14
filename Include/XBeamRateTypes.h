@@ -42,7 +42,11 @@ typedef struct xbrTypes
       pftLowerXBeam,
       pftUpperXBeam,
       pftDCReactions,
-      pftDWReactions
+      pftDWReactions,
+      pftCRReactions,
+      pftSHReactions,
+      pftPSReactions,
+      pftREReactions
    } ProductForceType;
 
    typedef enum ReactionLoadType

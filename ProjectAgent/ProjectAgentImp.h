@@ -178,8 +178,8 @@ public:
    virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType);
    virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
 
-   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 W);
-   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pW);
+   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W);
+   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW);
 
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
@@ -229,6 +229,18 @@ public:
 
    virtual void SetDWLoadFactor(Float64 dw);
    virtual Float64 GetDWLoadFactor();
+
+   virtual void SetCRLoadFactor(Float64 cr);
+   virtual Float64 GetCRLoadFactor();
+
+   virtual void SetSHLoadFactor(Float64 sh);
+   virtual Float64 GetSHLoadFactor();
+
+   virtual void SetPSLoadFactor(Float64 ps);
+   virtual Float64 GetPSLoadFactor();
+
+   virtual void SetRELoadFactor(Float64 re);
+   virtual Float64 GetRELoadFactor();
 
    virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll);
    virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
@@ -336,13 +348,17 @@ private:
    // Load Factors
    Float64 m_gDC;
    Float64 m_gDW;
+   Float64 m_gCR;
+   Float64 m_gSH;
+   Float64 m_gPS;
+   Float64 m_gRE;
    std::map<PierIDType,Float64> m_gLL[6]; // use pgsTypes::LoadRatingType to access array
 
    // Bearing Reactions
    typedef struct BearingReactions
    {
-      BearingReactions() { DC = 0, DW = 0; W = 0; }
-      Float64 DC, DW;
+      BearingReactions() { DC = 0, DW = 0; CR = 0; SH = 0; PS = 0; RE = 0; W = 0; }
+      Float64 DC, DW, CR, SH, PS, RE;
       Float64 W; // width of reaction (only used of reaction type is rltUniform
    } BearingReactions;
    std::map<PierIDType,std::vector<BearingReactions>> m_BearingReactions[2];

@@ -50,6 +50,9 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_Text(pDX,IDC_DC,pParent->m_PierData.m_gDC);
    DDX_Text(pDX,IDC_DW,pParent->m_PierData.m_gDW);
+   DDX_Text(pDX,IDC_CR,pParent->m_PierData.m_gCR);
+   DDX_Text(pDX,IDC_SH,pParent->m_PierData.m_gSH);
+   DDX_Text(pDX,IDC_PS,pParent->m_PierData.m_gPS);
 
    IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);
@@ -317,7 +320,7 @@ void CBearingsPage::FillReactionTypeComboBox(IndexType brgLineIdx)
    int idx = pcbReactionType->AddString(_T("Concentrated"));
    pcbReactionType->SetItemData(idx,(DWORD_PTR)xbrTypes::rltConcentrated);
 
-   idx = pcbReactionType->AddString(_T("Uniform"));
+   idx = pcbReactionType->AddString(_T("Uniform of width, W"));
    pcbReactionType->SetItemData(idx,(DWORD_PTR)xbrTypes::rltUniform);
 
    if ( pcbReactionType->SetCurSel(curSel) == CB_ERR )

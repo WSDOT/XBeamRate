@@ -156,17 +156,49 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
 {
    PierIDType pierID = m_GraphController.GetPierID();
 
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   // include time dependnet load cases if
+   // 1) we are running as a stand alone application
+   // 2) we are running as a PGS extension and the losses are computed with the time-step method
+   bool bIncludeTimeDependentLoads = true;
+
+   CComPtr<IXBeamRateAgent> pAgent;
+   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   if ( SUCCEEDED(hr) )
+   {
+      GET_IFACE2( pBroker, ILossParameters, pLossParams);
+      if ( pLossParams->GetLossMethod() != pgsTypes::TIME_STEP )
+      {
+         // PGS extension and not time-step analysis... don't include time dependent loads
+         bIncludeTimeDependentLoads = false;
+      }
+   }
+
    IDType graphID = 0;
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),xbrTypes::pftLowerXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Upper Cross Beam Dead Load"),xbrTypes::pftUpperXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure Diaphragm Dead Load"),xbrTypes::pftUpperXBeam));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),xbrTypes::pftDCReactions));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),xbrTypes::pftDWReactions));
+   if ( bIncludeTimeDependentLoads )
+   {
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre CR Reactions"),xbrTypes::pftCRReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre SH Reactions"),xbrTypes::pftSHReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre PS Reactions"),xbrTypes::pftPSReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre RE Reactions"),xbrTypes::pftREReactions));
+   }
 
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
+   if ( bIncludeTimeDependentLoads )
+   {
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),lcSH));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("CR"),lcCR));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),lcPS));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("RE"),lcRE));
+   }
 
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRProject,pProject);
    for ( int i = 1; i < 6; i++ )
    {
