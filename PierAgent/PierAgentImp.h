@@ -108,6 +108,8 @@ public:
    virtual Float64 GetXBeamLength(PierIDType pierID);
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape);
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape);
+   virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints);
+   virtual void GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints);
 
    virtual Float64 GetCrownPointOffset(PierIDType pierID);
    virtual Float64 GetCrownPointLocation(PierIDType pierID);

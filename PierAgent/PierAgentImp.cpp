@@ -429,6 +429,30 @@ void CPierAgentImp::GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape)
    xbeam->get_Profile(0,ppShape); // stage 0 is lower x-beam
 }
 
+void CPierAgentImp::GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<ICrossBeam> xbeam;
+   pier->get_CrossBeam(&xbeam);
+
+   StageIndexType stageIdx = GetStageIndex(stage);
+   xbeam->get_TopSurface(stageIdx,ppPoints);
+}
+
+void CPierAgentImp::GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<ICrossBeam> xbeam;
+   pier->get_CrossBeam(&xbeam);
+
+   StageIndexType stageIdx = GetStageIndex(stage);
+   xbeam->get_BottomSurface(stageIdx,ppPoints);
+}
+
 Float64 CPierAgentImp::GetCrownPointOffset(PierIDType pierID)
 {
    CComPtr<IPier> pier;

@@ -628,6 +628,23 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
    PierIDType pierID = GetPierID();
 
+   // Create a function that represents the bottom of the cross beam
+   // We will use it to make the top of the column match the bottom of the
+   // cross beam.
+   mathPwLinearFunction2dUsingPoints fn;
+   CComPtr<IPoint2dCollection> points;
+   pPier->GetBottomSurface(pierID,xbrTypes::Stage1,&points);
+   CComPtr<IEnumPoint2d> enumPoints;
+   points->get__Enum(&enumPoints);
+   CComPtr<IPoint2d> pnt;
+   while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+   {
+      Float64 x,y;
+      pnt->Location(&x,&y);
+      fn.AddPoint(x,y);
+      pnt.Release();
+   }
+
    IndexType nColumns = pPier->GetColumnCount(pierID);
    for (IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
@@ -664,33 +681,40 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       CComPtr<iSocket> socket2;
       connectable2->AddSocket(0,pntBot,&socket2);
 
-      CComPtr<iLineDisplayObject> doColumn;
-      doColumn.CoCreateInstance(CLSID_LineDisplayObject);
+      // Create the shape of the column
+      CComPtr<IPolyShape> columnShape;
+      columnShape.CoCreateInstance(CLSID_PolyShape);
+      Float64 X1,X2,X3;
+      pntTop->get_X(&X2);
+      X1 = X2-d1/2;
+      X3 = X2+d1/2;
+      Float64 Y1 = fn.Evaluate(X1);
+      Float64 Y2 = fn.Evaluate(X2);
+      Float64 Y3 = fn.Evaluate(X3);
+
+      columnShape->AddPoint(X1,Y1);
+      columnShape->AddPoint(X2,Y2);
+      columnShape->AddPoint(X3,Y3);
+      columnShape->AddPoint(X3,Ybot);
+      columnShape->AddPoint(X1,Ybot);
+
+      CComQIPtr<IShape> shape(columnShape);
+
+      CComPtr<iPointDisplayObject> doColumn;
+      doColumn.CoCreateInstance(CLSID_PointDisplayObject);
       doColumn->SetID(m_DisplayObjectID++);
+      doColumn->SetPosition(pntTop,FALSE,FALSE);
       doColumn->SetSelectionType(stNone);
 
-      CComPtr<iRectangleDrawLineStrategy> drawColumnStrategy;
-      drawColumnStrategy.CoCreateInstance(CLSID_RectangleDrawLineStrategy);
-      doColumn->SetDrawLineStrategy(drawColumnStrategy);
+      CComPtr<iShapeDrawStrategy> drawColumnStrategy;
+      drawColumnStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+      doColumn->SetDrawingStrategy(drawColumnStrategy);
 
-      drawColumnStrategy->SetWidth(d1);
-      drawColumnStrategy->SetColor(COLUMN_LINE_COLOR);
-      drawColumnStrategy->SetLineWidth(COLUMN_LINE_WEIGHT);
-      drawColumnStrategy->SetFillColor(COLUMN_FILL_COLOR);
-      drawColumnStrategy->SetDoFill(TRUE);
-
-      drawColumnStrategy->PerimeterGravityWell(TRUE);
-      CComQIPtr<iGravityWellStrategy> gravity_well(drawColumnStrategy);
-      doColumn->SetGravityWellStrategy(gravity_well);
-
-
-      CComQIPtr<iConnector> connector(doColumn);
-      CComPtr<iPlug> startPlug, endPlug;
-      connector->GetStartPlug(&startPlug);
-      connector->GetEndPlug(&endPlug);
-      DWORD dwCookie;
-      connectable1->Connect(0,atByID,startPlug,&dwCookie);
-      connectable2->Connect(0,atByID,endPlug,  &dwCookie);
+      drawColumnStrategy->SetShape(shape);
+      drawColumnStrategy->SetSolidLineColor(COLUMN_LINE_COLOR);
+      drawColumnStrategy->SetSolidLineWidth(COLUMN_LINE_WEIGHT);
+      drawColumnStrategy->SetSolidFillColor(COLUMN_FILL_COLOR);
+      drawColumnStrategy->DoFill(TRUE);
 
       displayList->AddDisplayObject(doColumn);
    }

@@ -39,6 +39,10 @@ interface IXBRPier : public IUnknown
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) = 0;
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape) = 0;
 
+   // Returns points that define the top/bottom surface of the cross beam
+   virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) = 0;
+   virtual void GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) = 0;
+
    virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;
    virtual Float64 GetCrownPointLocation(PierIDType pierID) = 0;
 

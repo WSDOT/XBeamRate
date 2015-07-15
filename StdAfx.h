@@ -27,3 +27,5 @@ extern CComModule _Module;
 #include <System\Transaction.h>
 
 #include <WBFLAll.h>
+
+#include <Math\Math.h>
