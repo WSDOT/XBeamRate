@@ -30,6 +30,7 @@
 
 #include <Units\SysUnitsMgr.h>
 
+#include <EAF\EAFAutoProgress.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -171,6 +172,10 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID)
    GET_IFACE(IXBRPier,pPier);
    GET_IFACE(IXBRMaterial,pMaterial);
    GET_IFACE(IXBRSectionProperties,pSectProp);
+
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Building pier analysis model"));
 
    // some dummy dimensions
    Float64 leftOverhang = pProject->GetXBeamLeftOverhang(pierID);

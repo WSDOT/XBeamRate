@@ -179,14 +179,14 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    IDType graphID = 0;
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),        xbrTypes::pftLowerXBeam));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure Diaphragm Dead Load"),xbrTypes::pftUpperXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),        xbrTypes::pftDCReactions));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),        xbrTypes::pftDWReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure DC Reactions"),       xbrTypes::pftDCReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure DW Reactions"),       xbrTypes::pftDWReactions));
    if ( bIncludeTimeDependentLoads )
    {
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre CR Reactions"),xbrTypes::pftCRReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre SH Reactions"),xbrTypes::pftSHReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre RE Reactions"),xbrTypes::pftREReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre PS Reactions"),xbrTypes::pftPSReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure CR Reactions"),xbrTypes::pftCRReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure SH Reactions"),xbrTypes::pftSHReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure RE Reactions"),xbrTypes::pftREReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure PS Reactions"),xbrTypes::pftPSReactions));
    }
 
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));

@@ -171,9 +171,11 @@ HRESULT CXBeamRateAgent::FinalConstruct()
    ULONG nAgentsLoaded = 0;
    while (SUCCEEDED(pIEnumCLSID->Next(nMaxAgents,clsid,&nAgentsLoaded)) && 0 < nAgentsLoaded )
    {
-      // load the agents
+      // load the agents... this method only gets called if we are an extenion agent to PGSuper/PGSplice
+      // since we are an extension, all of our sub-agents should also be considered extensions...
+      // that is why we use LoadExtensionAgents instead of LoadAgents
       CComPtr<IIndexArray> lErrArray;
-      hr = pBrokerInit->LoadAgents( clsid, nAgentsLoaded, &lErrArray );
+      hr = pBrokerInit->LoadExtensionAgents( clsid, nAgentsLoaded, &lErrArray );
       if ( FAILED(hr) )
       {
          return E_FAIL;
@@ -358,7 +360,7 @@ STDMETHODIMP CXBeamRateAgent::Init()
       pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
-   return S_OK;
+   return AGENT_S_SECONDPASSINIT;
 }
 
 STDMETHODIMP CXBeamRateAgent::Init2()

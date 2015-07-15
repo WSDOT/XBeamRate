@@ -53,6 +53,8 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
+#include <IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

@@ -36,6 +36,8 @@
 
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
+#include <IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -915,6 +917,9 @@ void CProjectAgentImp::SetPierData(const xbrPierData& pierData)
    }
 
    // Resize the dead load reaction containers to match the number of bearings
+   // NOTE: Don't get the reactions here. There is a huge computational effort
+   // required to get the reactions and we don't want to do that unless the
+   // reactions are actually going to be used.
    IndexType nBearingLines = pierData.GetBearingLineCount();
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
@@ -1100,14 +1105,106 @@ void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineId
 
 void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW)
 {
-   std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
-   *pDC = vReactions[brgIdx].DC;
-   *pDW = vReactions[brgIdx].DW;
-   *pCR = vReactions[brgIdx].CR;
-   *pSH = vReactions[brgIdx].SH;
-   *pPS = vReactions[brgIdx].PS;
-   *pRE = vReactions[brgIdx].RE;
-   *pW  = vReactions[brgIdx].W;
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      CComPtr<IXBeamRateAgent> pXBR;
+      HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
+      ATLASSERT(FAILED(hr));
+#endif
+
+      std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
+      *pDC = vReactions[brgIdx].DC;
+      *pDW = vReactions[brgIdx].DW;
+      *pCR = vReactions[brgIdx].CR;
+      *pSH = vReactions[brgIdx].SH;
+      *pPS = vReactions[brgIdx].PS;
+      *pRE = vReactions[brgIdx].RE;
+      *pW  = vReactions[brgIdx].W;
+   }
+   else
+   {
+      // We are in PGSuper/PGSplice Extension mode... get the reactions
+      CGirderKey girderKey = GetGirderKey(pierID,brgLineIdx,brgIdx);
+      PierIndexType pierIdx = GetPierIndex(pierID);
+
+      GET_IFACE(IIntervals,pIntervals);
+      IntervalIndexType nIntervals = pIntervals->GetIntervalCount();
+      IntervalIndexType lastIntervalIdx = nIntervals-1;
+
+      GET_IFACE(IProductForces,pProductForces);
+      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(pgsTypes::Maximize);
+      ResultsType resultsType = rtCumulative;
+
+      xbrPierData& pierData = GetPrivatePierData(pierID);
+      if ( pierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+      {
+         GET_IFACE(IBearingDesign,pBearingDesign);
+
+         Float64 dc[2];
+         Float64 dw[2];
+         Float64 cr[2];
+         Float64 sh[2];
+         Float64 re[2];
+         Float64 ps[2];
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcDC,girderKey,bat,resultsType,&dc[0],&dc[1]);
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcDWRating,girderKey,bat,resultsType,&dw[0],&dw[1]);
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
+         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+
+         *pDC = dc[brgLineIdx];
+         *pDW = dw[brgLineIdx];
+         *pCR = cr[brgLineIdx];
+         *pSH = sh[brgLineIdx];
+         *pRE = re[brgLineIdx];
+         *pPS = ps[brgLineIdx];
+      }
+      else
+      {
+         // Integral and Continuous piers are modeled with a single bearing line
+         ATLASSERT(brgLineIdx == 0);
+
+         GET_IFACE(IBridgeDescription,pIBridgeDesc);
+         const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
+         if ( pPier->IsBoundaryPier() )
+         {
+            const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
+            const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
+            ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
+            GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
+            GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
+
+            if ( nGirdersBack != nGirdersAhead )
+            {
+#pragma Reminder("WORKING HERE - if this is a boundary pier, need to make sure there are the same number of girders on each side")
+               // need to put an item in the status center and throw an unwind exception
+               // because we don't have a mapping for PGS reactions to a single bearing line for this case
+               ATLASSERT(false); // need to implement this
+            }
+         }
+
+
+         // we want the total pier reaction
+         GET_IFACE(IReactions,pReactions);
+
+         *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcDC,bat,resultsType);
+         *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcDWRating,bat,resultsType);
+         *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcCR,bat,resultsType);
+         *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcSH,bat,resultsType);
+         *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcRE,bat,resultsType);
+         *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcPS,bat,resultsType);
+      }
+
+#pragma Reminder("WORKING HERE - spread the reaction over the girder width if slab beam")
+      // or other wide bottom beams such as Deck Slab Beam, Box Girder... others
+      // for now, assume a concentrated load reaction
+      ATLASSERT(GetPrivateBearingReactionType(pierID,brgLineIdx) == xbrTypes::rltConcentrated);
+      *pW  = 0;
+   }
 }
 
 void CProjectAgentImp::GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
@@ -1644,7 +1741,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetSegmentConnectionType()) );
    }
 
-   PierIndexType pierIdx = pPier->GetIndex();
+   m_PierIdx = pPier->GetIndex();
    PierIDType pierID = pPier->GetID();
    
    pierData.SetID(pierID);
@@ -1654,7 +1751,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetBridgeLineOffset(alignment_offset);
 
    GET_IFACE(IBridge,pBridge);
-   Float64 pierStation = pBridge->GetPierStation(pierIdx);
+   Float64 pierStation = pBridge->GetPierStation(m_PierIdx);
 
    GET_IFACE(IRoadway,pRoadway);
    Float64 elevation = pRoadway->GetElevation(pierStation,0);
@@ -1663,8 +1760,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 CPO = pRoadway->GetCrownPointOffset(pierStation);
    pierData.SetCrownPointOffset(CPO);
 
-   Float64 leftCLO  = pBridge->GetLeftCurbOffset(pierIdx);
-   Float64 rightCLO = pBridge->GetRightCurbOffset(pierIdx);
+   Float64 leftCLO  = pBridge->GetLeftCurbOffset(m_PierIdx);
+   Float64 rightCLO = pBridge->GetRightCurbOffset(m_PierIdx);
    pierData.SetCurbLineDatum(pgsTypes::omtAlignment);
    pierData.SetCurbLineOffset(leftCLO,rightCLO);
 
@@ -1674,7 +1771,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
    // Skew angle
    CComPtr<IAngle> objSkew;
-   pBridge->GetPierSkew(pPier->GetIndex(),&objSkew);
+   pBridge->GetPierSkew(m_PierIdx,&objSkew);
    Float64 skewAngle;
    objSkew->get_Value(&skewAngle);
 
@@ -1697,9 +1794,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    // Upper Cross Beam Diaphragm
    Float64 H = Max(pPier->GetDiaphragmHeight(pgsTypes::Back),pPier->GetDiaphragmHeight(pgsTypes::Ahead));
    GroupIndexType backGrpIdx, aheadGrpIdx;
-   pBridge->GetGirderGroupIndex(pierIdx,&backGrpIdx,&aheadGrpIdx);
-   Float64 Aback  = pBridge->GetSlabOffset(backGrpIdx,pierIdx,0);
-   Float64 Aahead = pBridge->GetSlabOffset(aheadGrpIdx,pierIdx,0);
+   pBridge->GetGirderGroupIndex(m_PierIdx,&backGrpIdx,&aheadGrpIdx);
+   Float64 Aback  = pBridge->GetSlabOffset(backGrpIdx,m_PierIdx,0);
+   Float64 Aahead = pBridge->GetSlabOffset(aheadGrpIdx,m_PierIdx,0);
    H += Max(Aback,Aahead);
 
    W = pPier->GetDiaphragmWidth(pgsTypes::Back) + pPier->GetDiaphragmWidth(pgsTypes::Ahead);
@@ -1741,9 +1838,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       pierData.SetBearingLineCount(2);
 
       GirderIndexType gdrIdx = 0;
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
 
-      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData backBrgLine;
       backBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
       backBrgLine.SetBearingCount(vBackSpacing.size()+1);
@@ -1752,8 +1849,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
       m_BearingReactions[pierID][0].resize(backBrgLine.GetBearingCount());
 
-      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
-      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
+      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData aheadBrgLine;
       aheadBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
       aheadBrgLine.SetBearingCount(vAheadSpacing.size()+1);
@@ -1768,9 +1865,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       pierData.SetBearingLineCount(1);
 
       GirderIndexType gdrIdx = 0;
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
 
-      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData brgLine;
       brgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
       brgLine.SetBearingCount(vSpacing.size()+1);
@@ -1781,4 +1878,40 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    }
 
    Fire_OnProjectChanged();
+}
+
+PierIndexType CProjectAgentImp::GetPierIndex(PierIDType pierID)
+{
+   if ( pierID == INVALID_ID )
+   {
+      return INVALID_INDEX;
+   }
+
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
+   ATLASSERT(pPier != NULL);
+   return pPier->GetIndex();
+}
+
+CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
+{
+   ATLASSERT(pierID != INVALID_ID); // this method is only for piers that are part of a bridge 
+   ATLASSERT(brgLineIdx < 2); // brgLineIdx can only be 0 or 1
+
+   pgsTypes::PierFaceType pierFace = (brgLineIdx == 0 ? pgsTypes::Back : pgsTypes::Ahead);
+
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
+   ATLASSERT(pPier != NULL);
+
+   // Assuming there is a one-to-one relationship between bearings and girders
+   // This may change if we assume 2-bearings for U-Beams
+   GirderIndexType gdrIdx = brgIdx;
+
+   // Get the girder group
+   const CGirderGroupData* pGroup = pPier->GetGirderGroup(pierFace);
+   ATLASSERT(pGroup != NULL);
+   GroupIndexType grpIdx = pGroup->GetIndex();
+
+   return CGirderKey(grpIdx,gdrIdx);
 }

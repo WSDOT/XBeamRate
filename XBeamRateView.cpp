@@ -1040,16 +1040,17 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
          strategy->SetShape(skewedShape);
          strategy->SetSolidLineColor(SEGMENT_BORDER_COLOR);
-         strategy->SetSolidFillColor(SEGMENT_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
          strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
          if ( grpIdx == backGroupIdx )
          {
+            strategy->SetSolidFillColor(SEGMENT_FILL_COLOR);
             strategy->SetSolidLineStyle(lsSolid);
             strategy->SetVoidLineStyle(lsSolid);
          }
          else
          {
+            strategy->SetSolidFillColor(SEGMENT_FILL_GHOST_COLOR);
             strategy->SetSolidLineStyle(lsDash);
             strategy->SetVoidLineStyle(lsDash);
          }

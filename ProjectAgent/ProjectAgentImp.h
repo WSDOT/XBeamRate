@@ -390,6 +390,8 @@ private:
 
    void UpdatePiers();
    void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);
+   PierIndexType GetPierIndex(PierIDType pierID);
+   CGirderKey GetGirderKey(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)
