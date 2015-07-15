@@ -177,26 +177,26 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    }
 
    IDType graphID = 0;
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),xbrTypes::pftLowerXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),        xbrTypes::pftLowerXBeam));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure Diaphragm Dead Load"),xbrTypes::pftUpperXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),xbrTypes::pftDCReactions));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),xbrTypes::pftDWReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DC Reactions"),        xbrTypes::pftDCReactions));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre DW Reactions"),        xbrTypes::pftDWReactions));
    if ( bIncludeTimeDependentLoads )
    {
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre CR Reactions"),xbrTypes::pftCRReactions));
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre SH Reactions"),xbrTypes::pftSHReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre PS Reactions"),xbrTypes::pftPSReactions));
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre RE Reactions"),xbrTypes::pftREReactions));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructre PS Reactions"),xbrTypes::pftPSReactions));
    }
 
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
    if ( bIncludeTimeDependentLoads )
    {
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),lcSH));
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("CR"),lcCR));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),lcPS));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),lcSH));
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("RE"),lcRE));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),lcPS));
    }
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -212,15 +212,15 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    }
 
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Inventory/Operating)"),pgsTypes::lrDesign_Inventory));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),pgsTypes::lrLegal_Routine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Special)"),pgsTypes::lrLegal_Special));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),pgsTypes::lrPermit_Routine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Special)"),pgsTypes::lrPermit_Special));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),      pgsTypes::lrLegal_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Special)"),      pgsTypes::lrLegal_Special));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),     pgsTypes::lrPermit_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Special)"),     pgsTypes::lrPermit_Special));
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Inventory)"),pgsTypes::StrengthI_Inventory));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Operating)"),pgsTypes::StrengthI_Operating));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),pgsTypes::StrengthI_LegalRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Special)"),pgsTypes::StrengthI_LegalSpecial));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
    m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
 
