@@ -27,7 +27,7 @@
 
 #include <IReportManager.h>
 
-#include <EAF\EAFBrokerReportSpecificationBuilder.h>
+#include "XBeamRateReportSpecificationBuilder.h"
 
 #include "XBeamRateTitlePageBuilder.h"
 #include "TestChapterBuilder.h"
@@ -134,7 +134,7 @@ void CReportAgentImp::InitReportBuilders()
 {
    GET_IFACE(IReportManager,pRptMgr);
 
-   boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CEAFBrokerReportSpecificationBuilder(m_pBroker) );
+   boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CXBeamRateReportSpecificationBuilder(m_pBroker) );
 
 
    CReportBuilder* pReportBuilder = new CReportBuilder(_T("XBeam Rate Test Report"));
