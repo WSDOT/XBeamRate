@@ -31,6 +31,8 @@
 #include <Units\SysUnitsMgr.h>
 
 #include <EAF\EAFAutoProgress.h>
+#include <XBeamRateExt\XBeamRateUtilities.h>
+#include <XBeamRateExt\StatusItem.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,7 +87,12 @@ STDMETHODIMP CAnalysisAgentImp::RegInterfaces()
 
 STDMETHODIMP CAnalysisAgentImp::Init()
 {
-   //EAF_AGENT_INIT;
+   EAF_AGENT_INIT; // this macro defines pStatusCenter
+   m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
+
+   // Register status callbacks that we want to use
+   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
+
    return AGENT_S_SECONDPASSINIT;
 }
 
@@ -104,6 +111,15 @@ STDMETHODIMP CAnalysisAgentImp::Init2()
    hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+
+   // Connection point for the bridge description
+   hr = pBrokerInit->FindConnectionPoint( IID_IBridgeDescriptionEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwBridgeDescCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
 
    return S_OK;
 }
@@ -134,6 +150,14 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the connection point
 
+   hr = pBrokerInit->FindConnectionPoint(IID_IBridgeDescriptionEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwBridgeDescCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the connection point
+   }
+
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
@@ -149,6 +173,8 @@ CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID)
 
 void CAnalysisAgentImp::BuildModel(PierIDType pierID)
 {
+   CanModelPier(pierID,m_StatusGroupID,m_scidBridgeError); // if this is not the kind of pier we can model, an Unwind exception will be thrown
+
    std::map<PierIDType,ModelData>::iterator found = m_ModelData.find(pierID);
    if ( found == m_ModelData.end() )
    {
@@ -736,6 +762,42 @@ void CAnalysisAgentImp::Invalidate()
 HRESULT CAnalysisAgentImp::OnProjectChanged()
 {
    Invalidate();
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////
+// IBridgeDescriptionEventSink
+HRESULT CAnalysisAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
+{
+   GET_IFACE(IEAFStatusCenter,pStatusCenter);
+   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
+
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CAnalysisAgentImp::OnGirderFamilyChanged()
+{
+   return S_OK;
+}
+
+HRESULT CAnalysisAgentImp::OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint)
+{
+   return S_OK;
+}
+
+HRESULT CAnalysisAgentImp::OnLiveLoadChanged()
+{
+   return S_OK;
+}
+
+HRESULT CAnalysisAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName)
+{
+   return S_OK;
+}
+
+HRESULT CAnalysisAgentImp::OnConstructionLoadChanged()
+{
    return S_OK;
 }
 

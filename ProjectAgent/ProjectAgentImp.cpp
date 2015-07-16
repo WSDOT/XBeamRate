@@ -155,7 +155,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 STDMETHODIMP CProjectAgentImp::Init()
 {
    EAF_AGENT_INIT; // this macro defines pStatusCenter
-   m_scidBridgeError = pStatusCenter->CreateStatusGroupID();
+   m_XBeamRateStatusGroupID = pStatusCenter->CreateStatusGroupID();
 
    // Register status callbacks that we want to use
    m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 

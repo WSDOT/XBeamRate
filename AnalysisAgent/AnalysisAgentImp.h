@@ -37,6 +37,8 @@
 
 #include <WBFLFem2d.h>
 
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
@@ -48,7 +50,8 @@ class ATL_NO_VTABLE CAnalysisAgentImp :
    public IAgentEx,
    public IXBRProductForces,
    public IXBRAnalysisResults,
-   public IXBRProjectEventSink
+   public IXBRProjectEventSink,
+   public IBridgeDescriptionEventSink
 {  
 public:
 	CAnalysisAgentImp(); 
@@ -67,6 +70,7 @@ BEGIN_COM_MAP(CAnalysisAgentImp)
    COM_INTERFACE_ENTRY(IXBRProductForces)
 	COM_INTERFACE_ENTRY(IXBRAnalysisResults)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+   COM_INTERFACE_ENTRY(IBridgeDescriptionEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)// needed if we implement a connection point
 END_COM_MAP()
 
@@ -121,12 +125,22 @@ public:
 public:
    HRESULT OnProjectChanged();
 
+// IBridgeDescriptionEventSink
+public:
+   virtual HRESULT OnBridgeChanged(CBridgeChangedHint* pHint);
+   virtual HRESULT OnGirderFamilyChanged();
+   virtual HRESULT OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint);
+   virtual HRESULT OnLiveLoadChanged();
+   virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName);
+   virtual HRESULT OnConstructionLoadChanged();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
 
 private:
    DECLARE_EAF_AGENT_DATA;
+   StatusCallbackIDType m_scidBridgeError;
 
    void Invalidate();
 
@@ -134,6 +148,7 @@ private:
    std::vector<xbrTypes::ProductForceType> GetLoads(XBRCombinedForceType lcType);
 
    DWORD m_dwProjectCookie;
+   DWORD m_dwBridgeDescCookie;
 
    struct CapBeamMember
    {
