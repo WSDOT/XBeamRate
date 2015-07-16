@@ -33,11 +33,14 @@
 #include <WBFLUnitServer\OpenBridgeML.h>
 
 #include <PgsExt\BridgeDescription2.h>
+#include <PgsExt\GirderLabel.h>
 
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
+
+#include "StatusItem.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -154,11 +157,10 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
 STDMETHODIMP CProjectAgentImp::Init()
 {
    EAF_AGENT_INIT; // this macro defines pStatusCenter
-   m_XBeamRateID = pStatusCenter->CreateStatusGroupID();
+   m_scidBridgeError = pStatusCenter->CreateStatusGroupID();
 
-   //// Register status callbacks that we want to use
-   //m_scidInformationalError       = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusError)); 
-   //m_scidInformationalWarning     = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusWarning)); 
+   // Register status callbacks that we want to use
+   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
 
    return AGENT_S_SECONDPASSINIT;
 }
@@ -1168,25 +1170,19 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          // Integral and Continuous piers are modeled with a single bearing line
          ATLASSERT(brgLineIdx == 0);
 
-         GET_IFACE(IBridgeDescription,pIBridgeDesc);
-         const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
-         if ( pPier->IsBoundaryPier() )
+         // Detect the configurations from PGSuper/PGSplice that we can't model
+         bool bCanModel = CanModel(pierID);
+         if ( !bCanModel )
          {
-            const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
-            const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
-            ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
-            GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
-            GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
+            CString strMsg;
+            strMsg.Format(_T("XBeam Rate cannot model Pier %d"),LABEL_PIER(pierIdx));
+            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID,m_scidBridgeError,strMsg);
 
-            if ( nGirdersBack != nGirdersAhead )
-            {
-#pragma Reminder("WORKING HERE - if this is a boundary pier, need to make sure there are the same number of girders on each side")
-               // need to put an item in the status center and throw an unwind exception
-               // because we don't have a mapping for PGS reactions to a single bearing line for this case
-               ATLASSERT(false); // need to implement this
-            }
+            GET_IFACE(IEAFStatusCenter,pStatusCenter);
+            pStatusCenter->Add(pStatusItem);
+      
+            THROW_UNWIND(strMsg,-1);
          }
-
 
          // we want the total pier reaction
          GET_IFACE(IReactions,pReactions);
@@ -1609,6 +1605,9 @@ void CProjectAgentImp::CancelPendingEvents()
 // IBridgeDescriptionEventSink
 HRESULT CProjectAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
 {
+   GET_IFACE(IEAFStatusCenter,pStatusCenter);
+   pStatusCenter->RemoveByStatusGroupID(m_XBeamRateStatusGroupID);
+
    UpdatePiers();
    return S_OK;
 }
@@ -1914,4 +1913,34 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
    GroupIndexType grpIdx = pGroup->GetIndex();
 
    return CGirderKey(grpIdx,gdrIdx);
+}
+
+bool CProjectAgentImp::CanModel(PierIDType pierID)
+{
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
+   if ( pPier->IsBoundaryPier() )
+   {
+      pgsTypes::BoundaryConditionType bcType = pPier->GetBoundaryConditionType();
+      switch(bcType)
+      {
+      case pgsTypes::bctIntegralAfterDeckHingeBack:
+      case pgsTypes::bctIntegralBeforeDeckHingeBack:
+      case pgsTypes::bctIntegralAfterDeckHingeAhead:
+      case pgsTypes::bctIntegralBeforeDeckHingeAhead:
+         return false;
+      }
+
+      const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
+      const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
+      ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
+      GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
+      GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
+      if ( nGirdersBack != nGirdersAhead )
+      {
+         return false;
+      }
+   }
+
+   return true;
 }

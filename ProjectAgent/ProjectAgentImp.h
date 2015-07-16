@@ -324,7 +324,8 @@ private:
    CAgentCmdTarget m_CommandTarget;
 
    DWORD m_dwBridgeDescCookie;
-   StatusGroupIDType m_XBeamRateID; // ID used to identify status items created by this agent
+   StatusGroupIDType m_XBeamRateStatusGroupID; // ID used to identify status items created by this agent
+   StatusCallbackIDType m_scidBridgeError;
 
    // Project Properties
    CString m_strBridgeName;
@@ -392,6 +393,7 @@ private:
    void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);
    PierIndexType GetPierIndex(PierIDType pierID);
    CGirderKey GetGirderKey(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
+   bool CanModel(PierIDType pierID);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)
