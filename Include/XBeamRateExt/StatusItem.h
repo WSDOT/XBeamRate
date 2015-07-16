@@ -1,13 +1,16 @@
 #pragma once
 
-class xbrBridgeStatusItem : public CEAFStatusItem
+#include <XBeamRateExt\XBRExtExp.h>
+#include <EAF\EAFStatusItem.h>
+
+class XBREXTCLASS xbrBridgeStatusItem : public CEAFStatusItem
 {
 public:
    xbrBridgeStatusItem(StatusGroupIDType statusGroupID,StatusCallbackIDType callbackID,LPCTSTR strDescription);
    bool IsEqual(CEAFStatusItem* pOther);
 };
 
-class xbrBridgeStatusCallback : public iStatusCallback
+class XBREXTCLASS xbrBridgeStatusCallback : public iStatusCallback
 {
 public:
    xbrBridgeStatusCallback(eafTypes::StatusSeverityType severity,UINT helpID=0);

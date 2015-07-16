@@ -588,6 +588,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\StatusItem.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\stdafx.cpp"
 				>
 				<FileConfiguration
@@ -699,6 +703,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\XBeamRateExt\ShearRatingArtifact.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\StatusItem.h"
 				>
 			</File>
 			<File

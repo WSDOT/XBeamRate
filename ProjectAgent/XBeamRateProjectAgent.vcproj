@@ -949,10 +949,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\StatusItem.cpp"
-				>
-			</File>
-			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -1091,10 +1087,6 @@
 			</File>
 			<File
 				RelativePath="Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\StatusItem.h"
 				>
 			</File>
 			<File

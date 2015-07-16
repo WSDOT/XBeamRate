@@ -27,6 +27,8 @@
 
 #include <PgsExt\BridgeDescription2.h>
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #include <WBFLGenericBridge.h>
 
 #include <PGSuperColors.h>
@@ -987,9 +989,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   if ( FAILED(hr) )
+   if ( IsStandAlone() )
    {
       // not in PGSuper/PGSplice so we don't know anything about the shape of the girder
       return;
@@ -1432,9 +1432,12 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   if ( SUCCEEDED(hr) )
+   if ( IsStandAlone() )
+   {
+      GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
+      pProjectEdit->EditPier(INVALID_ID);
+   }
+   else
    {
       GET_IFACE2(pBroker,IEditByUI,pEditByUI);
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
@@ -1442,12 +1445,6 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
       PierIDType pierID = GetPierID();
       const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
       pEditByUI->EditPierDescription(pPier->GetIndex(),0/*pageIdx*/);
-
-   }
-   else
-   {
-      GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
-      pProjectEdit->EditPier(INVALID_ID);
    }
 }
 

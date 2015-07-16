@@ -32,6 +32,7 @@
 #include <PgsExt\GirderLabel.h>
 #include <PgsExt\BridgeDescription2.h>
 #include <EAF\EAFUtilities.h>
+#include <XBeamRateExt\XBeamRateUtilities.h>
 
 IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
 
@@ -130,19 +131,24 @@ void CXBRGraphController::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 
 void CXBRGraphController::FillPierList()
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
    CComboBox* pcbPiers = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPiers->GetCurSel();
    pcbPiers->ResetContent();
 
-   CComPtr<IXBeamRateAgent> pXBR;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-   if ( SUCCEEDED(hr) )
+   if ( IsStandAlone() )
+   {
+      int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
+      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
+      // so when we get the pier index there is something to return
+      pcbPiers->ShowWindow(SW_HIDE);
+   }
+   else
    {
       // We are extending PGSuper/PGSplice
       // Fill the combo box with piers
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
       PierIndexType nPiers = pBridgeDesc->GetPierCount();
@@ -159,13 +165,6 @@ void CXBRGraphController::FillPierList()
             pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
          }
       }
-   }
-   else
-   {
-      int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
-      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
-      // so when we get the pier index there is something to return
-      pcbPiers->ShowWindow(SW_HIDE);
    }
 
    pcbPiers->SetCurSel(curSel == CB_ERR ? 0 : curSel);

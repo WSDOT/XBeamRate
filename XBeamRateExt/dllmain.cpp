@@ -5,6 +5,8 @@
 
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <EAF\EAFStatusCenter.h>
 
 
 #ifdef _DEBUG

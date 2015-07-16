@@ -40,6 +40,8 @@
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
@@ -125,12 +127,15 @@ void CXBRGraphBuilder::OnPierChanged()
 
 bool CXBRGraphBuilder::UpdateNow()
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   if ( SUCCEEDED(hr) )
+   if ( IsStandAlone() )
    {
+      return true;
+   }
+   else
+   {
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
@@ -146,10 +151,6 @@ bool CXBRGraphBuilder::UpdateNow()
       m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
       return false;
    }
-   else
-   {
-      return true;
-   }
 }
 
 void CXBRGraphBuilder::UpdateGraphDefinitions()
@@ -164,9 +165,7 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    // 2) we are running as a PGS extension and the losses are computed with the time-step method
    bool bIncludeTimeDependentLoads = true;
 
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   if ( SUCCEEDED(hr) )
+   if ( IsPGSExtension() )
    {
       GET_IFACE2( pBroker, ILossParameters, pLossParams);
       if ( pLossParams->GetLossMethod() != pgsTypes::TIME_STEP )

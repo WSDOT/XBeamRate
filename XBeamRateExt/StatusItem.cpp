@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include <IFace\StatusCenter.h>
-#include "StatusItem.h"
+#include <XBeamRateExt\StatusItem.h>
 
 xbrBridgeStatusItem::xbrBridgeStatusItem(StatusGroupIDType statusGroupID,StatusCallbackIDType callbackID,LPCTSTR strDescription) :
 CEAFStatusItem(statusGroupID,callbackID,strDescription)
@@ -36,5 +36,5 @@ eafTypes::StatusSeverityType xbrBridgeStatusCallback::GetSeverity()
 
 void xbrBridgeStatusCallback::Execute(CEAFStatusItem* pStatusItem)
 {
-   EAFShowStatusMessage(pStatusItem,m_Severity,0);
+   EAFShowStatusMessage(pStatusItem,m_Severity,TRUE,0);
 }

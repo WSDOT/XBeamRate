@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include <XBeamRateExt\ReinforcementPage.h>
+#include <XBeamRateExt\XBeamRateUtilities.h>
 #include "LongitudinalRebarGrid.h"
 #include "StirrupGrid.h"
 
@@ -53,11 +54,7 @@ CPropertyPage()
 {
    m_pParent = pParent;
 
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   CComPtr<IXBeamRateAgent> pXBR;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-   UINT nIDCaption = (SUCCEEDED(hr) ? IDS_EXTENSION_TITLE : IDS_STANDALONE_TITLE);
+   UINT nIDCaption = (IsStandAlone() ? IDS_STANDALONE_TITLE : IDS_EXTENSION_TITLE);
 
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    Construct(IDD_REINFORCEMENT_PAGE,nIDCaption);

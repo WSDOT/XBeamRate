@@ -26,6 +26,7 @@
 #include "ProjectAgentImp.h"
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
+#include <XBeamRateExt\StatusItem.h>
 
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
@@ -33,14 +34,11 @@
 #include <WBFLUnitServer\OpenBridgeML.h>
 
 #include <PgsExt\BridgeDescription2.h>
-#include <PgsExt\GirderLabel.h>
 
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
-
-#include "StatusItem.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -220,9 +218,7 @@ STDMETHODIMP CProjectAgentImp::ShutDown()
 // IAgentUIIntegration
 STDMETHODIMP CProjectAgentImp::IntegrateWithUI(BOOL bIntegrate)
 {
-   CComPtr<IXBeamRateAgent> pXBR;
-   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-   if ( SUCCEEDED(hr) )
+   if ( IsPGSExtension())
    {
       // XBeam Rate is acting as an extension to PGSuper/PGSplice
       return S_OK;
@@ -246,8 +242,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 {
    HRESULT hr = S_OK;
 
-   CComPtr<IXBeamRateAgent> pAgent;
-   bool bIsStandAlone = (SUCCEEDED(m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent)) ? false : true);
+   bool bIsStandAlone = IsStandAlone();
 
    // Save project data, properties, reactions, settings, etc if we are in "stand alone" mode
    // otherwise we are a plug-in and all we want to save is the pier description
@@ -420,8 +415,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    CHRException hr;
    CComVariant var;
 
-   CComPtr<IXBeamRateAgent> pAgent;
-   bool bIsStandAlone = (SUCCEEDED(m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent)) ? false : true);
+   bool bIsStandAlone = IsStandAlone();
 
    try
    {
@@ -1107,14 +1101,16 @@ void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineId
 
 void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW)
 {
+   // Detect the configurations from PGSuper/PGSplice that we can't model
+   // Throwns an unwind exception if we can't model this thing
+   CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
+
    if ( pierID == INVALID_ID )
    {
 #if defined _DEBUG
       // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
       // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      CComPtr<IXBeamRateAgent> pXBR;
-      HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-      ATLASSERT(FAILED(hr));
+      ATLASSERT(IsStandAlone());
 #endif
 
       std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
@@ -1169,20 +1165,6 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       {
          // Integral and Continuous piers are modeled with a single bearing line
          ATLASSERT(brgLineIdx == 0);
-
-         // Detect the configurations from PGSuper/PGSplice that we can't model
-         bool bCanModel = CanModel(pierID);
-         if ( !bCanModel )
-         {
-            CString strMsg;
-            strMsg.Format(_T("XBeam Rate cannot model Pier %d"),LABEL_PIER(pierIdx));
-            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID,m_scidBridgeError,strMsg);
-
-            GET_IFACE(IEAFStatusCenter,pStatusCenter);
-            pStatusCenter->Add(pStatusItem);
-      
-            THROW_UNWIND(strMsg,-1);
-         }
 
          // we want the total pier reaction
          GET_IFACE(IReactions,pReactions);
@@ -1913,34 +1895,4 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
    GroupIndexType grpIdx = pGroup->GetIndex();
 
    return CGirderKey(grpIdx,gdrIdx);
-}
-
-bool CProjectAgentImp::CanModel(PierIDType pierID)
-{
-   GET_IFACE(IBridgeDescription,pIBridgeDesc);
-   const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
-   if ( pPier->IsBoundaryPier() )
-   {
-      pgsTypes::BoundaryConditionType bcType = pPier->GetBoundaryConditionType();
-      switch(bcType)
-      {
-      case pgsTypes::bctIntegralAfterDeckHingeBack:
-      case pgsTypes::bctIntegralBeforeDeckHingeBack:
-      case pgsTypes::bctIntegralAfterDeckHingeAhead:
-      case pgsTypes::bctIntegralBeforeDeckHingeAhead:
-         return false;
-      }
-
-      const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
-      const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
-      ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
-      GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
-      GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
-      if ( nGirdersBack != nGirdersAhead )
-      {
-         return false;
-      }
-   }
-
-   return true;
 }

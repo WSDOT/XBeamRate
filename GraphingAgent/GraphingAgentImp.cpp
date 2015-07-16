@@ -32,6 +32,8 @@
 #include <IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -153,9 +155,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 
    CXBRGraphBuilder* pGraphBuilder = new CXBRGraphBuilder;
    
-   CComPtr<IXBeamRateAgent> pXBR;
-   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pXBR);
-   if ( SUCCEEDED(hr) )
+   if ( IsPGSExtension() )
    {
       // XBeam Rate is acting as an extension to PGSuper/PGSplice
       // Change the default graph name so it doesn't conflict with PGSuper/PGSplice
@@ -171,11 +171,9 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 // IProjectEventSink
 HRESULT CGraphingAgentImp::OnProjectChanged()
 {
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = m_pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   if ( FAILED(hr) )
+   if ( IsStandAlone() )
    {
-      // not in PGSuper/PGSplice so we don't need to update PGSuper/PGSplice's graph view
+      // not extending PGSuper/PGSplice so we don't need to update PGSuper/PGSplice's graph view
       return S_OK;
    }
 
