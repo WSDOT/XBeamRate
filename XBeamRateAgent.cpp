@@ -28,6 +28,7 @@
 #include <XBeamRateCatCom.h>
 
 #include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 #include <PgsExt\PierData2.h>
 
 #include <IFace\DocumentType.h>
@@ -43,6 +44,9 @@
 #include "XBeamRateView.h"
 
 #include "txnEditReinforcement.h"
+#include "txnEditLoadRatingOptions.h"
+
+#include "LoadRatingOptionsPage.h"
 
 //
 //#include <IFace\Tools.h>
@@ -290,20 +294,24 @@ void CXBeamRateAgent::RemoveToolbar()
 
 void CXBeamRateAgent::RegisterUIExtensions()
 {
-   // Tell PGSuper/PGSplice that we want to add stuff to the Edit Pier dialog
+   // Tell PGSuper/PGSplice that we want to add stuff to the dialogs
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
    m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
+   m_EditLoadRatingOptionsCallbackID = pExtendUI->RegisterEditLoadRatingOptionsCallback(this);
 
+   // Add a command handler for to the bridge view
    GET_IFACE(IRegisterViewEvents,pBridgeViewEvents);
    m_BridgePlanViewCallbackID = pBridgeViewEvents->RegisterBridgePlanViewCallback(&m_CommandTarget);
 }
 
 void CXBeamRateAgent::UnregisterUIExtensions()
 {
-   // We are done adding stuff to the Edit Pier dialog
+   // We are done adding stuff to PGS's dialogs
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
    pExtendUI->UnregisterEditPierCallback(m_EditPierCallbackID);
+   pExtendUI->UnregisterEditLoadRatingOptionsCallback(m_EditLoadRatingOptionsCallbackID);
 
+   // Done with handling commands from the bridge view
    GET_IFACE(IRegisterViewEvents,pBridgeViewEvents);
    pBridgeViewEvents->UnregisterBridgePlanViewCallback(m_BridgePlanViewCallbackID);
 }
@@ -519,75 +527,7 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithGraphing(BOOL bIntegrate)
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-////// IEAFCommandCallback
-////BOOL CXBeamRateAgent::OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo)
-////{
-////   return m_MyCommandTarget.OnCmdMsg(nID,nCode,pExtra,pHandlerInfo);
-////}
-////
-////BOOL CXBeamRateAgent::GetStatusBarMessageString(UINT nID, CString& rMessage) const
-////{
-////   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-////
-////   // load appropriate string
-////	if ( rMessage.LoadString(nID) )
-////	{
-////		// first newline terminates actual string
-////      rMessage.Replace('\n','\0');
-////	}
-////	else
-////	{
-////		// not found
-////		TRACE1("Warning (CXBeamRateAgent): no message line prompt for ID 0x%04X.\n", nID);
-////	}
-////
-////   return TRUE;
-////}
-////
-////BOOL CXBeamRateAgent::GetToolTipMessageString(UINT nID, CString& rMessage) const
-////{
-////   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-////   CString string;
-////   // load appropriate string
-////	if ( string.LoadString(nID) )
-////	{
-////		// tip is after first newline 
-////      int pos = string.Find('\n');
-////      if ( 0 < pos )
-////         rMessage = string.Mid(pos+1);
-////	}
-////	else
-////	{
-////		// not found
-////		TRACE1("Warning (CXBeamRateAgent): no tool tip for ID 0x%04X.\n", nID);
-////	}
-////
-////   return TRUE;
-////}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditBridgeData* pBridgeData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditBridgeData* pBridgeData)
-//{
-//   return NULL;
-//}
-//
-//void CXBeamRateAgent::EditPier_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pPierPropertyPage)
-//{
-//}
-//
-//void CXBeamRateAgent::EditTemporarySupport_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pTempSupportPropertyPage)
-//{
-//}
-//
-//void CXBeamRateAgent::EditSpan_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pSpanPropertyPage)
-//{
-//}
-
+// IEditPierCallback
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
 {
    // The PGSuper/PGSplice Edit Pier dialog is being displayed... here is our
@@ -645,114 +585,40 @@ IDType CXBeamRateAgent::GetEditBridgeCallbackID()
 {
    return INVALID_ID;
 }
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditTemporarySupportData* pEditTemporarySupportData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditTemporarySupportData* pEditTemporarySupportData,CPropertyPage* pBridgePropertyPage)
-//{
-//   ATLASSERT(false);
-//   return NULL;
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditTemporarySupportData* pEditTemporarySupportData)
-//{
-//   return NULL;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditSpanData* pSpanData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditSpanData* pEditSpanData,CPropertyPage* pBridgePropertyPage)
-//{
-//   ATLASSERT(false);
-//   return NULL;
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditSpanData* pSpanData)
-//{
-//   return NULL;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditSegmentData* pSegmentData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditSegmentData* pSegmentData)
-//{
-//   return NULL;
-//}
-//
-//IDType CXBeamRateAgent::GetEditSplicedGirderCallbackID()
-//{
-//   return INVALID_ID;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditSegmentData* pEditSegmentData,CPropertyPage* pSplicedGirderPropertyPage)
-//{
-//   return NULL;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditClosureJointData* pClosureJointData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditClosureJointData* pClosureJointData)
-//{
-//   return NULL;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditClosureJointData* pEditClosureJointData,CPropertyPage* pSplicedGirderPropertyPage)
-//{
-//   return NULL;
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditSplicedGirderData* pGirderData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditSplicedGirderData* pGirderData)
-//{
-//   return NULL;
-//}
-//
-//void CXBeamRateAgent::EditSegment_OnOK(CPropertyPage* pSplicedGirderPropertyPage,CPropertyPage* pSegmentPropertyPage)
-//{
-//}
-//
-//void CXBeamRateAgent::EditClosureJoint_OnOK(CPropertyPage* pSplicedGirderPropertyPage,CPropertyPage* pClosureJointPropertyPage)
-//{
-//}
-//
-//CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditGirderData* pGirderData)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//   return new CPropertyPage(IDD_EDIT_PIER_PAGE);
-//}
-//
-//txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditGirderData* pGirderData)
-//{
-//   return NULL;
-//}
-//
-//HRESULT CXBeamRateAgent::OnHintsReset()
-//{
-//   AfxMessageBox(_T("Example Extension Agent - Hints Reset"));
-//   return S_OK;
-//}
 
+/////////////////////////////////////////////////////////////////////////////////
+// IEditLoadRatingOptionsCallback
+CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoadRatingOptions)
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CLoadRatingOptionsPage* pPage = new CLoadRatingOptionsPage();
+
+   GET_IFACE(IXBRRatingSpecification,pSpec);
+   pPage->m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
+
+   return pPage;
+}
+
+txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions)
+{
+   CLoadRatingOptionsPage* pLROPage = (CLoadRatingOptionsPage*)pPage;
+
+   GET_IFACE(IXBRRatingSpecification,pSpec);
+   pgsTypes::AnalysisType oldAnalysisType = pSpec->GetAnalysisMethodForReactions();
+   pgsTypes::AnalysisType newAnalysisType = pLROPage->m_AnalysisType;
+
+   if ( oldAnalysisType != newAnalysisType )
+   {
+      txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType);
+      return pTxn;
+   }
+   else
+   {
+      return NULL;
+   }
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 //IProjectPropertiesEventSink
 HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
 {
@@ -767,6 +633,7 @@ HRESULT CXBeamRateAgent::OnProjectPropertiesChanged()
    return S_OK;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
 // IXBRProjectEventSink
 HRESULT CXBeamRateAgent::OnProjectChanged()
 {
@@ -780,6 +647,7 @@ HRESULT CXBeamRateAgent::OnProjectChanged()
    return S_OK;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
 // IEAFCommandCallback
 BOOL CXBeamRateAgent::OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo)
 {

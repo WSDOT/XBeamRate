@@ -39,6 +39,9 @@
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
+#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <IFace\BeamFactory.h>
+#include <Plugins\BeamFamilyCLSID.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -109,6 +112,8 @@ CProjectAgentImp::CProjectAgentImp()
 
    // pier data for the stand alone case
    m_PierData.insert(std::make_pair(INVALID_ID,pierData));
+
+   m_AnalysisType = pgsTypes::Envelope;
 }
 
 CProjectAgentImp::~CProjectAgentImp()
@@ -382,15 +387,18 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          pStrSave->EndUnit(); // LiveLoad
       pStrSave->EndUnit(); // Reactions
-   } // end if bIsStandAlone
 
-   // Save the pier description information
-   if ( bIsStandAlone )
-   {
+      // Save the pier description information
       m_PierData[INVALID_ID].Save(pStrSave,NULL);
-   }
+
+      pStrSave->EndUnit(); // ProjectData
+   } // end if bIsStandAlone
    else
    {
+      pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+         pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
+      pStrSave->EndUnit(); // RatingSpecification
+
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
       std::map<PierIDType,xbrPierData>::iterator end(m_PierData.end());
       for ( ; iter != end; iter++ )
@@ -404,11 +412,6 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          ATLASSERT(pierData.GetID() != INVALID_ID);
          pierData.Save(pStrSave,NULL);
       }
-   }
-
-   if ( bIsStandAlone )
-   {
-      pStrSave->EndUnit(); // ProjectData
    }
 
    return hr;
@@ -718,15 +721,20 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             }
             hr = pStrLoad->EndUnit(); // Reactions
          }
-      } // end if bIsStandAlone
 
-      // Load the basic pier information
-      if ( bIsStandAlone )
-      {
+         // Load the basic pier information
          hr = m_PierData[INVALID_ID].Load(pStrLoad,NULL);
-      }
+
+         hr = pStrLoad->EndUnit(); // ProjectData
+      } // end if bIsStandAlone
       else
       {
+         hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("AnalysisType"),&var);
+         m_AnalysisType = (pgsTypes::AnalysisType)var.lVal;
+         hr = pStrLoad->EndUnit(); // RatingSpecification
+
          xbrPierData pierData;
          while ( SUCCEEDED(pierData.Load(pStrLoad,NULL)) )
          {
@@ -734,11 +742,6 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             ATLASSERT(pierID != INVALID_ID);
             m_PierData.insert(std::make_pair(pierID,pierData));
          }
-      }
-
-      if ( bIsStandAlone )
-      {
-         hr = pStrLoad->EndUnit(); // ProjectData
       }
    }
    catch (HRESULT)
@@ -771,19 +774,6 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
       UpdatePiers();
    }
-
-#pragma Reminder("FINISH - Set units")
-   //// extract our data from the binding object
-   //GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   //XBeamRate::ApplicationSettings& settings( m_XBeamRateXML->Settings() );
-   //if ( settings.Units() == XBeamRate::UnitModeEnum::SI )
-   //{
-   //   pDisplayUnits->SetUnitMode(eafTypes::umSI);
-   //}
-   //else
-   //{
-   //   pDisplayUnits->SetUnitMode(eafTypes::umUS);
-   //}
 
    return S_OK;
 }
@@ -1102,7 +1092,19 @@ void CProjectAgentImp::SetBearingReactionType(PierIDType pierID,IndexType brgLin
 
 xbrTypes::ReactionLoadType CProjectAgentImp::GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx)
 {
-   return GetPrivateBearingReactionType(pierID,brgLineIdx);
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      return GetPrivateBearingReactionType(pierID,brgLineIdx);
+   }
+   else
+   {
+      return UseUniformLoads(pierID,brgLineIdx) ? xbrTypes::rltUniform : xbrTypes::rltConcentrated;
+   }
 }
 
 void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W)
@@ -1151,12 +1153,8 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       IntervalIndexType nIntervals = pIntervals->GetIntervalCount();
       IntervalIndexType lastIntervalIdx = nIntervals-1;
 
-      //GET_IFACE(ISpecification,pSpec);
-      //pgsTypes::AnalysisType analysisType = pSpec->GetAnalysisType(); // this is were we need to get the analysis type that XBR is supposed to use
-      // Use simple if simple, continuous if continuous, or per user specification if envelope
       GET_IFACE(IProductForces,pProductForces);
-      //pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(analysisType,pgsTypes::Maximize);
-      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(pgsTypes::Maximize);
+      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
       ResultsType resultsType = rtCumulative;
 
       xbrPierData& pierData = GetPrivatePierData(pierID);
@@ -1176,6 +1174,9 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
          pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
          pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+
+#pragma Reminder("WORKING HERE - need to subtract superstructure pier diaphragm dead load from reaction") 
+         // it is applied as a load in the pier model... don't want to cout it twice
 
          *pDC = dc[brgLineIdx];
          *pDW = dw[brgLineIdx];
@@ -1198,13 +1199,47 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcSH,bat,resultsType);
          *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcRE,bat,resultsType);
          *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcPS,bat,resultsType);
+
+#pragma Reminder("WORKING HERE - need to subtract superstructure pier diaphragm dead load from reaction") 
+         // it is applied as a load in the pier model... don't want to cout it twice
       }
 
-#pragma Reminder("WORKING HERE - spread the reaction over the girder width if slab beam")
-      // or other wide bottom beams such as Deck Slab Beam, Box Girder... others
-      // for now, assume a concentrated load reaction
-      ATLASSERT(GetPrivateBearingReactionType(pierID,brgLineIdx) == xbrTypes::rltConcentrated);
-      *pW  = 0;
+      if ( UseUniformLoads(pierID,brgLineIdx) )
+      {
+         // the beam belongs to the type of family where we want to spread the reaction out
+         // as a uniform load
+         GET_IFACE(IGirder,pIGirder);
+         GET_IFACE(IBridge,pBridge);
+         CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
+
+         GET_IFACE(IPointOfInterest,pPoi);
+         pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(girderKey,pierIdx);
+
+         Float64 W;
+         if ( nBottomFlanges == 0 )
+         {
+            W = pIGirder->GetBottomWidth(poi);
+         }
+         else
+         {
+            W = pIGirder->GetBottomFlangeWidth(poi,0);
+         }
+
+         *pDC /= W;
+         *pDW /= W;
+         *pCR /= W;
+         *pSH /= W;
+         *pRE /= W;
+         *pPS /= W;
+
+         *pW = W;
+      }
+      else
+      {
+         *pW  = 0;
+      }
    }
 }
 
@@ -1518,7 +1553,7 @@ Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRati
 void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 {
    m_SysFactorFlexure = sysFactor;
-   Fire_OnProjectChanged();
+   Fire_OnRatingSpecificationChanged();
 }
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure()
@@ -1529,7 +1564,7 @@ Float64 CProjectAgentImp::GetSystemFactorFlexure()
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 {
    m_SysFactorShear = sysFactor;
-   Fire_OnProjectChanged();
+   Fire_OnRatingSpecificationChanged();
 }
 
 Float64 CProjectAgentImp::GetSystemFactorShear()
@@ -1540,12 +1575,26 @@ Float64 CProjectAgentImp::GetSystemFactorShear()
 void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
 {
    m_vbRateForShear[ratingType] = bRateForShear;
-   Fire_OnProjectChanged();
+   Fire_OnRatingSpecificationChanged();
 }
 
 bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType)
 {
    return m_vbRateForShear[ratingType];
+}
+
+pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions()
+{
+   return m_AnalysisType;
+}
+
+void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType)
+{
+   if ( analysisType != m_AnalysisType )
+   {
+      m_AnalysisType = analysisType;
+      Fire_OnRatingSpecificationChanged();
+   }
 }
 
 //////////////////////////////////////////////////////////
@@ -1918,4 +1967,35 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
    GroupIndexType grpIdx = pGroup->GetIndex();
 
    return CGirderKey(grpIdx,gdrIdx);
+}
+
+bool CProjectAgentImp::UseUniformLoads(PierIDType pierID,IndexType brgLineIdx)
+{
+   if ( pierID == INVALID_ID )
+   {
+      ATLASSERT(IsStandAlone());
+      return (GetBearingReactionType(pierID,brgLineIdx) == xbrTypes::rltUniform);
+   }
+
+   CGirderKey girderKey = GetGirderKey(pierID,brgLineIdx,0);
+
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CSplicedGirderData* pGirder = pIBridgeDesc->GetGirder(girderKey);
+   const GirderLibraryEntry* pGdrLibEntry = pGirder->GetGirderLibraryEntry();
+
+   CComPtr<IBeamFactory> beamFactory;
+   pGdrLibEntry->GetBeamFactory(&beamFactory);
+
+   CLSID clsidBeamFamily = beamFactory->GetFamilyCLSID();
+   if ( (clsidBeamFamily == CLSID_SlabBeamFamily) ||
+        (clsidBeamFamily == CLSID_BoxBeamFamily)  ||
+        (clsidBeamFamily == CLSID_DeckedSlabBeamFamily)
+      )
+   {
+      return true;
+   }
+   else
+   {
+      return false;
+   }
 }

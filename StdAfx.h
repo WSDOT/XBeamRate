@@ -29,3 +29,4 @@ extern CComModule _Module;
 #include <WBFLAll.h>
 
 #include <Math\Math.h>
+#include <afxdlgs.h>

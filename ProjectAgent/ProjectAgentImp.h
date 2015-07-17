@@ -50,6 +50,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>,
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public CProxyIXBREventsEventSink<CProjectAgentImp>,
+   public CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
@@ -89,6 +90,7 @@ END_COM_MAP()
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
    CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBRProjectPropertiesEventSink )
+   CONNECTION_POINT_ENTRY( IID_IXBRRatingSpecificationEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBREventsSink )
 END_CONNECTION_POINT_MAP()
 
@@ -295,6 +297,9 @@ public:
    //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
    //virtual pgsTypes::SpecialPermitType GetSpecialPermitType() = 0;
 
+   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions();
+   virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType);
+
 // IXBRProjectEdit
 public:
    virtual void EditPier(int nPage);
@@ -379,12 +384,15 @@ private:
    };
    std::map<PierIDType,std::vector<LiveLoadReaction>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
 
+   pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
+
    // Events
    int m_EventHoldCount;
    Uint32 m_PendingEvents;
 
    friend CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>;
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
+   friend CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>;
 
    void CreateMenus();
    void RemoveMenus();
@@ -393,6 +401,7 @@ private:
    void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);
    PierIndexType GetPierIndex(PierIDType pierID);
    CGirderKey GetGirderKey(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
+   bool UseUniformLoads(PierIDType pierID,IndexType brgLineIdx);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

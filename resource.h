@@ -10,6 +10,7 @@
 #define IDS_PROJNAME                    100
 #define IDR_XBEAMRATE                   102
 #define IDD_PIER_VIEW_CONTROLS          103
+#define IDD_RATING_OPTIONS              106
 #define IDD_ABOUTBOX                    107
 #define IDR_XBEAMRATEAPP                129
 #define IDR_COMPONENTINFO               130
@@ -19,6 +20,9 @@
 #define IDC_APPICON                     140
 #define IDC_COMBO1                      202
 #define IDC_PIERS                       202
+#define IDC_ANALYSIS_MODEL              202
+#define IDC_ANALYSIS_MODE               202
+#define IDC_ANALYSIS_MODE_LABEL         203
 #define IDI_ICON                        205
 #define IDR_TOOLBAR1                    206
 #define IDC_VERSION                     207
@@ -49,7 +53,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         203
+#define _APS_NEXT_CONTROL_VALUE         204
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

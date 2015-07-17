@@ -232,6 +232,17 @@ BEGIN
     LTEXT           "Static",IDC_LOCATION,15,36,291,43
 END
 
+IDD_RATING_OPTIONS DIALOGEX 0, 0, 352, 207
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "XBeam"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    LTEXT           "Options for Cross Beam Load Rating",IDC_STATIC,7,7,128,8
+    LTEXT           "When PGSuper is in Envelope Mode, use",IDC_ANALYSIS_MODE_LABEL,14,21,130,8
+    COMBOBOX        IDC_ANALYSIS_MODE,148,18,103,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "for the Pier reactions",IDC_STATIC,257,20,68,8
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -275,6 +286,15 @@ BEGIN
         RIGHTMARGIN, 319
         TOPMARGIN, 7
         BOTTOMMARGIN, 108
+    END
+
+    IDD_RATING_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 345
+        VERTGUIDE, 14
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 200
     END
 END
 #endif    // APSTUDIO_INVOKED

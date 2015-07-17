@@ -623,6 +623,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoadRatingOptionsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\mfcdual.cpp"
 				>
 			</File>
@@ -1100,6 +1104,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoadRatingOptionsPage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\mfcdual.h"
 				>
 			</File>
@@ -1258,6 +1266,10 @@
 				Filter="*.h"
 				>
 				<File
+					RelativePath=".\txnEditLoadRatingOptions.h"
+					>
+				</File>
+				<File
 					RelativePath=".\txnEditReinforcement.h"
 					>
 				</File>
@@ -1266,6 +1278,10 @@
 				Name="Source Files"
 				Filter="*.cpp"
 				>
+				<File
+					RelativePath=".\txnEditLoadRatingOptions.cpp"
+					>
+				</File>
 				<File
 					RelativePath=".\txnEditReinforcement.cpp"
 					>

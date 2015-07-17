@@ -63,6 +63,11 @@ interface IXBRRatingSpecification : IUnknown
    //// Permit type for rating for special/limited crossing permit vehicle
    //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
    //virtual pgsTypes::SpecialPermitType GetSpecialPermitType() = 0;
+
+   // Controls the analysis type to be used for superstructure reactions obtained
+   // from PGSuper when PGSuper is in Envelope mode
+   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() = 0;
+   virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) = 0;
 };
 
 /*****************************************************************************

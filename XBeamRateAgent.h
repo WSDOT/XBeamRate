@@ -84,15 +84,8 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    public IAgentUIIntegration,
    public IAgentReportingIntegration,
    public IAgentGraphingIntegration,
-   //public IEditBridgeCallback,
    public IEditPierCallback, // not a COM interface
-   //public IEditTemporarySupportCallback,
-   //public IEditSpanCallback,  // not a COM interface
-   //public IEditSegmentCallback,
-   //public IEditClosureJointCallback,
-   //public IEditSplicedGirderCallback,
-   //public IEditGirderCallback,
-   //public IExtendUIEventSink,
+   public IEditLoadRatingOptionsCallback, // not a COM interface
    public IProjectPropertiesEventSink,
    public IXBRProjectEventSink,
    public IXBeamRate,
@@ -171,22 +164,6 @@ public:
 public:
    STDMETHOD(IntegrateWithGraphing)(BOOL bIntegrate);
 
-//
-//// IEAFCommandCallback
-//public:
-//   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
-//   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
-//   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
-//
-//
-//// IEditBridgeCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditBridgeData* pBridgeData);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditBridgeData* pBridgeData);
-//   virtual void EditPier_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pPierPropertyPage);
-//   virtual void EditTemporarySupport_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pTempSupportPropertyPage);
-//   virtual void EditSpan_OnOK(CPropertyPage* pBridgePropertyPage,CPropertyPage* pSpanPropertyPage);
-
 // IEditPierCallback
 public:
    virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData);
@@ -194,50 +171,10 @@ public:
    virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData);
    virtual IDType GetEditBridgeCallbackID();
 
-//// IEditTemporarySupportCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditTemporarySupportData* pEditTemporarySupportData);
-//   virtual CPropertyPage* CreatePropertyPage(IEditTemporarySupportData* pEditTemporarySupportData,CPropertyPage* pBridgePropertyPage);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditTemporarySupportData* pEditTemporarySupportData);
-//   //virtual IDType GetEditBridgeCallbackID();
-//
-//// IEditSpanCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditSpanData* pEditSpanData);
-//   virtual CPropertyPage* CreatePropertyPage(IEditSpanData* pEditSpanData,CPropertyPage* pBridgePropertyPage);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditSpanData* pEditSpanData);
-//   //virtual IDType GetEditBridgeCallbackID();
-//
-//// IEditSegmentCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditSegmentData* pSegmentData);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditSegmentData* pSegmentData);
-//   virtual IDType GetEditSplicedGirderCallbackID();
-//   virtual CPropertyPage* CreatePropertyPage(IEditSegmentData* pEditSegmentData,CPropertyPage* pSplicedGirderPropertyPage);
-//
-//// IEditClosureJointCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditClosureJointData* pClosureJointData);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditClosureJointData* pClosureJointData);
-//   //virtual IDType GetEditSplicedGirderCallbackID();
-//   virtual CPropertyPage* CreatePropertyPage(IEditClosureJointData* pEditClosureJointData,CPropertyPage* pSplicedGirderPropertyPage);
-//
-//// IEditSplicedGirderCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditSplicedGirderData* pGirderData);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditSplicedGirderData* pGirderData);
-//   virtual void EditSegment_OnOK(CPropertyPage* pSplicedGirderPropertyPage,CPropertyPage* pSegmentPropertyPage);
-//   virtual void EditClosureJoint_OnOK(CPropertyPage* pSplicedGirderPropertyPage,CPropertyPage* pClosureJointPropertyPage);
-//
-//// IEditGirderCallback
-//public:
-//   virtual CPropertyPage* CreatePropertyPage(IEditGirderData* pGirderData);
-//   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditGirderData* pGirderData);
-//
-//
-//// IExtendUIEventSink
-//public:
-//   virtual HRESULT OnHintsReset();
+// IEditLoadRatingOptionsCallback
+public:
+   virtual CPropertyPage* CreatePropertyPage(IEditLoadRatingOptions* pLoadRatingOptions);
+   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions);
 
 // IProjectPropertiesEventSink
 public:
@@ -277,14 +214,8 @@ private:
 
    void RegisterUIExtensions();
    void UnregisterUIExtensions();
-   //IDType m_EditBridgeCallbackID;
    IDType m_EditPierCallbackID;
-   //IDType m_EditTemporarySupportCallbackID;
-   //IDType m_EditSpanCallbackID;
-   //IDType m_EditSegmentCallbackID;
-   //IDType m_EditClosureJointCallbackID;
-   //IDType m_EditSplicedGirderCallbackID;
-   //IDType m_EditGirderCallbackID;
+   IDType m_EditLoadRatingOptionsCallbackID;
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(XBeamRateAgent), CXBeamRateAgent)

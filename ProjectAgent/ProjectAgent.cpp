@@ -55,6 +55,8 @@
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
+#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <Plugins\BeamFamilyCLSID.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

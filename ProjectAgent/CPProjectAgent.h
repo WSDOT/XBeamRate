@@ -1,5 +1,6 @@
 #define EVT_PROJECTPROPERTIES    0x0001
 #define EVT_PROJECT              0x0002
+#define EVT_RATINGSPECIFICATION  0x0004
 
 //////////////////////////////////////////////////////////////////////////////
 // CProxyIXBRProjectPropertiesEventSink
@@ -135,6 +136,43 @@ public:
 			{
 				IXBREventsSink* pEventSink = reinterpret_cast<IXBREventsSink*>(*pp);
 				ret = pEventSink->OnCancelPendingEvents();
+			}
+			pp++;
+		}
+		pT->Unlock();
+		return ret;
+	}
+};
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CProxyIXBRRatingSpecificationEventSink
+template <class T>
+class CProxyIXBRRatingSpecificationEventSink : public IConnectionPointImpl<T, &IID_IXBRRatingSpecificationEventSink, CComDynamicUnkArray>
+{
+public:
+
+//IXBRRatingSpecificationEventSink : IUnknown
+public:
+	HRESULT Fire_OnRatingSpecificationChanged()
+	{
+		T* pT = (T*)this;
+
+      if ( 0 < pT->m_EventHoldCount )
+      {
+         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_RATINGSPECIFICATION);
+         return S_OK;
+      }
+
+      pT->Lock();
+		HRESULT ret = S_OK;
+		IUnknown** pp = m_vec.begin();
+		while (pp < m_vec.end())
+		{
+			if (*pp != NULL)
+			{
+				IXBRRatingSpecificationEventSink* pEventSink = reinterpret_cast<IXBRRatingSpecificationEventSink*>(*pp);
+				ret = pEventSink->OnRatingSpecificationChanged();
 			}
 			pp++;
 		}
