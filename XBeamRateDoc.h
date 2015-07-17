@@ -84,6 +84,7 @@ protected:
 
    bool m_bAutoCalcEnabled;
 
+   virtual BOOL OpenTheDocument(LPCTSTR lpszPathName);
    virtual void OnCreateFinalize();
    virtual void BrokerShutDown();
 

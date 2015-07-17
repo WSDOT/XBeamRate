@@ -31,7 +31,8 @@ class CXBeamRateDocProxyAgent :
    public IAgentUIIntegration,
    public IXBRProjectEventSink,
    public IXBeamRate,
-   public IEAFDisplayUnitsEventSink
+   public IEAFDisplayUnitsEventSink,
+   public IXBRUIEvents
    //public IVersionInfo,
 {
 public:
@@ -46,6 +47,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
    COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
+   COM_INTERFACE_ENTRY(IXBRUIEvents)
    //COM_INTERFACE_ENTRY(IVersionInfo)
 END_COM_MAP()
 
@@ -83,6 +85,13 @@ public:
 public:
    virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
 
+// IXBRUIEvents
+public:
+   virtual void HoldEvents(bool bHold=true);
+   virtual void FirePendingEvents();
+   virtual void CancelPendingEvents();
+   virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>());
+
 
 //// IVersionInfo
 //public:
@@ -111,5 +120,15 @@ private:
    long m_GraphingViewKey;
    
    CXBeamRateDoc* m_pMyDocument;
+
+   int m_EventHoldCount;
+   bool m_bFiringEvents;
+   struct UIEvent
+   {
+      CView* pSender;
+      LPARAM lHint;
+      boost::shared_ptr<CObject> pHint;
+   };
+   std::vector<UIEvent> m_UIEvents;
 };
 

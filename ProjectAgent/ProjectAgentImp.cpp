@@ -260,6 +260,11 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("Comments"),CComVariant(m_strComments));
       pStrSave->EndUnit(); // ProjectProperties
 
+      pStrSave->BeginUnit(_T("ProjectSettings"),1.0);
+         GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+         pStrSave->put_Property(_T("Units"),CComVariant(pDisplayUnits->GetUnitMode()));
+      pStrSave->EndUnit(); // ProjectSettings
+
       // Need to save stuff like units and project properties,system factors
       // Also, need to save/load this data per pier
       // when this is a PGSuper/PGSplice extension, there can be many piers
@@ -451,6 +456,20 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->EndUnit(); // ProjectProperties
          }
+
+         {
+            hr = pStrLoad->BeginUnit(_T("ProjectSettings"));
+
+            var.vt = VT_I4;
+            hr = pStrLoad->get_Property(_T("Units"),&var);
+
+            GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+            eafTypes::UnitMode unitMode = (eafTypes::UnitMode)(var.iVal);
+            pDisplayUnits->SetUnitMode(unitMode);
+
+            hr = pStrLoad->EndUnit(); // ProjectSettings
+         }
+
 
 
          {
@@ -1132,7 +1151,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       IntervalIndexType nIntervals = pIntervals->GetIntervalCount();
       IntervalIndexType lastIntervalIdx = nIntervals-1;
 
+      //GET_IFACE(ISpecification,pSpec);
+      //pgsTypes::AnalysisType analysisType = pSpec->GetAnalysisType(); // this is were we need to get the analysis type that XBR is supposed to use
+      // Use simple if simple, continuous if continuous, or per user specification if envelope
       GET_IFACE(IProductForces,pProductForces);
+      //pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(analysisType,pgsTypes::Maximize);
       pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(pgsTypes::Maximize);
       ResultsType resultsType = rtCumulative;
 

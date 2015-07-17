@@ -12,6 +12,8 @@
 #include "GraphViewChildFrame.h"
 #include "XBeamRateGraphView.h"
 
+#include "XBeamRateHints.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -27,6 +29,9 @@ CXBeamRateDocProxyAgent::CXBeamRateDocProxyAgent()
 {
    m_pMyDocument = NULL;
    m_StdToolBarID = -1;
+   
+   m_EventHoldCount = 0;
+   m_bFiringEvents = false;
 }
 
 CXBeamRateDocProxyAgent::~CXBeamRateDocProxyAgent()
@@ -93,7 +98,8 @@ STDMETHODIMP CXBeamRateDocProxyAgent::SetBroker(IBroker* pBroker)
 STDMETHODIMP CXBeamRateDocProxyAgent::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2> pBrokerInit(m_pBroker);
-   pBrokerInit->RegInterface( IID_IXBeamRate,  this );
+   pBrokerInit->RegInterface( IID_IXBeamRate,   this );
+   pBrokerInit->RegInterface( IID_IXBRUIEvents, this );
    return S_OK;
 }
 
@@ -196,9 +202,109 @@ HRESULT CXBeamRateDocProxyAgent::OnUnitsChanged(eafTypes::UnitMode newUnitMode)
    m_pMyDocument->GetDocUnitSystem(&pDocUnitSystem);
    pDocUnitSystem->put_UnitMode(UnitModeType(pDisplayUnits->GetUnitMode()));
 
-#pragma Reminder("UPDATE: could use a hint that says the units changed")
-   m_pMyDocument->UpdateAllViews(0,0,0);
+   boost::shared_ptr<CObject> pnull;
+   FireEvent( 0, HINT_UNITSCHANGED, pnull );
+
    return S_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////
+// IXBRUIEvents
+void CXBeamRateDocProxyAgent::HoldEvents(bool bHold)
+{
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   if ( bHold )
+   {
+      m_EventHoldCount++;
+   }
+   else
+   {
+      m_EventHoldCount--;
+   }
+
+   if ( m_EventHoldCount <= 0 && !m_bFiringEvents )
+   {
+      m_EventHoldCount = 0;
+      m_UIEvents.clear();
+   }
+}
+
+void CXBeamRateDocProxyAgent::FirePendingEvents()
+{
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   if ( m_EventHoldCount == 0 )
+   {
+      return;
+   }
+
+   if ( 1 == m_EventHoldCount )
+   {
+      m_EventHoldCount--;
+
+      m_bFiringEvents = true;
+
+      std::vector<UIEvent>::iterator iter(m_UIEvents.begin());
+      std::vector<UIEvent>::iterator iterEnd(m_UIEvents.end());
+      for ( ; iter != iterEnd; iter++ )
+      {
+         UIEvent event = *iter;
+         m_pMyDocument->UpdateAllViews(event.pSender,event.lHint,event.pHint.get());
+      }
+
+      m_bFiringEvents = false;
+      m_UIEvents.clear();
+   }
+   else
+   {
+      m_EventHoldCount--;
+   }
+}
+
+void CXBeamRateDocProxyAgent::CancelPendingEvents()
+{
+   m_EventHoldCount--;
+   if ( m_EventHoldCount <= 0 && !m_bFiringEvents )
+   {
+      m_EventHoldCount = 0;
+      m_UIEvents.clear();
+   }
+}
+
+void CXBeamRateDocProxyAgent::FireEvent(CView* pSender,LPARAM lHint,boost::shared_ptr<CObject> pHint)
+{
+   AFX_MANAGE_STATE(AfxGetAppModuleState());
+   if ( 0 < m_EventHoldCount )
+   {
+      UIEvent event;
+      event.pSender = pSender;
+      event.lHint = lHint;
+      event.pHint = pHint;
+
+      // skip all but one result hint - firing multiple result hints 
+      // causes the UI to unnecessarilly update multiple times
+      bool skip = false;
+      std::vector<UIEvent>::iterator iter(m_UIEvents.begin());
+      std::vector<UIEvent>::iterator iterEnd(m_UIEvents.end());
+      for ( ; iter != iterEnd; iter++ )
+      {
+         UIEvent e = *iter;
+         if ( MIN_RESULTS_HINT <= e.lHint && e.lHint <= MAX_RESULTS_HINT )
+         {
+            skip = true;
+            break; // a result hint is already queued 
+         }
+      }
+
+      if (!skip)
+      {
+         ATLASSERT( !m_bFiringEvents ); // don't add to the container while we are iterating through it
+         m_UIEvents.push_back(event);
+      }
+   }
+   else
+   {
+      m_pMyDocument->UpdateAllViews(pSender,lHint,pHint.get());
+   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

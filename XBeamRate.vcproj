@@ -1164,6 +1164,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\XBeamRateHints.h"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRatePluginApp.h"
 				>
 			</File>

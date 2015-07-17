@@ -291,12 +291,35 @@ void CXBeamRateDoc::Dump(CDumpContext& dc) const
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateDoc commands
+BOOL CXBeamRateDoc::OpenTheDocument(LPCTSTR lpszPathName)
+{
+   // don't fire UI events as the UI isn't completely built when the document is created
+   // (view classes haven't been initialized)
+   m_pMyDocProxyAgent->HoldEvents();
+   // Events are released in OnCreateFinalize()
+
+   if ( !CEAFBrokerDocument::OpenTheDocument(lpszPathName) )
+   {
+      return FALSE;
+   }
+
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   m_DocUnitSystem->put_UnitMode( IS_US_UNITS(pDisplayUnits) ? umUS : umSI );
+  
+   return TRUE;
+}
 
 void CXBeamRateDoc::OnCreateFinalize()
 {
    CEAFBrokerDocument::OnCreateFinalize();
    PopulateReportMenu();
    PopulateGraphMenu();
+
+   // views have been initilized so fire any pending events
+   GET_IFACE(IXBREvents,pEvents);
+   GET_IFACE(IXBRUIEvents,pUIEvents);
+   pEvents->FirePendingEvents(); 
+   pUIEvents->HoldEvents(false);
 }
 
 void CXBeamRateDoc::BrokerShutDown()

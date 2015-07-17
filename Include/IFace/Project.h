@@ -3,6 +3,8 @@
 #include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\PierData.h>
 
+#include <boost\shared_ptr.hpp>
+
 /*****************************************************************************
 INTERFACE
    IXBRProjectProperties
@@ -226,7 +228,7 @@ interface IXBRProjectEdit : IUnknown
 
 /*****************************************************************************
 INTERFACE
-   IEvents
+   IXBREvents
 
    Interface to control events
 
@@ -245,7 +247,7 @@ interface IXBREvents : IUnknown
 
 /*****************************************************************************
 INTERFACE
-   IEventsSink
+   IXBREventsSink
 
    Interface to control events
 
@@ -260,4 +262,23 @@ interface IXBREventsSink : IUnknown
    virtual HRESULT OnHoldEvents() = 0;
    virtual HRESULT OnFirePendingEvents() = 0;
    virtual HRESULT OnCancelPendingEvents() = 0;
+};
+
+/*****************************************************************************
+INTERFACE
+   IXBRUIEvents
+
+   Interface to control events in the user interface
+
+DESCRIPTION
+   Interface to control events in the user interface
+*****************************************************************************/
+DEFINE_GUID(IID_IXBRUIEvents, 
+0xb2734352, 0xc900, 0x4c92, 0x9b, 0x68, 0x94, 0x84, 0xfc, 0x58, 0x1a, 0x1b);
+interface IXBRUIEvents : IUnknown
+{
+   virtual void HoldEvents(bool bHold=true) = 0;
+   virtual void FirePendingEvents() = 0;
+   virtual void CancelPendingEvents() = 0;
+   virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>()) = 0;
 };
