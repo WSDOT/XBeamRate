@@ -10,6 +10,9 @@
 
 #include "XBeamRateReportSpecification.h"
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -43,6 +46,27 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    CComPtr<IBroker> pBroker;
    pXBRRptSpec->GetBroker(&pBroker);
 
+   PierIDType pierID = pXBRRptSpec->GetPierID();
+
+   if ( IsPGSExtension() )
+   {
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
+      if ( pPier->GetPierModelType() == pgsTypes::pmtIdealized )
+      {
+         rptParagraph* pPara = new rptParagraph;
+         *pChapter << pPara;
+         *pPara << _T("Pier is idealized") << rptNewLine;
+         return pChapter;
+      }
+   }
+#if defined _DEBUG
+   else
+   {
+      ATLASSERT(pierID == INVALID_ID);
+   }
+#endif
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
@@ -61,7 +85,6 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    (*pTable)(0,0) << _T("Column");
    (*pTable)(0,1) << COLHDR(_T("Height"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
 
-   PierIDType pierID = pXBRRptSpec->GetPierID();
 
    RowIndexType tableRowIdx = 1;
    ColumnIndexType nColumns = pProject->GetColumnCount(pierID);

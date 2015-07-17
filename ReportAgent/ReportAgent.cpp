@@ -49,6 +49,9 @@
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <IFace\Selection.h>
+
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

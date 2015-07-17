@@ -22,9 +22,9 @@ xbrPierData::xbrPierData()
    m_H2 = ::ConvertToSysUnits(1,unitMeasure::Feet);
    m_H3 = ::ConvertToSysUnits(5,unitMeasure::Feet);
    m_H4 = ::ConvertToSysUnits(1,unitMeasure::Feet);
-   m_X1 = ::ConvertToSysUnits(3,unitMeasure::Feet);
+   m_X1 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_X2 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_X3 = ::ConvertToSysUnits(3,unitMeasure::Feet);
+   m_X3 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_X4 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_XW = ::ConvertToSysUnits(5,unitMeasure::Feet);
 

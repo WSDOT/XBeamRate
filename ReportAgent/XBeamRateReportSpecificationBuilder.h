@@ -11,4 +11,5 @@ public:
    ~CXBeamRateReportSpecificationBuilder(void);
 
    virtual boost::shared_ptr<CReportSpecification> CreateReportSpec(const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pRptSpec);
+   virtual boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateDefaultReportSpec(const CReportDescription& rptDesc);
 };
