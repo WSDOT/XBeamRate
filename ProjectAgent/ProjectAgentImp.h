@@ -381,8 +381,10 @@ private:
       Float64 LLIM;
       LiveLoadReaction() {;}
       LiveLoadReaction(LPCTSTR name,Float64 llim) : Name(name), LLIM(llim) {;}
+      LiveLoadReaction(const LiveLoadReaction& other) {Name=other.Name; LLIM=other.LLIM;}
    };
    std::map<PierIDType,std::vector<LiveLoadReaction>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
+   std::vector<CProjectAgentImp::LiveLoadReaction>& GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
 
    pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
 

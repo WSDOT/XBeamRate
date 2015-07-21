@@ -56,6 +56,15 @@ CProjectAgentImp::CProjectAgentImp()
    m_pBroker = 0;
    m_EventHoldCount = 0;
 
+   m_strBridgeName = _T("");
+   m_strBridgeId   = _T("");
+   m_strJobNumber  = _T("");
+   m_strEngineer   = _T("");
+   m_strCompany    = _T("");
+   m_strComments   = _T("");
+
+   m_PierIdx = INVALID_INDEX;
+
    m_SysFactorFlexure = 1.0;
    m_SysFactorShear   = 1.0;
    m_vbRateForShear[pgsTypes::lrDesign_Inventory] = true;
@@ -1255,12 +1264,14 @@ void CProjectAgentImp::SetReferenceBearing(PierIDType pierID,IndexType brgLineId
 
 IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   return m_LiveLoadReactions[ratingType][pierID].size();
+   std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   return vReactions.size();
 }
 
 void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
 {
-   m_LiveLoadReactions[ratingType][pierID].clear();
+   std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   vReactions.clear();
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(vLLIM.begin());
    std::vector<std::pair<std::_tstring,Float64>>::const_iterator iterEnd(vLLIM.end());
    for ( ; iter != iterEnd; iter++ )
@@ -1268,7 +1279,7 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRati
       LiveLoadReaction ll;
       ll.Name = iter->first;
       ll.LLIM = iter->second;
-      m_LiveLoadReactions[ratingType][pierID].push_back(ll);
+      vReactions.push_back(ll);
    }
 
    Fire_OnProjectChanged();
@@ -1276,8 +1287,9 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRati
 
 std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
+   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
    std::vector<std::pair<std::_tstring,Float64>> vReactions;
-   BOOST_FOREACH(LiveLoadReaction& ll,m_LiveLoadReactions[ratingType][pierID])
+   BOOST_FOREACH(LiveLoadReaction& ll,vLLReactions)
    {
       vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
    }
@@ -1286,12 +1298,14 @@ std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReact
 
 LPCTSTR CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_LiveLoadReactions[ratingType][pierID][vehIdx].Name.c_str();
+   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   return vLLReactions[vehIdx].Name.c_str();
 }
 
 Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
 {
-   return m_LiveLoadReactions[ratingType][pierID][vehIdx].LLIM;
+   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   return vLLReactions[vehIdx].LLIM;
 }
 
 void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade)
@@ -1749,6 +1763,18 @@ std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBea
    return m_BearingReactions[brgLineIdx][pierID];
 }
 
+std::vector<CProjectAgentImp::LiveLoadReaction>& CProjectAgentImp::GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
+{
+   std::map<PierIDType,std::vector<LiveLoadReaction>>::const_iterator found(m_LiveLoadReactions[ratingType].find(pierID));
+   if ( found == m_LiveLoadReactions[ratingType].end() )
+   {
+      std::vector<LiveLoadReaction> vReactions;
+      m_LiveLoadReactions[ratingType].insert(std::make_pair(pierID,vReactions));
+   }
+
+   return m_LiveLoadReactions[ratingType][pierID];
+}
+
 xbrTypes::ReactionLoadType& CProjectAgentImp::GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx)
 {
    std::map<PierIDType,xbrTypes::ReactionLoadType>::const_iterator found(m_BearingReactionType[brgLineIdx].find(pierID));
@@ -1774,7 +1800,7 @@ void CProjectAgentImp::UpdatePiers()
    {
       const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
       PierIDType pierID = pPier->GetID();
-      xbrPierData& pierData = m_PierData[pierID];
+      xbrPierData& pierData = GetPrivatePierData(pierID);
       UpdatePierData(pPier,pierData);
    }
 }
@@ -1899,7 +1925,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       backBrgLine.SetSpacing(vBackSpacing);
       pierData.SetBearingLineData(0,backBrgLine);
 
-      m_BearingReactions[pierID][0].resize(backBrgLine.GetBearingCount());
+      std::vector<BearingReactions>& vBackBrgReactions = GetPrivateBearingReactions(pierID,0);
+      vBackBrgReactions.resize(backBrgLine.GetBearingCount());
 
       refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
       std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
@@ -1909,7 +1936,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       aheadBrgLine.SetSpacing(vAheadSpacing);
       pierData.SetBearingLineData(1,aheadBrgLine);
 
-      m_BearingReactions[pierID][1].resize(backBrgLine.GetBearingCount());
+      std::vector<BearingReactions>& vAheadBrgReactions = GetPrivateBearingReactions(pierID,1);
+      vAheadBrgReactions.resize(aheadBrgLine.GetBearingCount());
    }
    else
    {
