@@ -1183,8 +1183,13 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
          pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
 
-#pragma Reminder("WORKING HERE - need to subtract superstructure pier diaphragm dead load from reaction") 
-         // it is applied as a load in the pier model... don't want to cout it twice
+         // superstructure pier diaphragm dead load is applied to the pier model and is included
+         // in the superstructure reactions. subtract out the pier diaphragm load. don't want to cout it twice
+         Float64 Pback, Mback, Pahead, Mahead;
+         GET_IFACE(IProductLoads,pProductLoads);
+         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&Pahead,&Mahead);
+         dc[0] -= Pback;
+         dc[1] -= Pahead;
 
          *pDC = dc[brgLineIdx];
          *pDW = dw[brgLineIdx];
@@ -1208,8 +1213,12 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcRE,bat,resultsType);
          *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcPS,bat,resultsType);
 
-#pragma Reminder("WORKING HERE - need to subtract superstructure pier diaphragm dead load from reaction") 
-         // it is applied as a load in the pier model... don't want to cout it twice
+         // superstructure pier diaphragm dead load is applied to the pier model and is included
+         // in the superstructure reactions. subtract out the pier diaphragm load. don't want to cout it twice
+         Float64 Pback, Mback, Pahead, Mahead;
+         GET_IFACE(IProductLoads,pProductLoads);
+         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&Pahead,&Mahead);
+         *pDC -= (Pback + Pahead);
       }
 
       if ( UseUniformLoads(pierID,brgLineIdx) )
