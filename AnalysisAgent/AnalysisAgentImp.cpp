@@ -894,7 +894,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
    return vV;
 }
 
-Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi)
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    Float64 M = 0;
@@ -907,7 +907,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedForceType lcTy
    return M;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi)
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    sysSectionValue V(0,0);
@@ -920,7 +920,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,XBRCombinedForceTy
    return V;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
@@ -932,7 +932,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,XBRCombinedF
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
@@ -1042,7 +1042,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    Float64 DC = 0;
-   std::vector<xbrTypes::ProductForceType> vDC = GetLoads(lcDC);
+   std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDC)
    {
       Float64 dc = GetMoment(pierID,pfType,poi);
@@ -1050,7 +1050,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 
    Float64 DW = 0;
-   std::vector<xbrTypes::ProductForceType> vDW = GetLoads(lcDW);
+   std::vector<xbrTypes::ProductForceType> vDW = GetLoads(xbrTypes::lcDW);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDW)
    {
       Float64 dw = GetMoment(pierID,pfType,poi);
@@ -1058,7 +1058,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 
    Float64 CR = 0;
-   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(lcCR);
+   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(xbrTypes::lcCR);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
    {
       Float64 cr = GetMoment(pierID,pfType,poi);
@@ -1066,7 +1066,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 
    Float64 SH = 0;
-   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(lcSH);
+   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(xbrTypes::lcSH);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
    {
       Float64 sh = GetMoment(pierID,pfType,poi);
@@ -1074,7 +1074,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 
    Float64 PS = 0;
-   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(lcPS);
+   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(xbrTypes::lcPS);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
    {
       Float64 ps = GetMoment(pierID,pfType,poi);
@@ -1082,7 +1082,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 
    Float64 RE = 0;
-   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(lcRE);
+   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(xbrTypes::lcRE);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
    {
       Float64 re = GetMoment(pierID,pfType,poi);
@@ -1110,7 +1110,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
 
    sysSectionValue DC = 0;
-   std::vector<xbrTypes::ProductForceType> vDC = GetLoads(lcDC);
+   std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDC)
    {
       sysSectionValue dc = GetShear(pierID,pfType,poi);
@@ -1118,7 +1118,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 
    sysSectionValue DW = 0;
-   std::vector<xbrTypes::ProductForceType> vDW = GetLoads(lcDW);
+   std::vector<xbrTypes::ProductForceType> vDW = GetLoads(xbrTypes::lcDW);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDW)
    {
       sysSectionValue dw = GetShear(pierID,pfType,poi);
@@ -1126,7 +1126,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 
    sysSectionValue CR = 0;
-   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(lcCR);
+   std::vector<xbrTypes::ProductForceType> vCR = GetLoads(xbrTypes::lcCR);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
    {
       sysSectionValue cr = GetShear(pierID,pfType,poi);
@@ -1134,7 +1134,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 
    sysSectionValue SH = 0;
-   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(lcSH);
+   std::vector<xbrTypes::ProductForceType> vSH = GetLoads(xbrTypes::lcSH);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
    {
       sysSectionValue sh = GetShear(pierID,pfType,poi);
@@ -1142,7 +1142,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 
    sysSectionValue PS = 0;
-   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(lcPS);
+   std::vector<xbrTypes::ProductForceType> vPS = GetLoads(xbrTypes::lcPS);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
    {
       sysSectionValue ps = GetShear(pierID,pfType,poi);
@@ -1150,7 +1150,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 
    sysSectionValue RE = 0;
-   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(lcRE);
+   std::vector<xbrTypes::ProductForceType> vRE = GetLoads(xbrTypes::lcRE);
    BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
    {
       sysSectionValue re = GetShear(pierID,pfType,poi);
@@ -1194,34 +1194,34 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 }
 
-std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(XBRCombinedForceType lcType)
+std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::CombinedForceType lcType)
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes;
    switch(lcType)
    {
-   case lcDC:
+   case xbrTypes::lcDC:
       vPFTypes.push_back(xbrTypes::pftLowerXBeam);
       vPFTypes.push_back(xbrTypes::pftUpperXBeam);
       vPFTypes.push_back(xbrTypes::pftDCReactions);
       break;
 
-   case lcDW:
+   case xbrTypes::lcDW:
       vPFTypes.push_back(xbrTypes::pftDWReactions);
       break;
 
-   case lcSH:
+   case xbrTypes::lcSH:
       vPFTypes.push_back(xbrTypes::pftSHReactions);
       break;
 
-   case lcCR:
+   case xbrTypes::lcCR:
       vPFTypes.push_back(xbrTypes::pftCRReactions);
       break;
 
-   case lcPS:
+   case xbrTypes::lcPS:
       vPFTypes.push_back(xbrTypes::pftPSReactions);
       break;
 
-   case lcRE:
+   case xbrTypes::lcRE:
       vPFTypes.push_back(xbrTypes::pftREReactions);
       break;
 

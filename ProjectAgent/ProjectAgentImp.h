@@ -148,6 +148,8 @@ public:
 
    virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation);
    virtual Float64 GetDeckElevation(PierIDType pierID);
+   virtual void SetDeckThickness(PierIDType pierID,Float64 tDeck);
+   virtual Float64 GetDeckThickness(PierIDType pierID);
    virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo);
    virtual Float64 GetCrownPointOffset(PierIDType pierID);
    virtual void SetBridgeLineOffset(PierIDType pierID,Float64 blo);

@@ -101,10 +101,10 @@ public:
    virtual std::vector<Float64> GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
    virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi);
 
-   virtual Float64 GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
-   virtual sysSectionValue GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi);
-   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
-   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual Float64 GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi);
+   virtual sysSectionValue GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi);
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
 
    virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
    virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
@@ -145,7 +145,7 @@ private:
    void Invalidate();
 
    LoadCaseIDType GetLoadCaseID(xbrTypes::ProductForceType pfType);
-   std::vector<xbrTypes::ProductForceType> GetLoads(XBRCombinedForceType lcType);
+   std::vector<xbrTypes::ProductForceType> GetLoads(xbrTypes::CombinedForceType lcType);
 
    DWORD m_dwProjectCookie;
    DWORD m_dwBridgeDescCookie;

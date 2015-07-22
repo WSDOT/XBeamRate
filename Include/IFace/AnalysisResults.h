@@ -11,16 +11,6 @@ struct LowerXBeamLoad
    Float64 We;
 };
 
-typedef enum XBRCombinedForceType
-{
-   lcDC,
-   lcDW,
-   lcSH,
-   lcCR,
-   lcPS,
-   lcRE
-} XBRCombinedForceType;
-
 
 /*****************************************************************************
 INTERFACE
@@ -58,10 +48,10 @@ interface IXBRAnalysisResults : IUnknown
    virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
 
    // Combined Load Results
-   virtual Float64 GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
-   virtual sysSectionValue GetShear(PierIDType pierID,XBRCombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
-   virtual std::vector<Float64> GetMoment(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
-   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,XBRCombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual Float64 GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
+   virtual sysSectionValue GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi) = 0;
+   virtual std::vector<Float64> GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
+   virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) = 0;
 
    // Live Load Results
    virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) = 0;

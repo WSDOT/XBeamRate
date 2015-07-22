@@ -129,6 +129,7 @@ public:
    virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
    virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape);
 
 // IXBRMaterial

@@ -67,6 +67,11 @@ interface IXBRSectionProperties : public IUnknown
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 
+   // Returns the total shape of the cross beam cross section at a POI.
+   virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape) = 0;
+
+   // Returns the shape of the cross beam cross section at a POI, taking into account the pier type
+   // and the stage.
    virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape) = 0;
 };
 

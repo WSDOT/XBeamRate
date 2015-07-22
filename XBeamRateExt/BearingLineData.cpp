@@ -6,6 +6,8 @@ xbrBearingLineData::xbrBearingLineData()
    m_RefBearingDatum = pgsTypes::omtAlignment;
    m_RefBearingIndex = 0;
    m_RefBearingOffset = 0;
+
+   m_BrgLineOffset = 0;
 }
 
 xbrBearingLineData::xbrBearingLineData(const xbrBearingLineData& rOther)
@@ -21,6 +23,21 @@ xbrBearingLineData& xbrBearingLineData::operator=(const xbrBearingLineData& rOth
 {
    MakeAssignment(rOther);
    return *this;
+}
+
+void xbrBearingLineData::SetBearingLineOffset(Float64 offset)
+{
+   m_BrgLineOffset = offset;
+}
+
+Float64 xbrBearingLineData::GetBearingLineOffset() const
+{
+   return m_BrgLineOffset;
+}
+
+Float64& xbrBearingLineData::GetBearingLineOffset()
+{
+   return m_BrgLineOffset;
 }
 
 void xbrBearingLineData::SetReferenceBearing(pgsTypes::OffsetMeasurementType datum,IndexType refBrgIdx,Float64 refBrgOffset)
@@ -112,6 +129,7 @@ IndexType xbrBearingLineData::GetBearingCount() const
 HRESULT xbrBearingLineData::Save(IStructuredSave* pStrSave)
 {
    pStrSave->BeginUnit(_T("BearingLine"),1.0);
+      pStrSave->put_Property(_T("BearingLineOffset"),CComVariant(m_BrgLineOffset));
       pStrSave->put_Property(_T("RefBrgDatum"),CComVariant(m_RefBearingDatum));
       pStrSave->put_Property(_T("RefBrgIndex"),CComVariant(m_RefBearingIndex));
       pStrSave->put_Property(_T("RefBrgOffset"),CComVariant(m_RefBearingOffset));
@@ -136,6 +154,10 @@ HRESULT xbrBearingLineData::Load(IStructuredLoad* pStrLoad)
       {
          return hRes;
       }
+
+      var.vt = VT_R8;
+      hr = pStrLoad->get_Property(_T("BearingLineOffset"),&var);
+      m_BrgLineOffset = var.dblVal;
 
       var.vt = VT_I4;
       hr = pStrLoad->get_Property(_T("RefBrgDatum"),&var);
@@ -173,6 +195,7 @@ void xbrBearingLineData::MakeCopy(const xbrBearingLineData& rOther)
    m_RefBearingIndex  = rOther.m_RefBearingIndex;
    m_RefBearingOffset = rOther.m_RefBearingOffset;
    m_vSpacing         = rOther.m_vSpacing;
+   m_BrgLineOffset    = rOther.m_BrgLineOffset;
 }
 
 void xbrBearingLineData::MakeAssignment(const xbrBearingLineData& rOther)

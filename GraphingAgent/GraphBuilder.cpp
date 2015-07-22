@@ -188,14 +188,14 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
       m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure PS Reactions"),xbrTypes::pftPSReactions));
    }
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),lcDC));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),lcDW));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),xbrTypes::lcDC));
+   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),xbrTypes::lcDW));
    if ( bIncludeTimeDependentLoads )
    {
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("CR"),lcCR));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),lcSH));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("RE"),lcRE));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),lcPS));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("CR"),xbrTypes::lcCR));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),xbrTypes::lcSH));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("RE"),xbrTypes::lcRE));
+      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),xbrTypes::lcPS));
    }
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -379,7 +379,7 @@ void CXBRGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vecto
 
 void CXBRGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
-   XBRCombinedForceType comboType = graphDef.m_LoadType.CombinedLoadType;
+   xbrTypes::CombinedForceType comboType = graphDef.m_LoadType.CombinedLoadType;
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);

@@ -23,7 +23,7 @@ pgsTypes::LimitState ls
 }
 
 // constructor for combinations
-CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,XBRCombinedForceType comb) :
+CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,xbrTypes::CombinedForceType comb) :
 m_ID(id), m_Name(name)
 {
    m_GraphType = graphCombined;

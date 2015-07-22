@@ -488,8 +488,8 @@ void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::L
    pgsTypes::LiveLoadType llType = GetLiveLoadType(ratingType);
 
    GET_IFACE(IXBRAnalysisResults,pResults);
-   vDC = pResults->GetMoment(pierID,lcDC,vPoi);
-   vDW = pResults->GetMoment(pierID,lcDW,vPoi);
+   vDC = pResults->GetMoment(pierID,xbrTypes::lcDC,vPoi);
+   vDW = pResults->GetMoment(pierID,xbrTypes::lcDW,vPoi);
 
    if ( vehicleIdx == INVALID_INDEX )
    {

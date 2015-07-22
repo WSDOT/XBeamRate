@@ -44,6 +44,7 @@
 #include <IFace\ViewEvents.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <IFace\Alignment.h>
 
 #include "PGSComponentInfo.h"
 

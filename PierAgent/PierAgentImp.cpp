@@ -677,6 +677,18 @@ Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrP
    }
 }
 
+void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<ICrossBeam> xbeam;
+   pier->get_CrossBeam(&xbeam);
+
+   Float64 Xxb = poi.GetDistFromStart();
+   xbeam->get_BasicShape(Xxb,ppShape);
+}
+
 void CPierAgentImp::GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape)
 {
    CComPtr<IPier> pier;
@@ -1170,6 +1182,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    pierModel->put_CrownPointOffset(pierData.GetCrownPointOffset());
 
    pierModel->put_DeckElevation(pierData.GetDeckElevation());
+   pierModel->put_DeckThickness(pierData.GetDeckThickness());
 
    CComPtr<IAngle> skew;
    skew.CoCreateInstance(CLSID_Angle);
@@ -1260,6 +1273,8 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    for (IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
       const xbrBearingLineData& brgLineData = pierData.GetBearingLineData(brgLineIdx);
+
+      bearingLayout->put_BearingLineOffset(brgLineIdx,brgLineData.GetBearingLineOffset());
 
       pgsTypes::OffsetMeasurementType datum;
       IndexType refBrgIdx;

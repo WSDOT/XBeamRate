@@ -75,6 +75,10 @@ interface IXBRProject : IUnknown
    virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation) = 0;
    virtual Float64 GetDeckElevation(PierIDType pierID) = 0;
 
+   // Gross thickness of the deck at the CL Pier
+   virtual void SetDeckThickness(PierIDType pierID,Float64 tDeck) = 0;
+   virtual Float64 GetDeckThickness(PierIDType pierID) = 0;
+
    // Distance from alignment to crown point.
    virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo) = 0;
    virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;

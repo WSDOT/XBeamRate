@@ -20,6 +20,7 @@
 #include <\ARP\PGSuper\Include\IFace\Bridge.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\Intervals.h>
+#include <IFace\Alignment.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
@@ -57,6 +58,8 @@
 // The End/Section view of the pier is offset from the Elevation
 // view by this amount.
 const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
+
+const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -220,17 +223,17 @@ int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
    // Setup display lists
    CComPtr<iDisplayList> displayList;
    ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(ROADWAY_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(SECTION_CUT_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
    ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(DIMENSIONS_DISPLAY_LIST_ID);
+   dispMgr->AddDisplayList(displayList);
+
+   displayList.Release();
+   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   displayList->SetID(ROADWAY_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
@@ -462,38 +465,174 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       displayList->AddDisplayObject(doBridgeLine);
    }
 
-   // Draw the top of roadway surface between curblines
-   Float64 LCO, RCO;
-   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+   // Draw Roadway Surface
+   if ( IsStandAlone() )
+   {
+      // Stand-alone... we don't have an actual deck modeled, so
+      // just show the curb-to-curb extents of the roadway surface
+      Float64 LCO, RCO;
+      pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
 
-   Float64 Ylc = pPier->GetElevation(pierID,0);
-   Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
-   CComPtr<IPoint2d> pnt3;
-   pnt1.Release();
-   pnt1.CoCreateInstance(CLSID_Point2d);
-   LCO /= cos(skew); // skew adjust
-   pnt1->Move(LCO,Ylc);
+      Float64 Ylc = pPier->GetElevation(pierID,0);
+      Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
+      CComPtr<IPoint2d> pnt3;
+      pnt1.Release();
+      pnt1.CoCreateInstance(CLSID_Point2d);
+      LCO /= cos(skew); // skew adjust
+      pnt1->Move(LCO,Ylc);
 
-   pnt2.Release();
-   pnt2.CoCreateInstance(CLSID_Point2d);
-   pnt2->Move(0,Ydeck);
+      pnt2.Release();
+      pnt2.CoCreateInstance(CLSID_Point2d);
+      pnt2->Move(0,Ydeck);
 
-   pnt3.CoCreateInstance(CLSID_Point2d);
-   RCO /= cos(skew); // skew adjust
-   pnt3->Move(RCO,Yrc);
+      pnt3.CoCreateInstance(CLSID_Point2d);
+      RCO /= cos(skew); // skew adjust
+      pnt3->Move(RCO,Yrc);
 
-   CComPtr<iPolyLineDisplayObject> doDeck;
-   doDeck.CoCreateInstance(CLSID_PolyLineDisplayObject);
-   doDeck->SetID(m_DisplayObjectID++);
-   doDeck->AddPoint(pnt1);
-   doDeck->AddPoint(pnt2);
-   doDeck->AddPoint(pnt3);
-   doDeck->put_PointType(plpNone);
-   doDeck->put_Color(PROFILE_COLOR);
-   doDeck->put_Width(PROFILE_LINE_WEIGHT);
-   doDeck->Commit();
+      CComPtr<iPolyLineDisplayObject> doDeck;
+      doDeck.CoCreateInstance(CLSID_PolyLineDisplayObject);
+      doDeck->SetID(m_DisplayObjectID++);
+      doDeck->AddPoint(pnt1);
+      doDeck->AddPoint(pnt2);
+      doDeck->AddPoint(pnt3);
+      doDeck->put_PointType(plpNone);
+      doDeck->put_Color(PROFILE_COLOR);
+      doDeck->put_Width(PROFILE_LINE_WEIGHT);
+      doDeck->Commit();
 
-   displayList->AddDisplayObject(doDeck);
+      displayList->AddDisplayObject(doDeck);
+   }
+   else
+   {
+      // Deck
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      const CDeckDescription2* pDeck = pBridgeDesc->GetDeckDescription();
+
+      PierIndexType pierIdx = GetPierIndex();
+      const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
+      Float64 pierStation = pPier->GetStation();
+
+      GET_IFACE2(pBroker,IShapes,pShapes);
+      GET_IFACE2(pBroker,IBridge,pBridge);
+
+      pgsTypes::SupportedDeckType deckType = pDeck->DeckType;
+      if ( deckType != pgsTypes::sdtNone )
+      {
+         CComPtr<iPointDisplayObject> dispObj;
+         dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+
+         CComPtr<IShape> shape;
+         pShapes->GetSlabShape(pierStation,&shape);
+
+         CComPtr<IShape> skewedShape;
+         SkewGirderShape(skew,shape,&skewedShape);
+
+         CComPtr<iShapeDrawStrategy> strategy;
+         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+
+         strategy->SetShape(skewedShape);
+         strategy->SetSolidLineColor(DECK_BORDER_COLOR);
+         strategy->SetSolidFillColor(DECK_FILL_COLOR);
+         strategy->SetVoidLineColor(VOID_BORDER_COLOR);
+         strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
+         strategy->DoFill(true);
+
+         dispObj->SetDrawingStrategy(strategy);
+
+         CComPtr<iShapeGravityWellStrategy> gravity_well;
+         gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
+         gravity_well->SetShape(shape);
+
+         dispObj->SetGravityWellStrategy(gravity_well);
+
+         dispObj->SetSelectionType(selectionType);
+
+         dispObj->SetID(m_DisplayObjectID++);
+
+         displayList->AddDisplayObject(dispObj);
+      }
+
+      // Left Hand Barrier
+      GET_IFACE2(pBroker,IRoadway,pAlignment);
+      CComPtr<iPointDisplayObject> left_dispObj;
+      left_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+
+      Float64 left_curb_offset  = pBridge->GetLeftCurbOffset(pierIdx);
+      Float64 right_curb_offset = pBridge->GetRightCurbOffset(pierIdx);
+
+      CComPtr<IShape> left_shape;
+      pShapes->GetLeftTrafficBarrierShape(pierStation,&left_shape);
+
+      CComPtr<iShapeDrawStrategy> strategy;
+      if ( left_shape )
+      {
+         // rotate the shape to match the crown slope
+#pragma Reminder("UPDATE: need crown slope in the plane of the pier") // this gives slopes normal to alignment at pier station
+         Float64 slope = pAlignment->GetSlope(pierStation,left_curb_offset);
+         Float64 angle = atan(slope);
+
+         CComPtr<IShape> skewedShape;
+         SkewGirderShape(skew,left_shape,&skewedShape);
+
+         CComQIPtr<IXYPosition> position(skewedShape);
+         CComPtr<IPoint2d> hook_point;
+         position->get_LocatorPoint(lpHookPoint,&hook_point);
+         position->RotateEx(hook_point,angle);
+
+         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+
+         strategy->SetShape(skewedShape);
+         strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
+         strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
+         strategy->SetVoidLineColor(VOID_BORDER_COLOR);
+         strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
+         strategy->DoFill(true);
+         strategy->HasBoundingShape(false);
+
+         left_dispObj->SetDrawingStrategy(strategy);
+
+         displayList->AddDisplayObject(left_dispObj);
+      }
+
+      // Right Hand Barrier
+      CComPtr<iPointDisplayObject> right_dispObj;
+      right_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+
+      CComPtr<IShape> right_shape;
+      pShapes->GetRightTrafficBarrierShape(pierStation,&right_shape);
+
+      if ( right_shape )
+      {
+         // rotate the shape to match the crown slope
+#pragma Reminder("UPDATE: need crown slope in the plane of the pier") // this gives slopes normal to alignment at pier station
+         Float64 slope = pAlignment->GetSlope(pierStation,right_curb_offset);
+         Float64 angle = atan(slope);
+
+         CComPtr<IShape> skewedShape;
+         SkewGirderShape(skew,right_shape,&skewedShape);
+
+         CComQIPtr<IXYPosition> position(skewedShape);
+         CComPtr<IPoint2d> hook_point;
+         position->get_LocatorPoint(lpHookPoint,&hook_point);
+         position->RotateEx(hook_point,angle);
+
+         strategy.Release();
+         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+
+         strategy->SetShape(skewedShape);
+         strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
+         strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
+         strategy->SetVoidLineColor(VOID_BORDER_COLOR);
+         strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
+         strategy->DoFill(true);
+         strategy->HasBoundingShape(false);
+
+         right_dispObj->SetDrawingStrategy(strategy);
+
+         displayList->AddDisplayObject(right_dispObj);
+      }
+   }
 }
 
 void CXBeamRateView::UpdateXBeamDisplayObjects()
@@ -528,7 +667,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
       doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
       doUpperXBeam->SetID(m_DisplayObjectID++);
       doUpperXBeam->SetPosition(point,FALSE,FALSE);
-      doUpperXBeam->SetSelectionType(stNone);
+      doUpperXBeam->SetSelectionType(selectionType);
 
       CComPtr<IShape> upperXBeamShape;
       pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
@@ -555,7 +694,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doLowerXBeam.CoCreateInstance(CLSID_PointDisplayObject);
    doLowerXBeam->SetID(m_DisplayObjectID++);
    doLowerXBeam->SetPosition(point,FALSE,FALSE);
-   doLowerXBeam->SetSelectionType(stNone);
+   doLowerXBeam->SetSelectionType(selectionType);
 
    CComPtr<IShape> lowerXBeamShape;
    pPier->GetLowerXBeamProfile(pierID,&lowerXBeamShape);
@@ -586,10 +725,10 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doXBeamSection.CoCreateInstance(CLSID_PointDisplayObject);
    doXBeamSection->SetID(m_DisplayObjectID++);
    doXBeamSection->SetPosition(point,FALSE,FALSE);
-   doXBeamSection->SetSelectionType(stNone);
+   doXBeamSection->SetSelectionType(selectionType);
 
    CComPtr<IShape> xbeamShape;
-   pSectProp->GetXBeamShape(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,XxbCut),&xbeamShape);
+   pSectProp->GetXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,XxbCut),&xbeamShape);
    CComQIPtr<IXYPosition> position(xbeamShape);
    position->Offset(EndOffset+Lxb,0);
 
@@ -706,7 +845,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       doColumn.CoCreateInstance(CLSID_PointDisplayObject);
       doColumn->SetID(m_DisplayObjectID++);
       doColumn->SetPosition(pntTop,FALSE,FALSE);
-      doColumn->SetSelectionType(stNone);
+      doColumn->SetSelectionType(selectionType);
 
       CComPtr<iShapeDrawStrategy> drawColumnStrategy;
       drawColumnStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
@@ -824,6 +963,8 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    Float64 H,W;
    pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
+   Float64 tDeck = pProject->GetDeckThickness(pierID);
+
    xbrTypes::SuperstructureConnectionType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
@@ -845,6 +986,8 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
             Float64 Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
 
             Float64 Ytop = pPier->GetElevation(pierID,Xcl);
+
+            Ytop -= tDeck;
 
             Float64 D = pSectProps->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
             Float64 Ybot = Ytop - D;
@@ -1058,7 +1201,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
 
          dispObj->SetDrawingStrategy(strategy);
 
-         dispObj->SetSelectionType(stNone);
+         dispObj->SetSelectionType(selectionType);
 
          dispObj->SetID(m_DisplayObjectID++);
 
@@ -1125,6 +1268,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
+   Float64 tDeck = pProject->GetDeckThickness(pierID);
+
    xbrTypes::SuperstructureConnectionType pierType = pProject->GetPierType(pierID);
 
    Float64 CPO = pPier->GetCrownPointOffset(pierID);
@@ -1142,7 +1287,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 Xxb = 0;
    Float64 Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
    Float64 Xp  = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
-   Float64 Y   = pPier->GetElevation(pierID,Xcl);
+   Float64 Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
    CComPtr<IPoint2d> uxbTL;
    uxbTL.CoCreateInstance(CLSID_Point2d);
    uxbTL->Move(Xp-X2,Y);
@@ -1161,7 +1306,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Xxb = pPier->GetXBeamLength(pierID);
    Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
    Xp  = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
-   Y   = pPier->GetElevation(pierID,Xcl);
+   Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
    CComPtr<IPoint2d> uxbTR;
    uxbTR.CoCreateInstance(CLSID_Point2d);
    uxbTR->Move(Xp+X4,Y);
@@ -1345,7 +1490,6 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pntTop->Offset(EndOffset+Lxb,0);
    pntBot->Offset(EndOffset+Lxb,0);
    BuildDimensionLine(displayList,pntTop,pntBot);
-
 }
 
 void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)

@@ -11,6 +11,10 @@ public:
 
    xbrBearingLineData& operator = (const xbrBearingLineData& rOther);
 
+   void SetBearingLineOffset(Float64 offset);
+   Float64 GetBearingLineOffset() const;
+   Float64& GetBearingLineOffset();
+
    void SetReferenceBearing(pgsTypes::OffsetMeasurementType datum,IndexType refBrgIdx,Float64 refBrgOffset);
    void GetReferenceBearing(pgsTypes::OffsetMeasurementType* pdatum,IndexType* prefBrgIdx,Float64* prefBrgOffset) const;
    pgsTypes::OffsetMeasurementType& GetRefBearingDatum();
@@ -34,6 +38,9 @@ protected:
    virtual void MakeAssignment(const xbrBearingLineData& rOther);
 
 protected:
+   // Offset from CL Pier to the bearing line, measure normal to the pier
+   Float64 m_BrgLineOffset;
+
    // dimensions are measured in the plane of the pier, along the CL pier
    pgsTypes::OffsetMeasurementType m_RefBearingDatum;
    IndexType m_RefBearingIndex;

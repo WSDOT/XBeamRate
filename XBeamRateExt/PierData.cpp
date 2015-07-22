@@ -17,6 +17,7 @@ xbrPierData::xbrPierData()
    m_RightCrownSlope = -0.02;
    m_H = ::ConvertToSysUnits(8,unitMeasure::Feet);
    m_W = ::ConvertToSysUnits(5,unitMeasure::Feet);
+   m_tDeck = ::ConvertToSysUnits(8.0,unitMeasure::Inch);
 
    m_H1 = ::ConvertToSysUnits(5,unitMeasure::Feet);
    m_H2 = ::ConvertToSysUnits(1,unitMeasure::Feet);
@@ -115,6 +116,21 @@ Float64 xbrPierData::GetDeckElevation() const
 Float64& xbrPierData::GetDeckElevation()
 {
    return m_DeckElevation;
+}
+
+void xbrPierData::SetDeckThickness(Float64 tDeck)
+{
+   m_tDeck = tDeck;
+}
+
+Float64 xbrPierData::GetDeckThickness() const
+{
+   return m_tDeck;
+}
+
+Float64& xbrPierData::GetDeckThickness()
+{
+   return m_tDeck;
 }
 
 void xbrPierData::SetCrownPointOffset(Float64 cpo)
@@ -647,6 +663,8 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
 
       pStrSave->put_Property(_T("LeftCrownSlope"),CComVariant(m_LeftCrownSlope));
       pStrSave->put_Property(_T("RightCrownSlope"),CComVariant(m_RightCrownSlope));
+
+      pStrSave->put_Property(_T("DeckThickness"),CComVariant(m_tDeck));
    pStrSave->EndUnit(); // Layout
 
    pStrSave->BeginUnit(_T("Diaphragm"),1.0);
@@ -776,6 +794,10 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("RightCrownSlope"),&var);
          m_RightCrownSlope = var.dblVal;
+
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("DeckThickness"),&var);
+         m_tDeck = var.dblVal;
 
          hr = pStrLoad->EndUnit(); 
       }
@@ -964,6 +986,8 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
 
    m_H = rOther.m_H;
    m_W = rOther.m_W;
+
+   m_tDeck = rOther.m_tDeck;
 
    m_H1 = rOther.m_H1;
    m_H2 = rOther.m_H2;

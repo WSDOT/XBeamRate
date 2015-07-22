@@ -33,6 +33,11 @@ public:
    Float64 GetCrownPointOffset() const;
    Float64& GetCrownPointOffset();
 
+   // Set/Get the deck thickness
+   void SetDeckThickness(Float64 tDeck);
+   Float64 GetDeckThickness() const;
+   Float64& GetDeckThickness();
+
    // Set/Get the offset from the alignment to the bridge line
    void SetBridgeLineOffset(Float64 blo);
    Float64 GetBridgeLineOffset() const;
@@ -169,6 +174,8 @@ protected:
    Float64 m_LeftCurbOffset, m_RightCurbOffset; 
    Float64 m_LeftCrownSlope, m_RightCrownSlope;
    Float64 m_H, m_W; // diaphragm dimensions
+
+   Float64 m_tDeck; // gross thickness of the deck. Locates top of upper diaphragm relative to the roadway surface
 
    // Lower X-Beam Dimensions
    Float64 m_H1, m_H2, m_H3, m_H4;

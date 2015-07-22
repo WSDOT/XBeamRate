@@ -49,6 +49,16 @@ typedef struct xbrTypes
       pftREReactions
    } ProductForceType;
 
+   typedef enum CombinedForceType
+   {
+      lcDC,
+      lcDW,
+      lcCR,
+      lcSH,
+      lcRE,
+      lcPS
+   } CombinedForceType;
+
    typedef enum ReactionLoadType
    {
       rltConcentrated, // DC/DW reaction values are concentrated forces
