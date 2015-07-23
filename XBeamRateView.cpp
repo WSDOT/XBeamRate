@@ -436,9 +436,12 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    drawAlignmentStrategy->SetColor(ALIGNMENT_COLOR);
    drawAlignmentStrategy->SetLineStyle(lsCenterline);
 
-   displayList->AddDisplayObject(doAlignment);
+   // Don't add the object to the display list here... do it at the end
+   // We want it to be drawn on top so it has to go into the display list last
+   //displayList->AddDisplayObject(doAlignment);
 
    // Draw the bridge line if different then the alignment
+   CComPtr<iLineDisplayObject> doBridgeLine;
    Float64 BLO = pProject->GetBridgeLineOffset(pierID);
    if ( !IsZero(BLO) )
    {
@@ -453,7 +456,6 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       pnt2.CoCreateInstance(CLSID_Point2d);
       pnt2->Move(X,Yb);
 
-      CComPtr<iLineDisplayObject> doBridgeLine;
       CreateLineDisplayObject(pnt1,pnt2,&doBridgeLine);
       CComPtr<iDrawLineStrategy> drawStrategy;
       doBridgeLine->GetDrawLineStrategy(&drawStrategy);
@@ -632,6 +634,12 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
 
          displayList->AddDisplayObject(right_dispObj);
       }
+   }
+   
+   displayList->AddDisplayObject(doAlignment);
+   if ( doBridgeLine )
+   {
+      displayList->AddDisplayObject(doBridgeLine);
    }
 }
 
