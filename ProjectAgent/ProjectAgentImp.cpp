@@ -609,8 +609,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
                      m_BearingReactions[brgLineIdx].insert(std::make_pair(INVALID_ID,vBearingReactions));
                      brgLineIdx++;
+                     hr = pStrLoad->EndUnit(); // BearingLine
                   }
-                  hr = pStrLoad->EndUnit(); // BearingLine
                   hr = pStrLoad->EndUnit(); // DeadLoad
                }
 
@@ -939,7 +939,6 @@ void CProjectAgentImp::SetPierData(const xbrPierData& pierData)
       std::map<PierIDType,std::vector<BearingReactions>>::iterator foundReactions(m_BearingReactions[brgLineIdx].find(pierData.GetID()));
       if ( foundReactions == m_BearingReactions[brgLineIdx].end() )
       {
-         ATLASSERT(pierData.GetID() != INVALID_ID);
          std::vector<BearingReactions> vBearingReactions;
          m_BearingReactions[brgLineIdx].insert(std::make_pair(pierData.GetID(),vBearingReactions));
          foundReactions = m_BearingReactions[brgLineIdx].find(pierData.GetID());

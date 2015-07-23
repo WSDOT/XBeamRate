@@ -54,7 +54,8 @@ void CAgentCmdTarget::OnEditPier()
    txnEditPierData oldPierData;
    oldPierData.m_PierData = pProject->GetPierData(pierID);
 
-   for ( IndexType brgLineIdx = 0; brgLineIdx < oldPierData.m_PierData.GetBearingLineCount(); brgLineIdx++ )
+   IndexType nBearingLines = oldPierData.m_PierData.GetBearingLineCount();
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
       oldPierData.m_DeadLoadReactionType[brgLineIdx] = pProject->GetBearingReactionType(pierID,brgLineIdx);
       IndexType nBearings = oldPierData.m_PierData.GetBearingCount(brgLineIdx);

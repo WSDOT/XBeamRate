@@ -57,6 +57,13 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
    IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);
 
+   // Left side bearing offsets are < 0
+   // Adjust the sign
+   if ( !pDX->m_bSaveAndValidate )
+   {
+      pParent->m_PierData.m_PierData.GetBearingLineData(0).GetBearingLineOffset() *= -1;
+   }
+
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
       DDX_CBEnum(pDX,IDC_BACK_REACTION_TYPE+brgLineIdx,pParent->m_PierData.m_DeadLoadReactionType[brgLineIdx]);
@@ -64,11 +71,18 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
       DDX_CBIndex(pDX,IDC_BACK_REF_BEARING_LIST+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingIndex());
       DDX_OffsetAndTag(pDX,IDC_BACK_REF_BEARING_LOCATION+brgLineIdx,IDC_BACK_REF_BEARING_LOCATION_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingOffset(),pDisplayUnits->GetSpanLengthUnit());
       DDX_CBEnum(pDX,IDC_BACK_REF_BEARING_DATUM+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetRefBearingDatum());
+      DDX_UnitValueAndTag(pDX,IDC_BACK_BRG_OFFSET+brgLineIdx,IDC_BACK_BRG_OFFSET_UNIT+brgLineIdx,pParent->m_PierData.m_PierData.GetBearingLineData(brgLineIdx).GetBearingLineOffset(),pDisplayUnits->GetComponentDimUnit());
+   }
+
+   if ( pDX->m_bSaveAndValidate )
+   {
+      pParent->m_PierData.m_PierData.GetBearingLineData(0).GetBearingLineOffset() *= -1;
    }
 
    // make sure the unit labels are set for both bearing lines (one bearing line could be missed in the loop above)
    DDX_Tag(pDX,IDC_BACK_REF_BEARING_LOCATION_UNIT,pDisplayUnits->GetSpanLengthUnit());
    DDX_Tag(pDX,IDC_AHEAD_REF_BEARING_LOCATION_UNIT,pDisplayUnits->GetSpanLengthUnit());
+   DDX_Tag(pDX,IDC_AHEAD_BRG_OFFSET_UNIT,pDisplayUnits->GetComponentDimUnit());
 }
 
 
@@ -180,6 +194,9 @@ void CBearingsPage::OnCopyAhead()
    pcbReaction = (CComboBox*)GetDlgItem(IDC_AHEAD_REACTION_TYPE);
    pcbReaction->SetCurSel(curSel);
    OnAheadReactionTypeChanged();
+
+   GetDlgItem(IDC_BACK_BRG_OFFSET)->GetWindowText(str);
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET)->SetWindowText(str);
 }
 
 void CBearingsPage::OnCopyBack()
@@ -209,6 +226,9 @@ void CBearingsPage::OnCopyBack()
    pcbReaction = (CComboBox*)GetDlgItem(IDC_BACK_REACTION_TYPE);
    pcbReaction->SetCurSel(curSel);
    OnBackReactionTypeChanged();
+
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET)->GetWindowText(str);
+   GetDlgItem(IDC_BACK_BRG_OFFSET)->SetWindowText(str);
 }
 
 void CBearingsPage::OnBearingLineCountChanged()
@@ -222,6 +242,11 @@ void CBearingsPage::OnBearingLineCountChanged()
    m_Grid[1].ShowWindow(show);
    GetDlgItem(IDC_COPY_AHEAD)->ShowWindow(show);
    GetDlgItem(IDC_COPY_BACK)->ShowWindow(show);
+   GetDlgItem(IDC_BACK_BRG_OFFSET_LABEL1)->ShowWindow(show);
+   GetDlgItem(IDC_BACK_BRG_OFFSET_LABEL2)->ShowWindow(show);
+   GetDlgItem(IDC_BACK_BRG_OFFSET)->ShowWindow(show);
+   GetDlgItem(IDC_BACK_BRG_OFFSET_UNIT)->ShowWindow(show);
+
    GetDlgItem(IDC_ADD_AHEAD)->ShowWindow(show);
    GetDlgItem(IDC_REMOVE_AHEAD)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_LABEL)->ShowWindow(show);
@@ -235,6 +260,10 @@ void CBearingsPage::OnBearingLineCountChanged()
    GetDlgItem(IDC_AHEAD_BEARING_LABEL1)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_BEARING_LABEL2)->ShowWindow(show);
    GetDlgItem(IDC_AHEAD_BEARING_LABEL3)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET_LABEL1)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET_LABEL2)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET)->ShowWindow(show);
+   GetDlgItem(IDC_AHEAD_BRG_OFFSET_UNIT)->ShowWindow(show);
 }
 
 void CBearingsPage::OnBackReactionTypeChanged()
