@@ -269,10 +269,13 @@ BEGIN
     LTEXT           "W",IDC_STATIC,7,319,8,8
     EDITTEXT        IDC_W,23,316,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_W_UNIT,66,319,19,8
-    LTEXT           "H",IDC_STATIC,116,319,8,8
-    EDITTEXT        IDC_H,127,316,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_H_UNIT,175,319,19,8
+    LTEXT           "H",IDC_STATIC,90,319,8,8
+    EDITTEXT        IDC_H,101,316,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_H_UNIT,149,319,19,8
     LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,339,184,8
+    LTEXT           "Gross Slab Depth (TS)",IDC_STATIC,175,319,71,8
+    EDITTEXT        IDC_SLAB_DEPTH,249,317,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SLAB_DEPTH_UNIT,295,320,19,8
 END
 
 IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 450

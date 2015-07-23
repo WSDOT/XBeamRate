@@ -62,6 +62,7 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_UnitValueAndTag(pDX,IDC_H,IDC_H_UNIT,pParent->m_PierData.m_PierData.GetDiaphragmHeight(),pDisplayUnits->GetSpanLengthUnit());
    DDX_UnitValueAndTag(pDX,IDC_W,IDC_W_UNIT,pParent->m_PierData.m_PierData.GetDiaphragmWidth(),pDisplayUnits->GetSpanLengthUnit());
+   DDX_UnitValueAndTag(pDX,IDC_SLAB_DEPTH,IDC_SLAB_DEPTH_UNIT,pParent->m_PierData.m_PierData.GetDeckThickness(),pDisplayUnits->GetComponentDimUnit());
 }
 
 BEGIN_MESSAGE_MAP(CSuperstructureLayoutPage, CPropertyPage)

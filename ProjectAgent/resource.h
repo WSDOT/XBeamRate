@@ -102,8 +102,10 @@
 #define IDC_AGG_SIZE_UNIT               294
 #define IDC_CR                          294
 #define IDC_SH                          295
-#define IDC_EDIT3                       296
 #define IDC_PS                          296
+#define IDC_EDIT1                       297
+#define IDC_SLAB_DEPTH                  297
+#define IDC_SLAB_DEPTH_UNIT             298
 #define IDD_AASHTO_CONCRETE             500
 #define IDC_EC_K1_LABEL                 501
 #define IDC_EC_K1                       502
@@ -174,7 +176,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         297
+#define _APS_NEXT_CONTROL_VALUE         299
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif
