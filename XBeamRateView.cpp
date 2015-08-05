@@ -506,6 +506,8 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    }
    else
    {
+      // Part of PGSuper/PGSplice... we can get the actual superstructure shapes
+
       // Deck
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
@@ -518,6 +520,9 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       GET_IFACE2(pBroker,IShapes,pShapes);
       GET_IFACE2(pBroker,IBridge,pBridge);
 
+      CComPtr<IDirection> pierDirection;
+      pBridge->GetPierDirection(pierIdx,&pierDirection);
+
       pgsTypes::SupportedDeckType deckType = pDeck->DeckType;
       if ( deckType != pgsTypes::sdtNone )
       {
@@ -525,15 +530,12 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
          dispObj.CoCreateInstance(CLSID_PointDisplayObject);
 
          CComPtr<IShape> shape;
-         pShapes->GetSlabShape(pierStation,&shape);
-
-         CComPtr<IShape> skewedShape;
-         SkewGirderShape(skew,shape,&skewedShape);
+         pShapes->GetSlabShape(pierStation,pierDirection,&shape);
 
          CComPtr<iShapeDrawStrategy> strategy;
          strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
 
-         strategy->SetShape(skewedShape);
+         strategy->SetShape(shape);
          strategy->SetSolidLineColor(DECK_BORDER_COLOR);
          strategy->SetSolidFillColor(DECK_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
@@ -556,7 +558,6 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       }
 
       // Left Hand Barrier
-      GET_IFACE2(pBroker,IRoadway,pAlignment);
       CComPtr<iPointDisplayObject> left_dispObj;
       left_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
 
@@ -564,27 +565,14 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       Float64 right_curb_offset = pBridge->GetRightCurbOffset(pierIdx);
 
       CComPtr<IShape> left_shape;
-      pShapes->GetLeftTrafficBarrierShape(pierStation,&left_shape);
+      pShapes->GetLeftTrafficBarrierShape(pierStation,pierDirection,&left_shape);
 
       CComPtr<iShapeDrawStrategy> strategy;
       if ( left_shape )
       {
-         // rotate the shape to match the crown slope
-#pragma Reminder("UPDATE: need crown slope in the plane of the pier") // this gives slopes normal to alignment at pier station
-         Float64 slope = pAlignment->GetSlope(pierStation,left_curb_offset);
-         Float64 angle = atan(slope);
-
-         CComPtr<IShape> skewedShape;
-         SkewGirderShape(skew,left_shape,&skewedShape);
-
-         CComQIPtr<IXYPosition> position(skewedShape);
-         CComPtr<IPoint2d> hook_point;
-         position->get_LocatorPoint(lpHookPoint,&hook_point);
-         position->RotateEx(hook_point,angle);
-
          strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
 
-         strategy->SetShape(skewedShape);
+         strategy->SetShape(left_shape);
          strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
          strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
@@ -602,27 +590,14 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       right_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
 
       CComPtr<IShape> right_shape;
-      pShapes->GetRightTrafficBarrierShape(pierStation,&right_shape);
+      pShapes->GetRightTrafficBarrierShape(pierStation,pierDirection,&right_shape);
 
       if ( right_shape )
       {
-         // rotate the shape to match the crown slope
-#pragma Reminder("UPDATE: need crown slope in the plane of the pier") // this gives slopes normal to alignment at pier station
-         Float64 slope = pAlignment->GetSlope(pierStation,right_curb_offset);
-         Float64 angle = atan(slope);
-
-         CComPtr<IShape> skewedShape;
-         SkewGirderShape(skew,right_shape,&skewedShape);
-
-         CComQIPtr<IXYPosition> position(skewedShape);
-         CComPtr<IPoint2d> hook_point;
-         position->get_LocatorPoint(lpHookPoint,&hook_point);
-         position->RotateEx(hook_point,angle);
-
          strategy.Release();
          strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
 
-         strategy->SetShape(skewedShape);
+         strategy->SetShape(right_shape);
          strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
          strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
