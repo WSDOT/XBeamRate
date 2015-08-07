@@ -189,6 +189,7 @@ private:
    std::vector<xbrPointOfInterest>& GetPointsOfInterest(PierIDType pierID);
    std::map<PierIDType,std::vector<xbrPointOfInterest>> m_XBeamPoi;
    bool FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi);
+   void GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint);
 
    typedef struct
    {

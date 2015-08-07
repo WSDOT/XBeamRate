@@ -455,19 +455,17 @@ void CPierAgentImp::GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPo
 
 Float64 CPierAgentImp::GetCrownPointOffset(PierIDType pierID)
 {
-   CComPtr<IPier> pier;
-   GetPierModel(pierID,&pier);
-   Float64 CPO;
-   pier->get_CrownPointOffset(&CPO);
-   return CPO;
+   CComPtr<IPoint2d> pnt;
+   GetCrownPoint(pierID,&pnt);
+   Float64 cpo;
+   pnt->get_X(&cpo);
+   return cpo;
 }
 
 Float64 CPierAgentImp::GetCrownPointLocation(PierIDType pierID)
 {
-   CComPtr<IPier> pier;
-   GetPierModel(pierID,&pier);
-   Float64 Xcrown;
-   pier->get_CrownPointLocation(&Xcrown);
+   Float64 cpo = GetCrownPointOffset(pierID);
+   Float64 Xcrown = ConvertPierToCurbLineCoordinate(pierID,cpo);
    return Xcrown;
 }
 
@@ -523,15 +521,21 @@ Float64 CPierAgentImp::ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float6
 
 Float64 CPierAgentImp::ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier)
 {
-   Float64 Xxb = ConvertPierToCrossBeamCoordinate(pierID,Xpier);
-   Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   Float64 Xcl;
+   pier->ConvertPierToCurbLineCoordinate(Xpier,&Xcl);
    return Xcl;
 }
 
 Float64 CPierAgentImp::ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl)
 {
-   Float64 Xxb = ConvertCurbLineToCrossBeamCoordinate(pierID,Xcl);
-   Float64 Xpier = ConvertCrossBeamToPierCoordinate(pierID,Xxb);
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   Float64 Xpier;
+   pier->ConvertCurbLineToPierCoordinate(Xcl,&Xpier);
    return Xpier;
 }
 
@@ -1174,14 +1178,65 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    pierModel->put_CurbLineOffset(qcbLeft, leftCLO);
    pierModel->put_CurbLineOffset(qcbRight,rightCLO);
 
-   Float64 sl,sr;
-   pierData.GetCrownSlope(&sl,&sr);
-   pierModel->put_CrownSlope(qcbLeft, -sl);
-   pierModel->put_CrownSlope(qcbRight, sr);
+   if ( pierData.GetDeckSurfaceType() == xbrPierData::Simplified )
+   {
+      CComPtr<IPoint2dCollection> deckProfile;
+      deckProfile.CoCreateInstance(CLSID_Point2dCollection);
 
-   pierModel->put_CrownPointOffset(pierData.GetCrownPointOffset());
+      Float64 elevDeck = pierData.GetDeckElevation();
 
-   pierModel->put_DeckElevation(pierData.GetDeckElevation());
+      Float64 sl,sr;
+      pierData.GetCrownSlope(&sl,&sr);
+
+      Float64 cpo = pierData.GetCrownPointOffset();
+
+      Float64 elevCP;
+      if ( IsZero(cpo) )
+      {
+         elevCP = elevDeck;
+      }
+      else
+      {
+         if ( cpo < 0 )
+         {
+            elevCP = -cpo*sr + elevDeck;
+         }
+         else
+         {
+            ATLASSERT(0 < cpo);
+            elevCP = elevDeck + sl*cpo;
+         }
+      }
+
+      // left curbline point
+      Float64 elevLCL = elevCP - sl*(leftCLO - cpo);
+      CComPtr<IPoint2d> pntLCL;
+      pntLCL.CoCreateInstance(CLSID_Point2d);
+      pntLCL->Move(leftCLO,elevLCL);
+      deckProfile->Add(pntLCL);
+
+      // Crown Point
+      CComPtr<IPoint2d> pntCP;
+      pntCP.CoCreateInstance(CLSID_Point2d);
+      pntCP->Move(cpo,elevCP);
+      deckProfile->Add(pntCP);
+
+      // right curb line point
+      Float64 elevRCL = elevCP + sr*(rightCLO - cpo);
+      CComPtr<IPoint2d> pntRCL;
+      pntRCL.CoCreateInstance(CLSID_Point2d);
+      pntRCL->Move(rightCLO,elevRCL);
+      deckProfile->Add(pntRCL);
+
+      pierModel->putref_DeckProfile(deckProfile);
+   }
+   else
+   {
+      CComPtr<IPoint2dCollection> deckProfile;
+      pierData.GetDeckProfile(&deckProfile);
+      pierModel->putref_DeckProfile(deckProfile);
+   }
+
    pierModel->put_DeckThickness(pierData.GetDeckThickness());
 
    CComPtr<IAngle> skew;
@@ -1732,4 +1787,88 @@ bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInteres
    }
 
    return false;
+}
+
+void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+
+   CComPtr<IPoint2dCollection> deckProfile;
+   pier->get_DeckProfile(&deckProfile);
+
+   IndexType idx = 0;
+   IndexType maxIdx = INVALID_INDEX; // index of point where Ymax occurs
+   Float64 Ymax = -DBL_MAX;
+   Float64 lastY;
+   bool bFlat = true;
+
+   CComPtr<IEnumPoint2d> enumPoints;
+   deckProfile->get__Enum(&enumPoints);
+   CComPtr<IPoint2d> pnt;
+   while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+   {
+      Float64 y;
+      pnt->get_Y(&y);
+
+      // if this is the first point, capture y as the last y evaluated
+      if ( idx == 0 )
+      {
+         lastY = y;
+      }
+
+      // if we have not already determined that the profile is not flat
+      // and if the current y is not equal to the last y, then the profile
+      // is not flat
+      if ( bFlat && !IsEqual(y,lastY) )
+      {
+         ATLASSERT(bFlat == true); // once we determine the profile is not flat, we should never get here
+         bFlat = false;
+      }
+
+      if ( Ymax < y )
+      {
+         Ymax = y;
+         maxIdx = idx;
+      }
+
+      idx++;
+      pnt.Release();
+   }
+
+   if ( bFlat )
+   {
+      // the profile is flat... use the alignment point as the crown point
+      enumPoints->Reset();
+      while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+      {
+         Float64 x;
+         pnt->get_X(&x);
+         if ( IsZero(x) || 0 < x )
+         {
+            // this is the first point at or after zero
+            // (the alignment is at zero)
+            if ( IsZero(x) )
+            {
+               pnt.CopyTo(ppPoint);
+               return;
+            }
+            else
+            {
+               CComPtr<IPoint2d> pntAlignment;
+               pntAlignment.CoCreateInstance(CLSID_Point2d);
+               Float64 y;
+               pnt->get_Y(&y);
+               pntAlignment->Move(0,y);
+               pntAlignment.CopyTo(ppPoint);
+               return;
+            }
+         }
+         pnt.Release();
+      }
+   }
+
+   ATLASSERT( !bFlat ); // should never get here if the profile is not flat
+
+   deckProfile->get_Item(maxIdx,ppPoint);
 }

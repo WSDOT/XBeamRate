@@ -416,7 +416,8 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    // Model a vertical line for the alignment
    // The alignment is at X = 0 in Pier coordinates
    Float64 X = 0;
-   Float64 Ydeck = pProject->GetDeckElevation(pierID); // deck elevation at alignment
+   Float64 Xcl = pPier->ConvertPierToCurbLineCoordinate(pierID,X);
+   Float64 Ydeck = pPier->GetElevation(pierID,Xcl); // deck elevation at alignment
    Float64 Yt = Ydeck + ::ConvertToSysUnits(1.0,unitMeasure::Feet); // add a little so it projects over the roadway surface
    CComPtr<IPoint2d> pnt1;
    pnt1.CoCreateInstance(CLSID_Point2d);

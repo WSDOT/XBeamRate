@@ -8,6 +8,9 @@
 #include <XBeamRateVersion.h>
 
 #include <afxwin.h>
+#include <atlbase.h>
+#include <atlcom.h>
+
 #include <WBFLAtlExt.h>
 #include <System\System.h>
 #include <Units\Units.h>

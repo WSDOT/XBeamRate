@@ -4,20 +4,23 @@
 xbrPierData::xbrPierData()
 {
    m_ID = INVALID_ID;
-   m_strSkew = _T("00 00 0.0 L");
-   m_DeckElevation = 0;
-   m_CrownPointOffset = 0;
-   m_BridgeLineOffset = 0;
    m_ConnectionType = xbrTypes::pctIntegral;
-
+   m_strSkew = _T("00 00 0.0 L");
+   m_BridgeLineOffset = 0;
    m_CurbLineDatum = pgsTypes::omtAlignment;
    m_LeftCurbOffset  = -::ConvertToSysUnits(10.0,unitMeasure::Feet);
    m_RightCurbOffset = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
+
+   m_tDeck = ::ConvertToSysUnits(8.0,unitMeasure::Inch);
+
+   m_DeckSurfaceType = Simplified;
+   m_DeckElevation = 0;
+   m_CrownPointOffset = 0;
    m_LeftCrownSlope = -0.02;
    m_RightCrownSlope = -0.02;
+
    m_H = ::ConvertToSysUnits(8,unitMeasure::Feet);
    m_W = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_tDeck = ::ConvertToSysUnits(8.0,unitMeasure::Inch);
 
    m_H1 = ::ConvertToSysUnits(5,unitMeasure::Feet);
    m_H2 = ::ConvertToSysUnits(1,unitMeasure::Feet);
@@ -131,6 +134,27 @@ Float64 xbrPierData::GetDeckThickness() const
 Float64& xbrPierData::GetDeckThickness()
 {
    return m_tDeck;
+}
+
+void xbrPierData::SetDeckSurfaceType(xbrPierData::DeckSurfaceType surfaceType)
+{
+   m_DeckSurfaceType = surfaceType;
+}
+
+xbrPierData::DeckSurfaceType xbrPierData::GetDeckSurfaceType() const
+{
+   return m_DeckSurfaceType;
+}
+
+void xbrPierData::SetDeckProfile(IPoint2dCollection* pProfile)
+{
+   m_DeckProfile.Release();
+   pProfile->Clone(&m_DeckProfile);
+}
+
+void xbrPierData::GetDeckProfile(IPoint2dCollection** ppProfile) const
+{
+   m_DeckProfile->Clone(ppProfile);
 }
 
 void xbrPierData::SetCrownPointOffset(Float64 cpo)
@@ -652,19 +676,39 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
    pStrSave->BeginUnit(_T("Layout"),1.0);
       pStrSave->put_Property(_T("SuperstructureConnectionType"),CComVariant(m_ConnectionType));
       pStrSave->put_Property(_T("Skew"),CComVariant(m_strSkew.c_str()));
-
-      pStrSave->put_Property(_T("DeckElevation"),CComVariant(m_DeckElevation));
-      pStrSave->put_Property(_T("CrownPointOffset"),CComVariant(m_CrownPointOffset));
       pStrSave->put_Property(_T("BridgeLineOffset"),CComVariant(m_BridgeLineOffset));
-
       pStrSave->put_Property(_T("CurbLineDatum"),CComVariant(m_CurbLineDatum));
       pStrSave->put_Property(_T("LeftCurbOffset"),CComVariant(m_LeftCurbOffset));
       pStrSave->put_Property(_T("RightCurbOffset"),CComVariant(m_RightCurbOffset));
-
-      pStrSave->put_Property(_T("LeftCrownSlope"),CComVariant(m_LeftCrownSlope));
-      pStrSave->put_Property(_T("RightCrownSlope"),CComVariant(m_RightCrownSlope));
-
       pStrSave->put_Property(_T("DeckThickness"),CComVariant(m_tDeck));
+
+      pStrSave->put_Property(_T("DeckSurfaceType"),CComVariant(m_DeckSurfaceType));
+      if ( m_DeckSurfaceType == Simplified )
+      {
+         pStrSave->put_Property(_T("DeckElevation"),CComVariant(m_DeckElevation));
+         pStrSave->put_Property(_T("CrownPointOffset"),CComVariant(m_CrownPointOffset));
+         pStrSave->put_Property(_T("LeftCrownSlope"),CComVariant(m_LeftCrownSlope));
+         pStrSave->put_Property(_T("RightCrownSlope"),CComVariant(m_RightCrownSlope));
+      }
+      else
+      {
+         pStrSave->BeginUnit(_T("DeckProfile"),1.0);
+         CComPtr<IEnumPoint2d> enumPoints;
+         m_DeckProfile->get__Enum(&enumPoints);
+         CComPtr<IPoint2d> pnt;
+         while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+         {
+            Float64 x,y;
+            pnt->Location(&x,&y);
+            pStrSave->BeginUnit(_T("Point"),1.0);
+               pStrSave->put_Property(_T("X"),CComVariant(x));
+               pStrSave->put_Property(_T("Y"),CComVariant(y));
+            pStrSave->EndUnit(); // Point
+            pnt.Release();
+         }
+         pStrSave->EndUnit(); // DeckProfile
+      }
+
    pStrSave->EndUnit(); // Layout
 
    pStrSave->BeginUnit(_T("Diaphragm"),1.0);
@@ -764,14 +808,6 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
          m_strSkew = OLE2T(var.bstrVal);
 
          var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("DeckElevation"),&var);
-         m_DeckElevation = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("CrownPointOffset"),&var);
-         m_CrownPointOffset = var.dblVal;
-
-         var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("BridgeLineOffset"),&var);
          m_BridgeLineOffset = var.dblVal;
 
@@ -788,16 +824,62 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
          m_RightCurbOffset = var.dblVal;
 
          var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("LeftCrownSlope"),&var);
-         m_LeftCrownSlope = var.dblVal;
-
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("RightCrownSlope"),&var);
-         m_RightCrownSlope = var.dblVal;
-
-         var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("DeckThickness"),&var);
          m_tDeck = var.dblVal;
+
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("DeckSurfaceType"),&var);
+         m_DeckSurfaceType = (DeckSurfaceType)var.lVal;
+
+         if ( m_DeckSurfaceType == Simplified )
+         {
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("DeckElevation"),&var);
+            m_DeckElevation = var.dblVal;
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("CrownPointOffset"),&var);
+            m_CrownPointOffset = var.dblVal;
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("LeftCrownSlope"),&var);
+            m_LeftCrownSlope = var.dblVal;
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("RightCrownSlope"),&var);
+            m_RightCrownSlope = var.dblVal;
+         }
+         else
+         {
+            if (m_DeckProfile)
+            {
+               m_DeckProfile->Clear();
+            }
+            else
+            {
+               m_DeckProfile.CoCreateInstance(CLSID_Point2dCollection);
+            }
+
+            hr = pStrLoad->BeginUnit(_T("DeckProfile"));
+            while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Point"))) )
+            {
+               var.vt = VT_R8;
+               hr = pStrLoad->get_Property(_T("X"),&var);
+               Float64 x = var.dblVal;
+
+               var.vt = VT_R8;
+               hr = pStrLoad->get_Property(_T("Y"),&var);
+               Float64 y = var.dblVal;
+
+               hr = pStrLoad->EndUnit(); // Point
+
+               CComPtr<IPoint2d> pnt;
+               pnt.CoCreateInstance(CLSID_Point2d);
+               pnt->Move(x,y);
+               m_DeckProfile->Add(pnt);
+            }
+            hr = pStrLoad->EndUnit(); // DeckProfile
+         }
 
          hr = pStrLoad->EndUnit(); 
       }
@@ -971,18 +1053,23 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_ID = rOther.m_ID;
 
    m_strSkew = rOther.m_strSkew;
-
-   m_DeckElevation    = rOther.m_DeckElevation;
-   m_CrownPointOffset = rOther.m_CrownPointOffset;
    m_BridgeLineOffset = rOther.m_BridgeLineOffset;
-
 
    m_ConnectionType  = rOther.m_ConnectionType;
    m_CurbLineDatum   = rOther.m_CurbLineDatum;
    m_LeftCurbOffset  = rOther.m_LeftCurbOffset;
    m_RightCurbOffset = rOther.m_RightCurbOffset;
-   m_LeftCrownSlope  = rOther.m_LeftCrownSlope;
-   m_RightCrownSlope = rOther.m_RightCrownSlope;
+
+   m_DeckSurfaceType  = rOther.m_DeckSurfaceType;
+   m_DeckElevation    = rOther.m_DeckElevation;
+   m_CrownPointOffset = rOther.m_CrownPointOffset;
+   m_LeftCrownSlope   = rOther.m_LeftCrownSlope;
+   m_RightCrownSlope  = rOther.m_RightCrownSlope;
+   m_DeckProfile.Release();
+   if ( rOther.m_DeckProfile )
+   {
+      rOther.m_DeckProfile->Clone(&m_DeckProfile);
+   }
 
    m_H = rOther.m_H;
    m_W = rOther.m_W;

@@ -1873,8 +1873,10 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
 
    GET_IFACE(IRoadway,pRoadway);
-   Float64 elevation = pRoadway->GetElevation(pierStation,0);
-   pierData.SetDeckElevation(elevation);
+   CComPtr<IPoint2dCollection> deckProfile;
+   pRoadway->GetRoadwaySurface(pierStation,pierDirection,&deckProfile);
+   pierData.SetDeckSurfaceType(xbrPierData::Profile);
+   pierData.SetDeckProfile(deckProfile);
 
    GroupIndexType backGrpIdx, aheadGrpIdx;
    pBridge->GetGirderGroupIndex(m_PierIdx,&backGrpIdx,&aheadGrpIdx);
@@ -1883,34 +1885,10 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 tSlab = pBridge->GetGrossSlabDepth(poi);
    pierData.SetDeckThickness(tSlab);
 
-   Float64 CPO = pRoadway->GetCrownPointOffset(pierStation);
-   pierData.SetCrownPointOffset(CPO);
-
    Float64 leftCLO  = pBridge->GetLeftCurbOffset(m_PierIdx);
    Float64 rightCLO = pBridge->GetRightCurbOffset(m_PierIdx);
    pierData.SetCurbLineDatum(pgsTypes::omtAlignment);
    pierData.SetCurbLineOffset(leftCLO,rightCLO);
-
-   // Compute average slope of roadway deck in plane of pier
-   // This defines the shape of the top surface of the cross beam
-#pragma Reminder("UPDATE: Should be using roadway surface cut in the direction of the pier to establish the top surface")
-   Float64 leftSkewCLO  = leftCLO/cos(skew);
-   Float64 rightSkewCLO = rightCLO/cos(skew);
-   CComPtr<IPoint2d> pntLeftCurbLine,pntRightCurbLine;
-   pRoadway->GetPoint(pierStation,-leftSkewCLO, pierDirection,&pntLeftCurbLine);
-   pRoadway->GetPoint(pierStation,-rightSkewCLO,pierDirection,&pntRightCurbLine);
-
-   Float64 leftCurbStation,rightCurbStation;
-   Float64 leftCurbOffset, rightCurbOffset;
-   pRoadway->GetStationAndOffset(pntLeftCurbLine,&leftCurbStation,&leftCurbOffset);
-   pRoadway->GetStationAndOffset(pntRightCurbLine,&rightCurbStation,&rightCurbOffset);
-
-   Float64 leftCurbElev = pRoadway->GetElevation(leftCurbStation,leftCurbOffset);
-   Float64 rightCurbElev = pRoadway->GetElevation(rightCurbStation,rightCurbOffset);
-
-   Float64 sLeft  = (elevation - leftCurbElev)/fabs(leftSkewCLO);
-   Float64 sRight = (rightCurbElev - elevation)/fabs(rightSkewCLO);
-   pierData.SetCrownSlope(-sLeft,sRight);
 
    CComPtr<IAngleDisplayUnitFormatter> angle_formatter;
    angle_formatter.CoCreateInstance(CLSID_AngleDisplayUnitFormatter);
@@ -1918,7 +1896,6 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    CComBSTR bstrSkew;
    angle_formatter->Format(skew,CComBSTR(),&bstrSkew);
    pierData.SetSkew(OLE2T(bstrSkew));
-
 
    // Lower Cross Beam
    Float64 H1, H2, H3, H4;

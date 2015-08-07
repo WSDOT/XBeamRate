@@ -6,10 +6,17 @@
 #include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
 #include <PgsExt\ConcreteMaterial.h>
+#include <WBFLGeometry.h>
 
 class XBREXTCLASS xbrPierData
 {
 public:
+   enum DeckSurfaceType
+   {
+      Simplified, // deck surface defined by elevation and crown slopes
+      Profile // deck surface defined by a profile
+   };
+
    xbrPierData();
    xbrPierData(const xbrPierData& rOther);
    virtual ~xbrPierData();
@@ -19,9 +26,25 @@ public:
    void SetID(PierIDType id);
    PierIDType GetID() const;
 
+   // Set/Get the offset from the alignment to the bridge line
+   void SetBridgeLineOffset(Float64 blo);
+   Float64 GetBridgeLineOffset() const;
+   Float64& GetBridgeLineOffset();
+
    // Sets/Get the pier skew angle as an input string (e.g. "15 01 14 L")
    void SetSkew(LPCTSTR strSkew);
    LPCTSTR GetSkew() const;
+
+   // Set/Get the deck thickness
+   void SetDeckThickness(Float64 tDeck);
+   Float64 GetDeckThickness() const;
+   Float64& GetDeckThickness();
+
+   // Defines the deck surface description type
+   void SetDeckSurfaceType(DeckSurfaceType surfaceType);
+   DeckSurfaceType GetDeckSurfaceType() const;
+
+   // Simplified Deck Surface Parameters
 
    // Set/Get the deck elevation at the alignment line
    void SetDeckElevation(Float64 elev);
@@ -33,15 +56,16 @@ public:
    Float64 GetCrownPointOffset() const;
    Float64& GetCrownPointOffset();
 
-   // Set/Get the deck thickness
-   void SetDeckThickness(Float64 tDeck);
-   Float64 GetDeckThickness() const;
-   Float64& GetDeckThickness();
+   // Set/Get the crown slope on either side of the crown point
+   // Slope is measured in the plane of the pier
+   void SetCrownSlope(Float64 sLeft,Float64 sRight);
+   void GetCrownSlope(Float64* psLeft,Float64* psRight) const;
+   Float64& GetLeftCrownSlope();
+   Float64& GetRightCrownSlope();
 
-   // Set/Get the offset from the alignment to the bridge line
-   void SetBridgeLineOffset(Float64 blo);
-   Float64 GetBridgeLineOffset() const;
-   Float64& GetBridgeLineOffset();
+   // Profile Deck Surface Parameters
+   void SetDeckProfile(IPoint2dCollection* pProfile);
+   void GetDeckProfile(IPoint2dCollection** ppProfile) const;
 
    // Defines the general superstructure connectivity at this pier
    void SetSuperstructureConnectionType(xbrTypes::SuperstructureConnectionType type);
@@ -58,13 +82,6 @@ public:
    void GetCurbLineOffset(Float64* pLeftCLO,Float64* pRightCLO) const;
    Float64& GetLeftCurbLineOffset();
    Float64& GetRightCurbLineOffset();
-
-   // Set/Get the crown slope on either side of the crown point
-   // Slope is measured in the plane of the pier
-   void SetCrownSlope(Float64 sLeft,Float64 sRight);
-   void GetCrownSlope(Float64* psLeft,Float64* psRight) const;
-   Float64& GetLeftCrownSlope();
-   Float64& GetRightCrownSlope();
 
    // Set/Get the diaphragm dimensions
    // w = width of the diaphragm. at expansion piers, w is the sum of the left and right diaphragm
@@ -166,16 +183,21 @@ protected:
 protected:
    PierIDType m_ID;
    std::_tstring m_strSkew;
-   Float64 m_DeckElevation; // elevation of the top of deck at the alignment line
-   Float64 m_CrownPointOffset; // offset from alignment to crown point
    Float64 m_BridgeLineOffset; // offset from alignment to bridge line
    xbrTypes::SuperstructureConnectionType m_ConnectionType;
    pgsTypes::OffsetMeasurementType m_CurbLineDatum;
    Float64 m_LeftCurbOffset, m_RightCurbOffset; 
-   Float64 m_LeftCrownSlope, m_RightCrownSlope;
    Float64 m_H, m_W; // diaphragm dimensions
 
    Float64 m_tDeck; // gross thickness of the deck. Locates top of upper diaphragm relative to the roadway surface
+
+   DeckSurfaceType m_DeckSurfaceType;
+   // Simplified Deck Surface
+   Float64 m_DeckElevation; // elevation of the top of deck at the alignment line
+   Float64 m_CrownPointOffset; // offset from alignment to crown point
+   Float64 m_LeftCrownSlope, m_RightCrownSlope;
+   // Deck Surface Profile
+   CComPtr<IPoint2dCollection> m_DeckProfile; // x = offset from alignment, y = elevation
 
    // Lower X-Beam Dimensions
    Float64 m_H1, m_H2, m_H3, m_H4;
