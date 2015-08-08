@@ -59,7 +59,8 @@
 // view by this amount.
 const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
 
-const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
+//const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
+const SelectionType selectionType = stAll;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1103,6 +1104,12 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
 void CXBeamRateView::UpdateGirderDisplayObjects()
 {
+   if ( IsStandAlone() )
+   {
+      // not in PGSuper/PGSplice so we don't know anything about the shape of the girder
+      return;
+   }
+
    CWaitCursor wait;
 
    CComPtr<iDisplayMgr> dispMgr;
@@ -1115,12 +1122,6 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-
-   if ( IsStandAlone() )
-   {
-      // not in PGSuper/PGSplice so we don't know anything about the shape of the girder
-      return;
-   }
 
    PierIndexType pierIdx = GetPierIndex();
    GET_IFACE2(pBroker,IBridge,pBridge);
@@ -1153,6 +1154,8 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
 
          CComPtr<IShape> skewedShape;
          SkewGirderShape(skew,shape,&skewedShape);
+
+#pragma Reminder("WORKING HERE - also need to apply a shear") // uphill skewed girder... skewed end view is sheared
 
          CComPtr<iPointDisplayObject> dispObj;
          dispObj.CoCreateInstance(CLSID_PointDisplayObject);
