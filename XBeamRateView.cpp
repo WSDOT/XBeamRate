@@ -1128,16 +1128,24 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
    GroupIndexType backGroupIdx,aheadGroupIdx;
    pBridge->GetGirderGroupIndex(pierIdx,&backGroupIdx,&aheadGroupIdx);
 
+   GET_IFACE2(pBroker,IRoadway,pAlignment);
+   GET_IFACE2(pBroker,IGeometry,pGeometry);
    GET_IFACE2(pBroker,IShapes,pShapes);
    GET_IFACE2(pBroker,IPointOfInterest,pPoi);
    GET_IFACE2(pBroker,IIntervals,pIntervals);
+   GET_IFACE2(pBroker,IGirder,pGirder);
+
+   CComPtr<IDirection> pierDirection;
+   pBridge->GetPierDirection(pierIdx,&pierDirection);
+
+   Float64 dirPier;
+   pierDirection->get_Value(&dirPier);
 
    CComPtr<IAngle> objSkew;
    pBridge->GetPierSkew(pierIdx,&objSkew);
 
-   Float64 skew;
-   objSkew->get_Value(&skew);
-
+   Float64 pierSkew;
+   objSkew->get_Value(&pierSkew);
 
    for ( GroupIndexType grpIdx = aheadGroupIdx; backGroupIdx <= grpIdx && grpIdx != INVALID_INDEX; grpIdx-- ) // draw in reverse order so back side girders cover ahead side girders
    {
@@ -1146,16 +1154,52 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
       {
          CGirderKey girderKey(grpIdx,gdrIdx);
          pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(girderKey,pierIdx);
-
-         IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(poi.GetSegmentKey());
+         const CSegmentKey& segmentKey = poi.GetSegmentKey();
+         IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          CComPtr<IShape> shape;
-         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,&shape);
+         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
 
+         // compute skew angle of segment with respect to the viewing direction
+         // (viewing direction is normal to pier)
+         CComPtr<IDirection> segDirection;
+         pGirder->GetSegmentDirection(segmentKey,&segDirection);
+
+         Float64 dirSegment;
+         segDirection->get_Value(&dirSegment);
+
+         Float64 skew = dirPier - PI_OVER_2 - dirSegment;
+         if ( skew < 0 )
+         {
+            skew += TWO_PI;
+         }
+         ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
+
+         // compute shear factor
+         Float64 wTop = pGirder->GetTopWidth(poi);
+         wTop /= cos(skew); // top width of the girder, measured normal to the viewing direction
+
+         // Get location of the top left and right corners of the girder, projected onto the viewing plane
+         CComPtr<IPoint2d> pntPier1,pntEnd1,pntBrg1,pntBrg2,pntEnd2,pntPier2;
+         pGirder->GetSegmentEndPoints(segmentKey,&pntPier1,&pntEnd1,&pntBrg1,&pntBrg2,&pntEnd2,&pntPier2);
+         CComPtr<IPoint2d> pntLeft, pntRight;
+         pGeometry->ByDistDir(pntEnd1, wTop/2,CComVariant(pierDirection),0.0,&pntLeft);
+         pGeometry->ByDistDir(pntEnd1,-wTop/2,CComVariant(pierDirection),0.0,&pntRight);
+
+         // Get the elevation of the top left and right corners
+         Float64 station, offset;
+         pAlignment->GetStationAndOffset(pntLeft,&station,&offset);
+         Float64 elev1 = pAlignment->GetElevation(station,offset);
+
+         pAlignment->GetStationAndOffset(pntRight,&station,&offset);
+         Float64 elev2 = pAlignment->GetElevation(station,offset);
+
+         // Compute the shear factor
+         Float64 shear = (elev2 - elev1)/wTop;
+
+         // Adjust the shape of the girder for skew and shear
          CComPtr<IShape> skewedShape;
-         SkewGirderShape(skew,shape,&skewedShape);
-
-#pragma Reminder("WORKING HERE - also need to apply a shear") // uphill skewed girder... skewed end view is sheared
+         SkewGirderShape(skew,shear,shape,&skewedShape);
 
          CComPtr<iPointDisplayObject> dispObj;
          dispObj.CoCreateInstance(CLSID_PointDisplayObject);
@@ -1652,7 +1696,7 @@ void CXBeamRateView::OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect
    AfxMessageBox(_T("CBridgePlanView::OnDropped"));
 }
 
-void CXBeamRateView::SkewGirderShape(Float64 skew,IShape* pShape,IShape** ppSkewedShape)
+void CXBeamRateView::SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,IShape** ppSkewedShape)
 {
    if ( IsZero(skew) )
    {
@@ -1662,6 +1706,13 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,IShape* pShape,IShape** ppSkew
       return;
    }
 
+   CComPtr<IRect2d> bbox;
+   pShape->get_BoundingBox(&bbox);
+   CComPtr<IPoint2d> pntTC;
+   bbox->get_TopCenter(&pntTC);
+   Float64 xcl;
+   pntTC->get_X(&xcl);
+
    CComPtr<IPoint2dCollection> points;
    pShape->get_PolyPoints(&points);
    CComPtr<IPoint2d> pnt;
@@ -1669,10 +1720,13 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,IShape* pShape,IShape** ppSkew
    points->get__Enum(&enumPoints);
    while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
    {
-      Float64 x;
-      pnt->get_X(&x);
+      Float64 x,y;
+      pnt->Location(&x,&y);
+
+      y += shear*(x-xcl);
       x /= cos(skew);
-      pnt->put_X(x);
+
+      pnt->Move(x,y);
 
       pnt.Release();
    }

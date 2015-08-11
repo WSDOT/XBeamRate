@@ -78,7 +78,7 @@ protected:
    void CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO);
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
-   void SkewGirderShape(Float64 skew,IShape* pShape,IShape** ppSkewedShape);
+   void SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,IShape** ppSkewedShape);
 
 	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint);
 
