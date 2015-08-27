@@ -15,7 +15,7 @@ bool xbrBridgeStatusItem::IsEqual(CEAFStatusItem* pOther)
       return false;
    }
 
-   if ( GetDescription() != other->GetDescription())
+   if ( CString(GetDescription()) != CString(other->GetDescription()) )
    {
       return false;
    }
