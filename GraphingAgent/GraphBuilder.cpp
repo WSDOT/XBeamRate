@@ -264,9 +264,9 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       strYAxisTitle = _T("Shear (") + ((ShearTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
    }
 
-   graph.SetYAxisTitle(strYAxisTitle);
+   graph.SetYAxisTitle(strYAxisTitle.c_str());
 
-   graph.SetXAxisTitle(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")"));
+   graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")")).c_str());
 
    PierIDType pierID = m_GraphController.GetPierID();
 
