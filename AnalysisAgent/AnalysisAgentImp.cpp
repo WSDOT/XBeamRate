@@ -1633,6 +1633,8 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    Float64 LLIMmin, LLIMmax;
    GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL);
 
+#pragma Reminder("WORKING HERE - need to include multiple presence factor in load combination")
+
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
@@ -1700,6 +1702,8 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue LLIMmin, LLIMmax;
    GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL,NULL,NULL);
+
+#pragma Reminder("WORKING HERE - need to include multiple presence factor in load combination")
 
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
