@@ -26,40 +26,7 @@
 
 #pragma once
 
-#ifndef STRICT
-#define STRICT
-#endif
-
-#define VC_EXTRALEAN
-#define COM_STDMETHOD_CAN_THROW
-
-#define _ATL_APARTMENT_THREADED
-#define _ATL_NO_AUTOMATIC_NAMESPACE
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
-
-
-#include <XBeamRateVersion.h>
-
-#include <afxwin.h>         // MFC core and standard components
-#include <afxext.h>         // MFC extensions
-#include <afxpriv.h>        // Private MFC extensions
-#include <afxole.h>         // MFC OLE classes
-#include <afxodlgs.h>       // MFC OLE dialog classes
-#include <afxdisp.h>        // MFC OLE automation classes
-
-#include <atlbase.h>
-#include <atlcom.h>
-
-using namespace ATL;
-
-#include <WBFLAll.h>
-#include <XBeamRateTypes.h>
-
-#include <WBFLDebug.h>
-#include <System\Transaction.h>
-
-#include <WBFLCore.h>
-#include <AgentTools.h>
+#include <XBeamRateAll.h>
 
 #include <LRFD\LRFD.h>
 #include <EAF\EAFAutoProgress.h>

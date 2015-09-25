@@ -334,6 +334,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->EndUnit(); // DeadLoad
 
          pStrSave->BeginUnit(_T("LiveLoad"),1.0);
+            pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetPrivateReactionLoadApplication(INVALID_ID)));
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
             BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID])
             {
@@ -617,6 +618,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                {
                   hr = pStrLoad->BeginUnit(_T("LiveLoad"));
                   {
+                     var.vt = VT_I4;
+                     hr = pStrLoad->get_Property(_T("ReactionLoadApplication"),&var);
+                     GetPrivateReactionLoadApplication(INVALID_ID) = (xbrTypes::ReactionLoadApplicationType)var.iVal;
+
                      hr = pStrLoad->BeginUnit(_T("Design_Inventory"));
                      m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
@@ -1168,8 +1173,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       PierIndexType pierIdx = GetPierIndex(pierID);
 
       GET_IFACE(IIntervals,pIntervals);
-      IntervalIndexType nIntervals = pIntervals->GetIntervalCount();
-      IntervalIndexType lastIntervalIdx = nIntervals-1;
+      IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
 
       GET_IFACE(IProductForces,pProductForces);
       pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
@@ -1186,12 +1190,12 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          Float64 sh[2];
          Float64 re[2];
          Float64 ps[2];
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcDC,girderKey,bat,resultsType,&dc[0],&dc[1]);
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcDWRating,girderKey,bat,resultsType,&dw[0],&dw[1]);
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
-         pBearingDesign->GetBearingCombinedReaction(lastIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDC,girderKey,bat,resultsType,&dc[0],&dc[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDWRating,girderKey,bat,resultsType,&dw[0],&dw[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
+         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
@@ -1226,12 +1230,12 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          // we want the total pier reaction
          GET_IFACE(IReactions,pReactions);
 
-         *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcDC,bat,resultsType);
-         *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcDWRating,bat,resultsType);
-         *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcCR,bat,resultsType);
-         *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcSH,bat,resultsType);
-         *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcRE,bat,resultsType);
-         *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,lastIntervalIdx,lcPS,bat,resultsType);
+         *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDC,bat,resultsType);
+         *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType);
+         *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType);
+         *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType);
+         *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType);
+         *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType);
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
@@ -1291,10 +1295,35 @@ void CProjectAgentImp::SetReferenceBearing(PierIDType pierID,IndexType brgLineId
    Fire_OnProjectChanged();
 }
 
+void CProjectAgentImp::SetReactionLoadApplicationType(PierIDType pierID,xbrTypes::ReactionLoadApplicationType applicationType)
+{
+   GetPrivateReactionLoadApplication(pierID) = applicationType;
+   Fire_OnProjectChanged();
+}
+
+xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicationType(PierIDType pierID)
+{
+   return GetPrivateReactionLoadApplication(pierID);
+}
+
 IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-   return vReactions.size();
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      return vReactions.size();
+   }
+   else
+   {
+      GET_IFACE(IProductLoads,pProductLoads);
+      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
+      return pProductLoads->GetVehicleCount(llType);
+   }
 }
 
 void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
@@ -1316,25 +1345,92 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRati
 
 std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-   std::vector<std::pair<std::_tstring,Float64>> vReactions;
-   BOOST_FOREACH(LiveLoadReaction& ll,vLLReactions)
+   if ( pierID == INVALID_ID )
    {
-      vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      std::vector<std::pair<std::_tstring,Float64>> vReactions;
+      BOOST_FOREACH(LiveLoadReaction& ll,vLLReactions)
+      {
+         vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
+      }
+      return vReactions;
    }
-   return vReactions;
+   else
+   {
+      std::vector<std::pair<std::_tstring,Float64>> vReactions;
+      IndexType nReactions = GetLiveLoadReactionCount(pierID,ratingType);
+      for ( IndexType reactionIdx = 0; reactionIdx < nReactions; reactionIdx++ )
+      {
+         std::_tstring strName = GetLiveLoadName(pierID,ratingType,reactionIdx);
+         Float64 R = GetLiveLoadReaction(pierID,ratingType,reactionIdx);
+         vReactions.push_back(std::make_pair(strName,R));
+      }
+      return vReactions;
+   }
 }
 
-LPCTSTR CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
-   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-   return vLLReactions[vehIdx].Name.c_str();
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      return vLLReactions[vehicleIdx].Name;
+   }
+   else
+   {
+      GET_IFACE(IProductLoads,pProductLoads);
+      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
+      std::_tstring strName = pProductLoads->GetLiveLoadName(llType,vehicleIdx);
+      return strName;
+   }
 }
 
-Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx)
+Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
-   std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-   return vLLReactions[vehIdx].LLIM;
+   // Detect the configurations from PGSuper/PGSplice that we can't model
+   // Throwns an unwind exception if we can't model this thing
+   CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
+
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      return vLLReactions[vehicleIdx].LLIM;
+   }
+   else
+   {
+      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
+      GET_IFACE(IReactions,pReactions);
+      GET_IFACE(IIntervals,pIntervals);
+      IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
+
+      PierIndexType pierIdx = GetPierIndex(pierID);
+
+#pragma Reminder("WORKING HERE - need to get live load reactions for longest girder line")
+      CGirderKey girderKey = GetGirderKey(pierID,0,0);
+
+      GET_IFACE(IProductForces,pProductForces);
+      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
+
+      Float64 Rmin,Rmax;
+      pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
+
+      return Rmax;
+   }
 }
 
 void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade)
@@ -1802,6 +1898,17 @@ std::vector<CProjectAgentImp::LiveLoadReaction>& CProjectAgentImp::GetPrivateLiv
    }
 
    return m_LiveLoadReactions[ratingType][pierID];
+}
+
+xbrTypes::ReactionLoadApplicationType& CProjectAgentImp::GetPrivateReactionLoadApplication(PierIDType pierID)
+{
+   std::map<PierIDType,xbrTypes::ReactionLoadApplicationType>::const_iterator found(m_ReactionApplication.find(pierID));
+   if ( found == m_ReactionApplication.end() )
+   {
+      m_ReactionApplication.insert(std::make_pair(pierID,xbrTypes::rlaCrossBeam));
+   }
+
+   return m_ReactionApplication[pierID];
 }
 
 xbrTypes::ReactionLoadType& CProjectAgentImp::GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx)

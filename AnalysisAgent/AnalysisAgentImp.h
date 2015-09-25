@@ -39,6 +39,10 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 
+#include <PgsExt\ThreadManager.h>
+
+#define FIRST_LIVELOAD_ID 10000
+
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
@@ -106,15 +110,15 @@ public:
    virtual std::vector<Float64> GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
    virtual std::vector<sysSectionValue> GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi);
 
-   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
-   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
-   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
-   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<WheelLineConfiguration>* pvMinConfiguration,std::vector<WheelLineConfiguration>* pvMaxConfiguration);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<WheelLineConfiguration>* pvMinLeftConfiguration,std::vector<WheelLineConfiguration>* pvMinRightConfiguration,std::vector<WheelLineConfiguration>* pvMaxLeftConfiguration,std::vector<WheelLineConfiguration>* pvMaxRightConfiguration);
 
-   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
-   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
-   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax);
-   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,VehicleIndexType* pMinVehicleIdx,VehicleIndexType* pMaxVehicleIdx);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,VehicleIndexType* pMinLeftVehicleIdx,VehicleIndexType* pMinRightVehicleIdx,VehicleIndexType* pMaxLeftVehicleIdx,VehicleIndexType* pMaxRightVehicleIdx);
+   virtual void GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<VehicleIndexType>* pvMinVehicleIdx,std::vector<VehicleIndexType>* pvMaxVehicleIdx);
+   virtual void GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<VehicleIndexType>* pvMinLeftVehicleIdx,std::vector<VehicleIndexType>* pvMinRightVehicleIdx,std::vector<VehicleIndexType>* pvMaxLeftVehicleIdx,std::vector<VehicleIndexType>* pvMaxRightVehicleIdx);
 
    virtual void GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax);
    virtual void GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax);
@@ -150,33 +154,92 @@ private:
    DWORD m_dwProjectCookie;
    DWORD m_dwBridgeDescCookie;
 
-   struct CapBeamMember
+   struct BeamMember
    {
-      Float64 Xs;
-      Float64 Xe;
+      Float64 Xs; // start of member location
+      Float64 Xe; // end of member location
       MemberIDType mbrID;
+   };
+
+   struct LiveLoadConfiguration
+   {
+      bool operator<(const LiveLoadConfiguration& other)const { return m_LoadCaseID < other.m_LoadCaseID;} 
+
+      LoadCaseIDType m_LoadCaseID; // FEM load case id for this live load configuration
+      IndexType m_nLoadedLanes; // number of loaded lanes for this configuration
+      Float64 m_Xoffset; // offset from left curb line to the left edge of the left-most loaded lane
+      std::vector<std::pair<Float64,Float64>> m_Loading; // first = load, second = load position
    };
 
    typedef struct ModelData
    {
       CComPtr<IFem2dModel> m_Model;
-      std::vector<CapBeamMember> m_CapBeamMembers;
+      
+      std::vector<BeamMember> m_XBeamMembers; // these members make up the cap beam
+      std::vector<BeamMember> m_SuperstructureMembers; // these are the members where the live load is applied
+      
       std::vector<LowerXBeamLoad> m_LowerXBeamLoads;
+
       // key is the product model poi ID
       // value is the FEM model poi ID
       std::map<PoiIDType,PoiIDType> m_PoiMap;
+
+      LoadCaseIDType m_NextLiveLoadCaseID;
+      std::set<LiveLoadConfiguration> m_LiveLoadConfigurations;
+      ModelData() { m_NextLiveLoadCaseID = FIRST_LIVELOAD_ID; }
    } ModelData;
-   std::map<PierIDType,ModelData> m_ModelData;
+   std::auto_ptr<std::map<PierIDType,ModelData>> m_pModelData;
    ModelData* GetModelData(PierIDType pierID);
    void BuildModel(PierIDType pierID);
    void GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
-   void GetCapBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
+   void GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
+   void GetSuperstructureFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
 
    void ApplyDeadLoad(PierIDType pierID,ModelData* pModelData);
    void ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
    void ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
    void ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData);
    void ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
+
+   void ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelData);
+   void GetLanePositions(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions);
+   std::vector<std::pair<Float64,Float64>> ConfigureWheelLineLoads(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition);
+   LoadCaseIDType ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<std::pair<Float64,Float64>>& vLoading);
+
+
+   struct UnitLiveLoadResult
+   {
+      bool operator<(const UnitLiveLoadResult& other)const {return m_idPOI < other.m_idPOI;}
+      PoiIDType m_idPOI;
+
+      // moment
+      LoadCaseIDType m_lcidMzMin;
+      LoadCaseIDType m_lcidMzMax;
+      Float64 m_MzMin;
+      Float64 m_MzMax;
+
+      // shear
+      LoadCaseIDType m_lcidFyLeftMin, m_lcidFyRightMin;
+      LoadCaseIDType m_lcidFyLeftMax, m_lcidFyRightMax;
+      sysSectionValue m_FyMin;
+      sysSectionValue m_FyMax;
+   };
+   std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>> m_pUnitLiveLoadResults;
+   std::set<UnitLiveLoadResult>& GetUnitLiveLoadResults(PierIDType pierID);
+   void ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
+   UnitLiveLoadResult GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
+
+
+#if defined _USE_MULTITHREADING
+   CThreadManager m_ThreadManager;
+#endif
+
+   void InvalidateModels();
+   static UINT DeleteModels(LPVOID pParam);
+
+   void InvalidateResults();
+   static UINT DeleteResults(LPVOID pParam);
+
 };
 
 OBJECT_ENTRY_AUTO(CLSID_AnalysisAgent, CAnalysisAgentImp)

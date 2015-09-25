@@ -52,6 +52,7 @@ void CLiveLoadReactionsPage::DoDataExchange(CDataExchange* pDX)
    DDX_LiveLoadReactionsGrid(pDX,m_PermitRoutineGrid, pParent->m_PierData.m_PermitRoutineLiveLoad);
    DDX_LiveLoadReactionsGrid(pDX,m_PermitSpecialGrid, pParent->m_PierData.m_PermitSpecialLiveLoad);
 
+   DDX_CBEnum(pDX,IDC_REACTION_APPLICATION,pParent->m_PierData.m_LiveLoadReactionApplication);
 }
 
 
@@ -87,6 +88,12 @@ BOOL CLiveLoadReactionsPage::OnInitDialog()
 
    m_PermitSpecialGrid.SubclassDlgItem(IDC_PERMIT_SPECIAL_GRID, this);
    m_PermitSpecialGrid.CustomInit();
+
+   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_REACTION_APPLICATION);
+   int idx = pCB->AddString(_T("Apply reactions directly to cross beam"));
+   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::rlaCrossBeam);
+   idx = pCB->AddString(_T("Apply reactions through bearings"));
+   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::rlaBearings);
 
    CPropertyPage::OnInitDialog();
 

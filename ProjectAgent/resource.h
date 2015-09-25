@@ -110,6 +110,8 @@
 #define IDC_BACK_BRG_OFFSET_UNIT        301
 #define IDC_AHEAD_BRG_OFFSET_UNIT       302
 #define IDC_BACK_BRG_OFFSET_LABEL1      303
+#define IDC_COMBO1                      303
+#define IDC_REACTION_APPLICATION        303
 #define IDC_AHEAD_BRG_OFFSET_LABEL1     304
 #define IDC_BACK_BRG_OFFSET_LABEL2      305
 #define IDC_AHEAD_BRG_OFFSET_LABEL2     306
@@ -183,7 +185,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        206
 #define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         303
+#define _APS_NEXT_CONTROL_VALUE         304
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

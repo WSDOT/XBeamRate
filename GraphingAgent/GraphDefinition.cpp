@@ -42,13 +42,13 @@ xbrTypes::ProductForceType type
 }
 
 // constructor for vehicular live loads
-CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex) :
+CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) :
 m_ID(id),
 m_Name(name)
 {
    m_GraphType = graphVehicularLiveLoad;
    m_LoadType.LiveLoadType = ratingType;
-   m_VehicleIndex = vehicleIndex;
+   m_VehicleIndex = vehicleIdx;
 }
 
 // constructor for live loads

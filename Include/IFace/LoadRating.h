@@ -45,5 +45,5 @@ DEFINE_GUID(IID_IXBRArtifact,
 0xe7b694b8, 0x1b81, 0x4b53, 0xa7, 0x37, 0xf2, 0x15, 0x3c, 0xcc, 0xb5, 0xca);
 interface IXBRArtifact : IUnknown
 {
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex) = 0;
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
 };

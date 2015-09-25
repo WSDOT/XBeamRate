@@ -4,12 +4,7 @@
 
 #pragma once
 
-#include <XBeamRateVersion.h>
-
-#include <afxwin.h>
-#include <afxdisp.h>
-#include <afxext.h>
-#include <afxcmn.h>
+#include <XBeamRateAll.h>
 
 #include <atlbase.h>
 //You may derive a class from CComModule and use it if you want to override
@@ -17,16 +12,6 @@
 extern CComModule _Module;
 #include <atlcom.h>
 
-#include <XBeamRateTypes.h>
-
-#include <WBFLCore.h>
-#include <WBFLDebug.h>
-#include <AgentTools.h>
-
 #include <EAF\EAFUtilities.h>
-#include <System\Transaction.h>
-
-#include <WBFLAll.h>
 
 #include <Math\Math.h>
-#include <afxdlgs.h>

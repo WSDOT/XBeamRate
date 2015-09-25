@@ -479,6 +479,15 @@ Float64 CPierAgentImp::GetElevation(PierIDType pierID,Float64 Xcl)
    return elev;
 }
 
+Float64 CPierAgentImp::GetCurbToCurbWidth(PierIDType pierID)
+{
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+   Float64 Wcc;
+   pier->get_CurbToCurbWidth(clmNormalToAlignment,&Wcc);
+   return Wcc;
+}
+
 Float64 CPierAgentImp::ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb)
 {
    CComPtr<IPier> pier;
@@ -1739,7 +1748,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    Float64 Xpoi = 0;
-   while ( Xpoi < (L/2 - step))
+   while ( ::IsLE(Xpoi,(L/2 - step)) )
    {
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xpoi));
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-Xpoi));

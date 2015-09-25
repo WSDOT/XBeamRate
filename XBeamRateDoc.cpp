@@ -259,7 +259,7 @@ void CXBeamRateDoc::SaveToolbarState()
 
 CString CXBeamRateDoc::GetToolbarSectionName()
 {
-   return "XBeamRate";
+   return _T("XBeamRate");
 }
 
 BOOL CXBeamRateDoc::GetStatusBarMessageString(UINT nID,CString& rMessage) const

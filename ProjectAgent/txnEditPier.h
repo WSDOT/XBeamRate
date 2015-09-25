@@ -41,6 +41,8 @@ public:
    xbrTypes::ReactionLoadType m_DeadLoadReactionType[2];
    std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2]; // use bearing line index to access array
 
+   xbrTypes::ReactionLoadApplicationType m_LiveLoadReactionApplication;
+
    txnLiveLoadReactions m_DesignLiveLoad;
    txnLiveLoadReactions m_LegalRoutineLiveLoad;
    txnLiveLoadReactions m_LegalSpecialLiveLoad;

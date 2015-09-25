@@ -188,11 +188,14 @@ public:
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
 
+   virtual void SetReactionLoadApplicationType(PierIDType pierID,xbrTypes::ReactionLoadApplicationType applicationType);
+   virtual xbrTypes::ReactionLoadApplicationType GetReactionLoadApplicationType(PierIDType pierID);
+
    virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
    virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
-   virtual LPCTSTR GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
-   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx);
+   virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
    virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade);
    virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade);
@@ -387,6 +390,9 @@ private:
    };
    std::map<PierIDType,std::vector<LiveLoadReaction>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
    std::vector<CProjectAgentImp::LiveLoadReaction>& GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
+
+   std::map<PierIDType,xbrTypes::ReactionLoadApplicationType> m_ReactionApplication;
+   xbrTypes::ReactionLoadApplicationType& GetPrivateReactionLoadApplication(PierIDType pierID);
 
    pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
 

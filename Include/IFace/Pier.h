@@ -43,11 +43,17 @@ interface IXBRPier : public IUnknown
    virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) = 0;
    virtual void GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) = 0;
 
+   // Returns the offset of the crown point from the alignment
    virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;
+
+   // Returns the location of the crown point in curb line coordinates
    virtual Float64 GetCrownPointLocation(PierIDType pierID) = 0;
 
    // Returns the deck elevation at the specified location in curb line coordinates
    virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl) = 0;
+
+   // Returns the curb-to-curb width, normal to the alignment at the CL Pier
+   virtual Float64 GetCurbToCurbWidth(PierIDType pierID) = 0;
 
    virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb) = 0;
    virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl) = 0;

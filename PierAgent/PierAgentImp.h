@@ -116,6 +116,8 @@ public:
 
    virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl);
 
+   virtual Float64 GetCurbToCurbWidth(PierIDType pierID);
+
    virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb);
    virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl);
    virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier);

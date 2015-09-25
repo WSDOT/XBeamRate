@@ -93,7 +93,7 @@ public:
 
 // IXBRArtifact
 public:
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
 // IXBRProjectEventSink
 public:
@@ -133,7 +133,7 @@ private:
 
 #pragma Reminder("UPDATE: need to have rating artifacts by pier")
    std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key
-   void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
+   void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)

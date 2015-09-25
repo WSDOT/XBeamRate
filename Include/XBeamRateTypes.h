@@ -65,4 +65,10 @@ typedef struct xbrTypes
       rltUniform // DC/DW are uniform load forces (FORCE/LENGTH) centered about the CL Bearing
    } ReactionLoadType;
 
+   typedef enum ReactionLoadApplicationType
+   {
+      rlaCrossBeam,  // apply wheel line reactions directly to cross beam
+      rlaBearings    // apply wheel line reactions to bearings through a load transfer model
+   } ReactionLoadApplicationType;
+
 } xbrTypes;

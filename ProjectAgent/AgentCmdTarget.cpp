@@ -79,6 +79,7 @@ void CAgentCmdTarget::OnEditPier()
       oldPierData.m_gLL[ratingType] = pProject->GetLiveLoadFactor(pierID,ratingType);
    }
 
+   oldPierData.m_LiveLoadReactionApplication  = pProject->GetReactionLoadApplicationType(pierID);
    oldPierData.m_DesignLiveLoad.m_LLIM        = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);
    oldPierData.m_LegalRoutineLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine);
    oldPierData.m_LegalSpecialLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special);

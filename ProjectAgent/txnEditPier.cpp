@@ -87,6 +87,8 @@ void txnEditPier::Execute(int i)
    pProject->SetPSLoadFactor(m_PierData[i].m_gPS);
    pProject->SetRELoadFactor(m_PierData[i].m_gCR); // using creep factor for relaxation
 
+   pProject->SetReactionLoadApplicationType(pierID,m_PierData[i].m_LiveLoadReactionApplication);
+
    for ( int j = 0; j < 6; j++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)j;

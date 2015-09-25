@@ -1144,6 +1144,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\Include\XBeamRateAll.h"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateAppPlugin.h"
 				>
 			</File>

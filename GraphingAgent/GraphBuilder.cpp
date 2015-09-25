@@ -203,10 +203,13 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
       IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
-      for ( VehicleIndexType vehIdx = 0; vehIdx < nVehicles; vehIdx++ )
+      for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
       {
-         LPCTSTR strName = pProject->GetLiveLoadName(pierID,ratingType,vehIdx);
-         m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,strName,ratingType,vehIdx));
+         std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
+         if ( strName != _T("No Live Load Defined") )
+         {
+            m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,strName.c_str(),ratingType,vehicleIdx));
+         }
       }
    }
 
@@ -276,15 +279,15 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    {
       CGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
 
-      IndexType graphIdx, positiveGraphIdx, negativeGraphIdx;
+      IndexType graphIdx, maxGraphIdx, minGraphIdx;
       if ( graphDef.m_GraphType == graphCapacity ||
            graphDef.m_GraphType == graphVehicularLiveLoad ||
            graphDef.m_GraphType == graphLiveLoad ||
            graphDef.m_GraphType == graphLimitState
          )
       {
-         positiveGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
-         negativeGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,BLUE);
+         maxGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
+         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,BLUE);
       }
       else
       {
@@ -304,19 +307,19 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       }
       else if ( graphDef.m_GraphType == graphVehicularLiveLoad )
       {
-         BuildVehicularLiveLoadGraph(pierID,vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         BuildVehicularLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else if ( graphDef.m_GraphType == graphLiveLoad )
       {
-         BuildLiveLoadGraph(pierID,vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         BuildLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else if ( graphDef.m_GraphType == graphLimitState )
       {
-         BuildLimitStateGraph(pierID,vPoi,graphDef,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         BuildLimitStateGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else if ( graphDef.m_GraphType == graphCapacity )
       {
-         BuildCapacityGraph(pierID,vPoi,actionType,positiveGraphIdx,negativeGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         BuildCapacityGraph(pierID,vPoi,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else
       {
@@ -424,7 +427,7 @@ void CXBRGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax);
+         pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax,NULL,NULL);
          Mmin = pVerticalAxisFormat->Convert(Mmin);
          Mmax = pVerticalAxisFormat->Convert(Mmax);
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
@@ -433,14 +436,14 @@ void CXBRGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::
       else
       {
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax);
+         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,NULL,NULL,NULL,NULL);
          Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
          Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
          Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
          Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
          graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
@@ -462,7 +465,7 @@ void CXBRGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xb
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax);
+         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,NULL,NULL);
          Mmin = pVerticalAxisFormat->Convert(Mmin);
          Mmax = pVerticalAxisFormat->Convert(Mmax);
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
@@ -471,14 +474,14 @@ void CXBRGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xb
       else
       {
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax);
+         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,NULL,NULL,NULL,NULL);
          Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
          Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
          Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
          Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
          graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
@@ -522,7 +525,7 @@ void CXBRGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<
    }
 }
 
-void CXBRGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType positiveGraphIdx,IndexType negativeGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType maxGraphIdx,IndexType minGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -539,19 +542,19 @@ void CXBRGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xb
          Float64 Mz = pMomentCapacity->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,true);
          Mz = pVerticalAxisFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
-         graph.AddPoint(positiveGraphIdx,point);
+         graph.AddPoint(maxGraphIdx,point);
 
          Mz = pMomentCapacity->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,false);
          Mz = pVerticalAxisFormat->Convert(Mz);
          point.Y() = Mz;
-         graph.AddPoint(negativeGraphIdx,point);
+         graph.AddPoint(minGraphIdx,point);
       }
       else
       {
          Float64 V = pShearCapacity->GetShearCapacity(pierID,poi);
          V = pVerticalAxisFormat->Convert(V);
-         graph.AddPoint(positiveGraphIdx,gpPoint2d(X,V));
-         graph.AddPoint(negativeGraphIdx,gpPoint2d(X,-V));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,V));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,-V));
       }
    }
 }

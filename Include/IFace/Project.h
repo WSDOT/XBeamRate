@@ -79,11 +79,11 @@ interface IXBRProject : IUnknown
    virtual void SetDeckThickness(PierIDType pierID,Float64 tDeck) = 0;
    virtual Float64 GetDeckThickness(PierIDType pierID) = 0;
 
-   // Distance from alignment to crown point.
+   // Distance from alignment to crown point, measured normal to the alignment.
    virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo) = 0;
    virtual Float64 GetCrownPointOffset(PierIDType pierID) = 0;
 
-   // Distance form alignemnt to bridge line
+   // Distance form alignemnt to bridge line, measured normal to the alignment
    virtual void SetBridgeLineOffset(PierIDType pierID,Float64 blo) = 0;
    virtual Float64 GetBridgeLineOffset(PierIDType pierID) = 0;
 
@@ -95,9 +95,11 @@ interface IXBRProject : IUnknown
    virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum(PierIDType pierID) = 0;
    virtual void SetCurbLineDatum(PierIDType pierID,pgsTypes::OffsetMeasurementType datumType) = 0;
 
+   // Location of the curb lines, measured from and normal to the alignment
    virtual void SetCurbLineOffset(PierIDType pierID,Float64 leftCLO,Float64 rightCLO) = 0;
    virtual void GetCurbLineOffset(PierIDType pierID,Float64* pLeftCLO,Float64* pRightCLO) = 0;
 
+   // Crown slopes measured normal to the alignment
    virtual void SetCrownSlopes(PierIDType pierID,Float64 sl,Float64 sr) = 0;
    virtual void GetCrownSlopes(PierIDType pierID,Float64* psl,Float64* psr) = 0;
 
@@ -123,6 +125,7 @@ interface IXBRProject : IUnknown
    // Bearing reactions
    virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType) = 0;
    virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx) = 0;
+   // W = bearing reaction width if uniform load (e.g. slabs) ... use W = 0 for point load reactions
    virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W) = 0;
    virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) = 0;
 
@@ -130,12 +133,16 @@ interface IXBRProject : IUnknown
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
    virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) = 0;
 
+   // Reaction load application type
+   virtual void SetReactionLoadApplicationType(PierIDType pierID,xbrTypes::ReactionLoadApplicationType applicationType) = 0;
+   virtual xbrTypes::ReactionLoadApplicationType GetReactionLoadApplicationType(PierIDType pierID) = 0;
+
    // Live Load Reactions per lane
    virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
    virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
    virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
-   virtual LPCTSTR GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
-   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehIdx) = 0;
+   virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
+   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
 
    // Material properties
    virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade) = 0;

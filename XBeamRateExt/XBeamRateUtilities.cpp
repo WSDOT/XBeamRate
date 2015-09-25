@@ -154,3 +154,50 @@ bool CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,StatusCallba
 
    return true;
 }
+
+void GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloadedLane)
+{
+   // Wlane = width of lane
+   // WloadedLane = width of lane that is loaded
+   // Typically we have 12 ft lanes and the load is spread over 10 ft.
+   //
+   //   |    |
+   // 2'| 6' |2'
+   //   v    v
+   // ==========
+   Float64 w10 = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
+   Float64 w12 = ::ConvertToSysUnits(12.0,unitMeasure::Feet);
+   Float64 w18 = ::ConvertToSysUnits(18.0,unitMeasure::Feet);
+   Float64 w24 = ::ConvertToSysUnits(24.0,unitMeasure::Feet);
+   if ( Wcc < w12 )
+   {
+      *pWlane = 0;
+      *pnLanes = 0;
+      *pWloadedLane = 0;
+   }
+   else if ( w12 <= Wcc && Wcc < w18 )
+   {
+      *pWlane = w12;
+      *pnLanes = 1;
+      *pWloadedLane = w10;
+   }
+   else if ( ::InRange(w18,Wcc,w24) )
+   {
+      *pWlane = Wcc/2;
+      *pnLanes = 2;
+      if ( w12 <= *pWlane )
+      {
+         *pWloadedLane = w10;
+      }
+      else
+      {
+         *pWloadedLane = *pWlane;
+      }
+   }
+   else
+   {
+      *pWlane = w12;
+      *pnLanes = (IndexType)floor(Wcc/(*pWlane));
+      *pWloadedLane = w10;
+   }
+}

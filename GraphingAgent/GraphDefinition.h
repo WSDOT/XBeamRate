@@ -32,7 +32,7 @@ public:
    CGraphDefinition(IDType id,LPCTSTR name,xbrTypes::ProductForceType type);
    
    // constructor for vehicular live loads
-   CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex);
+   CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
    // constructor for live loads
    CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType);

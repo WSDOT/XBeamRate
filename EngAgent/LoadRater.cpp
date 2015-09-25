@@ -493,17 +493,17 @@ void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::L
 
    if ( vehicleIdx == INVALID_INDEX )
    {
-      pResults->GetMoment(pierID,ratingType,vPoi,&vLLIMmin,&vLLIMmax);
+      pResults->GetMoment(pierID,ratingType,vPoi,&vLLIMmin,&vLLIMmax,NULL,NULL);
    }
    else
    {
-      pResults->GetMoment(pierID,ratingType,vehicleIdx,vPoi,&vLLIMmin,&vLLIMmax);
+      pResults->GetMoment(pierID,ratingType,vehicleIdx,vPoi,&vLLIMmin,&vLLIMmax,NULL,NULL);
    }
 
    if ( ::IsPermitRatingType(ratingType) )
    {
       pgsTypes::LoadRatingType legalRatingType = (ratingType == pgsTypes::lrPermit_Routine ? pgsTypes::lrLegal_Routine : pgsTypes::lrLegal_Special);
-      pResults->GetMoment(pierID,legalRatingType,vPoi,&vAdjLLIMmin,&vAdjLLIMmax);
+      pResults->GetMoment(pierID,legalRatingType,vPoi,&vAdjLLIMmin,&vAdjLLIMmax,NULL,NULL);
    }
    else
    {

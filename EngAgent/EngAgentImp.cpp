@@ -187,14 +187,14 @@ Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInteres
 
 //////////////////////////////////////////////////////////////////////
 // IXBRArtifactCapacity
-const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
+const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
 #pragma Reminder("UPDATE: need rating artifacts for each pier")
-   std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = m_RatingArtifacts[ratingType].find(vehicleIndex);
+   std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = m_RatingArtifacts[ratingType].find(vehicleIdx);
    if ( found == m_RatingArtifacts[ratingType].end() )
    {
-      CreateRatingArtifact(pierID,ratingType,vehicleIndex);
-      found = m_RatingArtifacts[ratingType].find(vehicleIndex);
+      CreateRatingArtifact(pierID,ratingType,vehicleIdx);
+      found = m_RatingArtifacts[ratingType].find(vehicleIdx);
    }
 
    if ( found == m_RatingArtifacts[ratingType].end() )
@@ -455,12 +455,12 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
    return Avg_Av_over_S;
 }
 
-void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIndex)
+void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
 #pragma Reminder("UPDATE: need to have rating artifacts by pier")
    xbrLoadRater loadRater(m_pBroker);
-   xbrRatingArtifact artifact = loadRater.RateXBeam(pierID,ratingType,vehicleIndex);
-   std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIndex,artifact));
+   xbrRatingArtifact artifact = loadRater.RateXBeam(pierID,ratingType,vehicleIdx);
+   std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIdx,artifact));
    ATLASSERT(result.second == true);
 }
 
