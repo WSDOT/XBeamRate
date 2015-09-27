@@ -34,6 +34,10 @@ interface IXBRProductForces : public IUnknown
 {
    virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading(PierIDType pierID) = 0;
    virtual Float64 GetUpperCrossBeamLoading(PierIDType pierID) = 0;
+
+   virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID) = 0;
+   virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx) = 0;
+   virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx) = 0;
 };
 
 

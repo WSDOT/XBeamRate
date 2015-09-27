@@ -98,6 +98,10 @@ public:
    virtual const std::vector<LowerXBeamLoad>& GetLowerCrossBeamLoading(PierIDType pierID);
    virtual Float64 GetUpperCrossBeamLoading(PierIDType pierID);
 
+   virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID);
+   virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx);
+   virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx);
+
 // IXBRAnalysisResults
 public:
    virtual Float64 GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi);

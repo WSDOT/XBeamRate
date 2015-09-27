@@ -995,6 +995,49 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
    return w;
 }
 
+IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID)
+{
+   ModelData* pModelData = GetModelData(pierID);
+   return (IndexType)(pModelData->m_NextLiveLoadCaseID - FIRST_LIVELOAD_ID);
+}
+
+IndexType CAnalysisAgentImp::GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx)
+{
+   ModelData* pModelData = GetModelData(pierID);
+   LiveLoadConfiguration key;
+   key.m_LoadCaseID = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
+   std::set<LiveLoadConfiguration>::iterator found = pModelData->m_LiveLoadConfigurations.find(key);
+   ATLASSERT(found != pModelData->m_LiveLoadConfigurations.end());
+   LiveLoadConfiguration& llConfig = *found;
+   return llConfig.m_nLoadedLanes;
+}
+
+WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx)
+{
+   ModelData* pModelData = GetModelData(pierID);
+   LiveLoadConfiguration key;
+   key.m_LoadCaseID = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
+   std::set<LiveLoadConfiguration>::iterator found = pModelData->m_LiveLoadConfigurations.find(key);
+   ATLASSERT(found != pModelData->m_LiveLoadConfigurations.end());
+   LiveLoadConfiguration& llConfig = *found;
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
+
+   WheelLineConfiguration wheelConfig;
+   std::vector<std::pair<Float64,Float64>>::iterator iter(llConfig.m_Loading.begin());
+   std::vector<std::pair<Float64,Float64>>::iterator end(llConfig.m_Loading.end());
+   for ( ; iter != end; iter++ )
+   {
+      std::pair<Float64,Float64> p(*iter);
+      WheelLinePlacement placement;
+      placement.P = R*p.first;
+      placement.Xxb = llConfig.m_Xoffset + p.second;
+      wheelConfig.push_back(placement);
+   }
+   return wheelConfig;
+}
+
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
 Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi)
