@@ -37,12 +37,18 @@
 #include <numeric>
 
 #include <System\Flags.h>
+#include <LRFD\Utility.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+// NOTE: Any time you get live load results directly from the FEM model,
+// apply the multiple presence factor.
+/////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
@@ -1154,6 +1160,103 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
    return vV;
 }
 
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi)
+{
+   ModelData* pModelData = GetModelData(pierID);
+
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
+   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+
+   Float64 FxLeft, FyLeft, MzLeft;
+   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 FxRight, FyRight, MzRight;
+   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 Mz;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Mz = -MzRight;
+   }
+   else
+   {
+      Mz = MzLeft;
+   }
+
+   Mz = IsZero(Mz) ? 0 : Mz;
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
+   IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
+   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+
+   Mz *= R*mpf;
+
+   return Mz;
+}
+
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi)
+{
+   ModelData* pModelData = GetModelData(pierID);
+
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
+   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+
+   Float64 FxLeft, FyLeft, MzLeft;
+   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 FxRight, FyRight, MzRight;
+   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   sysSectionValue Fy(-FyLeft,FyRight);
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
+
+   IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
+   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+
+   Fy *= R*mpf;
+
+   return Fy;
+}
+
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<Float64> vM;
+   vM.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 m = GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
+      vM.push_back(m);
+   }
+   return vM;
+}
+
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi)
+{
+   std::vector<sysSectionValue> vV;
+   vV.reserve(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      sysSectionValue v = GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
+      vV.push_back(v);
+   }
+   return vV;
+}
+
 void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration)
 {
    UnitLiveLoadResult liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
@@ -1172,16 +1275,14 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMinConfig = (*foundLLConfig);
-   IndexType minLoadedLanes = llMinConfig.m_nLoadedLanes;
 
    key.m_LoadCaseID = liveLoadResult.m_lcidMzMax;
    foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMaxConfig = (*foundLLConfig);
-   IndexType maxLoadedLanes = llMaxConfig.m_nLoadedLanes;
 
-   *pMin *= R*minLoadedLanes;
-   *pMax *= R*maxLoadedLanes;
+   *pMin *= R;
+   *pMax *= R;
 
    if ( pMinConfiguration )
    {
@@ -1234,31 +1335,27 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMinLeftConfig = (*foundLLConfig);
-   IndexType minLoadedLanesLeft = llMinLeftConfig.m_nLoadedLanes;
 
    key.m_LoadCaseID = liveLoadResult.m_lcidFyRightMin;
    foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMinRightConfig = (*foundLLConfig);
-   IndexType minLoadedLanesRight = llMinRightConfig.m_nLoadedLanes;
 
    key.m_LoadCaseID = liveLoadResult.m_lcidFyLeftMax;
    foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMaxLeftConfig = (*foundLLConfig);
-   IndexType maxLoadedLanesLeft = llMaxLeftConfig.m_nLoadedLanes;
 
    key.m_LoadCaseID = liveLoadResult.m_lcidFyRightMax;
    foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    LiveLoadConfiguration& llMaxRightConfig = (*foundLLConfig);
-   IndexType maxLoadedLanesRight = llMaxRightConfig.m_nLoadedLanes;
 
-   pMin->Left()  *= R*minLoadedLanesLeft;
-   pMin->Right() *= R*minLoadedLanesRight;
+   pMin->Left()  *= R;
+   pMin->Right() *= R;
    
-   pMax->Left()  *= R*maxLoadedLanesLeft;
-   pMax->Right() *= R*maxLoadedLanesRight;
+   pMax->Left()  *= R;
+   pMax->Right() *= R;
 
    if ( pMinLeftConfiguration )
    {
@@ -1428,6 +1525,13 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       *pMaxVehicleIdx = INVALID_INDEX;
    }
 
+   if ( nLiveLoadReactions == 0 )
+   {
+      *pMin = 0;
+      *pMax = 0;
+      return;
+   }
+
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoadReactions; vehicleIdx++ )
    {
       Float64 min,max;
@@ -1476,6 +1580,13 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    if ( pMaxRightVehicleIdx )
    {
       *pMaxRightVehicleIdx = INVALID_INDEX;
+   }
+
+   if ( nLiveLoadReactions == 0 )
+   {
+      *pMin = 0;
+      *pMax = 0;
+      return;
    }
 
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoadReactions; vehicleIdx++ )
@@ -1676,8 +1787,6 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    Float64 LLIMmin, LLIMmax;
    GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL);
 
-#pragma Reminder("WORKING HERE - need to include multiple presence factor in load combination")
-
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
@@ -1745,8 +1854,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue LLIMmin, LLIMmax;
    GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL,NULL,NULL);
-
-#pragma Reminder("WORKING HERE - need to include multiple presence factor in load combination")
 
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
@@ -1914,7 +2021,7 @@ void CAnalysisAgentImp::GetLanePositions(IndexType nTotalSteps,IndexType nLaneGa
    }
 
    static std::vector<IndexType> vDigits;
-   for ( IndexType stepIdx = 0; stepIdx < nTotalSteps; stepIdx++ )
+   for ( IndexType stepIdx = 0; stepIdx <= nTotalSteps; stepIdx++ )
    {
       vDigits.push_back(stepIdx);
       if ( 1 < nLaneGaps )
@@ -2038,6 +2145,9 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
    for ( LoadCaseIDType lcid = FIRST_LIVELOAD_ID; lcid < pModelData->m_NextLiveLoadCaseID; lcid++ )
    {
+      IndexType nLoadedLanes = GetLoadedLaneCount(pierID,lcid-FIRST_LIVELOAD_ID);
+      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+
       Float64 FxLeft, FyLeft, MzLeft;
       HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
       ATLASSERT(SUCCEEDED(hr));
@@ -2057,6 +2167,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       }
 
       Mz = IsZero(Mz) ? 0 : Mz;
+      Mz *= mpf;
 
       if ( Mz < MzMin )
       {
@@ -2073,6 +2184,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
       FyRight = IsZero(FyRight) ? 0 : FyRight;
       sysSectionValue Fy(-FyLeft,FyRight);
+      Fy *= mpf;
 
       if ( Fy.Left() < FyMin.Left() )
       {

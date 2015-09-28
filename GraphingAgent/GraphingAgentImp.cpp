@@ -26,7 +26,8 @@
 #include "GraphingAgentImp.h"
 #include <IGraphManager.h>
 
-#include "GraphBuilder.h"
+#include "AnalysisResultsGraphBuilder.h"
+#include "LiveLoadGraphBuilder.h"
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Views.h>
@@ -153,16 +154,28 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 {
    GET_IFACE(IGraphManager,pGraphMgr);
 
-   CXBRGraphBuilder* pGraphBuilder = new CXBRGraphBuilder;
+   CXBRAnalysisResultsGraphBuilder* pAnalysisResultsGraphBuilder = new CXBRAnalysisResultsGraphBuilder;
    
    if ( IsPGSExtension() )
    {
       // XBeam Rate is acting as an extension to PGSuper/PGSplice
       // Change the default graph name so it doesn't conflict with PGSuper/PGSplice
-      pGraphBuilder->SetName(_T("Cross Beam Rating"));
+      pAnalysisResultsGraphBuilder->SetName(_T("Cross Beam Analysis Results"));
    }
 
-   VERIFY(pGraphMgr->AddGraphBuilder( pGraphBuilder ));
+   VERIFY(pGraphMgr->AddGraphBuilder( pAnalysisResultsGraphBuilder ));
+
+
+   CXBRLiveLoadGraphBuilder* pLiveLoadGraphBuilder = new CXBRLiveLoadGraphBuilder;
+   
+   if ( IsPGSExtension() )
+   {
+      // XBeam Rate is acting as an extension to PGSuper/PGSplice
+      // Change the default graph name so it doesn't conflict with PGSuper/PGSplice
+      pAnalysisResultsGraphBuilder->SetName(_T("Cross Beam Live Load Results"));
+   }
+
+   VERIFY(pGraphMgr->AddGraphBuilder( pLiveLoadGraphBuilder ));
 
    return S_OK;
 }

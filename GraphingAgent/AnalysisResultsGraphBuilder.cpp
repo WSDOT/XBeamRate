@@ -23,7 +23,7 @@
 #include "stdafx.h"
 
 #include "resource.h"
-#include "GraphBuilder.h"
+#include "AnalysisResultsGraphBuilder.h"
 
 #include <EAF\EAFGraphChildFrame.h>
 #include <EAF\EAFGraphView.h>
@@ -58,46 +58,46 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-BEGIN_MESSAGE_MAP(CXBRGraphBuilder, CEAFGraphBuilderBase)
-   ON_BN_CLICKED(IDC_MOMENT, &CXBRGraphBuilder::OnGraphTypeChanged)
-   ON_BN_CLICKED(IDC_SHEAR, &CXBRGraphBuilder::OnGraphTypeChanged)
-   ON_LBN_SELCHANGE(IDC_LOADING,&CXBRGraphBuilder::OnLbnSelChanged)
-   ON_CBN_SELCHANGE(IDC_PIERS,&CXBRGraphBuilder::OnPierChanged)
+BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFGraphBuilderBase)
+   ON_BN_CLICKED(IDC_MOMENT, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
+   ON_BN_CLICKED(IDC_SHEAR, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
+   ON_LBN_SELCHANGE(IDC_LOADING,&CXBRAnalysisResultsGraphBuilder::OnLbnSelChanged)
+   ON_CBN_SELCHANGE(IDC_PIERS,&CXBRAnalysisResultsGraphBuilder::OnPierChanged)
 END_MESSAGE_MAP()
 
 
-CXBRGraphBuilder::CXBRGraphBuilder()
+CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder()
 {
    SetName(_T("Analysis Results"));
 }
 
-CXBRGraphBuilder::CXBRGraphBuilder(const CXBRGraphBuilder& other) :
+CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder(const CXBRAnalysisResultsGraphBuilder& other) :
 CEAFGraphBuilderBase(other)
 {
 }
 
-CEAFGraphControlWindow* CXBRGraphBuilder::GetGraphControlWindow()
+CEAFGraphControlWindow* CXBRAnalysisResultsGraphBuilder::GetGraphControlWindow()
 {
    return &m_GraphController;
 }
 
-CGraphBuilder* CXBRGraphBuilder::Clone()
+CGraphBuilder* CXBRAnalysisResultsGraphBuilder::Clone()
 {
    // set the module state or the commands wont route to the
    // the graph control window
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return new CXBRGraphBuilder(*this);
+   return new CXBRAnalysisResultsGraphBuilder(*this);
 }
 
-const CGraphDefinitions& CXBRGraphBuilder::GetGraphDefinitions()
+const CXBRAnalysisResultsGraphDefinitions& CXBRAnalysisResultsGraphBuilder::GetGraphDefinitions()
 {
    return m_GraphDefinitions;
 }
 
-BOOL CXBRGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
+BOOL CXBRAnalysisResultsGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   if ( !m_GraphController.Create(pParent,IDD_GRAPH_CONTROLLER, CBRS_LEFT, nID) )
+   if ( !m_GraphController.Create(pParent,IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER, CBRS_LEFT, nID) )
    {
       TRACE0("Failed to create control bar\n");
       return FALSE; // failed to create
@@ -108,24 +108,24 @@ BOOL CXBRGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
    return TRUE;
 }
 
-void CXBRGraphBuilder::OnGraphTypeChanged()
+void CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged()
 {
    CEAFGraphView* pGraphView = m_pFrame->GetGraphView();
    pGraphView->Invalidate();
    pGraphView->UpdateWindow();
 }
 
-void CXBRGraphBuilder::OnLbnSelChanged()
+void CXBRAnalysisResultsGraphBuilder::OnLbnSelChanged()
 {
    OnGraphTypeChanged();
 }
 
-void CXBRGraphBuilder::OnPierChanged()
+void CXBRAnalysisResultsGraphBuilder::OnPierChanged()
 {
    OnGraphTypeChanged();
 }
 
-bool CXBRGraphBuilder::UpdateNow()
+bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
 {
    if ( IsStandAlone() )
    {
@@ -153,7 +153,7 @@ bool CXBRGraphBuilder::UpdateNow()
    }
 }
 
-void CXBRGraphBuilder::UpdateGraphDefinitions()
+void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
 {
    PierIDType pierID = m_GraphController.GetPierID();
 
@@ -176,26 +176,26 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
    }
 
    IDType graphID = 0;
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),        xbrTypes::pftLowerXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure Diaphragm Dead Load"),xbrTypes::pftUpperXBeam));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure DC Reactions"),       xbrTypes::pftDCReactions));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure DW Reactions"),       xbrTypes::pftDWReactions));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Lower Cross Beam Dead Load"),        xbrTypes::pftLowerXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure Diaphragm Dead Load"),xbrTypes::pftUpperXBeam));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure DC Reactions"),       xbrTypes::pftDCReactions));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure DW Reactions"),       xbrTypes::pftDWReactions));
    if ( bIncludeTimeDependentLoads )
    {
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure CR Reactions"),xbrTypes::pftCRReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure SH Reactions"),xbrTypes::pftSHReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure RE Reactions"),xbrTypes::pftREReactions));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Superstructure PS Reactions"),xbrTypes::pftPSReactions));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure CR Reactions"),xbrTypes::pftCRReactions));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure SH Reactions"),xbrTypes::pftSHReactions));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure RE Reactions"),xbrTypes::pftREReactions));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Superstructure PS Reactions"),xbrTypes::pftPSReactions));
    }
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DC"),xbrTypes::lcDC));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("DW"),xbrTypes::lcDW));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("DC"),xbrTypes::lcDC));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("DW"),xbrTypes::lcDW));
    if ( bIncludeTimeDependentLoads )
    {
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("CR"),xbrTypes::lcCR));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("SH"),xbrTypes::lcSH));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("RE"),xbrTypes::lcRE));
-      m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("PS"),xbrTypes::lcPS));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("CR"),xbrTypes::lcCR));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("SH"),xbrTypes::lcSH));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("RE"),xbrTypes::lcRE));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("PS"),xbrTypes::lcPS));
    }
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -208,30 +208,30 @@ void CXBRGraphBuilder::UpdateGraphDefinitions()
          std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
          if ( strName != _T("No Live Load Defined") )
          {
-            m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,strName.c_str(),ratingType,vehicleIdx));
+            m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,strName.c_str(),ratingType,vehicleIdx));
          }
       }
    }
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Inventory/Operating)"),pgsTypes::lrDesign_Inventory));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),      pgsTypes::lrLegal_Routine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Legal Special)"),      pgsTypes::lrLegal_Special));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),     pgsTypes::lrPermit_Routine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("LLIM (Permit Special)"),     pgsTypes::lrPermit_Special));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Inventory/Operating)"),pgsTypes::lrDesign_Inventory));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),      pgsTypes::lrLegal_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Legal Special)"),      pgsTypes::lrLegal_Special));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),     pgsTypes::lrPermit_Routine));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Special)"),     pgsTypes::lrPermit_Special));
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
 
-   m_GraphDefinitions.AddGraphDefinition(CGraphDefinition(graphID++,_T("Capacity")));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 
    m_GraphController.FillLoadingList();
 }
 
-void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
+void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -273,11 +273,11 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
    PierIDType pierID = m_GraphController.GetPierID();
 
-   CGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
+   CXBRAnalysisResultsGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
    IndexType nGraphs = graphDefs.GetGraphDefinitionCount();
    for ( IndexType idx = 0; idx < nGraphs; idx++ )
    {
-      CGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
+      CXBRAnalysisResultsGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
 
       IndexType graphIdx, maxGraphIdx, minGraphIdx;
       if ( graphDef.m_GraphType == graphCapacity ||
@@ -335,7 +335,7 @@ void CXBRGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    delete pHorizontalAxisFormat;
 }
 
-LPCTSTR CXBRGraphBuilder::GetGraphTitle(ActionType actionType)
+LPCTSTR CXBRAnalysisResultsGraphBuilder::GetGraphTitle(ActionType actionType)
 {
    switch(actionType)
    {
@@ -349,7 +349,7 @@ LPCTSTR CXBRGraphBuilder::GetGraphTitle(ActionType actionType)
    return _T("Unknown Graph Type");
 }
 
-void CXBRGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    xbrTypes::ProductForceType pfType = graphDef.m_LoadType.ProductLoadType;
 
@@ -380,7 +380,7 @@ void CXBRGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vecto
    }
 }
 
-void CXBRGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    xbrTypes::CombinedForceType comboType = graphDef.m_LoadType.CombinedLoadType;
 
@@ -411,7 +411,7 @@ void CXBRGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vect
    }
 }
 
-void CXBRGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
 
@@ -449,7 +449,7 @@ void CXBRGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::
    }
 }
 
-void CXBRGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
 
@@ -487,7 +487,7 @@ void CXBRGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xb
    }
 }
 
-void CXBRGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    pgsTypes::LimitState limitState = graphDef.m_LoadType.LimitStateType;
 
@@ -518,14 +518,14 @@ void CXBRGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<
          Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
          Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmin));
+         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
          graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
 }
 
-void CXBRGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType maxGraphIdx,IndexType minGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);

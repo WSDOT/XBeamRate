@@ -1409,7 +1409,14 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       ATLASSERT(IsStandAlone());
 #endif
       std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      return vLLReactions[vehicleIdx].LLIM;
+      if ( 0 < vLLReactions.size() )
+      {
+         return vLLReactions[vehicleIdx].LLIM;
+      }
+      else
+      {
+         return 0;
+      }
    }
    else
    {

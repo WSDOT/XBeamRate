@@ -26,34 +26,43 @@
 #include <IFace\AnalysisResults.h>
 #include <GraphingTypes.h>
 
-class CGraphDefinitions;
+class CXBRLiveLoadGraphDefinitions;
 
-class CXBRGraphController : public CEAFGraphControlWindow
+class CXBRLiveLoadGraphController : public CEAFGraphControlWindow
 {
 public:
-   CXBRGraphController();
-   DECLARE_DYNCREATE(CXBRGraphController);
+   CXBRLiveLoadGraphController();
+   DECLARE_DYNCREATE(CXBRLiveLoadGraphController);
 
-   CGraphDefinitions GetSelectedGraphDefinitions();
+   std::vector<IndexType> GetSelectedLiveLoadConfigurations();
    ActionType GetActionType();
    PierIDType GetPierID();
+   pgsTypes::LoadRatingType GetLoadRatingType();
+   VehicleIndexType GetVehicleIndex();
 
    void EnableControls(BOOL bEnable);
 
    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 
    void FillLoadingList();
+   void SelectAll();
+   void Next();
+   void Prev();
+
+   void RatingTypeChanged();
 
 protected:
 
    virtual BOOL OnInitDialog();
 
-	//{{AFX_MSG(CXBRGraphController)
+	//{{AFX_MSG(CXBRLiveLoadGraphController)
    //}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
 
    void FillPierList();
+   void FillRatingType();
+   void FillVehicleType();
 
 #ifdef _DEBUG
 public:

@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include "GraphDefinition.h"
+#include "LiveLoadGraphDefinition.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -8,11 +8,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-CGraphDefinition::CGraphDefinition()
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition()
 {
 }
 
-CGraphDefinition::CGraphDefinition(
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(
 IDType id,
 LPCTSTR name,
 pgsTypes::LimitState ls
@@ -23,7 +23,7 @@ pgsTypes::LimitState ls
 }
 
 // constructor for combinations
-CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,xbrTypes::CombinedForceType comb) :
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(IDType id,LPCTSTR name,xbrTypes::CombinedForceType comb) :
 m_ID(id), m_Name(name)
 {
    m_GraphType = graphCombined;
@@ -31,7 +31,7 @@ m_ID(id), m_Name(name)
 }
 
 // constructor for product loads
-CGraphDefinition::CGraphDefinition(
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(
 IDType id,
 LPCTSTR name,
 xbrTypes::ProductForceType type
@@ -42,7 +42,7 @@ xbrTypes::ProductForceType type
 }
 
 // constructor for vehicular live loads
-CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) :
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) :
 m_ID(id),
 m_Name(name)
 {
@@ -52,7 +52,7 @@ m_Name(name)
 }
 
 // constructor for live loads
-CGraphDefinition::CGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType) :
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(IDType id,LPCTSTR name,pgsTypes::LoadRatingType ratingType) :
 m_ID(id),
 m_Name(name)
 {
@@ -61,7 +61,7 @@ m_Name(name)
 }
 
 // constructor for ultimate forces
-CGraphDefinition::CGraphDefinition(
+CXBRLiveLoadGraphDefinition::CXBRLiveLoadGraphDefinition(
 IDType id,
 LPCTSTR name
 ): m_ID(id),m_Name(name)
@@ -76,37 +76,37 @@ LPCTSTR name
 //}
 
 //////////////////////////////////////////////////////////////////////
-CGraphDefinitions::CGraphDefinitions()
+CXBRLiveLoadGraphDefinitions::CXBRLiveLoadGraphDefinitions()
 {
 }
 
-void CGraphDefinitions::AddGraphDefinition(const CGraphDefinition& def)
+void CXBRLiveLoadGraphDefinitions::AddGraphDefinition(const CXBRLiveLoadGraphDefinition& def)
 {
    m_Definitions.push_back(def);
 }
 
-IndexType CGraphDefinitions::GetGraphDefinitionCount() const
+IndexType CXBRLiveLoadGraphDefinitions::GetGraphDefinitionCount() const
 {
    return m_Definitions.size();
 }
 
-CGraphDefinition& CGraphDefinitions::GetGraphDefinition(IndexType graphIdx)
+CXBRLiveLoadGraphDefinition& CXBRLiveLoadGraphDefinitions::GetGraphDefinition(IndexType graphIdx)
 {
    return m_Definitions[graphIdx];
 }
 
-const CGraphDefinition& CGraphDefinitions::GetGraphDefinition(IndexType graphIdx) const
+const CXBRLiveLoadGraphDefinition& CXBRLiveLoadGraphDefinitions::GetGraphDefinition(IndexType graphIdx) const
 {
    return m_Definitions[graphIdx];
 }
 
-CGraphDefinition& CGraphDefinitions::FindGraphDefinition(IDType graphID)
+CXBRLiveLoadGraphDefinition& CXBRLiveLoadGraphDefinitions::FindGraphDefinition(IDType graphID)
 {
    GraphDefinitionIterator iter(m_Definitions.begin());
    GraphDefinitionIterator end(m_Definitions.end());
    for ( ; iter != end; iter++ )
    {
-      CGraphDefinition& def(*iter);
+      CXBRLiveLoadGraphDefinition& def(*iter);
       if ( def.m_ID == graphID )
       {
          return def;
@@ -117,13 +117,13 @@ CGraphDefinition& CGraphDefinitions::FindGraphDefinition(IDType graphID)
    return m_Definitions.back();
 }
 
-const CGraphDefinition& CGraphDefinitions::FindGraphDefinition(IDType graphID) const
+const CXBRLiveLoadGraphDefinition& CXBRLiveLoadGraphDefinitions::FindGraphDefinition(IDType graphID) const
 {
    ConstGraphDefinitionIterator iter(m_Definitions.begin());
    ConstGraphDefinitionIterator end(m_Definitions.end());
    for ( ; iter != end; iter++ )
    {
-      const CGraphDefinition& def(*iter);
+      const CXBRLiveLoadGraphDefinition& def(*iter);
       if ( def.m_ID == graphID )
       {
          return def;
@@ -134,14 +134,14 @@ const CGraphDefinition& CGraphDefinitions::FindGraphDefinition(IDType graphID) c
    return m_Definitions.back();
 }
 
-IndexType CGraphDefinitions::GetGraphIndex(IDType graphID) const
+IndexType CXBRLiveLoadGraphDefinitions::GetGraphIndex(IDType graphID) const
 {
    IndexType index = 0;
    ConstGraphDefinitionIterator iter(m_Definitions.begin());
    ConstGraphDefinitionIterator end(m_Definitions.end());
    for ( ; iter != end; iter++, index++ )
    {
-      const CGraphDefinition& def = *iter;
+      const CXBRLiveLoadGraphDefinition& def = *iter;
       if ( def.m_ID == graphID )
       {
          return index;
@@ -152,23 +152,23 @@ IndexType CGraphDefinitions::GetGraphIndex(IDType graphID) const
    return INVALID_INDEX;
 }
 
-void CGraphDefinitions::RemoveGraphDefinition(IndexType graphIdx)
+void CXBRLiveLoadGraphDefinitions::RemoveGraphDefinition(IndexType graphIdx)
 {
    m_Definitions.erase(m_Definitions.begin()+graphIdx);
 }
 
-void CGraphDefinitions::RemoveGraphDefinitionByID(IDType graphID)
+void CXBRLiveLoadGraphDefinitions::RemoveGraphDefinitionByID(IDType graphID)
 {
    RemoveGraphDefinition(GetGraphIndex(graphID));
 }
 
-//std::_tstring CGraphDefinitions::GetDefaultLoadCase(IntervalIndexType intervalIdx) const
+//std::_tstring CXBRLiveLoadGraphDefinitions::GetDefaultLoadCase(IntervalIndexType intervalIdx) const
 //{
 //   // return the of the first graph definition that is applicable to the given stage
 //   ConstGraphDefinitionIterator iter;
 //   for ( iter = m_Definitions.begin(); iter != m_Definitions.end(); iter++ )
 //   {
-//      const CGraphDefinition& def = *iter;
+//      const CXBRLiveLoadGraphDefinition& def = *iter;
 //      std::set<IntervalIndexType>::const_iterator found = def.m_IntervalApplicability.find(intervalIdx);
 //      if (found != def.m_IntervalApplicability.end())
 //      {
@@ -179,7 +179,7 @@ void CGraphDefinitions::RemoveGraphDefinitionByID(IDType graphID)
 //   return _T("DC");
 //}
 //   
-//std::vector< std::pair<std::_tstring,IDType> > CGraphDefinitions::GetLoadings(IntervalIndexType intervalIdx, ActionType action) const
+//std::vector< std::pair<std::_tstring,IDType> > CXBRLiveLoadGraphDefinitions::GetLoadings(IntervalIndexType intervalIdx, ActionType action) const
 //{
 //   std::vector< std::pair<std::_tstring,IDType> > lcNames;
 //
@@ -231,7 +231,7 @@ void CGraphDefinitions::RemoveGraphDefinitionByID(IDType graphID)
 //   return lcNames;
 //}
 
-void CGraphDefinitions::Clear()
+void CXBRLiveLoadGraphDefinitions::Clear()
 {
    m_Definitions.clear();
 }

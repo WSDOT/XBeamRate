@@ -23,8 +23,8 @@
 #include "stdafx.h"
 
 #include "resource.h"
-#include "GraphController.h"
-#include "GraphBuilder.h"
+#include "AnalysisResultsGraphController.h"
+#include "AnalysisResultsGraphBuilder.h"
 
 #include <IFace\XBeamRateAgent.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
@@ -34,18 +34,18 @@
 #include <EAF\EAFUtilities.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
-IMPLEMENT_DYNCREATE(CXBRGraphController,CEAFGraphControlWindow)
+IMPLEMENT_DYNCREATE(CXBRAnalysisResultsGraphController,CEAFGraphControlWindow)
 
-CXBRGraphController::CXBRGraphController()
+CXBRAnalysisResultsGraphController::CXBRAnalysisResultsGraphController()
 {
 }
 
-BEGIN_MESSAGE_MAP(CXBRGraphController, CEAFGraphControlWindow)
-	//{{AFX_MSG_MAP(CXBRGraphController)
+BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphController, CEAFGraphControlWindow)
+	//{{AFX_MSG_MAP(CXBRAnalysisResultsGraphController)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-BOOL CXBRGraphController::OnInitDialog()
+BOOL CXBRAnalysisResultsGraphController::OnInitDialog()
 {
    FillPierList();
    FillLoadingList();
@@ -57,21 +57,21 @@ BOOL CXBRGraphController::OnInitDialog()
 }
 
 #ifdef _DEBUG
-void CXBRGraphController::AssertValid() const
+void CXBRAnalysisResultsGraphController::AssertValid() const
 {
 	CEAFGraphControlWindow::AssertValid();
 }
 
-void CXBRGraphController::Dump(CDumpContext& dc) const
+void CXBRAnalysisResultsGraphController::Dump(CDumpContext& dc) const
 {
 	CEAFGraphControlWindow::Dump(dc);
 }
 #endif //_DEBUG
 
-CGraphDefinitions CXBRGraphController::GetSelectedGraphDefinitions()
+CXBRAnalysisResultsGraphDefinitions CXBRAnalysisResultsGraphController::GetSelectedGraphDefinitions()
 {
-   CXBRGraphBuilder* pGraphBuilder = (CXBRGraphBuilder*)GetGraphBuilder();
-   const CGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
+   CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
+   const CXBRAnalysisResultsGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
 
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
    int nSel = plbLoading->GetSelCount();
@@ -79,19 +79,19 @@ CGraphDefinitions CXBRGraphController::GetSelectedGraphDefinitions()
    selectedItems.SetSize(nSel);
    plbLoading->GetSelItems(nSel,selectedItems.GetData());
 
-   CGraphDefinitions selectedGraphDefinitions;
+   CXBRAnalysisResultsGraphDefinitions selectedGraphDefinitions;
    for ( int i = 0; i < nSel; i++ )
    {
       int idx = selectedItems.GetAt(i);
       IDType graphID = (IDType)plbLoading->GetItemData(idx);
-      const CGraphDefinition& graphDef(graphDefinitions.FindGraphDefinition(graphID));
+      const CXBRAnalysisResultsGraphDefinition& graphDef(graphDefinitions.FindGraphDefinition(graphID));
       selectedGraphDefinitions.AddGraphDefinition(graphDef);
    }
 
    return selectedGraphDefinitions;
 }
 
-ActionType CXBRGraphController::GetActionType()
+ActionType CXBRAnalysisResultsGraphController::GetActionType()
 {
 #pragma Reminder("UPDATE: need to add load rating graph action")
    int graphType = GetCheckedRadioButton(IDC_MOMENT,IDC_SHEAR);
@@ -105,7 +105,7 @@ ActionType CXBRGraphController::GetActionType()
    }
 }
 
-PierIDType CXBRGraphController::GetPierID()
+PierIDType CXBRAnalysisResultsGraphController::GetPierID()
 {
    CComboBox* pcbPier = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPier->GetCurSel();
@@ -119,17 +119,17 @@ BOOL CALLBACK EnableChildWindow(HWND hwnd,LPARAM lParam)
    return TRUE;
 }
 
-void CXBRGraphController::EnableControls(BOOL bEnable)
+void CXBRAnalysisResultsGraphController::EnableControls(BOOL bEnable)
 {
    EnumChildWindows(GetSafeHwnd(),EnableChildWindow,bEnable);
 }
 
-void CXBRGraphController::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
+void CXBRAnalysisResultsGraphController::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
    FillPierList();
 }
 
-void CXBRGraphController::FillPierList()
+void CXBRAnalysisResultsGraphController::FillPierList()
 {
    CComboBox* pcbPiers = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPiers->GetCurSel();
@@ -170,16 +170,16 @@ void CXBRGraphController::FillPierList()
    pcbPiers->SetCurSel(curSel == CB_ERR ? 0 : curSel);
 }
 
-void CXBRGraphController::FillLoadingList()
+void CXBRAnalysisResultsGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
 
-   CXBRGraphBuilder* pGraphBuilder = (CXBRGraphBuilder*)GetGraphBuilder();
-   const CGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
+   CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
+   const CXBRAnalysisResultsGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
    IndexType nGraphs = graphDefinitions.GetGraphDefinitionCount();
    for ( IndexType graphIdx = 0; graphIdx < nGraphs; graphIdx++ )
    {
-      const CGraphDefinition& graphDefinition(graphDefinitions.GetGraphDefinition(graphIdx));
+      const CXBRAnalysisResultsGraphDefinition& graphDefinition(graphDefinitions.GetGraphDefinition(graphIdx));
       
       int idx = plbLoading->AddString(graphDefinition.m_Name.c_str());
       plbLoading->SetItemData(idx,graphDefinition.m_ID);
