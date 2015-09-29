@@ -5,7 +5,8 @@ class txnEditLoadRatingOptions :
    public txnTransaction
 {
 public:
-   txnEditLoadRatingOptions(pgsTypes::AnalysisType oldAnalysisType,pgsTypes::AnalysisType newAnalysisType);
+   txnEditLoadRatingOptions(pgsTypes::AnalysisType oldAnalysisType,pgsTypes::AnalysisType newAnalysisType,
+                            xbrTypes::PermitRatingMethod oldMethod,xbrTypes::PermitRatingMethod newMethod);
    ~txnEditLoadRatingOptions(void);
 
    virtual bool Execute();
@@ -19,4 +20,5 @@ private:
    void Execute(int i);
 
    pgsTypes::AnalysisType m_AnalysisType[2];
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod[2];
 };

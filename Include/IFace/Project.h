@@ -234,6 +234,7 @@ DEFINE_GUID(IID_IXBRProjectEdit,
 interface IXBRProjectEdit : IUnknown
 {
    virtual void EditPier(int nPage) = 0;
+   virtual void EditOptions() = 0;
 };
 
 

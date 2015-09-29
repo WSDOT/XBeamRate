@@ -71,4 +71,10 @@ typedef struct xbrTypes
       rlaBearings    // apply wheel line reactions to bearings through a load transfer model
    } ReactionLoadApplicationType;
 
+   typedef enum PermitRatingMethod
+   {
+      prmAASHTO, // use AASHTO MBE Equation 6A.4.2.1-1
+      prmWSDOT   // use WSDOT BDM Equation 13.1.1A-2
+   } PermitRatingMethod;
+
 } xbrTypes;

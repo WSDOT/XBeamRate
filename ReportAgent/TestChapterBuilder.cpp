@@ -7,6 +7,7 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 
 #include "XBeamRateReportSpecification.h"
 
@@ -170,121 +171,137 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    *pPara << _T("Upper XBeam Dead Load, w = ") << fpl.SetValue(pProductForces->GetUpperCrossBeamLoading(pierID)) << rptNewLine;
    *pPara << rptNewLine;
 
-   pTable = new rptRcTable(6,0);
-   pTable->TableCaption() << _T("Live Load - Design Inventory");
-   *pPara << pTable << rptNewLine;
-   (*pTable)(0,0) << _T("POI ID");
-   (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   (*pTable)(0,2) << COLHDR(_T("Mmin"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
-   (*pTable)(0,3) << _T("Mmin Configuration");
-   (*pTable)(0,4) << COLHDR(_T("Mmax"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
-   (*pTable)(0,5) << _T("Mmax Configuration");
-   row = pTable->GetNumberOfHeaderRows();
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   // Write live load results for design and legal cases
+   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
+   int nRatingTypes = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO ? 6 : 4);
+   for ( int i = 0; i < nRatingTypes; i++ )
    {
-      (*pTable)(row,0) << poi.GetID();
-      (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
-
-      Float64 Mmin,Mmax;
-      VehicleIndexType minVehIdx,maxVehIdx;
-      pResults->GetMoment(pierID,pgsTypes::lrDesign_Inventory,poi,&Mmin,&Mmax,&minVehIdx,&maxVehIdx);
-
-      Float64 vehMmin, vehMmax, dummy;
-      WheelLineConfiguration minConfig, maxConfig;
-      pResults->GetMoment(pierID,pgsTypes::lrDesign_Inventory,minVehIdx,poi,&vehMmin,&dummy,&minConfig,NULL);
-      pResults->GetMoment(pierID,pgsTypes::lrDesign_Inventory,maxVehIdx,poi,&dummy,&vehMmax,NULL,&maxConfig);
-
-      ATLASSERT(IsEqual(Mmin,vehMmin));
-      ATLASSERT(IsEqual(Mmax,vehMmax));
-
-      (*pTable)(row,2) << moment.SetValue(Mmin);
-      
-      (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,minVehIdx) << rptNewLine;
-      BOOST_FOREACH(WheelLinePlacement& placement,minConfig)
+      pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
+      if ( nVehicles == 0 )
       {
-         (*pTable)(row,3) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
+         continue;
       }
 
-      (*pTable)(row,4) << moment.SetValue(Mmax);
-      
-      (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,maxVehIdx) << rptNewLine;
-      BOOST_FOREACH(WheelLinePlacement& placement,maxConfig)
+      std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,INVALID_INDEX);
+
+      // Live Load Moment Results
+      pTable = new rptRcTable(6,0);
+      pTable->TableCaption() << strLiveLoadName.c_str();
+      *pPara << pTable << rptNewLine;
+      (*pTable)(0,0) << _T("POI ID");
+      (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      (*pTable)(0,2) << COLHDR(_T("Mmin"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+      (*pTable)(0,3) << _T("Mmin Configuration");
+      (*pTable)(0,4) << COLHDR(_T("Mmax"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+      (*pTable)(0,5) << _T("Mmax Configuration");
+      row = pTable->GetNumberOfHeaderRows();
+      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
       {
-         (*pTable)(row,5) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
-      }
+         (*pTable)(row,0) << poi.GetID();
+         (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
 
-      row++;
-   }
+         Float64 Mmin,Mmax;
+         VehicleIndexType minVehIdx,maxVehIdx;
+         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,&minVehIdx,&maxVehIdx);
 
+         Float64 vehMmin, vehMmax, dummy;
+         WheelLineConfiguration minConfig, maxConfig;
+         pResults->GetMoment(pierID,ratingType,minVehIdx,poi,&vehMmin,&dummy,&minConfig,NULL);
+         pResults->GetMoment(pierID,ratingType,maxVehIdx,poi,&dummy,&vehMmax,NULL,&maxConfig);
 
-   pTable = new rptRcTable(6,0);
-   pTable->TableCaption() << _T("Live Load - Design Inventory");
-   *pPara << pTable << rptNewLine;
-   (*pTable)(0,0) << _T("POI ID");
-   (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   (*pTable)(0,2) << COLHDR(_T("Vmin"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
-   (*pTable)(0,3) << _T("Vmin Configuration");
-   (*pTable)(0,4) << COLHDR(_T("Vmax"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
-   (*pTable)(0,5) << _T("Vmax Configuration");
-   row = pTable->GetNumberOfHeaderRows();
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
-   {
-      (*pTable)(row,0) << poi.GetID();
-      (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
+         ATLASSERT(IsEqual(Mmin,vehMmin));
+         ATLASSERT(IsEqual(Mmax,vehMmax));
 
-      sysSectionValue Vmin,Vmax;
-      VehicleIndexType minLeftVehIdx,minRightVehIdx,maxLeftVehIdx,maxRightVehIdx;
-      pResults->GetShear(pierID,pgsTypes::lrDesign_Inventory,poi,&Vmin,&Vmax,&minLeftVehIdx,&minRightVehIdx,&maxLeftVehIdx,&maxRightVehIdx);
-
-      sysSectionValue vehVmin, vehVmax, dummy;
-      WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
-      pResults->GetShear(pierID,pgsTypes::lrDesign_Inventory,minLeftVehIdx, poi,&vehVmin,&dummy,&minLeftConfig,NULL,NULL,NULL);
-      pResults->GetShear(pierID,pgsTypes::lrDesign_Inventory,minRightVehIdx,poi,&vehVmin,&dummy,NULL,&minRightConfig,NULL,NULL);
-      pResults->GetShear(pierID,pgsTypes::lrDesign_Inventory,maxLeftVehIdx, poi,&dummy,&vehVmax,NULL,NULL,&maxLeftConfig,NULL);
-      pResults->GetShear(pierID,pgsTypes::lrDesign_Inventory,maxRightVehIdx,poi,&dummy,&vehVmax,NULL,NULL,NULL,&maxRightConfig);
-
-      ATLASSERT(IsEqual(Vmin.Left(),vehVmin.Left()));
-      ATLASSERT(IsEqual(Vmax.Left(),vehVmax.Left()));
-      ATLASSERT(IsEqual(Vmin.Right(),vehVmin.Right()));
-      ATLASSERT(IsEqual(Vmax.Right(),vehVmax.Right()));
-
-      (*pTable)(row,2) << shear.SetValue(Vmin);
-      
-      (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,minLeftVehIdx) << rptNewLine;
-      BOOST_FOREACH(WheelLinePlacement& placement,minLeftConfig)
-      {
-         (*pTable)(row,3) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
-      }
-
-      if ( minLeftVehIdx != minRightVehIdx )
-      {
-         (*pTable)(row,3) << _T("--------------") << rptNewLine;
-         (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,minRightVehIdx) << rptNewLine;
-         BOOST_FOREACH(WheelLinePlacement& placement,minRightConfig)
+         (*pTable)(row,2) << moment.SetValue(Mmin);
+         
+         (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,ratingType,minVehIdx) << rptNewLine;
+         BOOST_FOREACH(WheelLinePlacement& placement,minConfig)
          {
             (*pTable)(row,3) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
          }
-      }
 
-      (*pTable)(row,4) << shear.SetValue(Vmax);
-      
-      (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,maxLeftVehIdx) << rptNewLine;
-      BOOST_FOREACH(WheelLinePlacement& placement,maxLeftConfig)
-      {
-         (*pTable)(row,5) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
-      }
-
-      if ( maxLeftVehIdx != maxRightVehIdx )
-      {
-         (*pTable)(row,5) << _T("--------------") << rptNewLine;
-         (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,pgsTypes::lrDesign_Inventory,maxRightVehIdx) << rptNewLine;
-         BOOST_FOREACH(WheelLinePlacement& placement,maxRightConfig)
+         (*pTable)(row,4) << moment.SetValue(Mmax);
+         
+         (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,ratingType,maxVehIdx) << rptNewLine;
+         BOOST_FOREACH(WheelLinePlacement& placement,maxConfig)
          {
             (*pTable)(row,5) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
          }
+
+         row++;
       }
 
-      row++;
+      // Live Load Shear Results
+      pTable = new rptRcTable(6,0);
+      pTable->TableCaption() << strLiveLoadName.c_str();
+      *pPara << pTable << rptNewLine;
+      (*pTable)(0,0) << _T("POI ID");
+      (*pTable)(0,1) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      (*pTable)(0,2) << COLHDR(_T("Vmin"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
+      (*pTable)(0,3) << _T("Vmin Configuration");
+      (*pTable)(0,4) << COLHDR(_T("Vmax"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
+      (*pTable)(0,5) << _T("Vmax Configuration");
+      row = pTable->GetNumberOfHeaderRows();
+      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+      {
+         (*pTable)(row,0) << poi.GetID();
+         (*pTable)(row,1) << length.SetValue(poi.GetDistFromStart());
+
+         sysSectionValue Vmin,Vmax;
+         VehicleIndexType minLeftVehIdx,minRightVehIdx,maxLeftVehIdx,maxRightVehIdx;
+         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,&minLeftVehIdx,&minRightVehIdx,&maxLeftVehIdx,&maxRightVehIdx);
+
+         sysSectionValue vehVmin, vehVmax, dummy;
+         WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
+         pResults->GetShear(pierID,ratingType,minLeftVehIdx, poi,&vehVmin,&dummy,&minLeftConfig,NULL,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,minRightVehIdx,poi,&vehVmin,&dummy,NULL,&minRightConfig,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,maxLeftVehIdx, poi,&dummy,&vehVmax,NULL,NULL,&maxLeftConfig,NULL);
+         pResults->GetShear(pierID,ratingType,maxRightVehIdx,poi,&dummy,&vehVmax,NULL,NULL,NULL,&maxRightConfig);
+
+         ATLASSERT(IsEqual(Vmin.Left(),vehVmin.Left()));
+         ATLASSERT(IsEqual(Vmax.Left(),vehVmax.Left()));
+         ATLASSERT(IsEqual(Vmin.Right(),vehVmin.Right()));
+         ATLASSERT(IsEqual(Vmax.Right(),vehVmax.Right()));
+
+         (*pTable)(row,2) << shear.SetValue(Vmin);
+         
+         (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,ratingType,minLeftVehIdx) << rptNewLine;
+         BOOST_FOREACH(WheelLinePlacement& placement,minLeftConfig)
+         {
+            (*pTable)(row,3) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
+         }
+
+         if ( minLeftVehIdx != minRightVehIdx )
+         {
+            (*pTable)(row,3) << _T("--------------") << rptNewLine;
+            (*pTable)(row,3) << pProject->GetLiveLoadName(pierID,ratingType,minRightVehIdx) << rptNewLine;
+            BOOST_FOREACH(WheelLinePlacement& placement,minRightConfig)
+            {
+               (*pTable)(row,3) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
+            }
+         }
+
+         (*pTable)(row,4) << shear.SetValue(Vmax);
+         
+         (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,ratingType,maxLeftVehIdx) << rptNewLine;
+         BOOST_FOREACH(WheelLinePlacement& placement,maxLeftConfig)
+         {
+            (*pTable)(row,5) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
+         }
+
+         if ( maxLeftVehIdx != maxRightVehIdx )
+         {
+            (*pTable)(row,5) << _T("--------------") << rptNewLine;
+            (*pTable)(row,5) << pProject->GetLiveLoadName(pierID,ratingType,maxRightVehIdx) << rptNewLine;
+            BOOST_FOREACH(WheelLinePlacement& placement,maxRightConfig)
+            {
+               (*pTable)(row,5) << force.SetValue(placement.P) << _T(" @ ") << location.SetValue(placement.Xxb) << rptNewLine;
+            }
+         }
+
+         row++;
+      }
    }
 
    pTable = new rptRcTable(4,0);

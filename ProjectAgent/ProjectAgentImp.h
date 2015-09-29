@@ -305,9 +305,13 @@ public:
    virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions();
    virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType);
 
+   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod();
+   virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod);
+
 // IXBRProjectEdit
 public:
    virtual void EditPier(int nPage);
+   virtual void EditOptions();
 
 // IXBREvents
 public:
@@ -395,6 +399,9 @@ private:
    xbrTypes::ReactionLoadApplicationType& GetPrivateReactionLoadApplication(PierIDType pierID);
 
    pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
+
+   // Options
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
    // Events
    int m_EventHoldCount;

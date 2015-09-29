@@ -8,6 +8,7 @@
 #include <txnEditPier.h>
 
 #include "PierDlg.h"
+#include "OptionsDlg.h"
 
 #include <IFace\Project.h>
 
@@ -15,6 +16,7 @@
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
    ON_COMMAND(ID_EDIT_PROJECT_NAME,OnEditProjectName)
    ON_COMMAND(ID_EDIT_PIER, &CAgentCmdTarget::OnEditPier)
+   ON_COMMAND(ID_EDIT_OPTIONS,&CAgentCmdTarget::OnEditOptions)
 END_MESSAGE_MAP()
 
 CAgentCmdTarget::CAgentCmdTarget()
@@ -93,5 +95,15 @@ void CAgentCmdTarget::OnEditPier()
       txnEditPier txn(oldPierData,newPierData);
       GET_IFACE(IEAFTransactions,pTransactions);
       pTransactions->Execute(txn);
+   }
+}
+
+void CAgentCmdTarget::OnEditOptions()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   COptionsDlg dlg;
+   dlg.m_PermitRatingMethod = xbrTypes::prmAASHTO;
+   if ( dlg.DoModal() == IDOK )
+   {
    }
 }

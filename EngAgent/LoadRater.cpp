@@ -102,15 +102,15 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    //pgsTypes::LiveLoadType llType = GetLiveLoadType(ratingType);
    //std::vector<std::_tstring> strLLNames = pProductLoads->GetVehicleNames(llType,girderKey);
 
-   //CollectionIndexType nPOI = vPoi.size();
-   //for ( CollectionIndexType i = 0; i < nPOI; i++ )
-   //{
-   //   const pgsPointOfInterest& poi = vPoi[i];
+   CollectionIndexType nPOI = vPoi.size();
+   for ( CollectionIndexType i = 0; i < nPOI; i++ )
+   {
+      const xbrPointOfInterest& poi = vPoi[i];
 
    //   Float64 condition_factor = (bPositiveMoment ? pRatingSpec->GetGirderConditionFactor(poi.GetSegmentKey()) 
    //                                               : pRatingSpec->GetDeckConditionFactor() );
 
-   //   Float64 DC   = (bPositiveMoment ? vDCmax[i]   : vDCmin[i]);
+      Float64 DC   = vDC[i];//(bPositiveMoment ? vDCmax[i]   : vDCmin[i]);
    //   Float64 DW   = (bPositiveMoment ? vDWmax[i]   : vDWmin[i]);
    //   Float64 CR   = (bPositiveMoment ? vCRmax[i]   : vCRmin[i]);
    //   Float64 SH   = (bPositiveMoment ? vSHmax[i]   : vSHmin[i]);
@@ -178,9 +178,9 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
 
    //   Float64 W = pProductLoads->GetVehicleWeight(llType,truck_index);
 
-   //   pgsMomentRatingArtifact momentArtifact;
-   //   momentArtifact.SetRatingType(ratingType);
-   //   momentArtifact.SetPointOfInterest(poi);
+      xbrMomentRatingArtifact momentArtifact;
+      momentArtifact.SetRatingType(ratingType);
+      momentArtifact.SetPointOfInterest(poi);
    //   momentArtifact.SetVehicleIndex(truck_index);
    //   momentArtifact.SetVehicleWeight(W);
    //   momentArtifact.SetVehicleName(strVehicleName.c_str());
@@ -190,7 +190,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    //   momentArtifact.SetMinimumReinforcementFactor(K);
    //   momentArtifact.SetNominalMomentCapacity(Mn);
    //   momentArtifact.SetDeadLoadFactor(gDC);
-   //   momentArtifact.SetDeadLoadMoment(DC);
+      momentArtifact.SetDeadLoadMoment(DC);
    //   momentArtifact.SetWearingSurfaceFactor(gDW);
    //   momentArtifact.SetWearingSurfaceMoment(DW);
    //   momentArtifact.SetCreepFactor(gCR);
@@ -204,8 +204,8 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    //   momentArtifact.SetLiveLoadFactor(gLL);
    //   momentArtifact.SetLiveLoadMoment(LLIM+PL);
 
-   //   ratingArtifact.AddArtifact(poi,momentArtifact,bPositiveMoment);
-   //}
+      ratingArtifact.AddArtifact(poi,momentArtifact,bPositiveMoment);
+   }
 }
 
 void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
@@ -485,7 +485,7 @@ pgsTypes::LimitState xbrLoadRater::GetStrengthLimitStateType(pgsTypes::LoadRatin
 
 void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax, std::vector<Float64>& vAdjLLIMmin, std::vector<Float64>& vAdjLLIMmax)
 {
-   pgsTypes::LiveLoadType llType = GetLiveLoadType(ratingType);
+   pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
 
    GET_IFACE(IXBRAnalysisResults,pResults);
    vDC = pResults->GetMoment(pierID,xbrTypes::lcDC,vPoi);

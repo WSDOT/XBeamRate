@@ -165,10 +165,12 @@ void GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloade
    // 2'| 6' |2'
    //   v    v
    // ==========
+
+   // LRFR 6A.2.3.2
    Float64 w10 = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
    Float64 w12 = ::ConvertToSysUnits(12.0,unitMeasure::Feet);
    Float64 w18 = ::ConvertToSysUnits(18.0,unitMeasure::Feet);
-   Float64 w24 = ::ConvertToSysUnits(24.0,unitMeasure::Feet);
+   Float64 w20 = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
    if ( Wcc < w12 )
    {
       *pWlane = 0;
@@ -181,7 +183,7 @@ void GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloade
       *pnLanes = 1;
       *pWloadedLane = w10;
    }
-   else if ( ::InRange(w18,Wcc,w24) )
+   else if ( ::InRange(w18,Wcc,w20) )
    {
       *pWlane = Wcc/2;
       *pnLanes = 2;

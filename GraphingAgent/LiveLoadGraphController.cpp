@@ -266,6 +266,7 @@ void CXBRLiveLoadGraphController::Prev()
 void CXBRLiveLoadGraphController::RatingTypeChanged()
 {
    FillVehicleType();
+   FillLoadingList();
 }
 
 void CXBRLiveLoadGraphController::FillLoadingList()
@@ -280,7 +281,8 @@ void CXBRLiveLoadGraphController::FillLoadingList()
 
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
 
-   IndexType nLiveLoadConfigs = pProductForces->GetLiveLoadConfigurationCount(pierID);
+   pgsTypes::LoadRatingType ratingType = GetLoadRatingType();
+   IndexType nLiveLoadConfigs = pProductForces->GetLiveLoadConfigurationCount(pierID,ratingType);
    for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigs; llConfigIdx++ )
    {
       CString str;

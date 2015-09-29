@@ -241,6 +241,8 @@ BEGIN
     LTEXT           "When PGSuper is in Envelope Mode, use",IDC_ANALYSIS_MODE_LABEL,14,21,130,8
     COMBOBOX        IDC_ANALYSIS_MODE,148,18,103,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "for the Pier reactions",IDC_STATIC,257,20,68,8
+    LTEXT           "Compute permit rating factors using",IDC_STATIC,14,37,116,8
+    COMBOBOX        IDC_PERMIT_FACTORS,136,36,180,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
 END
 
 

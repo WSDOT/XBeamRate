@@ -49,6 +49,7 @@
 #include <EAF\EAFTransactions.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\Pier.h>
+#include <IFace\RatingSpecification.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

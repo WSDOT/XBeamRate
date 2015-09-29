@@ -16,11 +16,13 @@ public:
    virtual BOOL OnInitDialog();
 
    pgsTypes::AnalysisType m_AnalysisType;
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
    void FillAnalysisModeComboBox();
+   void FillPermitRatingMethodComboBox();
 
 	DECLARE_MESSAGE_MAP()
 };

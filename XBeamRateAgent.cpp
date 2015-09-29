@@ -595,6 +595,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
 
    GET_IFACE(IXBRRatingSpecification,pSpec);
    pPage->m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
+   pPage->m_PermitRatingMethod = pSpec->GetPermitRatingMethod();
 
    return pPage;
 }
@@ -607,9 +608,12 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    pgsTypes::AnalysisType oldAnalysisType = pSpec->GetAnalysisMethodForReactions();
    pgsTypes::AnalysisType newAnalysisType = pLROPage->m_AnalysisType;
 
+   xbrTypes::PermitRatingMethod oldMethod = pSpec->GetPermitRatingMethod();
+   xbrTypes::PermitRatingMethod newMethod = pLROPage->m_PermitRatingMethod;
+
    if ( oldAnalysisType != newAnalysisType )
    {
-      txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType);
+      txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType,oldMethod,newMethod);
       return pTxn;
    }
    else

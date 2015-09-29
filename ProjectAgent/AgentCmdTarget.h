@@ -14,4 +14,5 @@ private:
    DECLARE_MESSAGE_MAP()
 public:
    afx_msg void OnEditPier();
+   afx_msg void OnEditOptions();
 };

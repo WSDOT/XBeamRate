@@ -48,9 +48,10 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
-#include <IFace\Selection.h>
+#include <\ARP\PGSuper\Include\IFace\Selection.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

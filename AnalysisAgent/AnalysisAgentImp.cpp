@@ -27,6 +27,7 @@
 
 #include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
+#include <IFace\RatingSpecification.h>
 
 #include <Units\SysUnitsMgr.h>
 
@@ -1001,47 +1002,42 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
    return w;
 }
 
-IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID)
+IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
    ModelData* pModelData = GetModelData(pierID);
-   return (IndexType)(pModelData->m_NextLiveLoadCaseID - FIRST_LIVELOAD_ID);
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
+   {
+      return (IndexType)(pModelData->m_LastSingleLaneLoadCaseID - FIRST_LIVELOAD_ID + 1);
+   }
+   else
+   {
+      return (IndexType)(pModelData->m_NextLiveLoadCaseID - FIRST_LIVELOAD_ID);
+   }
 }
 
 IndexType CAnalysisAgentImp::GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx)
 {
    ModelData* pModelData = GetModelData(pierID);
-   LiveLoadConfiguration key;
-   key.m_LoadCaseID = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
-   std::set<LiveLoadConfiguration>::iterator found = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(found != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llConfig = *found;
+   LoadCaseIDType lcid = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
+   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
    return llConfig.m_nLoadedLanes;
 }
 
-WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx)
+WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx)
 {
    ModelData* pModelData = GetModelData(pierID);
-   LiveLoadConfiguration key;
-   key.m_LoadCaseID = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
-   std::set<LiveLoadConfiguration>::iterator found = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(found != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llConfig = *found;
+   LoadCaseIDType lcid = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
+   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
 
-   GET_IFACE(IXBRProject,pProject);
-   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
-
-   WheelLineConfiguration wheelConfig;
-   std::vector<std::pair<Float64,Float64>>::iterator iter(llConfig.m_Loading.begin());
-   std::vector<std::pair<Float64,Float64>>::iterator end(llConfig.m_Loading.end());
-   for ( ; iter != end; iter++ )
+#if defined _DEBUG
+   if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
    {
-      std::pair<Float64,Float64> p(*iter);
-      WheelLinePlacement placement;
-      placement.P = R*p.first;
-      placement.Xxb = llConfig.m_Xoffset + p.second;
-      wheelConfig.push_back(placement);
+      ATLASSERT(llConfig.m_nLoadedLanes == 1);
    }
-   return wheelConfig;
+#endif
+
+   return GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llConfig,permitLaneIdx);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1196,6 +1192,12 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
 
+   if ( ::IsPermitRatingType(ratingType) && nLoadedLanes == 1 )
+   {
+      // MBE 6A.4.5.4.2a ... no MPF for permit cases
+      mpf = 1.0;
+   }
+
    Mz *= R*mpf;
 
    return Mz;
@@ -1228,6 +1230,12 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
 
+   if ( ::IsPermitRatingType(ratingType) && nLoadedLanes == 1 )
+   {
+      // MBE 6A.4.5.4.2a ... no MPF for permit cases
+      mpf = 1.0;
+   }
+
    Fy *= R*mpf;
 
    return Fy;
@@ -1257,12 +1265,173 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTy
    return vV;
 }
 
+//////////////////////////////////
+
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
+{
+   ATLASSERT(::IsPermitRatingType(permitRatingType));
+#if defined _DEBUG
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
+   // This method is only used for WSDOT permit ratings
+#endif
+
+   IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
+   if ( nLoadedLanes == 1 )
+   {
+      // if there is only one loaded lane, it is the permit vehicle... just use the regular implementation
+      *pMpermit = GetMoment(pierID,permitRatingType,vehicleIdx,llConfigIdx,poi);
+      *pMlegal = 0;
+      return;
+   }
+
+   // This strategy for this method is as follows:
+   // The specified live load configuration is for multiple loaded lanes.
+   // The results for this live load configuration assumes the same live load in all lanes
+   // We want all lanes loaded with the governing legal load reaction except for the
+   // permit lane, which has the permit reaction in it.
+   //
+   // The legal load moment is the moment for legal load in all lanes mines the legal load moment
+   // in the permit lane.
+
+   ModelData* pModelData = GetModelData(pierID);
+
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
+
+   // Get the results for all loaded lanes having the same vehicle reaction
+   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
+
+   Float64 FxLeft, FyLeft, MzLeft;
+   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 FxRight, FyRight, MzRight;
+   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 Mz_MultiLane;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Mz_MultiLane = -MzRight;
+   }
+   else
+   {
+      Mz_MultiLane = MzLeft;
+   }
+
+   Mz_MultiLane = IsZero(Mz_MultiLane) ? 0 : Mz_MultiLane;
+
+   // Get the results for the specified lane having a single vehicle
+   LoadCaseIDType lcidSingle = llConfig.m_LaneConfiguration[permitLaneIdx].m_SingleLaneLoadCaseID;
+
+   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 Mz_SingleLane;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Mz_SingleLane = -MzRight;
+   }
+   else
+   {
+      Mz_SingleLane = MzLeft;
+   }
+
+   Mz_SingleLane = IsZero(Mz_SingleLane) ? 0 : Mz_SingleLane;
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
+   Float64 Rlegal  = GetMaxLegalReaction(pierID);
+
+   Float64 Mlegal_in_all_lanes    = Rlegal*Mz_MultiLane;   // legal loads in all lanes
+   Float64 Mlegal_in_permit_lane  = Rlegal*Mz_SingleLane;  // legal load in permit lane
+   Float64 Mpermit_in_permit_lane = Rpermit*Mz_SingleLane; // permit load in permit lane
+
+   *pMlegal  = Mlegal_in_all_lanes - Mlegal_in_permit_lane;
+   *pMpermit = Mpermit_in_permit_lane;
+   
+   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   if ( nLoadedLanes == 1 )
+   {
+      mpf = 1.0;
+   }
+
+   *pMlegal  *= mpf;
+   *pMpermit *= mpf;
+}
+
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
+{
+   pvMpermit->clear();
+   pvMpermit->resize(vPoi.size());
+   pvMlegal->clear();
+   pvMlegal->resize(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 Mpermit,Mlegal;
+      GetMoment(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
+      pvMpermit->push_back(Mpermit);
+      pvMlegal->push_back(Mlegal);
+   }
+}
+
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
+{
+}
+
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
+{
+   pvMpermit->clear();
+   pvMpermit->resize(vPoi.size());
+   pvMlegal->clear();
+   pvMlegal->resize(vPoi.size());
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 Mpermit,Mlegal;
+      GetMoment(pierID,permitRatingType,vehicleIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
+      pvMpermit->push_back(Mpermit);
+      pvMlegal->push_back(Mlegal);
+   }
+}
+
+//////////////////////////////////
+
 void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration)
 {
    UnitLiveLoadResult liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
-   *pMin = liveLoadResult.m_MzMin;
-   *pMax = liveLoadResult.m_MzMax;
+   // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
+   // the presence of vehicles in other lanes (See MBE 6A.4.5.4.2a)
+   bool bIsPermitRating = ::IsPermitRatingType(ratingType);
+   if ( bIsPermitRating )
+   {
+      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
+      *pMin = liveLoadResult.m_MzMin_SingleLane/mpf;
+      *pMax = liveLoadResult.m_MzMax_SingleLane/mpf;
+   }
+   else
+   {
+      *pMin = liveLoadResult.m_MzMin;
+      *pMax = liveLoadResult.m_MzMax;
+   }
+
+#if defined _DEBUG
+   if ( bIsPermitRating )
+   {
+      GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+      ATLASSERT(pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT);
+      // Don't use this method for permit rating cases with the WSDOT method
+      // of computing rating factors is used.
+   }
+#endif
 
 
    GET_IFACE(IXBRProject,pProject);
@@ -1270,50 +1439,24 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
 
    ModelData* pModelData = GetModelData(pierID);
 
-   LiveLoadConfiguration key;
-   key.m_LoadCaseID = liveLoadResult.m_lcidMzMin;
-   std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMinConfig = (*foundLLConfig);
-
-   key.m_LoadCaseID = liveLoadResult.m_lcidMzMax;
-   foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMaxConfig = (*foundLLConfig);
+   LiveLoadConfiguration& llMinConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMin_SingleLane : liveLoadResult.m_lcidMzMin));
+   LiveLoadConfiguration& llMaxConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMax_SingleLane : liveLoadResult.m_lcidMzMax));
 
    *pMin *= R;
    *pMax *= R;
 
+   // NOTE: This method should not be used for permit rating cases with the WSDOT method
+   // for that reason, we don't need to know which lane the permit truck is in and hence
+   // we use INVALID_INDEX for the permit truck lane index
+
    if ( pMinConfiguration )
    {
-      pMinConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMinConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMinConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMinConfig.m_Xoffset + p.second;
-         pMinConfiguration->push_back(placement);
-      }
+      *pMinConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinConfig,INVALID_INDEX);
    }
    
    if ( pMaxConfiguration )
    {
-      pMaxConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMaxConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMaxConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMaxConfig.m_Xoffset + p.second;
-         pMaxConfiguration->push_back(placement);
-      }
+      *pMaxConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxConfig,INVALID_INDEX);
    }
 }
 
@@ -1321,35 +1464,41 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
 {
    UnitLiveLoadResult liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
-   *pMin = liveLoadResult.m_FyMin;
-   *pMax = liveLoadResult.m_FyMax;
+   // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
+   // the presence of vehicles in other lanes (See MBE 6A.4.5.4.2a)
+   bool bIsPermitRating = ::IsPermitRatingType(ratingType);
+   if ( bIsPermitRating )
+   {
+      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
+      *pMin = liveLoadResult.m_FyMin_SingleLane/mpf;
+      *pMax = liveLoadResult.m_FyMax_SingleLane/mpf;
+   }
+   else
+   {
+      *pMin = liveLoadResult.m_FyMin;
+      *pMax = liveLoadResult.m_FyMax;
+   }
 
+#if defined _DEBUG
+   if ( bIsPermitRating )
+   {
+      GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+      ATLASSERT(pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT);
+      // Don't use this method for permit rating cases with the WSDOT method
+      // of computing rating factors is used.
+   }
+#endif
 
    GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
    ModelData* pModelData = GetModelData(pierID);
 
-   LiveLoadConfiguration key;
-   key.m_LoadCaseID = liveLoadResult.m_lcidFyLeftMin;
-   std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMinLeftConfig = (*foundLLConfig);
+   LiveLoadConfiguration& llMinLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMin));
+   LiveLoadConfiguration& llMinRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMin_SingleLane : liveLoadResult.m_lcidFyRightMin));
 
-   key.m_LoadCaseID = liveLoadResult.m_lcidFyRightMin;
-   foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMinRightConfig = (*foundLLConfig);
-
-   key.m_LoadCaseID = liveLoadResult.m_lcidFyLeftMax;
-   foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMaxLeftConfig = (*foundLLConfig);
-
-   key.m_LoadCaseID = liveLoadResult.m_lcidFyRightMax;
-   foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   LiveLoadConfiguration& llMaxRightConfig = (*foundLLConfig);
+   LiveLoadConfiguration& llMaxLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMax));
+   LiveLoadConfiguration& llMaxRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMax_SingleLane : liveLoadResult.m_lcidFyRightMax));
 
    pMin->Left()  *= R;
    pMin->Right() *= R;
@@ -1357,68 +1506,28 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    pMax->Left()  *= R;
    pMax->Right() *= R;
 
+   // NOTE: This method should not be used for permit rating cases with the WSDOT method
+   // for that reason, we don't need to know which lane the permit truck is in and hence
+   // we use INVALID_INDEX for the permit truck lane index
+
    if ( pMinLeftConfiguration )
    {
-      pMinLeftConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMinLeftConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMinLeftConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMinLeftConfig.m_Xoffset + p.second;
-         pMinLeftConfiguration->push_back(placement);
-      }
+      *pMinLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinLeftConfig,INVALID_INDEX);
    }
 
    if ( pMinRightConfiguration )
    {
-      pMinRightConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMinRightConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMinRightConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMinRightConfig.m_Xoffset + p.second;
-         pMinRightConfiguration->push_back(placement);
-      }
+      *pMinRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinRightConfig,INVALID_INDEX);
    }
    
    if ( pMaxLeftConfiguration )
    {
-      pMaxLeftConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMaxLeftConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMaxLeftConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMaxLeftConfig.m_Xoffset + p.second;
-         pMaxLeftConfiguration->push_back(placement);
-      }
+      *pMaxLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxLeftConfig,INVALID_INDEX);
    }
    
    if ( pMaxRightConfiguration )
    {
-      pMaxRightConfiguration->clear();
-
-      std::vector<std::pair<Float64,Float64>>::iterator iter(llMaxRightConfig.m_Loading.begin());
-      std::vector<std::pair<Float64,Float64>>::iterator end(llMaxRightConfig.m_Loading.end());
-      for ( ; iter != end; iter++ )
-      {
-         std::pair<Float64,Float64> p(*iter);
-         WheelLinePlacement placement;
-         placement.P = R*p.first;
-         placement.Xxb = llMaxRightConfig.m_Xoffset + p.second;
-         pMaxRightConfiguration->push_back(placement);
-      }
+      *pMaxRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxRightConfig,INVALID_INDEX);
    }
 }
 
@@ -1975,7 +2084,9 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       {
          // wheel line reaction configuration is a sequence of vertical load and position from left curb line
          // pairs.
-         std::vector<std::pair<Float64,Float64>> vLoading = ConfigureWheelLineLoads(skew,stepSize,wLoadedLane,vGapPosition);
+         std::vector<Float64> vLoadPositions = ConfigureWheelLineLoads(skew,stepSize,wLoadedLane,vGapPosition);
+         ATLASSERT(vLoadPositions.size() % 2 == 0);
+         ATLASSERT(vLoadPositions.size()/2 == nLoadedLanes);
 
          // get the number of steps used to make the wheel line reaction configuration.
          IndexType nStepsUsed = std::accumulate(vGapPosition.begin(),vGapPosition.end(),(IndexType)0);
@@ -1987,8 +2098,8 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
 
 #if defined _DEBUG
          // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
-         Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet);
-         ATLASSERT(IsEqual(vLoading.back().second + stepSize*nStepsRemaining + w2,Wcc));
+         Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet); // 2' shy distance from curb-line
+         ATLASSERT(IsEqual(vLoadPositions.back() + stepSize*nStepsRemaining + w2,Wcc));
 #endif
 
          // Step the wheel line reaction configuration towards the right curb line, analyzing the
@@ -1996,15 +2107,56 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
          for ( IndexType stepIdx = 0; stepIdx <= nStepsRemaining; stepIdx++ )
          {
             Float64 Xoffset = stepSize*stepIdx; // amount to shift the wheel line configuration towards the right curb line
-            Xoffset += XcurbLine;
 
-            LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vLoading);
+            LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vLoadPositions);
 
             LiveLoadConfiguration llconfig;
             llconfig.m_LoadCaseID = lcid;
-            llconfig.m_nLoadedLanes = vGapPosition.size()+1;
-            llconfig.m_Xoffset = Xoffset;
-            llconfig.m_Loading = vLoading;
+            llconfig.m_nLoadedLanes = nLoadedLanes;
+            
+            for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
+            {
+               LaneConfiguration laneConfig;
+               Float64 Xleft  = vLoadPositions[2*laneIdx]   + Xoffset;
+               Float64 Xright = vLoadPositions[2*laneIdx+1] + Xoffset;
+               laneConfig.Xleft  = Xleft  + XcurbLine;
+               laneConfig.Xright = Xright + XcurbLine;
+
+               if ( nLoadedLanes == 1 )
+               {
+                  // if this is the one loaded lane case, we have the information
+                  laneConfig.m_SingleLaneLoadCaseID = lcid;
+                  pModelData->m_SingleLaneLoadCaseIDs.insert(std::make_pair(stepIdx,lcid));
+               }
+               else
+               {
+                  // this is the multiple loaded lane case
+                  // we need to relate the location of the current laneIdx for the multi-lane loading condition
+                  // to the exact same lane location for the single lane case
+
+                  // |<-- Left Curb Line
+                  // |
+                  // |<------------- Xcenter --------->|
+                  // |                      |                      |
+                  // |                      |      P        P      |
+                  // |                      |      |        |      |
+                  // |                      |<-2'->|<--6'-->|<-2'->| (not skew adjusted... assuming standard 10' wide truck in 12' lane)
+                  // |                      |      |        |      |
+                  // |                      |      V        V      |
+                  // |<- stepIdx*stepSize ->|<---- wLoadedLane --->|
+
+                  // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
+
+                  Float64 Xcenter = (Xleft + Xright)/2; // center of lane from left curb line
+                  IndexType singleLaneStepIdx = (IndexType)floor((Xcenter - wLoadedLane/2)/stepSize);
+                  std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
+                  ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
+                  laneConfig.m_SingleLaneLoadCaseID = found->second;
+               }
+               
+               llconfig.m_LaneConfiguration.push_back(laneConfig);
+            }
+
             pModelData->m_LiveLoadConfigurations.insert(llconfig);
          } // next step
       } // next lane configuration
@@ -2041,16 +2193,14 @@ void CAnalysisAgentImp::GetLanePositions(IndexType nTotalSteps,IndexType nLaneGa
    }
 }
 
-std::vector<std::pair<Float64,Float64>> CAnalysisAgentImp::ConfigureWheelLineLoads(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition)
+std::vector<Float64> CAnalysisAgentImp::ConfigureWheelLineLoads(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition)
 {
    Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet)/cos(skew); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
 
-   Float64 P = -0.5; // using a unit load live load reaction... half for each wheel line
-
-   std::vector<std::pair<Float64,Float64>> vLoads;
+   std::vector<Float64> vLoadPositions;
    // first pair of wheel line loads... at left curb line
-   vLoads.push_back(std::make_pair(P,wLoadedLane/2-w3));
-   vLoads.push_back(std::make_pair(P,wLoadedLane/2+w3));
+   vLoadPositions.push_back(wLoadedLane/2-w3);
+   vLoadPositions.push_back(wLoadedLane/2+w3);
 
    std::vector<IndexType>::iterator gapPositionIter(vGapPosition.begin());
    std::vector<IndexType>::iterator gapPositionIterEnd(vGapPosition.end());
@@ -2067,19 +2217,28 @@ std::vector<std::pair<Float64,Float64>> CAnalysisAgentImp::ConfigureWheelLineLoa
       Float64 XleftWheelLine  = XclLane - w3;
       Float64 XrightWheelLine = XclLane + w3;
 
-      vLoads.push_back(std::make_pair(P,XleftWheelLine));
-      vLoads.push_back(std::make_pair(P,XrightWheelLine));
+      vLoadPositions.push_back(XleftWheelLine);
+      vLoadPositions.push_back(XrightWheelLine);
    }
 
-   return vLoads;
+   return vLoadPositions;
 }
 
-LoadCaseIDType CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<std::pair<Float64,Float64> >& vLoading)
+LoadCaseIDType CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vLoadPositions)
 {
    CComPtr<IFem2dLoadingCollection> loadings;
    pModelData->m_Model->get_Loadings(&loadings);
 
    LoadCaseIDType loadCaseID = pModelData->m_NextLiveLoadCaseID++; 
+
+   // keep track of the last load case ID used for one loaded lane
+   // vLoadPositions has two point loads per lane, so the number of loaded lanes
+   // is half the size of the container
+   IndexType nLoadedLanes = vLoadPositions.size()/2;
+   if ( nLoadedLanes == 1 )
+   {
+      pModelData->m_LastSingleLaneLoadCaseID = loadCaseID;
+   }
 
    CComPtr<IFem2dLoading> loading;
    loadings->Create(loadCaseID,&loading);
@@ -2088,14 +2247,9 @@ LoadCaseIDType CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pMode
    loading->get_PointLoads(&pointLoads);
 
    LoadIDType loadID = 0;
-   std::vector<std::pair<Float64,Float64>>::iterator iter(vLoading.begin());
-   std::vector<std::pair<Float64,Float64>>::iterator end(vLoading.end());
-   for ( ; iter != end; iter++ )
+   Float64 P = -0.5; // unit lane load = 0.5 per wheel line
+   BOOST_FOREACH(Float64 X,vLoadPositions)
    {
-      std::pair<Float64,Float64>& loading(*iter);
-      Float64 P = loading.first;
-      Float64 X = loading.second;
-
       MemberIDType mbrID;
       Float64 mbrLocation;
       GetSuperstructureFemModelLocation(pModelData,X+Xoffset,&mbrID,&mbrLocation);
@@ -2129,12 +2283,24 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    LoadCaseIDType minMzLCID = INVALID_ID;
    LoadCaseIDType maxMzLCID = INVALID_ID;
 
+   Float64 MzMin_SingleLane = DBL_MAX;
+   Float64 MzMax_SingleLane = -DBL_MAX;
+   LoadCaseIDType minMzLCID_SingleLane = INVALID_ID;
+   LoadCaseIDType maxMzLCID_SingleLane = INVALID_ID;
+
    sysSectionValue FyMin = DBL_MAX;
    sysSectionValue FyMax = -DBL_MAX;
    LoadCaseIDType minFyLeftLCID = INVALID_ID;
    LoadCaseIDType maxFyLeftLCID = INVALID_ID;
    LoadCaseIDType minFyRightLCID = INVALID_ID;
    LoadCaseIDType maxFyRightLCID = INVALID_ID;
+
+   sysSectionValue FyMin_SingleLane = DBL_MAX;
+   sysSectionValue FyMax_SingleLane = -DBL_MAX;
+   LoadCaseIDType minFyLeftLCID_SingleLane = INVALID_ID;
+   LoadCaseIDType maxFyLeftLCID_SingleLane = INVALID_ID;
+   LoadCaseIDType minFyRightLCID_SingleLane = INVALID_ID;
+   LoadCaseIDType maxFyRightLCID_SingleLane = INVALID_ID;
 
    ModelData* pModelData = GetModelData(pierID);
 
@@ -2149,11 +2315,11 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
 
       Float64 FxLeft, FyLeft, MzLeft;
-      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
       ATLASSERT(SUCCEEDED(hr));
 
       Float64 FxRight, FyRight, MzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
       ATLASSERT(SUCCEEDED(hr));
 
       Float64 Mz;
@@ -2181,9 +2347,26 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
          maxMzLCID = lcid;
       }
 
+
+      if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
+      {
+         if ( Mz < MzMin_SingleLane )
+         {
+            MzMin_SingleLane = Mz;
+            minMzLCID_SingleLane = lcid;
+         }
+
+         if ( MzMax_SingleLane < Mz )
+         {
+            MzMax_SingleLane = Mz;
+            maxMzLCID_SingleLane = lcid;
+         }
+      }
+
       FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
       FyRight = IsZero(FyRight) ? 0 : FyRight;
       sysSectionValue Fy(-FyLeft,FyRight);
+
       Fy *= mpf;
 
       if ( Fy.Left() < FyMin.Left() )
@@ -2209,6 +2392,34 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
          FyMax.Right() = Fy.Right();
          maxFyRightLCID = lcid;
       }
+
+
+      if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
+      {
+         if ( Fy.Left() < FyMin_SingleLane.Left() )
+         {
+            FyMin_SingleLane.Left() = Fy.Left();
+            minFyLeftLCID_SingleLane = lcid;
+         }
+
+         if ( Fy.Right() < FyMin_SingleLane.Right() )
+         {
+            FyMin_SingleLane.Right() = Fy.Right();
+            minFyRightLCID_SingleLane = lcid;
+         }
+
+         if ( FyMax_SingleLane.Left() < Fy.Left() )
+         {
+            FyMax_SingleLane.Left() = Fy.Left();
+            maxFyLeftLCID_SingleLane = lcid;
+         }
+
+         if ( FyMax_SingleLane.Right() < Fy.Right() )
+         {
+            FyMax_SingleLane.Right() = Fy.Right();
+            maxFyRightLCID_SingleLane = lcid;
+         }
+      }
    }
 
    ATLASSERT(minMzLCID != INVALID_ID);
@@ -2217,6 +2428,13 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    ATLASSERT(maxFyLeftLCID != INVALID_ID);
    ATLASSERT(minFyRightLCID != INVALID_ID);
    ATLASSERT(maxFyRightLCID != INVALID_ID);
+
+   ATLASSERT(minMzLCID_SingleLane != INVALID_ID);
+   ATLASSERT(maxMzLCID_SingleLane != INVALID_ID);
+   ATLASSERT(minFyLeftLCID_SingleLane != INVALID_ID);
+   ATLASSERT(maxFyLeftLCID_SingleLane != INVALID_ID);
+   ATLASSERT(minFyRightLCID_SingleLane != INVALID_ID);
+   ATLASSERT(maxFyRightLCID_SingleLane != INVALID_ID);
 
    // Use the following if we need the number of loaded lanes associated with the min/max value
    //LiveLoadConfiguration key;
@@ -2245,6 +2463,17 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    liveLoadResult.m_lcidFyRightMin = minFyRightLCID;
    liveLoadResult.m_lcidFyRightMax = maxFyRightLCID;
 
+   liveLoadResult.m_MzMax_SingleLane = MzMax_SingleLane;
+   liveLoadResult.m_MzMin_SingleLane = MzMin_SingleLane;
+   liveLoadResult.m_lcidMzMin_SingleLane = minMzLCID_SingleLane;
+   liveLoadResult.m_lcidMzMax_SingleLane = maxMzLCID_SingleLane;
+   liveLoadResult.m_FyMax_SingleLane = FyMax_SingleLane;
+   liveLoadResult.m_FyMin_SingleLane = FyMin_SingleLane;
+   liveLoadResult.m_lcidFyLeftMin_SingleLane = minFyLeftLCID_SingleLane;
+   liveLoadResult.m_lcidFyLeftMax_SingleLane = maxFyLeftLCID_SingleLane;
+   liveLoadResult.m_lcidFyRightMin_SingleLane = minFyRightLCID_SingleLane;
+   liveLoadResult.m_lcidFyRightMax_SingleLane = maxFyRightLCID_SingleLane;
+
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);
    liveLoadResults.insert(liveLoadResult);
 }
@@ -2265,6 +2494,97 @@ CAnalysisAgentImp::UnitLiveLoadResult CAnalysisAgentImp::GetUnitLiveLoadResult(P
    return *found;
 }
 
+WheelLineConfiguration CAnalysisAgentImp::GetWheelLineConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const LiveLoadConfiguration& llConfig,IndexType permitLaneIdx)
+{
+   GET_IFACE(IXBRProject,pProject);
+   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
+
+   bool bIsPermit = ::IsPermitRatingType(ratingType);
+
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   bool bIsWSDOTMethod = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT ? true : false);
+
+   Float64 Rlgl = 0;
+   if ( bIsPermit && bIsWSDOTMethod )
+   {
+      Rlgl = GetMaxLegalReaction(pierID);
+   }
+
+   WheelLineConfiguration wheelConfig;
+   IndexType laneIdx = 0;
+   BOOST_FOREACH(const LaneConfiguration& laneConfig,llConfig.m_LaneConfiguration)
+   {
+      if ( bIsPermit && bIsWSDOTMethod )
+      {
+         if ( laneIdx == permitLaneIdx )
+         {
+            WheelLinePlacement leftWheelLinePlacement;
+            leftWheelLinePlacement.P = -0.5*R;
+            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+            wheelConfig.push_back(leftWheelLinePlacement);
+
+            WheelLinePlacement rightWheelLinePlacement;
+            rightWheelLinePlacement.P = -0.5*R;
+            rightWheelLinePlacement.Xxb = laneConfig.Xright;
+            wheelConfig.push_back(rightWheelLinePlacement);
+         }
+         else
+         {
+            WheelLinePlacement leftWheelLinePlacement;
+            leftWheelLinePlacement.P = -0.5*Rlgl;
+            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+            wheelConfig.push_back(leftWheelLinePlacement);
+
+            WheelLinePlacement rightWheelLinePlacement;
+            rightWheelLinePlacement.P = -0.5*Rlgl;
+            rightWheelLinePlacement.Xxb = laneConfig.Xright;
+            wheelConfig.push_back(rightWheelLinePlacement);
+         }
+      }
+      else
+      {
+         WheelLinePlacement leftWheelLinePlacement;
+         leftWheelLinePlacement.P = -0.5*R;
+         leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+         wheelConfig.push_back(leftWheelLinePlacement);
+
+         WheelLinePlacement rightWheelLinePlacement;
+         rightWheelLinePlacement.P = -0.5*R;
+         rightWheelLinePlacement.Xxb = laneConfig.Xright;
+         wheelConfig.push_back(rightWheelLinePlacement);
+      }
+
+      laneIdx++;
+   }
+   return wheelConfig;
+}
+
+Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
+{
+   GET_IFACE(IXBRProject,pProject);
+
+   Float64 Rlgl = -DBL_MAX;
+   for ( int i = 0; i < 2; i++ )
+   {
+      pgsTypes::LoadRatingType legalRatingType = (i == 0 ? pgsTypes::lrLegal_Routine : pgsTypes::lrLegal_Special);
+      VehicleIndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,legalRatingType);
+      for ( VehicleIndexType vIdx = 0; vIdx < nVehicles; vIdx++ )
+      {
+         Float64 r_legal = pProject->GetLiveLoadReaction(pierID,legalRatingType,vIdx);
+         Rlgl = Max(Rlgl,r_legal);
+      }
+   }
+   return Rlgl;
+}
+
+CAnalysisAgentImp::LiveLoadConfiguration& CAnalysisAgentImp::GetLiveLoadConfiguration(ModelData* pModelData,LoadCaseIDType lcid)
+{
+   LiveLoadConfiguration key;
+   key.m_LoadCaseID = lcid;
+   std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
+   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
+   return (*foundLLConfig);
+}
 
 void CAnalysisAgentImp::InvalidateModels()
 {

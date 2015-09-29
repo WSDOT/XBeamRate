@@ -68,6 +68,10 @@ interface IXBRRatingSpecification : IUnknown
    // from PGSuper when PGSuper is in Envelope mode
    virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() = 0;
    virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) = 0;
+
+   // Controls the method used to rating factors for permit loading cases
+   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() = 0;
+   virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) = 0;
 };
 
 /*****************************************************************************

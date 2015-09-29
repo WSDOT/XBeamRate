@@ -131,8 +131,10 @@ private:
    Float64 GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
 
 
-#pragma Reminder("UPDATE: need to have rating artifacts by pier")
-   std::map<VehicleIndexType,xbrRatingArtifact> m_RatingArtifacts[6]; // pgsTypes::LoadRatingType enum as key
+   // rating artifacts for vehicleIdx == INVALID_INDEX are the governing artifacts for a load rating type
+   typedef std::map<VehicleIndexType,xbrRatingArtifact> RatingArtifacts;
+   std::map<PierIDType,RatingArtifacts> m_RatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
+   RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 };
 

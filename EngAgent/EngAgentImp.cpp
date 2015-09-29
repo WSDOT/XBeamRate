@@ -189,15 +189,15 @@ Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInteres
 // IXBRArtifactCapacity
 const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
-#pragma Reminder("UPDATE: need rating artifacts for each pier")
-   std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = m_RatingArtifacts[ratingType].find(vehicleIdx);
-   if ( found == m_RatingArtifacts[ratingType].end() )
+   RatingArtifacts& ratingArtifacts = GetPrivateRatingArtifacts(pierID,ratingType,vehicleIdx);
+   std::map<VehicleIndexType,xbrRatingArtifact>::iterator found = ratingArtifacts.find(vehicleIdx);
+   if ( found == ratingArtifacts.end() )
    {
       CreateRatingArtifact(pierID,ratingType,vehicleIdx);
-      found = m_RatingArtifacts[ratingType].find(vehicleIdx);
+      found = ratingArtifacts.find(vehicleIdx);
    }
 
-   if ( found == m_RatingArtifacts[ratingType].end() )
+   if ( found == ratingArtifacts.end() )
    {
       return NULL;
    }
@@ -455,12 +455,25 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
    return Avg_Av_over_S;
 }
 
+CEngAgentImp::RatingArtifacts& CEngAgentImp::GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
+{
+   std::map<PierIDType,RatingArtifacts>::iterator found = m_RatingArtifacts[ratingType].find(pierID);
+   if ( found == m_RatingArtifacts[ratingType].end() )
+   {
+      RatingArtifacts artifacts;
+      std::pair<std::map<PierIDType,RatingArtifacts>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(pierID,artifacts));
+      ATLASSERT(result.second == true);
+      found = result.first;
+   }
+   return found->second;
+}
+
 void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
-#pragma Reminder("UPDATE: need to have rating artifacts by pier")
+   RatingArtifacts& ratingArtifacts = GetPrivateRatingArtifacts(pierID,ratingType,vehicleIdx);
    xbrLoadRater loadRater(m_pBroker);
    xbrRatingArtifact artifact = loadRater.RateXBeam(pierID,ratingType,vehicleIdx);
-   std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(vehicleIdx,artifact));
+   std::pair<std::map<VehicleIndexType,xbrRatingArtifact>::iterator,bool> result = ratingArtifacts.insert(std::make_pair(vehicleIdx,artifact));
    ATLASSERT(result.second == true);
 }
 

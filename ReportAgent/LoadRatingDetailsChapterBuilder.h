@@ -20,18 +20,27 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
 #pragma once
 
+#include <ReportManager\ChapterBuilder.h>
+#include "XBeamRateChapterBuilder.h"
 
-#include <XBeamRateAll.h>
+/*****************************************************************************
+CLASS 
+   CTestChapterBuilder
 
-#include <EAF\EAFUtilities.h>
+*****************************************************************************/
 
-#include <MFCTools\MFCTools.h>
+class CLoadRatingDetailsChapterBuilder : public CXBeamRateChapterBuilder
+{
+public:
+   CLoadRatingDetailsChapterBuilder();
+   virtual LPCTSTR GetName() const;
+   rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
+   virtual CChapterBuilder* Clone() const;
 
-#include <grid\gxall.h>
-#include <afxwin.h>
+private:
+   // Prevent accidental copying and assignment
+   CLoadRatingDetailsChapterBuilder(const CLoadRatingDetailsChapterBuilder&);
+   CLoadRatingDetailsChapterBuilder& operator=(const CLoadRatingDetailsChapterBuilder&);
+};

@@ -381,7 +381,11 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
 
-   WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx);
+#pragma Reminder("WORKING HERE - need to supply the lane where the permit load is located")
+   // only true for permit ratings and for the WSDOT method of computing rating factors
+   // using INVALID_INDEX as dummy value for now
+   IndexType permitLaneIdx = INVALID_INDEX;
+   WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
 
    grlibPointMapper mapper( graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );
    LONG x,y;
@@ -409,6 +413,7 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    mapper.SetDeviceOrg(dox,doy);
 
    CPen pen(PS_SOLID,2,BLACK);
+   CPen permit_pen(PS_SOLID,2,GREEN);
    CPen* pOldPen = pDC->SelectObject(&pen);
 
    LONG dx_last, dy_last;
@@ -416,6 +421,17 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    std::vector<WheelLinePlacement>::iterator end(wheelLineConfig.end());
    for ( ; iter != end; iter++ )
    {
+      IndexType idx = std::distance(wheelLineConfig.begin(),iter);
+      IndexType laneIdx = idx/2;
+      if ( laneIdx == permitLaneIdx )
+      {
+         pDC->SelectObject(&permit_pen);
+      }
+      else
+      {
+         pDC->SelectObject(&pen);
+      }
+
       WheelLinePlacement& placement = *iter;
 
       Float64 X = pHorizontalAxisFormat->Convert(placement.Xxb);
@@ -427,7 +443,6 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
       pDC->LineTo(dx,dy-30);
 
       // draw the crossbar connecting wheel lines
-      IndexType idx = std::distance(wheelLineConfig.begin(),iter);
       if ( idx % 2 == 0 )
       {
          dx_last = dx;

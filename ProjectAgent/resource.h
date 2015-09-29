@@ -17,6 +17,7 @@
 #define IDD_BEARINGS_PAGE               202
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDD_LIVE_LOAD_REACTIONS         205
+#define IDD_OPTIONS                     206
 #define IDC_LF_PERMIT_ROUTINE           208
 #define IDC_DECK_ELEVATION              211
 #define IDC_DECK_ELEVATION_UNIT         212
@@ -110,9 +111,10 @@
 #define IDC_BACK_BRG_OFFSET_UNIT        301
 #define IDC_AHEAD_BRG_OFFSET_UNIT       302
 #define IDC_BACK_BRG_OFFSET_LABEL1      303
-#define IDC_COMBO1                      303
 #define IDC_REACTION_APPLICATION        303
 #define IDC_AHEAD_BRG_OFFSET_LABEL1     304
+#define IDC_COMBO1                      304
+#define IDC_PERMIT_FACTORS              304
 #define IDC_BACK_BRG_OFFSET_LABEL2      305
 #define IDC_AHEAD_BRG_OFFSET_LABEL2     306
 #define IDD_AASHTO_CONCRETE             500
@@ -178,14 +180,16 @@
 #define EAFID_EDIT_UNITS                32774
 #define ID_EDIT_PROJECT_NAME            50000
 #define ID_EDIT_PIER                    50002
+#define ID_OPTIONS                      50003
+#define ID_EDIT_OPTIONS                 50004
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        206
-#define _APS_NEXT_COMMAND_VALUE         50003
-#define _APS_NEXT_CONTROL_VALUE         304
+#define _APS_NEXT_RESOURCE_VALUE        207
+#define _APS_NEXT_COMMAND_VALUE         50005
+#define _APS_NEXT_CONTROL_VALUE         305
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

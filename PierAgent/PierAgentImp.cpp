@@ -1703,6 +1703,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    if ( 1 < nColumns )
    {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-0.001));
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+0.001));
       SpacingIndexType nSpaces = nColumns - 1;
@@ -1711,6 +1712,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
       {
          Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
          X += space;
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-0.001));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+0.001));
       }
@@ -1731,6 +1733,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          if ( reactionType == xbrTypes::rltConcentrated )
          {
             // POI at CL Bearing
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-0.001));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+0.001));
          }
@@ -1744,6 +1747,20 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          }
       }
    }
+
+   //// Left/Right Curb lines
+   //Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet);
+   //Float64 LCO, RCO;
+   //pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+   //Float64 Xcl = ConvertPierToCrossBeamCoordinate(pierID,LCO);
+   //Xcl += w2;
+   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl-0.001));
+   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl));
+
+   //Xcl = ConvertPierToCrossBeamCoordinate(pierID,RCO);
+   //Xcl -= w2;
+   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl));
+   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl+0.001));
 
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);

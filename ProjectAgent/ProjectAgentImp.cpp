@@ -86,7 +86,7 @@ CProjectAgentImp::CProjectAgentImp()
    m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]    = 1.80;
    m_gLL[pgsTypes::lrLegal_Special][INVALID_ID]    = 1.60;
    m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID]   = 1.15;
-   m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]   = 1.30;
+   m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]   = 1.20;
 
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
@@ -123,6 +123,8 @@ CProjectAgentImp::CProjectAgentImp()
    m_PierData.insert(std::make_pair(INVALID_ID,pierData));
 
    m_AnalysisType = pgsTypes::Envelope;
+
+   m_PermitRatingMethod = xbrTypes::prmAASHTO;
 }
 
 CProjectAgentImp::~CProjectAgentImp()
@@ -284,6 +286,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(m_SysFactorFlexure));
          pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(m_SysFactorShear));
          pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(m_vbRateForShear[pgsTypes::lrDesign_Inventory]));
@@ -407,6 +410,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    {
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
+         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
       pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
@@ -487,6 +491,11 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
          {
             hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+
+            var.vt = VT_I4;
+            hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
+            m_PermitRatingMethod = (xbrTypes::PermitRatingMethod)var.lVal;
+
             var.vt = VT_R8;
             hr = pStrLoad->get_Property(_T("SystemFactorFlexure"),&var);
             m_SysFactorFlexure = var.dblVal;
@@ -744,9 +753,15 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       else
       {
          hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+         
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("AnalysisType"),&var);
          m_AnalysisType = (pgsTypes::AnalysisType)var.lVal;
+
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
+         m_PermitRatingMethod = (xbrTypes::PermitRatingMethod)var.lVal;
+
          hr = pStrLoad->EndUnit(); // RatingSpecification
 
          xbrPierData pierData;
@@ -1376,6 +1391,11 @@ std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReact
 
 std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
+   if ( vehicleIdx == INVALID_INDEX )
+   {
+      return std::_tstring(::GetLiveLoadTypeName(ratingType));
+   }
+
    if ( pierID == INVALID_ID )
    {
 #if defined _DEBUG
@@ -1427,8 +1447,25 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
 
       PierIndexType pierIdx = GetPierIndex(pierID);
 
-#pragma Reminder("WORKING HERE - need to get live load reactions for longest girder line")
-      CGirderKey girderKey = GetGirderKey(pierID,0,0);
+      GET_IFACE(IBridge,pBridge);
+
+      // base live load reactions on the longest girder line
+      Float64 LglMax = -DBL_MAX;
+      GirderIndexType nGirderlines = pBridge->GetGirderlineCount();
+      GirderIndexType gdrIdx;
+      for ( GirderIndexType glIdx = 0; glIdx < nGirderlines; gdrIdx++ )
+      {
+         Float64 Lgl = pBridge->GetGirderlineLength(glIdx);
+         if ( LglMax < Lgl )
+         {
+            LglMax = Lgl;
+            gdrIdx = glIdx;
+         }
+      }
+
+      // assume a single bearing line at the pier and one bearing per girder
+      // when getting the girder key we'll use for live load reactions
+      CGirderKey girderKey = GetGirderKey(pierID,0,gdrIdx);
 
       GET_IFACE(IProductForces,pProductForces);
       pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
@@ -1742,11 +1779,30 @@ void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType anal
    }
 }
 
+xbrTypes::PermitRatingMethod CProjectAgentImp::GetPermitRatingMethod()
+{
+   return m_PermitRatingMethod;
+}
+
+void CProjectAgentImp::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
+{
+   if ( m_PermitRatingMethod != permitRatingMethod )
+   {
+      m_PermitRatingMethod = permitRatingMethod;
+      Fire_OnRatingSpecificationChanged();
+   }
+}
+
 //////////////////////////////////////////////////////////
 // IXBRProjectEdit
 void CProjectAgentImp::EditPier(int nPage)
 {
    m_CommandTarget.OnEditPier();
+}
+
+void CProjectAgentImp::EditOptions()
+{
+   m_CommandTarget.OnEditOptions();
 }
 
 ////////////////////////////////////////////////////////////////////////

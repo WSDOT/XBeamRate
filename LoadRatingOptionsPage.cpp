@@ -26,6 +26,8 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 	CPropertyPage::DoDataExchange(pDX);
 
    DDX_CBEnum(pDX,IDC_ANALYSIS_MODE,m_AnalysisType);
+
+   DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_PermitRatingMethod);
 }
 
 
@@ -38,6 +40,7 @@ END_MESSAGE_MAP()
 BOOL CLoadRatingOptionsPage::OnInitDialog()
 {
    FillAnalysisModeComboBox();
+   FillPermitRatingMethodComboBox();
 
    CPropertyPage::OnInitDialog();
 
@@ -57,4 +60,16 @@ void CLoadRatingOptionsPage::FillAnalysisModeComboBox()
 
    idx = pCB->AddString(_T("Envelope"));
    pCB->SetItemData(idx,(DWORD_PTR)pgsTypes::Envelope);
+}
+
+void CLoadRatingOptionsPage::FillPermitRatingMethodComboBox()
+{
+   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_PERMIT_FACTORS);
+   pCB->ResetContent();
+
+   int idx = pCB->AddString(_T("AASHTO MBE Equation 6A.4.2.1-1"));
+   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmAASHTO);
+
+   idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
+   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmWSDOT);
 }

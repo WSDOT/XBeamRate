@@ -20,7 +20,6 @@
 #define IDC_APPICON                     140
 #define IDC_COMBO1                      202
 #define IDC_PIERS                       202
-#define IDC_ANALYSIS_MODEL              202
 #define IDC_ANALYSIS_MODE               202
 #define IDC_ANALYSIS_MODE_LABEL         203
 #define IDI_ICON                        205
@@ -35,6 +34,7 @@
 #define IDD_SECTION_CUT                 211
 #define IDR_PGSUPERCOMPONENTINFO        300
 #define IDR_PGSPLICECOMPONENTINFO       301
+#define IDC_PERMIT_FACTORS              304
 #define IDC_LOCATION                    1260
 #define IDC_SLIDER                      1807
 #define EAF_RESERVED_COMMAND_BASE       0x8000

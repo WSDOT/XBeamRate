@@ -31,6 +31,7 @@
 
 #include "XBeamRateTitlePageBuilder.h"
 #include "TestChapterBuilder.h"
+#include "LoadRatingDetailsChapterBuilder.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -144,5 +145,6 @@ void CReportAgentImp::InitReportBuilders()
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
    pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CTestChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
 }
