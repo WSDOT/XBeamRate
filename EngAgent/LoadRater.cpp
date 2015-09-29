@@ -85,8 +85,8 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    //ATLASSERT(vPSmin.size()   == vPSmax.size());
    //ATLASSERT(vLLIMmin.size() == vLLIMmax.size());
 
-   //GET_IFACE(IRatingSpecification,pRatingSpec);
-   //Float64 system_factor    = pRatingSpec->GetSystemFactorFlexure();
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   Float64 system_factor    = pRatingSpec->GetSystemFactorFlexure();
    //bool bIncludePL = pRatingSpec->IncludePedestrianLiveLoad();
 
    //pgsTypes::LimitState ls = GetStrengthLimitStateType(ratingType);
@@ -184,7 +184,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    //   momentArtifact.SetVehicleIndex(truck_index);
    //   momentArtifact.SetVehicleWeight(W);
    //   momentArtifact.SetVehicleName(strVehicleName.c_str());
-   //   momentArtifact.SetSystemFactor(system_factor);
+      momentArtifact.SetSystemFactor(system_factor);
    //   momentArtifact.SetConditionFactor(condition_factor);
    //   momentArtifact.SetCapacityReductionFactor(phi_moment);
    //   momentArtifact.SetMinimumReinforcementFactor(K);
