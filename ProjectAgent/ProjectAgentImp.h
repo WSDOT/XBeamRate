@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,6 +19,7 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
+
 
 // ProjectAgentImp.h : Declaration of the CProjectAgentImp
 
@@ -226,35 +227,41 @@ public:
    virtual const xbrStirrupData& GetLowerXBeamStirrups(PierIDType pierID);
    virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups);
    virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID);
+   
+   virtual void SetSystemFactorFlexure(Float64 sysFactor);
+   virtual Float64 GetSystemFactorFlexure();
+   
+   virtual void SetSystemFactorShear(Float64 sysFactor);
+   virtual Float64 GetSystemFactorShear();
 
    virtual void SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor);
    virtual void GetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor);
    virtual Float64 GetConditionFactor(PierIDType pierID);
 
-   virtual void SetDCLoadFactor(Float64 dc);
-   virtual Float64 GetDCLoadFactor();
+   virtual void SetDCLoadFactor(pgsTypes::LimitState limitState,Float64 dc);
+   virtual Float64 GetDCLoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetDWLoadFactor(Float64 dw);
-   virtual Float64 GetDWLoadFactor();
+   virtual void SetDWLoadFactor(pgsTypes::LimitState limitState,Float64 dw);
+   virtual Float64 GetDWLoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetCRLoadFactor(Float64 cr);
-   virtual Float64 GetCRLoadFactor();
+   virtual void SetCRLoadFactor(pgsTypes::LimitState limitState,Float64 cr);
+   virtual Float64 GetCRLoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetSHLoadFactor(Float64 sh);
-   virtual Float64 GetSHLoadFactor();
+   virtual void SetSHLoadFactor(pgsTypes::LimitState limitState,Float64 sh);
+   virtual Float64 GetSHLoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetPSLoadFactor(Float64 ps);
-   virtual Float64 GetPSLoadFactor();
+   virtual void SetRELoadFactor(pgsTypes::LimitState limitState,Float64 re);
+   virtual Float64 GetRELoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetRELoadFactor(Float64 re);
-   virtual Float64 GetRELoadFactor();
+   virtual void SetPSLoadFactor(pgsTypes::LimitState limitState,Float64 ps);
+   virtual Float64 GetPSLoadFactor(pgsTypes::LimitState limitState);
 
-   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll);
-   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
+   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll);
+   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx);
 
 // IXBRRatingSpecification
 public:
-   //virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType);
    //virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) = 0;
 
    //virtual std::_tstring GetRatingSpecification() = 0;
@@ -262,12 +269,6 @@ public:
 
    //virtual void SetADTT(Int16 adtt) = 0;
    //virtual Int16 GetADTT() = 0; // < 0 = Unknown
-   
-   virtual void SetSystemFactorFlexure(Float64 sysFactor);
-   virtual Float64 GetSystemFactorFlexure();
-   
-   virtual void SetSystemFactorShear(Float64 sysFactor);
-   virtual Float64 GetSystemFactorShear();
 
    //virtual void SetDeadLoadFactor(pgsTypes::LimitState ls,Float64 gDC) = 0;
    //virtual Float64 GetDeadLoadFactor(pgsTypes::LimitState ls) = 0;
@@ -283,7 +284,7 @@ public:
    //virtual Float64 GetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType) = 0;
 
    //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
-   //virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool RateForStress(pgsTypes::LoadRatingType ratingType);
 
    virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear);
    virtual bool RateForShear(pgsTypes::LoadRatingType ratingType);
@@ -367,8 +368,7 @@ private:
    Float64 m_gSH;
    Float64 m_gPS;
    Float64 m_gRE;
-   std::map<PierIDType,Float64> m_gLL[6]; // use pgsTypes::LoadRatingType to access array
-
+   std::map<PierIDType,Float64> m_gLL[6]; // use GET_INDEX macro to access the array
    // Bearing Reactions
    typedef struct BearingReactions
    {
@@ -419,6 +419,8 @@ private:
    PierIndexType GetPierIndex(PierIDType pierID);
    CGirderKey GetGirderKey(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
    bool UseUniformLoads(PierIDType pierID,IndexType brgLineIdx);
+
+   GirderIndexType GetLongestGirderLine();
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

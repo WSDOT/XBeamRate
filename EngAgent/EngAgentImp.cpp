@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -26,9 +26,11 @@
 #include "EngAgentImp.h"
 
 #include <XBeamRateExt\PointOfInterest.h>
+#include <XBeamRateExt\XBeamRateUtilities.h>
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
 #include <IFace\Pier.h>
+#include <IFace\AnalysisResults.h>
 
 #include <Units\SysUnits.h>
 
@@ -140,8 +142,94 @@ STDMETHODIMP CEngAgentImp::ShutDown()
 // IXBRMomentCapacity
 Float64 CEngAgentImp::GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
-   MomentCapacityDetails capacityDetails = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
+   const MomentCapacityDetails& capacityDetails = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    return capacityDetails.Mr;
+}
+
+const MomentCapacityDetails& CEngAgentImp::GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   std::map<IDType,MomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMomentCapacity[stage] : &m_NegativeMomentCapacity[stage]);
+   std::map<IDType,MomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
+   if ( found != pCapacity->end() )
+   {
+      return found->second;
+   }
+
+   MomentCapacityDetails capacityDetails = ComputeMomentCapacity(pierID,stage,poi,bPositiveMoment);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,MomentCapacityDetails>::iterator,bool> result = pCapacity->insert(std::make_pair(poi.GetID(),capacityDetails));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,MomentCapacityDetails>::iterator iter = result.first;
+   MomentCapacityDetails& details = iter->second;
+   return details;
+}
+
+Float64 CEngAgentImp::GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
+   Float64 Mcr = McrDetails.Mcr;
+
+   bool bAfter2002 = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   if ( bAfter2002 && bBefore2012 )
+   {
+      Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
+   }
+   else
+   {
+      Mcr = McrDetails.Mcr;
+   }
+
+   return Mcr;
+}
+
+const CrackingMomentDetails& CEngAgentImp::GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   std::map<IDType,CrackingMomentDetails>* pCapacity = (bPositiveMoment ? &m_PositiveCrackingMoment[stage] : &m_NegativeCrackingMoment[stage]);
+   std::map<IDType,CrackingMomentDetails>::iterator found(pCapacity->find(poi.GetID()));
+   if ( found != pCapacity->end() )
+   {
+      return found->second;
+   }
+
+   CrackingMomentDetails McrDetails = ComputeCrackingMoment(pierID,stage,poi,bPositiveMoment);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,CrackingMomentDetails>::iterator,bool> result = pCapacity->insert(std::make_pair(poi.GetID(),McrDetails));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,CrackingMomentDetails>::iterator iter = result.first;
+   CrackingMomentDetails& details = iter->second;
+   return details;
+}
+
+Float64 CEngAgentImp::GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   const MinMomentCapacityDetails& MminDetails = GetMinMomentCapacityDetails(pierID,limitState,stage,poi,bPositiveMoment);
+   return MminDetails.MrMin;
+}
+
+const MinMomentCapacityDetails& CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   ATLASSERT(::IsRatingLimitState(limitState));// must be a load rating limit state
+   std::map<IDType,MinMomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMinMomentCapacity[stage][GET_INDEX(limitState)] : &m_NegativeMinMomentCapacity[stage][GET_INDEX(limitState)]);
+   std::map<IDType,MinMomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
+   if ( found != pCapacity->end() )
+   {
+      return found->second;
+   }
+
+   MinMomentCapacityDetails MminDetails = ComputeMinMomentCapacity(pierID,limitState,stage,poi,bPositiveMoment);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,MinMomentCapacityDetails>::iterator,bool> result = pCapacity->insert(std::make_pair(poi.GetID(),MminDetails));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,MinMomentCapacityDetails>::iterator iter = result.first;
+   MinMomentCapacityDetails& details = iter->second;
+   return details;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -210,35 +298,37 @@ const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,
 //////////////////////////////////////////////////
 HRESULT CEngAgentImp::OnProjectChanged()
 {
-   m_PositiveMomentCapacity[xbrTypes::Stage1].clear();
-   m_PositiveMomentCapacity[xbrTypes::Stage2].clear();
+   for ( int i = 0; i < 2; i++ )
+   {
+      m_PositiveMomentCapacity[i].clear();
+      m_NegativeMomentCapacity[i].clear();
 
-   m_NegativeMomentCapacity[xbrTypes::Stage1].clear();
-   m_NegativeMomentCapacity[xbrTypes::Stage2].clear();
+      m_PositiveCrackingMoment[i].clear();
+      m_NegativeCrackingMoment[i].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].clear();
+
+      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
+      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
+   }
    return S_OK;
 }
 
 //////////////////////////////////////////////////
-CEngAgentImp::MomentCapacityDetails CEngAgentImp::GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
-{
-   std::map<IDType,MomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMomentCapacity[stage] : &m_NegativeMomentCapacity[stage]);
-   std::map<IDType,MomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
-   if ( found != pCapacity->end() )
-   {
-      return found->second;
-   }
-
-   MomentCapacityDetails capacityDetails = ComputeMomentCapacity(pierID,stage,poi,bPositiveMoment);
-   if ( poi.GetID() != INVALID_ID )
-   {
-      std::pair<std::map<IDType,MomentCapacityDetails>::iterator,bool> result = pCapacity->insert(std::make_pair(poi.GetID(),capacityDetails));
-      ATLASSERT(result.second == true);
-   }
-
-   return capacityDetails;
-}
-
-CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    CComPtr<IRCBeam2> rcBeam;
    HRESULT hr = rcBeam.CoCreateInstance(CLSID_RCBeam2);
@@ -261,6 +351,9 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    rcBeam->put_FcSlab(concrete.Fc);
    rcBeam->put_FcBeam(concrete.Fc);
+
+#pragma Reminder("WORKING HERE - need rebar material for rc model")
+   // rebar could be grade 60, 80, 100, etc
 
    Float64 dt = 0; // location of the extreme tension steel
 
@@ -332,7 +425,6 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
       Mn *= -1;
    }
 
-   // Still need phi-factor
    Float64 dc = 0;
    Float64 de = 0;
    Float64 phi = 0;
@@ -365,7 +457,7 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    }
 
    MomentCapacityDetails capacityDetails;
-   capacityDetails.rcBeam = rcBeam;
+   //capacityDetails.rcBeam = rcBeam;
    capacityDetails.solution = solution;
    capacityDetails.dc = dc;
    capacityDetails.de = de;
@@ -375,6 +467,126 @@ CEngAgentImp::MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDTy
    capacityDetails.Mr = phi*Mn;
 
    return capacityDetails;
+}
+
+void CEngAgentImp::GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3)
+{
+   // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
+   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   {
+      *pG1 = 1.6; // all other concrete structures (not-segmental)
+      *pG2 = 1.1; // bonded strand/tendon
+
+      GET_IFACE(IXBRMaterial,pMaterial);
+      Float64 E,fy,fu;
+      pMaterial->GetRebarProperties(pierID,&E,&fy,&fu);
+      *pG3 = fy/fu;
+   }
+   else
+   {
+      *pG1 = 1.0;
+      *pG2 = 1.0;
+      *pG3 = 1.0;
+   }
+}
+
+CrackingMomentDetails CEngAgentImp::ComputeCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   CrackingMomentDetails McrDetails;
+
+   McrDetails.McrLimit; // Limiting cracking moment ... per 2nd Edition + 2003 interims (changed in 2005 interims)
+
+   GET_IFACE(IXBRMaterial,pMaterial);
+   Float64 fr = pMaterial->GetXBeamModulusOfRupture(pierID);
+
+   Float64 fcpe = 0; // There is no prestressing in the cross beams
+
+   // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
+   Float64 g1, g2, g3;
+   GetCrackingMomentFactors(pierID,&g1,&g2,&g3);
+
+   GET_IFACE(IXBRAnalysisResults,pAnalysisResults);
+   Float64 Mdnc = pAnalysisResults->GetMoment(pierID,xbrTypes::pftLowerXBeam,poi);
+
+   GET_IFACE(IXBRSectionProperties,pSectProps);
+   Float64 Sc  = (bPositiveMoment ? pSectProps->GetSbot(pierID,stage,poi)            : pSectProps->GetStop(pierID,stage,poi));
+   Float64 Snc = (bPositiveMoment ? pSectProps->GetSbot(pierID,xbrTypes::Stage1,poi) : pSectProps->GetStop(pierID,xbrTypes::Stage1,poi));
+
+   Float64 Mcr = g3*((g1*fr + g2*fcpe)*Sc - Mdnc*(Sc/Snc-1));
+
+   if ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() )
+   {
+      Float64 McrLimit = Sc*fr;
+      McrDetails.McrLimit = McrLimit;
+   }
+
+   McrDetails.Snc = Snc;
+   McrDetails.Sc  = Sc;
+   McrDetails.Mdnc = Mdnc;
+   McrDetails.fr = fr;
+   McrDetails.fcpe = fcpe;
+   McrDetails.g1 = g1;
+   McrDetails.g2 = g2;
+   McrDetails.g3 = g3;
+
+   McrDetails.Mcr = Mcr;
+
+   return McrDetails;
+}
+
+MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   Float64 Mr;     // Nominal resistance (phi*Mn)
+   Float64 Mcr;    // Cracking moment
+   Float64 MrMin;  // Minimum nominal resistance - Min(MrMin1,MrMin2)
+   Float64 MrMin1; // 1.2Mcr
+   Float64 MrMin2; // 1.33Mu
+   Float64 Mu;
+
+   const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
+   const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
+
+   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   if ( bAfter2002 && bBefore2012 )
+   {
+      Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
+   }
+   else
+   {
+      Mcr = McrDetails.Mcr;
+   }
+
+   Mr = MnDetails.phi * MnDetails.Mn;
+
+   GET_IFACE(IXBRAnalysisResults,pAnalysisResults);
+
+   Float64 MuMin, MuMax;
+   pAnalysisResults->GetMoment(pierID,limitState,poi,&MuMin,&MuMax);
+   Mu = (bPositiveMoment ? MuMax : MuMin);
+
+   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   {
+      MrMin1 = Mcr;
+   }
+   else
+   {
+      MrMin1 = 1.20*Mcr;
+   }
+
+   MrMin2 = 1.33*Mu;
+
+   MrMin = (bPositiveMoment ? Min(MrMin1,MrMin2) : Max(MrMin1,MrMin2));
+
+   MinMomentCapacityDetails MminDetails;
+   MminDetails.Mr     = Mr;
+   MminDetails.Mcr    = Mcr;
+   MminDetails.MrMin  = MrMin;
+   MminDetails.MrMin1 = MrMin1;
+   MminDetails.MrMin2 = MrMin2;
+   MminDetails.Mu     = Mu;
+
+   return MminDetails;
 }
 
 Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)

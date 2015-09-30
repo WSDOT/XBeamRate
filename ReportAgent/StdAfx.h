@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,6 +20,7 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
+
 // stdafx.h : include file for standard system include files,
 //      or project specific include files that are used frequently,
 //      but are changed infrequently
@@ -32,3 +33,4 @@
 #include <Reporter\Reporter.h>
 #include <ReportManager\ReportManager.h>
 #include <EAF\EAFBrokerReportSpecification.h>
+#include <PgsExt\ReportStyleHolder.h>

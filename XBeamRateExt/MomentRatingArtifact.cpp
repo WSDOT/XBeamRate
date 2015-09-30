@@ -1,3 +1,24 @@
+///////////////////////////////////////////////////////////////////////
+// XBeamRate - Cross Beam Load Rating
+// Copyright © 1999-2015  Washington State Department of Transportation
+//                        Bridge and Structures Office
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the Alternate Route Open Source License as 
+// published by the Washington State Department of Transportation, 
+// Bridge and Structures Office.
+//
+// This program is distributed in the hope that it will be useful, but 
+// distribution is AS IS, WITHOUT ANY WARRANTY; without even the implied 
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See 
+// the Alternate Route Open Source License for more details.
+//
+// You should have received a copy of the Alternate Route Open Source 
+// License along with this program; if not, write to the Washington 
+// State Department of Transportation, Bridge and Structures Office, 
+// P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
+// Bridge_Support@wsdot.wa.gov
+///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include <XBeamRateExt\MomentRatingArtifact.h>
@@ -205,6 +226,94 @@ Float64 xbrMomentRatingArtifact::GetWearingSurfaceMoment() const
    return m_Mdw;
 }
 
+void xbrMomentRatingArtifact::SetCreepFactor(Float64 gCR)
+{
+   m_gCR = gCR;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetCreepFactor() const
+{
+   return m_gCR;
+}
+
+void xbrMomentRatingArtifact::SetCreepMoment(Float64 Mcr)
+{
+   m_Mcr = Mcr;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetCreepMoment() const
+{
+   return m_Mcr;
+}
+
+void xbrMomentRatingArtifact::SetShrinkageFactor(Float64 gSH)
+{
+   m_gSH = gSH;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetShrinkageFactor() const
+{
+   return m_gSH;
+}
+
+void xbrMomentRatingArtifact::SetShrinkageMoment(Float64 Msh)
+{
+   m_Msh = Msh;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetShrinkageMoment() const
+{
+   return m_Msh;
+}
+
+void xbrMomentRatingArtifact::SetRelaxationFactor(Float64 gRE)
+{
+   m_gRE = gRE;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetRelaxationFactor() const
+{
+   return m_gRE;
+}
+
+void xbrMomentRatingArtifact::SetRelaxationMoment(Float64 Mre)
+{
+   m_Mre = Mre;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetRelaxationMoment() const
+{
+   return m_Mre;
+}
+
+void xbrMomentRatingArtifact::SetSecondaryEffectsFactor(Float64 gPS)
+{
+   m_gPS = gPS;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetSecondaryEffectsFactor() const
+{
+   return m_gPS;
+}
+
+void xbrMomentRatingArtifact::SetSecondaryEffectsMoment(Float64 Mps)
+{
+   m_Mps;
+   m_bRFComputed = false;
+}
+
+Float64 xbrMomentRatingArtifact::GetSecondaryEffectsMoment() const
+{
+   return m_Mps;
+}
+
 void xbrMomentRatingArtifact::SetLiveLoadFactor(Float64 gLL)
 {
    m_gLL = gLL;
@@ -259,7 +368,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       }
 
       Float64 C = p * m_CapacityRedutionFactor * m_MinimumReinforcementFactor * m_Mn;
-      Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw;
+      Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
       if ( IsPermitRatingType(m_RatingType) )
       {
          RFtop -= m_gLL*m_AdjMllim; // BDM Eqn. 13.1.1A-2
@@ -305,9 +414,17 @@ void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
    m_Mn                         = rOther.m_Mn;
    m_gDC                        = rOther.m_gDC;
    m_gDW                        = rOther.m_gDW;
+   m_gCR                        = rOther.m_gCR;
+   m_gSH                        = rOther.m_gSH;
+   m_gRE                        = rOther.m_gRE;
+   m_gPS                        = rOther.m_gPS;
    m_gLL                        = rOther.m_gLL;
    m_Mdc                        = rOther.m_Mdc;
    m_Mdw                        = rOther.m_Mdw;
+   m_Mcr                        = rOther.m_Mcr;
+   m_Msh                        = rOther.m_Msh;
+   m_Mre                        = rOther.m_Mre;
+   m_Mps                        = rOther.m_Mps;
    m_Mllim                      = rOther.m_Mllim;
    m_AdjMllim                   = rOther.m_AdjMllim;
 }

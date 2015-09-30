@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -86,6 +86,13 @@ public:
 // IXBRMomentCapacity
 public:
    virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+
+   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+
+   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
 
 // IXBRShearCapacity
 public:
@@ -104,28 +111,25 @@ private:
 
    DWORD m_dwProjectCookie;
 
-   typedef struct MomentCapacityDetails
-   {
-      CComPtr<IRCBeam2> rcBeam;
-      CComPtr<IRCSolutionEx> solution;
-      Float64 dt; // distance from compression face to extreme tensile reinforcement
-      Float64 de; // distance from compression face to resultant tensile force
-      Float64 dc; // distance from compression face to resultant compression force
-      Float64 phi; // capacity reduction factor
-      Float64 Mn; // nominal capacity
-      Float64 Mr; // nominal resistance (phi*Mn)
-   } MomentCapacityDetails;
 
    // PierID is not used to store moment capacity because the POI ID is sufficent
    // POI IDs are not duplicated between piers
    std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
    std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity[2];
 
-#pragma Reminder("UPDATE: need to have shear capacity by pier")
+   std::map<IDType,CrackingMomentDetails> m_PositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::map<IDType,CrackingMomentDetails> m_NegativeCrackingMoment[2];
+
+   std::map<IDType,MinMomentCapacityDetails> m_PositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
+   std::map<IDType,MinMomentCapacityDetails> m_NegativeMinMomentCapacity[2][6]; 
+
+#pragma Reminder("WORKING HERE: need to have shear capacity by pier")
    // need to cache shear capacity
 
-   MomentCapacityDetails GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    MomentCapacityDetails ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   CrackingMomentDetails ComputeCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   MinMomentCapacityDetails ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   void GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3);
 
    Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    Float64 GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);

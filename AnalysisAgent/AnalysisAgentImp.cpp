@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -1005,7 +1005,7 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
 IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
    ModelData* pModelData = GetModelData(pierID);
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   GET_IFACE_NOCHECK(IXBRRatingSpecification,pRatingSpec);
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
    {
       return (IndexType)(pModelData->m_LastSingleLaneLoadCaseID - FIRST_LIVELOAD_ID + 1);
@@ -1837,13 +1837,13 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 gDC = pProject->GetDCLoadFactor();
-   Float64 gDW = pProject->GetDWLoadFactor();
-   Float64 gCR = pProject->GetCRLoadFactor();
-   Float64 gSH = pProject->GetSHLoadFactor();
-   Float64 gPS = pProject->GetPSLoadFactor();
-   Float64 gRE = pProject->GetRELoadFactor();
-   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
+   Float64 gDC = pProject->GetDCLoadFactor(limitState);
+   Float64 gDW = pProject->GetDWLoadFactor(limitState);
+   Float64 gCR = pProject->GetCRLoadFactor(limitState);
+   Float64 gSH = pProject->GetSHLoadFactor(limitState);
+   Float64 gPS = pProject->GetPSLoadFactor(limitState);
+   Float64 gRE = pProject->GetRELoadFactor(limitState);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,limitState,INVALID_INDEX);
 
    Float64 DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);
@@ -1905,13 +1905,13 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 gDC = pProject->GetDCLoadFactor();
-   Float64 gDW = pProject->GetDWLoadFactor();
-   Float64 gCR = pProject->GetCRLoadFactor();
-   Float64 gSH = pProject->GetSHLoadFactor();
-   Float64 gPS = pProject->GetPSLoadFactor();
-   Float64 gRE = pProject->GetRELoadFactor();
-   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ratingType);
+   Float64 gDC = pProject->GetDCLoadFactor(limitState);
+   Float64 gDW = pProject->GetDWLoadFactor(limitState);
+   Float64 gCR = pProject->GetCRLoadFactor(limitState);
+   Float64 gSH = pProject->GetSHLoadFactor(limitState);
+   Float64 gPS = pProject->GetPSLoadFactor(limitState);
+   Float64 gRE = pProject->GetRELoadFactor(limitState);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,limitState,INVALID_INDEX);
 
    sysSectionValue DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);

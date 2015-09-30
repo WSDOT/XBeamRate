@@ -678,11 +678,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoadRatingChapterBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LoadRatingDetailsChapterBuilder.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\PierReportDlg.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\RatingSummaryTable.cpp"
 				>
 			</File>
 			<File
@@ -936,6 +944,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateReportBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateReportSpecification.cpp"
 				>
 			</File>
@@ -957,11 +969,19 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoadRatingChapterBuilder.h"
+				>
+			</File>
+			<File
 				RelativePath=".\LoadRatingDetailsChapterBuilder.h"
 				>
 			</File>
 			<File
 				RelativePath=".\PierReportDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RatingSummaryTable.h"
 				>
 			</File>
 			<File
@@ -990,6 +1010,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateChapterBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateReportBuilder.h"
 				>
 			</File>
 			<File

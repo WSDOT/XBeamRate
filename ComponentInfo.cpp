@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// BridgeLink Example - BridgeLink Application Framework Example
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //

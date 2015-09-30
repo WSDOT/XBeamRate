@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// ExtensionAgentExample - Extension Agent Example Project for PGSuper
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,8 +19,6 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
-
-// ExampleExtensionAgent.cpp : Implementation of CXBeamRateAgent
 
 #include "stdafx.h"
 #include "resource.h"

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -690,6 +690,44 @@ Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrP
    }
 }
 
+Float64 CPierAgentImp::GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   ATLASSERT(poi.IsColumnPOI() == false);
+   CComPtr<IShape> shape;
+   GetXBeamShape(pierID,stage,poi,&shape);
+
+   CComPtr<IShapeProperties> shapeProps;
+   shape->get_ShapeProperties(&shapeProps);
+
+   Float64 ixx;
+   shapeProps->get_Ixx(&ixx);
+   
+   Float64 Yt;
+   shapeProps->get_Ytop(&Yt);
+
+   Float64 St = ixx/Yt;
+   return St;
+}
+
+Float64 CPierAgentImp::GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   ATLASSERT(poi.IsColumnPOI() == false);
+   CComPtr<IShape> shape;
+   GetXBeamShape(pierID,stage,poi,&shape);
+
+   CComPtr<IShapeProperties> shapeProps;
+   shape->get_ShapeProperties(&shapeProps);
+
+   Float64 ixx;
+   shapeProps->get_Ixx(&ixx);
+   
+   Float64 Yb;
+   shapeProps->get_Ybottom(&Yb);
+
+   Float64 Sb = ixx/Yb;
+   return Sb;
+}
+
 void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
 {
    CComPtr<IPier> pier;
@@ -745,10 +783,29 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID)
    return Ec;
 }
 
+Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID)
+{
+   GET_IFACE(IXBRProject,pProject);
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
+   return lrfdConcreteUtil::ModRupture(concrete.Fc,(lrfdConcreteUtil::DensityType)concrete.Type);
+}
+
 Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx)
 {
    // right now, everything uses the same material
    return GetXBeamEc(pierID);
+}
+
+void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu)
+{
+   matRebar::Type rebarType;
+   matRebar::Grade rebarGrade;
+   GET_IFACE(IXBRProject,pProject);
+   pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
+
+   *pE  = matRebar::GetE(rebarType,rebarGrade);
+   *pFy = matRebar::GetYieldStrength(rebarType,rebarGrade);
+   *pFy = matRebar::GetUltimateStrength(rebarType,rebarGrade);
 }
 
 

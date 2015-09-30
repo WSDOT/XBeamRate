@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// ExtensionAgentExample - Extension Agent Example Project for PGSuper
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -206,7 +206,7 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
       for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
       {
          std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-         if ( strName != _T("No Live Load Defined") )
+         if ( strName != NO_LIVE_LOADS_DEFINED )
          {
             m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,strName.c_str(),ratingType,vehicleIdx));
          }

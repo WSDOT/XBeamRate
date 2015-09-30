@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,6 +19,7 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
+
 
 // PierAgentImp.h : Declaration of the CPierAgentImp
 
@@ -131,6 +132,8 @@ public:
    virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
    virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape);
 
@@ -138,7 +141,9 @@ public:
 public:
    virtual Float64 GetXBeamDensity(PierIDType pierID);
    virtual Float64 GetXBeamEc(PierIDType pierID);
+   virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID);
    virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx);
+   virtual void GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu);
 
 // IXBRRebar
 public:

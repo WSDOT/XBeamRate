@@ -1,7 +1,66 @@
+///////////////////////////////////////////////////////////////////////
+// XBeamRate - Cross Beam Load Rating
+// Copyright © 1999-2015  Washington State Department of Transportation
+//                        Bridge and Structures Office
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the Alternate Route Open Source License as 
+// published by the Washington State Department of Transportation, 
+// Bridge and Structures Office.
+//
+// This program is distributed in the hope that it will be useful, but 
+// distribution is AS IS, WITHOUT ANY WARRANTY; without even the implied 
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See 
+// the Alternate Route Open Source License for more details.
+//
+// You should have received a copy of the Alternate Route Open Source 
+// License along with this program; if not, write to the Washington 
+// State Department of Transportation, Bridge and Structures Office, 
+// P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
+// Bridge_Support@wsdot.wa.gov
+///////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <XBeamRateExt\PointOfInterest.h>
 #include <XBeamRateExt\RatingArtifact.h>
+
+#include <WBFLRCCapacity.h>
+typedef struct MomentCapacityDetails
+{
+   Float64 dt; // distance from compression face to extreme tensile reinforcement
+   Float64 de; // distance from compression face to resultant tensile force
+   Float64 dc; // distance from compression face to resultant compression force
+   Float64 phi; // capacity reduction factor
+   Float64 Mn; // nominal capacity
+   Float64 Mr; // nominal resistance (phi*Mn)
+   CComPtr<IRCSolutionEx> solution;
+} MomentCapacityDetails;
+
+
+typedef struct CrackingMomentDetails
+{
+   Float64 Mcr;  // Cracking moment
+   Float64 Mdnc; // Dead load moment on non-composite XBeam (lower x-beam dead load)
+   Float64 fr;   // Rupture stress
+   Float64 fcpe; // Stress at bottom of non-composite XBeam due to prestress
+   Float64 Snc;  // Section modulus of non-composite XBeam
+   Float64 Sc;   // Section modulus of composite XBeam
+   Float64 McrLimit; // Limiting cracking moment ... per 2nd Edition + 2003 interims (changed in 2005 interims)
+
+   Float64 g1,g2,g3; // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
+} CrackingMomentDetails;
+
+typedef struct MinMomentCapacityDetails
+{
+   Float64 Mr;     // Nominal resistance (phi*Mn)
+   Float64 Mcr;
+   Float64 MrMin;  // Minimum nominal resistance Max(MrMin1,MrMin2)
+   Float64 MrMin1; // 1.2Mcr
+   Float64 MrMin2; // 1.33Mu
+   Float64 Mu;
+} MinMomentCapacityDetails;
+
 
 /*****************************************************************************
 INTERFACE
@@ -16,6 +75,13 @@ DEFINE_GUID(IID_IXBRMomentCapacity,
 interface IXBRMomentCapacity : IUnknown
 {
    virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+
+   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+
+   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
 };
 
 /*****************************************************************************

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// BridgeLink Example - BridgeLink Application Framework Example
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,7 +19,6 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
-
 
 #pragma once
 #include <EAF\EAFComponentInfo.h>

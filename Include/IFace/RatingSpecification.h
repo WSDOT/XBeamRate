@@ -1,3 +1,25 @@
+///////////////////////////////////////////////////////////////////////
+// XBeamRate - Cross Beam Load Rating
+// Copyright © 1999-2015  Washington State Department of Transportation
+//                        Bridge and Structures Office
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the Alternate Route Open Source License as 
+// published by the Washington State Department of Transportation, 
+// Bridge and Structures Office.
+//
+// This program is distributed in the hope that it will be useful, but 
+// distribution is AS IS, WITHOUT ANY WARRANTY; without even the implied 
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See 
+// the Alternate Route Open Source License for more details.
+//
+// You should have received a copy of the Alternate Route Open Source 
+// License along with this program; if not, write to the Washington 
+// State Department of Transportation, Bridge and Structures Office, 
+// P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
+// Bridge_Support@wsdot.wa.gov
+///////////////////////////////////////////////////////////////////////
+
 #pragma once
 
 #include <WbflTypes.h>
@@ -16,7 +38,7 @@ DEFINE_GUID(IID_IXBRRatingSpecification,
 0x34ba2439, 0xc0a2, 0x4171, 0x9f, 0xdc, 0xb4, 0x30, 0x70, 0x36, 0xc0, 0x7c);
 interface IXBRRatingSpecification : IUnknown
 {
-   //virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) = 0;
    //virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) = 0;
 
    //virtual std::_tstring GetRatingSpecification() = 0;
@@ -24,12 +46,6 @@ interface IXBRRatingSpecification : IUnknown
 
    //virtual void SetADTT(Int16 adtt) = 0;
    //virtual Int16 GetADTT() = 0; // < 0 = Unknown
-
-   virtual void SetSystemFactorFlexure(Float64 sysFactor) = 0;
-   virtual Float64 GetSystemFactorFlexure() = 0;
-   
-   virtual void SetSystemFactorShear(Float64 sysFactor) = 0;
-   virtual Float64 GetSystemFactorShear() = 0;
 
    //virtual void SetDeadLoadFactor(pgsTypes::LimitState ls,Float64 gDC) = 0;
    //virtual Float64 GetDeadLoadFactor(pgsTypes::LimitState ls) = 0;
@@ -45,7 +61,7 @@ interface IXBRRatingSpecification : IUnknown
    //virtual Float64 GetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType) = 0;
 
    //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
-   //virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool RateForStress(pgsTypes::LoadRatingType ratingType) = 0;
 
    virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
    virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -20,6 +20,7 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
+
 // ReportAgentImp.cpp : Implementation of CReportAgentImp
 #include "stdafx.h"
 #include "ReportAgent.h"
@@ -29,8 +30,12 @@
 
 #include "XBeamRateReportSpecificationBuilder.h"
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
+#include "XBeamRateReportBuilder.h"
 #include "XBeamRateTitlePageBuilder.h"
 #include "TestChapterBuilder.h"
+#include "LoadRatingChapterBuilder.h"
 #include "LoadRatingDetailsChapterBuilder.h"
 
 #ifdef _DEBUG
@@ -138,13 +143,23 @@ void CReportAgentImp::InitReportBuilders()
    boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CXBeamRateReportSpecificationBuilder(m_pBroker) );
 
 
-   CReportBuilder* pReportBuilder = new CReportBuilder(_T("XBeam Rate Test Report"));
+   CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(_T("XBeam Rate Test Report"));
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
 #endif
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
    pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CTestChapterBuilder()));
+   pRptMgr->AddReportBuilder(pReportBuilder);
+
+
+   pReportBuilder = new CXBeamRateReportBuilder(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report"));
+#if defined _DEBUG || defined _BETA_VERSION
+   pReportBuilder->IncludeTimingChapter();
+#endif
+   pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
+   pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
+   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
 }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -19,6 +19,7 @@
 // P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
+
 
 // ProjectAgentImp.cpp : Implementation of CProjectAgentImp
 #include "stdafx.h"
@@ -40,6 +41,7 @@
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <\ARP\PGSuper\Include\IFace\RatingSpecification.h>
 #include <IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
@@ -81,12 +83,12 @@ CProjectAgentImp::CProjectAgentImp()
    m_gPS = 1.00;
    m_gRE = 1.00;
 
-   m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = 1.75;
-   m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID] = 1.35;
-   m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]    = 1.80;
-   m_gLL[pgsTypes::lrLegal_Special][INVALID_ID]    = 1.60;
-   m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID]   = 1.15;
-   m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]   = 1.20;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]       = 1.75;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]       = 1.35;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID]    = 1.80;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]    = 1.60;
+   m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]  = 1.15;
+   m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]  = 1.20;
 
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
@@ -304,12 +306,12 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("SH"),CComVariant(m_gSH));
          pStrSave->put_Property(_T("PS"),CComVariant(m_gPS));
          pStrSave->put_Property(_T("RE"),CComVariant(m_gRE));
-         pStrSave->put_Property(_T("LL_Design_Inventory"),CComVariant(m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_Design_Operating"),CComVariant(m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_Legal_Routine"),CComVariant(m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_Legal_Special"),CComVariant(m_gLL[pgsTypes::lrLegal_Special][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_Permit_Routine"),CComVariant(m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_Permit_Special"),CComVariant(m_gLL[pgsTypes::lrPermit_Special][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthI_Inventory"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthI_Operating"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthII_PermitRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthII_PermitSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]));
       pStrSave->EndUnit(); // LoadFactors
 
       pStrSave->BeginUnit(_T("Reactions"),1.0);
@@ -547,23 +549,23 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("RE"),&var);
             m_gRE = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Design_Inventory"),&var);
-            m_gLL[pgsTypes::lrDesign_Inventory][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthI_Inventory"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID] = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Design_Operating"),&var);
-            m_gLL[pgsTypes::lrDesign_Operating][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthI_Operating"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID] = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Legal_Routine"),&var);
-            m_gLL[pgsTypes::lrLegal_Routine][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthI_LegalRoutine"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID] = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Legal_Special"),&var);
-            m_gLL[pgsTypes::lrLegal_Special][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthI_LegalSpecial"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID] = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Permit_Routine"),&var);
-            m_gLL[pgsTypes::lrPermit_Routine][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthII_PermitRoutine"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID] = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("LL_Permit_Special"),&var);
-            m_gLL[pgsTypes::lrPermit_Special][INVALID_ID] = var.dblVal;
+            hr = pStrLoad->get_Property(_T("LL_StrengthII_PermitSpecial"),&var);
+            m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->EndUnit(); // LoadFactors
          }
@@ -1404,6 +1406,10 @@ std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::Load
       ATLASSERT(IsStandAlone());
 #endif
       std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      if ( vLLReactions.size() == 0 )
+      {
+         return NO_LIVE_LOADS_DEFINED;
+      }
       return vLLReactions[vehicleIdx].Name;
    }
    else
@@ -1446,22 +1452,7 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
 
       PierIndexType pierIdx = GetPierIndex(pierID);
-
-      GET_IFACE(IBridge,pBridge);
-
-      // base live load reactions on the longest girder line
-      Float64 LglMax = -DBL_MAX;
-      GirderIndexType nGirderlines = pBridge->GetGirderlineCount();
-      GirderIndexType gdrIdx;
-      for ( GirderIndexType glIdx = 0; glIdx < nGirderlines; gdrIdx++ )
-      {
-         Float64 Lgl = pBridge->GetGirderlineLength(glIdx);
-         if ( LglMax < Lgl )
-         {
-            LglMax = Lgl;
-            gdrIdx = glIdx;
-         }
-      }
+      GirderIndexType gdrIdx = GetLongestGirderLine();
 
       // assume a single bearing line at the pier and one bearing per girder
       // when getting the girder key we'll use for live load reactions
@@ -1615,6 +1606,28 @@ const xbrStirrupData& CProjectAgentImp::GetFullDepthStirrups(PierIDType pierID)
    return GetPrivatePierData(pierID).GetFullDepthStirrups();
 }
 
+void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
+{
+   m_SysFactorFlexure = sysFactor;
+   Fire_OnRatingSpecificationChanged();
+}
+
+Float64 CProjectAgentImp::GetSystemFactorFlexure()
+{
+   return m_SysFactorFlexure;
+}
+
+void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
+{
+   m_SysFactorShear = sysFactor;
+   Fire_OnRatingSpecificationChanged();
+}
+
+Float64 CProjectAgentImp::GetSystemFactorShear()
+{
+   return m_SysFactorShear;
+}
+
 void CProjectAgentImp::SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
 {
    GetPrivatePierData(pierID).SetConditionFactorType(conditionFactorType);
@@ -1653,105 +1666,174 @@ Float64 CProjectAgentImp::GetConditionFactor(PierIDType pierID)
    return 1.0;
 }
 
-void CProjectAgentImp::SetDCLoadFactor(Float64 dc)
+void CProjectAgentImp::SetDCLoadFactor(pgsTypes::LimitState limitState,Float64 dc)
 {
    m_gDC = dc;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetDCLoadFactor()
+Float64 CProjectAgentImp::GetDCLoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gDC;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gDC;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetDeadLoadFactor(limitState);
+   }
 }
 
-void CProjectAgentImp::SetDWLoadFactor(Float64 dw)
+void CProjectAgentImp::SetDWLoadFactor(pgsTypes::LimitState limitState,Float64 dw)
 {
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    m_gDW = dw;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetDWLoadFactor()
+Float64 CProjectAgentImp::GetDWLoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gDW;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gDW;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetWearingSurfaceFactor(limitState);
+   }
 }
 
-void CProjectAgentImp::SetCRLoadFactor(Float64 cr)
+void CProjectAgentImp::SetCRLoadFactor(pgsTypes::LimitState limitState,Float64 cr)
 {
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    m_gCR = cr;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetCRLoadFactor()
+Float64 CProjectAgentImp::GetCRLoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gCR;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gCR;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetCreepFactor(limitState);
+   }
 }
 
-void CProjectAgentImp::SetSHLoadFactor(Float64 sh)
+void CProjectAgentImp::SetSHLoadFactor(pgsTypes::LimitState limitState,Float64 sh)
 {
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    m_gSH = sh;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetSHLoadFactor()
+Float64 CProjectAgentImp::GetSHLoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gSH;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gSH;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetShrinkageFactor(limitState);
+   }
 }
 
-void CProjectAgentImp::SetPSLoadFactor(Float64 ps)
+void CProjectAgentImp::SetRELoadFactor(pgsTypes::LimitState limitState,Float64 re)
 {
-   m_gPS = ps;
-   Fire_OnProjectChanged();
-}
-
-Float64 CProjectAgentImp::GetPSLoadFactor()
-{
-   return m_gPS;
-}
-
-void CProjectAgentImp::SetRELoadFactor(Float64 re)
-{
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    m_gRE = re;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetRELoadFactor()
+Float64 CProjectAgentImp::GetRELoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gRE;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gRE;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetRelaxationFactor(limitState);
+   }
 }
 
-void CProjectAgentImp::SetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType,Float64 ll)
+void CProjectAgentImp::SetPSLoadFactor(pgsTypes::LimitState limitState,Float64 ps)
 {
-   m_gLL[ratingType][pierID] = ll;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   m_gPS = ps;
    Fire_OnProjectChanged();
 }
 
-Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
+Float64 CProjectAgentImp::GetPSLoadFactor(pgsTypes::LimitState limitState)
 {
-   return m_gLL[ratingType][pierID];
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gPS;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetSecondaryEffectsFactor(limitState);
+   }
+}
+
+void CProjectAgentImp::SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll)
+{
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   m_gLL[GET_INDEX(limitState)][pierID] = ll;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx)
+{
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( IsStandAlone() )
+   {
+      return m_gLL[GET_INDEX(limitState)][pierID];
+   }
+   else
+   {
+      PierIndexType pierIdx = GetPierIndex(pierID);
+      GirderIndexType gdrIdx = GetLongestGirderLine();
+      pgsTypes::LoadRatingType ratingType = ::RatingTypeFromLimitState(limitState);
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      if ( ::IsStrengthLimitState(limitState) )
+      {
+         return pRatingSpec->GetReactionStrengthLiveLoadFactor(pierIdx,gdrIdx,ratingType,vehicleIdx);
+      }
+      else
+      {
+         return pRatingSpec->GetReactionServiceLiveLoadFactor(pierIdx,gdrIdx,ratingType,vehicleIdx);
+      }
+   }
 }
 
 //////////////////////////////////////////////////////////
 // IXBRRatingSpecification
-void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
+bool CProjectAgentImp::IsRatingEnabled(pgsTypes::LoadRatingType ratingType)
 {
-   m_SysFactorFlexure = sysFactor;
-   Fire_OnRatingSpecificationChanged();
+#pragma Reminder("WORKING HERE")
+   return true;
 }
 
-Float64 CProjectAgentImp::GetSystemFactorFlexure()
+bool CProjectAgentImp::RateForStress(pgsTypes::LoadRatingType ratingType)
 {
-   return m_SysFactorFlexure;
-}
-
-void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
-{
-   m_SysFactorShear = sysFactor;
-   Fire_OnRatingSpecificationChanged();
-}
-
-Float64 CProjectAgentImp::GetSystemFactorShear()
-{
-   return m_SysFactorShear;
+#pragma Reminder("WORKING HERE")
+   return false;
 }
 
 void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
@@ -2247,4 +2329,24 @@ bool CProjectAgentImp::UseUniformLoads(PierIDType pierID,IndexType brgLineIdx)
    {
       return false;
    }
+}
+
+GirderIndexType CProjectAgentImp::GetLongestGirderLine()
+{
+   GET_IFACE(IBridge,pBridge);
+
+   // base live load reactions on the longest girder line
+   Float64 LglMax = -DBL_MAX;
+   GirderIndexType nGirderlines = pBridge->GetGirderlineCount();
+   GirderIndexType gdrIdx;
+   for ( GirderIndexType glIdx = 0; glIdx < nGirderlines; glIdx++ )
+   {
+      Float64 Lgl = pBridge->GetGirderlineLength(glIdx);
+      if ( LglMax < Lgl )
+      {
+         LglMax = Lgl;
+         gdrIdx = glIdx;
+      }
+   }
+   return gdrIdx;
 }

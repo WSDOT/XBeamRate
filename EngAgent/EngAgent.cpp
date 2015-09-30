@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////
-// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// XBeamRate - Cross Beam Load Rating
 // Copyright © 1999-2015  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
@@ -45,7 +45,7 @@
 #include "XBeamRateCatCom.h"
 #include <System\ComCatMgr.h>
 
-#include <EAF\EAFTransactions.h>
+#include <EAF\EAFDisplayUnits.h>
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
 #include <IFace\Pier.h>
