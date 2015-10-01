@@ -34,11 +34,13 @@ public:
    CXBRLiveLoadGraphController();
    DECLARE_DYNCREATE(CXBRLiveLoadGraphController);
 
+   void UpdatePermitLaneLabel();
    std::vector<IndexType> GetSelectedLiveLoadConfigurations();
    ActionType GetActionType();
    PierIDType GetPierID();
    pgsTypes::LoadRatingType GetLoadRatingType();
    VehicleIndexType GetVehicleIndex();
+   IndexType GetPermitLaneIndex();
 
    void EnableControls(BOOL bEnable);
 
@@ -50,12 +52,14 @@ public:
    void Prev();
 
    void RatingTypeChanged();
+   void LoadingChanged();
 
 protected:
 
    virtual BOOL OnInitDialog();
 
 	//{{AFX_MSG(CXBRLiveLoadGraphController)
+   afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
    //}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

@@ -1423,6 +1423,8 @@ std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::Load
 
 Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
+   ATLASSERT(vehicleIdx != INVALID_INDEX);
+
    // Detect the configurations from PGSuper/PGSplice that we can't model
    // Throwns an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
@@ -1437,19 +1439,7 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       if ( 0 < vLLReactions.size() )
       {
-         if ( vehicleIdx == INVALID_INDEX )
-         {
-            Float64 Rmax = -DBL_MAX;
-            BOOST_FOREACH(LiveLoadReaction& llReaction,vLLReactions)
-            {
-               Rmax = Max(Rmax,llReaction.LLIM);
-            }
-            return Rmax;
-         }
-         else
-         {
-            return vLLReactions[vehicleIdx].LLIM;
-         }
+         return vLLReactions[vehicleIdx].LLIM;
       }
       else
       {
@@ -1929,6 +1919,11 @@ void CProjectAgentImp::FirePendingEvents()
 	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
       {
 	      Fire_OnProjectChanged();
+      }
+
+	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_RATINGSPECIFICATION) )
+      {
+	      Fire_OnRatingSpecificationChanged();
       }
 
       // tell event listeners that it is time to fire their events

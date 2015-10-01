@@ -2523,6 +2523,12 @@ WheelLineConfiguration CAnalysisAgentImp::GetWheelLineConfiguration(PierIDType p
    {
       Rlgl = GetMaxLegalReaction(pierID);
    }
+#if defined _DEBUG
+   else
+   {
+      ATLASSERT(permitLaneIdx == INVALID_INDEX); // permit lane idx isn't used for this case, expecting it to be INVALID_INDEX
+   }
+#endif
 
    WheelLineConfiguration wheelConfig;
    IndexType laneIdx = 0;

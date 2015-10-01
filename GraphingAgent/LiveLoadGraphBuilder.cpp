@@ -39,6 +39,7 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
@@ -115,6 +116,7 @@ void CXBRLiveLoadGraphBuilder::OnGraphTypeChanged()
 
 void CXBRLiveLoadGraphBuilder::OnLbnSelChanged()
 {
+   m_GraphController.LoadingChanged();
    OnGraphTypeChanged();
 }
 
@@ -185,6 +187,7 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
 
    ActionType actionType = m_GraphController.GetActionType();
 
@@ -226,6 +229,7 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
    pgsTypes::LoadRatingType ratingType = m_GraphController.GetLoadRatingType();
    VehicleIndexType vehicleIdx = m_GraphController.GetVehicleIndex();
+   IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
@@ -237,16 +241,29 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       strName.Format(_T("%d"),(llConfigIdx+1));
       IndexType graphIdx = graph.CreateDataSeries(strName,PS_SOLID,1,RED);
 
-      BuildLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
+      {
+         IndexType permitGraphIdx = graph.CreateDataSeries(strName,PS_SOLID,1,GREEN);
+         BuildWSDOTPermitLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,actionType,permitGraphIdx,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+      else
+      {
+         BuildLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
    }
 
-   IndexType minGraphIdx = graph.CreateDataSeries(_T("Min"),PS_SOLID,2,BLUE);
-   IndexType maxGraphIdx = graph.CreateDataSeries(_T("Max"),PS_SOLID,2,GREEN);
-   BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+   if ( !::IsPermitRatingType(ratingType) || ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT ) )
+   {
+      // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method
+      // envelope doesn't make sense with WSDOT method.
+      IndexType minGraphIdx = graph.CreateDataSeries(_T("Min"),PS_SOLID,2,BLUE);
+      IndexType maxGraphIdx = graph.CreateDataSeries(_T("Max"),PS_SOLID,2,GREEN);
+      BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
 
-   IndexType minVehGraphIdx = graph.CreateDataSeries(_T("Min"),PS_DASH,2,BLUE);
-   IndexType maxVehGraphIdx = graph.CreateDataSeries(_T("Max"),PS_DASH,2,GREEN);
-   BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      IndexType minVehGraphIdx = graph.CreateDataSeries(_T("Min"),PS_DASH,2,BLUE);
+      IndexType maxVehGraphIdx = graph.CreateDataSeries(_T("Max"),PS_DASH,2,GREEN);
+      BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+   }
 
    CRect rect = GetView()->GetDrawingRect();
    graph.SetOutputRect(rect);
@@ -375,16 +392,51 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
    }
 }
 
+void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,ActionType actionType,IndexType permitGraphIdx,IndexType legalGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
+
+   // make sure the permitLaneIdx is value... if multipe loads are selected, and the live load cases
+   // have a different number of lanes, the permit lane index could be too big for some cases.
+   GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+   IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(pierID,llConfigIdx);
+   permitLaneIdx = (nLoadedLanes <= permitLaneIdx ? nLoadedLanes-1 : permitLaneIdx);
+
+
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
+      Float64 X = poi.GetDistFromStart();
+      X  = pHorizontalAxisFormat->Convert(X);
+
+      if ( actionType == actionMoment )
+      {
+         Float64 Mpermit, Mlegal;
+         pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
+         Mpermit = pVerticalAxisFormat->Convert(Mpermit);
+         Mlegal  = pVerticalAxisFormat->Convert(Mlegal);
+         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Mpermit));
+         graph.AddPoint(legalGraphIdx, gpPoint2d(X,Mlegal));
+      }
+      else
+      {
+         //sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
+         //Float64 Vl = pVerticalAxisFormat->Convert(Fy.Left());
+         //Float64 Vr = pVerticalAxisFormat->Convert(Fy.Right());
+         //graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         //graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+      }
+   }
+}
+
 void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGraphXY& graph,PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
 
-#pragma Reminder("WORKING HERE - need to supply the lane where the permit load is located")
-   // only true for permit ratings and for the WSDOT method of computing rating factors
-   // using INVALID_INDEX as dummy value for now
-   IndexType permitLaneIdx = INVALID_INDEX;
+   IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
    WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
 
    grlibPointMapper mapper( graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );

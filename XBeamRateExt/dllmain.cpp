@@ -28,6 +28,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\Project.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <EAF\EAFStatusCenter.h>

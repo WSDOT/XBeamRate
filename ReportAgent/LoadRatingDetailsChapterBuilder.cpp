@@ -177,10 +177,17 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
                {
                   IndexType llConfigIdx;
                   IndexType permitLaneIdx;
+                  VehicleIndexType vehicleIdx;
                   Float64 Mpermit;
                   Float64 Mlegal;
-                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&Mpermit,&Mlegal);
+                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehicleIdx,&Mpermit,&Mlegal);
                   (*pTable)(row,col++) << moment.SetValue(Mpermit);
+#if defined _DEBUG || defined _BETA_VERSION
+                  (*pTable)(row,col-1) << rptNewLine;
+                  (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
+                  (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
+                  (*pTable)(row,col-1) << _T("Permit Vehicle: ") << pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx).c_str();
+#endif
                   (*pTable)(row,col++) << moment.SetValue(Mlegal);
                }
                else

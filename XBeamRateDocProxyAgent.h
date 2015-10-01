@@ -25,6 +25,7 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\RatingSpecification.h>
 #include <EAF\EAFDisplayUnits.h>
 
 class CXBeamRateDoc;
@@ -51,10 +52,11 @@ class CXBeamRateDocProxyAgent :
    //public CProxyIExtendUIEventSink<CXBeamRateDocProxyAgent>,
    public IAgentEx,
    public IAgentUIIntegration,
-   public IXBRProjectEventSink,
    public IXBeamRate,
-   public IEAFDisplayUnitsEventSink,
-   public IXBRUIEvents
+   public IXBRUIEvents,
+   public IXBRProjectEventSink,
+   public IXBRRatingSpecificationEventSink,
+   public IEAFDisplayUnitsEventSink
    //public IVersionInfo,
 {
 public:
@@ -66,10 +68,11 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBeamRate)
-   COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    COM_INTERFACE_ENTRY(IXBRUIEvents)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
+   COM_INTERFACE_ENTRY(IXBRRatingSpecificationEventSink)
+   COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    //COM_INTERFACE_ENTRY(IVersionInfo)
 END_COM_MAP()
 
@@ -103,6 +106,10 @@ public:
 public:
    virtual HRESULT OnProjectChanged();
 
+// IXBRRatingSpecificationEventSink
+public:
+   virtual HRESULT OnRatingSpecificationChanged();
+
 // IEAFDisplayUnitsEventSink
 public:
    virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
@@ -130,6 +137,7 @@ private:
    void AdviseEventSinks();
    void UnadviseEventSinks();
    DWORD m_dwProjectCookie;
+   DWORD m_dwRatingSpecCookie;
    DWORD m_dwDisplayUnitsCookie;
 
    void CreateToolBars();

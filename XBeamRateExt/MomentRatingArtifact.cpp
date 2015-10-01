@@ -23,6 +23,7 @@
 #include "stdafx.h"
 #include <XBeamRateExt\MomentRatingArtifact.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\Project.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,6 +43,7 @@ m_strVehicleName(_T("Unknown"))
 
    m_LLConfigIdx = INVALID_INDEX;
    m_PermitLaneIdx = INVALID_INDEX;
+   m_PermitVehicleIdx = INVALID_INDEX;
    m_Mpermit = -DBL_MAX;
    m_Mlegal  = -DBL_MAX;
 
@@ -50,7 +52,7 @@ m_strVehicleName(_T("Unknown"))
    m_RatingType = pgsTypes::lrDesign_Inventory;
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
-   m_VehicleIndex = INVALID_INDEX;
+   m_VehicleIdx = INVALID_INDEX;
    m_VehicleWeight = -999999;
 
    m_SystemFactor = 1.0;
@@ -131,12 +133,13 @@ xbrTypes::PermitRatingMethod xbrMomentRatingArtifact::GetPermitRatingMethod() co
 
 void xbrMomentRatingArtifact::SetVehicleIndex(VehicleIndexType vehicleIdx)
 {
-   m_VehicleIndex = vehicleIdx;
+   m_VehicleIdx = vehicleIdx;
+   m_bRFComputed = false;
 }
 
 VehicleIndexType xbrMomentRatingArtifact::GetVehicleIndex() const
 {
-   return m_VehicleIndex;
+   return m_VehicleIdx;
 }
 
 void xbrMomentRatingArtifact::SetVehicleName(LPCTSTR str)
@@ -386,28 +389,38 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       bool bFirst = true;
       CComPtr<IBroker> pBroker;
       EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IXBRProject,pProject);
       GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
       GET_IFACE2(pBroker,IXBRAnalysisResults,pAnalysisResults);
+
+      VehicleIndexType nVehicles = (m_VehicleIdx == INVALID_INDEX ? pProject->GetLiveLoadReactionCount(m_PierID,m_RatingType) : 1);
+      VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
+      VehicleIndexType lastVehicleIdx  = (m_VehicleIdx == INVALID_INDEX ? nVehicles-1 : firstVehicleIdx);
+
       IndexType nLiveLoadConfigurations = pProductForces->GetLiveLoadConfigurationCount(m_PierID,m_RatingType);
       for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigurations; llConfigIdx++ )
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
          {
-            Float64 Mpermit, Mlegal;
-            pAnalysisResults->GetMoment(m_PierID,m_RatingType,m_VehicleIndex,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
-
-            Float64 rf = GetRatingFactor(Mpermit,Mlegal);
-            if ( rf < RFmin || bFirst )
+            for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
             {
-               RFmin = rf;
-               m_LLConfigIdx = llConfigIdx;
-               m_PermitLaneIdx = permitLaneIdx;
-               m_Mpermit = Mpermit;
-               m_Mlegal  = Mlegal;
+               Float64 Mpermit, Mlegal;
+               pAnalysisResults->GetMoment(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
 
-               bFirst = false;
-            }
+               Float64 rf = GetRatingFactor(Mpermit,Mlegal);
+               if ( rf < RFmin || bFirst )
+               {
+                  RFmin = rf;
+                  m_LLConfigIdx = llConfigIdx;
+                  m_PermitLaneIdx = permitLaneIdx;
+                  m_PermitVehicleIdx = vehicleIdx;
+                  m_Mpermit = Mpermit;
+                  m_Mlegal  = Mlegal;
+
+                  bFirst = false;
+               }
+            } // next vehicle
          } // permit truck in next position
       } // next live load configuration
 
@@ -422,18 +435,15 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
    return m_RF;
 }
 
-void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,Float64 *pMpermit,Float64* pMlegal) const
+void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal) const
 {
    Float64 RF = GetRatingFactor(); // causes the rating factor analysis to happen
 
    *pLLConfigIdx   = m_LLConfigIdx;
    *pPermitLaneIdx = m_PermitLaneIdx;
+   *pVehicleIdx    = m_PermitVehicleIdx;
    *pMpermit       = m_Mpermit;
    *pMlegal        = m_Mlegal;
-
-#pragma Reminder("WORKING HERE - may also need vehicle index")
-   // when the rating artifact is for m_VehicleIdx = INVALID_INDEX (all vehicles for the rating type)
-   // we probably want to know which vehicleIdx is associated with the controlling rating factor
 }
 
 void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
@@ -442,13 +452,14 @@ void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
    m_POI                        = rOther.m_POI;
    m_RatingType                 = rOther.m_RatingType;
    m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
-   m_VehicleIndex               = rOther.m_VehicleIndex;
+   m_VehicleIdx                 = rOther.m_VehicleIdx;
    m_VehicleWeight              = rOther.m_VehicleWeight;
    m_strVehicleName             = rOther.m_strVehicleName;
    m_bRFComputed                = rOther.m_bRFComputed;
    m_RF                         = rOther.m_RF;
    m_LLConfigIdx                = rOther.m_LLConfigIdx;
    m_PermitLaneIdx              = rOther.m_PermitLaneIdx;
+   m_PermitVehicleIdx           = rOther.m_PermitVehicleIdx;
    m_Mpermit                    = rOther.m_Mpermit;
    m_Mlegal                     = rOther.m_Mlegal;
    m_SystemFactor               = rOther.m_SystemFactor;
