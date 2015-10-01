@@ -153,11 +153,29 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
                ATLASSERT(poi == artifact.GetPointOfInterest());
 
+               IndexType llConfigIdx;
+               IndexType permitLaneIdx;
+               VehicleIndexType vehicleIdx;
+               Float64 Mpermit;
+               Float64 Mlegal;
+               Float64 K;
+               if ( bIsWSDOTPermitRating )
+               {
+                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehicleIdx,&Mpermit,&Mlegal,&K);
+               }
+
                (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
                (*pTable)(row,col++) << artifact.GetSystemFactor();
                (*pTable)(row,col++) << artifact.GetConditionFactor();
                (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
-               (*pTable)(row,col++) << artifact.GetMinimumReinforcementFactor();
+                if ( bIsWSDOTPermitRating )
+                {
+                  (*pTable)(row,col++) << K;
+                }
+                else
+                {
+                  (*pTable)(row,col++) << artifact.GetMinimumReinforcementFactor();
+                }
                (*pTable)(row,col++) << moment.SetValue(artifact.GetNominalMomentCapacity());
                (*pTable)(row,col++) << artifact.GetDeadLoadFactor();
                (*pTable)(row,col++) << moment.SetValue(artifact.GetDeadLoadMoment());
@@ -175,12 +193,6 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
                if ( bIsWSDOTPermitRating )
                {
-                  IndexType llConfigIdx;
-                  IndexType permitLaneIdx;
-                  VehicleIndexType vehicleIdx;
-                  Float64 Mpermit;
-                  Float64 Mlegal;
-                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehicleIdx,&Mpermit,&Mlegal);
                   (*pTable)(row,col++) << moment.SetValue(Mpermit);
 #if defined _DEBUG || defined _BETA_VERSION
                   (*pTable)(row,col-1) << rptNewLine;

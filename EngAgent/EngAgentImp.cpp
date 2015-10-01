@@ -232,6 +232,15 @@ const MinMomentCapacityDetails& CEngAgentImp::GetMinMomentCapacityDetails(PierID
    return details;
 }
 
+MinMomentCapacityDetails CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx)
+{
+   GET_IFACE(IProgress, pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Computing minimum moment capacity"));
+
+   return ComputeMinMomentCapacity(pierID,limitState,stage,poi,bPositiveMoment,vehicleIdx,llConfigIdx,permitLaneIdx);
+}
+
 //////////////////////////////////////////////////////////////////////
 // IXBRShearCapacity
 Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi)
@@ -595,6 +604,80 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    return MminDetails;
 }
 
+MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx)
+{
+   Float64 Mr;     // Nominal resistance (phi*Mn)
+   Float64 Mcr;    // Cracking moment
+   Float64 MrMin;  // Minimum nominal resistance - Min(MrMin1,MrMin2)
+   Float64 MrMin1; // 1.2Mcr
+   Float64 MrMin2; // 1.33Mu
+   Float64 Mu;
+
+   const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
+   const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
+
+   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   if ( bAfter2002 && bBefore2012 )
+   {
+      Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
+   }
+   else
+   {
+      Mcr = McrDetails.Mcr;
+   }
+
+   Mr = MnDetails.phi * MnDetails.Mn;
+
+   GET_IFACE(IXBRAnalysisResults,pAnalysisResults);
+
+   Float64 Mdc = pAnalysisResults->GetMoment(pierID,xbrTypes::lcDC,poi);
+   Float64 Mdw = pAnalysisResults->GetMoment(pierID,xbrTypes::lcDW,poi);
+   Float64 Mcreep = pAnalysisResults->GetMoment(pierID,xbrTypes::lcCR,poi);
+   Float64 Msh = pAnalysisResults->GetMoment(pierID,xbrTypes::lcSH,poi);
+   Float64 Mre = pAnalysisResults->GetMoment(pierID,xbrTypes::lcRE,poi);
+   Float64 Mps = pAnalysisResults->GetMoment(pierID,xbrTypes::lcPS,poi);
+
+   pgsTypes::LoadRatingType ratingType = ::RatingTypeFromLimitState(limitState);
+
+   Float64 Mpermit, Mlegal;
+   pAnalysisResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 gDC = pProject->GetDCLoadFactor(limitState);
+   Float64 gDW = pProject->GetDWLoadFactor(limitState);
+   Float64 gCR = pProject->GetCRLoadFactor(limitState);
+   Float64 gSH = pProject->GetSHLoadFactor(limitState);
+   Float64 gRE = pProject->GetRELoadFactor(limitState);
+   Float64 gPS = pProject->GetPSLoadFactor(limitState);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,limitState,vehicleIdx);
+
+   Mu = gDC*Mdc + gDW*Mdw + gCR*Mcreep + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
+
+   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   {
+      MrMin1 = Mcr;
+   }
+   else
+   {
+      MrMin1 = 1.20*Mcr;
+   }
+
+   MrMin2 = 1.33*Mu;
+
+   MrMin = (bPositiveMoment ? Min(MrMin1,MrMin2) : Max(MrMin1,MrMin2));
+
+   MinMomentCapacityDetails MminDetails;
+   MminDetails.Mr     = Mr;
+   MminDetails.Mcr    = Mcr;
+   MminDetails.MrMin  = MrMin;
+   MminDetails.MrMin1 = MrMin1;
+   MminDetails.MrMin2 = MrMin2;
+   MminDetails.Mu     = Mu;
+
+   return MminDetails;
+}
+
 Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
@@ -688,6 +771,10 @@ CEngAgentImp::RatingArtifacts& CEngAgentImp::GetPrivateRatingArtifacts(PierIDTyp
 
 void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
+   GET_IFACE(IProgress, pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Load rating cross beam"));
+
    RatingArtifacts& ratingArtifacts = GetPrivateRatingArtifacts(pierID,ratingType,vehicleIdx);
    xbrLoadRater loadRater(m_pBroker);
    xbrRatingArtifact artifact = loadRater.RateXBeam(pierID,ratingType,vehicleIdx);

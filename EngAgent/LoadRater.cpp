@@ -139,19 +139,27 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
       Float64 phi_moment = momentCapacityDetails.phi;
       Float64 Mn = momentCapacityDetails.Mn;
 
-      // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
-      // is positive. This happens near the simple ends of spans. For example Mr < 0 because we are rating for
-      // negative moment and Mmin = min (1.2Mcr and 1.33Mu)... Mcr < 0 because we are looking at negative moment
-      // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
-      // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
-      // No adjustment needs to be made for underreinforcement so take K = 1.0
-      const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,xbrTypes::Stage2,poi,bPositiveMoment);
-      Float64 Mr = minCapacityDetails.Mr;
-      Float64 MrMin = minCapacityDetails.MrMin;
-      Float64 K = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
-      if ( K < 0.0 || 1.0 < K )
+      Float64 K = 1.0;
+      bool bPermitRating = ::IsPermitRatingType(ratingType);
+      if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
       {
-         K = 1.0;
+         // NOTE: For WSDOT Method - Permit cases, K has to be computed for each combination
+         // of legal and permit loading... K will be computed in the moment rating artifact for the WSDOT/permit case.
+
+         // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
+         // is positive. This happens near the simple ends of spans. For example Mr < 0 because we are rating for
+         // negative moment and Mmin = min (1.2Mcr and 1.33Mu)... Mcr < 0 because we are looking at negative moment
+         // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
+         // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
+         // No adjustment needs to be made for underreinforcement so take K = 1.0
+         const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,xbrTypes::Stage2,poi,bPositiveMoment);
+         Float64 Mr = minCapacityDetails.Mr;
+         Float64 MrMin = minCapacityDetails.MrMin;
+         Float64 K = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
+         if ( K < 0.0 || 1.0 < K )
+         {
+            K = 1.0;
+         }
       }
 
 #pragma Reminder("WORKING HERE - need vehicle weight for load posting analysis")

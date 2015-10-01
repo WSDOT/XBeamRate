@@ -29,6 +29,7 @@
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\Project.h>
+#include <IFace\LoadRating.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <EAF\EAFStatusCenter.h>

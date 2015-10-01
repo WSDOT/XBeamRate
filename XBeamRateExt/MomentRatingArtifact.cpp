@@ -24,6 +24,7 @@
 #include <XBeamRateExt\MomentRatingArtifact.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\Project.h>
+#include <IFace\LoadRating.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,6 +47,7 @@ m_strVehicleName(_T("Unknown"))
    m_PermitVehicleIdx = INVALID_INDEX;
    m_Mpermit = -DBL_MAX;
    m_Mlegal  = -DBL_MAX;
+   m_K       = -DBL_MAX;
 
    m_PierID = INVALID_ID;
 
@@ -387,11 +389,15 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       // in between.
       Float64 RFmin = DBL_MAX;
       bool bFirst = true;
+      pgsTypes::LimitState ls = ::GetStrengthLimitStateType(m_RatingType);
+      bool bPositiveMoment = (0 <= m_Mn ? true : false);
+
       CComPtr<IBroker> pBroker;
       EAFGetBroker(&pBroker);
       GET_IFACE2(pBroker,IXBRProject,pProject);
       GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
       GET_IFACE2(pBroker,IXBRAnalysisResults,pAnalysisResults);
+      GET_IFACE2(pBroker,IXBRMomentCapacity,pMomentCapacity);
 
       VehicleIndexType nVehicles = (m_VehicleIdx == INVALID_INDEX ? pProject->GetLiveLoadReactionCount(m_PierID,m_RatingType) : 1);
       VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
@@ -405,18 +411,60 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
          {
             for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
             {
+               Float64 rf;
+
                Float64 Mpermit, Mlegal;
                pAnalysisResults->GetMoment(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
 
-               Float64 rf = GetRatingFactor(Mpermit,Mlegal);
+               // Mininum reinforcement is a function of Mu... for the WSDOT Permit rating method, we need to compute it
+               // for every combination of Mpermit and Mlegal
+
+               // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
+               // is positive. This happens near the simple ends of spans. For example Mr < 0 because we are rating for
+               // negative moment and Mmin = min (1.2Mcr and 1.33Mu)... Mcr < 0 because we are looking at negative moment
+               // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
+               // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
+               // No adjustment needs to be made for underreinforcement so take K = 1.0
+               Float64 K = 1.0;
+
+               // it is really expensive to compute K and it is usually 1.0 anyway.
+               // Here is the strategy. Assume K to be 1.0 and compute the rating factor
+               // if the current rating factor is within 10% of the mininum factor found so far,
+               // or if this is our first time through the loop, compute the actual K and re-compute
+               // the rating factor using the actual K.
+
+               rf = GetRatingFactor(1.0,Mpermit,Mlegal); // compute rating factor assuming K = 1.0
+               if ( bFirst || rf < 1.1*RFmin ) // if first time, or rf with assumed K is near the controlling RF... re-compute it with the actual K
+               {
+                  // compute the actual K for this case
+                  MinMomentCapacityDetails minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(m_PierID,ls,xbrTypes::Stage2,m_POI,bPositiveMoment,vehicleIdx,llConfigIdx,permitLaneIdx);
+                  Float64 Mr = minCapacityDetails.Mr;
+                  Float64 MrMin = minCapacityDetails.MrMin;
+                  Float64 k = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
+                  if ( k < 0.0 || 1.0 < k )
+                  {
+                     k = 1.0;
+                  }
+
+                  if ( k < 1.0 )
+                  {
+                     // the actual K is less than one, so it will reduce the rating factor based on the assumed
+                     // K of 1.0.
+                     // re-compute the rating factor using the actual K
+                     K = k;
+                     rf = GetRatingFactor(K,Mpermit,Mlegal);
+                  }
+               }
+
                if ( rf < RFmin || bFirst )
                {
-                  RFmin = rf;
-                  m_LLConfigIdx = llConfigIdx;
-                  m_PermitLaneIdx = permitLaneIdx;
+                  RFmin              = rf;
+                  m_LLConfigIdx      = llConfigIdx;
+                  m_PermitLaneIdx    = permitLaneIdx;
                   m_PermitVehicleIdx = vehicleIdx;
-                  m_Mpermit = Mpermit;
-                  m_Mlegal  = Mlegal;
+                  m_Mpermit          = Mpermit;
+                  m_Mlegal           = Mlegal;
+                  m_K                = K;
 
                   bFirst = false;
                }
@@ -428,14 +476,14 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
    }
    else
    {
-      m_RF = GetRatingFactor(m_Mllim,0);
+      m_RF = GetRatingFactor(m_MinimumReinforcementFactor,m_Mllim,0);
    }
 
    m_bRFComputed = true;
    return m_RF;
 }
 
-void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal) const
+void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal,Float64* pK) const
 {
    Float64 RF = GetRatingFactor(); // causes the rating factor analysis to happen
 
@@ -444,6 +492,7 @@ void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigId
    *pVehicleIdx    = m_PermitVehicleIdx;
    *pMpermit       = m_Mpermit;
    *pMlegal        = m_Mlegal;
+   *pK             = m_K;
 }
 
 void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
@@ -462,6 +511,7 @@ void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
    m_PermitVehicleIdx           = rOther.m_PermitVehicleIdx;
    m_Mpermit                    = rOther.m_Mpermit;
    m_Mlegal                     = rOther.m_Mlegal;
+   m_K                          = rOther.m_K;
    m_SystemFactor               = rOther.m_SystemFactor;
    m_ConditionFactor            = rOther.m_ConditionFactor;
    m_MinimumReinforcementFactor = rOther.m_MinimumReinforcementFactor;
@@ -489,7 +539,7 @@ void xbrMomentRatingArtifact::MakeAssignment(const xbrMomentRatingArtifact& rOth
 }
 
 
-Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 Mllim,Float64 MllimAdj) const
+Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64 MllimAdj) const
 {
    Float64 RF = -DBL_MAX;
 
@@ -505,7 +555,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 Mllim,Float64 MllimAdj)
          p = 0.85; // 6A.4.2.1-3)
       }
 
-      Float64 C = p * m_CapacityRedutionFactor * m_MinimumReinforcementFactor * m_Mn;
+      Float64 C = p * m_CapacityRedutionFactor * K * m_Mn;
       Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
 
       if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )

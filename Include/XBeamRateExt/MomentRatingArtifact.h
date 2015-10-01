@@ -135,12 +135,12 @@ public:
 
    Float64 GetRatingFactor() const;
 
-   void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal) const;
+   void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal,Float64* pK) const;
 
 protected:
    void MakeCopy(const xbrMomentRatingArtifact& rOther);
    virtual void MakeAssignment(const xbrMomentRatingArtifact& rOther);
-   Float64 GetRatingFactor(Float64 Mllim,Float64 MllimAdj) const;
+   Float64 GetRatingFactor(Float64 K,Float64 Mllim,Float64 MllimAdj) const;
 
    mutable bool m_bRFComputed;
    mutable Float64 m_RF;
@@ -152,6 +152,7 @@ protected:
    mutable VehicleIndexType m_PermitVehicleIdx; // index of the vehicles, for this rating type, associted with the min rating factor
    mutable Float64 m_Mpermit; // permit load response associated with min rating factor
    mutable Float64 m_Mlegal; // legal load response associated with min rating factor
+   mutable Float64 m_K; // mininum reinforcement factor associted with min rating factor
 
    PierIDType m_PierID;
    xbrPointOfInterest m_POI;

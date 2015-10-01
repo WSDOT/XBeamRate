@@ -28,6 +28,8 @@
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <PgsExt\GirderLabel.h>
 
+#include <EAF\EAFAutoProgress.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -45,6 +47,12 @@ boost::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(boost::shared
 
    CComPtr<IBroker> pBroker;
    pXBRRptSpec->GetBroker(&pBroker);
+
+   GET_IFACE2(pBroker,IProgress, pProgress);
+   CEAFAutoProgress ap(pProgress);
+   CString strMsg;
+   strMsg.Format(_T("Building %s report"),pRptSpec->GetReportName().c_str());
+   pProgress->UpdateMessage(strMsg);
 
    PierIDType pierID = pXBRRptSpec->GetPierID();
 

@@ -204,8 +204,6 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
    grGraphXY graph(*pHorizontalAxisFormat,*pVerticalAxisFormat);
 
-   graph.DrawLegend(false); // don't draw the legend
-
    graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
    graph.SetClientAreaColor(GRAPH_BACKGROUND);
 
@@ -235,6 +233,9 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
 
    std::vector<IndexType> vLiveLoadConfigs = m_GraphController.GetSelectedLiveLoadConfigurations();
+
+   graph.DrawLegend(vLiveLoadConfigs.size() < 1 ? true : false);
+
    BOOST_FOREACH(IndexType llConfigIdx,vLiveLoadConfigs)
    {
       CString strName;
