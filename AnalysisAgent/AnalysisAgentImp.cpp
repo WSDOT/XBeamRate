@@ -2085,7 +2085,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       //            |<--->|          |<------>|
       //              gap               gap
       std::vector<std::vector<IndexType>> vGapPositions;
-      GetLanePositions(nTotalSteps,nLaneGaps,vGapPositions);
+      GetLaneGapConfiguration(nTotalSteps,nLaneGaps,vGapPositions);
 
       // for each lane configuration, get the wheel line reaction configuration
       // and analyze the structure for the configuration. The configuration, in general,
@@ -2095,7 +2095,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       {
          // wheel line reaction configuration is a sequence of vertical load and position from left curb line
          // pairs.
-         std::vector<Float64> vLoadPositions = ConfigureWheelLineLoads(skew,stepSize,wLoadedLane,vGapPosition);
+         std::vector<Float64> vLoadPositions = GetWheelLinePositions(skew,stepSize,wLoadedLane,vGapPosition);
          ATLASSERT(vLoadPositions.size() % 2 == 0);
          ATLASSERT(vLoadPositions.size()/2 == nLoadedLanes);
 
@@ -2110,6 +2110,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
 #if defined _DEBUG
          // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
          Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet); // 2' shy distance from curb-line
+         w2 /= cos(skew);
          ATLASSERT(IsEqual(vLoadPositions.back() + stepSize*nStepsRemaining + w2,Wcc));
 #endif
 
@@ -2118,6 +2119,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
          for ( IndexType stepIdx = 0; stepIdx <= nStepsRemaining; stepIdx++ )
          {
             Float64 Xoffset = stepSize*stepIdx; // amount to shift the wheel line configuration towards the right curb line
+            Xoffset += XcurbLine;
 
             LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vLoadPositions);
 
@@ -2130,8 +2132,8 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
                LaneConfiguration laneConfig;
                Float64 Xleft  = vLoadPositions[2*laneIdx]   + Xoffset;
                Float64 Xright = vLoadPositions[2*laneIdx+1] + Xoffset;
-               laneConfig.Xleft  = Xleft  + XcurbLine;
-               laneConfig.Xright = Xright + XcurbLine;
+               laneConfig.Xleft  = Xleft;
+               laneConfig.Xright = Xright;
 
                if ( nLoadedLanes == 1 )
                {
@@ -2158,7 +2160,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
 
                   // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
 
-                  Float64 Xcenter = (Xleft + Xright)/2; // center of lane from left curb line
+                  Float64 Xcenter = (Xleft-XcurbLine + Xright-XcurbLine)/2; // center of lane from left curb line
                   IndexType singleLaneStepIdx = (IndexType)floor((Xcenter - wLoadedLane/2)/stepSize);
                   std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
                   ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
@@ -2174,7 +2176,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
    } // next number of loaded lanes
 }
 
-void CAnalysisAgentImp::GetLanePositions(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions)
+void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions)
 {
    if ( nLaneGaps == 0 )
    {
@@ -2189,7 +2191,7 @@ void CAnalysisAgentImp::GetLanePositions(IndexType nTotalSteps,IndexType nLaneGa
       vDigits.push_back(stepIdx);
       if ( 1 < nLaneGaps )
       {
-         GetLanePositions(nTotalSteps-stepIdx,nLaneGaps-1,vGapPositions);
+         GetLaneGapConfiguration(nTotalSteps-stepIdx,nLaneGaps-1,vGapPositions);
       }
       else
       {
@@ -2204,9 +2206,10 @@ void CAnalysisAgentImp::GetLanePositions(IndexType nTotalSteps,IndexType nLaneGa
    }
 }
 
-std::vector<Float64> CAnalysisAgentImp::ConfigureWheelLineLoads(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition)
+std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition)
 {
-   Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet)/cos(skew); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
+   Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
+   w3 /= cos(skew); // we are working in the plane of the pier, so make skew adjustment
 
    std::vector<Float64> vLoadPositions;
    // first pair of wheel line loads... at left curb line

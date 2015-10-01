@@ -231,8 +231,8 @@ private:
    void ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
 
    void ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelData);
-   void GetLanePositions(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions);
-   std::vector<Float64> ConfigureWheelLineLoads(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition);
+   void GetLaneGapConfiguration(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions);
+   std::vector<Float64> GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition);
    LoadCaseIDType ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vLoadPositions);
 
 
