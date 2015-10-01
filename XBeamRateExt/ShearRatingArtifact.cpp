@@ -40,6 +40,7 @@ m_strVehicleName(_T("Unknown"))
    m_RF = 0;
 
    m_RatingType = pgsTypes::lrDesign_Inventory;
+   m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
    m_VehicleIndex = INVALID_INDEX;
    m_VehicleWeight = -999999;
@@ -89,11 +90,23 @@ const xbrPointOfInterest& xbrShearRatingArtifact::GetPointOfInterest() const
 void xbrShearRatingArtifact::SetRatingType(pgsTypes::LoadRatingType ratingType)
 {
    m_RatingType = ratingType;
+   m_bRFComputed = false;
 }
 
 pgsTypes::LoadRatingType xbrShearRatingArtifact::GetLoadRatingType() const
 {
    return m_RatingType;
+}
+
+void xbrShearRatingArtifact::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
+{
+   m_PermitRatingMethod = permitRatingMethod;
+   m_bRFComputed = false;
+}
+
+xbrTypes::PermitRatingMethod xbrShearRatingArtifact::GetPermitRatingMethod() const
+{
+   return m_PermitRatingMethod;
 }
 
 void xbrShearRatingArtifact::SetVehicleIndex(VehicleIndexType vehicleIdx)
@@ -269,9 +282,9 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
 
       Float64 C = p * m_CapacityRedutionFactor * m_Vn;
       Float64 RFtop = C - m_gDC*m_Vdc - m_gDW*m_Vdw;
-      if ( IsPermitRatingType(m_RatingType) )
+      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
       {
-         RFtop -= m_gLL*m_AdjVllim; // BDM Eqn. 13.1.1A-2
+         RFtop -= m_gLL*m_AdjVllim; // WSDOT BDM Eqn. 13.1.1A-2
       }
       Float64 RFbot = m_gLL*m_Vllim;
 
@@ -301,6 +314,7 @@ void xbrShearRatingArtifact::MakeCopy(const xbrShearRatingArtifact& rOther)
 {
    m_POI                        = rOther.m_POI;
    m_RatingType                 = rOther.m_RatingType;
+   m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
    m_VehicleIndex               = rOther.m_VehicleIndex;
    m_VehicleWeight              = rOther.m_VehicleWeight;
    m_strVehicleName             = rOther.m_strVehicleName;

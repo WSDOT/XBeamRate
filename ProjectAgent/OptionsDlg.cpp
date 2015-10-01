@@ -42,11 +42,21 @@ COptionsDlg::~COptionsDlg()
 {
 }
 
+void COptionsDlg::SetOptions(const txnEditOptionsData& options)
+{
+   m_Options = options;
+}
+
+const txnEditOptionsData& COptionsDlg::GetOptions() const
+{
+   return m_Options;
+}
+
 void COptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
-   DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_PermitRatingMethod);
+   DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_Options.m_PermitRatingMethod);
 }
 
 

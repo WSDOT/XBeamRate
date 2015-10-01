@@ -55,11 +55,17 @@ public:
 
    xbrMomentRatingArtifact& operator = (const xbrMomentRatingArtifact& rOther);
 
+   void SetPierID(PierIDType pierID);
+   PierIDType GetPierID() const;
+
    void SetPointOfInterest(const xbrPointOfInterest& poi);
    const xbrPointOfInterest& GetPointOfInterest() const;
 
    void SetRatingType(pgsTypes::LoadRatingType ratingType);
    pgsTypes::LoadRatingType GetLoadRatingType() const;
+
+   void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod);
+   xbrTypes::PermitRatingMethod GetPermitRatingMethod() const;
 
    void SetVehicleIndex(VehicleIndexType vehicleIdx);
    VehicleIndexType GetVehicleIndex() const;
@@ -127,21 +133,31 @@ public:
    void SetLiveLoadMoment(Float64 Mllim);
    Float64 GetLiveLoadMoment() const;
 
-   void SetAdjacentLaneLiveLoadMoment(Float64 Mllim);
-   Float64 GetAdjacentLaneLiveLoadMoment() const;
-
    Float64 GetRatingFactor() const;
+
+   void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,Float64 *pMpermit,Float64* pMlegal) const;
 
 protected:
    void MakeCopy(const xbrMomentRatingArtifact& rOther);
    virtual void MakeAssignment(const xbrMomentRatingArtifact& rOther);
+   Float64 GetRatingFactor(Float64 Mllim,Float64 MllimAdj) const;
 
    mutable bool m_bRFComputed;
    mutable Float64 m_RF;
 
+   // loading configuration, for the WSDOT method, that
+   // results in the minimum rating factor
+   mutable IndexType m_LLConfigIdx; // live load configuration for min rating factor
+   mutable IndexType m_PermitLaneIdx; // lane position of permit vehicle within the live load configuration for min rating factor
+   mutable Float64 m_Mpermit; // permit load response associated with min rating factor
+   mutable Float64 m_Mlegal; // legal load response associated with min rating factor
+
+
+   PierIDType m_PierID;
    xbrPointOfInterest m_POI;
 
    pgsTypes::LoadRatingType m_RatingType;
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
    VehicleIndexType m_VehicleIndex;
    Float64 m_VehicleWeight;
@@ -166,5 +182,4 @@ protected:
    Float64 m_Mre;
    Float64 m_Mps;
    Float64 m_Mllim;
-   Float64 m_AdjMllim;
 };

@@ -20,35 +20,65 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#pragma once
 
-#include <txnEditOptions.h>
+#include "stdafx.h"
+#include "txnEditOptions.h"
 
+#include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 
-// COptionsDlg dialog
-
-class COptionsDlg : public CDialog
+txnEditOptions::txnEditOptions(const txnEditOptionsData& oldOptions,const txnEditOptionsData& newOptions)
 {
-	DECLARE_DYNAMIC(COptionsDlg)
+   m_Options[0] = oldOptions;
+   m_Options[1] = newOptions;
+}
 
-public:
-	COptionsDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~COptionsDlg();
+txnEditOptions::~txnEditOptions(void)
+{
+}
 
-// Dialog Data
-	enum { IDD = IDD_OPTIONS };
+bool txnEditOptions::Execute()
+{
+   Execute(1);
+   return true;
+}
 
-   void SetOptions(const txnEditOptionsData& options);
-   const txnEditOptionsData& GetOptions() const;
+void txnEditOptions::Undo()
+{
+   Execute(0);
+}
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+void txnEditOptions::Execute(int i)
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
 
-   txnEditOptionsData m_Options;
+   GET_IFACE2(pBroker,IXBREvents, pEvents);
+   pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   void FillPermitFactorList();
+   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
-	DECLARE_MESSAGE_MAP()
-public:
-   virtual BOOL OnInitDialog();
-};
+   pRatingSpec->SetPermitRatingMethod(m_Options[i].m_PermitRatingMethod);
+
+   pEvents->FirePendingEvents();
+}
+
+txnTransaction* txnEditOptions::CreateClone() const
+{
+   return new txnEditOptions(m_Options[0],m_Options[1]);
+}
+
+std::_tstring txnEditOptions::Name() const
+{
+   return _T("Edit Options");
+}
+
+bool txnEditOptions::IsUndoable()
+{
+   return true;
+}
+
+bool txnEditOptions::IsRepeatable()
+{
+   return false;
+}

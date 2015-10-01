@@ -1357,12 +1357,23 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
 
    *pMlegal  = Mlegal_in_all_lanes - Mlegal_in_permit_lane;
    *pMpermit = Mpermit_in_permit_lane;
+
+   *pMlegal  = IsZero(*pMlegal)  ? 0 : *pMlegal;
+   *pMpermit = IsZero(*pMpermit) ? 0 : *pMpermit;
    
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
    {
       mpf = 1.0;
    }
+
+   // NOTE: Multiple presense factor is applied to both the permit and legal loads. Consider the following
+   // (ignore load factors)
+   // Q = DC + DW + mpf(LL)
+   // LL = LL_Permit + LL_Legal
+   // therefore Q = DC + DW + mpf(LL_Permit + LL_Legal);
+   // Re-arrange into the rating factor equation
+   // RF = [Q - DC - DW - mpf(LL_Legal)]/[mpf(LL_Permit)]
 
    *pMlegal  *= mpf;
    *pMpermit *= mpf;

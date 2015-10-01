@@ -22,6 +22,7 @@
 
 #include "stdafx.h"
 #include <XBeamRateExt\MomentRatingArtifact.h>
+#include <IFace\AnalysisResults.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -39,7 +40,15 @@ m_strVehicleName(_T("Unknown"))
    m_bRFComputed = false;
    m_RF = 0;
 
+   m_LLConfigIdx = INVALID_INDEX;
+   m_PermitLaneIdx = INVALID_INDEX;
+   m_Mpermit = -DBL_MAX;
+   m_Mlegal  = -DBL_MAX;
+
+   m_PierID = INVALID_ID;
+
    m_RatingType = pgsTypes::lrDesign_Inventory;
+   m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
    m_VehicleIndex = INVALID_INDEX;
    m_VehicleWeight = -999999;
@@ -55,7 +64,6 @@ m_strVehicleName(_T("Unknown"))
    m_Mdc = 0;
    m_Mdw = 0;
    m_Mllim = 0;
-   m_AdjMllim = 0;
 }
 
 xbrMomentRatingArtifact::xbrMomentRatingArtifact(const xbrMomentRatingArtifact& rOther)
@@ -77,9 +85,21 @@ xbrMomentRatingArtifact& xbrMomentRatingArtifact::operator=(const xbrMomentRatin
    return *this;
 }
 
+void xbrMomentRatingArtifact::SetPierID(PierIDType pierID)
+{
+   m_PierID = pierID;
+   m_bRFComputed = false;
+}
+
+PierIDType xbrMomentRatingArtifact::GetPierID() const
+{
+   return m_PierID;
+}
+
 void xbrMomentRatingArtifact::SetPointOfInterest(const xbrPointOfInterest& poi)
 {
    m_POI = poi;
+   m_bRFComputed = false;
 }
 
 const xbrPointOfInterest& xbrMomentRatingArtifact::GetPointOfInterest() const
@@ -90,11 +110,23 @@ const xbrPointOfInterest& xbrMomentRatingArtifact::GetPointOfInterest() const
 void xbrMomentRatingArtifact::SetRatingType(pgsTypes::LoadRatingType ratingType)
 {
    m_RatingType = ratingType;
+   m_bRFComputed = false;
 }
 
 pgsTypes::LoadRatingType xbrMomentRatingArtifact::GetLoadRatingType() const
 {
    return m_RatingType;
+}
+
+void xbrMomentRatingArtifact::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
+{
+   m_PermitRatingMethod = permitRatingMethod;
+   m_bRFComputed = false;
+}
+
+xbrTypes::PermitRatingMethod xbrMomentRatingArtifact::GetPermitRatingMethod() const
+{
+   return m_PermitRatingMethod;
 }
 
 void xbrMomentRatingArtifact::SetVehicleIndex(VehicleIndexType vehicleIdx)
@@ -336,17 +368,6 @@ Float64 xbrMomentRatingArtifact::GetLiveLoadMoment() const
    return m_Mllim;
 }
 
-void xbrMomentRatingArtifact::SetAdjacentLaneLiveLoadMoment(Float64 Mllim)
-{
-   m_AdjMllim = Mllim;
-   m_bRFComputed = false;
-}
-
-Float64 xbrMomentRatingArtifact::GetAdjacentLaneLiveLoadMoment() const
-{
-   return m_AdjMllim;
-}
-
 Float64 xbrMomentRatingArtifact::GetRatingFactor() const
 {
    if ( m_bRFComputed )
@@ -354,59 +375,82 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       return m_RF;
    }
 
-
-   if ( IsZero(m_Mllim) || IsZero(m_gLL) )
+   if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
    {
-      m_RF = DBL_MAX;
+      // we don't know which combination of permit and legal loads cause the minimum rating factor
+      // so we have to check them all.... the min rating factor could happen when the legal load
+      // effect is greatest, leaving the least reserve capacity for the permit vehicle, or when
+      // the legal load effect is least coupled with a very large permit load response, or something
+      // in between.
+      Float64 RFmin = DBL_MAX;
+      bool bFirst = true;
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+      GET_IFACE2(pBroker,IXBRAnalysisResults,pAnalysisResults);
+      IndexType nLiveLoadConfigurations = pProductForces->GetLiveLoadConfigurationCount(m_PierID,m_RatingType);
+      for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigurations; llConfigIdx++ )
+      {
+         IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
+         for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
+         {
+            Float64 Mpermit, Mlegal;
+            pAnalysisResults->GetMoment(m_PierID,m_RatingType,m_VehicleIndex,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
+
+            Float64 rf = GetRatingFactor(Mpermit,Mlegal);
+            if ( rf < RFmin || bFirst )
+            {
+               RFmin = rf;
+               m_LLConfigIdx = llConfigIdx;
+               m_PermitLaneIdx = permitLaneIdx;
+               m_Mpermit = Mpermit;
+               m_Mlegal  = Mlegal;
+
+               bFirst = false;
+            }
+         } // permit truck in next position
+      } // next live load configuration
+
+      m_RF = RFmin;
    }
    else
    {
-      Float64 p = m_SystemFactor * m_ConditionFactor;
-      if ( p < 0.85 )
-      {
-         p = 0.85; // 6A.4.2.1-3)
-      }
-
-      Float64 C = p * m_CapacityRedutionFactor * m_MinimumReinforcementFactor * m_Mn;
-      Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
-      if ( IsPermitRatingType(m_RatingType) )
-      {
-         RFtop -= m_gLL*m_AdjMllim; // BDM Eqn. 13.1.1A-2
-      }
-
-      Float64 RFbot = m_gLL*m_Mllim;
-
-      if ( (0 < m_Mllim && RFtop < 0) || (m_Mllim < 0 && 0 < RFtop) )
-      {
-         // There isn't any capacity remaining for live load
-         m_RF = 0;
-      }
-      else if ( ::BinarySign(RFtop) != ::BinarySign(RFbot) && !IsZero(RFtop) )
-      {
-         // (C - DL) and LL have opposite signs
-         // this case probably shouldn't happen, but if does,
-         // the rating is great
-         m_RF = DBL_MAX;
-      }
-      else
-      {
-         m_RF = RFtop/RFbot;
-      }
+      m_RF = GetRatingFactor(m_Mllim,0);
    }
 
    m_bRFComputed = true;
    return m_RF;
 }
 
+void xbrMomentRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,Float64 *pMpermit,Float64* pMlegal) const
+{
+   Float64 RF = GetRatingFactor(); // causes the rating factor analysis to happen
+
+   *pLLConfigIdx   = m_LLConfigIdx;
+   *pPermitLaneIdx = m_PermitLaneIdx;
+   *pMpermit       = m_Mpermit;
+   *pMlegal        = m_Mlegal;
+
+#pragma Reminder("WORKING HERE - may also need vehicle index")
+   // when the rating artifact is for m_VehicleIdx = INVALID_INDEX (all vehicles for the rating type)
+   // we probably want to know which vehicleIdx is associated with the controlling rating factor
+}
+
 void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
 {
+   m_PierID                     = rOther.m_PierID;
    m_POI                        = rOther.m_POI;
    m_RatingType                 = rOther.m_RatingType;
+   m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
    m_VehicleIndex               = rOther.m_VehicleIndex;
    m_VehicleWeight              = rOther.m_VehicleWeight;
    m_strVehicleName             = rOther.m_strVehicleName;
    m_bRFComputed                = rOther.m_bRFComputed;
    m_RF                         = rOther.m_RF;
+   m_LLConfigIdx                = rOther.m_LLConfigIdx;
+   m_PermitLaneIdx              = rOther.m_PermitLaneIdx;
+   m_Mpermit                    = rOther.m_Mpermit;
+   m_Mlegal                     = rOther.m_Mlegal;
    m_SystemFactor               = rOther.m_SystemFactor;
    m_ConditionFactor            = rOther.m_ConditionFactor;
    m_MinimumReinforcementFactor = rOther.m_MinimumReinforcementFactor;
@@ -426,10 +470,57 @@ void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
    m_Mre                        = rOther.m_Mre;
    m_Mps                        = rOther.m_Mps;
    m_Mllim                      = rOther.m_Mllim;
-   m_AdjMllim                   = rOther.m_AdjMllim;
 }
 
 void xbrMomentRatingArtifact::MakeAssignment(const xbrMomentRatingArtifact& rOther)
 {
    MakeCopy( rOther );
+}
+
+
+Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 Mllim,Float64 MllimAdj) const
+{
+   Float64 RF = -DBL_MAX;
+
+   if ( IsZero(Mllim) || IsZero(m_gLL) )
+   {
+      RF = DBL_MAX;
+   }
+   else
+   {
+      Float64 p = m_SystemFactor * m_ConditionFactor;
+      if ( p < 0.85 )
+      {
+         p = 0.85; // 6A.4.2.1-3)
+      }
+
+      Float64 C = p * m_CapacityRedutionFactor * m_MinimumReinforcementFactor * m_Mn;
+      Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
+
+      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+      {
+         RFtop -= m_gLL*MllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
+      }
+
+      Float64 RFbot = m_gLL*Mllim;
+
+      if ( (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
+      {
+         // There isn't any capacity remaining for live load
+         RF = 0;
+      }
+      else if ( ::BinarySign(RFtop) != ::BinarySign(RFbot) && !IsZero(RFtop) )
+      {
+         // (C - DL) and LL have opposite signs
+         // this case probably shouldn't happen, but if does,
+         // the rating is great
+         RF = DBL_MAX;
+      }
+      else
+      {
+         RF = RFtop/RFbot;
+      }
+   }
+
+   return RF;
 }

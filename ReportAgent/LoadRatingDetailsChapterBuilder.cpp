@@ -74,8 +74,9 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
-   int nRatingTypes = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO ? 6 : 4);
-   for ( int i = 0; i < nRatingTypes; i++ )
+   xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
+
+   for ( int i = 0; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 
@@ -100,7 +101,10 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
             CString strTitle;
             strTitle.Format(_T("%s Moment Rating - %s"),(bPositiveMoment ? _T("Positive") : _T("Negative")),strLiveLoadName.c_str());
 
-            rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(21,strTitle);
+            bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+            ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
+
+            rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
             pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
             pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
@@ -126,7 +130,15 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
             (*pTable)(0,col++) << Sub2(symbol(gamma),_T("PS"));
             (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("PS")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
             (*pTable)(0,col++) << Sub2(symbol(gamma),_T("LL"));
-            (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
+            if ( bIsWSDOTPermitRating )
+            {
+               (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")) << rptNewLine << _T("Permit"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
+               (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")) << rptNewLine << _T("Legal"),  rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
+            }
+            else
+            {
+               (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
+            }
             (*pTable)(0,col++) << _T("RF");
 
             RowIndexType row = pTable->GetNumberOfHeaderRows();
@@ -160,7 +172,21 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
                (*pTable)(row,col++) << artifact.GetSecondaryEffectsFactor();
                (*pTable)(row,col++) << moment.SetValue(artifact.GetSecondaryEffectsMoment());
                (*pTable)(row,col++) << artifact.GetLiveLoadFactor();
-               (*pTable)(row,col++) << moment.SetValue(artifact.GetLiveLoadMoment());
+
+               if ( bIsWSDOTPermitRating )
+               {
+                  IndexType llConfigIdx;
+                  IndexType permitLaneIdx;
+                  Float64 Mpermit;
+                  Float64 Mlegal;
+                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&Mpermit,&Mlegal);
+                  (*pTable)(row,col++) << moment.SetValue(Mpermit);
+                  (*pTable)(row,col++) << moment.SetValue(Mlegal);
+               }
+               else
+               {
+                  (*pTable)(row,col++) << moment.SetValue(artifact.GetLiveLoadMoment());
+               }
 
                Float64 RF = artifact.GetRatingFactor();
 

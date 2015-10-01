@@ -22,33 +22,30 @@
 
 #pragma once
 
-#include <txnEditOptions.h>
+#include <WBFLCore.h>
 
-
-// COptionsDlg dialog
-
-class COptionsDlg : public CDialog
+struct txnEditOptionsData
 {
-	DECLARE_DYNAMIC(COptionsDlg)
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+};
 
+class txnEditOptions :
+   public txnTransaction
+{
 public:
-	COptionsDlg(CWnd* pParent = NULL);   // standard constructor
-	virtual ~COptionsDlg();
+   txnEditOptions(const txnEditOptionsData& oldOptionsData,const txnEditOptionsData& newOptionsData);
+   ~txnEditOptions(void);
 
-// Dialog Data
-	enum { IDD = IDD_OPTIONS };
+   virtual bool Execute();
+   virtual void Undo();
+   virtual txnTransaction* CreateClone() const;
+   virtual std::_tstring Name() const;
+   virtual bool IsUndoable();
+   virtual bool IsRepeatable();
 
-   void SetOptions(const txnEditOptionsData& options);
-   const txnEditOptionsData& GetOptions() const;
+private:
+   void Execute(int i);
 
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+   txnEditOptionsData m_Options[2];
 
-   txnEditOptionsData m_Options;
-
-   void FillPermitFactorList();
-
-	DECLARE_MESSAGE_MAP()
-public:
-   virtual BOOL OnInitDialog();
 };

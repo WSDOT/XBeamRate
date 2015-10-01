@@ -28,6 +28,7 @@
 #include <EAF\EAFTransactions.h>
 #include <txnEditProject.h>
 #include <txnEditPier.h>
+#include <txnEditOptions.h>
 
 #include "PierDlg.h"
 #include "OptionsDlg.h"
@@ -35,6 +36,7 @@
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
 #include <IFace\Project.h>
+#include <IFace\RatingSpecification.h>
 
 
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
@@ -129,9 +131,20 @@ void CAgentCmdTarget::OnEditPier()
 void CAgentCmdTarget::OnEditOptions()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   
+   txnEditOptionsData oldOptions;
+   oldOptions.m_PermitRatingMethod = pRatingSpec->GetPermitRatingMethod();
+
    COptionsDlg dlg;
-   dlg.m_PermitRatingMethod = xbrTypes::prmAASHTO;
+   dlg.SetOptions(oldOptions);
    if ( dlg.DoModal() == IDOK )
    {
+      txnEditOptionsData newOptions = dlg.GetOptions();
+
+      txnEditOptions txn(oldOptions,newOptions);
+      GET_IFACE(IEAFTransactions,pTransactions);
+      pTransactions->Execute(txn);
    }
 }

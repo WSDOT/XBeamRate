@@ -1437,7 +1437,19 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       if ( 0 < vLLReactions.size() )
       {
-         return vLLReactions[vehicleIdx].LLIM;
+         if ( vehicleIdx == INVALID_INDEX )
+         {
+            Float64 Rmax = -DBL_MAX;
+            BOOST_FOREACH(LiveLoadReaction& llReaction,vLLReactions)
+            {
+               Rmax = Max(Rmax,llReaction.LLIM);
+            }
+            return Rmax;
+         }
+         else
+         {
+            return vLLReactions[vehicleIdx].LLIM;
+         }
       }
       else
       {

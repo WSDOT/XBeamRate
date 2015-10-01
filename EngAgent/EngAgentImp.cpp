@@ -324,6 +324,12 @@ HRESULT CEngAgentImp::OnProjectChanged()
       m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
       m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
    }
+
+   for ( int i = 0; i < 6; i++ )
+   {
+      m_RatingArtifacts[i].clear();
+   }
+
    return S_OK;
 }
 
