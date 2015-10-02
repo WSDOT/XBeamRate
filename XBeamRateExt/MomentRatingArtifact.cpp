@@ -433,8 +433,19 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
                // or if this is our first time through the loop, compute the actual K and re-compute
                // the rating factor using the actual K.
 
-               rf = GetRatingFactor(1.0,Mpermit,Mlegal); // compute rating factor assuming K = 1.0
-               if ( bFirst || rf < 1.1*RFmin ) // if first time, or rf with assumed K is near the controlling RF... re-compute it with the actual K
+               // if the K associated with the current min rating factor is < 1.0
+               // then there is a problem with minimum moment capacity so we'll be 
+               // computing K for every Mpermit/Mlegal combination until the controlling
+               // point no longer has minimum moment capacity issues.
+
+               if ( 1.0 <= m_K )
+               {
+                  // no need to do this step if the K currently associated with the min rating
+                  // factor is less then one (we will be computing rating factor below)
+                  rf = GetRatingFactor(1.0,Mpermit,Mlegal); // compute rating factor assuming K = 1.0
+               }
+
+               if ( bFirst || m_K < 1.0 || rf < 1.1*RFmin ) // if first time, or rf with assumed K is near the controlling RF... re-compute it with the actual K
                {
                   // compute the actual K for this case
                   MinMomentCapacityDetails minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(m_PierID,ls,xbrTypes::Stage2,m_POI,bPositiveMoment,vehicleIdx,llConfigIdx,permitLaneIdx);
@@ -446,7 +457,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
                      k = 1.0;
                   }
 
-                  if ( k < 1.0 )
+                  if ( k < 1.0 || m_K < 1.0 )
                   {
                      // the actual K is less than one, so it will reduce the rating factor based on the assumed
                      // K of 1.0.
