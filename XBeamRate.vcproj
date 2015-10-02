@@ -1254,6 +1254,10 @@
 			Filter="*.h"
 			>
 			<File
+				RelativePath=".\Include\IFace\VersionInfo.h"
+				>
+			</File>
+			<File
 				RelativePath=".\Include\IFace\XBeamRateAgent.h"
 				>
 			</File>

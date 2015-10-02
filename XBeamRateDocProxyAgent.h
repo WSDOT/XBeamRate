@@ -26,6 +26,7 @@
 #include <IFace\Project.h>
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\RatingSpecification.h>
+#include <IFace\VersionInfo.h>
 #include <EAF\EAFDisplayUnits.h>
 
 class CXBeamRateDoc;
@@ -56,8 +57,8 @@ class CXBeamRateDocProxyAgent :
    public IXBRUIEvents,
    public IXBRProjectEventSink,
    public IXBRRatingSpecificationEventSink,
-   public IEAFDisplayUnitsEventSink
-   //public IVersionInfo,
+   public IEAFDisplayUnitsEventSink,
+   public IXBRVersionInfo
 {
 public:
    CXBeamRateDocProxyAgent();
@@ -73,7 +74,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    COM_INTERFACE_ENTRY(IXBRRatingSpecificationEventSink)
    COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
-   //COM_INTERFACE_ENTRY(IVersionInfo)
+   COM_INTERFACE_ENTRY(IXBRVersionInfo)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CXBeamRateDocProxyAgent)
@@ -121,11 +122,10 @@ public:
    virtual void CancelPendingEvents();
    virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>());
 
-
-//// IVersionInfo
-//public:
-//   virtual CString GetVersionString(bool bIncludeBuildNumber=false);
-//   virtual CString GetVersion(bool bIncludeBuildNumber=false);
+// IXBRVersionInfo
+public:
+   virtual CString GetVersionString(bool bIncludeBuildNumber=false);
+   virtual CString GetVersion(bool bIncludeBuildNumber=false);
 
 // IViews ??? 
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);

@@ -45,11 +45,13 @@
 
 #include <IReportManager.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 #include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 #include <IFace\RatingSpecification.h>
+#include <IFace\VersionInfo.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <\ARP\PGSuper\Include\IFace\Selection.h>

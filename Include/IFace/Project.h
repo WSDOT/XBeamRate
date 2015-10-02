@@ -45,8 +45,6 @@ interface IXBRProjectProperties : IUnknown
    virtual void SetBridgeName(LPCTSTR name) = 0;
    virtual LPCTSTR GetBridgeID() const = 0;
    virtual void SetBridgeID(LPCTSTR bid) = 0;
-   virtual PierIndexType GetPierIndex() = 0;
-   virtual void SetPierIndex(PierIndexType pierIdx) = 0;
    virtual LPCTSTR GetJobNumber() const = 0;
    virtual void SetJobNumber(LPCTSTR jid) = 0;
    virtual LPCTSTR GetEngineer() const = 0;

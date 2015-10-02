@@ -36,6 +36,8 @@
 
 #include "XBeamRateHints.h"
 
+#include <MFCTools\VersionInfo.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -132,8 +134,9 @@ STDMETHODIMP CXBeamRateDocProxyAgent::SetBroker(IBroker* pBroker)
 STDMETHODIMP CXBeamRateDocProxyAgent::RegInterfaces()
 {
    CComQIPtr<IBrokerInitEx2> pBrokerInit(m_pBroker);
-   pBrokerInit->RegInterface( IID_IXBeamRate,   this );
-   pBrokerInit->RegInterface( IID_IXBRUIEvents, this );
+   pBrokerInit->RegInterface( IID_IXBeamRate,      this );
+   pBrokerInit->RegInterface( IID_IXBRUIEvents,    this );
+   pBrokerInit->RegInterface( IID_IXBRVersionInfo, this );
    return S_OK;
 }
 
@@ -356,47 +359,47 @@ void CXBeamRateDocProxyAgent::FireEvent(CView* pSender,LPARAM lHint,boost::share
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-// IVersionInfo
-//CString CXBeamRateDocProxyAgent::GetVersionString(bool bIncludeBuildNumber)
-//{
-//   CString str(_T("Version "));
-//   str += GetVersion(bIncludeBuildNumber);
-//#if defined _BETA_VERSION
-//   str += CString(_T(" BETA"));
-//#endif
-//
-//   str += CString(_T(" - Built on "));
-//   str += CString(__DATE__);
-//   return str;
-//}
-//
-//CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
-//{
-//   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-//
-//   CWinApp* pApp = AfxGetApp();
-//   CString strExe( pApp->m_pszExeName );
-//   strExe += _T(".dll");
-//
-//   CVersionInfo verInfo;
-//   verInfo.Load(strExe);
-//   
-//   CString strVersion = verInfo.GetProductVersionAsString();
-//
-//#if defined _DEBUG || defined _BETA_VERSION
-//   // always include the build number in debug and beta versions
-//   bIncludeBuildNumber = true;
-//#endif
-//
-//   if (!bIncludeBuildNumber)
-//   {
-//      // remove the build number
-//      int pos = strVersion.ReverseFind(_T('.')); // find the last '.'
-//      strVersion = strVersion.Left(pos);
-//   }
-//
-//   return strVersion;
-//}
+// IXBRVersionInfo
+CString CXBeamRateDocProxyAgent::GetVersionString(bool bIncludeBuildNumber)
+{
+   CString str(_T("Version "));
+   str += GetVersion(bIncludeBuildNumber);
+#if defined _BETA_VERSION
+   str += CString(_T(" BETA"));
+#endif
+
+   str += CString(_T(" - Built on "));
+   str += CString(__DATE__);
+   return str;
+}
+
+CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CWinApp* pApp = AfxGetApp();
+   CString strExe( pApp->m_pszExeName );
+   strExe += _T(".dll");
+
+   CVersionInfo verInfo;
+   verInfo.Load(strExe);
+   
+   CString strVersion = verInfo.GetProductVersionAsString();
+
+#if defined _DEBUG || defined _BETA_VERSION
+   // always include the build number in debug and beta versions
+   bIncludeBuildNumber = true;
+#endif
+
+   if (!bIncludeBuildNumber)
+   {
+      // remove the build number
+      int pos = strVersion.ReverseFind(_T('.')); // find the last '.'
+      strVersion = strVersion.Left(pos);
+   }
+
+   return strVersion;
+}
 
 /////////////////////////////////////////////////////////////////////
 void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec)

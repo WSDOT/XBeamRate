@@ -65,8 +65,6 @@ CProjectAgentImp::CProjectAgentImp()
    m_strCompany    = _T("");
    m_strComments   = _T("");
 
-   m_PierIdx = INVALID_INDEX;
-
    m_SysFactorFlexure = 1.0;
    m_SysFactorShear   = 1.0;
 
@@ -174,6 +172,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
 
    pBrokerInit->RegInterface( IID_IXBRProject,             this );
+   pBrokerInit->RegInterface( IID_IXBRProjectProperties,   this );
    pBrokerInit->RegInterface( IID_IXBRRatingSpecification, this );
    pBrokerInit->RegInterface( IID_IXBRProjectEdit,         this );
    pBrokerInit->RegInterface( IID_IXBREvents,              this );
@@ -282,7 +281,6 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->BeginUnit(_T("ProjectProperties"),1.0);
          pStrSave->put_Property(_T("BridgeName"), CComVariant(m_strBridgeName));
          pStrSave->put_Property(_T("BridgeId"),CComVariant(m_strBridgeId));
-         pStrSave->put_Property(_T("Pier"),CComVariant(m_PierIdx));
          pStrSave->put_Property(_T("JobNumber"),CComVariant(m_strJobNumber));
          pStrSave->put_Property(_T("Engineer"),CComVariant(m_strEngineer));
          pStrSave->put_Property(_T("Company"),CComVariant(m_strCompany));
@@ -477,10 +475,6 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("BridgeId"),&var);
             m_strBridgeId = OLE2T(var.bstrVal);
-
-            var.vt = VT_INDEX;
-            hr = pStrLoad->get_Property(_T("Pier"),&var);
-            m_PierIdx = VARIANT2INDEX(var);
 
             var.vt = VT_BSTR;
             hr = pStrLoad->get_Property(_T("JobNumber"),&var);
@@ -911,7 +905,15 @@ BOOL CProjectAgentImp::GetToolTipMessageString(UINT nID, CString& rMessage) cons
 // IXBRProjectProperties
 LPCTSTR CProjectAgentImp::GetBridgeName() const
 {
-   return m_strBridgeName;
+   if ( IsStandAlone() )
+   {
+      return m_strBridgeName;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetBridgeName();
+   }
 }
 
 void CProjectAgentImp::SetBridgeName(LPCTSTR name)
@@ -925,7 +927,15 @@ void CProjectAgentImp::SetBridgeName(LPCTSTR name)
 
 LPCTSTR CProjectAgentImp::GetBridgeID() const
 {
-   return m_strBridgeId;
+   if ( IsStandAlone() )
+   {
+      return m_strBridgeId;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetBridgeID();
+   }
 }
 
 void CProjectAgentImp::SetBridgeID(LPCTSTR bid)
@@ -937,23 +947,17 @@ void CProjectAgentImp::SetBridgeID(LPCTSTR bid)
    }
 }
 
-PierIndexType CProjectAgentImp::GetPierIndex()
-{
-   return m_PierIdx;
-}
-
-void CProjectAgentImp::SetPierIndex(PierIndexType pierIdx)
-{
-   if ( m_PierIdx != pierIdx )
-   {
-      m_PierIdx = pierIdx;
-      Fire_OnProjectPropertiesChanged();
-   }
-}
-
 LPCTSTR CProjectAgentImp::GetJobNumber() const
 {
-   return m_strJobNumber;
+   if ( IsStandAlone() )
+   {
+      return m_strJobNumber;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetJobNumber();
+   }
 }
 
 void CProjectAgentImp::SetJobNumber(LPCTSTR jid)
@@ -967,7 +971,15 @@ void CProjectAgentImp::SetJobNumber(LPCTSTR jid)
 
 LPCTSTR CProjectAgentImp::GetEngineer() const
 {
-   return m_strEngineer;
+   if ( IsStandAlone() )
+   {
+      return m_strEngineer;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetEngineer();
+   }
 }
 
 void CProjectAgentImp::SetEngineer(LPCTSTR eng)
@@ -981,7 +993,15 @@ void CProjectAgentImp::SetEngineer(LPCTSTR eng)
 
 LPCTSTR CProjectAgentImp::GetCompany() const
 {
-   return m_strCompany;
+   if ( IsStandAlone() )
+   {
+      return m_strCompany;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetCompany();
+   }
 }
 
 void CProjectAgentImp::SetCompany(LPCTSTR company)
@@ -995,7 +1015,15 @@ void CProjectAgentImp::SetCompany(LPCTSTR company)
 
 LPCTSTR CProjectAgentImp::GetComments() const
 {
-   return m_strComments;
+   if ( IsStandAlone() )
+   {
+      return m_strComments;
+   }
+   else
+   {
+      GET_IFACE(IProjectProperties,pProjectProperties);
+      return pProjectProperties->GetComments();
+   }
 }
 
 void CProjectAgentImp::SetComments(LPCTSTR comments)
@@ -2233,7 +2261,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetSegmentConnectionType()) );
    }
 
-   m_PierIdx = pPier->GetIndex();
+   PierIndexType pierIdx = pPier->GetIndex();
    PierIDType pierID = pPier->GetID();
    
    pierData.SetID(pierID);
@@ -2243,15 +2271,15 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetBridgeLineOffset(alignment_offset);
 
    GET_IFACE(IBridge,pBridge);
-   Float64 pierStation = pBridge->GetPierStation(m_PierIdx);
+   Float64 pierStation = pBridge->GetPierStation(pierIdx);
 
    CComPtr<IAngle> skewAngle;
-   pBridge->GetPierSkew(m_PierIdx,&skewAngle);
+   pBridge->GetPierSkew(pierIdx,&skewAngle);
    Float64 skew;
    skewAngle->get_Value(&skew);
 
    CComPtr<IDirection> pierDirection;
-   pBridge->GetPierDirection(m_PierIdx,&pierDirection);
+   pBridge->GetPierDirection(pierIdx,&pierDirection);
 
 
    GET_IFACE(IRoadway,pRoadway);
@@ -2261,14 +2289,14 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetDeckProfile(deckProfile);
 
    GroupIndexType backGrpIdx, aheadGrpIdx;
-   pBridge->GetGirderGroupIndex(m_PierIdx,&backGrpIdx,&aheadGrpIdx);
+   pBridge->GetGirderGroupIndex(pierIdx,&backGrpIdx,&aheadGrpIdx);
    GET_IFACE(IPointOfInterest,pPoi);
-   pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(CGirderKey(backGrpIdx,0),m_PierIdx);
+   pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(CGirderKey(backGrpIdx,0),pierIdx);
    Float64 tSlab = pBridge->GetGrossSlabDepth(poi);
    pierData.SetDeckThickness(tSlab);
 
-   Float64 leftCLO  = pBridge->GetLeftCurbOffset(m_PierIdx);
-   Float64 rightCLO = pBridge->GetRightCurbOffset(m_PierIdx);
+   Float64 leftCLO  = pBridge->GetLeftCurbOffset(pierIdx);
+   Float64 rightCLO = pBridge->GetRightCurbOffset(pierIdx);
    pierData.SetCurbLineDatum(pgsTypes::omtAlignment);
    pierData.SetCurbLineOffset(leftCLO,rightCLO);
 
@@ -2291,9 +2319,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    // (don't use the pPier object here... use the pBridge interface... it resolves
    // diaphragm dimensions that are computed based on bridge component geometry)
    Float64 Wback, Hback;
-   pBridge->GetPierDiaphragmSize(m_PierIdx,pgsTypes::Back,&Wback,&Hback);
+   pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Back,&Wback,&Hback);
    Float64 Wahead, Hahead;
-   pBridge->GetPierDiaphragmSize(m_PierIdx,pgsTypes::Ahead,&Wahead,&Hahead);
+   pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Ahead,&Wahead,&Hahead);
 
    Float64 H = Max(Hback,Hahead); // height from top of lower cross beam to bottom of slab
    W = Wback + Wahead;
@@ -2337,18 +2365,18 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       GirderIndexType gdrIdx = 0;
 
       GroupIndexType backGroupIdx, aheadGroupIdx;
-      pBridge->GetGirderGroupIndex(m_PierIdx,&backGroupIdx,&aheadGroupIdx);
+      pBridge->GetGirderGroupIndex(pierIdx,&backGroupIdx,&aheadGroupIdx);
 
-      CSegmentKey backSegmentKey  = pBridge->GetSegmentAtPier(m_PierIdx,CGirderKey(backGroupIdx, gdrIdx));
-      CSegmentKey aheadSegmentKey = pBridge->GetSegmentAtPier(m_PierIdx,CGirderKey(aheadGroupIdx,gdrIdx));
+      CSegmentKey backSegmentKey  = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(backGroupIdx, gdrIdx));
+      CSegmentKey aheadSegmentKey = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(aheadGroupIdx,gdrIdx));
 
       Float64 backBrgOffset  = pBridge->GetSegmentEndBearingOffset(backSegmentKey);
       backBrgOffset *= -1; // offset to back side of pier is < 0
       Float64 aheadBrgOffset = pBridge->GetSegmentStartBearingOffset(aheadSegmentKey);
 
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
 
-      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData backBrgLine;
       backBrgLine.SetBearingLineOffset(backBrgOffset);
       backBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
@@ -2359,8 +2387,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       std::vector<BearingReactions>& vBackBrgReactions = GetPrivateBearingReactions(pierID,0);
       vBackBrgReactions.resize(backBrgLine.GetBearingCount());
 
-      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
-      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
+      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData aheadBrgLine;
       aheadBrgLine.SetBearingLineOffset(aheadBrgOffset);
       aheadBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
@@ -2377,9 +2405,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       pierData.SetBearingLineCount(1);
 
       GirderIndexType gdrIdx = 0;
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,m_PierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
 
-      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(m_PierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData brgLine;
       brgLine.SetBearingLineOffset(0);
       brgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);

@@ -23,6 +23,16 @@
 
 #include "stdafx.h"
 #include <XBeamRateTitlePageBuilder.h>
+#include <XBeamRateReportSpecification.h>
+
+#include <IFace\VersionInfo.h>
+#include <IFace\Project.h>
+
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <EAF\EAFDocument.h>
+
+#include <PgsExt\PierData2.h>
+#include <PgsExt\GirderLabel.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -60,6 +70,8 @@ bool CXBeamRateTitlePageBuilder::NeedsUpdate(CReportHint* pHint,boost::shared_pt
 
 rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecification>& pRptSpec)
 {
+   boost::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = boost::dynamic_pointer_cast<CXBeamRateReportSpecification,CReportSpecification>(pRptSpec);
+
    // Create a title page for the report
    rptChapter* pTitlePage = new rptChapter;
 
@@ -70,6 +82,85 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    std::_tstring title = GetReportTitle();
 
    *pPara << title.c_str();
+
+   if ( pXBRRptSpec->GetPierID() != INVALID_INDEX )
+   {
+      GET_IFACE(IBridgeDescription,pIBridgeDesc);
+
+      const CPierData2* pPier = pIBridgeDesc->FindPier(pXBRRptSpec->GetPierID());
+      ATLASSERT(pPier);
+
+      *pPara << rptNewLine;
+      *pPara << _T("for Pier ") << LABEL_PIER(pPier->GetIndex()) << rptNewLine;
+   }
+
+
+   pPara = new rptParagraph;
+   pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
+   *pTitlePage << pPara;
+#if defined _WIN64
+   *pPara << _T("XBeam Rate") << Super(symbol(TRADEMARK)) << _T(" (x64)") << rptNewLine;
+#else
+   *pPara << _T("XBeam Rate") << Super(symbol(TRADEMARK)) << _T(" (x86)") << rptNewLine;
+#endif
+
+   pPara = new rptParagraph(pgsReportStyleHolder::GetCopyrightStyle());
+   *pTitlePage << pPara;
+   *pPara << _T("Copyright ") << symbol(COPYRIGHT) << _T(" ") << sysDate().Year() << _T(", WSDOT, All Rights Reserved") << rptNewLine;
+
+   pPara = new rptParagraph;
+   pPara->SetStyleName(pgsReportStyleHolder::GetReportSubtitleStyle());
+   *pTitlePage << pPara;
+   GET_IFACE(IXBRVersionInfo,pVerInfo);
+   *pPara << pVerInfo->GetVersionString() << rptNewLine;
+
+#pragma Reminder("WORKING HERE - need title page impage")
+   //const std::_tstring& strImage = pgsReportStyleHolder::GetReportCoverImage();
+   //WIN32_FIND_DATA file_find_data;
+   //HANDLE hFind;
+   //hFind = FindFirstFile(strImage.c_str(),&file_find_data);
+   //if ( hFind != INVALID_HANDLE_VALUE )
+   //{
+   //   *pPara << rptRcImage(strImage) << rptNewLine;
+   //}
+
+   //*pPara << rptNewLine << rptNewLine;
+
+   ////////////////////////////
+   // If this is stand alone, use the IXBRProjectProperties, otherwise
+   // use the IProjectProperties and report in PGSuper format
+   ////////////////////////////
+
+   GET_IFACE(IEAFDocument,pDocument);
+   GET_IFACE(IXBRProjectProperties,pProps);
+   rptParagraph* pPara3 = new rptParagraph( pgsReportStyleHolder::GetHeadingStyle() );
+   *pTitlePage << pPara3;
+
+   rptRcTable* pTbl = pgsReportStyleHolder::CreateTableNoHeading(2,_T("Project Properties"));
+
+   pTbl->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetColumnStyle(1,pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetStripeRowColumnStyle(1,pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
+
+   *pPara3 << rptNewLine << rptNewLine << rptNewLine;
+
+   *pPara3 << pTbl;
+   (*pTbl)(0,0) << _T("Bridge Name");
+   (*pTbl)(0,1) << pProps->GetBridgeName();
+   (*pTbl)(1,0) << _T("Bridge ID");
+   (*pTbl)(1,1) << pProps->GetBridgeID();
+   (*pTbl)(2,0) << _T("Company");
+   (*pTbl)(2,1) << pProps->GetCompany();
+   (*pTbl)(3,0) << _T("Engineer");
+   (*pTbl)(3,1) << pProps->GetEngineer();
+   (*pTbl)(4,0) << _T("Job Number");
+   (*pTbl)(4,1) << pProps->GetJobNumber();
+   (*pTbl)(5,0) << _T("Comments");
+   (*pTbl)(5,1) << pProps->GetComments();
+   (*pTbl)(6,0) << _T("File");
+   (*pTbl)(6,1) << pDocument->GetFilePath();
+
 
    // Throw in a page break
    pPara = new rptParagraph;

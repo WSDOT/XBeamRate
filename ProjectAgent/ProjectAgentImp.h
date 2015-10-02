@@ -128,8 +128,6 @@ public:
    virtual void SetBridgeName(LPCTSTR name);
    virtual LPCTSTR GetBridgeID() const;
    virtual void SetBridgeID(LPCTSTR bid);
-   virtual PierIndexType GetPierIndex();
-   virtual void SetPierIndex(PierIndexType pierIdx);
    virtual LPCTSTR GetJobNumber() const;
    virtual void SetJobNumber(LPCTSTR jid);
    virtual LPCTSTR GetEngineer() const;
@@ -333,7 +331,6 @@ private:
    // Project Properties
    CString m_strBridgeName;
    CString m_strBridgeId;
-   PierIndexType m_PierIdx;
    CString m_strJobNumber;
    CString m_strEngineer;
    CString m_strCompany;
