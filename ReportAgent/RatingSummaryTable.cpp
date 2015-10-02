@@ -95,10 +95,10 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
    table->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
    table->SetColumnStyle(1,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
    table->SetStripeRowColumnStyle(1,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
-   table->SetColumnStyle(4,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(4,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
-   table->SetColumnStyle(7,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(7,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   //table->SetColumnStyle(4,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   //table->SetStripeRowColumnStyle(4,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   //table->SetColumnStyle(7,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   //table->SetStripeRowColumnStyle(7,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    table->SetNumberOfHeaderRows(2);
 
@@ -116,7 +116,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
    (*table)(0,2) << strRoutine;
    (*table)(1,2) << _T("RF");
    (*table)(1,3) << Sub2(symbol(gamma),_T("LL"));
-   (*table)(1,4) << _T("Location");
+   (*table)(1,4) << _T("Controlling Point");
    table->SetColumnSpan(0,5,3);
    table->SetColumnSpan(0,6,SKIP_CELL);
    table->SetColumnSpan(0,7,SKIP_CELL);
@@ -487,8 +487,8 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
    pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
    pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
-   pTable->SetColumnStyle(3,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(3,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   //pTable->SetColumnStyle(3,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   //pTable->SetStripeRowColumnStyle(3,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    pTable->SetColumnStyle(4,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
    pTable->SetStripeRowColumnStyle(4,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));

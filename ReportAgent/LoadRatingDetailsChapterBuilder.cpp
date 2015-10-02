@@ -63,6 +63,15 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
    CComPtr<IBroker> pBroker;
    pXBRRptSpec->GetBroker(&pBroker);
 
+#pragma Reminder("WORKING HERE - add rating equations")
+   // RF, K, etc... see PGSuper/PGSplice report
+
+   // NOTE: To be consistent with PGSuper/PGSplice we want to report
+   // Vehicle
+   //    +M
+   //    -M
+   //    V
+
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
@@ -80,16 +89,23 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 
+      if ( !pRatingSpec->IsRatingEnabled(ratingType) )
+      {
+         continue;
+      }
+
       rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
       *pChapter << pPara;
 
       *pPara << ::GetLiveLoadTypeName(ratingType) << rptNewLine;
 
       IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
-      for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
+      VehicleIndexType firstVehicleIdx = 0;
+      VehicleIndexType lastVehicleIdx  = (ratingType == pgsTypes::lrDesign_Inventory || ratingType == pgsTypes::lrDesign_Operating ? 0 : nVehicles-1);
+      for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
       {
-         std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-         const xbrRatingArtifact* pRatingArtifact = pArtifact->GetXBeamRatingArtifact(pierID,ratingType,vehicleIdx);
+         std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,(ratingType == pgsTypes::lrDesign_Inventory || ratingType == pgsTypes::lrDesign_Operating) ? INVALID_INDEX : vehicleIdx);
+         const xbrRatingArtifact* pRatingArtifact = pArtifact->GetXBeamRatingArtifact(pierID,ratingType,(ratingType == pgsTypes::lrDesign_Inventory || ratingType == pgsTypes::lrDesign_Operating) ? INVALID_INDEX : vehicleIdx);
 
          for ( int i = 0; i < 2; i++ )
          {
@@ -99,7 +115,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
             *pChapter << pPara;
 
             CString strTitle;
-            strTitle.Format(_T("%s Moment Rating - %s"),(bPositiveMoment ? _T("Positive") : _T("Negative")),strLiveLoadName.c_str());
+            strTitle.Format(_T("Rating for %s Moment - %s"),(bPositiveMoment ? _T("Positive") : _T("Negative")),strLiveLoadName.c_str());
 
             bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
             ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
@@ -155,13 +171,13 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
                IndexType llConfigIdx;
                IndexType permitLaneIdx;
-               VehicleIndexType vehicleIdx;
+               VehicleIndexType permitVehicleIdx;
                Float64 Mpermit;
                Float64 Mlegal;
                Float64 K;
                if ( bIsWSDOTPermitRating )
                {
-                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehicleIdx,&Mpermit,&Mlegal,&K);
+                  artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Mpermit,&Mlegal,&K);
                }
 
                (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
@@ -198,7 +214,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
                   (*pTable)(row,col-1) << rptNewLine;
                   (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
                   (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
-                  (*pTable)(row,col-1) << _T("Permit Vehicle: ") << pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx).c_str();
+                  (*pTable)(row,col-1) << _T("Permit Vehicle: ") << pProject->GetLiveLoadName(pierID,ratingType,permitVehicleIdx).c_str();
 #endif
                   (*pTable)(row,col++) << moment.SetValue(Mlegal);
                }

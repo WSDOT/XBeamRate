@@ -26,6 +26,16 @@
 
 struct txnEditOptionsData
 {
+   bool m_bDesignRating;
+   bool m_bDesignRateForShear;
+
+   bool m_bLegalRating;
+   bool m_bLegalRateForShear;
+
+   bool m_bPermitRating;
+   bool m_bPermitRateForShear;
+   bool m_bCheckYieldStress;
+   Float64 m_YieldStressCoefficient;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 };
 

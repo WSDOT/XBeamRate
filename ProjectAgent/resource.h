@@ -116,7 +116,18 @@
 #define IDC_COMBO1                      304
 #define IDC_PERMIT_FACTORS              304
 #define IDC_BACK_BRG_OFFSET_LABEL2      305
+#define IDC_DESIGN_RATING               305
 #define IDC_AHEAD_BRG_OFFSET_LABEL2     306
+#define IDC_DESIGN_SHEAR                306
+#define IDC_LEGAL_RATING                307
+#define IDC_LEGAL_SHEAR                 308
+#define IDC_PERMIT_RATING               309
+#define IDC_PERMIT_SHEAR                310
+#define IDC_PERMIT_YIELD_STRESS         311
+#define IDC_YIELD_STRESS_LABEL          312
+#define IDC_ALLOWABLE_STRESS_LABEL      312
+#define IDC_ALLOWABLE_STRESS            313
+#define IDC_ALLOWABLE_STRESS_TAG        314
 #define IDD_AASHTO_CONCRETE             500
 #define IDC_EC_K1_LABEL                 501
 #define IDC_EC_K1                       502
@@ -189,7 +200,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        207
 #define _APS_NEXT_COMMAND_VALUE         50005
-#define _APS_NEXT_CONTROL_VALUE         305
+#define _APS_NEXT_CONTROL_VALUE         315
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

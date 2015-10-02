@@ -64,7 +64,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    rptChapter* pTitlePage = new rptChapter;
 
    rptParagraph* pPara = new rptParagraph;
-   //pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
+   pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
    *pTitlePage << pPara;
 
    std::_tstring title = GetReportTitle();

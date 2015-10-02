@@ -60,6 +60,10 @@ interface IXBRProductForces : public IUnknown
    virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
    virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx) = 0;
    virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx) = 0;
+
+   // Returns vectors contain the live load configuration indicies associated with the N min/max moments
+   // Used only for WSDOT Permit rating method
+   virtual void GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax) = 0;
 };
 
 

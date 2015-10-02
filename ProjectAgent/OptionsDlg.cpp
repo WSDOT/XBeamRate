@@ -56,6 +56,16 @@ void COptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
+   DDX_Check_Bool(pDX,IDC_DESIGN_RATING,m_Options.m_bDesignRating);
+   DDX_Check_Bool(pDX,IDC_DESIGN_SHEAR,m_Options.m_bDesignRateForShear);
+
+   DDX_Check_Bool(pDX,IDC_LEGAL_RATING,m_Options.m_bLegalRating);
+   DDX_Check_Bool(pDX,IDC_LEGAL_SHEAR,m_Options.m_bLegalRateForShear);
+
+   DDX_Check_Bool(pDX,IDC_PERMIT_RATING,m_Options.m_bPermitRating);
+   DDX_Check_Bool(pDX,IDC_PERMIT_SHEAR,m_Options.m_bPermitRateForShear);
+   DDX_Check_Bool(pDX,IDC_PERMIT_YIELD_STRESS,m_Options.m_bCheckYieldStress);
+   DDX_Text(pDX,IDC_ALLOWABLE_STRESS,m_Options.m_YieldStressCoefficient);
    DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_Options.m_PermitRatingMethod);
 }
 

@@ -69,12 +69,23 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_SysFactorFlexure = 1.0;
    m_SysFactorShear   = 1.0;
-   m_vbRateForShear[pgsTypes::lrDesign_Inventory] = true;
-   m_vbRateForShear[pgsTypes::lrDesign_Operating] = true;
-   m_vbRateForShear[pgsTypes::lrLegal_Routine]    = true;
-   m_vbRateForShear[pgsTypes::lrLegal_Special]    = true;
-   m_vbRateForShear[pgsTypes::lrPermit_Routine]   = true;
-   m_vbRateForShear[pgsTypes::lrPermit_Special]   = true;
+
+   m_bRatingEnabled[pgsTypes::lrDesign_Inventory] = true;
+   m_bRatingEnabled[pgsTypes::lrDesign_Operating] = true;
+   m_bRatingEnabled[pgsTypes::lrLegal_Routine]    = true;
+   m_bRatingEnabled[pgsTypes::lrLegal_Special]    = true;
+   m_bRatingEnabled[pgsTypes::lrPermit_Routine]   = true;
+   m_bRatingEnabled[pgsTypes::lrPermit_Special]   = true;
+
+   m_bRateForShear[pgsTypes::lrDesign_Inventory] = true;
+   m_bRateForShear[pgsTypes::lrDesign_Operating] = true;
+   m_bRateForShear[pgsTypes::lrLegal_Routine]    = true;
+   m_bRateForShear[pgsTypes::lrLegal_Special]    = true;
+   m_bRateForShear[pgsTypes::lrPermit_Routine]   = true;
+   m_bRateForShear[pgsTypes::lrPermit_Special]   = true;
+
+   m_bCheckYieldStress = true;
+   m_YieldStressCoefficient = 0.9;
 
    m_gDC = 1.25;
    m_gDW = 1.50;
@@ -291,12 +302,23 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(m_SysFactorFlexure));
          pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(m_SysFactorShear));
-         pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(m_vbRateForShear[pgsTypes::lrDesign_Inventory]));
-         pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(m_vbRateForShear[pgsTypes::lrDesign_Operating]));
-         pStrSave->put_Property(_T("RateForShear_Legal_Routine"),CComVariant(m_vbRateForShear[pgsTypes::lrLegal_Routine]));
-         pStrSave->put_Property(_T("RateForShear_Legal_Special"),CComVariant(m_vbRateForShear[pgsTypes::lrLegal_Special]));
-         pStrSave->put_Property(_T("RateForShear_Permit_Routine"),CComVariant(m_vbRateForShear[pgsTypes::lrPermit_Routine]));
-         pStrSave->put_Property(_T("RateForShear_Permit_Special"),CComVariant(m_vbRateForShear[pgsTypes::lrPermit_Special]));
+
+         pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Inventory]));
+         pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Operating]));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Routine"),   CComVariant(m_bRatingEnabled[pgsTypes::lrLegal_Routine]));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Special"),   CComVariant(m_bRatingEnabled[pgsTypes::lrLegal_Special]));
+         pStrSave->put_Property(_T("RatingEnabled_Permit_Routine"),  CComVariant(m_bRatingEnabled[pgsTypes::lrPermit_Routine]));
+         pStrSave->put_Property(_T("RatingEnabled_Permit_Special"),  CComVariant(m_bRatingEnabled[pgsTypes::lrPermit_Special]));
+
+         pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(m_bRateForShear[pgsTypes::lrDesign_Inventory]));
+         pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(m_bRateForShear[pgsTypes::lrDesign_Operating]));
+         pStrSave->put_Property(_T("RateForShear_Legal_Routine"),   CComVariant(m_bRateForShear[pgsTypes::lrLegal_Routine]));
+         pStrSave->put_Property(_T("RateForShear_Legal_Special"),   CComVariant(m_bRateForShear[pgsTypes::lrLegal_Special]));
+         pStrSave->put_Property(_T("RateForShear_Permit_Routine"),  CComVariant(m_bRateForShear[pgsTypes::lrPermit_Routine]));
+         pStrSave->put_Property(_T("RateForShear_Permit_Special"),  CComVariant(m_bRateForShear[pgsTypes::lrPermit_Special]));
+
+         pStrSave->put_Property(_T("CheckYieldStressLimit"), CComVariant(m_bCheckYieldStress));
+         pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(m_YieldStressCoefficient));
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
@@ -506,23 +528,51 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             m_SysFactorShear = var.dblVal;
 
             var.vt = VT_BOOL;
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Design_Inventory"),&var);
+            m_bRatingEnabled[pgsTypes::lrDesign_Inventory] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Design_Operating"),&var);
+            m_bRatingEnabled[pgsTypes::lrDesign_Operating] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Legal_Routine"),&var);
+            m_bRatingEnabled[pgsTypes::lrLegal_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Legal_Special"),&var);
+            m_bRatingEnabled[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Permit_Routine"),&var);
+            m_bRatingEnabled[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            hr = pStrLoad->get_Property(_T("RatingEnabled_Permit_Special"),&var);
+            m_bRatingEnabled[pgsTypes::lrPermit_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+
+            var.vt = VT_BOOL;
             hr = pStrLoad->get_Property(_T("RateForShear_Design_Inventory"),&var);
-            m_vbRateForShear[pgsTypes::lrDesign_Inventory] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrDesign_Inventory] = (var.boolVal == VARIANT_TRUE ? true : false);
 
             hr = pStrLoad->get_Property(_T("RateForShear_Design_Operating"),&var);
-            m_vbRateForShear[pgsTypes::lrDesign_Operating] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrDesign_Operating] = (var.boolVal == VARIANT_TRUE ? true : false);
 
             hr = pStrLoad->get_Property(_T("RateForShear_Legal_Routine"),&var);
-            m_vbRateForShear[pgsTypes::lrLegal_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrLegal_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
 
             hr = pStrLoad->get_Property(_T("RateForShear_Legal_Special"),&var);
-            m_vbRateForShear[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
 
             hr = pStrLoad->get_Property(_T("RateForShear_Permit_Routine"),&var);
-            m_vbRateForShear[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
 
             hr = pStrLoad->get_Property(_T("RateForShear_Permit_Special"),&var);
-            m_vbRateForShear[pgsTypes::lrPermit_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+            m_bRateForShear[pgsTypes::lrPermit_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            var.vt = VT_BOOL;
+            hr = pStrLoad->get_Property(_T("CheckYieldStressLimit"), &var);
+            m_bCheckYieldStress = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("YieldStressCoefficient"), &var);
+            m_YieldStressCoefficient = var.dblVal;
 
             hr = pStrLoad->EndUnit(); // RatingSpecification
          }
@@ -866,8 +916,11 @@ LPCTSTR CProjectAgentImp::GetBridgeName() const
 
 void CProjectAgentImp::SetBridgeName(LPCTSTR name)
 {
-   m_strBridgeName = name;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strBridgeName != name )
+   {
+      m_strBridgeName = name;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 LPCTSTR CProjectAgentImp::GetBridgeID() const
@@ -877,8 +930,11 @@ LPCTSTR CProjectAgentImp::GetBridgeID() const
 
 void CProjectAgentImp::SetBridgeID(LPCTSTR bid)
 {
-   m_strBridgeId = bid;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strBridgeId != bid )
+   {
+      m_strBridgeId = bid;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 PierIndexType CProjectAgentImp::GetPierIndex()
@@ -888,8 +944,11 @@ PierIndexType CProjectAgentImp::GetPierIndex()
 
 void CProjectAgentImp::SetPierIndex(PierIndexType pierIdx)
 {
-   m_PierIdx = pierIdx;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_PierIdx != pierIdx )
+   {
+      m_PierIdx = pierIdx;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 LPCTSTR CProjectAgentImp::GetJobNumber() const
@@ -899,8 +958,11 @@ LPCTSTR CProjectAgentImp::GetJobNumber() const
 
 void CProjectAgentImp::SetJobNumber(LPCTSTR jid)
 {
-   m_strJobNumber = jid;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strJobNumber != jid )
+   {
+      m_strJobNumber = jid;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 LPCTSTR CProjectAgentImp::GetEngineer() const
@@ -910,8 +972,11 @@ LPCTSTR CProjectAgentImp::GetEngineer() const
 
 void CProjectAgentImp::SetEngineer(LPCTSTR eng)
 {
-   m_strEngineer = eng;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strEngineer != eng )
+   {
+      m_strEngineer = eng;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 LPCTSTR CProjectAgentImp::GetCompany() const
@@ -921,8 +986,11 @@ LPCTSTR CProjectAgentImp::GetCompany() const
 
 void CProjectAgentImp::SetCompany(LPCTSTR company)
 {
-   m_strCompany = company;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strCompany != company )
+   {
+      m_strCompany = company;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 LPCTSTR CProjectAgentImp::GetComments() const
@@ -932,8 +1000,11 @@ LPCTSTR CProjectAgentImp::GetComments() const
 
 void CProjectAgentImp::SetComments(LPCTSTR comments)
 {
-   m_strComments = comments;
-   Fire_OnProjectPropertiesChanged();
+   if ( m_strComments != comments )
+   {
+      m_strComments = comments;
+      Fire_OnProjectPropertiesChanged();
+   }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1828,25 +1899,77 @@ Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitSta
 // IXBRRatingSpecification
 bool CProjectAgentImp::IsRatingEnabled(pgsTypes::LoadRatingType ratingType)
 {
-#pragma Reminder("WORKING HERE")
-   return true;
+   if ( IsStandAlone() )
+   {
+      return m_bRatingEnabled[ratingType];
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->IsRatingEnabled(ratingType);
+   }
 }
 
-bool CProjectAgentImp::RateForStress(pgsTypes::LoadRatingType ratingType)
+void CProjectAgentImp::EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable)
 {
-#pragma Reminder("WORKING HERE")
-   return false;
+   m_bRatingEnabled[ratingType] = bEnable;
 }
 
 void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
 {
-   m_vbRateForShear[ratingType] = bRateForShear;
+   m_bRateForShear[ratingType] = bRateForShear;
    Fire_OnRatingSpecificationChanged();
 }
 
 bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType)
 {
-   return m_vbRateForShear[ratingType];
+   if ( IsStandAlone() )
+   {
+      return m_bRateForShear[ratingType];
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->RateForShear(ratingType);
+   }
+}
+
+void CProjectAgentImp::CheckYieldStressLimit(bool bCheckYieldStress)
+{
+   m_bCheckYieldStress = bCheckYieldStress;
+   Fire_OnRatingSpecificationChanged();
+}
+
+bool CProjectAgentImp::CheckYieldStressLimit()
+{
+   if ( IsStandAlone() )
+   {
+      return m_bCheckYieldStress;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->RateForStress(pgsTypes::lrPermit_Routine);
+   }
+}
+
+void CProjectAgentImp::SetYieldStressLimitCoefficient(Float64 x)
+{
+   m_YieldStressCoefficient = x;
+   Fire_OnRatingSpecificationChanged();
+}
+
+Float64 CProjectAgentImp::GetYieldStressLimitCoefficient()
+{
+   if ( IsStandAlone() )
+   {
+      return m_YieldStressCoefficient;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetYieldStressLimitCoefficient();
+   }
 }
 
 pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions()

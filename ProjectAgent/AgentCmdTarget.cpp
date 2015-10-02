@@ -135,6 +135,16 @@ void CAgentCmdTarget::OnEditOptions()
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    
    txnEditOptionsData oldOptions;
+   oldOptions.m_bDesignRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
+   oldOptions.m_bDesignRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);
+
+   oldOptions.m_bLegalRating  = pRatingSpec->IsRatingEnabled(pgsTypes::lrLegal_Routine);
+   oldOptions.m_bLegalRateForShear  = pRatingSpec->RateForShear(pgsTypes::lrLegal_Routine);
+
+   oldOptions.m_bPermitRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrPermit_Routine);
+   oldOptions.m_bPermitRateForShear = pRatingSpec->RateForShear(pgsTypes::lrPermit_Routine);
+   oldOptions.m_bCheckYieldStress = pRatingSpec->CheckYieldStressLimit();
+   oldOptions.m_YieldStressCoefficient = pRatingSpec->GetYieldStressLimitCoefficient();
    oldOptions.m_PermitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
    COptionsDlg dlg;

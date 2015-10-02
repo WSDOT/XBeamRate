@@ -101,6 +101,7 @@ public:
    virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
    virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx);
    virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx);
+   virtual void GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax);
 
 // IXBRAnalysisResults
 public:
@@ -257,6 +258,17 @@ private:
       Float64 m_MzMin;
       Float64 m_MzMax;
 
+      // Load case IDs for the load cases that cause the N max/min moments
+      // Used only when permit rating factors are computed by the WSDOT method.
+      // WSDOT permit rating factor method requires that multiple combinations
+      // of permit load in one lane and legal load in all remaining lanes be
+      // evaluated. In theory, all loading conditions should be evaluated, however
+      // this is considerably time-consuming. Instead, the rating factor
+      // will be computed based the N load cases that cause the max/min
+      // moments at this section.
+      std::vector<LoadCaseIDType> m_MzMaxLoadCases;
+      std::vector<LoadCaseIDType> m_MzMinLoadCases;
+
       // controlling shear for one loaded lane
       LoadCaseIDType m_lcidFyLeftMin_SingleLane, m_lcidFyRightMin_SingleLane; // controlling FEM load cases for min shear
       LoadCaseIDType m_lcidFyLeftMax_SingleLane, m_lcidFyRightMax_SingleLane; // controlling FEM load cases for max shear
@@ -272,7 +284,7 @@ private:
    std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>> m_pUnitLiveLoadResults;
    std::set<UnitLiveLoadResult>& GetUnitLiveLoadResults(PierIDType pierID);
    void ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
-   UnitLiveLoadResult GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
+   UnitLiveLoadResult& GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
 
    WheelLineConfiguration GetWheelLineConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const LiveLoadConfiguration& llConfig,IndexType permitLaneIdx);
 

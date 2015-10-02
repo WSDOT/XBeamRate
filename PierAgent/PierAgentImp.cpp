@@ -1725,6 +1725,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
 
+   Float64 delta = ::ConvertToSysUnits(0.001,unitMeasure::Feet);
+
    Float64 H1, H2, X1, X2;
    Float64 H3, H4, X3, X4;
    Float64 W;
@@ -1760,18 +1762,18 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    if ( 1 < nColumns )
    {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-0.001));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta));
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+0.001));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta));
       SpacingIndexType nSpaces = nColumns - 1;
       Float64 X = LeftOH;
       for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
       {
          Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
          X += space;
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-0.001));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+0.001));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta));
       }
    }
 
@@ -1790,9 +1792,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          if ( reactionType == xbrTypes::rltConcentrated )
          {
             // POI at CL Bearing
-            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-0.001));
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-delta));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
-            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+0.001));
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+delta));
          }
          else
          {

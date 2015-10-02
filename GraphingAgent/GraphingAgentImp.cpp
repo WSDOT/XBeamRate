@@ -172,7 +172,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
    {
       // XBeam Rate is acting as an extension to PGSuper/PGSplice
       // Change the default graph name so it doesn't conflict with PGSuper/PGSplice
-      pAnalysisResultsGraphBuilder->SetName(_T("Cross Beam Live Load Results"));
+      pLiveLoadGraphBuilder->SetName(_T("Cross Beam Live Load Results"));
    }
 
    VERIFY(pGraphMgr->AddGraphBuilder( pLiveLoadGraphBuilder ));

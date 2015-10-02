@@ -58,6 +58,22 @@ void txnEditOptions::Execute(int i)
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRateForShear);
+
+   pRatingSpec->EnableRating(pgsTypes::lrLegal_Routine,m_Options[i].m_bLegalRating);
+   pRatingSpec->EnableRating(pgsTypes::lrLegal_Special,m_Options[i].m_bLegalRating);
+   pRatingSpec->RateForShear(pgsTypes::lrLegal_Routine,m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrLegal_Special,m_Options[i].m_bLegalRateForShear);
+
+   pRatingSpec->EnableRating(pgsTypes::lrPermit_Routine,m_Options[i].m_bPermitRating);
+   pRatingSpec->EnableRating(pgsTypes::lrPermit_Special,m_Options[i].m_bPermitRating);
+   pRatingSpec->RateForShear(pgsTypes::lrPermit_Routine,m_Options[i].m_bPermitRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrPermit_Special,m_Options[i].m_bPermitRateForShear);
+   pRatingSpec->CheckYieldStressLimit(m_Options[i].m_bCheckYieldStress);
+   pRatingSpec->SetYieldStressLimitCoefficient(m_Options[i].m_YieldStressCoefficient);
    pRatingSpec->SetPermitRatingMethod(m_Options[i].m_PermitRatingMethod);
 
    pEvents->FirePendingEvents();

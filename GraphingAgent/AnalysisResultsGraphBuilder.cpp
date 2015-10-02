@@ -156,6 +156,11 @@ bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
 void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
 {
    PierIDType pierID = m_GraphController.GetPierID();
+   if ( !IsStandAlone() && pierID == INVALID_ID )
+   {
+      // nothing to graph
+      return;
+   }
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);

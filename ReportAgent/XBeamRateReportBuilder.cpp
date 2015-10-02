@@ -51,7 +51,7 @@ boost::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(boost::shared
    GET_IFACE2(pBroker,IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
    CString strMsg;
-   strMsg.Format(_T("Building %s report"),pRptSpec->GetReportName().c_str());
+   strMsg.Format(_T("Building %s"),pRptSpec->GetReportName().c_str());
    pProgress->UpdateMessage(strMsg);
 
    PierIDType pierID = pXBRRptSpec->GetPierID();

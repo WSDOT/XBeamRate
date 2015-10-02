@@ -1040,6 +1040,24 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
    return GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llConfig,permitLaneIdx);
 }
 
+void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
+{
+   pvMin->clear();
+   pvMax->clear();
+
+   UnitLiveLoadResult& unitLiveLoadResult = GetUnitLiveLoadResult(pierID,poi);
+
+   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_MzMinLoadCases)
+   {
+      pvMin->push_back(lcid - FIRST_LIVELOAD_ID);
+   }
+
+   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_MzMaxLoadCases)
+   {
+      pvMax->push_back(lcid - FIRST_LIVELOAD_ID);
+   }
+}
+
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
 Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi)
@@ -1419,7 +1437,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
 
 void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration)
 {
-   UnitLiveLoadResult liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
+   UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
    // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
    // the presence of vehicles in other lanes (See MBE 6A.4.5.4.2a)
@@ -1475,7 +1493,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
 
 void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration)
 {
-   UnitLiveLoadResult liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
+   UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
    // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
    // the presence of vehicles in other lanes (See MBE 6A.4.5.4.2a)
@@ -2292,6 +2310,14 @@ std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveL
    return results;
 }
 
+struct Result
+{
+   Float64 M;
+   LoadCaseIDType lcid;
+   Result(Float64 m,LoadCaseIDType l) : M(m), lcid(l) {}
+   bool operator<(const Result& result)const { return M < result.M; }
+};
+
 void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
 {
    Float64 MzMin = DBL_MAX;
@@ -2324,6 +2350,8 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    ATLASSERT(found != pModelData->m_PoiMap.end());
    PoiIDType femPoiID = found->second;
 
+   std::set<Result> moments;
+
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
    for ( LoadCaseIDType lcid = FIRST_LIVELOAD_ID; lcid < pModelData->m_NextLiveLoadCaseID; lcid++ )
    {
@@ -2350,6 +2378,8 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
       Mz = IsZero(Mz) ? 0 : Mz;
       Mz *= mpf;
+
+      moments.insert(Result(Mz,lcid));
 
       if ( Mz < MzMin )
       {
@@ -2490,11 +2520,33 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    liveLoadResult.m_lcidFyRightMin_SingleLane = minFyRightLCID_SingleLane;
    liveLoadResult.m_lcidFyRightMax_SingleLane = maxFyRightLCID_SingleLane;
 
+   // moments is sorted least to greatest... N minimum moments are
+   // at the begining of the sequence... the N maximum moments are at
+   // the end of the sequence.
+   // Use forward iterator at start of sequence
+   int N = 50; // using 50 min/max moments
+   std::set<Result>::iterator fIter(moments.begin());
+   std::set<Result>::iterator fEnd(moments.end());
+   for ( int i = 0; i < N && fIter != fEnd; i++, fIter++ )
+   {
+      Result& r(*fIter);
+      liveLoadResult.m_MzMinLoadCases.push_back(r.lcid);
+   }
+
+   // Use reverse iterator at end of sequence
+   std::set<Result>::reverse_iterator rIter(moments.rbegin());
+   std::set<Result>::reverse_iterator rEnd(moments.rend());
+   for ( int i = 0; i < N && rIter != rEnd; i++, rIter++ )
+   {
+      Result& r(*rIter);
+      liveLoadResult.m_MzMaxLoadCases.push_back(r.lcid);
+   }
+
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);
    liveLoadResults.insert(liveLoadResult);
 }
 
-CAnalysisAgentImp::UnitLiveLoadResult CAnalysisAgentImp::GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
+CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
 {
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);
    UnitLiveLoadResult key;

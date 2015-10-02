@@ -262,29 +262,13 @@ public:
 // IXBRRatingSpecification
 public:
    virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType);
-   //virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) = 0;
+   virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable);
 
    //virtual std::_tstring GetRatingSpecification() = 0;
    //virtual void SetRatingSpecification(const std::_tstring& spec) = 0;
 
    //virtual void SetADTT(Int16 adtt) = 0;
    //virtual Int16 GetADTT() = 0; // < 0 = Unknown
-
-   //virtual void SetDeadLoadFactor(pgsTypes::LimitState ls,Float64 gDC) = 0;
-   //virtual Float64 GetDeadLoadFactor(pgsTypes::LimitState ls) = 0;
-
-   //virtual void SetWearingSurfaceFactor(pgsTypes::LimitState ls,Float64 gDW) = 0;
-   //virtual Float64 GetWearingSurfaceFactor(pgsTypes::LimitState ls) = 0;
-
-   //virtual void SetLiveLoadFactor(pgsTypes::LimitState ls,Float64 gLL) = 0;
-   //virtual Float64 GetLiveLoadFactor(pgsTypes::LimitState ls,bool bResolveIfDefault=false) = 0;
-   //virtual Float64 GetLiveLoadFactor(pgsTypes::LimitState ls,pgsTypes::SpecialPermitType specialPermitType,Int16 adtt,const RatingLibraryEntry* pRatingEntry,bool bResolveIfDefault=false) = 0;
-
-   //virtual void SetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType,Float64 t) = 0;
-   //virtual Float64 GetAllowableTensionCoefficient(pgsTypes::LoadRatingType ratingType) = 0;
-
-   //virtual void RateForStress(pgsTypes::LoadRatingType ratingType,bool bRateForStress) = 0;
-   virtual bool RateForStress(pgsTypes::LoadRatingType ratingType);
 
    virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear);
    virtual bool RateForShear(pgsTypes::LoadRatingType ratingType);
@@ -294,10 +278,14 @@ public:
    //virtual void ExcludeLegalLoadLaneLoading(bool bExclude) = 0;
    //virtual bool ExcludeLegalLoadLaneLoading() = 0;
 
-   //// returns fraction of yield stress that reinforcement can be stressed to during
-   //// a permit load rating evaluation MBE 6A.5.4.2.2b
-   //virtual void SetYieldStressLimitCoefficient(Float64 x) = 0;
-   //virtual Float64 GetYieldStressLimitCoefficient() = 0;
+   // Evalute yield stress in reinforcement MBE 6A.5.4.2.2b
+   virtual void CheckYieldStressLimit(bool bCheckYieldStress);
+   virtual bool CheckYieldStressLimit();
+
+   // returns fraction of yield stress that reinforcement can be stressed to during
+   // a permit load rating evaluation MBE 6A.5.4.2.2b
+   virtual void SetYieldStressLimitCoefficient(Float64 x);
+   virtual Float64 GetYieldStressLimitCoefficient();
 
    //// Permit type for rating for special/limited crossing permit vehicle
    //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
@@ -359,7 +347,10 @@ private:
 
    Float64 m_SysFactorFlexure;
    Float64 m_SysFactorShear;
-   bool m_vbRateForShear[6]; // array index is pgsTypes::LoadRatingType
+   bool m_bRatingEnabled[6]; // array index is pgsTypes::LoadRatingType
+   bool m_bRateForShear[6]; // array index is pgsTypes::LoadRatingType
+   bool m_bCheckYieldStress;
+   Float64 m_YieldStressCoefficient;
 
    // Load Factors
    Float64 m_gDC;

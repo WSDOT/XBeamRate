@@ -32,6 +32,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+//#define COMPARE_WITH_FULL_ANALYSIS
+
 /****************************************************************************
 CLASS
    xbrMomentRatingArtifact
@@ -342,7 +344,7 @@ Float64 xbrMomentRatingArtifact::GetSecondaryEffectsFactor() const
 
 void xbrMomentRatingArtifact::SetSecondaryEffectsMoment(Float64 Mps)
 {
-   m_Mps;
+   m_Mps = Mps;
    m_bRFComputed = false;
 }
 
@@ -392,6 +394,17 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       pgsTypes::LimitState ls = ::GetStrengthLimitStateType(m_RatingType);
       bool bPositiveMoment = (0 <= m_Mn ? true : false);
 
+#if defined COMPARE_WITH_FULL_ANALYSIS
+      Float64 _RFmin = DBL_MAX;
+      bool _bFirst = true;
+      IndexType _LLConfigIdx;
+      IndexType _PermitLaneIdx;
+      VehicleIndexType _PermitVehicleIdx;
+      Float64 _Mpermit;
+      Float64 _Mlegal;
+      Float64 _K;
+#endif
+
       CComPtr<IBroker> pBroker;
       EAFGetBroker(&pBroker);
       GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -403,8 +416,10 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
       VehicleIndexType lastVehicleIdx  = (m_VehicleIdx == INVALID_INDEX ? nVehicles-1 : firstVehicleIdx);
 
-      IndexType nLiveLoadConfigurations = pProductForces->GetLiveLoadConfigurationCount(m_PierID,m_RatingType);
-      for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigurations; llConfigIdx++ )
+      std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
+      pProductForces->GetGoverningMomentLiveLoadConfigurations(m_PierID,m_POI,&vMinLLConfigIdx,&vMaxLLConfigIdx);
+      std::vector<IndexType>* pvLLConfigIdx = (bPositiveMoment ? &vMaxLLConfigIdx : &vMinLLConfigIdx);
+      BOOST_FOREACH(IndexType llConfigIdx,*pvLLConfigIdx)
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
@@ -482,6 +497,98 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
             } // next vehicle
          } // permit truck in next position
       } // next live load configuration
+
+#if defined COMPARE_WITH_FULL_ANALYSIS
+      IndexType nLiveLoadConfigurations = pProductForces->GetLiveLoadConfigurationCount(m_PierID,m_RatingType);
+      for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigurations; llConfigIdx++ )
+      {
+         IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
+         for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
+         {
+            for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
+            {
+               Float64 rf;
+
+               Float64 Mpermit, Mlegal;
+               pAnalysisResults->GetMoment(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
+
+
+               // compute the actual K for this case
+               MinMomentCapacityDetails minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(m_PierID,ls,xbrTypes::Stage2,m_POI,bPositiveMoment,vehicleIdx,llConfigIdx,permitLaneIdx);
+               Float64 Mr = minCapacityDetails.Mr;
+               Float64 MrMin = minCapacityDetails.MrMin;
+               Float64 k = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
+               if ( k < 0.0 || 1.0 < k )
+               {
+                  k = 1.0;
+               }
+
+               rf = GetRatingFactor(k,Mpermit,Mlegal);
+
+               if ( rf < _RFmin || _bFirst )
+               {
+                  _RFmin            = rf;
+                  _LLConfigIdx      = llConfigIdx;
+                  _PermitLaneIdx    = permitLaneIdx;
+                  _PermitVehicleIdx = vehicleIdx;
+                  _Mpermit          = Mpermit;
+                  _Mlegal           = Mlegal;
+                  _K                = k;
+
+                  _bFirst = false;
+               }
+            } // next vehicle
+         } // permit truck in next position
+      } // next live load configuration
+
+#if defined _DEBUG
+      if ( _RFmin != DBL_MAX )
+      {
+         ATLASSERT(IsEqual(_RFmin,RFmin));
+         ATLASSERT(_LLConfigIdx == m_LLConfigIdx);
+         ATLASSERT(_PermitLaneIdx == m_PermitLaneIdx);
+         ATLASSERT(_PermitVehicleIdx == m_PermitVehicleIdx);
+         ATLASSERT(IsEqual(_Mpermit,m_Mpermit));
+         ATLASSERT(IsEqual(_Mlegal,m_Mlegal));
+         ATLASSERT(IsEqual(_K,m_K));
+      }
+#else
+      if ( _RFmin != DBL_MAX &&
+            (!IsEqual(_RFmin,RFmin) ||
+            _LLConfigIdx != m_LLConfigIdx ||
+            _PermitLaneIdx != m_PermitLaneIdx ||
+            _PermitVehicleIdx != m_PermitVehicleIdx ||
+            !IsEqual(_Mpermit,m_Mpermit) ||
+            !IsEqual(_Mlegal,m_Mlegal) ||
+            !IsEqual(_K,m_K))
+            )
+      {
+         CString strMsg1;
+         strMsg1.Format(_T("Full and simplified analysis results don't match.\r\n%s\r\nPOI %d @ %f\r\nRF %f (Full), %f (Simplified)"),(bPositiveMoment ? _T("+M") : _T("-M")),m_POI.GetID(),m_POI.GetDistFromStart(),_RFmin,RFmin);
+
+         CString strMsg2;
+         strMsg2.Format(_T("LLConfigIdx %d (Full), %d (Simplified)"),_LLConfigIdx,m_LLConfigIdx);
+
+         CString strMsg3;
+         strMsg3.Format(_T("PermitLaneIdx %d (Full), %d (Simplified)"),_PermitLaneIdx,m_PermitLaneIdx);
+
+         CString strMsg4;
+         strMsg4.Format(_T("PermitVehicleIdx %d (Full), %d (Simplified)"),_PermitVehicleIdx,m_PermitVehicleIdx);
+
+         CString strMsg5;
+         strMsg5.Format(_T("Mpermit %f (Full), %f (Simplified)"),_Mpermit,m_Mpermit);
+
+         CString strMsg6;
+         strMsg6.Format(_T("Mlegal %f (Full), %f (Simplified)"),_Mlegal,m_Mlegal);
+
+         CString strMsg7;
+         strMsg7.Format(_T("K %f (Full), %f (Simplified)"),_K,m_K);
+
+         CString strMsg = strMsg1 + _T("\r\n") + strMsg2 + _T("\r\n") + strMsg3 + _T("\r\n") + strMsg4 + _T("\r\n") + strMsg5 + _T("\r\n") + strMsg6 + _T("\r\n") + strMsg7;
+         AfxMessageBox(strMsg);
+      }
+#endif
+#endif // COMPARE_WITH_FULL_ANALYSIS
 
       m_RF = RFmin;
    }

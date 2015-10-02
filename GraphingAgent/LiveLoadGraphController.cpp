@@ -381,6 +381,10 @@ void CXBRLiveLoadGraphController::FillLoadingList()
    plbLoading->ResetContent();
 
    PierIDType pierID = GetPierID();
+   if ( !IsStandAlone() && pierID == INVALID_ID )
+   {
+      return;
+   }
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
