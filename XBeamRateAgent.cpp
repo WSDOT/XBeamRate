@@ -626,15 +626,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    xbrTypes::PermitRatingMethod oldMethod = pSpec->GetPermitRatingMethod();
    xbrTypes::PermitRatingMethod newMethod = pLROPage->m_PermitRatingMethod;
 
-   if ( oldAnalysisType != newAnalysisType )
-   {
-      txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType,oldMethod,newMethod);
-      return pTxn;
-   }
-   else
-   {
-      return NULL;
-   }
+   txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType,oldMethod,newMethod);
+   return pTxn;
 }
 
 /////////////////////////////////////////////////////////////////////////////////

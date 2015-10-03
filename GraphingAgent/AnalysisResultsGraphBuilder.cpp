@@ -39,6 +39,7 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
@@ -155,6 +156,8 @@ bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
 
 void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
 {
+   m_GraphDefinitions.Clear();
+
    PierIDType pierID = m_GraphController.GetPierID();
    if ( !IsStandAlone() && pierID == INVALID_ID )
    {
@@ -228,8 +231,15 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
+
+   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
+   if ( pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT )
+   {
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
+   }
+   // NOTE: Strength II limit state doesn't make sense for WSDOT method. The graphs show the limit state based on a controlling envelope. For the WSDOT method
+   // we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combinatin of Legal and Permit loads
 
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 

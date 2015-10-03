@@ -40,14 +40,14 @@ public:
    virtual CGraphBuilder* Clone();
    const CXBRAnalysisResultsGraphDefinitions& GetGraphDefinitions();
 
+   void UpdateGraphDefinitions();
+
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow();
 
    afx_msg void OnGraphTypeChanged();
    afx_msg void OnLbnSelChanged();
    afx_msg void OnPierChanged();
-
-   void UpdateGraphDefinitions();
 
    virtual bool UpdateNow();
 

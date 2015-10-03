@@ -127,6 +127,9 @@ void CXBRAnalysisResultsGraphController::EnableControls(BOOL bEnable)
 void CXBRAnalysisResultsGraphController::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
    FillPierList();
+
+   CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
+   pGraphBuilder->UpdateGraphDefinitions();
 }
 
 void CXBRAnalysisResultsGraphController::FillPierList()
@@ -173,6 +176,8 @@ void CXBRAnalysisResultsGraphController::FillPierList()
 void CXBRAnalysisResultsGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
+#pragma Reminder("WORKING HERE - need to capture current selection and attempt to reselect")
+   plbLoading->ResetContent();
 
    CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
    const CXBRAnalysisResultsGraphDefinitions& graphDefinitions = pGraphBuilder->GetGraphDefinitions();
