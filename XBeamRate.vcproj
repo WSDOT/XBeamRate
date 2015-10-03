@@ -1027,6 +1027,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateVersionInfoImpl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateView.cpp"
 				>
 				<FileConfiguration
@@ -1189,6 +1193,10 @@
 			</File>
 			<File
 				RelativePath=".\Include\XBeamRateVersion.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateVersionInfoImpl.h"
 				>
 			</File>
 			<File

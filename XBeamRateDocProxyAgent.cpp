@@ -36,7 +36,7 @@
 
 #include "XBeamRateHints.h"
 
-#include <MFCTools\VersionInfo.h>
+#include "XBeamRateVersionInfoImpl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -362,43 +362,14 @@ void CXBeamRateDocProxyAgent::FireEvent(CView* pSender,LPARAM lHint,boost::share
 // IXBRVersionInfo
 CString CXBeamRateDocProxyAgent::GetVersionString(bool bIncludeBuildNumber)
 {
-   CString str(_T("Version "));
-   str += GetVersion(bIncludeBuildNumber);
-#if defined _BETA_VERSION
-   str += CString(_T(" BETA"));
-#endif
-
-   str += CString(_T(" - Built on "));
-   str += CString(__DATE__);
-   return str;
+   CXBeamRateVersionInfoImpl vi;
+   return vi.GetVersionString(bIncludeBuildNumber);
 }
 
 CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-   CWinApp* pApp = AfxGetApp();
-   CString strExe( pApp->m_pszExeName );
-   strExe += _T(".dll");
-
-   CVersionInfo verInfo;
-   verInfo.Load(strExe);
-   
-   CString strVersion = verInfo.GetProductVersionAsString();
-
-#if defined _DEBUG || defined _BETA_VERSION
-   // always include the build number in debug and beta versions
-   bIncludeBuildNumber = true;
-#endif
-
-   if (!bIncludeBuildNumber)
-   {
-      // remove the build number
-      int pos = strVersion.ReverseFind(_T('.')); // find the last '.'
-      strVersion = strVersion.Left(pos);
-   }
-
-   return strVersion;
+   CXBeamRateVersionInfoImpl vi;
+   return vi.GetVersion(bIncludeBuildNumber);
 }
 
 /////////////////////////////////////////////////////////////////////

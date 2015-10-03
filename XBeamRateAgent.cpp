@@ -46,6 +46,8 @@
 
 #include "LoadRatingOptionsPage.h"
 
+#include "XBeamRateVersionInfoImpl.h"
+
 //
 //#include <IFace\Tools.h>
 //#include <IFace\EditByUI.h>
@@ -330,6 +332,7 @@ STDMETHODIMP CXBeamRateAgent::RegInterfaces()
    // Register interfaces here
    pBrokerInit->RegInterface( IID_IXBeamRateAgent, this);
    pBrokerInit->RegInterface( IID_IXBeamRate,      this);
+   pBrokerInit->RegInterface( IID_IXBRVersionInfo, this );
 
    return S_OK;
 }
@@ -414,6 +417,20 @@ STDMETHODIMP CXBeamRateAgent::GetClassID(CLSID* pCLSID)
    return S_OK;
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////
+// IXBRVersionInfo
+CString CXBeamRateAgent::GetVersionString(bool bIncludeBuildNumber)
+{
+   CXBeamRateVersionInfoImpl vi;
+   return vi.GetVersionString(bIncludeBuildNumber);
+}
+
+CString CXBeamRateAgent::GetVersion(bool bIncludeBuildNumber)
+{
+   CXBeamRateVersionInfoImpl vi;
+   return vi.GetVersion(bIncludeBuildNumber);
+}
 
 ////////////////////////////////////////////////////////////////////
 // IAgentPersist
