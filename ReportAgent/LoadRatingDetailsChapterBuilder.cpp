@@ -94,10 +94,20 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
          continue;
       }
 
+      CString strLiveLoadType = ::GetLiveLoadTypeName(ratingType);
       rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
       *pChapter << pPara;
+      pPara->SetName(strLiveLoadType);
+      *pPara << pPara->GetName() << rptNewLine;
 
-      *pPara << ::GetLiveLoadTypeName(ratingType) << rptNewLine;
+      std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,0);
+      if ( strName == NO_LIVE_LOADS_DEFINED )
+      {
+         pPara = new rptParagraph;
+         *pChapter << pPara;
+         *pPara << strName << rptNewLine;
+         continue;
+      }
 
       IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
       VehicleIndexType firstVehicleIdx = 0;

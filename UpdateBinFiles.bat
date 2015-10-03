@@ -9,3 +9,5 @@ copy /Y %REGFREECOM%\x64\Release\XBeamRate*.dll		%BINTARGET%\x64\
 copy /Y \ARP\BridgeLink\XBeamRate.chm	              	%BINTARGET%\
 
 copy /Y Images\*.png					%BINTARGET%\Images\
+copy /Y Images\*.gif					%BINTARGET%\Images\
+copy /Y Images\*.jpg					%BINTARGET%\Images\

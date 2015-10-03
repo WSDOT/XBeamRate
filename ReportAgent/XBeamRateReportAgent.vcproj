@@ -35,9 +35,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -141,9 +142,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -248,9 +250,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -353,9 +356,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -458,9 +462,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -570,9 +575,10 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				Description=""
-				CommandLine=""
-				Outputs=""
+				Description="Copying Images to BridgeLink\Image folder"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				AdditionalDependencies="$(ProjectDir)Images\*.*"
+				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

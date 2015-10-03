@@ -61,24 +61,24 @@ void CXBeamRateAppPlugin::GetAppUnitSystem(IAppUnitSystem** ppAppUnitSystem)
 
 BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+   //AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   //CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
 
-   CAutoRegistry autoReg(GetAppName());
+   //CAutoRegistry autoReg(GetAppName());
 
-   int i = pApp->GetProfileInt(_T("Settings"),_T("Placeholder"),0);
+   //int i = pApp->GetProfileInt(_T("Settings"),_T("Placeholder"),0);
 
    return TRUE;
 }
 
 void CXBeamRateAppPlugin::Terminate()
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+   //AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   //CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
 
-   CAutoRegistry autoReg(GetAppName());
+   //CAutoRegistry autoReg(GetAppName());
 
-   pApp->WriteProfileInt(_T("Settings"),_T("Placeholder"),1);
+   //pApp->WriteProfileInt(_T("Settings"),_T("Placeholder"),1);
 }
 
 void CXBeamRateAppPlugin::IntegrateWithUI(BOOL bIntegrate)

@@ -34,6 +34,8 @@
 #include <PgsExt\PierData2.h>
 #include <PgsExt\GirderLabel.h>
 
+#include <MFCTools\AutoRegistry.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -114,17 +116,30 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    GET_IFACE(IXBRVersionInfo,pVerInfo);
    *pPara << pVerInfo->GetVersionString() << rptNewLine;
 
-#pragma Reminder("WORKING HERE - need title page impage")
-   //const std::_tstring& strImage = pgsReportStyleHolder::GetReportCoverImage();
-   //WIN32_FIND_DATA file_find_data;
-   //HANDLE hFind;
-   //hFind = FindFirstFile(strImage.c_str(),&file_find_data);
-   //if ( hFind != INVALID_HANDLE_VALUE )
-   //{
-   //   *pPara << rptRcImage(strImage) << rptNewLine;
-   //}
+   // Title page art image.
+   // Can't use pgsReportStyleHolder method because it is for PGSuper/PGSplice.
+   // We will just do it here locally.
+   CAutoRegistry ar(_T("XBeamRate"));
+   CWinApp* pApp = (CWinApp*)AfxGetApp();
+   std::_tstring strImageName(pApp->GetProfileString(_T("Settings"),_T("ReportCoverImage"),_T("xbr_title_page_art.gif")));
+   std::_tstring strImage;
+   if ( strImageName == _T("xbr_title_page_art.gif") )
+   {
+      strImage = pgsReportStyleHolder::GetImagePath() + strImageName;
+   }
+   else
+   {
+      strImage = strImageName;
+   }
 
-   //*pPara << rptNewLine << rptNewLine;
+   WIN32_FIND_DATA file_find_data;
+   HANDLE hFind;
+   hFind = FindFirstFile(strImage.c_str(),&file_find_data);
+   if ( hFind != INVALID_HANDLE_VALUE )
+   {
+      *pPara << rptRcImage(strImage) << rptNewLine;
+   }
+   *pPara << rptNewLine << rptNewLine;
 
    ////////////////////////////
    // If this is stand alone, use the IXBRProjectProperties, otherwise
