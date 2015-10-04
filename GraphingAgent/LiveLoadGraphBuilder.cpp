@@ -30,6 +30,7 @@
 
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFAutoProgress.h>
 #include <MathEx.h>
 #include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
@@ -188,6 +189,11 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
+
+   GET_IFACE2(pBroker,IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Building Graph"));
+   CWaitCursor wait;
 
    ActionType actionType = m_GraphController.GetActionType();
 
