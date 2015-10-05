@@ -57,11 +57,13 @@ CEngAgentImp::~CEngAgentImp()
 
 HRESULT CEngAgentImp::FinalConstruct()
 {
+   CreateDataStructures();
    return S_OK;
 }
 
 void CEngAgentImp::FinalRelease()
 {
+   Invalidate(false);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -148,7 +150,7 @@ Float64 CEngAgentImp::GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,
 
 const MomentCapacityDetails& CEngAgentImp::GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
-   std::map<IDType,MomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMomentCapacity[stage] : &m_NegativeMomentCapacity[stage]);
+   std::map<IDType,MomentCapacityDetails>* pCapacity = (bPositiveMoment ? m_pPositiveMomentCapacity[stage].get() : m_pNegativeMomentCapacity[stage].get());
    std::map<IDType,MomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
    if ( found != pCapacity->end() )
    {
@@ -187,7 +189,7 @@ Float64 CEngAgentImp::GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,
 
 const CrackingMomentDetails& CEngAgentImp::GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
-   std::map<IDType,CrackingMomentDetails>* pCapacity = (bPositiveMoment ? &m_PositiveCrackingMoment[stage] : &m_NegativeCrackingMoment[stage]);
+   std::map<IDType,CrackingMomentDetails>* pCapacity = (bPositiveMoment ? m_pPositiveCrackingMoment[stage].get() : m_pNegativeCrackingMoment[stage].get());
    std::map<IDType,CrackingMomentDetails>::iterator found(pCapacity->find(poi.GetID()));
    if ( found != pCapacity->end() )
    {
@@ -214,7 +216,7 @@ Float64 CEngAgentImp::GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitStat
 const MinMomentCapacityDetails& CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    ATLASSERT(::IsRatingLimitState(limitState));// must be a load rating limit state
-   std::map<IDType,MinMomentCapacityDetails>* pCapacity = (bPositiveMoment ? &m_PositiveMinMomentCapacity[stage][GET_INDEX(limitState)] : &m_NegativeMinMomentCapacity[stage][GET_INDEX(limitState)]);
+   std::map<IDType,MinMomentCapacityDetails>* pCapacity = (bPositiveMoment ? m_pPositiveMinMomentCapacity[stage][GET_INDEX(limitState)].get() : m_pNegativeMinMomentCapacity[stage][GET_INDEX(limitState)].get());
    std::map<IDType,MinMomentCapacityDetails>::iterator found(pCapacity->find(poi.GetID()));
    if ( found != pCapacity->end() )
    {
@@ -307,37 +309,7 @@ const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,
 //////////////////////////////////////////////////
 HRESULT CEngAgentImp::OnProjectChanged()
 {
-   for ( int i = 0; i < 2; i++ )
-   {
-      m_PositiveMomentCapacity[i].clear();
-      m_NegativeMomentCapacity[i].clear();
-
-      m_PositiveCrackingMoment[i].clear();
-      m_NegativeCrackingMoment[i].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].clear();
-
-      m_PositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
-      m_NegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].clear();
-   }
-
-   for ( int i = 0; i < 6; i++ )
-   {
-      m_RatingArtifacts[i].clear();
-   }
+   Invalidate();
 
    return S_OK;
 }
@@ -758,11 +730,11 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
 
 CEngAgentImp::RatingArtifacts& CEngAgentImp::GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
-   std::map<PierIDType,RatingArtifacts>::iterator found = m_RatingArtifacts[ratingType].find(pierID);
-   if ( found == m_RatingArtifacts[ratingType].end() )
+   std::map<PierIDType,RatingArtifacts>::iterator found = m_pRatingArtifacts[ratingType]->find(pierID);
+   if ( found == m_pRatingArtifacts[ratingType]->end() )
    {
       RatingArtifacts artifacts;
-      std::pair<std::map<PierIDType,RatingArtifacts>::iterator,bool> result = m_RatingArtifacts[ratingType].insert(std::make_pair(pierID,artifacts));
+      std::pair<std::map<PierIDType,RatingArtifacts>::iterator,bool> result = m_pRatingArtifacts[ratingType]->insert(std::make_pair(pierID,artifacts));
       ATLASSERT(result.second == true);
       found = result.first;
    }
@@ -782,3 +754,126 @@ void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingTy
    ATLASSERT(result.second == true);
 }
 
+void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
+{
+   DataStructures* pDataStructures = new DataStructures;
+
+   for ( int i = 0; i < 2; i++ )
+   {
+      pDataStructures->m_pPositiveMomentCapacity[i] = m_pPositiveMomentCapacity[i].release();
+      pDataStructures->m_pNegativeMomentCapacity[i] = m_pNegativeMomentCapacity[i].release();
+
+      pDataStructures->m_pPositiveCrackingMoment[i] = m_pPositiveCrackingMoment[i].release();
+      pDataStructures->m_pNegativeCrackingMoment[i] = m_pNegativeCrackingMoment[i].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].release();
+
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
+   }
+
+   for ( int i = 0; i < 6; i++ )
+   {
+      pDataStructures->m_pRatingArtifacts[i] = m_pRatingArtifacts[i].release();
+   }
+
+
+#if defined _USE_MULTITHREADING
+   m_ThreadManager.CreateThread(CEngAgentImp::DeleteDataStructures,(LPVOID)(pDataStructures));
+#else
+   CEngAgentImp::DeleteDataStructures((LPVOID)(pDataStructures));
+#endif
+
+
+   if ( bCreateNewDataStructures )
+   {
+      CreateDataStructures();
+   }
+}
+
+void CEngAgentImp::CreateDataStructures()
+{
+   for ( int i = 0; i < 2; i++ )
+   {
+      m_pPositiveMomentCapacity[i] = std::auto_ptr<std::map<IDType,MomentCapacityDetails>>(new std::map<IDType,MomentCapacityDetails>());
+      m_pNegativeMomentCapacity[i] = std::auto_ptr<std::map<IDType,MomentCapacityDetails>>(new std::map<IDType,MomentCapacityDetails>());
+
+      m_pPositiveCrackingMoment[i] = std::auto_ptr<std::map<IDType,CrackingMomentDetails>>(new std::map<IDType,CrackingMomentDetails>());
+      m_pNegativeCrackingMoment[i] = std::auto_ptr<std::map<IDType,CrackingMomentDetails>>(new std::map<IDType,CrackingMomentDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+   }
+
+   for ( int i = 0; i < 6; i++ )
+   {
+      m_pRatingArtifacts[i] = std::auto_ptr<std::map<PierIDType,RatingArtifacts>>(new std::map<PierIDType,RatingArtifacts>());
+   }
+}
+
+UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
+{
+   DataStructures* pDataStructures = (DataStructures*)(pParam);
+
+   for ( int i = 0; i < 2; i++ )
+   {
+      delete pDataStructures->m_pPositiveMomentCapacity[i];
+      delete pDataStructures->m_pNegativeMomentCapacity[i];
+
+      delete pDataStructures->m_pPositiveCrackingMoment[i];
+      delete pDataStructures->m_pNegativeCrackingMoment[i];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)];
+
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
+   }
+
+   for ( int i = 0; i < 6; i++ )
+   {
+      delete pDataStructures->m_pRatingArtifacts[i];
+   }
+
+   return 0;
+}

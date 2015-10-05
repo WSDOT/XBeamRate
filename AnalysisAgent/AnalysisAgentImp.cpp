@@ -71,6 +71,7 @@ HRESULT CAnalysisAgentImp::FinalConstruct()
 
 void CAnalysisAgentImp::FinalRelease()
 {
+   Invalidate(false);
 }
 
 #if defined _DEBUG
@@ -905,10 +906,10 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfTyp
    return INVALID_ID;
 }
 
-void CAnalysisAgentImp::Invalidate()
+void CAnalysisAgentImp::Invalidate(bool bCreateNewDataStructures)
 {
-   InvalidateModels();
-   InvalidateResults();
+   InvalidateModels(bCreateNewDataStructures);
+   InvalidateResults(bCreateNewDataStructures);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -2660,10 +2661,13 @@ CAnalysisAgentImp::LiveLoadConfiguration& CAnalysisAgentImp::GetLiveLoadConfigur
    return (*foundLLConfig);
 }
 
-void CAnalysisAgentImp::InvalidateModels()
+void CAnalysisAgentImp::InvalidateModels(bool bCreateNewDataStructures)
 {
    std::map<PierIDType,ModelData>* pOldModelData = m_pModelData.release();
-   m_pModelData = std::auto_ptr<std::map<PierIDType,ModelData>>(new std::map<PierIDType,ModelData>());
+   if ( bCreateNewDataStructures )
+   {
+      m_pModelData = std::auto_ptr<std::map<PierIDType,ModelData>>(new std::map<PierIDType,ModelData>());
+   }
 
 #if defined _USE_MULTITHREADING
    m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteModels,(LPVOID)(pOldModelData));
@@ -2685,11 +2689,13 @@ UINT CAnalysisAgentImp::DeleteModels(LPVOID pParam)
    return 0;
 }
 
-
-void CAnalysisAgentImp::InvalidateResults()
+void CAnalysisAgentImp::InvalidateResults(bool bCreateNewDataStructures)
 {
    std::map<PierIDType,std::set<UnitLiveLoadResult>>* pOldResults = m_pUnitLiveLoadResults.release();
-   m_pUnitLiveLoadResults = std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>>(new std::map<PierIDType,std::set<UnitLiveLoadResult>>());
+   if ( bCreateNewDataStructures )
+   {
+      m_pUnitLiveLoadResults = std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>>(new std::map<PierIDType,std::set<UnitLiveLoadResult>>());
+   }
 
 #if defined _USE_MULTITHREADING
    m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteResults,(LPVOID)(pOldResults));

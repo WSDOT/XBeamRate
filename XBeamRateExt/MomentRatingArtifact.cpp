@@ -407,10 +407,10 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
 
       CComPtr<IBroker> pBroker;
       EAFGetBroker(&pBroker);
-      GET_IFACE2(pBroker,IXBRProject,pProject);
       GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
       GET_IFACE2(pBroker,IXBRAnalysisResults,pAnalysisResults);
       GET_IFACE2(pBroker,IXBRMomentCapacity,pMomentCapacity);
+      GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
       VehicleIndexType nVehicles = (m_VehicleIdx == INVALID_INDEX ? pProject->GetLiveLoadReactionCount(m_PierID,m_RatingType) : 1);
       VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);

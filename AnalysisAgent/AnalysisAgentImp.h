@@ -39,7 +39,9 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 
+#if defined _USE_MULTITHREADING
 #include <PgsExt\ThreadManager.h>
+#endif
 
 #define FIRST_LIVELOAD_ID 10000
 
@@ -162,7 +164,7 @@ private:
    DECLARE_EAF_AGENT_DATA;
    StatusCallbackIDType m_scidBridgeError;
 
-   void Invalidate();
+   void Invalidate(bool bCreateNewDataStructures = true);
 
    LoadCaseIDType GetLoadCaseID(xbrTypes::ProductForceType pfType);
    std::vector<xbrTypes::ProductForceType> GetLoads(xbrTypes::CombinedForceType lcType);
@@ -296,10 +298,10 @@ private:
    CThreadManager m_ThreadManager;
 #endif
 
-   void InvalidateModels();
+   void InvalidateModels(bool bCreateNewDataStructures = true);
    static UINT DeleteModels(LPVOID pParam);
 
-   void InvalidateResults();
+   void InvalidateResults(bool bCreateNewDataStructures = true);
    static UINT DeleteResults(LPVOID pParam);
 
 };

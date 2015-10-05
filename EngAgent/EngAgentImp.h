@@ -36,6 +36,10 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <IFace\Project.h>
 
+#if defined _USE_MULTITHREADING
+#include <PgsExt\ThreadManager.h>
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 // CEngAgentImp
 class ATL_NO_VTABLE CEngAgentImp : 
@@ -115,14 +119,14 @@ private:
 
    // PierID is not used to store moment capacity because the POI ID is sufficent
    // POI IDs are not duplicated between piers
-   std::map<IDType,MomentCapacityDetails> m_PositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
-   std::map<IDType,MomentCapacityDetails> m_NegativeMomentCapacity[2];
+   std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pPositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pNegativeMomentCapacity[2];
 
-   std::map<IDType,CrackingMomentDetails> m_PositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
-   std::map<IDType,CrackingMomentDetails> m_NegativeCrackingMoment[2];
+   std::auto_ptr<std::map<IDType,CrackingMomentDetails>> m_pPositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::auto_ptr<std::map<IDType,CrackingMomentDetails>> m_pNegativeCrackingMoment[2];
 
-   std::map<IDType,MinMomentCapacityDetails> m_PositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
-   std::map<IDType,MinMomentCapacityDetails> m_NegativeMinMomentCapacity[2][6]; 
+   std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
+   std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][6]; 
 
 #pragma Reminder("WORKING HERE: need to have shear capacity by pier")
    // need to cache shear capacity
@@ -139,9 +143,31 @@ private:
 
    // rating artifacts for vehicleIdx == INVALID_INDEX are the governing artifacts for a load rating type
    typedef std::map<VehicleIndexType,xbrRatingArtifact> RatingArtifacts;
-   std::map<PierIDType,RatingArtifacts> m_RatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
+   std::auto_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
    RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+
+
+#if defined _USE_MULTITHREADING
+   CThreadManager m_ThreadManager;
+#endif
+
+   void Invalidate(bool bCreateNewDataStructures = true);
+   struct DataStructures
+   {
+      std::map<IDType,MomentCapacityDetails>* m_pPositiveMomentCapacity[2];
+      std::map<IDType,MomentCapacityDetails>* m_pNegativeMomentCapacity[2];
+
+      std::map<IDType,CrackingMomentDetails>* m_pPositiveCrackingMoment[2];
+      std::map<IDType,CrackingMomentDetails>* m_pNegativeCrackingMoment[2];
+
+      std::map<IDType,MinMomentCapacityDetails>* m_pPositiveMinMomentCapacity[2][6];
+      std::map<IDType,MinMomentCapacityDetails>* m_pNegativeMinMomentCapacity[2][6];
+
+      std::map<PierIDType,RatingArtifacts>* m_pRatingArtifacts[6];
+   };
+   static UINT DeleteDataStructures(LPVOID pParam);
+   void CreateDataStructures();
 };
 
 OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)

@@ -102,12 +102,12 @@ CProjectAgentImp::CProjectAgentImp()
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
 
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)]"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
 
    m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3"),0));
    m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3S2"),0));
