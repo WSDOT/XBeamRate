@@ -875,5 +875,7 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
       delete pDataStructures->m_pRatingArtifacts[i];
    }
 
+   delete pDataStructures;
+
    return 0;
 }
