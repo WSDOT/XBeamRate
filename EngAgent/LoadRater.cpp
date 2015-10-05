@@ -163,14 +163,14 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
       }
 
 #pragma Reminder("WORKING HERE - need vehicle weight for load posting analysis")
-   //   Float64 W = pProductLoads->GetVehicleWeight(llType,truck_index);
+   //   Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
 
       xbrMomentRatingArtifact momentArtifact;
       momentArtifact.SetRatingType(ratingType);
       momentArtifact.SetPermitRatingMethod(permitRatingMethod);
       momentArtifact.SetPierID(pierID);
       momentArtifact.SetPointOfInterest(poi);
-   //   momentArtifact.SetVehicleIndex(truck_index);
+      momentArtifact.SetVehicleIndex(vehicleIdx);
    //   momentArtifact.SetVehicleWeight(W);
       momentArtifact.SetVehicleName(strVehicleName.c_str());
       momentArtifact.SetSystemFactor(system_factor);

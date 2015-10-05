@@ -123,7 +123,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
    (*table)(0,5) << strSpecial;
    (*table)(1,5) << _T("RF");
    (*table)(1,6) << Sub2(symbol(gamma),_T("LL"));
-   (*table)(1,7) << _T("Location");
+   (*table)(1,7) << _T("Controlling Point");
  
    RowIndexType row0 = 2; // row counter for column 0
    RowIndexType row1 = 2; // row counter for column 1
