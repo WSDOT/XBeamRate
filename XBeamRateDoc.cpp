@@ -54,6 +54,8 @@ IMPLEMENT_DYNCREATE(CXBeamRateDoc, CEAFBrokerDocument)
 BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
 	//{{AFX_MSG_MAP(CXBeamRateDoc)
    ON_COMMAND(ID_HELP_ABOUT, OnAbout)
+   ON_UPDATE_COMMAND_UI(ID_VIEW_GRAPHS,OnUpdateViewGraphs)
+   ON_UPDATE_COMMAND_UI(ID_VIEW_REPORTS,OnUpdateViewReports)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -264,6 +266,28 @@ BOOL CXBeamRateDoc::OnNewDocument()
 
 BOOL CXBeamRateDoc::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
 {
+   // document classes can't process ON_NOTIFY
+   // see http://www.codeproject.com/KB/docview/NotifierApp.aspx for details
+   if ( HIWORD(nCode) == WM_NOTIFY )
+   {
+    // verify that this is a WM_NOTIFY message
+     WORD wCode = LOWORD(nCode) ;
+
+     AFX_NOTIFY * notify = reinterpret_cast<AFX_NOTIFY*>(pExtra) ;
+     if ( notify->pNMHDR->code == TBN_DROPDOWN )
+     {
+        if ( notify->pNMHDR->idFrom == m_pMyDocProxyAgent->GetStdToolBarID() && ((NMTOOLBAR*)(notify->pNMHDR))->iItem == ID_VIEW_REPORTS )
+        {
+           return OnViewReports(notify->pNMHDR,notify->pResult); 
+        }
+
+        if ( notify->pNMHDR->idFrom == m_pMyDocProxyAgent->GetStdToolBarID() && ((NMTOOLBAR*)(notify->pNMHDR))->iItem == ID_VIEW_GRAPHS )
+        {
+           return OnViewGraphs(notify->pNMHDR,notify->pResult); 
+        }
+     }
+   }
+
    return CEAFBrokerDocument::OnCmdMsg(nID,nCode,pExtra,pHandlerInfo);
 }
 
@@ -400,4 +424,85 @@ void CXBeamRateDoc::OnAbout()
 
    CAboutDlg dlg(resourceID);
    dlg.DoModal();
+}
+
+void CXBeamRateDoc::OnUpdateViewGraphs(CCmdUI* pCmdUI)
+{
+   GET_IFACE(IGraphManager,pGraphMgr);
+   pCmdUI->Enable( 0 < pGraphMgr->GetGraphBuilderCount() );
+}
+
+BOOL CXBeamRateDoc::OnViewGraphs(NMHDR* pnmhdr,LRESULT* plr) 
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   // This method gets called when the down arrow toolbar button is used
+   // It creates the drop down menu with the report names on it
+   NMTOOLBAR* pnmtb = (NMTOOLBAR*)(pnmhdr);
+   if ( pnmtb->iItem != ID_VIEW_GRAPHS )
+   {
+      return FALSE; // not our button
+   }
+
+   CMenu menu;
+   VERIFY( menu.LoadMenu(IDR_GRAPHS) );
+   CMenu* pMenu = menu.GetSubMenu(0);
+   pMenu->RemoveMenu(0,MF_BYPOSITION); // remove the placeholder
+
+   CEAFMenu contextMenu(pMenu->Detach(),GetPluginCommandManager());
+
+
+   BuildGraphMenu(&contextMenu);
+
+   GET_IFACE(IEAFToolbars,pToolBars);
+   CEAFToolBar* pToolBar = pToolBars->GetToolBar( m_pMyDocProxyAgent->GetStdToolBarID() );
+   int idx = pToolBar->CommandToIndex(ID_VIEW_GRAPHS,NULL);
+   CRect rect;
+   pToolBar->GetItemRect(idx,&rect);
+
+   CPoint point(rect.left,rect.bottom);
+   pToolBar->ClientToScreen(&point);
+   contextMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x,point.y, EAFGetMainFrame() );
+
+   return TRUE;
+}
+
+void CXBeamRateDoc::OnUpdateViewReports(CCmdUI* pCmdUI)
+{
+   GET_IFACE(IReportManager,pReportMgr);
+   pCmdUI->Enable( 0 < pReportMgr->GetReportBuilderCount() );
+}
+
+BOOL CXBeamRateDoc::OnViewReports(NMHDR* pnmhdr,LRESULT* plr) 
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   // This method gets called when the down arrow toolbar button is used
+   // It creates the drop down menu with the report names on it
+   NMTOOLBAR* pnmtb = (NMTOOLBAR*)(pnmhdr);
+   if ( pnmtb->iItem != ID_VIEW_REPORTS )
+   {
+      return FALSE; // not our button
+   }
+
+   CMenu menu;
+   VERIFY( menu.LoadMenu(IDR_REPORTS) );
+   CMenu* pMenu = menu.GetSubMenu(0);
+   pMenu->RemoveMenu(0,MF_BYPOSITION); // remove the placeholder
+
+   CEAFMenu contextMenu(pMenu->Detach(),GetPluginCommandManager());
+
+   CEAFBrokerDocument::PopulateReportMenu(&contextMenu);
+
+   GET_IFACE(IEAFToolbars,pToolBars);
+   CEAFToolBar* pToolBar = pToolBars->GetToolBar( m_pMyDocProxyAgent->GetStdToolBarID() );
+   int idx = pToolBar->CommandToIndex(ID_VIEW_REPORTS,NULL);
+   CRect rect;
+   pToolBar->GetItemRect(idx,&rect);
+
+   CPoint point(rect.left,rect.bottom);
+   pToolBar->ClientToScreen(&point);
+   contextMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x,point.y, EAFGetMainFrame() );
+
+   return TRUE;
 }

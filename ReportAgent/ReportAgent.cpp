@@ -55,6 +55,7 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <\ARP\PGSuper\Include\IFace\Selection.h>
+#include <\ARP\PGSuper\Include\IFace\Views.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

@@ -191,10 +191,11 @@ public:
    virtual xbrTypes::ReactionLoadApplicationType GetReactionLoadApplicationType(PierIDType pierID);
 
    virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
-   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM);
-   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
+   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM);
+   virtual std::vector<xbrLiveLoadReactionData> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
    virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+   virtual Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
    virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade);
    virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade);
@@ -370,18 +371,8 @@ private:
    std::map<PierIDType,xbrTypes::ReactionLoadType> m_BearingReactionType[2];
    xbrTypes::ReactionLoadType& GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
 
-   // Live Load Reactions
-   class LiveLoadReaction
-   {
-   public:
-      std::_tstring Name;
-      Float64 LLIM;
-      LiveLoadReaction() {;}
-      LiveLoadReaction(LPCTSTR name,Float64 llim) : Name(name), LLIM(llim) {;}
-      LiveLoadReaction(const LiveLoadReaction& other) {Name=other.Name; LLIM=other.LLIM;}
-   };
-   std::map<PierIDType,std::vector<LiveLoadReaction>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
-   std::vector<CProjectAgentImp::LiveLoadReaction>& GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
+   std::map<PierIDType,std::vector<xbrLiveLoadReactionData>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
+   std::vector<xbrLiveLoadReactionData>& GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
 
    std::map<PierIDType,xbrTypes::ReactionLoadApplicationType> m_ReactionApplication;
    xbrTypes::ReactionLoadApplicationType& GetPrivateReactionLoadApplication(PierIDType pierID);

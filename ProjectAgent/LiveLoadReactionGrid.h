@@ -48,6 +48,9 @@ public:
    void AddVehicle();
    void RemoveSelectedVehicles();
 
+   void SetLoadRatingType(pgsTypes::LoadRatingType ratingType);
+   pgsTypes::LoadRatingType GetLoadRatingType();
+
    void GetLiveLoadData(txnLiveLoadReactions& llimData);
    void SetLiveLoadData(const txnLiveLoadReactions& llimData);
 
@@ -71,13 +74,15 @@ public:
    void CustomInit();
 
 private:
+   pgsTypes::LoadRatingType m_LoadRatingType;
+
    virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol);
 
    void SetRowStyle(ROWCOL row);
 
-   void AddLiveLoadData(const std::_tstring& strName,Float64 llim);
-   void SetLiveLoadData(ROWCOL row,const std::_tstring& strName,Float64 llim);
-   void GetLiveLoadData(ROWCOL row,std::_tstring& strName,Float64& llim);
+   void AddLiveLoadData(const xbrLiveLoadReactionData& reactionData);
+   void SetLiveLoadData(ROWCOL row,const xbrLiveLoadReactionData& reactionData);
+   void GetLiveLoadData(ROWCOL row,xbrLiveLoadReactionData& reactionData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };
 

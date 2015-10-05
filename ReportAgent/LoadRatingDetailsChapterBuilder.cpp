@@ -245,7 +245,15 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
                }
             } // next poi
          } // next pos/neg moment
+
+         if ( (ratingType == pgsTypes::lrLegal_Routine || ratingType == pgsTypes::lrLegal_Special) && 
+               pRatingArtifact->GetRatingFactor() < 1 
+            )
+         {
+            LoadPostingDetails(pChapter,pBroker,pRatingArtifact);
+         }
       } // next vehicle
+
    } // next rating type
 
    return pChapter;
@@ -255,4 +263,62 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 CChapterBuilder* CLoadRatingDetailsChapterBuilder::Clone() const
 {
    return new CLoadRatingDetailsChapterBuilder;
+}
+
+void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,IBroker* pBroker,const xbrRatingArtifact* pRatingArtifact) const
+{
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   *pChapter << pPara;
+   *pPara << _T("Load Posting Analysis Details [MBE 6A.8]") << rptNewLine;
+
+   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("SafePostingLoad.png") ) << rptNewLine;
+
+   INIT_UV_PROTOTYPE( rptForceUnitValue, tonnage, pDisplayUnits->GetTonnageUnit(), false );
+   rptCapacityToDemand rating_factor;
+
+   rptRcTable* table = pgsReportStyleHolder::CreateDefaultTable(5,_T(""));
+   
+   table->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   table->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+
+   *pPara << table << rptNewLine;
+
+   ColumnIndexType col = 0;
+   RowIndexType row = 0;
+
+   (*table)(row,col++) << _T("Truck");
+   (*table)(row,col++) << COLHDR(_T("Weight"), rptForceUnitTag, pDisplayUnits->GetTonnageUnit() );
+   (*table)(row,col++) << _T("RF");
+   (*table)(row,col++) << COLHDR(_T("Safe") << rptNewLine << _T("Load") << rptNewLine << _T("Capacity"), rptForceUnitTag, pDisplayUnits->GetTonnageUnit() );
+   (*table)(row,col++) << COLHDR(_T("Safe") << rptNewLine << _T("Posting") << rptNewLine << _T("Load"), rptForceUnitTag, pDisplayUnits->GetTonnageUnit() );
+
+   row++;
+   col = 0;
+
+   Float64 posting_load, W, RF;
+   std::_tstring strName;
+   pRatingArtifact->GetSafePostingLoad(&posting_load,&W,&RF,&strName);
+   (*table)(row,col++) << strName;
+   (*table)(row,col++) << tonnage.SetValue(W);
+
+   if ( RF < 1 )
+   {
+      (*table)(row,col++) << RF_FAIL(rating_factor,RF);
+   }
+   else
+   {
+      (*table)(row,col++) << RF_PASS(rating_factor,RF);
+   }
+
+   (*table)(row,col++) << tonnage.SetValue(::FloorOff(W*RF,0.01));
+   if ( RF < 1 )
+   {
+      (*table)(row,col++) << tonnage.SetValue(posting_load);
+   }
+   else
+   {
+      (*table)(row,col++) << _T("-");
+   }
 }

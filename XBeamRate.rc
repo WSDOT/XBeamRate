@@ -148,6 +148,22 @@ BEGIN
     END
 END
 
+IDR_REPORTS MENU 
+BEGIN
+    POPUP "ReportContextMenu"
+    BEGIN
+        MENUITEM SEPARATOR
+    END
+END
+
+IDR_GRAPHS MENU 
+BEGIN
+    POPUP "GraphContextMenu"
+    BEGIN
+        MENUITEM SEPARATOR
+    END
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -179,6 +195,9 @@ BEGIN
     SEPARATOR
     BUTTON      ID_EDIT_UNDO
     BUTTON      ID_EDIT_REDO
+    SEPARATOR
+    BUTTON      ID_VIEW_GRAPHS
+    BUTTON      ID_VIEW_REPORTS
 END
 
 
@@ -347,6 +366,8 @@ END
 STRINGTABLE 
 BEGIN
     ID_EDIT_PROJECTNAME     "Edit the Project Name\nEdit the project name"
+    ID_VIEW_GRAPHS          "View a graph\nGraphs"
+    ID_VIEW_REPORTS         "View a report\nReports"
 END
 
 STRINGTABLE 

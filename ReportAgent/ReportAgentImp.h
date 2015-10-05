@@ -34,6 +34,8 @@
 
 #include <EAF\EAFInterfaceCache.h>
 
+#include <IFace\Project.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CReportAgentImp
 class ATL_NO_VTABLE CReportAgentImp : 
@@ -42,7 +44,8 @@ class ATL_NO_VTABLE CReportAgentImp :
 	public CComCoClass<CReportAgentImp, &CLSID_ReportAgent>,
 	//public IConnectionPointContainerImpl<CReportAgentImp>,
    //public CProxyIProjectEventSink<CReportAgentImp>,
-   public IAgentEx
+   public IAgentEx,
+   public IXBRProjectEventSink
 {  
 public:
 	CReportAgentImp(); 
@@ -58,6 +61,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_REPORTAGENT)
 BEGIN_COM_MAP(CReportAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
    //COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -75,6 +79,10 @@ public:
    STDMETHOD(Init2)();
    STDMETHOD(GetClassID)(CLSID* pCLSID);
 
+// IXBRProjectEventSink
+public:
+   virtual HRESULT OnProjectChanged();
+
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -82,7 +90,11 @@ public:
 private:
    DECLARE_EAF_AGENT_DATA;
 
+   DWORD m_dwProjectCookie;
+
    void InitReportBuilders();
+
+   std::set<std::_tstring> m_ReportNames;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ReportAgent, CReportAgentImp)

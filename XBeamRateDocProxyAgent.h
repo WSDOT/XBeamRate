@@ -131,6 +131,8 @@ public:
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
 
+   UINT GetStdToolBarID();
+
 private:
    DECLARE_EAF_AGENT_DATA;
 

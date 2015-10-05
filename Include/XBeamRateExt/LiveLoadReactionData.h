@@ -20,32 +20,16 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-
 #pragma once
 
-#include <ReportManager\ChapterBuilder.h>
-#include "XBeamRateChapterBuilder.h"
+#include <XBeamRateExt\XBRExtExp.h>
 
-class xbrRatingArtifact;
-
-/*****************************************************************************
-CLASS 
-   CTestChapterBuilder
-
-*****************************************************************************/
-
-class CLoadRatingDetailsChapterBuilder : public CXBeamRateChapterBuilder
+struct XBREXTCLASS xbrLiveLoadReactionData
 {
-public:
-   CLoadRatingDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
-   rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   std::_tstring Name; // loading name
+   Float64 LLIM; // reaction
+   Float64 W;  // vehicle weight (used for load posting analysis - legal rating types only)
 
-private:
-   // Prevent accidental copying and assignment
-   CLoadRatingDetailsChapterBuilder(const CLoadRatingDetailsChapterBuilder&);
-   CLoadRatingDetailsChapterBuilder& operator=(const CLoadRatingDetailsChapterBuilder&);
-
-   void LoadPostingDetails(rptChapter* pChapter,IBroker* pBroker,const xbrRatingArtifact* pRatingArtifact) const;
+   xbrLiveLoadReactionData() {}
+   xbrLiveLoadReactionData(const std::_tstring& name,Float64 llim,Float64 w) : Name(name), LLIM(llim), W(w) {}
 };

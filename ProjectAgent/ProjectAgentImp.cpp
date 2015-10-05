@@ -99,22 +99,26 @@ CProjectAgentImp::CProjectAgentImp()
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]  = 1.15;
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]  = 1.20;
 
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Truck + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Tandem + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Truck + Lane"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Design Tandem + Lane"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Truck Train [90%(Truck + Lane)]"),0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(LiveLoadReaction(_T("LRFD Low Boy (Dual Tandem + Lane)"),0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Truck + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Tandem + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3"),0));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3S2"),0));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("Type 3-3"),0));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(LiveLoadReaction(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3"),0,::ConvertToSysUnits(50.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3S2"),0,::ConvertToSysUnits(72.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3-3"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(LiveLoadReaction(_T("Notional Rating Load (NRL)"),0));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,::ConvertToSysUnits(54.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
@@ -361,61 +365,67 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->BeginUnit(_T("LiveLoad"),1.0);
             pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetPrivateReactionLoadApplication(INVALID_ID)));
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Design_Inventory
 
             pStrSave->BeginUnit(_T("Design_Operating"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Design_Operating
 
             pStrSave->BeginUnit(_T("Legal_Routine"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Legal_Routine
 
             pStrSave->BeginUnit(_T("Legal_Special"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Legal_Special
 
             pStrSave->BeginUnit(_T("Permit_Routine"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Permit_Routine
 
             pStrSave->BeginUnit(_T("Permit_Special"),1.0);
-            BOOST_FOREACH(LiveLoadReaction& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID])
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID])
             {
                pStrSave->BeginUnit(_T("Reaction"),1.0);
                   pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
                   pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // Permit_Special
@@ -681,7 +691,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -689,6 +699,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -699,7 +713,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -707,6 +721,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -717,7 +735,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -725,6 +743,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -735,7 +757,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -743,6 +765,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -753,7 +779,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -761,6 +787,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -771,7 +801,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
                      {
-                        LiveLoadReaction llReaction;
+                        xbrLiveLoadReactionData llReaction;
                         var.vt = VT_BSTR;
                         hr = pStrLoad->get_Property(_T("Name"),&var);
                         llReaction.Name = OLE2T(var.bstrVal);
@@ -779,6 +809,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                         var.vt = VT_R8;
                         hr = pStrLoad->get_Property(_T("LLIM"),&var);
                         llReaction.LLIM = var.dblVal;
+
+                        var.vt = VT_R8;
+                        hr = pStrLoad->get_Property(_T("W"),&var);
+                        llReaction.W = var.dblVal;
 
                         m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID].push_back(llReaction);
                         hr = pStrLoad->EndUnit(); // Reaction
@@ -1431,7 +1465,7 @@ IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes:
       // when in stand-alone mode, IXBeamRateAgent interface isn't available
       ATLASSERT(IsStandAlone());
 #endif
-      std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      std::vector<xbrLiveLoadReactionData>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       return vReactions.size();
    }
    else
@@ -1442,24 +1476,16 @@ IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes:
    }
 }
 
-void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM)
+void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM)
 {
-   std::vector<LiveLoadReaction>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   std::vector<xbrLiveLoadReactionData>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
    vReactions.clear();
-   std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(vLLIM.begin());
-   std::vector<std::pair<std::_tstring,Float64>>::const_iterator iterEnd(vLLIM.end());
-   for ( ; iter != iterEnd; iter++ )
-   {
-      LiveLoadReaction ll;
-      ll.Name = iter->first;
-      ll.LLIM = iter->second;
-      vReactions.push_back(ll);
-   }
+   vReactions = vLLIM;
 
    Fire_OnProjectChanged();
 }
 
-std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
+std::vector<xbrLiveLoadReactionData> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
    if ( pierID == INVALID_ID )
    {
@@ -1468,23 +1494,19 @@ std::vector<std::pair<std::_tstring,Float64>> CProjectAgentImp::GetLiveLoadReact
       // when in stand-alone mode, IXBeamRateAgent interface isn't available
       ATLASSERT(IsStandAlone());
 #endif
-      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      std::vector<std::pair<std::_tstring,Float64>> vReactions;
-      BOOST_FOREACH(LiveLoadReaction& ll,vLLReactions)
-      {
-         vReactions.push_back(std::make_pair(ll.Name,ll.LLIM));
-      }
-      return vReactions;
+      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      return vLLReactions;
    }
    else
    {
-      std::vector<std::pair<std::_tstring,Float64>> vReactions;
+      std::vector<xbrLiveLoadReactionData> vReactions;
       IndexType nReactions = GetLiveLoadReactionCount(pierID,ratingType);
       for ( IndexType reactionIdx = 0; reactionIdx < nReactions; reactionIdx++ )
       {
          std::_tstring strName = GetLiveLoadName(pierID,ratingType,reactionIdx);
          Float64 R = GetLiveLoadReaction(pierID,ratingType,reactionIdx);
-         vReactions.push_back(std::make_pair(strName,R));
+         Float64 W = GetVehicleWeight(pierID,ratingType,reactionIdx);
+         vReactions.push_back(xbrLiveLoadReactionData(strName,R,W));
       }
       return vReactions;
    }
@@ -1504,7 +1526,7 @@ std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::Load
       // when in stand-alone mode, IXBeamRateAgent interface isn't available
       ATLASSERT(IsStandAlone());
 #endif
-      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       if ( vLLReactions.size() == 0 )
       {
          return NO_LIVE_LOADS_DEFINED;
@@ -1535,7 +1557,7 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       // when in stand-alone mode, IXBeamRateAgent interface isn't available
       ATLASSERT(IsStandAlone());
 #endif
-      std::vector<LiveLoadReaction>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       if ( 0 < vLLReactions.size() )
       {
          return vLLReactions[vehicleIdx].LLIM;
@@ -1566,6 +1588,40 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
       pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
 
       return Rmax;
+   }
+}
+
+Float64 CProjectAgentImp::GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
+{
+   ATLASSERT(vehicleIdx != INVALID_INDEX);
+
+   // Detect the configurations from PGSuper/PGSplice that we can't model
+   // Throwns an unwind exception if we can't model this thing
+   CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
+
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+      if ( 0 < vLLReactions.size() )
+      {
+         return vLLReactions[vehicleIdx].W;
+      }
+      else
+      {
+         return 0;
+      }
+   }
+   else
+   {
+      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
+      GET_IFACE(IProductLoads,pProductLoads);
+      Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
+      return W;
    }
 }
 
@@ -2191,12 +2247,12 @@ std::vector<CProjectAgentImp::BearingReactions>& CProjectAgentImp::GetPrivateBea
    return m_BearingReactions[brgLineIdx][pierID];
 }
 
-std::vector<CProjectAgentImp::LiveLoadReaction>& CProjectAgentImp::GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
+std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   std::map<PierIDType,std::vector<LiveLoadReaction>>::const_iterator found(m_LiveLoadReactions[ratingType].find(pierID));
+   std::map<PierIDType,std::vector<xbrLiveLoadReactionData>>::const_iterator found(m_LiveLoadReactions[ratingType].find(pierID));
    if ( found == m_LiveLoadReactions[ratingType].end() )
    {
-      std::vector<LiveLoadReaction> vReactions;
+      std::vector<xbrLiveLoadReactionData> vReactions;
       m_LiveLoadReactions[ratingType].insert(std::make_pair(pierID,vReactions));
    }
 

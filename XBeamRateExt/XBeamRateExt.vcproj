@@ -666,6 +666,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\Include\XBeamRateExt\LiveLoadReactionData.h"
+				>
+			</File>
+			<File
 				RelativePath="..\Include\XBeamRateExt\LongitudinalRebarData.h"
 				>
 			</File>

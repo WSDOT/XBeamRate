@@ -437,8 +437,8 @@ void CXBeamRateDocProxyAgent::CreateToolBars()
 
    // Add a drop-down arrow to the Open and Report buttons
    pToolBar->CreateDropDownButton(ID_FILE_OPEN,   NULL,BTNS_DROPDOWN);
-   //pToolBar->CreateDropDownButton(ID_VIEW_GRAPHS, NULL,BTNS_WHOLEDROPDOWN);
-   //pToolBar->CreateDropDownButton(ID_VIEW_REPORTS,NULL,BTNS_WHOLEDROPDOWN);
+   pToolBar->CreateDropDownButton(ID_VIEW_GRAPHS, NULL,BTNS_WHOLEDROPDOWN);
+   pToolBar->CreateDropDownButton(ID_VIEW_REPORTS,NULL,BTNS_WHOLEDROPDOWN);
 
    //OnStatusChanged(); // set the status items
 }
@@ -447,4 +447,9 @@ void CXBeamRateDocProxyAgent::RemoveToolBars()
 {
    GET_IFACE(IEAFToolbars,pToolBars);
    pToolBars->DestroyToolBar(m_StdToolBarID);
+}
+
+UINT CXBeamRateDocProxyAgent::GetStdToolBarID()
+{
+   return m_StdToolBarID;
 }

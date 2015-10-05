@@ -42,6 +42,7 @@ GRID_IMPLEMENT_REGISTER(CLiveLoadReactionGrid, CS_DBLCLKS, 0, 0, 0);
 CLiveLoadReactionGrid::CLiveLoadReactionGrid()
 {
 //   RegisterClass();
+   m_LoadRatingType = pgsTypes::lrDesign_Inventory;
 }
 
 CLiveLoadReactionGrid::~CLiveLoadReactionGrid()
@@ -57,6 +58,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CLiveLoadReactionGrid message handlers
 
+void CLiveLoadReactionGrid::SetLoadRatingType(pgsTypes::LoadRatingType ratingType)
+{
+   m_LoadRatingType = ratingType;
+}
+
+pgsTypes::LoadRatingType CLiveLoadReactionGrid::GetLoadRatingType()
+{
+   return m_LoadRatingType;
+}
+
 void CLiveLoadReactionGrid::CustomInit()
 {
 // Initialize the grid. For CWnd based grids this call is // 
@@ -68,7 +79,7 @@ void CLiveLoadReactionGrid::CustomInit()
    GetParam()->SetLockReadOnly(FALSE);
 
    const int num_rows = 0;
-   const int num_cols = 2;
+   const int num_cols = 3;
 
 	SetRowCount(num_rows);
 	SetColCount(num_cols);
@@ -109,6 +120,21 @@ void CLiveLoadReactionGrid::CustomInit()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(cv)
 		);
+
+   cv.Format(_T("Weight (%s)"),pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure.UnitTag().c_str());
+	SetStyleRange(CGXRange(0,col++), CGXStyle()
+         .SetWrapText(TRUE)
+			.SetEnabled(FALSE)          // disables usage as current cell
+         .SetHorizontalAlignment(DT_CENTER)
+         .SetVerticalAlignment(DT_VCENTER)
+			.SetValue(cv)
+		);
+
+   if ( !::IsLegalRatingType(m_LoadRatingType) )
+   {
+      // only show weight column for legal rating types
+      HideCols(3,3);
+   }
 
    // make it so that text fits correctly in header row
 	ResizeRowHeightsToFit(CGXRange(0,0,0,num_cols));
@@ -161,10 +187,10 @@ void CLiveLoadReactionGrid::GetLiveLoadData(txnLiveLoadReactions& llimData)
    ROWCOL nRows = GetRowCount();
    for ( ROWCOL row = 1; row <= nRows; row++ )
    {
-      std::_tstring strName;
-      Float64 llim;
-      GetLiveLoadData(row,strName,llim);
-      llimData.m_LLIM.push_back(std::make_pair(strName,llim));
+      xbrLiveLoadReactionData reactionData;
+      GetLiveLoadData(row,reactionData);
+      
+      llimData.m_LLIM.push_back(reactionData);
    }
 }
 
@@ -179,11 +205,9 @@ void CLiveLoadReactionGrid::SetLiveLoadData(const txnLiveLoadReactions& llimData
       RemoveRows(1,nRows);
    }
 
-   std::vector<std::pair<std::_tstring,Float64>>::const_iterator iter(llimData.m_LLIM.begin());
-   std::vector<std::pair<std::_tstring,Float64>>::const_iterator end(llimData.m_LLIM.end());
-   for ( ; iter != end; iter++ )
+   BOOST_FOREACH(const xbrLiveLoadReactionData& reactionData,llimData.m_LLIM)
    {
-      AddLiveLoadData(iter->first,iter->second);
+      AddLiveLoadData(reactionData);
    }
 
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
@@ -208,7 +232,7 @@ void CLiveLoadReactionGrid::SetRowStyle(ROWCOL row)
       );
 }
 
-void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const std::_tstring& strName,Float64 llim)
+void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const xbrLiveLoadReactionData& reactionData)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -217,31 +241,41 @@ void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const std::_tstring& strN
    ROWCOL col = 1;
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
-      .SetValue(strName.c_str())
+      .SetValue(reactionData.Name.c_str())
       );
 
-   Float64 value = ::ConvertFromSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   Float64 value = ::ConvertFromSysUnits(reactionData.LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetValue(value)
+      );
+
+   value = ::ConvertFromSysUnits(reactionData.W,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetValue(value)
       );
 }
 
-void CLiveLoadReactionGrid::AddLiveLoadData(const std::_tstring& strName,Float64 llim)
+void CLiveLoadReactionGrid::AddLiveLoadData(const xbrLiveLoadReactionData& reactionData)
 {
    InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
    SetRowStyle(row);
-   SetLiveLoadData(row,strName,llim);
+   SetLiveLoadData(row,reactionData);
 }
 
-void CLiveLoadReactionGrid::GetLiveLoadData(ROWCOL row,std::_tstring& strName,Float64& llim)
+void CLiveLoadReactionGrid::GetLiveLoadData(ROWCOL row,xbrLiveLoadReactionData& reactionData)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   strName = GetCellValue(row,1);
-   llim = _tstof(GetCellValue(row,2));
-   llim = ::ConvertToSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   
+   reactionData.Name = GetCellValue(row,1);
+   
+   Float64 llim = _tstof(GetCellValue(row,2));
+   reactionData.LLIM = ::ConvertToSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   
+   Float64 w = _tstof(GetCellValue(row,3));
+   reactionData.W = ::ConvertToSysUnits(w,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
 }
 
 CString CLiveLoadReactionGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)

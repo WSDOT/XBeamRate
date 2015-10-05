@@ -24,7 +24,7 @@
 
 #include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\PierData.h>
-
+#include <XBeamRateExt\LiveLoadReactionData.h>
 #include <boost\shared_ptr.hpp>
 
 /*****************************************************************************
@@ -159,10 +159,11 @@ interface IXBRProject : IUnknown
 
    // Live Load Reactions per lane
    virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
-   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<std::pair<std::_tstring,Float64>>& vLLIM) = 0;
-   virtual std::vector<std::pair<std::_tstring,Float64>> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
+   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM) = 0;
+   virtual std::vector<xbrLiveLoadReactionData> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
    virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
    virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
+   virtual Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) = 0;
 
    // Material properties
    virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade) = 0;

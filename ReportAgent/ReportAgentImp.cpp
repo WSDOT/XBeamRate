@@ -38,6 +38,10 @@
 #include "LoadRatingChapterBuilder.h"
 #include "LoadRatingDetailsChapterBuilder.h"
 
+#include <\ARP\PGSuper\Include\IFace\Views.h>
+#include <EAF\EAFUIIntegration.h>
+#include <EAF\EAFReportView.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -92,28 +96,30 @@ STDMETHODIMP CReportAgentImp::RegInterfaces()
 
 STDMETHODIMP CReportAgentImp::Init()
 {
-   //EAF_AGENT_INIT;
+   EAF_AGENT_INIT;
 
    InitReportBuilders();
 
-   return S_OK; // AGENT_S_SECONDPASSINIT;
+   return AGENT_S_SECONDPASSINIT;
 }
 
 STDMETHODIMP CReportAgentImp::Init2()
 {
-   ////
-   //// Attach to connection points
-   ////
-   //CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   //CComPtr<IConnectionPoint> pCP;
-   //HRESULT hr = S_OK;
+   //
+   // Attach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
 
-   //// Connection point for the bridge description
-   //hr = pBrokerInit->FindConnectionPoint( IID_IProjectEventSink, &pCP );
-   //ATLASSERT( SUCCEEDED(hr) );
-   //hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
-   //ATLASSERT( SUCCEEDED(hr) );
-   //pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   // Connection point for the user interface extension events
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
 
    return S_OK;
 }
@@ -131,6 +137,21 @@ STDMETHODIMP CReportAgentImp::GetClassID(CLSID* pCLSID)
 
 STDMETHODIMP CReportAgentImp::ShutDown()
 {
+   //
+   // Detach to connection points
+   //
+   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
+   CComPtr<IConnectionPoint> pCP;
+   HRESULT hr = S_OK;
+
+   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwProjectCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
+
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
 }
@@ -144,6 +165,7 @@ void CReportAgentImp::InitReportBuilders()
 
 
    CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(_T("XBeam Rate Test Report"));
+   m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
 #endif
@@ -154,6 +176,7 @@ void CReportAgentImp::InitReportBuilders()
 
 
    pReportBuilder = new CXBeamRateReportBuilder(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report"));
+   m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
 #endif
@@ -162,4 +185,48 @@ void CReportAgentImp::InitReportBuilders()
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// IXBRProjectEventSink
+HRESULT CReportAgentImp::OnProjectChanged()
+{
+   if ( !IsStandAlone() )
+   {
+      // we are plugged into PGSuper/PGSplice
+      // Something in our project changed
+      // Look at the open report views, if any of them are displaying a cross beam load rating report
+      // tell that view to update.
+      GET_IFACE(IViews,pViews);
+      GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
+
+      // get all the report views
+      long rptViewKey = pViews->GetReportViewKey();
+      std::vector<CView*> vViews = pViewRegistrar->GetRegisteredView(rptViewKey);
+      BOOST_FOREACH(CView* pView,vViews)
+      {
+         // make sure it is the right type so we can cast it
+         if ( pView->IsKindOf(RUNTIME_CLASS(CEAFReportView)) )
+         {
+            // Get the report spec so we can get the report name
+            CEAFReportView* pReportView = (CEAFReportView*)pView;
+            boost::shared_ptr<CReportSpecification> pReportSpec = pReportView->GetReportSpecification();
+            
+            // is it one of our reports?
+            std::set<std::_tstring>::iterator found = m_ReportNames.find(pReportSpec->GetReportName());
+            if ( found != m_ReportNames.end() )
+            {
+               // yes, it is one of our reports... update it.
+               pReportView->UpdateNow(0);
+               // OnUpdate is a protected method so we can't access it
+            }
+         }
+         else
+         {
+            ATLASSERT(false); // did PGSuper/PGSplice change the base class of the report view?
+         }
+      }
+   }
+
+   return S_OK;
 }

@@ -97,6 +97,10 @@ protected:
 	//{{AFX_MSG(CXBeamRateDoc)
    afx_msg void OnAbout();
 	//}}AFX_MSG
+   afx_msg void OnUpdateViewGraphs(CCmdUI* pCmdUI);
+   afx_msg BOOL OnViewGraphs(NMHDR* pnmhdr,LRESULT* plr);
+   afx_msg void OnUpdateViewReports(CCmdUI* pCmdUI);
+   afx_msg BOOL OnViewReports(NMHDR* pnmhdr,LRESULT* plr);
 	DECLARE_MESSAGE_MAP()
 
    friend CXBeamRateDocProxyAgent;
@@ -112,6 +116,7 @@ protected:
 
    void PopulateReportMenu();
    void PopulateGraphMenu();
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

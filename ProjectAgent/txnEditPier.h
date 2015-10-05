@@ -24,6 +24,7 @@
 
 #include <WBFLCore.h>
 #include <XBeamRateExt\PierData.h>
+#include <XBeamRateExt\LiveLoadReactionData.h>
 
 class txnDeadLoadReaction
 {
@@ -42,7 +43,7 @@ class txnLiveLoadReactions
 {
 public:
    txnLiveLoadReactions();
-   std::vector<std::pair<std::_tstring,Float64>> m_LLIM;
+   std::vector<xbrLiveLoadReactionData> m_LLIM;
 };
 
 class txnEditPierData
