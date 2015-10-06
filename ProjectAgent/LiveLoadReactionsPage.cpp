@@ -97,18 +97,23 @@ END_MESSAGE_MAP()
 BOOL CLiveLoadReactionsPage::OnInitDialog()
 {
    m_DesignGrid.SubclassDlgItem(IDC_DESIGN_GRID, this);
+   m_DesignGrid.SetLoadRatingType(pgsTypes::lrDesign_Inventory);
    m_DesignGrid.CustomInit();
 
    m_LegalRoutineGrid.SubclassDlgItem(IDC_LEGAL_ROUTINE_GRID, this);
+   m_LegalRoutineGrid.SetLoadRatingType(pgsTypes::lrLegal_Routine);
    m_LegalRoutineGrid.CustomInit();
 
    m_LegalSpecialGrid.SubclassDlgItem(IDC_LEGAL_SPECIAL_GRID, this);
+   m_LegalSpecialGrid.SetLoadRatingType(pgsTypes::lrLegal_Special);
    m_LegalSpecialGrid.CustomInit();
 
    m_PermitRoutineGrid.SubclassDlgItem(IDC_PERMIT_ROUTINE_GRID, this);
+   m_PermitRoutineGrid.SetLoadRatingType(pgsTypes::lrPermit_Routine);
    m_PermitRoutineGrid.CustomInit();
 
    m_PermitSpecialGrid.SubclassDlgItem(IDC_PERMIT_SPECIAL_GRID, this);
+   m_PermitSpecialGrid.SetLoadRatingType(pgsTypes::lrPermit_Special);
    m_PermitSpecialGrid.CustomInit();
 
    CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_REACTION_APPLICATION);

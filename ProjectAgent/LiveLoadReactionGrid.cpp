@@ -230,6 +230,12 @@ void CLiveLoadReactionGrid::SetRowStyle(ROWCOL row)
       .SetReadOnly(FALSE)
       .SetHorizontalAlignment(DT_RIGHT)
       );
+
+   SetStyleRange(CGXRange(row,col++), CGXStyle()
+      .SetEnabled(TRUE)
+      .SetReadOnly(FALSE)
+      .SetHorizontalAlignment(DT_RIGHT)
+      );
 }
 
 void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const xbrLiveLoadReactionData& reactionData)
