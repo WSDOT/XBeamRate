@@ -27,6 +27,7 @@
 #include "resource.h"
 #include "LiveLoadReactionsPage.h"
 #include "PierDlg.h"
+#include <XBeamRateExt\XBeamRateUtilities.h>
 
 void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadReactions& llData)
 {
@@ -61,12 +62,14 @@ void CLiveLoadReactionsPage::DoDataExchange(CDataExchange* pDX)
 
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_Text(pDX,IDC_LF_INVENTORY,pParent->m_PierData.m_gLL[pgsTypes::lrDesign_Inventory]);
-   DDX_Text(pDX,IDC_LF_OPERATING,pParent->m_PierData.m_gLL[pgsTypes::lrDesign_Operating]);
-   DDX_Text(pDX,IDC_LF_LEGAL_ROUTINE,pParent->m_PierData.m_gLL[pgsTypes::lrLegal_Routine]);
-   DDX_Text(pDX,IDC_LF_LEGAL_SPECIAL,pParent->m_PierData.m_gLL[pgsTypes::lrLegal_Special]);
-   DDX_Text(pDX,IDC_LF_PERMIT_ROUTINE,pParent->m_PierData.m_gLL[pgsTypes::lrPermit_Routine]);
-   DDX_Text(pDX,IDC_LF_PERMIT_SPECIAL,pParent->m_PierData.m_gLL[pgsTypes::lrPermit_Special]);
+   DDX_Text(pDX,IDC_LF_INVENTORY,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)]);
+   DDX_Text(pDX,IDC_LF_OPERATING,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)]);
+   DDX_Text(pDX,IDC_LF_LEGAL_ROUTINE,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)]);
+   DDX_Text(pDX,IDC_LF_LEGAL_SPECIAL,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)]);
+   DDX_Text(pDX,IDC_LF_PERMIT_ROUTINE,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)]);
+   DDX_Text(pDX,IDC_LF_PERMIT_SPECIAL,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)]);
+   DDX_Text(pDX,IDC_LF_PERMIT_ROUTINE_SERVICEI,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)]);
+   DDX_Text(pDX,IDC_LF_PERMIT_SPECIAL_SERVICEI,pParent->m_PierData.m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)]);
 
    DDX_LiveLoadReactionsGrid(pDX,m_DesignGrid,        pParent->m_PierData.m_DesignLiveLoad);
    DDX_LiveLoadReactionsGrid(pDX,m_LegalRoutineGrid,  pParent->m_PierData.m_LegalRoutineLiveLoad);

@@ -53,12 +53,25 @@ public:
 
    xbrPierData m_PierData;
 
-   Float64 m_gDC;
-   Float64 m_gDW;
-   Float64 m_gCR;
-   Float64 m_gSH;
-   Float64 m_gPS;
-   Float64 m_gLL[6]; // use GET_INDEX with a limit state to access the array
+   Float64 m_gDC_StrengthI;
+   Float64 m_gDW_StrengthI;
+   Float64 m_gCR_StrengthI;
+   Float64 m_gSH_StrengthI;
+   Float64 m_gPS_StrengthI;
+
+   Float64 m_gDC_StrengthII;
+   Float64 m_gDW_StrengthII;
+   Float64 m_gCR_StrengthII;
+   Float64 m_gSH_StrengthII;
+   Float64 m_gPS_StrengthII;
+
+   Float64 m_gDC_ServiceI;
+   Float64 m_gDW_ServiceI;
+   Float64 m_gCR_ServiceI;
+   Float64 m_gSH_ServiceI;
+   Float64 m_gPS_ServiceI;
+
+   Float64 m_gLL[8]; // use GET_INDEX with a limit state to access the array
 
    xbrTypes::ReactionLoadType m_DeadLoadReactionType[2];
    std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2]; // use bearing line index to access array

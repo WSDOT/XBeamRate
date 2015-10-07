@@ -85,12 +85,26 @@ CProjectAgentImp::CProjectAgentImp()
    m_bCheckYieldStress = true;
    m_YieldStressCoefficient = 0.9;
 
-   m_gDC = 1.25;
-   m_gDW = 1.50;
-   m_gCR = 1.00;
-   m_gSH = 1.00;
-   m_gPS = 1.00;
-   m_gRE = 1.00;
+   m_gDC_StrengthI = 1.25;
+   m_gDW_StrengthI = 1.50;
+   m_gCR_StrengthI = 1.00;
+   m_gSH_StrengthI = 1.00;
+   m_gPS_StrengthI = 1.00;
+   m_gRE_StrengthI = 1.00;
+
+   m_gDC_StrengthII = 1.25;
+   m_gDW_StrengthII = 1.50;
+   m_gCR_StrengthII = 1.00;
+   m_gSH_StrengthII = 1.00;
+   m_gPS_StrengthII = 1.00;
+   m_gRE_StrengthII = 1.00;
+
+   m_gDC_ServiceI = 1.00;
+   m_gDW_ServiceI = 1.00;
+   m_gCR_ServiceI = 1.00;
+   m_gSH_ServiceI = 1.00;
+   m_gPS_ServiceI = 1.00;
+   m_gRE_ServiceI = 1.00;
 
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]       = 1.75;
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]       = 1.35;
@@ -98,6 +112,8 @@ CProjectAgentImp::CProjectAgentImp()
    m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]    = 1.60;
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]  = 1.15;
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]  = 1.20;
+   m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)][INVALID_ID]    = 1.00;
+   m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)][INVALID_ID]    = 1.00;
 
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Truck + Lane"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Tandem + Lane"),0,0));
@@ -324,18 +340,35 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
-         pStrSave->put_Property(_T("DC"),CComVariant(m_gDC));
-         pStrSave->put_Property(_T("DW"),CComVariant(m_gDW));
-         pStrSave->put_Property(_T("CR"),CComVariant(m_gCR));
-         pStrSave->put_Property(_T("SH"),CComVariant(m_gSH));
-         pStrSave->put_Property(_T("PS"),CComVariant(m_gPS));
-         pStrSave->put_Property(_T("RE"),CComVariant(m_gRE));
+         pStrSave->put_Property(_T("DC_StrengthI"),CComVariant(m_gDC_StrengthI));
+         pStrSave->put_Property(_T("DW_StrengthI"),CComVariant(m_gDW_StrengthI));
+         pStrSave->put_Property(_T("CR_StrengthI"),CComVariant(m_gCR_StrengthI));
+         pStrSave->put_Property(_T("SH_StrengthI"),CComVariant(m_gSH_StrengthI));
+         pStrSave->put_Property(_T("PS_StrengthI"),CComVariant(m_gPS_StrengthI));
+         pStrSave->put_Property(_T("RE_StrengthI"),CComVariant(m_gRE_StrengthI));
+
+         pStrSave->put_Property(_T("DC_StrengthII"),CComVariant(m_gDC_StrengthII));
+         pStrSave->put_Property(_T("DW_StrengthII"),CComVariant(m_gDW_StrengthII));
+         pStrSave->put_Property(_T("CR_StrengthII"),CComVariant(m_gCR_StrengthII));
+         pStrSave->put_Property(_T("SH_StrengthII"),CComVariant(m_gSH_StrengthII));
+         pStrSave->put_Property(_T("PS_StrengthII"),CComVariant(m_gPS_StrengthII));
+         pStrSave->put_Property(_T("RE_StrengthII"),CComVariant(m_gRE_StrengthII));
+
+         pStrSave->put_Property(_T("DC_ServiceI"),CComVariant(m_gDC_ServiceI));
+         pStrSave->put_Property(_T("DW_ServiceI"),CComVariant(m_gDW_ServiceI));
+         pStrSave->put_Property(_T("CR_ServiceI"),CComVariant(m_gCR_ServiceI));
+         pStrSave->put_Property(_T("SH_ServiceI"),CComVariant(m_gSH_ServiceI));
+         pStrSave->put_Property(_T("PS_ServiceI"),CComVariant(m_gPS_ServiceI));
+         pStrSave->put_Property(_T("RE_ServiceI"),CComVariant(m_gRE_ServiceI));
+
          pStrSave->put_Property(_T("LL_StrengthI_Inventory"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]));
          pStrSave->put_Property(_T("LL_StrengthI_Operating"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]));
          pStrSave->put_Property(_T("LL_StrengthI_LegalRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID]));
          pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]));
          pStrSave->put_Property(_T("LL_StrengthII_PermitRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]));
          pStrSave->put_Property(_T("LL_StrengthII_PermitSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_ServiceI_PermitRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_ServiceI_PermitSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)][INVALID_ID]));
       pStrSave->EndUnit(); // LoadFactors
 
       pStrSave->BeginUnit(_T("Reactions"),1.0);
@@ -585,23 +618,63 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->BeginUnit(_T("LoadFactors"));
             
             var.vt = VT_R8;
-            hr = pStrLoad->get_Property(_T("DC"),&var);
-            m_gDC = var.dblVal;
+            hr = pStrLoad->get_Property(_T("DC_StrengthI"),&var);
+            m_gDC_StrengthI = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("DW"),&var);
-            m_gDW = var.dblVal;
+            hr = pStrLoad->get_Property(_T("DW_StrengthI"),&var);
+            m_gDW_StrengthI = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("CR"),&var);
-            m_gCR = var.dblVal;
+            hr = pStrLoad->get_Property(_T("CR_StrengthI"),&var);
+            m_gCR_StrengthI = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("SH"),&var);
-            m_gSH = var.dblVal;
+            hr = pStrLoad->get_Property(_T("SH_StrengthI"),&var);
+            m_gSH_StrengthI = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("PS"),&var);
-            m_gPS = var.dblVal;
+            hr = pStrLoad->get_Property(_T("PS_StrengthI"),&var);
+            m_gPS_StrengthI = var.dblVal;
 
-            hr = pStrLoad->get_Property(_T("RE"),&var);
-            m_gRE = var.dblVal;
+            hr = pStrLoad->get_Property(_T("RE_StrengthI"),&var);
+            m_gRE_StrengthI = var.dblVal;
+
+            
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("DC_StrengthII"),&var);
+            m_gDC_StrengthII = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("DW_StrengthII"),&var);
+            m_gDW_StrengthII = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("CR_StrengthII"),&var);
+            m_gCR_StrengthII = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("SH_StrengthII"),&var);
+            m_gSH_StrengthII = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PS_StrengthII"),&var);
+            m_gPS_StrengthII = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("RE_StrengthII"),&var);
+            m_gRE_StrengthII = var.dblVal;
+
+             
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("DC_ServiceI"),&var);
+            m_gDC_ServiceI = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("DW_ServiceI"),&var);
+            m_gDW_ServiceI = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("CR_ServiceI"),&var);
+            m_gCR_ServiceI = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("SH_ServiceI"),&var);
+            m_gSH_ServiceI = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PS_ServiceI"),&var);
+            m_gPS_ServiceI = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("RE_ServiceI"),&var);
+            m_gRE_ServiceI = var.dblVal;
 
             hr = pStrLoad->get_Property(_T("LL_StrengthI_Inventory"),&var);
             m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID] = var.dblVal;
@@ -620,6 +693,12 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("LL_StrengthII_PermitSpecial"),&var);
             m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID] = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("LL_ServiceI_PermitRoutine"),&var);
+            m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)][INVALID_ID] = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("LL_ServiceI_PermitSpecial"),&var);
+            m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)][INVALID_ID] = var.dblVal;
 
             hr = pStrLoad->EndUnit(); // LoadFactors
          }
@@ -1825,7 +1904,24 @@ Float64 CProjectAgentImp::GetConditionFactor(PierIDType pierID)
 
 void CProjectAgentImp::SetDCLoadFactor(pgsTypes::LimitState limitState,Float64 dc)
 {
-   m_gDC = dc;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gDC_StrengthI = dc;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gDC_StrengthII = dc;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gDC_ServiceI = dc;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
+
    Fire_OnProjectChanged();
 }
 
@@ -1834,7 +1930,23 @@ Float64 CProjectAgentImp::GetDCLoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gDC;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gDC_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gDC_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gDC_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {
@@ -1846,7 +1958,23 @@ Float64 CProjectAgentImp::GetDCLoadFactor(pgsTypes::LimitState limitState)
 void CProjectAgentImp::SetDWLoadFactor(pgsTypes::LimitState limitState,Float64 dw)
 {
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
-   m_gDW = dw;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gDW_StrengthI = dw;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gDW_StrengthII = dw;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gDW_ServiceI = dw;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
    Fire_OnProjectChanged();
 }
 
@@ -1855,7 +1983,23 @@ Float64 CProjectAgentImp::GetDWLoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gDW;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gDW_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gDW_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gDW_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {
@@ -1867,7 +2011,22 @@ Float64 CProjectAgentImp::GetDWLoadFactor(pgsTypes::LimitState limitState)
 void CProjectAgentImp::SetCRLoadFactor(pgsTypes::LimitState limitState,Float64 cr)
 {
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
-   m_gCR = cr;
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gCR_StrengthI = cr;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gCR_StrengthII = cr;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gCR_ServiceI = cr;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
    Fire_OnProjectChanged();
 }
 
@@ -1876,7 +2035,23 @@ Float64 CProjectAgentImp::GetCRLoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gCR;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gCR_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gCR_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gCR_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {
@@ -1888,7 +2063,23 @@ Float64 CProjectAgentImp::GetCRLoadFactor(pgsTypes::LimitState limitState)
 void CProjectAgentImp::SetSHLoadFactor(pgsTypes::LimitState limitState,Float64 sh)
 {
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
-   m_gSH = sh;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gSH_StrengthI = sh;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gSH_StrengthII = sh;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gSH_ServiceI = sh;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
    Fire_OnProjectChanged();
 }
 
@@ -1897,7 +2088,23 @@ Float64 CProjectAgentImp::GetSHLoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gSH;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gSH_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gSH_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gSH_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {
@@ -1909,7 +2116,23 @@ Float64 CProjectAgentImp::GetSHLoadFactor(pgsTypes::LimitState limitState)
 void CProjectAgentImp::SetRELoadFactor(pgsTypes::LimitState limitState,Float64 re)
 {
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
-   m_gRE = re;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gRE_StrengthI = re;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gRE_StrengthII = re;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gRE_ServiceI = re;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
    Fire_OnProjectChanged();
 }
 
@@ -1918,7 +2141,23 @@ Float64 CProjectAgentImp::GetRELoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gRE;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gRE_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gRE_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gRE_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {
@@ -1930,7 +2169,23 @@ Float64 CProjectAgentImp::GetRELoadFactor(pgsTypes::LimitState limitState)
 void CProjectAgentImp::SetPSLoadFactor(pgsTypes::LimitState limitState,Float64 ps)
 {
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
-   m_gPS = ps;
+   ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
+   if ( ::IsStrengthILimitState(limitState) )
+   {
+      m_gPS_StrengthI = ps;
+   }
+   else if (::IsStrengthIILimitState(limitState) )
+   {
+      m_gPS_StrengthII = ps;
+   }
+   else if ( ::IsServiceLimitState(limitState) )
+   {
+      m_gPS_ServiceI = ps;
+   }
+   else
+   {
+      ATLASSERT(false);
+   }
    Fire_OnProjectChanged();
 }
 
@@ -1939,7 +2194,23 @@ Float64 CProjectAgentImp::GetPSLoadFactor(pgsTypes::LimitState limitState)
    ATLASSERT(::IsRatingLimitState(limitState)); // must be a load rating limit state
    if ( IsStandAlone() )
    {
-      return m_gPS;
+      if ( ::IsStrengthILimitState(limitState) )
+      {
+         return m_gPS_StrengthI;
+      }
+      else if (::IsStrengthIILimitState(limitState) )
+      {
+         return m_gPS_StrengthII;
+      }
+      else if ( ::IsServiceLimitState(limitState) )
+      {
+         return m_gPS_ServiceI;
+      }
+      else
+      {
+         ATLASSERT(false);
+         return 99999;
+      }
    }
    else
    {

@@ -70,11 +70,23 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
 
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_Text(pDX,IDC_DC,pParent->m_PierData.m_gDC);
-   DDX_Text(pDX,IDC_DW,pParent->m_PierData.m_gDW);
-   DDX_Text(pDX,IDC_CR,pParent->m_PierData.m_gCR);
-   DDX_Text(pDX,IDC_SH,pParent->m_PierData.m_gSH);
-   DDX_Text(pDX,IDC_PS,pParent->m_PierData.m_gPS);
+   DDX_Text(pDX,IDC_DC_STRENGTH_I,pParent->m_PierData.m_gDC_StrengthI);
+   DDX_Text(pDX,IDC_DW_STRENGTH_I,pParent->m_PierData.m_gDW_StrengthI);
+   DDX_Text(pDX,IDC_CR_STRENGTH_I,pParent->m_PierData.m_gCR_StrengthI);
+   DDX_Text(pDX,IDC_SH_STRENGTH_I,pParent->m_PierData.m_gSH_StrengthI);
+   DDX_Text(pDX,IDC_PS_STRENGTH_I,pParent->m_PierData.m_gPS_StrengthI);
+
+   DDX_Text(pDX,IDC_DC_STRENGTH_II,pParent->m_PierData.m_gDC_StrengthII);
+   DDX_Text(pDX,IDC_DW_STRENGTH_II,pParent->m_PierData.m_gDW_StrengthII);
+   DDX_Text(pDX,IDC_CR_STRENGTH_II,pParent->m_PierData.m_gCR_StrengthII);
+   DDX_Text(pDX,IDC_SH_STRENGTH_II,pParent->m_PierData.m_gSH_StrengthII);
+   DDX_Text(pDX,IDC_PS_STRENGTH_II,pParent->m_PierData.m_gPS_StrengthII);
+
+   DDX_Text(pDX,IDC_DC_SERVICE_I,pParent->m_PierData.m_gDC_ServiceI);
+   DDX_Text(pDX,IDC_DW_SERVICE_I,pParent->m_PierData.m_gDW_ServiceI);
+   DDX_Text(pDX,IDC_CR_SERVICE_I,pParent->m_PierData.m_gCR_ServiceI);
+   DDX_Text(pDX,IDC_SH_SERVICE_I,pParent->m_PierData.m_gSH_ServiceI);
+   DDX_Text(pDX,IDC_PS_SERVICE_I,pParent->m_PierData.m_gPS_ServiceI);
 
    IndexType nBearingLines = pParent->m_PierData.m_PierData.GetBearingLineCount();
    DDX_CBItemData(pDX,IDC_BEARING_LINE_COUNT,nBearingLines);

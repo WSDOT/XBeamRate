@@ -102,15 +102,61 @@ void txnEditPier::Execute(int i)
       }
    }
 
-   // we are in stand-alone mode.... we only don't have load factors per limit state
-   // so just use a dummy limit state here
-   ATLASSERT(IsStandAlone());
-   pProject->SetDCLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gDC);
-   pProject->SetDWLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gDW);
-   pProject->SetCRLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gCR);
-   pProject->SetSHLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gSH);
-   pProject->SetRELoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gCR); // using creep factor for relaxation
-   pProject->SetPSLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gPS);
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_Inventory,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_Operating,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthII_PermitSpecial,m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gDC_ServiceI);
+   pProject->SetDWLoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gDW_ServiceI);
+   pProject->SetCRLoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gCR_ServiceI);
+   pProject->SetSHLoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gSH_ServiceI);
+   pProject->SetRELoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gCR_ServiceI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::ServiceI_PermitRoutine,m_PierData[i].m_gPS_ServiceI);
+
+   pProject->SetDCLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gDC_ServiceI);
+   pProject->SetDWLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gDW_ServiceI);
+   pProject->SetCRLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gCR_ServiceI);
+   pProject->SetSHLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gSH_ServiceI);
+   pProject->SetRELoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gCR_ServiceI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gPS_ServiceI);
 
    pProject->SetReactionLoadApplicationType(pierID,m_PierData[i].m_LiveLoadReactionApplication);
 
@@ -120,6 +166,8 @@ void txnEditPier::Execute(int i)
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalSpecial,   m_PierData[i].m_gLL[3]);
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine, m_PierData[i].m_gLL[4]);
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial, m_PierData[i].m_gLL[5]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,   m_PierData[i].m_gLL[6]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,   m_PierData[i].m_gLL[7]);
 
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory, m_PierData[i].m_DesignLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Operating, m_PierData[i].m_DesignLiveLoad.m_LLIM);

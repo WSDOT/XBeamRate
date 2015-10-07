@@ -95,14 +95,24 @@ void CAgentCmdTarget::OnEditPier()
       }
    }
 
-   // we are in stand-alone mode.... we only don't have load factors per limit state
-   // so just use a dummy limit state here
    ATLASSERT(IsStandAlone());
-   oldPierData.m_gDC = pProject->GetDCLoadFactor(pgsTypes::StrengthI_Inventory);
-   oldPierData.m_gDW = pProject->GetDWLoadFactor(pgsTypes::StrengthI_Inventory);
-   oldPierData.m_gCR = pProject->GetCRLoadFactor(pgsTypes::StrengthI_Inventory);
-   oldPierData.m_gSH = pProject->GetSHLoadFactor(pgsTypes::StrengthI_Inventory);
-   oldPierData.m_gPS = pProject->GetPSLoadFactor(pgsTypes::StrengthI_Inventory);
+   oldPierData.m_gDC_StrengthI = pProject->GetDCLoadFactor(pgsTypes::StrengthI_Inventory);
+   oldPierData.m_gDW_StrengthI = pProject->GetDWLoadFactor(pgsTypes::StrengthI_Inventory);
+   oldPierData.m_gCR_StrengthI = pProject->GetCRLoadFactor(pgsTypes::StrengthI_Inventory);
+   oldPierData.m_gSH_StrengthI = pProject->GetSHLoadFactor(pgsTypes::StrengthI_Inventory);
+   oldPierData.m_gPS_StrengthI = pProject->GetPSLoadFactor(pgsTypes::StrengthI_Inventory);
+
+   oldPierData.m_gDC_StrengthII = pProject->GetDCLoadFactor(pgsTypes::StrengthII_PermitRoutine);
+   oldPierData.m_gDW_StrengthII = pProject->GetDWLoadFactor(pgsTypes::StrengthII_PermitRoutine);
+   oldPierData.m_gCR_StrengthII = pProject->GetCRLoadFactor(pgsTypes::StrengthII_PermitRoutine);
+   oldPierData.m_gSH_StrengthII = pProject->GetSHLoadFactor(pgsTypes::StrengthII_PermitRoutine);
+   oldPierData.m_gPS_StrengthII = pProject->GetPSLoadFactor(pgsTypes::StrengthII_PermitRoutine);
+
+   oldPierData.m_gDC_ServiceI = pProject->GetDCLoadFactor(pgsTypes::ServiceI_PermitRoutine);
+   oldPierData.m_gDW_ServiceI = pProject->GetDWLoadFactor(pgsTypes::ServiceI_PermitRoutine);
+   oldPierData.m_gCR_ServiceI = pProject->GetCRLoadFactor(pgsTypes::ServiceI_PermitRoutine);
+   oldPierData.m_gSH_ServiceI = pProject->GetSHLoadFactor(pgsTypes::ServiceI_PermitRoutine);
+   oldPierData.m_gPS_ServiceI = pProject->GetPSLoadFactor(pgsTypes::ServiceI_PermitRoutine);
 
    oldPierData.m_gLL[0] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_Inventory,INVALID_INDEX);
    oldPierData.m_gLL[1] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_Operating,INVALID_INDEX);
@@ -110,6 +120,8 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_gLL[3] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalSpecial,INVALID_INDEX);
    oldPierData.m_gLL[4] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine,INVALID_INDEX);
    oldPierData.m_gLL[5] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial,INVALID_INDEX);
+   oldPierData.m_gLL[6] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,INVALID_INDEX);
+   oldPierData.m_gLL[7] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,INVALID_INDEX);
 
    oldPierData.m_LiveLoadReactionApplication  = pProject->GetReactionLoadApplicationType(pierID);
    oldPierData.m_DesignLiveLoad.m_LLIM        = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);

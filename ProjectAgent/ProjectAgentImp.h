@@ -351,13 +351,28 @@ private:
    Float64 m_YieldStressCoefficient;
 
    // Load Factors
-   Float64 m_gDC;
-   Float64 m_gDW;
-   Float64 m_gCR;
-   Float64 m_gSH;
-   Float64 m_gPS;
-   Float64 m_gRE;
-   std::map<PierIDType,Float64> m_gLL[6]; // use GET_INDEX macro to access the array
+   Float64 m_gDC_StrengthI;
+   Float64 m_gDW_StrengthI;
+   Float64 m_gCR_StrengthI;
+   Float64 m_gSH_StrengthI;
+   Float64 m_gPS_StrengthI;
+   Float64 m_gRE_StrengthI;
+
+   Float64 m_gDC_StrengthII;
+   Float64 m_gDW_StrengthII;
+   Float64 m_gCR_StrengthII;
+   Float64 m_gSH_StrengthII;
+   Float64 m_gPS_StrengthII;
+   Float64 m_gRE_StrengthII;
+
+   Float64 m_gDC_ServiceI;
+   Float64 m_gDW_ServiceI;
+   Float64 m_gCR_ServiceI;
+   Float64 m_gSH_ServiceI;
+   Float64 m_gPS_ServiceI;
+   Float64 m_gRE_ServiceI;
+
+   std::map<PierIDType,Float64> m_gLL[8]; // use GET_INDEX macro to access the array
    // Bearing Reactions
    typedef struct BearingReactions
    {
