@@ -23,7 +23,7 @@
 #pragma once
 
 #include <XBeamRateExt\XBRExtExp.h>
-#include <XBeamRateExt\ReportPointOfInterest.h>
+#include <XBeamRateExt\PointOfInterest.h>
 
 /*****************************************************************************
 CLASS 

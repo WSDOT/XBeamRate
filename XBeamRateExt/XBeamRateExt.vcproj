@@ -651,6 +651,10 @@
 				RelativePath=".\XBeamRateUtilities.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\YieldStressRatioArtifact.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

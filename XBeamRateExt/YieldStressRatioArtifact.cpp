@@ -41,7 +41,7 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
    m_fsRebar = 0;
    m_fcrRebar = 0;
 
-   m_RatingType = xbrTypes::lrDesign_Inventory;
+   m_RatingType = pgsTypes::lrDesign_Inventory;
 
    m_VehicleIndex = INVALID_INDEX;
    m_VehicleWeight = -9999999;
@@ -425,55 +425,9 @@ Float64 xbrYieldStressRatioArtifact::GetRebarAllowableStress() const
    return m_AllowableStressRatio*m_fyb;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetStrandCrackingStressIncrement() const
-{
-   ComputeStressRatios();
-   return m_fcrStrand;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetStrandStress() const
-{
-   ComputeStressRatios();
-   return m_fsStrand;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetStrandStressRatio() const
-{
-   ComputeStressRatios();
-   return m_StrandRF;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetStrandAllowableStress() const
-{
-   return m_AllowableStressRatio*m_fyps;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetTendonCrackingStressIncrement() const
-{
-   ComputeStressRatios();
-   return m_fcrTendon;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetTendonStress() const
-{
-   ComputeStressRatios();
-   return m_fsTendon;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetTendonStressRatio() const
-{
-   ComputeStressRatios();
-   return m_TendonRF;
-}
-
-Float64 xbrYieldStressRatioArtifact::GetTendonAllowableStress() const
-{
-   return m_AllowableStressRatio*m_fypt;
-}
-
 Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
 {
-   return Min(GetRebarStressRatio(),GetStrandStressRatio(),GetTendonStressRatio());
+   return GetRebarStressRatio();
 }
 
 void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rOther)
