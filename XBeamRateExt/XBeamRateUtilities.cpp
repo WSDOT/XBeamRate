@@ -229,7 +229,6 @@ void GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloade
 int GetIndexFromLimitState(pgsTypes::LimitState ls)
 {
    ATLASSERT(::IsRatingLimitState(ls));
-   ATLASSERT(::IsStrengthLimitState(ls));
 
    int idx = 0;
    switch(ls)
