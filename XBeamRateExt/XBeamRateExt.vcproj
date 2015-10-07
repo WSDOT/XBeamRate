@@ -729,6 +729,10 @@
 				RelativePath="..\Include\XBeamRateExt\XBRExtExp.h"
 				>
 			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\YieldStressRatioArtifact.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

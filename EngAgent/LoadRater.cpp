@@ -81,6 +81,12 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
       ShearRating(pierID,vPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
    }
 
+   if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
+   {
+      CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,true /*positive moment*/,ratingArtifact);
+      CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,false/*negative moment*/,ratingArtifact);
+   }
+
    return ratingArtifact;
 }
 
@@ -434,6 +440,10 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
 
    //   ratingArtifact.AddArtifact(poi,shearArtifact);
    //}
+}
+
+void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,bool bPositiveMoment,xbrRatingArtifact& ratingArtifact)
+{
 }
 
 void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax)
