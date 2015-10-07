@@ -510,12 +510,10 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
       const xbrMomentRatingArtifact* pPositiveMoment;
       const xbrMomentRatingArtifact* pNegativeMoment;
       const xbrShearRatingArtifact* pShear;
-      //const xbrStressRatingArtifact* pStress;
-      //const xbrYieldStressRatioArtifact* pYieldStressPositiveMoment;
-      //const xbrYieldStressRatioArtifact* pYieldStressNegativeMoment;
-#pragma Reminder("WORKING HERE - need yield stress results")
+      const xbrYieldStressRatioArtifact* pYieldStressPositiveMoment;
+      const xbrYieldStressRatioArtifact* pYieldStressNegativeMoment;
 
-      Float64 RF = pRatingArtifact->GetRatingFactorEx(&pPositiveMoment,&pNegativeMoment,&pShear/*,&pStress,&pYieldStressPositiveMoment,&pYieldStressNegativeMoment*/);
+      Float64 RF = pRatingArtifact->GetRatingFactorEx(&pPositiveMoment,&pNegativeMoment,&pShear,&pYieldStressPositiveMoment,&pYieldStressNegativeMoment);
 
       Float64 gLL;
       std::_tstring strControlling;
@@ -542,29 +540,22 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
          strControlling = _T("Shear");
          poi = pShear->GetPointOfInterest();
       }
-      //else if ( pStress )
-      //{
-      //   ATLASSERT(vehicleIdx == pStress->GetVehicleIndex());
-      //   gLL = pStress->GetLiveLoadFactor();
-      //   strControlling = _T("Stress");
-      //   poi = pStress->GetPointOfInterest();
-      //}
-      //else if ( pYieldStressPositiveMoment )
-      //{
-      //   ATLASSERT(vehicleIdx == pYieldStressPositiveMoment->GetVehicleIndex());
-      //   gLL = pYieldStressPositiveMoment->GetLiveLoadFactor();
-      //   strControlling = _T("Yield Stress Positive Moment");
-      //   poi = pYieldStressPositiveMoment->GetPointOfInterest();
-      //   bIsStressRatio = true;
-      //}
-      //else if ( pYieldStressNegativeMoment )
-      //{
-      //   ATLASSERT(vehicleIdx == pYieldStressNegativeMoment->GetVehicleIndex());
-      //   gLL = pYieldStressNegativeMoment->GetLiveLoadFactor();
-      //   strControlling = _T("Yield Stress Negative Moment");
-      //   poi = pYieldStressNegativeMoment->GetPointOfInterest();
-      //   bIsStressRatio = true;
-      //}
+      else if ( pYieldStressPositiveMoment )
+      {
+         ATLASSERT(vehicleIdx == pYieldStressPositiveMoment->GetVehicleIndex());
+         gLL = pYieldStressPositiveMoment->GetLiveLoadFactor();
+         strControlling = _T("Yield Stress Positive Moment");
+         poi = pYieldStressPositiveMoment->GetPointOfInterest();
+         bIsStressRatio = true;
+      }
+      else if ( pYieldStressNegativeMoment )
+      {
+         ATLASSERT(vehicleIdx == pYieldStressNegativeMoment->GetVehicleIndex());
+         gLL = pYieldStressNegativeMoment->GetLiveLoadFactor();
+         strControlling = _T("Yield Stress Negative Moment");
+         poi = pYieldStressNegativeMoment->GetPointOfInterest();
+         bIsStressRatio = true;
+      }
       else
       {
          gLL = 0;

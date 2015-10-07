@@ -26,6 +26,7 @@
 #include <XBeamRateExt\PointOfInterest.h>
 #include <XBeamRateExt\MomentRatingArtifact.h>
 #include <XBeamRateExt\ShearRatingArtifact.h>
+#include <XBeamRateExt\YieldStressRatioArtifact.h>
 
 /*****************************************************************************
 CLASS 
@@ -53,6 +54,7 @@ class XBREXTCLASS xbrRatingArtifact
 public:
    typedef std::vector<std::pair<xbrPointOfInterest,xbrMomentRatingArtifact>> MomentRatings;
    typedef std::vector<std::pair<xbrPointOfInterest,xbrShearRatingArtifact>>  ShearRatings;
+   typedef std::vector<std::pair<xbrPointOfInterest,xbrYieldStressRatioArtifact>> YieldStressRatios;
 
    xbrRatingArtifact();
    xbrRatingArtifact(const xbrRatingArtifact& rOther);
@@ -62,9 +64,11 @@ public:
 
    void AddArtifact(const xbrPointOfInterest& poi,const xbrMomentRatingArtifact& artifact,bool bPositiveMoment);
    void AddArtifact(const xbrPointOfInterest& poi,const xbrShearRatingArtifact& artifact);
+   void AddArtifact(const xbrPointOfInterest& poi,const xbrYieldStressRatioArtifact& artifact,bool bPositiveMoment);
 
    const MomentRatings& GetMomentRatings(bool bPositiveMoment) const;
    const ShearRatings& GetShearRatings() const;
+   const YieldStressRatios& GetYieldStressRatios(bool bPositiveMoment) const;
 
    Float64 GetMomentRatingFactor(bool bPositiveMoment) const;
    Float64 GetMomentRatingFactorEx(bool bPositiveMoment,const xbrMomentRatingArtifact** ppArtifact) const;
@@ -72,10 +76,13 @@ public:
    Float64 GetShearRatingFactor() const;
    Float64 GetShearRatingFactorEx(const xbrShearRatingArtifact** ppArtifact) const;
 
+   Float64 GetYieldStressRatio(bool bPositiveMoment) const;
+   Float64 GetYieldStressRatioEx(bool bPositiveMoment,const xbrYieldStressRatioArtifact** ppArtifact) const;
+
    Float64 GetRatingFactor() const;
    Float64 GetRatingFactorEx(const xbrMomentRatingArtifact** ppPositiveMoment,const xbrMomentRatingArtifact** ppNegativeMoment,
-                             const xbrShearRatingArtifact** ppShear) const;
-
+                             const xbrShearRatingArtifact** ppShear,
+                             const xbrYieldStressRatioArtifact** ppYieldStressPositiveMoment,const xbrYieldStressRatioArtifact** ppYieldStressNegativeMoment) const;
    void GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeight,Float64* pRF,std::_tstring* pVehicle) const;
 
 protected:
@@ -85,4 +92,6 @@ protected:
    MomentRatings m_PositiveMomentRatings;
    MomentRatings m_NegativeMomentRatings;
    ShearRatings  m_ShearRatings;
+   YieldStressRatios m_PositiveMomentYieldStressRatios;
+   YieldStressRatios m_NegativeMomentYieldStressRatios;
 };

@@ -73,6 +73,18 @@ void xbrRatingArtifact::AddArtifact(const xbrPointOfInterest& poi,const xbrShear
    m_ShearRatings.push_back( std::make_pair(poi,artifact) );
 }
 
+void xbrRatingArtifact::AddArtifact(const xbrPointOfInterest& poi,const xbrYieldStressRatioArtifact& artifact,bool bPositiveMoment)
+{
+   if ( bPositiveMoment )
+   {
+      m_PositiveMomentYieldStressRatios.push_back( std::make_pair(poi,artifact) );
+   }
+   else
+   {
+      m_NegativeMomentYieldStressRatios.push_back( std::make_pair(poi,artifact) );
+   }
+}
+
 const xbrRatingArtifact::MomentRatings& xbrRatingArtifact::GetMomentRatings(bool bPositiveMoment) const
 {
    return (bPositiveMoment ? m_PositiveMomentRatings : m_NegativeMomentRatings);
@@ -154,16 +166,59 @@ Float64 xbrRatingArtifact::GetRatingFactor() const
    const xbrMomentRatingArtifact* pPositiveMoment;
    const xbrMomentRatingArtifact* pNegativeMoment;
    const xbrShearRatingArtifact* pShear;
+   const xbrYieldStressRatioArtifact* pYieldStressPositiveMoment;
+   const xbrYieldStressRatioArtifact* pYieldStressNegativeMoment;
 
-   return GetRatingFactorEx(&pPositiveMoment,&pNegativeMoment,&pShear);
+   return GetRatingFactorEx(&pPositiveMoment,&pNegativeMoment,&pShear,&pYieldStressPositiveMoment,&pYieldStressNegativeMoment);
+}
+
+const xbrRatingArtifact::YieldStressRatios& xbrRatingArtifact::GetYieldStressRatios(bool bPositiveMoment) const
+{
+   return (bPositiveMoment ? m_PositiveMomentYieldStressRatios : m_NegativeMomentYieldStressRatios);
+}
+
+Float64 xbrRatingArtifact::GetYieldStressRatioEx(bool bPositiveMoment,const xbrYieldStressRatioArtifact** ppArtifact) const
+{
+   Float64 RF = DBL_MAX;
+   (*ppArtifact) = NULL;
+
+   const YieldStressRatios* pRatios = (bPositiveMoment ? &m_PositiveMomentYieldStressRatios : &m_NegativeMomentYieldStressRatios);
+   YieldStressRatios::const_iterator iter;
+   for ( iter = pRatios->begin(); iter != pRatios->end(); iter++ )
+   {
+      const xbrYieldStressRatioArtifact& artifact = iter->second;
+      Float64 ratio = artifact.GetStressRatio();
+      if ( ratio < RF )
+      {
+         RF = ratio;
+         *ppArtifact = &artifact;
+      }
+   }
+
+   if ( *ppArtifact == NULL && 0 < pRatios->size() )
+   {
+      ATLASSERT(RF == DBL_MAX);
+      (*ppArtifact) = &(pRatios->front().second);
+   }
+
+   return RF;
+}
+
+Float64 xbrRatingArtifact::GetYieldStressRatio(bool bPositiveMoment) const
+{
+   const xbrYieldStressRatioArtifact* pArtifact;
+   return GetYieldStressRatioEx(bPositiveMoment,&pArtifact);
 }
 
 Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppPositiveMoment,const xbrMomentRatingArtifact** ppNegativeMoment,
-                                             const xbrShearRatingArtifact** ppShear) const
+                                             const xbrShearRatingArtifact** ppShear,
+                                             const xbrYieldStressRatioArtifact** ppYieldStressPositiveMoment,const xbrYieldStressRatioArtifact** ppYieldStressNegativeMoment) const
 {
    Float64 RF_pM = GetMomentRatingFactorEx(true,ppPositiveMoment);
    Float64 RF_nM = GetMomentRatingFactorEx(false,ppNegativeMoment);
    Float64 RF_V  = GetShearRatingFactorEx(ppShear);
+   Float64 RF_ys_pM = GetYieldStressRatioEx(true,ppYieldStressPositiveMoment);
+   Float64 RF_ys_nM = GetYieldStressRatioEx(false,ppYieldStressNegativeMoment);
 
    Float64 RF = DBL_MAX;
    int i = -1; // initialize to an invalid value so that we know if a rating factor wasn't found
@@ -185,38 +240,73 @@ Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppP
       i = 2;
    }
 
+   if ( RF_ys_pM < RF )
+   {
+      RF = RF_ys_pM;
+      i = 3;
+   }
+
+   if ( RF_ys_nM < RF )
+   {
+      RF = RF_ys_nM;
+      i = 4;
+   }
+
    // NULL out all but the controlling rating
    if ( i == 0 )
    {
       //(*ppPositiveMoment)            = NULL;
       (*ppNegativeMoment)            = NULL;
       (*ppShear)                     = NULL;
+      (*ppYieldStressPositiveMoment) = NULL;
+      (*ppYieldStressNegativeMoment) = NULL;
    }
    else if ( i == 1 )
    {
       (*ppPositiveMoment)            = NULL;
       //(*ppNegativeMoment)            = NULL;
       (*ppShear)                     = NULL;
+      (*ppYieldStressPositiveMoment) = NULL;
+      (*ppYieldStressNegativeMoment) = NULL;
    }
    else if ( i == 2 )
    {
       (*ppPositiveMoment)            = NULL;
       (*ppNegativeMoment)            = NULL;
       //(*ppShear)                     = NULL;
+      (*ppYieldStressPositiveMoment) = NULL;
+      (*ppYieldStressNegativeMoment) = NULL;
+   }
+   else if ( i == 3 )
+   {
+      (*ppPositiveMoment)            = NULL;
+      (*ppNegativeMoment)            = NULL;
+      (*ppShear)                     = NULL;
+      //(*ppYieldStressPositiveMoment) = NULL;
+      (*ppYieldStressNegativeMoment) = NULL;
+   }
+   else if ( i == 4 )
+   {
+      (*ppPositiveMoment)            = NULL;
+      (*ppNegativeMoment)            = NULL;
+      (*ppShear)                     = NULL;
+      (*ppYieldStressPositiveMoment) = NULL;
+      //(*ppYieldStressNegativeMoment) = NULL;
    }
    else
    {
       // ??? rating wasn't done?
       // this can happen if we are rating with a negative moment only truck
       // but the bridge is simple span... we run the truck because we want
-      // reactions, but the rating factors are DBL_MAX...
+      // reactions, but the reating factors are DBL_MAX...
       // since all types of ratings control equally, use positive moment as controlling factor
       ATLASSERT(i == -1);
       //(*ppPositiveMoment)            = NULL;
       (*ppNegativeMoment)            = NULL;
       (*ppShear)                     = NULL;
+      (*ppYieldStressPositiveMoment) = NULL;
+      (*ppYieldStressNegativeMoment) = NULL;
    }
-
    return RF;
 }
 
@@ -276,6 +366,51 @@ void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeigh
       std::_tstring strVehicle = artifact.GetVehicleName();
       Float64 W = artifact.GetVehicleWeight();
       Float64 RF = artifact.GetRatingFactor();
+      Float64 spl = W*(RF - 0.3)/0.7;
+      if ( spl < 0 )
+      {
+         spl = 0;
+      }
+
+      if ( spl < posting_load )
+      {
+         posting_load = spl;
+         *pWeight = W;
+         *pRF = RF;
+         *pVehicle = strVehicle;
+      }
+   }
+
+   YieldStressRatios::const_iterator yield_stress_iter;
+   for ( yield_stress_iter = m_PositiveMomentYieldStressRatios.begin(); yield_stress_iter != m_PositiveMomentYieldStressRatios.end(); yield_stress_iter++ )
+   {
+      const xbrYieldStressRatioArtifact& artifact = yield_stress_iter->second;
+
+      std::_tstring strVehicle = artifact.GetVehicleName();
+      Float64 W = artifact.GetVehicleWeight();
+      Float64 RF = artifact.GetStressRatio();
+      Float64 spl = W*(RF - 0.3)/0.7;
+      if ( spl < 0 )
+      {
+         spl = 0;
+      }
+
+      if ( spl < posting_load )
+      {
+         posting_load = spl;
+         *pWeight = W;
+         *pRF = RF;
+         *pVehicle = strVehicle;
+      }
+   }
+
+   for ( yield_stress_iter = m_NegativeMomentYieldStressRatios.begin(); yield_stress_iter != m_NegativeMomentYieldStressRatios.end(); yield_stress_iter++ )
+   {
+      const xbrYieldStressRatioArtifact& artifact = yield_stress_iter->second;
+
+      std::_tstring strVehicle = artifact.GetVehicleName();
+      Float64 W = artifact.GetVehicleWeight();
+      Float64 RF = artifact.GetStressRatio();
       Float64 spl = W*(RF - 0.3)/0.7;
       if ( spl < 0 )
       {
