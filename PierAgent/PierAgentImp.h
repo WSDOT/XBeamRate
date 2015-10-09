@@ -157,6 +157,7 @@ public:
    virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem);
    virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx);
    virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
+   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,IPoint2d* pRebarLocation);
 
 // IXBRStirrups
 public:

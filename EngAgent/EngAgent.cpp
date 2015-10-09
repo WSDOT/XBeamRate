@@ -53,6 +53,9 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
 
+#include <IFace\Intervals.h>
+#include <IFace\Bridge.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE
 

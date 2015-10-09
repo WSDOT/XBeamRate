@@ -860,7 +860,7 @@ void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pF
 
    *pE  = matRebar::GetE(rebarType,rebarGrade);
    *pFy = matRebar::GetYieldStrength(rebarType,rebarGrade);
-   *pFy = matRebar::GetUltimateStrength(rebarType,rebarGrade);
+   *pFu = matRebar::GetUltimateStrength(rebarType,rebarGrade);
 }
 
 
@@ -1081,6 +1081,24 @@ void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest&
    rebarSection->get_Item(barIdx,&rebarSectionItem);
 
    rebarSectionItem->get_Location(ppPoint);
+}
+
+Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,IPoint2d* pRebarLocation)
+{
+   Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID,poi.GetDistFromStart());
+   Float64 Ydeck = GetElevation(pierID,Xcl);
+
+   CComPtr<IPier> pier;
+   GetPierModel(pierID,&pier);
+   Float64 tDeck;
+   pier->get_DeckThickness(&tDeck);
+
+   Float64 Y;
+   pRebarLocation->get_Y(&Y);
+
+   Float64 Yb = Ydeck - Y - tDeck;
+
+   return Yb;
 }
 
 //////////////////////////////////////////

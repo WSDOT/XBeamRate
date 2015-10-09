@@ -109,7 +109,7 @@ void CLongitudinalRebarGrid::CustomInit()
 
    SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
-         .SetValue(_T("Beam Face"))
+         .SetValue(_T("XBeam Face"))
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
 			.SetEnabled(FALSE)          // disables usage as current cell

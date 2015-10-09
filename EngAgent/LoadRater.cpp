@@ -551,7 +551,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       GET_IFACE(IXBRRebar,pRebar);
       CComPtr<IRebarSection> rebarSection;
       pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
-      Float64 Y = (bPositiveMoment ? DBL_MAX : -DBL_MAX);
+      Float64 Y = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
       CComPtr<IEnumRebarSectionItem> enumRebarSectionItem;
       rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
 
@@ -560,14 +560,13 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       {
         CComPtr<IPoint2d> location;
         rebarSectionItem->get_Location(&location);
-        Float64 y;
-        location->get_Y(&y); // this is in section coordinates so (0,0) is at top center... y should be < 0
-        ATLASSERT(y < 0);
-        Y = (bPositiveMoment ? Min(Y,y) : Max(Y,y));
+        Float64 y = pRebar->GetRebarDepth(pierID,poi,location);
+        ATLASSERT(0 <= y);
+        Y = (bPositiveMoment ? Max(Y,y) : Min(Y,y));
         rebarSectionItem.Release();
      }
 
-      Float64 ds = (bPositiveMoment ? -Y : Hxb+Y); // depth to rebar layer, measured from compression face
+      Float64 ds = (bPositiveMoment ? Y : Hxb-Y); // depth to rebar layer, measured from compression face
       
       // Get allowable
       Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();

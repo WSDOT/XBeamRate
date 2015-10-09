@@ -32,6 +32,9 @@
 #include <IFace\Pier.h>
 #include <IFace\AnalysisResults.h>
 
+#include <IFace\Intervals.h>
+#include <IFace\Bridge.h>
+
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\Format.h>
 
@@ -664,29 +667,47 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    ATLASSERT(SUCCEEDED(hr));
 
    GET_IFACE(IXBRSectionProperties,pSectProps);
+   GET_IFACE(IXBRProject,pProject);
+
+   // only using the cross beam height for capacity
+   // the top of the cross beam is at the bottom of the slab
    Float64 h = pSectProps->GetDepth(pierID,stage,poi);
    rcBeam->put_h(h);
    rcBeam->put_hf(0);
 
-   GET_IFACE(IXBRProject,pProject);
    Float64 w = pProject->GetXBeamWidth(pierID);
-   rcBeam->put_b(w);
    rcBeam->put_bw(w);
+   rcBeam->put_b(w); // model the top flange width equal to the web (maybe change this in the future for T-section capacity)
 
    xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
    Float64 d;
-   pProject->GetDiaphragmDimensions(pierID,&d,&w);
+   pProject->GetDiaphragmDimensions(pierID,&d,&w); // dimensions of upper diaphragm/xbeam
 
    GET_IFACE(IXBRMaterial,pMaterial);
    Float64 fc = pMaterial->GetXBeamFc(pierID);
-   rcBeam->put_FcSlab(fc);
    rcBeam->put_FcBeam(fc);
+
+   if ( IsStandAlone() )
+   {
+      rcBeam->put_FcSlab(fc);
+   }
+   else
+   {
+      GET_IFACE(IIntervals,pIntervals);
+      IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
+
+      GET_IFACE(IMaterials,pMaterials);
+      Float64 fcSlab = pMaterials->GetDeckDesignFc(loadRatingIntervalIdx);
+      rcBeam->put_FcSlab(fcSlab);
+   }
 
    Float64 E, fy, fu;
    pMaterial->GetRebarProperties(pierID,&E,&fy,&fu);
    rcBeam->put_fy(fy);
 
-   Float64 dt = 0; // location of the extreme tension steel
+   Float64 tDeck = pProject->GetDeckThickness(pierID);
+
+   Float64 dt = 0; // location of the extreme tension steel, measured from the top of the deck
 
    GET_IFACE(IXBRRebar,pRebar);
    CComPtr<IRebarSection> rebarSection;
@@ -701,11 +722,9 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
       CComPtr<IPoint2d> pntRebar;
       rebarSectionItem->get_Location(&pntRebar);
 
-      Float64 Ybar;
-      pntRebar->get_Y(&Ybar);
-      ATLASSERT(Ybar < 0); // bars are in section coordinates so they should be below the X-axis
+      Float64 Ybar = pRebar->GetRebarDepth(pierID,poi,pntRebar); // depth from top of cross beam to rebar
 
-      Ybar *= -1; // Ybar is now measured from the top down with Y being positive downwards
+      ATLASSERT(Ybar < h);
 
       // if continous or expansion pier, the upper cross beam doesn't contribute
       // to capacity. but the rebar are measured from the top down of the entire

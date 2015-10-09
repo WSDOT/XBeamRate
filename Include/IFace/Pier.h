@@ -126,6 +126,7 @@ DEFINE_GUID(IID_IXBRRebar,
 0x80b9f943, 0xf0bf, 0x4c4b, 0xbc, 0xe9, 0x70, 0xbb, 0xb3, 0xa5, 0x51, 0x88);
 interface IXBRRebar : public IUnknown
 {
+   // The rebar points obtained through this method are in global cross section coordinates.
    virtual void GetRebarSection(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection) = 0;
 
    virtual IndexType GetRebarRowCount(PierIDType pierID) = 0;
@@ -134,9 +135,12 @@ interface IXBRRebar : public IUnknown
 
    virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem) = 0;
 
-   // Returns the depth to a rebar row, measured from the top of the cross beam
+   // Returns the vertical location of a rebar row, measured in global cross section coordinates.
    virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx) = 0;
    virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
+
+   // Returns the depth of the rebar, measured down from top of the cross beam
+   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,IPoint2d* pRebarLocation) = 0;
 };
 
 // {025A63FF-9FE0-4733-8AB9-B1B6B96E0F7B}
