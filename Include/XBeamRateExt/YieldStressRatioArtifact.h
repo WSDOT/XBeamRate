@@ -107,9 +107,6 @@ public:
 
    void SetSecondaryEffectsMoment(Float64 Mps);
    Float64 GetSecondaryEffectsMoment() const;
-   
-   void SetLiveLoadDistributionFactor(Float64 gM);
-   Float64 GetLiveLoadDistributionFactor() const;
 
    void SetLiveLoadFactor(Float64 gLL);
    Float64 GetLiveLoadFactor() const;

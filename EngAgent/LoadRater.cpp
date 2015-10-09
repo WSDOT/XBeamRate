@@ -27,7 +27,9 @@
 #include <IFace\AnalysisResults.h>
 #include <IFace\RatingSpecification.h>
 #include <IFace\LoadRating.h>
+#include <IFace\Pier.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <WBFLGenericBridge.h>
 
 #include <PGSuperUnits.h> // for FormatDimension
 
@@ -92,15 +94,14 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
 
 void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
-   std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
-   std::vector<Float64> vLLIMmin,vLLIMmax;
-
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
 
    GET_IFACE(IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
    pProgress->UpdateMessage(_T("Load rating for moment"));
 
+   std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
+   std::vector<Float64> vLLIMmin,vLLIMmax;
    GetMoments(pierID, bPositiveMoment, ratingType, permitRatingMethod, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax);
 
    GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
@@ -110,6 +111,8 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    Float64 condition_factor = pProject->GetConditionFactor(pierID);
 
    pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
+
+   xbrTypes::Stage stage = xbrTypes::Stage2;
 
    Float64 gDC = pProject->GetDCLoadFactor(ls);
    Float64 gDW = pProject->GetDWLoadFactor(ls);
@@ -143,7 +146,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
                          ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
       pProgress->UpdateMessage(strProgress);
 
-      const MomentCapacityDetails& momentCapacityDetails = pMomentCapacity->GetMomentCapacityDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment);
+      const MomentCapacityDetails& momentCapacityDetails = pMomentCapacity->GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
       Float64 phi_moment = momentCapacityDetails.phi;
       Float64 Mn = momentCapacityDetails.Mn;
 
@@ -160,7 +163,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
          // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
          // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
          // No adjustment needs to be made for underreinforcement so take K = 1.0
-         const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,xbrTypes::Stage2,poi,bPositiveMoment);
+         const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,stage,poi,bPositiveMoment);
          Float64 Mr = minCapacityDetails.Mr;
          Float64 MrMin = minCapacityDetails.MrMin;
          Float64 K = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
@@ -204,6 +207,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
 
 void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
+#pragma Reminder("WORKING HERE - shear rating")
    //GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    //GET_IFACE(IProgress, pProgress);
    //CEAFAutoProgress ap(pProgress);
@@ -444,6 +448,186 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
 
 void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,bool bPositiveMoment,xbrRatingArtifact& ratingArtifact)
 {
+#pragma Reminder("WORKING HERE - reinforcement yielding")
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IProgress, pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Checking for reinforcement yielding"));
+
+   ATLASSERT(::IsPermitRatingType(ratingType));
+
+   pgsTypes::LimitState ls = ::GetServiceLimitStateType(ratingType);
+   xbrTypes::Stage stage = xbrTypes::Stage2;
+
+   GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
+   GET_IFACE(IXBRCrackedSection,pCrackedSection);
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IXBRSectionProperties,pSectProps);
+
+   GET_IFACE(IXBRMaterial,pMaterial);
+   Float64 Exbm = pMaterial->GetXBeamEc(pierID);
+
+   // Get load factors
+   Float64 gDC = pProject->GetDCLoadFactor(ls);
+   Float64 gDW = pProject->GetDWLoadFactor(ls);
+   Float64 gCR = pProject->GetCRLoadFactor(ls);
+   Float64 gSH = pProject->GetSHLoadFactor(ls);
+   Float64 gRE = pProject->GetRELoadFactor(ls);
+   Float64 gPS = pProject->GetPSLoadFactor(ls);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ls,vehicleIdx);
+//
+//   // parameter needed for negative moment evalation
+//   // (get it outside the loop so we don't have to get it over and over)
+//   GET_IFACE(ILongRebarGeometry,pLongRebar);
+//   Float64 top_slab_cover = pLongRebar->GetCoverTopMat();
+//
+//   GET_IFACE(IProductLoads,pProductLoads);
+//   std::vector<std::_tstring> strLLNames = pProductLoads->GetVehicleNames(llType,girderKey);
+//
+//   GET_IFACE(ISpecification,pSpec);
+//   pgsTypes::AnalysisType analysisType = pSpec->GetAnalysisType();
+//
+//   pgsTypes::StressLocation topLocation = pgsTypes::TopDeck;
+//   pgsTypes::StressLocation botLocation = pgsTypes::BottomGirder;
+//
+//   GET_IFACE(ISectionProperties,pSectProp);
+//   GET_IFACE(IPointOfInterest,pPoi);
+//   GET_IFACE(IBridge,pBridge);
+//   GET_IFACE(ILongRebarGeometry,pRebarGeom);
+//   GET_IFACE(IStrandGeometry,pStrandGeom);
+//   GET_IFACE(ITendonGeometry,pTendonGeom);
+//
+
+   // Create artifacts
+   CollectionIndexType nPOI = vPoi.size();
+   for ( CollectionIndexType i = 0; i < nPOI; i++ )
+   {
+      const xbrPointOfInterest& poi = vPoi[i];
+      const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);
+
+      CString strProgress;
+      strProgress.Format(_T("Checking for reinforcement yielding %s for %s moment at %s"),
+                         pMomentRatingArtifact->GetVehicleName().c_str(),bPositiveMoment ? _T("positive") : _T("negative"),
+                         ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+      pProgress->UpdateMessage(strProgress);
+
+
+      const CrackingMomentDetails& crackingMomentDetails = pMomentCapacity->GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
+      const CrackedSectionDetails& crackedSectionDetails = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment);
+
+
+      // use this to get all the loading information
+      Float64 DC = pMomentRatingArtifact->GetDeadLoadMoment();
+      Float64 DW = pMomentRatingArtifact->GetWearingSurfaceMoment();
+      Float64 CR = pMomentRatingArtifact->GetCreepMoment();
+      Float64 SH = pMomentRatingArtifact->GetShrinkageMoment();
+      Float64 RE = pMomentRatingArtifact->GetRelaxationMoment();
+      Float64 PS = pMomentRatingArtifact->GetSecondaryEffectsMoment();
+
+      Float64 LLIM;
+      if ( pMomentRatingArtifact->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
+      {
+         LLIM = pMomentRatingArtifact->GetLiveLoadMoment(); // this is for AASHTO method
+      }
+      else
+      {
+         IndexType llConfigIdx;
+         IndexType permitLaneIdx;
+         IndexType vehIdx;
+         Float64 Mpermit;
+         Float64 Mlegal;
+         Float64 K;
+         pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&Mpermit,&Mlegal,&K);
+         LLIM = Mpermit + Mlegal;
+      }
+
+      Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
+
+      Float64 Es, fy, fu;
+      pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
+
+      // Get distance to reinforcement from extreme compression face
+      GET_IFACE(IXBRRebar,pRebar);
+      CComPtr<IRebarSection> rebarSection;
+      pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
+      Float64 Y = (bPositiveMoment ? DBL_MAX : -DBL_MAX);
+      CComPtr<IEnumRebarSectionItem> enumRebarSectionItem;
+      rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
+
+      CComPtr<IRebarSectionItem> rebarSectionItem;
+      while ( enumRebarSectionItem->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+      {
+        CComPtr<IPoint2d> location;
+        rebarSectionItem->get_Location(&location);
+        Float64 y;
+        location->get_Y(&y); // this is in section coordinates so (0,0) is at top center... y should be < 0
+        ATLASSERT(y < 0);
+        Y = (bPositiveMoment ? Min(Y,y) : Max(Y,y));
+        rebarSectionItem.Release();
+     }
+
+      Float64 ds = (bPositiveMoment ? -Y : Hxb+Y); // depth to rebar layer, measured from compression face
+      
+      // Get allowable
+      Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
+
+      Float64 Mcr = crackingMomentDetails.Mcr;
+
+      Float64 Icr = crackedSectionDetails.Icr;
+      Float64 c   = crackedSectionDetails.c; // measured from tension face to crack
+
+      // make sure reinforcement is on the tension side of the crack
+      bool bRebar = (ds < Hxb - c ? false : true);
+
+      // Stress in reinforcement before cracking
+      Float64 fs  = 0;
+      if ( bRebar )
+      {
+         Float64 I = pSectProps->GetIxx(pierID,stage,poi);
+         Float64 y; // distance from centroid to rebar
+         if ( bPositiveMoment )
+         {
+            Float64 Ytg = pSectProps->GetYtop(pierID,stage,poi);
+            y = ds - Ytg;
+         }
+         else
+         {
+            Float64 Ybg = pSectProps->GetYbot(pierID,stage,poi);
+            y = ds - Ybg;
+         }
+
+         fs = (Es/Exbm)*fabs(Mcr)*y/I;
+      }
+
+      xbrYieldStressRatioArtifact stressRatioArtifact;
+      stressRatioArtifact.SetRatingType(ratingType);
+      stressRatioArtifact.SetPointOfInterest(poi);
+      stressRatioArtifact.SetVehicleIndex(pMomentRatingArtifact->GetVehicleIndex());
+      stressRatioArtifact.SetVehicleWeight(pMomentRatingArtifact->GetVehicleWeight());
+      stressRatioArtifact.SetVehicleName(pMomentRatingArtifact->GetVehicleName().c_str());
+      stressRatioArtifact.SetAllowableStressRatio(K);
+      stressRatioArtifact.SetDeadLoadFactor(gDC);
+      stressRatioArtifact.SetDeadLoadMoment(DC);
+      stressRatioArtifact.SetWearingSurfaceFactor(gDW);
+      stressRatioArtifact.SetWearingSurfaceMoment(DW);
+      stressRatioArtifact.SetCreepFactor(gCR);
+      stressRatioArtifact.SetCreepMoment(CR);
+      stressRatioArtifact.SetShrinkageFactor(gSH);
+      stressRatioArtifact.SetShrinkageMoment(SH);
+      stressRatioArtifact.SetRelaxationFactor(gRE);
+      stressRatioArtifact.SetRelaxationMoment(RE);
+      stressRatioArtifact.SetSecondaryEffectsFactor(gPS);
+      stressRatioArtifact.SetSecondaryEffectsMoment(PS);
+      stressRatioArtifact.SetLiveLoadFactor(gLL);
+      stressRatioArtifact.SetLiveLoadMoment(LLIM);
+      stressRatioArtifact.SetCrackingMoment(Mcr);
+      stressRatioArtifact.SetIcr(Icr);
+      stressRatioArtifact.SetCrackDepth(c);
+      stressRatioArtifact.SetEg(Exbm);
+      stressRatioArtifact.SetRebar(ds,fs,fy,Es);
+      ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
+   } // next poi
 }
 
 void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax)

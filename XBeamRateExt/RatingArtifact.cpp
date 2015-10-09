@@ -60,28 +60,28 @@ void xbrRatingArtifact::AddArtifact(const xbrPointOfInterest& poi,const xbrMomen
 {
    if ( bPositiveMoment )
    {
-      m_PositiveMomentRatings.push_back( std::make_pair(poi,artifact) );
+      m_PositiveMomentRatings.insert( std::make_pair(poi,artifact) );
    }
    else
    {
-      m_NegativeMomentRatings.push_back( std::make_pair(poi,artifact) );
+      m_NegativeMomentRatings.insert( std::make_pair(poi,artifact) );
    }
 }
 
 void xbrRatingArtifact::AddArtifact(const xbrPointOfInterest& poi,const xbrShearRatingArtifact& artifact)
 {
-   m_ShearRatings.push_back( std::make_pair(poi,artifact) );
+   m_ShearRatings.insert( std::make_pair(poi,artifact) );
 }
 
 void xbrRatingArtifact::AddArtifact(const xbrPointOfInterest& poi,const xbrYieldStressRatioArtifact& artifact,bool bPositiveMoment)
 {
    if ( bPositiveMoment )
    {
-      m_PositiveMomentYieldStressRatios.push_back( std::make_pair(poi,artifact) );
+      m_PositiveMomentYieldStressRatios.insert( std::make_pair(poi,artifact) );
    }
    else
    {
-      m_NegativeMomentYieldStressRatios.push_back( std::make_pair(poi,artifact) );
+      m_NegativeMomentYieldStressRatios.insert( std::make_pair(poi,artifact) );
    }
 }
 
@@ -117,7 +117,8 @@ Float64 xbrRatingArtifact::GetMomentRatingFactorEx(bool bPositiveMoment,const xb
    if ( *ppArtifact == NULL && 0 < pRatings->size() )
    {
       ATLASSERT(RF == DBL_MAX);
-      (*ppArtifact) = &(pRatings->front().second);
+      const xbrMomentRatingArtifact& artifact = pRatings->begin()->second;
+      (*ppArtifact) = &artifact;
    }
 
    return RF;
@@ -127,6 +128,21 @@ Float64 xbrRatingArtifact::GetMomentRatingFactor(bool bPositiveMoment) const
 {
    const xbrMomentRatingArtifact* pArtifact;
    return GetMomentRatingFactorEx(bPositiveMoment,&pArtifact);
+}
+
+const xbrMomentRatingArtifact* xbrRatingArtifact::GetMomentRatingArtifact(const xbrPointOfInterest& poi,bool bPositiveMoment) const
+{
+   const MomentRatings* pRatings = (bPositiveMoment ? &m_PositiveMomentRatings : &m_NegativeMomentRatings);
+   MomentRatings::const_iterator found = pRatings->find(poi);
+   if ( found == pRatings->end() )
+   {
+      return NULL;
+   }
+   else
+   {
+      const xbrMomentRatingArtifact& artifact = found->second;
+      return &artifact;
+   }
 }
 
 Float64 xbrRatingArtifact::GetShearRatingFactorEx(const xbrShearRatingArtifact** ppArtifact) const
@@ -149,7 +165,8 @@ Float64 xbrRatingArtifact::GetShearRatingFactorEx(const xbrShearRatingArtifact**
    if ( *ppArtifact == NULL && 0 < m_ShearRatings.size() )
    {
       ATLASSERT(RF == DBL_MAX);
-      (*ppArtifact) = &(m_ShearRatings.front().second);
+      const xbrShearRatingArtifact& artifact = m_ShearRatings.begin()->second;
+      (*ppArtifact) = &artifact;
    }
 
    return RF;
@@ -198,7 +215,8 @@ Float64 xbrRatingArtifact::GetYieldStressRatioEx(bool bPositiveMoment,const xbrY
    if ( *ppArtifact == NULL && 0 < pRatios->size() )
    {
       ATLASSERT(RF == DBL_MAX);
-      (*ppArtifact) = &(pRatios->front().second);
+      const xbrYieldStressRatioArtifact& artifact = pRatios->begin()->second;
+      (*ppArtifact) = &artifact;
    }
 
    return RF;
@@ -431,9 +449,12 @@ void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeigh
 
 void xbrRatingArtifact::MakeCopy(const xbrRatingArtifact& rOther)
 {
-   m_PositiveMomentRatings = rOther.m_PositiveMomentRatings;
-   m_NegativeMomentRatings = rOther.m_NegativeMomentRatings;
-   m_ShearRatings  = rOther.m_ShearRatings;
+   m_PositiveMomentRatings           = rOther.m_PositiveMomentRatings;
+   m_NegativeMomentRatings           = rOther.m_NegativeMomentRatings;
+   m_ShearRatings                    = rOther.m_ShearRatings;
+   m_PositiveMomentYieldStressRatios = rOther.m_PositiveMomentYieldStressRatios;
+   m_NegativeMomentYieldStressRatios = rOther.m_NegativeMomentYieldStressRatios;
+
 }
 
 void xbrRatingArtifact::MakeAssignment(const xbrRatingArtifact& rOther)

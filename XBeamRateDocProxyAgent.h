@@ -130,6 +130,7 @@ public:
 // IViews ??? 
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
+   virtual void CreatePierView();
 
    UINT GetStdToolBarID();
 
@@ -150,6 +151,7 @@ private:
    void UnregisterViews();
    long m_ReportViewKey;
    long m_GraphingViewKey;
+   long m_PierViewKey;
    
    CXBeamRateDoc* m_pMyDocument;
 

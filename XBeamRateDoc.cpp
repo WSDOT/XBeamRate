@@ -56,6 +56,7 @@ BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
    ON_COMMAND(ID_HELP_ABOUT, OnAbout)
    ON_UPDATE_COMMAND_UI(ID_VIEW_GRAPHS,OnUpdateViewGraphs)
    ON_UPDATE_COMMAND_UI(ID_VIEW_REPORTS,OnUpdateViewReports)
+   ON_COMMAND(ID_VIEW_PIER, OnViewPier)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -505,4 +506,9 @@ BOOL CXBeamRateDoc::OnViewReports(NMHDR* pnmhdr,LRESULT* plr)
    contextMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON, point.x,point.y, EAFGetMainFrame() );
 
    return TRUE;
+}
+
+void CXBeamRateDoc::OnViewPier()
+{
+   m_pMyDocProxyAgent->CreatePierView();
 }

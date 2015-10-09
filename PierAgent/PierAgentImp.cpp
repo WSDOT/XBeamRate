@@ -690,42 +690,90 @@ Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrP
    }
 }
 
+Float64 CPierAgentImp::GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+
+      GET_IFACE(IXBRProject,pProject);
+
+      Float64 H;
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
+
+      if (shapeType == CColumnData::cstCircle)
+      {
+         return D1/2;
+      }
+      else
+      {
+         return D2/2;
+      }
+   }
+   else
+   {
+      CComPtr<IShape> shape;
+      GetXBeamShape(pierID,stage,poi,&shape);
+
+      CComPtr<IShapeProperties> shapeProps;
+      shape->get_ShapeProperties(&shapeProps);
+
+      Float64 Ytop;
+      shapeProps->get_Ytop(&Ytop);
+      return Ytop;
+   }
+}
+
+Float64 CPierAgentImp::GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   if ( poi.IsColumnPOI() )
+   {
+      CColumnData::ColumnShapeType shapeType;
+      Float64 D1, D2;
+      CColumnData::ColumnHeightMeasurementType columnHeightType;
+
+      GET_IFACE(IXBRProject,pProject);
+
+      Float64 H;
+      pProject->GetColumnProperties(pierID,poi.GetColumnIndex(),&shapeType,&D1,&D2,&columnHeightType,&H);
+
+      if (shapeType == CColumnData::cstCircle)
+      {
+         return D1/2;
+      }
+      else
+      {
+         return D2/2;
+      }
+   }
+   else
+   {
+      CComPtr<IShape> shape;
+      GetXBeamShape(pierID,stage,poi,&shape);
+
+      CComPtr<IShapeProperties> shapeProps;
+      shape->get_ShapeProperties(&shapeProps);
+
+      Float64 Ybot;
+      shapeProps->get_Ybottom(&Ybot);
+      return Ybot;
+   }
+}
+
 Float64 CPierAgentImp::GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
-   ATLASSERT(poi.IsColumnPOI() == false);
-   CComPtr<IShape> shape;
-   GetXBeamShape(pierID,stage,poi,&shape);
-
-   CComPtr<IShapeProperties> shapeProps;
-   shape->get_ShapeProperties(&shapeProps);
-
-   Float64 ixx;
-   shapeProps->get_Ixx(&ixx);
-   
-   Float64 Yt;
-   shapeProps->get_Ytop(&Yt);
-
-   Float64 St = ixx/Yt;
-   return St;
+   Float64 Ixx = GetIxx(pierID,stage,poi);
+   Float64 Yt  = GetYtop(pierID,stage,poi);
+   return Ixx/Yt;
 }
 
 Float64 CPierAgentImp::GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
-   ATLASSERT(poi.IsColumnPOI() == false);
-   CComPtr<IShape> shape;
-   GetXBeamShape(pierID,stage,poi,&shape);
-
-   CComPtr<IShapeProperties> shapeProps;
-   shape->get_ShapeProperties(&shapeProps);
-
-   Float64 ixx;
-   shapeProps->get_Ixx(&ixx);
-   
-   Float64 Yb;
-   shapeProps->get_Ybottom(&Yb);
-
-   Float64 Sb = ixx/Yb;
-   return Sb;
+   Float64 Ixx = GetIxx(pierID,stage,poi);
+   Float64 Yb  = GetYbot(pierID,stage,poi);
+   return Ixx/Yb;
 }
 
 void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
@@ -761,6 +809,13 @@ Float64 CPierAgentImp::GetXBeamDensity(PierIDType pierID)
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    return concrete.WeightDensity;
+}
+
+Float64 CPierAgentImp::GetXBeamFc(PierIDType pierID)
+{
+   GET_IFACE(IXBRProject,pProject);
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
+   return concrete.Fc;
 }
 
 Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID)

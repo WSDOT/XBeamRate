@@ -30,15 +30,16 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "dllmain.h"
-#include <WBFLRCCapacity.h>
 
 #include "initguid.h"
 #include "EngAgent.h"
 
 #include "EngAgentCLSID.h"
 
+#include <WBFLSections_i.c>
 #include <WBFLCore_i.c>
 #include <WBFLRCCapacity_i.c>
+#include <WBFLGeometry_i.c>
 
 #include "EngAgentImp.h"
 

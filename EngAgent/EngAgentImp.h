@@ -49,6 +49,7 @@ class ATL_NO_VTABLE CEngAgentImp :
    public IAgentEx,
    public IXBRMomentCapacity,
    public IXBRShearCapacity,
+   public IXBRCrackedSection,
    public IXBRArtifact,
    public IXBRProjectEventSink
 {  
@@ -68,6 +69,7 @@ BEGIN_COM_MAP(CEngAgentImp)
    COM_INTERFACE_ENTRY(IAgentEx)
 	COM_INTERFACE_ENTRY(IXBRMomentCapacity)
 	COM_INTERFACE_ENTRY(IXBRShearCapacity)
+   COM_INTERFACE_ENTRY(IXBRCrackedSection)
    COM_INTERFACE_ENTRY(IXBRArtifact)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
 	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
@@ -99,6 +101,11 @@ public:
    virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx);
 
+// IXBRCrackedSection
+public:
+   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+
 // IXBRShearCapacity
 public:
    virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi);
@@ -128,6 +135,9 @@ private:
    std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
    std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][6]; 
 
+   std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pPositiveMomentCrackedSection[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pNegativeMomentCrackedSection[2];
+
 #pragma Reminder("WORKING HERE: need to have shear capacity by pier")
    // need to cache shear capacity
 
@@ -136,6 +146,8 @@ private:
    MinMomentCapacityDetails ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    MinMomentCapacityDetails ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx);
    void GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3);
+   CrackedSectionDetails ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   void BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,IRCBeam2** ppModel,Float64* pdt);
 
    Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    Float64 GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
@@ -146,6 +158,9 @@ private:
    std::auto_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
    RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+
+   CComPtr<IMomentCapacitySolver> m_MomentCapacitySolver;
+   CComPtr<IRCCrackedSectionSolver2> m_CrackedSectionSolver;
 
 
 #if defined _USE_MULTITHREADING
@@ -163,6 +178,9 @@ private:
 
       std::map<IDType,MinMomentCapacityDetails>* m_pPositiveMinMomentCapacity[2][6];
       std::map<IDType,MinMomentCapacityDetails>* m_pNegativeMinMomentCapacity[2][6];
+
+      std::map<IDType,CrackedSectionDetails>* m_pPositiveMomentCrackedSection[2];
+      std::map<IDType,CrackedSectionDetails>* m_pNegativeMomentCrackedSection[2];
 
       std::map<PierIDType,RatingArtifacts>* m_pRatingArtifacts[6];
    };

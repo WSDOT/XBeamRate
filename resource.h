@@ -42,11 +42,12 @@
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
 #define EAFID_UNITS_SI                  32772
-#define ID_VIEW_REPORTS                 32777
 #define EAFID_UNITS_US                  32773
 #define ID_REPORTS_THISISAPLACEHOLDER   32774
 #define ID_VIEW_GRAPHS                  32775
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
+#define ID_VIEW_REPORTS                 32777
+#define ID_BUTTON32782                  32782
 #define ID_VIEW_PIER                    33030
 
 // Next default values for new objects
@@ -54,7 +55,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        212
-#define _APS_NEXT_COMMAND_VALUE         32782
+#define _APS_NEXT_COMMAND_VALUE         32783
 #define _APS_NEXT_CONTROL_VALUE         204
 #define _APS_NEXT_SYMED_VALUE           103
 #endif

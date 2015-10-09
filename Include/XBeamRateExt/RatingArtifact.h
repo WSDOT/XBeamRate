@@ -27,6 +27,7 @@
 #include <XBeamRateExt\MomentRatingArtifact.h>
 #include <XBeamRateExt\ShearRatingArtifact.h>
 #include <XBeamRateExt\YieldStressRatioArtifact.h>
+#include <map>
 
 /*****************************************************************************
 CLASS 
@@ -52,9 +53,9 @@ LOG
 class XBREXTCLASS xbrRatingArtifact
 {
 public:
-   typedef std::vector<std::pair<xbrPointOfInterest,xbrMomentRatingArtifact>> MomentRatings;
-   typedef std::vector<std::pair<xbrPointOfInterest,xbrShearRatingArtifact>>  ShearRatings;
-   typedef std::vector<std::pair<xbrPointOfInterest,xbrYieldStressRatioArtifact>> YieldStressRatios;
+   typedef std::map<xbrPointOfInterest,xbrMomentRatingArtifact> MomentRatings;
+   typedef std::map<xbrPointOfInterest,xbrShearRatingArtifact>  ShearRatings;
+   typedef std::map<xbrPointOfInterest,xbrYieldStressRatioArtifact> YieldStressRatios;
 
    xbrRatingArtifact();
    xbrRatingArtifact(const xbrRatingArtifact& rOther);
@@ -72,6 +73,7 @@ public:
 
    Float64 GetMomentRatingFactor(bool bPositiveMoment) const;
    Float64 GetMomentRatingFactorEx(bool bPositiveMoment,const xbrMomentRatingArtifact** ppArtifact) const;
+   const xbrMomentRatingArtifact* GetMomentRatingArtifact(const xbrPointOfInterest& poi,bool bPositiveMoment) const;
 
    Float64 GetShearRatingFactor() const;
    Float64 GetShearRatingFactorEx(const xbrShearRatingArtifact** ppArtifact) const;

@@ -35,6 +35,7 @@ typedef struct MomentCapacityDetails
    Float64 Mn; // nominal capacity
    Float64 Mr; // nominal resistance (phi*Mn)
    CComPtr<IRCSolutionEx> solution;
+   //CComPtr<IMomentCapacitySolution> solution;
 } MomentCapacityDetails;
 
 
@@ -60,6 +61,13 @@ typedef struct MinMomentCapacityDetails
    Float64 MrMin2; // 1.33Mu
    Float64 Mu;
 } MinMomentCapacityDetails;
+
+typedef struct CrackedSectionDetails
+{
+   Float64 c;   // distance from top of section to crack (crack depth)
+   Float64 Icr; // cracked section moment of inertia
+   CComPtr<ICrackedSectionSolution> CrackedSectionSolution;
+} CrackedSectionDetails;
 
 
 /*****************************************************************************
@@ -100,6 +108,22 @@ DEFINE_GUID(IID_IXBRShearCapacity,
 interface IXBRShearCapacity : IUnknown
 {
    virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi) = 0;
+};
+
+/*****************************************************************************
+INTERFACE
+   IXBRCrackedSection
+
+DESCRIPTION
+   Interface for getting cracked section information
+*****************************************************************************/
+// {20128EE2-B293-49dc-A335-DA01574AC2A8}
+DEFINE_GUID(IID_IXBRCrackedSection, 
+0x20128ee2, 0xb293, 0x49dc, 0xa3, 0x35, 0xda, 0x1, 0x57, 0x4a, 0xc2, 0xa8);
+interface IXBRCrackedSection : IUnknown
+{
+   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
 };
 
 /*****************************************************************************

@@ -94,6 +94,8 @@ interface IXBRSectionProperties : public IUnknown
    virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
    virtual Float64 GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 
@@ -111,6 +113,7 @@ DEFINE_GUID(IID_IXBRMaterial,
 interface IXBRMaterial : public IUnknown
 {
    virtual Float64 GetXBeamDensity(PierIDType pierID) = 0;
+   virtual Float64 GetXBeamFc(PierIDType pierID) = 0;
    virtual Float64 GetXBeamEc(PierIDType pierID) = 0;
    virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID) = 0;
    virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx) = 0;

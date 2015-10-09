@@ -34,6 +34,9 @@
 #include "GraphViewChildFrame.h"
 #include "XBeamRateGraphView.h"
 
+#include "XBeamRateChildFrame.h"
+#include "XBeamRateView.h"
+
 #include "XBeamRateHints.h"
 
 #include "XBeamRateVersionInfoImpl.h"
@@ -397,6 +400,12 @@ void CXBeamRateDocProxyAgent::CreateGraphView(CollectionIndexType graphIdx)
    pViewReg->CreateView(m_GraphingViewKey,(LPVOID)&data);
 }
 
+void CXBeamRateDocProxyAgent::CreatePierView()
+{
+   GET_IFACE(IEAFViewRegistrar,pViewReg);
+   pViewReg->CreateView(m_PierViewKey);
+}
+
 /////////////////////////////////////////////////////////////////////
 void CXBeamRateDocProxyAgent::RegisterViews()
 {
@@ -413,8 +422,9 @@ void CXBeamRateDocProxyAgent::RegisterViews()
    // for the views below will register them. For example, the analysis results view is the
    // responsiblity of the analysis results agent, so that view's implementation will move
    GET_IFACE(IEAFViewRegistrar,pViewReg);
-   m_ReportViewKey    = pViewReg->RegisterView(IDR_REPORT,   NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
-   m_GraphingViewKey  = pViewReg->RegisterView(IDR_GRAPHING, NULL, RUNTIME_CLASS(CGraphViewChildFrame),  RUNTIME_CLASS(CXBeamRateGraphView),  hMenu, -1); // unlimited number of reports
+   m_ReportViewKey    = pViewReg->RegisterView(IDR_REPORT,    NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
+   m_GraphingViewKey  = pViewReg->RegisterView(IDR_GRAPHING,  NULL, RUNTIME_CLASS(CGraphViewChildFrame),  RUNTIME_CLASS(CXBeamRateGraphView),  hMenu, -1); // unlimited number of reports
+   m_PierViewKey      = pViewReg->RegisterView(IDR_XBEAMRATE, NULL, RUNTIME_CLASS(CXBeamRateChildFrame),  RUNTIME_CLASS(CXBeamRateView),        hMenu, 1);
 }
 
 void CXBeamRateDocProxyAgent::UnregisterViews()
@@ -422,6 +432,7 @@ void CXBeamRateDocProxyAgent::UnregisterViews()
    GET_IFACE(IEAFViewRegistrar,pViewReg);
    pViewReg->RemoveView(m_ReportViewKey);
    pViewReg->RemoveView(m_GraphingViewKey);
+   pViewReg->RemoveView(m_PierViewKey);
 }
 
 void CXBeamRateDocProxyAgent::CreateToolBars()

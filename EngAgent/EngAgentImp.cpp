@@ -32,6 +32,9 @@
 #include <IFace\Pier.h>
 #include <IFace\AnalysisResults.h>
 
+#include <EAF\EAFDisplayUnits.h>
+#include <MFCTools\Format.h>
+
 #include <Units\SysUnits.h>
 
 #include "LoadRater.h"
@@ -58,6 +61,14 @@ CEngAgentImp::~CEngAgentImp()
 HRESULT CEngAgentImp::FinalConstruct()
 {
    CreateDataStructures();
+
+   HRESULT hr;
+   hr = m_MomentCapacitySolver.CoCreateInstance(CLSID_MomentCapacitySolver);
+   ATLASSERT(SUCCEEDED(hr));
+
+   hr = m_CrackedSectionSolver.CoCreateInstance(CLSID_NLSolver);
+   ATLASSERT(SUCCEEDED(hr));
+
    return S_OK;
 }
 
@@ -80,6 +91,7 @@ STDMETHODIMP CEngAgentImp::RegInterfaces()
 
    pBrokerInit->RegInterface( IID_IXBRMomentCapacity, this );
    pBrokerInit->RegInterface( IID_IXBRShearCapacity,  this );
+   pBrokerInit->RegInterface( IID_IXBRCrackedSection, this );
    pBrokerInit->RegInterface( IID_IXBRArtifact,       this );
 
    return S_OK;
@@ -244,6 +256,33 @@ MinMomentCapacityDetails CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pi
 }
 
 //////////////////////////////////////////////////////////////////////
+// IXBRCrackedSection
+Float64 CEngAgentImp::GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   const CrackedSectionDetails& details = GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment);
+   return details.Icr;
+}
+
+const CrackedSectionDetails& CEngAgentImp::GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   std::map<IDType,CrackedSectionDetails>* pDetails = (bPositiveMoment ? m_pPositiveMomentCrackedSection[stage].get() : m_pNegativeMomentCrackedSection[stage].get());
+   std::map<IDType,CrackedSectionDetails>::iterator found(pDetails->find(poi.GetID()));
+   if ( found != pDetails->end() )
+   {
+      return found->second;
+   }
+
+   CrackedSectionDetails details = ComputeCrackedSectionProperties(pierID,stage,poi,bPositiveMoment);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,CrackedSectionDetails>::iterator,bool> result = pDetails->insert(std::make_pair(poi.GetID(),details));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,CrackedSectionDetails>::iterator iter = result.first;
+   return iter->second;
+}
+
+//////////////////////////////////////////////////////////////////////
 // IXBRShearCapacity
 Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi)
 {
@@ -318,87 +357,11 @@ HRESULT CEngAgentImp::OnProjectChanged()
 MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
    CComPtr<IRCBeam2> rcBeam;
-   HRESULT hr = rcBeam.CoCreateInstance(CLSID_RCBeam2);
-   ATLASSERT(SUCCEEDED(hr));
-
-   GET_IFACE(IXBRSectionProperties,pSectProps);
-   Float64 h = pSectProps->GetDepth(pierID,stage,poi);
-   rcBeam->put_h(h);
-   rcBeam->put_hf(0);
-
-   GET_IFACE(IXBRProject,pProject);
-   Float64 w = pProject->GetXBeamWidth(pierID);
-   rcBeam->put_b(w);
-   rcBeam->put_bw(w);
-
-   xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
-   Float64 d;
-   pProject->GetDiaphragmDimensions(pierID,&d,&w);
-
-   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
-   rcBeam->put_FcSlab(concrete.Fc);
-   rcBeam->put_FcBeam(concrete.Fc);
-
-#pragma Reminder("WORKING HERE - need rebar material for rc model")
-   // rebar could be grade 60, 80, 100, etc
-
-   Float64 dt = 0; // location of the extreme tension steel
-
-   GET_IFACE(IXBRRebar,pRebar);
-   IndexType nRows = pRebar->GetRebarRowCount(pierID);
-   for ( IndexType rowIdx = 0; rowIdx < nRows; rowIdx++ )
-   {
-      CComPtr<IRebarSection> rebarSection;
-      pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
-
-      CComPtr<IEnumRebarSectionItem> enumRebar;
-      rebarSection->get__EnumRebarSectionItem(&enumRebar);
-
-      CComPtr<IRebarSectionItem> rebarSectionItem;
-      while ( enumRebar->Next(1,&rebarSectionItem,NULL) != S_FALSE )
-      {
-         CComPtr<IPoint2d> pntRebar;
-         rebarSectionItem->get_Location(&pntRebar);
-
-         Float64 Ybar;
-         pntRebar->get_Y(&Ybar);
-         ATLASSERT(Ybar < 0); // bars are in section coordinates so they should be below the X-axis
-
-         Ybar *= -1; // Ybar is now measured from the top down with Y being positive downwards
-
-         // if continous or expansion pier, the upper cross beam doesn't contribute
-         // to capacity. but the rebar are measured from the top down of the entire
-         // section. deduct the height of the upper cross beam to get the depth of
-         // the rebar relative to the top of the lower cross beam
-         if ( connectionType != xbrTypes::pctIntegral )
-         {
-            Ybar -= d;
-         }
-
-         if ( !bPositiveMoment )
-         {
-            Ybar = h - Ybar; // Ybar is measured from the bottom up for negative moment
-         }
-
-         dt = Max(dt,Ybar);
-
-         CComPtr<IRebar> rebar;
-         rebarSectionItem->get_Rebar(&rebar);
-
-         Float64 As;
-         rebar->get_NominalArea(&As);
-
-         Float64 devFactor = pRebar->GetDevLengthFactor(pierID,poi,rebarSectionItem);
-         ATLASSERT(::InRange(0.0,devFactor,1.0));
-         rcBeam->AddRebarLayer(Ybar,As,devFactor);
-
-         rebarSectionItem.Release();
-      }
-   }
-
+   Float64 dt;
+   BuildMomentCapacityModel(pierID,stage,poi,bPositiveMoment,&rcBeam,&dt);
 
    CComPtr<IRCSolver2> solver;
-   hr = solver.CoCreateInstance(CLSID_LRFDSolver2);
+   HRESULT hr = solver.CoCreateInstance(CLSID_LRFDSolver2);
    ATLASSERT(SUCCEEDED(hr));
 
    CComPtr<IRCSolutionEx> solution;
@@ -422,6 +385,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 
       matRebar::Type rebarType;
       matRebar::Grade rebarGrade;
+      GET_IFACE(IXBRProject,pProject);
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
       Float64 et = (dt - c)*0.003/c;
@@ -650,6 +614,132 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    return MminDetails;
 }
 
+CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+{
+   CrackedSectionDetails csd;
+
+   CComPtr<IRCBeam2> rcBeam;
+   Float64 dt;
+   BuildMomentCapacityModel(pierID,stage,poi,bPositiveMoment,&rcBeam,&dt);
+
+   CComQIPtr<INLSolver> solver(m_CrackedSectionSolver);
+   solver->put_Slices(1);
+
+   CComPtr<ICrackedSectionSolution> solution;
+   HRESULT hr = m_CrackedSectionSolver->Solve(rcBeam,&solution); 
+   ATLASSERT(SUCCEEDED(hr));
+
+   csd.CrackedSectionSolution = solution;
+  
+   ///////////////////////////////////////////
+   // Compute I-crack
+   ///////////////////////////////////////////
+   CComPtr<IElasticProperties> elastic_properties;
+   solution->get_ElasticProperties(&elastic_properties);
+
+   // transform properties into girder matieral
+   GET_IFACE(IXBRMaterial,pMaterials);
+   Float64 Eg = pMaterials->GetXBeamEc(pierID);
+
+   CComPtr<IShapeProperties> shape_properties;
+   elastic_properties->TransformProperties(Eg,&shape_properties);
+
+   // Icrack for girder
+   Float64 Icr;
+   shape_properties->get_Ixx(&Icr);
+   csd.Icr = Icr;
+
+   // distance from top of section to the cracked centroid
+   Float64 c;
+   shape_properties->get_Ytop(&c);
+   csd.c = c;
+
+   return csd;
+}
+
+void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,IRCBeam2** ppModel,Float64* pdt)
+{
+   CComPtr<IRCBeam2> rcBeam;
+   HRESULT hr = rcBeam.CoCreateInstance(CLSID_RCBeam2);
+   ATLASSERT(SUCCEEDED(hr));
+
+   GET_IFACE(IXBRSectionProperties,pSectProps);
+   Float64 h = pSectProps->GetDepth(pierID,stage,poi);
+   rcBeam->put_h(h);
+   rcBeam->put_hf(0);
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 w = pProject->GetXBeamWidth(pierID);
+   rcBeam->put_b(w);
+   rcBeam->put_bw(w);
+
+   xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
+   Float64 d;
+   pProject->GetDiaphragmDimensions(pierID,&d,&w);
+
+   GET_IFACE(IXBRMaterial,pMaterial);
+   Float64 fc = pMaterial->GetXBeamFc(pierID);
+   rcBeam->put_FcSlab(fc);
+   rcBeam->put_FcBeam(fc);
+
+   Float64 E, fy, fu;
+   pMaterial->GetRebarProperties(pierID,&E,&fy,&fu);
+   rcBeam->put_fy(fy);
+
+   Float64 dt = 0; // location of the extreme tension steel
+
+   GET_IFACE(IXBRRebar,pRebar);
+   CComPtr<IRebarSection> rebarSection;
+   pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
+
+   CComPtr<IEnumRebarSectionItem> enumRebar;
+   rebarSection->get__EnumRebarSectionItem(&enumRebar);
+
+   CComPtr<IRebarSectionItem> rebarSectionItem;
+   while ( enumRebar->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+   {
+      CComPtr<IPoint2d> pntRebar;
+      rebarSectionItem->get_Location(&pntRebar);
+
+      Float64 Ybar;
+      pntRebar->get_Y(&Ybar);
+      ATLASSERT(Ybar < 0); // bars are in section coordinates so they should be below the X-axis
+
+      Ybar *= -1; // Ybar is now measured from the top down with Y being positive downwards
+
+      // if continous or expansion pier, the upper cross beam doesn't contribute
+      // to capacity. but the rebar are measured from the top down of the entire
+      // section. deduct the height of the upper cross beam to get the depth of
+      // the rebar relative to the top of the lower cross beam
+      if ( connectionType != xbrTypes::pctIntegral )
+      {
+         Ybar -= d;
+      }
+
+      if ( !bPositiveMoment )
+      {
+         Ybar = h - Ybar; // Ybar is measured from the bottom up for negative moment
+      }
+
+      dt = Max(dt,Ybar);
+
+      CComPtr<IRebar> rebar;
+      rebarSectionItem->get_Rebar(&rebar);
+
+      Float64 As;
+      rebar->get_NominalArea(&As);
+
+      Float64 devFactor = pRebar->GetDevLengthFactor(pierID,poi,rebarSectionItem);
+      ATLASSERT(::InRange(0.0,devFactor,1.0));
+      rcBeam->AddRebarLayer(Ybar,As,devFactor);
+
+      rebarSectionItem.Release();
+   }
+
+   rcBeam.CopyTo(ppModel);
+   *pdt = dt;
+}
+
 Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
@@ -783,6 +873,9 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
 
       pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
       pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
+
+      pDataStructures->m_pPositiveMomentCrackedSection[i] = m_pPositiveMomentCrackedSection[i].release();
+      pDataStructures->m_pNegativeMomentCrackedSection[i] = m_pNegativeMomentCrackedSection[i].release();
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -831,6 +924,9 @@ void CEngAgentImp::CreateDataStructures()
 
       m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
       m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+
+      m_pPositiveMomentCrackedSection[i] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pNegativeMomentCrackedSection[i] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -868,6 +964,10 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
 
       delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
       delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
+
+      delete pDataStructures->m_pPositiveMomentCrackedSection[i];
+      delete pDataStructures->m_pNegativeMomentCrackedSection[i];
+
    }
 
    for ( int i = 0; i < 6; i++ )

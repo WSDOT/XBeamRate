@@ -132,6 +132,8 @@ public:
    virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual Float64 GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
@@ -140,6 +142,7 @@ public:
 // IXBRMaterial
 public:
    virtual Float64 GetXBeamDensity(PierIDType pierID);
+   virtual Float64 GetXBeamFc(PierIDType pierID);
    virtual Float64 GetXBeamEc(PierIDType pierID);
    virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID);
    virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx);

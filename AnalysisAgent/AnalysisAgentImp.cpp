@@ -2182,7 +2182,7 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
                   // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
 
                   Float64 Xcenter = (Xleft-XcurbLine + Xright-XcurbLine)/2; // center of lane from left curb line
-                  IndexType singleLaneStepIdx = (IndexType)floor((Xcenter - wLoadedLane/2)/stepSize);
+                  IndexType singleLaneStepIdx = IsZero(stepSize) ? 0 : (IndexType)floor((Xcenter - wLoadedLane/2)/stepSize);
                   std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
                   ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
                   laneConfig.m_SingleLaneLoadCaseID = found->second;
