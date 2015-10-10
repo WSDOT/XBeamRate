@@ -132,6 +132,7 @@ BEGIN
         BEGIN
             MENUITEM "This is a placeholder",       ID_REPORTS_THISISAPLACEHOLDER
         END
+        MENUITEM "View Pier",                   ID_VIEW_PIER
     END
     POPUP "&Window"
     BEGIN
