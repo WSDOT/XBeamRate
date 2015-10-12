@@ -34,8 +34,8 @@ typedef struct MomentCapacityDetails
    Float64 phi; // capacity reduction factor
    Float64 Mn; // nominal capacity
    Float64 Mr; // nominal resistance (phi*Mn)
+   CComPtr<IRCBeam2> rcBeam; // need this for cracked section analysis, so cache it here
    CComPtr<IRCSolutionEx> solution;
-   //CComPtr<IMomentCapacitySolution> solution;
 } MomentCapacityDetails;
 
 

@@ -457,6 +457,8 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    ATLASSERT(::IsPermitRatingType(ratingType));
 
    pgsTypes::LimitState ls = ::GetServiceLimitStateType(ratingType);
+   ATLASSERT(::IsServiceLimitState(ls));
+
    xbrTypes::Stage stage = xbrTypes::Stage2;
 
    GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
@@ -504,6 +506,9 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    for ( CollectionIndexType i = 0; i < nPOI; i++ )
    {
       const xbrPointOfInterest& poi = vPoi[i];
+
+      // assume yield stress ratio is minimized for the controlling flexure rating at this location
+      // this also gives us accees to Mlegal and Mpermit for the controlling case (WSDOT method)
       const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);
 
       CString strProgress;
@@ -514,6 +519,8 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
 
 
       const CrackingMomentDetails& crackingMomentDetails = pMomentCapacity->GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
+
+      // NOTE: need cracked section for permanent and transient loads
       const CrackedSectionDetails& crackedSectionDetails = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment);
 
 
@@ -542,6 +549,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
          LLIM = Mpermit + Mlegal;
       }
 
+      // NOTE: not sure if we need to do this part of the analysis (rebar stress)
       Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
       Float64 Es, fy, fu;
@@ -599,8 +607,10 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
          fs = (Es/Exbm)*fabs(Mcr)*y/I;
       }
 
+      // NOTE: stresses are computed in artifact (Es/Exbr)(M)c/Icr use 2n for permanet load stresses
       xbrYieldStressRatioArtifact stressRatioArtifact;
       stressRatioArtifact.SetRatingType(ratingType);
+      stressRatioArtifact.SetPermitRatingMethod(pMomentRatingArtifact->GetPermitRatingMethod());
       stressRatioArtifact.SetPointOfInterest(poi);
       stressRatioArtifact.SetVehicleIndex(pMomentRatingArtifact->GetVehicleIndex());
       stressRatioArtifact.SetVehicleWeight(pMomentRatingArtifact->GetVehicleWeight());
@@ -619,12 +629,12 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       stressRatioArtifact.SetSecondaryEffectsFactor(gPS);
       stressRatioArtifact.SetSecondaryEffectsMoment(PS);
       stressRatioArtifact.SetLiveLoadFactor(gLL);
-      stressRatioArtifact.SetLiveLoadMoment(LLIM);
-      stressRatioArtifact.SetCrackingMoment(Mcr);
+      stressRatioArtifact.SetLiveLoadMoment(LLIM); // need Mp and Ml for WSDOT method
+      stressRatioArtifact.SetCrackingMoment(Mcr); // Don't need this
       stressRatioArtifact.SetIcr(Icr);
-      stressRatioArtifact.SetCrackDepth(c);
+      stressRatioArtifact.SetCrackDepth(c); // distance from compression face to cracked centroid
       stressRatioArtifact.SetEg(Exbm);
-      stressRatioArtifact.SetRebar(ds,fs,fy,Es);
+      stressRatioArtifact.SetRebar(ds,fs,fy,Es); // Don't need fs
       ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
    } // next poi
 }

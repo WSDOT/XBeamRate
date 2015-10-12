@@ -42,6 +42,7 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
    m_fcrRebar = 0;
 
    m_RatingType = pgsTypes::lrDesign_Inventory;
+   m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
    m_VehicleIndex = INVALID_INDEX;
    m_VehicleWeight = -9999999;
@@ -97,6 +98,7 @@ xbrYieldStressRatioArtifact& xbrYieldStressRatioArtifact::operator=(const xbrYie
 void xbrYieldStressRatioArtifact::SetPointOfInterest(const xbrPointOfInterest& poi)
 {
    m_POI = poi;
+   m_bRFComputed = false;
 }
 
 const xbrPointOfInterest& xbrYieldStressRatioArtifact::GetPointOfInterest() const
@@ -107,6 +109,7 @@ const xbrPointOfInterest& xbrYieldStressRatioArtifact::GetPointOfInterest() cons
 void xbrYieldStressRatioArtifact::SetRatingType(pgsTypes::LoadRatingType ratingType)
 {
    m_RatingType = ratingType;
+   m_bRFComputed = false;
 }
 
 pgsTypes::LoadRatingType xbrYieldStressRatioArtifact::GetLoadRatingType() const
@@ -114,9 +117,21 @@ pgsTypes::LoadRatingType xbrYieldStressRatioArtifact::GetLoadRatingType() const
    return m_RatingType;
 }
 
+void xbrYieldStressRatioArtifact::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
+{
+   m_PermitRatingMethod = permitRatingMethod;
+   m_bRFComputed = false;
+}
+
+xbrTypes::PermitRatingMethod xbrYieldStressRatioArtifact::GetPermitRatingMethod() const
+{
+   return m_PermitRatingMethod;
+}
+
 void xbrYieldStressRatioArtifact::SetVehicleIndex(VehicleIndexType vehicleIdx)
 {
    m_VehicleIndex = vehicleIdx;
+   m_bRFComputed = false;
 }
 
 VehicleIndexType xbrYieldStressRatioArtifact::GetVehicleIndex() const
@@ -127,6 +142,7 @@ VehicleIndexType xbrYieldStressRatioArtifact::GetVehicleIndex() const
 void xbrYieldStressRatioArtifact::SetVehicleWeight(Float64 W)
 {
    m_VehicleWeight = W;
+   m_bRFComputed = false;
 }
 
 Float64 xbrYieldStressRatioArtifact::GetVehicleWeight() const
@@ -137,6 +153,7 @@ Float64 xbrYieldStressRatioArtifact::GetVehicleWeight() const
 void xbrYieldStressRatioArtifact::SetVehicleName(LPCTSTR str)
 {
    m_strVehicleName = str;
+   m_bRFComputed = false;
 }
 
 std::_tstring xbrYieldStressRatioArtifact::GetVehicleName() const
@@ -373,6 +390,10 @@ Float64 xbrYieldStressRatioArtifact::GetEg() const
 
 Float64 xbrYieldStressRatioArtifact::GetExcessMoment() const
 {
+////////////////////////////
+// NOTE: DON'T NEED THIS
+////////////////////////////
+
    Float64 M = m_gDC*m_Mdc + m_gDW*m_Mdw + m_gCR*m_Mcr + m_gSH*m_Msh + m_gRE*m_Mre + m_gPS*m_Mps + m_gLL*m_Mllim;
    // NOTE: m_Mllim includes the LLDF... don't include m_gM here
 
@@ -404,6 +425,9 @@ Float64 xbrYieldStressRatioArtifact::GetExcessMoment() const
 
 Float64 xbrYieldStressRatioArtifact::GetRebarCrackingStressIncrement() const
 {
+////////////////////////////
+// NOTE: DON'T NEED THIS
+////////////////////////////
    ComputeStressRatios();
    return m_fcrRebar;
 }
@@ -416,6 +440,9 @@ Float64 xbrYieldStressRatioArtifact::GetRebarStress() const
 
 Float64 xbrYieldStressRatioArtifact::GetRebarStressRatio() const
 {
+////////////////////////////
+// NOTE: DON'T NEED THIS - use GetStressRatio only
+////////////////////////////
    ComputeStressRatios();
    return m_RebarRF;
 }
@@ -434,6 +461,7 @@ void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rO
 {
    m_POI            = rOther.m_POI;
    m_RatingType     = rOther.m_RatingType;
+   m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
    m_VehicleIndex   = rOther.m_VehicleIndex;
    m_bRFComputed    = rOther.m_bRFComputed;
    m_VehicleWeight  = rOther.m_VehicleWeight;
@@ -496,7 +524,10 @@ void xbrYieldStressRatioArtifact::ComputeStressRatios() const
 void xbrYieldStressRatioArtifact::ComputeStressRatio(Float64 d,Float64 E,Float64 fbcr,Float64 fy,Float64* pfcr,Float64* pfs,Float64* pRF) const
 {
    // moment in excess of cracking
-   Float64 M = GetExcessMoment();
+   Float64 M = GetExcessMoment(); // NOTE: don't need this
+
+   // for permanet loads use (E/(2*m_Eg))
+   // compute stresses and then put in the normal rating equation (or the wsdot equation)
 
    Float64 fcr = (E/m_Eg)*fabs(M)*(d-m_c)/m_Icrack; // stress added to strand at instance of cracking
    Float64 fs = fbcr + fcr; // total stress in strand just after cracking

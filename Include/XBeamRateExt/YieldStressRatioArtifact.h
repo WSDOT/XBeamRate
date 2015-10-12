@@ -60,6 +60,9 @@ public:
    void SetRatingType(pgsTypes::LoadRatingType ratingType);
    pgsTypes::LoadRatingType GetLoadRatingType() const;
 
+   void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod);
+   xbrTypes::PermitRatingMethod GetPermitRatingMethod() const;
+
    void SetVehicleIndex(VehicleIndexType vehicleIdx);
    VehicleIndexType GetVehicleIndex() const;
 
@@ -153,6 +156,7 @@ protected:
    xbrPointOfInterest m_POI;
 
    pgsTypes::LoadRatingType m_RatingType;
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
    VehicleIndexType m_VehicleIndex;
    Float64 m_VehicleWeight;

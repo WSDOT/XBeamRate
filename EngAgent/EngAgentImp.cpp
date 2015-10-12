@@ -72,6 +72,11 @@ HRESULT CEngAgentImp::FinalConstruct()
    hr = m_CrackedSectionSolver.CoCreateInstance(CLSID_NLSolver);
    ATLASSERT(SUCCEEDED(hr));
 
+   // use only one slice for cracked section analysis
+   CComQIPtr<INLSolver> solver(m_CrackedSectionSolver);
+   solver->put_Slices(1);
+
+
    return S_OK;
 }
 
@@ -411,7 +416,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
    }
 
    MomentCapacityDetails capacityDetails;
-   //capacityDetails.rcBeam = rcBeam;
+   capacityDetails.rcBeam = rcBeam;
    capacityDetails.solution = solution;
    capacityDetails.dc = dc;
    capacityDetails.de = de;
@@ -619,17 +624,15 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
 CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
 {
+#pragma Reminder("WORKING HERE - cracked section analysis")
+   // getting capacity problem from moment capacity details... this is only good for the transient load case
+   // need to build a new section for the permanent load case using E/2 for concrete E (equal to a modular ratio of 2n)
+   const MomentCapacityDetails& mcd = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
+
    CrackedSectionDetails csd;
 
-   CComPtr<IRCBeam2> rcBeam;
-   Float64 dt;
-   BuildMomentCapacityModel(pierID,stage,poi,bPositiveMoment,&rcBeam,&dt);
-
-   CComQIPtr<INLSolver> solver(m_CrackedSectionSolver);
-   solver->put_Slices(1);
-
    CComPtr<ICrackedSectionSolution> solution;
-   HRESULT hr = m_CrackedSectionSolver->Solve(rcBeam,&solution); 
+   HRESULT hr = m_CrackedSectionSolver->Solve(mcd.rcBeam,&solution); 
    ATLASSERT(SUCCEEDED(hr));
 
    csd.CrackedSectionSolution = solution;
@@ -652,7 +655,7 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
    shape_properties->get_Ixx(&Icr);
    csd.Icr = Icr;
 
-   // distance from top of section to the cracked centroid
+   // distance from compression face to the cracked centroid
    Float64 c;
    shape_properties->get_Ytop(&c);
    csd.c = c;
@@ -737,6 +740,10 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
 
       if ( !bPositiveMoment )
       {
+         // for negative moment we have to build the section "upside down"
+         // since the solver only solves for bending in one direction (compression top - tension bottom)
+         // for neg moment, compression and tension faces are reversed so we put the top rebar
+         // at the bottom and the bottom rebar at the top for negative moment capacity.
          Ybar = h - Ybar; // Ybar is measured from the bottom up for negative moment
       }
 
