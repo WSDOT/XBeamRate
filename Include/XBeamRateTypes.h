@@ -99,4 +99,11 @@ typedef struct xbrTypes
       prmWSDOT   // use WSDOT BDM Equation 13.1.1A-2
    } PermitRatingMethod;
 
+   typedef enum LoadType
+   {
+      ltPermanent, // permanent loads 
+      ltTransient  // transient loads
+      // used for cracked section properties (See LRFD 5.7.1 and MBE example in appendix A2)
+   } LoadType;
+
 } xbrTypes;

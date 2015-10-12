@@ -25,6 +25,8 @@
 #include "EngAgent.h"
 #include "EngAgentImp.h"
 
+#include "CrackedSectionStressStrainModel.h"
+
 #include <XBeamRateExt\PointOfInterest.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <IFace\Project.h>
@@ -265,22 +267,22 @@ MinMomentCapacityDetails CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pi
 
 //////////////////////////////////////////////////////////////////////
 // IXBRCrackedSection
-Float64 CEngAgentImp::GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+Float64 CEngAgentImp::GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType)
 {
-   const CrackedSectionDetails& details = GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment);
+   const CrackedSectionDetails& details = GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,loadType);
    return details.Icr;
 }
 
-const CrackedSectionDetails& CEngAgentImp::GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+const CrackedSectionDetails& CEngAgentImp::GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType)
 {
-   std::map<IDType,CrackedSectionDetails>* pDetails = (bPositiveMoment ? m_pPositiveMomentCrackedSection[stage].get() : m_pNegativeMomentCrackedSection[stage].get());
+   std::map<IDType,CrackedSectionDetails>* pDetails = (bPositiveMoment ? m_pPositiveMomentCrackedSection[stage][loadType].get() : m_pNegativeMomentCrackedSection[stage][loadType].get());
    std::map<IDType,CrackedSectionDetails>::iterator found(pDetails->find(poi.GetID()));
    if ( found != pDetails->end() )
    {
       return found->second;
    }
 
-   CrackedSectionDetails details = ComputeCrackedSectionProperties(pierID,stage,poi,bPositiveMoment);
+   CrackedSectionDetails details = ComputeCrackedSectionProperties(pierID,stage,poi,bPositiveMoment,loadType);
    ATLASSERT(poi.GetID() != INVALID_ID);
 
    std::pair<std::map<IDType,CrackedSectionDetails>::iterator,bool> result = pDetails->insert(std::make_pair(poi.GetID(),details));
@@ -622,19 +624,57 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    return MminDetails;
 }
 
-CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment)
+CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType)
 {
-#pragma Reminder("WORKING HERE - cracked section analysis")
-   // getting capacity problem from moment capacity details... this is only good for the transient load case
-   // need to build a new section for the permanent load case using E/2 for concrete E (equal to a modular ratio of 2n)
+   GET_IFACE(IXBRMaterial,pMaterial);
+
+   Float64 Ec = pMaterial->GetXBeamEc(pierID);
+
+   Float64 Es, fy, fu;
+   pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
+
+   Float64 n = ::Round(Es/Ec); // modular ratio is rounded to nearest integer (LRFD 5.7.1)
+   if ( loadType == xbrTypes::ltPermanent )
+   {
+      n *= 2; // use 2n for permanent loads (LRFD 5.7.1)
+   }
+
+   // The cracked section solver is going to use whatever Eb and Ec we give to it.
+   // We have to manipulate Ec so that the solver uses the correct modular ratio
+   // (The solver computes y = Sum(EAy)/Sum(EA) = (Ec*Ac*Yc + Eb*Ab*Yb)/(Ec*Ac + Eb*Ab)
+   // Below, use Ec to transform the elastic properties to transformed section properties
+   // and this is where the modular ratio comes into play. We have to alter Ec here
+   // so that when we divide through by Ec below (for TransformedProperties), Ec/Ec = 1
+   // and Es/Ec = 2
+   Ec = Es/n;
+
+
+   // The cracked section solver only uses the modulus of elasticity part of the
+   // the IStressStrain object. We have a special implementation for the exact purpose.
+   CComObject<CCrackedSectionStressStrainModel>* pSSModel;
+   CComObject<CCrackedSectionStressStrainModel>::CreateInstance(&pSSModel);
+   pSSModel->SetXBeamModE(Ec);
+
+   CComPtr<IStressStrain> ss;
+   pSSModel->QueryInterface(&ss);
+
+   // tell the solver to use our special stress/strain model for the beam and slab concrete
+   CComQIPtr<INLSolver> solver(m_CrackedSectionSolver);
+   solver->putref_SlabConcreteModel(ss);
+   solver->putref_BeamConcreteModel(ss);
+
+
+   // The "Capacity Problem" is the same as we used for moment capacity analysis.
+   // Get it from the cache
    const MomentCapacityDetails& mcd = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
 
-   CrackedSectionDetails csd;
-
+   // solver the cracked section problem
    CComPtr<ICrackedSectionSolution> solution;
    HRESULT hr = m_CrackedSectionSolver->Solve(mcd.rcBeam,&solution); 
    ATLASSERT(SUCCEEDED(hr));
 
+   CrackedSectionDetails csd;
+   csd.n = n;
    csd.CrackedSectionSolution = solution;
   
    ///////////////////////////////////////////
@@ -643,12 +683,9 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
    CComPtr<IElasticProperties> elastic_properties;
    solution->get_ElasticProperties(&elastic_properties);
 
-   // transform properties into girder matieral
-   GET_IFACE(IXBRMaterial,pMaterials);
-   Float64 Eg = pMaterials->GetXBeamEc(pierID);
-
+   // transform properties into concrete matieral
    CComPtr<IShapeProperties> shape_properties;
-   elastic_properties->TransformProperties(Eg,&shape_properties);
+   elastic_properties->TransformProperties(Ec,&shape_properties);
 
    // Icrack for girder
    Float64 Icr;
@@ -704,9 +741,10 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
       rcBeam->put_FcSlab(fcSlab);
    }
 
-   Float64 E, fy, fu;
-   pMaterial->GetRebarProperties(pierID,&E,&fy,&fu);
+   Float64 Es, fy, fu;
+   pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
    rcBeam->put_fy(fy);
+   rcBeam->put_Es(Es);
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
@@ -900,8 +938,11 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
       pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
       pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)].release();
 
-      pDataStructures->m_pPositiveMomentCrackedSection[i] = m_pPositiveMomentCrackedSection[i].release();
-      pDataStructures->m_pNegativeMomentCrackedSection[i] = m_pNegativeMomentCrackedSection[i].release();
+      pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent] = m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent].release();
+      pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent] = m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent].release();
+
+      pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient].release();
+      pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient].release();
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -951,8 +992,11 @@ void CEngAgentImp::CreateDataStructures()
       m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
       m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
 
-      m_pPositiveMomentCrackedSection[i] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
-      m_pNegativeMomentCrackedSection[i] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+
+      m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -991,9 +1035,11 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
       delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
       delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)];
 
-      delete pDataStructures->m_pPositiveMomentCrackedSection[i];
-      delete pDataStructures->m_pNegativeMomentCrackedSection[i];
+      delete pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent];
+      delete pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent];
 
+      delete pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient];
+      delete pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient];
    }
 
    for ( int i = 0; i < 6; i++ )

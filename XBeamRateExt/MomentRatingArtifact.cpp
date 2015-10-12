@@ -428,7 +428,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
             {
                Float64 rf;
 
-               Float64 Mpermit, Mlegal;
+               Float64 Mpermit, Mlegal; // Moments include multiple presence factor
                pAnalysisResults->GetMoment(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
 
                // Mininum reinforcement is a function of Mu... for the WSDOT Permit rating method, we need to compute it

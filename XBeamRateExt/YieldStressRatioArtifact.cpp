@@ -37,10 +37,6 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
 {
    m_bRFComputed = false;
 
-   m_RebarRF = 0;
-   m_fsRebar = 0;
-   m_fcrRebar = 0;
-
    m_RatingType = pgsTypes::lrDesign_Inventory;
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
@@ -56,10 +52,7 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
    m_Mre = 0;
    m_Mps = 0;
    m_Mllim = 0;
-   m_Mcrack = 0;
-   m_Icrack = 0;
-   m_c = 0;
-   m_Eg = 0;
+   m_MllimAdj = 0;
    m_gDC = 1.0;
    m_gDW = 1.0;
    m_gCR = 1.0;
@@ -68,12 +61,16 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
    m_gPS = 1.0;
    m_gLL = 1.0;
 
+   m_Icr[xbrTypes::ltPermanent] = 99999;
+   m_c[xbrTypes::ltPermanent] = 99999;
+   m_n[xbrTypes::ltPermanent] = 99999;
 
-   m_bRebar = false;
-   m_db = 0;
-   m_fb = 0;
-   m_fyb = 0;
-   m_Eb = 0;
+   m_Icr[xbrTypes::ltTransient] = 99999;
+   m_c[xbrTypes::ltTransient] = 99999;
+   m_n[xbrTypes::ltTransient] = 99999;
+
+   m_fy = 0;
+   m_Ybar = 0;
 }
 
 xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact(const xbrYieldStressRatioArtifact& rOther)
@@ -325,136 +322,140 @@ Float64 xbrYieldStressRatioArtifact::GetLiveLoadMoment() const
 {
    return m_Mllim;
 }
-
-void xbrYieldStressRatioArtifact::SetCrackingMoment(Float64 Mcr)
+   
+void xbrYieldStressRatioArtifact::SetAdjLiveLoadMoment(Float64 Mllim)
 {
-   m_Mcrack = Mcr;
+   m_MllimAdj = Mllim;
    m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetCrackingMoment() const
+Float64 xbrYieldStressRatioArtifact::GetAdjLiveLoadMoment() const
 {
-   return m_Mcrack;
+   return m_MllimAdj;
 }
 
-void xbrYieldStressRatioArtifact::SetIcr(Float64 Icr)
+void xbrYieldStressRatioArtifact::SetIcr(xbrTypes::LoadType loadType,Float64 Icr)
 {
-   m_Icrack = Icr;
+   m_Icr[loadType] = Icr;
    m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetIcr() const
+Float64 xbrYieldStressRatioArtifact::GetIcr(xbrTypes::LoadType loadType) const
 {
-   return m_Icrack;
+   return m_Icr[loadType];
 }
 
-void xbrYieldStressRatioArtifact::SetCrackDepth(Float64 c)
+void xbrYieldStressRatioArtifact::SetCrackDepth(xbrTypes::LoadType loadType,Float64 c)
 {
-   m_c = c;
+   m_c[loadType] = c;
    m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetCrackDepth() const
+Float64 xbrYieldStressRatioArtifact::GetCrackDepth(xbrTypes::LoadType loadType) const
 {
-   return m_c;
+   return m_c[loadType];
 }
 
-void xbrYieldStressRatioArtifact::SetRebar(Float64 db,Float64 fb,Float64 fyb,Float64 Eb)
+void xbrYieldStressRatioArtifact::SetModularRatio(xbrTypes::LoadType loadType,Float64 n)
 {
-   m_db  = db;
-   m_fb  = fb;
-   m_fyb = fyb;
-   m_Eb  = Eb;
-   m_bRebar = true;
-}
-
-bool xbrYieldStressRatioArtifact::GetRebar(Float64* pdb, Float64* pfb,Float64* pfyb,Float64* pEb) const
-{
-   *pdb  = m_db;
-   *pfb  = m_fb;
-   *pfyb = m_fyb;
-   *pEb  = m_Eb;
-   return m_bRebar;
-}
-
-void xbrYieldStressRatioArtifact::SetEg(Float64 Eg)
-{
-   m_Eg = Eg;
+   m_n[loadType] = n;
    m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetEg() const
+Float64 xbrYieldStressRatioArtifact::GetModularRatio(xbrTypes::LoadType loadType) const
 {
-   return m_Eg;
+   return m_n[loadType];
 }
 
-Float64 xbrYieldStressRatioArtifact::GetExcessMoment() const
+void xbrYieldStressRatioArtifact::SetYbar(Float64 Ybar)
 {
-////////////////////////////
-// NOTE: DON'T NEED THIS
-////////////////////////////
-
-   Float64 M = m_gDC*m_Mdc + m_gDW*m_Mdw + m_gCR*m_Mcr + m_gSH*m_Msh + m_gRE*m_Mre + m_gPS*m_Mps + m_gLL*m_Mllim;
-   // NOTE: m_Mllim includes the LLDF... don't include m_gM here
-
-   if ( m_Mcrack < 0 )
-   {
-      // negative moment
-      if ( m_Mcrack < M )
-      {
-         return 0; // section isn't cracked
-      }
-      else
-      {
-         return M - m_Mcrack;
-      }
-   }
-   else
-   {
-      // positive moment
-      if ( M < m_Mcrack )
-      {
-         return 0; // section isn't cracked
-      }
-      else
-      {
-         return M - m_Mcrack;
-      }
-   }
+   m_Ybar = Ybar;
+   m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetRebarCrackingStressIncrement() const
+Float64 xbrYieldStressRatioArtifact::GetYbar() const
 {
-////////////////////////////
-// NOTE: DON'T NEED THIS
-////////////////////////////
-   ComputeStressRatios();
-   return m_fcrRebar;
+   return m_Ybar;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetRebarStress() const
+void xbrYieldStressRatioArtifact::SetYieldStrength(Float64 fy)
 {
-   ComputeStressRatios();
-   return m_fsRebar;
+   m_fy = fy;
+   m_bRFComputed = false;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetRebarStressRatio() const
+Float64 xbrYieldStressRatioArtifact::GetYieldStrength() const
 {
-////////////////////////////
-// NOTE: DON'T NEED THIS - use GetStressRatio only
-////////////////////////////
-   ComputeStressRatios();
-   return m_RebarRF;
+   return m_fy;
 }
 
-Float64 xbrYieldStressRatioArtifact::GetRebarAllowableStress() const
+Float64 xbrYieldStressRatioArtifact::GetAllowableStress() const
 {
-   return m_AllowableStressRatio*m_fyb;
+   return m_AllowableStressRatio*m_fy;
 }
 
 Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
 {
-   return GetRebarStressRatio();
+   // NOTE: Calculation procedure based on MBE A2A.13.2.2
+   if ( m_bRFComputed )
+   {
+      return m_StressRatio;
+   }
+
+   Float64 SR = -DBL_MAX;
+
+   if ( IsZero(m_Mllim) || IsZero(m_gLL) )
+   {
+      SR = DBL_MAX;
+   }
+   else
+   {
+      Float64 kp = (m_Ybar - m_c[xbrTypes::ltPermanent])/m_Icr[xbrTypes::ltPermanent];
+
+      Float64 fDC = m_gDC*m_Mdc*kp;
+      Float64 fDW = m_gDW*m_Mdw*kp;
+      Float64 fCR = m_gCR*m_Mcr*kp;
+      Float64 fSH = m_gSH*m_Msh*kp;
+      Float64 fRE = m_gRE*m_Mre*kp;
+      Float64 fPS = m_gPS*m_Mps*kp;
+
+      Float64 kt = (m_Ybar - m_c[xbrTypes::ltTransient])/m_Icr[xbrTypes::ltTransient];
+
+      Float64 fLLIM = m_gLL*m_Mllim*kt;
+      Float64 fLLIM_Adj = m_gLL*m_MllimAdj*kt;
+
+      Float64 C = GetAllowableStress();
+
+      Float64 SRtop = C - fabs(m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS));
+
+      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+      {
+         SRtop -= fabs(m_n[xbrTypes::ltTransient]*fLLIM_Adj); // WSDOT BDM Eqn. 13.1.1A-2
+      }
+
+      Float64 SRbot = fabs(m_n[xbrTypes::ltTransient]*fLLIM);
+
+      if ( IsZero(C) || (0 < C && SRtop < 0) || (C < 0 && 0 < SRtop) )
+      {
+         // There isn't any capacity remaining for live load
+         SR = 0;
+      }
+      else if ( ::BinarySign(SRtop) != ::BinarySign(SRbot) && !IsZero(SRtop) )
+      {
+         // (C - DL) and LL have opposite signs
+         // this case probably shouldn't happen, but if does,
+         // the rating is great
+         SR = DBL_MAX;
+      }
+      else
+      {
+         SR = SRtop/SRbot;
+      }
+   }
+
+   m_StressRatio = SR;;
+   m_bRFComputed = true;
+   return m_StressRatio;
 }
 
 void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rOther)
@@ -464,12 +465,10 @@ void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rO
    m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
    m_VehicleIndex   = rOther.m_VehicleIndex;
    m_bRFComputed    = rOther.m_bRFComputed;
+   m_StressRatio    = rOther.m_StressRatio;
    m_VehicleWeight  = rOther.m_VehicleWeight;
    m_strVehicleName = rOther.m_strVehicleName;
-   m_RebarRF        = rOther.m_RebarRF;
    m_AllowableStressRatio = rOther.m_AllowableStressRatio;
-   m_fcrRebar       = rOther.m_fcrRebar;
-   m_fsRebar        = rOther.m_fsRebar;
    m_Mdc            = rOther.m_Mdc;
    m_Mdw            = rOther.m_Mdw;
    m_Mcr            = rOther.m_Mcr;
@@ -477,10 +476,7 @@ void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rO
    m_Mre            = rOther.m_Mre;
    m_Mps            = rOther.m_Mps;
    m_Mllim          = rOther.m_Mllim;
-   m_Mcrack         = rOther.m_Mcrack;
-   m_Icrack         = rOther.m_Icrack;
-   m_c              = rOther.m_c;
-   m_Eg             = rOther.m_Eg;
+   m_MllimAdj       = rOther.m_MllimAdj;
    m_gDC            = rOther.m_gDC;
    m_gDW            = rOther.m_gDW;
    m_gCR            = rOther.m_gCR;
@@ -489,59 +485,19 @@ void xbrYieldStressRatioArtifact::MakeCopy(const xbrYieldStressRatioArtifact& rO
    m_gPS            = rOther.m_gPS;
    m_gLL            = rOther.m_gLL;
 
-   m_bRebar = rOther.m_bRebar;
-   m_db     = rOther.m_db;
-   m_fb     = rOther.m_fb;
-   m_fyb    = rOther.m_fyb;
-   m_Eb     = rOther.m_Eb;
+   m_Icr[xbrTypes::ltPermanent] = rOther.m_Icr[xbrTypes::ltPermanent];
+   m_c[xbrTypes::ltPermanent]   = rOther.m_c[xbrTypes::ltPermanent];
+   m_n[xbrTypes::ltPermanent]   = rOther.m_n[xbrTypes::ltPermanent];
+
+   m_Icr[xbrTypes::ltTransient] = rOther.m_Icr[xbrTypes::ltTransient];
+   m_c[xbrTypes::ltTransient]   = rOther.m_c[xbrTypes::ltTransient];
+   m_n[xbrTypes::ltTransient]   = rOther.m_n[xbrTypes::ltTransient];
+
+   m_fy             = rOther.m_fy;
+   m_Ybar           = rOther.m_Ybar;
 }
 
 void xbrYieldStressRatioArtifact::MakeAssignment(const xbrYieldStressRatioArtifact& rOther)
 {
    MakeCopy( rOther );
-}
-
-
-void xbrYieldStressRatioArtifact::ComputeStressRatios() const
-{
-   if ( m_bRFComputed )
-   {
-      return;
-   }
-
-   if ( m_bRebar )
-   {
-      ComputeStressRatio(m_db,m_Eb,m_fb,m_fyb,&m_fcrRebar,&m_fsRebar,&m_RebarRF);
-   }
-   else
-   {
-      m_RebarRF = DBL_MAX;
-      m_fcrRebar = 0;
-      m_fsRebar = 0;
-   }
-}
-
-void xbrYieldStressRatioArtifact::ComputeStressRatio(Float64 d,Float64 E,Float64 fbcr,Float64 fy,Float64* pfcr,Float64* pfs,Float64* pRF) const
-{
-   // moment in excess of cracking
-   Float64 M = GetExcessMoment(); // NOTE: don't need this
-
-   // for permanet loads use (E/(2*m_Eg))
-   // compute stresses and then put in the normal rating equation (or the wsdot equation)
-
-   Float64 fcr = (E/m_Eg)*fabs(M)*(d-m_c)/m_Icrack; // stress added to strand at instance of cracking
-   Float64 fs = fbcr + fcr; // total stress in strand just after cracking
-   if ( IsLE(fs,0.0) )
-   {
-      *pRF = DBL_MAX;
-   }
-   else
-   {
-      *pRF = m_AllowableStressRatio*fy/fs;
-   }
-
-   ATLASSERT( 0 <= *pRF );
-
-   *pfcr = fcr;
-   *pfs = fs;
 }

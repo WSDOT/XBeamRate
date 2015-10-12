@@ -33,18 +33,6 @@
 
 #include <PGSuperUnits.h> // for FormatDimension
 
-//void special_transform(IBridge* pBridge,IPointOfInterest* pPoi,IIntervals* pIntervals,
-//                       std::vector<pgsPointOfInterest>::const_iterator poiBeginIter,
-//                       std::vector<pgsPointOfInterest>::const_iterator poiEndIter,
-//                       std::vector<Float64>::iterator forceBeginIter,
-//                       std::vector<Float64>::iterator resultBeginIter,
-//                       std::vector<Float64>::iterator outputBeginIter);
-//
-//bool AxleHasWeight(AxlePlacement& placement)
-//{
-//   return !IsZero(placement.Weight);
-//}
-
 xbrLoadRater::xbrLoadRater(IBroker* pBroker)
 {
    //CREATE_LOGFILE("LoadRating");
@@ -138,7 +126,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
       Float64 RE   = vRE[i];
       Float64 PS   = vPS[i];
 
-      Float64 LLIM     = (bPositiveMoment ? vLLIMmax[i] : vLLIMmin[i]); // Live load
+      Float64 LLIM     = (bPositiveMoment ? vLLIMmax[i] : vLLIMmin[i]); // Live load (includes mpf)
 
       CString strProgress;
       strProgress.Format(_T("Load rating %s for %s moment at %s"),
@@ -448,7 +436,6 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
 
 void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,bool bPositiveMoment,xbrRatingArtifact& ratingArtifact)
 {
-#pragma Reminder("WORKING HERE - reinforcement yielding")
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
@@ -461,7 +448,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
 
    xbrTypes::Stage stage = xbrTypes::Stage2;
 
-   GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
    GET_IFACE(IXBRCrackedSection,pCrackedSection);
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    GET_IFACE(IXBRProject,pProject);
@@ -478,28 +464,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    Float64 gRE = pProject->GetRELoadFactor(ls);
    Float64 gPS = pProject->GetPSLoadFactor(ls);
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ls,vehicleIdx);
-//
-//   // parameter needed for negative moment evalation
-//   // (get it outside the loop so we don't have to get it over and over)
-//   GET_IFACE(ILongRebarGeometry,pLongRebar);
-//   Float64 top_slab_cover = pLongRebar->GetCoverTopMat();
-//
-//   GET_IFACE(IProductLoads,pProductLoads);
-//   std::vector<std::_tstring> strLLNames = pProductLoads->GetVehicleNames(llType,girderKey);
-//
-//   GET_IFACE(ISpecification,pSpec);
-//   pgsTypes::AnalysisType analysisType = pSpec->GetAnalysisType();
-//
-//   pgsTypes::StressLocation topLocation = pgsTypes::TopDeck;
-//   pgsTypes::StressLocation botLocation = pgsTypes::BottomGirder;
-//
-//   GET_IFACE(ISectionProperties,pSectProp);
-//   GET_IFACE(IPointOfInterest,pPoi);
-//   GET_IFACE(IBridge,pBridge);
-//   GET_IFACE(ILongRebarGeometry,pRebarGeom);
-//   GET_IFACE(IStrandGeometry,pStrandGeom);
-//   GET_IFACE(ITendonGeometry,pTendonGeom);
-//
 
    // Create artifacts
    CollectionIndexType nPOI = vPoi.size();
@@ -518,10 +482,8 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       pProgress->UpdateMessage(strProgress);
 
 
-      const CrackingMomentDetails& crackingMomentDetails = pMomentCapacity->GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
-
-      // NOTE: need cracked section for permanent and transient loads
-      const CrackedSectionDetails& crackedSectionDetails = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment);
+      const CrackedSectionDetails& crackedSectionDetails_PermanentLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltPermanent);
+      const CrackedSectionDetails& crackedSectionDetails_TransientLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltTransient);
 
 
       // use this to get all the loading information
@@ -532,21 +494,20 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       Float64 RE = pMomentRatingArtifact->GetRelaxationMoment();
       Float64 PS = pMomentRatingArtifact->GetSecondaryEffectsMoment();
 
-      Float64 LLIM;
+      // NOTE, moments include multiple presence factor
+      Float64 LLIMpermit = 0;
+      Float64 LLIMlegal = 0;
       if ( pMomentRatingArtifact->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
       {
-         LLIM = pMomentRatingArtifact->GetLiveLoadMoment(); // this is for AASHTO method
+         LLIMpermit = pMomentRatingArtifact->GetLiveLoadMoment(); // this is for AASHTO method
       }
       else
       {
          IndexType llConfigIdx;
          IndexType permitLaneIdx;
          IndexType vehIdx;
-         Float64 Mpermit;
-         Float64 Mlegal;
          Float64 K;
-         pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&Mpermit,&Mlegal,&K);
-         LLIM = Mpermit + Mlegal;
+         pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&LLIMpermit,&LLIMlegal,&K);
       }
 
       // NOTE: not sure if we need to do this part of the analysis (rebar stress)
@@ -579,34 +540,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       // Get allowable
       Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
 
-      Float64 Mcr = crackingMomentDetails.Mcr;
-
-      Float64 Icr = crackedSectionDetails.Icr;
-      Float64 c   = crackedSectionDetails.c; // measured from tension face to crack
-
-      // make sure reinforcement is on the tension side of the crack
-      bool bRebar = (ds < Hxb - c ? false : true);
-
-      // Stress in reinforcement before cracking
-      Float64 fs  = 0;
-      if ( bRebar )
-      {
-         Float64 I = pSectProps->GetIxx(pierID,stage,poi);
-         Float64 y; // distance from centroid to rebar
-         if ( bPositiveMoment )
-         {
-            Float64 Ytg = pSectProps->GetYtop(pierID,stage,poi);
-            y = ds - Ytg;
-         }
-         else
-         {
-            Float64 Ybg = pSectProps->GetYbot(pierID,stage,poi);
-            y = ds - Ybg;
-         }
-
-         fs = (Es/Exbm)*fabs(Mcr)*y/I;
-      }
-
       // NOTE: stresses are computed in artifact (Es/Exbr)(M)c/Icr use 2n for permanet load stresses
       xbrYieldStressRatioArtifact stressRatioArtifact;
       stressRatioArtifact.SetRatingType(ratingType);
@@ -629,12 +562,16 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       stressRatioArtifact.SetSecondaryEffectsFactor(gPS);
       stressRatioArtifact.SetSecondaryEffectsMoment(PS);
       stressRatioArtifact.SetLiveLoadFactor(gLL);
-      stressRatioArtifact.SetLiveLoadMoment(LLIM); // need Mp and Ml for WSDOT method
-      stressRatioArtifact.SetCrackingMoment(Mcr); // Don't need this
-      stressRatioArtifact.SetIcr(Icr);
-      stressRatioArtifact.SetCrackDepth(c); // distance from compression face to cracked centroid
-      stressRatioArtifact.SetEg(Exbm);
-      stressRatioArtifact.SetRebar(ds,fs,fy,Es); // Don't need fs
+      stressRatioArtifact.SetLiveLoadMoment(LLIMpermit);
+      stressRatioArtifact.SetAdjLiveLoadMoment(LLIMlegal);
+      stressRatioArtifact.SetIcr(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Icr);
+      stressRatioArtifact.SetIcr(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Icr);
+      stressRatioArtifact.SetCrackDepth(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.c); // distance from compression face to cracked centroid
+      stressRatioArtifact.SetCrackDepth(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.c); // distance from compression face to cracked centroid
+      stressRatioArtifact.SetModularRatio(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.n);
+      stressRatioArtifact.SetModularRatio(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.n);
+      stressRatioArtifact.SetYbar(ds);
+      stressRatioArtifact.SetYieldStrength(fy);
       ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
    } // next poi
 }
@@ -654,6 +591,7 @@ void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::L
    bool bPermitRating = ::IsPermitRatingType(ratingType);
    if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
    {
+      // moments include multiple presence factor
       if ( vehicleIdx == INVALID_INDEX )
       {
          pResults->GetMoment(pierID,ratingType,vPoi,&vLLIMmin,&vLLIMmax,NULL,NULL);
@@ -671,157 +609,3 @@ void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::L
       vLLIMmax.resize(vPoi.size(),0);
    }
 }
-
-//void special_transform(IBridge* pBridge,IPointOfInterest* pPoi,IIntervals* pIntervals,
-//                       std::vector<pgsPointOfInterest>::const_iterator poiBeginIter,
-//                       std::vector<pgsPointOfInterest>::const_iterator poiEndIter,
-//                       std::vector<Float64>::iterator forceBeginIter,
-//                       std::vector<Float64>::iterator resultBeginIter,
-//                       std::vector<Float64>::iterator outputBeginIter)
-//{
-//   std::vector<pgsPointOfInterest>::const_iterator poiIter( poiBeginIter );
-//   std::vector<Float64>::iterator forceIter( forceBeginIter );
-//   std::vector<Float64>::iterator resultIter( resultBeginIter );
-//   std::vector<Float64>::iterator outputIter( outputBeginIter );
-//
-//
-//   for ( ; poiIter != poiEndIter; poiIter++, forceIter++, resultIter++, outputIter++ )
-//   {
-//      const pgsPointOfInterest& poi = *poiIter;
-//      const CSegmentKey& segmentKey = poi.GetSegmentKey();
-//      CSpanKey spanKey;
-//      Float64 Xspan;
-//      pPoi->ConvertPoiToSpanPoint(poi,&spanKey,&Xspan);
-//
-//      EventIndexType start,end,dummy;
-//      PierIndexType prevPierIdx = spanKey.spanIndex;
-//      PierIndexType nextPierIdx = prevPierIdx + 1;
-//
-//      pBridge->GetContinuityEventIndex(prevPierIdx,&dummy,&start);
-//      pBridge->GetContinuityEventIndex(nextPierIdx,&end,&dummy);
-//
-//      IntervalIndexType compositeDeckIntervalIdx       = pIntervals->GetCompositeDeckInterval();
-//      IntervalIndexType startPierContinuityIntervalIdx = pIntervals->GetInterval(start);
-//      IntervalIndexType endPierContinuityIntervalIdx   = pIntervals->GetInterval(end);
-//
-//      if ( startPierContinuityIntervalIdx == compositeDeckIntervalIdx && 
-//           endPierContinuityIntervalIdx   == compositeDeckIntervalIdx )
-//      {
-//         *outputIter = (*forceIter + *resultIter);
-//      }
-//   }
-//}
-//
-//Float64 pgsLoadRater::GetStrengthLiveLoadFactor(pgsTypes::LoadRatingType ratingType,AxleConfiguration& axleConfig)
-//{
-//   Float64 sum_axle_weight = 0; // sum of axle weights on the bridge
-//   Float64 firstAxleLocation = -1;
-//   Float64 lastAxleLocation = 0;
-//   BOOST_FOREACH(AxlePlacement& axle_placement,axleConfig)
-//   {
-//      sum_axle_weight += axle_placement.Weight;
-//
-//      if ( !IsZero(axle_placement.Weight) )
-//      {
-//         if ( firstAxleLocation < 0 )
-//         {
-//            firstAxleLocation = axle_placement.Location;
-//         }
-//
-//         lastAxleLocation = axle_placement.Location;
-//      }
-//   }
-//   
-//   Float64 AL = fabs(firstAxleLocation - lastAxleLocation); // front axle to rear axle length (for axles on the bridge)
-//
-//   Float64 gLL = 0;
-//   GET_IFACE(IRatingSpecification,pRatingSpec);
-//   GET_IFACE(ILibrary,pLibrary);
-//   const RatingLibraryEntry* pRatingEntry = pLibrary->GetRatingEntry( pRatingSpec->GetRatingSpecification().c_str() );
-//   if ( pRatingEntry->GetSpecificationVersion() < lrfrVersionMgr::SecondEditionWith2013Interims )
-//   {
-//      CLiveLoadFactorModel model;
-//      if ( ratingType == pgsTypes::lrPermit_Routine )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(pgsTypes::lrPermit_Routine);
-//      }
-//      else if ( ratingType == pgsTypes::lrPermit_Special )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(pRatingSpec->GetSpecialPermitType());
-//      }
-//      else
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(ratingType);
-//      }
-//
-//      gLL = model.GetStrengthLiveLoadFactor(pRatingSpec->GetADTT(),sum_axle_weight);
-//   }
-//   else
-//   {
-//      Float64 GVW = sum_axle_weight;
-//      Float64 PermitWeightRatio = IsZero(AL) ? 0 : GVW/AL;
-//      CLiveLoadFactorModel2 model;
-//      if ( ratingType == pgsTypes::lrPermit_Routine )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(pgsTypes::lrPermit_Routine);
-//      }
-//      else if ( ratingType == pgsTypes::lrPermit_Special )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(pRatingSpec->GetSpecialPermitType());
-//      }
-//      else
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(ratingType);
-//      }
-//
-//      gLL = model.GetStrengthLiveLoadFactor(pRatingSpec->GetADTT(),PermitWeightRatio);
-//   }
-//
-//   return gLL;
-//}
-//
-//Float64 pgsLoadRater::GetServiceLiveLoadFactor(pgsTypes::LoadRatingType ratingType)
-//{
-//   Float64 gLL = 0;
-//   GET_IFACE(IRatingSpecification,pRatingSpec);
-//   GET_IFACE(ILibrary,pLibrary);
-//   const RatingLibraryEntry* pRatingEntry = pLibrary->GetRatingEntry( pRatingSpec->GetRatingSpecification().c_str() );
-//   if ( pRatingEntry->GetSpecificationVersion() < lrfrVersionMgr::SecondEditionWith2013Interims )
-//   {
-//      CLiveLoadFactorModel model;
-//      if ( ratingType == pgsTypes::lrPermit_Routine )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(pgsTypes::lrPermit_Routine);
-//      }
-//      else if ( ratingType == pgsTypes::lrPermit_Special )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(pRatingSpec->GetSpecialPermitType());
-//      }
-//      else
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel(ratingType);
-//      }
-//
-//      gLL = model.GetServiceLiveLoadFactor(pRatingSpec->GetADTT());
-//   }
-//   else
-//   {
-//      CLiveLoadFactorModel2 model;
-//      if ( ratingType == pgsTypes::lrPermit_Routine )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(pgsTypes::lrPermit_Routine);
-//      }
-//      else if ( ratingType == pgsTypes::lrPermit_Special )
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(pRatingSpec->GetSpecialPermitType());
-//      }
-//      else
-//      {
-//         model = pRatingEntry->GetLiveLoadFactorModel2(ratingType);
-//      }
-//
-//      gLL = model.GetServiceLiveLoadFactor(pRatingSpec->GetADTT());
-//   }
-//
-//   return gLL;
-//}

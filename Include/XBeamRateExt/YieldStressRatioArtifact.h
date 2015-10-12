@@ -116,42 +116,35 @@ public:
 
    void SetLiveLoadMoment(Float64 Mllim);
    Float64 GetLiveLoadMoment() const;
+   
+   void SetAdjLiveLoadMoment(Float64 Mllim);
+   Float64 GetAdjLiveLoadMoment() const;
 
-   void SetCrackingMoment(Float64 Mcr);
-   Float64 GetCrackingMoment() const;
+   void SetIcr(xbrTypes::LoadType loadType,Float64 Icr);
+   Float64 GetIcr(xbrTypes::LoadType loadType) const;
 
-   void SetIcr(Float64 Icr);
-   Float64 GetIcr() const;
+   void SetCrackDepth(xbrTypes::LoadType loadType,Float64 c);
+   Float64 GetCrackDepth(xbrTypes::LoadType loadType) const;
 
-   void SetCrackDepth(Float64 c);
-   Float64 GetCrackDepth() const;
+   void SetModularRatio(xbrTypes::LoadType loadType,Float64 n);
+   Float64 GetModularRatio(xbrTypes::LoadType loadType) const;
 
-   void SetRebar(Float64 db,Float64 fb,Float64 fyb,Float64 Eb);
-   bool GetRebar(Float64* pdb, Float64* pfb,Float64* pfyb,Float64* pEb) const;
+   void SetYbar(Float64 Ybar);
+   Float64 GetYbar() const;
 
-   void SetEg(Float64 Eg);
-   Float64 GetEg() const;
+   void SetYieldStrength(Float64 fy);
+   Float64 GetYieldStrength() const;
 
-   Float64 GetExcessMoment() const;
-
-   Float64 GetRebarCrackingStressIncrement() const;
+   Float64 GetAllowableStress() const;
    Float64 GetRebarStress() const;
-   Float64 GetRebarStressRatio() const;
-   Float64 GetRebarAllowableStress() const;
-
    Float64 GetStressRatio() const;
 
 protected:
    void MakeCopy(const xbrYieldStressRatioArtifact& rOther);
    virtual void MakeAssignment(const xbrYieldStressRatioArtifact& rOther);
-   void ComputeStressRatios() const;
-   void ComputeStressRatio(Float64 d,Float64 E,Float64 fbcr,Float64 fy,Float64* pfcr,Float64* pfs,Float64* pRF) const;
 
    mutable bool m_bRFComputed;
-
-   mutable Float64 m_RebarRF;
-   mutable Float64 m_fcrRebar;
-   mutable Float64 m_fsRebar;
+   mutable Float64 m_StressRatio;
 
    xbrPointOfInterest m_POI;
 
@@ -170,10 +163,7 @@ protected:
    Float64 m_Mre;
    Float64 m_Mps;
    Float64 m_Mllim;
-   Float64 m_Mcrack;
-   Float64 m_Icrack;
-   Float64 m_c;
-   Float64 m_Eg;
+   Float64 m_MllimAdj;
    Float64 m_gDC;
    Float64 m_gDW;
    Float64 m_gCR;
@@ -182,9 +172,11 @@ protected:
    Float64 m_gPS;
    Float64 m_gLL;
 
-   bool m_bRebar;
-   Float64 m_db;  // depth to reinforcement from extreme compression face
-   Float64 m_fb;  // stress in reinforcement beforc cracking
-   Float64 m_fyb; // yield strength
-   Float64 m_Eb;  // mod E.
+   // use xbrTypes::LoadType for array index
+   Float64 m_Icr[2];
+   Float64 m_c[2];
+   Float64 m_n[2];
+
+   Float64 m_Ybar;
+   Float64 m_fy;
 };

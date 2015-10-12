@@ -64,6 +64,7 @@ typedef struct MinMomentCapacityDetails
 
 typedef struct CrackedSectionDetails
 {
+   Float64 n;   // modular ratio used to compute properties (LRFD 5.7.1)
    Float64 c;   // distance from top of section to crack (crack depth)
    Float64 Icr; // cracked section moment of inertia
    CComPtr<ICrackedSectionSolution> CrackedSectionSolution;
@@ -122,8 +123,8 @@ DEFINE_GUID(IID_IXBRCrackedSection,
 0x20128ee2, 0xb293, 0x49dc, 0xa3, 0x35, 0xda, 0x1, 0x57, 0x4a, 0xc2, 0xa8);
 interface IXBRCrackedSection : IUnknown
 {
-   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
-   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) = 0;
+   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) = 0;
+   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) = 0;
 };
 
 /*****************************************************************************
