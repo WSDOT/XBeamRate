@@ -428,11 +428,16 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
       }
       else
       {
-         //sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
-         //Float64 Vl = pVerticalAxisFormat->Convert(Fy.Left());
-         //Float64 Vr = pVerticalAxisFormat->Convert(Fy.Right());
-         //graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
-         //graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+         sysSectionValue Vpermit, Vlegal;
+         pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
+         Vpermit.Left() = pVerticalAxisFormat->Convert(Vpermit.Left());
+         Vpermit.Right() = pVerticalAxisFormat->Convert(Vpermit.Right());
+         Vlegal.Left() = pVerticalAxisFormat->Convert(Vlegal.Left());
+         Vlegal.Right() = pVerticalAxisFormat->Convert(Vlegal.Right());
+         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Left()));
+         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Right()));
+         graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Left()));
+         graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Right()));
       }
    }
 }

@@ -115,7 +115,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
          if ( pRatingSpec->RateForShear(ratingType) )
          {
-         // shear
+            ShearRatingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,pRatingArtifact);
          }
 
          if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
@@ -134,7 +134,6 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
    return pChapter;
 }
-
 
 CChapterBuilder* CLoadRatingDetailsChapterBuilder::Clone() const
 {
@@ -251,17 +250,136 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       if ( bIsWSDOTPermitRating )
       {
          (*pTable)(row,col++) << moment.SetValue(Mpermit);
-#if defined _DEBUG || defined _BETA_VERSION
          (*pTable)(row,col-1) << rptNewLine;
          (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
          (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("Permit Vehicle: ") << pProject->GetLiveLoadName(pierID,ratingType,permitVehicleIdx).c_str();
-#endif
          (*pTable)(row,col++) << moment.SetValue(Mlegal);
       }
       else
       {
          (*pTable)(row,col++) << moment.SetValue(artifact.GetLiveLoadMoment());
+      }
+
+      Float64 RF = artifact.GetRatingFactor();
+
+      if ( RF < 1 )
+      {
+         (*pTable)(row,col++) << RF_FAIL(rating_factor,RF);
+      }
+      else
+      {
+         (*pTable)(row,col++) << RF_PASS(rating_factor,RF);
+      }
+   } // next poi
+}
+
+void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,const xbrRatingArtifact* pRatingArtifact) const
+{
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), true );
+   INIT_UV_PROTOTYPE( rptForceUnitValue, shear, pDisplayUnits->GetShearUnit(), false );
+   rptCapacityToDemand rating_factor;
+
+   GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
+
+   rptParagraph* pPara = new rptParagraph;
+   *pChapter << pPara;
+
+#pragma Reminder("WORKING HERE - add rating equations")
+
+   CString strTitle(_T("Rating for Shear"));
+
+   bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 21 : 20);
+
+   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
+   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+
+   *pPara << pTable << rptNewLine;
+
+   ColumnIndexType col = 0;
+   (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+   (*pTable)(0,col++) << Sub2(symbol(phi),_T("c"));
+   (*pTable)(0,col++) << Sub2(symbol(phi),_T("s"));
+   (*pTable)(0,col++) << Sub2(symbol(phi),_T("n"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("n")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("DC"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("DC")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("DW"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("DW")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("CR"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("CR")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("SR"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("SR")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("RE"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("RE")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("PS"));
+   (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("PS")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   (*pTable)(0,col++) << Sub2(symbol(gamma),_T("LL"));
+   if ( bIsWSDOTPermitRating )
+   {
+      (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")) << rptNewLine << _T("Permit"), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+      (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")) << rptNewLine << _T("Legal"),  rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   }
+   else
+   {
+      (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+   }
+   (*pTable)(0,col++) << _T("RF");
+
+   RowIndexType row = pTable->GetNumberOfHeaderRows();
+   const xbrRatingArtifact::ShearRatings& shearRatings = pRatingArtifact->GetShearRatings();
+   xbrRatingArtifact::ShearRatings::const_iterator iter(shearRatings.begin());
+   xbrRatingArtifact::ShearRatings::const_iterator end(shearRatings.end());
+   for ( ; iter != end; iter++, row++ )
+   {
+      col = 0;
+      const xbrPointOfInterest& poi = iter->first;
+      const xbrShearRatingArtifact& artifact = iter->second;
+
+      ATLASSERT(poi == artifact.GetPointOfInterest());
+
+      IndexType llConfigIdx;
+      IndexType permitLaneIdx;
+      VehicleIndexType permitVehicleIdx;
+      Float64 Vpermit;
+      Float64 Vlegal;
+      if ( bIsWSDOTPermitRating )
+      {
+         artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Vpermit,&Vlegal);
+      }
+
+      (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,col++) << artifact.GetSystemFactor();
+      (*pTable)(row,col++) << artifact.GetConditionFactor();
+      (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetNominalShearCapacity());
+      (*pTable)(row,col++) << artifact.GetDeadLoadFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetDeadLoadShear());
+      (*pTable)(row,col++) << artifact.GetWearingSurfaceFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetWearingSurfaceShear());
+      (*pTable)(row,col++) << artifact.GetCreepFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetCreepShear());
+      (*pTable)(row,col++) << artifact.GetShrinkageFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetShrinkageShear());
+      (*pTable)(row,col++) << artifact.GetRelaxationFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetRelaxationShear());
+      (*pTable)(row,col++) << artifact.GetSecondaryEffectsFactor();
+      (*pTable)(row,col++) << shear.SetValue(artifact.GetSecondaryEffectsShear());
+      (*pTable)(row,col++) << artifact.GetLiveLoadFactor();
+
+      if ( bIsWSDOTPermitRating )
+      {
+         (*pTable)(row,col++) << shear.SetValue(Vpermit);
+         (*pTable)(row,col-1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
+         (*pTable)(row,col++) << shear.SetValue(Vlegal);
+      }
+      else
+      {
+         (*pTable)(row,col++) << shear.SetValue(artifact.GetLiveLoadShear());
       }
 
       Float64 RF = artifact.GetRatingFactor();

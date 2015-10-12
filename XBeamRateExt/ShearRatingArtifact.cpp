@@ -22,12 +22,16 @@
 
 #include "stdafx.h"
 #include <XBeamRateExt\ShearRatingArtifact.h>
+#include <IFace\AnalysisResults.h>
+#include <IFace\Project.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+//#define COMPARE_WITH_FULL_ANALYSIS
 
 /****************************************************************************
 CLASS
@@ -38,11 +42,18 @@ m_strVehicleName(_T("Unknown"))
 {
    m_bRFComputed = false;
    m_RF = 0;
+   m_LLConfigIdx = INVALID_INDEX;
+   m_PermitLaneIdx = INVALID_INDEX;
+   m_PermitVehicleIdx = INVALID_INDEX;
+   m_Vpermit = -DBL_MAX;
+   m_Vlegal  = -DBL_MAX;
+
+   m_PierID = INVALID_ID;
 
    m_RatingType = pgsTypes::lrDesign_Inventory;
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
-   m_VehicleIndex = INVALID_INDEX;
+   m_VehicleIdx = INVALID_INDEX;
    m_VehicleWeight = -999999;
 
    m_SystemFactor = 1.0;
@@ -51,11 +62,18 @@ m_strVehicleName(_T("Unknown"))
    m_Vn = 0;
    m_gDC = 1;
    m_gDW = 1;
+   m_gCR = 1;
+   m_gSH = 1;
+   m_gRE = 1;
+   m_gPS = 1;
    m_gLL = 1;
    m_Vdc = 0;
    m_Vdw = 0;
+   m_Vcr = 0;
+   m_Vsh = 0;
+   m_Vre = 0;
+   m_Vps = 0;
    m_Vllim = 0;
-   m_AdjVllim = 0;
 }
 
 xbrShearRatingArtifact::xbrShearRatingArtifact(const xbrShearRatingArtifact& rOther)
@@ -75,6 +93,17 @@ xbrShearRatingArtifact& xbrShearRatingArtifact::operator=(const xbrShearRatingAr
    }
 
    return *this;
+}
+
+void xbrShearRatingArtifact::SetPierID(PierIDType pierID)
+{
+   m_PierID = pierID;
+   m_bRFComputed = false;
+}
+
+PierIDType xbrShearRatingArtifact::GetPierID() const
+{
+   return m_PierID;
 }
 
 void xbrShearRatingArtifact::SetPointOfInterest(const xbrPointOfInterest& poi)
@@ -111,12 +140,12 @@ xbrTypes::PermitRatingMethod xbrShearRatingArtifact::GetPermitRatingMethod() con
 
 void xbrShearRatingArtifact::SetVehicleIndex(VehicleIndexType vehicleIdx)
 {
-   m_VehicleIndex = vehicleIdx;
+   m_VehicleIdx = vehicleIdx;
 }
 
 VehicleIndexType xbrShearRatingArtifact::GetVehicleIndex() const
 {
-   return m_VehicleIndex;
+   return m_VehicleIdx;
 }
 
 void xbrShearRatingArtifact::SetVehicleWeight(Float64 W)
@@ -227,6 +256,94 @@ Float64 xbrShearRatingArtifact::GetWearingSurfaceShear() const
    return m_Vdw;
 }
 
+void xbrShearRatingArtifact::SetCreepFactor(Float64 gCR)
+{
+   m_gCR = gCR;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetCreepFactor() const
+{
+   return m_gCR;
+}
+
+void xbrShearRatingArtifact::SetCreepShear(Float64 Vcr)
+{
+   m_Vcr = Vcr;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetCreepShear() const
+{
+   return m_Vcr;
+}
+
+void xbrShearRatingArtifact::SetShrinkageFactor(Float64 gSH)
+{
+   m_gSH = gSH;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetShrinkageFactor() const
+{
+   return m_gSH;
+}
+
+void xbrShearRatingArtifact::SetShrinkageShear(Float64 Vsh)
+{
+   m_Vsh = Vsh;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetShrinkageShear() const
+{
+   return m_Vsh;
+}
+
+void xbrShearRatingArtifact::SetRelaxationFactor(Float64 gRE)
+{
+   m_gRE = gRE;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetRelaxationFactor() const
+{
+   return m_gRE;
+}
+
+void xbrShearRatingArtifact::SetRelaxationShear(Float64 Vre)
+{
+   m_Vre = Vre;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetRelaxationShear() const
+{
+   return m_Vre;
+}
+
+void xbrShearRatingArtifact::SetSecondaryEffectsFactor(Float64 gPS)
+{
+   m_gPS = gPS;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetSecondaryEffectsFactor() const
+{
+   return m_gPS;
+}
+
+void xbrShearRatingArtifact::SetSecondaryEffectsShear(Float64 Vps)
+{
+   m_Vps = Vps;
+   m_bRFComputed = false;
+}
+
+Float64 xbrShearRatingArtifact::GetSecondaryEffectsShear() const
+{
+   return m_Vps;
+}
+
 void xbrShearRatingArtifact::SetLiveLoadFactor(Float64 gLL)
 {
    m_gLL = gLL;
@@ -249,17 +366,6 @@ Float64 xbrShearRatingArtifact::GetLiveLoadShear() const
    return m_Vllim;
 }
 
-void xbrShearRatingArtifact::SetAdjacentLaneLiveLoadShear(Float64 Vllim)
-{
-   m_AdjVllim = Vllim;
-   m_bRFComputed = false;
-}
-
-Float64 xbrShearRatingArtifact::GetAdjacentLaneLiveLoadShear() const
-{
-   return m_AdjVllim;
-}
-
 Float64 xbrShearRatingArtifact::GetRatingFactor() const
 {
    if ( m_bRFComputed )
@@ -268,9 +374,217 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
    }
 
 
-   if ( IsZero(m_Vllim) || IsZero(m_gLL) )
+   if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
    {
-      m_RF = DBL_MAX;
+      // we don't know which combination of permit and legal loads cause the minimum rating factor
+      // so we have to check them all.... the min rating factor could happen when the legal load
+      // effect is greatest, leaving the least reserve capacity for the permit vehicle, or when
+      // the legal load effect is least coupled with a very large permit load response, or something
+      // in between.
+      Float64 RFmin = DBL_MAX;
+      bool bFirst = true;
+      pgsTypes::LimitState ls = ::GetStrengthLimitStateType(m_RatingType);
+      bool bPositiveMoment = (0 <= m_Vn ? true : false);
+
+#if defined COMPARE_WITH_FULL_ANALYSIS
+      Float64 _RFmin = DBL_MAX;
+      bool _bFirst = true;
+      IndexType _LLConfigIdx;
+      IndexType _PermitLaneIdx;
+      VehicleIndexType _PermitVehicleIdx;
+      Float64 _Vpermit;
+      Float64 _Vlegal;
+#endif
+
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+      GET_IFACE2(pBroker,IXBRAnalysisResults,pAnalysisResults);
+      GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
+
+      VehicleIndexType nVehicles = (m_VehicleIdx == INVALID_INDEX ? pProject->GetLiveLoadReactionCount(m_PierID,m_RatingType) : 1);
+      VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
+      VehicleIndexType lastVehicleIdx  = (m_VehicleIdx == INVALID_INDEX ? nVehicles-1 : firstVehicleIdx);
+
+      std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
+      pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vMinLLConfigIdx,&vMaxLLConfigIdx);
+      std::vector<IndexType>* pvLLConfigIdx = (bPositiveMoment ? &vMaxLLConfigIdx : &vMinLLConfigIdx);
+      BOOST_FOREACH(IndexType llConfigIdx,*pvLLConfigIdx)
+      {
+         IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
+         for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
+         {
+            for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
+            {
+               Float64 rf;
+
+               sysSectionValue Vpermit, Vlegal; // Shear include multiple presence factor
+               pAnalysisResults->GetShear(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Vpermit,&Vlegal);
+   
+               Float64 vp = MaxMagnitude(Vpermit.Left(),Vpermit.Right());
+               Float64 vl = MaxMagnitude(Vlegal.Left(),Vlegal.Right());
+               rf = GetRatingFactor(vp,vl);
+
+               if ( rf < RFmin || bFirst )
+               {
+                  RFmin              = rf;
+                  m_LLConfigIdx      = llConfigIdx;
+                  m_PermitLaneIdx    = permitLaneIdx;
+                  m_PermitVehicleIdx = vehicleIdx;
+                  m_Vpermit          = vp;
+                  m_Vlegal           = vl;
+
+                  bFirst = false;
+               }
+            } // next vehicle
+         } // permit truck in next position
+      } // next live load configuration
+
+#if defined COMPARE_WITH_FULL_ANALYSIS
+      IndexType nLiveLoadConfigurations = pProductForces->GetLiveLoadConfigurationCount(m_PierID,m_RatingType);
+      for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigurations; llConfigIdx++ )
+      {
+         IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
+         for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
+         {
+            for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
+            {
+               Float64 rf;
+
+               sysSectionValue Vpermit, Vlegal;
+               pAnalysisResults->GetShear(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Vpermit,&Vlegal);
+
+               rf = GetRatingFactor(Vpermit,Vlegal);
+
+               if ( rf < _RFmin || _bFirst )
+               {
+                  _RFmin            = rf;
+                  _LLConfigIdx      = llConfigIdx;
+                  _PermitLaneIdx    = permitLaneIdx;
+                  _PermitVehicleIdx = vehicleIdx;
+                  _Vpermit          = Vpermit;
+                  _Vlegal           = Vlegal;
+
+                  _bFirst = false;
+               }
+            } // next vehicle
+         } // permit truck in next position
+      } // next live load configuration
+
+#if defined _DEBUG
+      if ( _RFmin != DBL_MAX )
+      {
+         ATLASSERT(IsEqual(_RFmin,RFmin));
+         ATLASSERT(_LLConfigIdx == m_LLConfigIdx);
+         ATLASSERT(_PermitLaneIdx == m_PermitLaneIdx);
+         ATLASSERT(_PermitVehicleIdx == m_PermitVehicleIdx);
+         ATLASSERT(IsEqual(_Vpermit,m_Vpermit));
+         ATLASSERT(IsEqual(_Vlegal,m_Vlegal));
+      }
+#else
+      if ( _RFmin != DBL_MAX &&
+            (!IsEqual(_RFmin,RFmin) ||
+            _LLConfigIdx != m_LLConfigIdx ||
+            _PermitLaneIdx != m_PermitLaneIdx ||
+            _PermitVehicleIdx != m_PermitVehicleIdx ||
+            !IsEqual(_Vpermit,m_Vpermit) ||
+            !IsEqual(_Vlegal,m_Vlegal))
+            )
+      {
+         CString strMsg1;
+         strMsg1.Format(_T("Full and simplified analysis results don't match.\r\n%s\r\nPOI %d @ %f\r\nRF %f (Full), %f (Simplified)"),(bPositiveMoment ? _T("+M") : _T("-M")),m_POI.GetID(),m_POI.GetDistFromStart(),_RFmin,RFmin);
+
+         CString strMsg2;
+         strMsg2.Format(_T("LLConfigIdx %d (Full), %d (Simplified)"),_LLConfigIdx,m_LLConfigIdx);
+
+         CString strMsg3;
+         strMsg3.Format(_T("PermitLaneIdx %d (Full), %d (Simplified)"),_PermitLaneIdx,m_PermitLaneIdx);
+
+         CString strMsg4;
+         strMsg4.Format(_T("PermitVehicleIdx %d (Full), %d (Simplified)"),_PermitVehicleIdx,m_PermitVehicleIdx);
+
+         CString strMsg5;
+         strMsg5.Format(_T("Vpermit %f (Full), %f (Simplified)"),_Vpermit,m_Vpermit);
+
+         CString strMsg6;
+         strMsg6.Format(_T("Vlegal %f (Full), %f (Simplified)"),_Vlegal,m_Vlegal);
+
+         CString strMsg = strMsg1 + _T("\r\n") + strMsg2 + _T("\r\n") + strMsg3 + _T("\r\n") + strMsg4 + _T("\r\n") + strMsg5 + _T("\r\n") + strMsg6;
+         AfxMessageBox(strMsg);
+      }
+#endif
+#endif // COMPARE_WITH_FULL_ANALYSIS
+
+      m_RF = RFmin;
+   }
+   else
+   {
+      m_RF = GetRatingFactor(m_Vllim,0);
+   }
+
+   m_bRFComputed = true;
+   return m_RF;
+}
+
+void xbrShearRatingArtifact::GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pVpermit,Float64* pVlegal) const
+{
+   Float64 RF = GetRatingFactor(); // causes the rating factor analysis to happen
+
+   *pLLConfigIdx   = m_LLConfigIdx;
+   *pPermitLaneIdx = m_PermitLaneIdx;
+   *pVehicleIdx    = m_PermitVehicleIdx;
+   *pVpermit       = m_Vpermit;
+   *pVlegal        = m_Vlegal;
+}
+
+void xbrShearRatingArtifact::MakeCopy(const xbrShearRatingArtifact& rOther)
+{
+   m_PierID                     = rOther.m_PierID;
+   m_POI                        = rOther.m_POI;
+   m_RatingType                 = rOther.m_RatingType;
+   m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
+   m_VehicleIdx                 = rOther.m_VehicleIdx;
+   m_VehicleWeight              = rOther.m_VehicleWeight;
+   m_strVehicleName             = rOther.m_strVehicleName;
+   m_bRFComputed                = rOther.m_bRFComputed;
+   m_RF                         = rOther.m_RF;
+   m_LLConfigIdx                = rOther.m_LLConfigIdx;
+   m_PermitLaneIdx              = rOther.m_PermitLaneIdx;
+   m_PermitVehicleIdx           = rOther.m_PermitVehicleIdx;
+   m_Vpermit                    = rOther.m_Vpermit;
+   m_Vlegal                     = rOther.m_Vlegal;
+   m_SystemFactor               = rOther.m_SystemFactor;
+   m_ConditionFactor            = rOther.m_ConditionFactor;
+   m_CapacityRedutionFactor     = rOther.m_CapacityRedutionFactor;
+   m_Vn                         = rOther.m_Vn;
+   m_gDC                        = rOther.m_gDC;
+   m_gDW                        = rOther.m_gDW;
+   m_gCR                        = rOther.m_gCR;
+   m_gSH                        = rOther.m_gSH;
+   m_gRE                        = rOther.m_gRE;
+   m_gPS                        = rOther.m_gPS;
+   m_gLL                        = rOther.m_gLL;
+   m_Vdc                        = rOther.m_Vdc;
+   m_Vdw                        = rOther.m_Vdw;
+   m_Vcr                        = rOther.m_Vcr;
+   m_Vsh                        = rOther.m_Vsh;
+   m_Vre                        = rOther.m_Vre;
+   m_Vps                        = rOther.m_Vps;
+   m_Vllim                      = rOther.m_Vllim;
+}
+
+void xbrShearRatingArtifact::MakeAssignment(const xbrShearRatingArtifact& rOther)
+{
+   MakeCopy( rOther );
+}
+
+Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) const
+{
+   Float64 RF = -DBL_MAX;
+
+   if ( IsZero(Vllim) || IsZero(m_gLL) )
+   {
+      RF = DBL_MAX;
    }
    else
    {
@@ -281,59 +595,32 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
       }
 
       Float64 C = p * m_CapacityRedutionFactor * m_Vn;
-      Float64 RFtop = C - m_gDC*m_Vdc - m_gDW*m_Vdw;
+      Float64 RFtop = C - m_gDC*m_Vdc - m_gDW*m_Vdw - m_gCR*m_Vcr - m_gSH*m_Vsh - m_gRE*m_Vre - m_gPS*m_Vps;
+
       if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
       {
-         RFtop -= m_gLL*m_AdjVllim; // WSDOT BDM Eqn. 13.1.1A-2
+         RFtop -= m_gLL*VllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
       }
-      Float64 RFbot = m_gLL*m_Vllim;
 
-      if ( IsZero(C) || RFtop < 0 )
+      Float64 RFbot = m_gLL*Vllim;
+
+      if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
       {
          // There isn't any capacity remaining for live load
-         m_RF = 0;
+         RF = 0;
       }
       else if ( ::BinarySign(RFtop) != ::BinarySign(RFbot) && !IsZero(RFtop) )
       {
-         // (fr - DL) and LL have opposite signs
+         // (C - DL) and LL have opposite signs
          // this case probably shouldn't happen, but if does,
          // the rating is great
-         m_RF = DBL_MAX;
+         RF = DBL_MAX;
       }
       else
       {
-         m_RF = RFtop/RFbot;
+         RF = RFtop/RFbot;
       }
    }
 
-   m_bRFComputed = true;
-   return m_RF;
-}
-
-void xbrShearRatingArtifact::MakeCopy(const xbrShearRatingArtifact& rOther)
-{
-   m_POI                        = rOther.m_POI;
-   m_RatingType                 = rOther.m_RatingType;
-   m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
-   m_VehicleIndex               = rOther.m_VehicleIndex;
-   m_VehicleWeight              = rOther.m_VehicleWeight;
-   m_strVehicleName             = rOther.m_strVehicleName;
-   m_bRFComputed                = rOther.m_bRFComputed;
-   m_RF                         = rOther.m_RF;
-   m_SystemFactor               = rOther.m_SystemFactor;
-   m_ConditionFactor            = rOther.m_ConditionFactor;
-   m_CapacityRedutionFactor     = rOther.m_CapacityRedutionFactor;
-   m_Vn                         = rOther.m_Vn;
-   m_gDC                        = rOther.m_gDC;
-   m_gDW                        = rOther.m_gDW;
-   m_gLL                        = rOther.m_gLL;
-   m_Vdc                        = rOther.m_Vdc;
-   m_Vdw                        = rOther.m_Vdw;
-   m_Vllim                      = rOther.m_Vllim;
-   m_AdjVllim                   = rOther.m_AdjVllim;
-}
-
-void xbrShearRatingArtifact::MakeAssignment(const xbrShearRatingArtifact& rOther)
-{
-   MakeCopy( rOther );
+   return RF;
 }

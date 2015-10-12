@@ -1059,6 +1059,24 @@ void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pier
    }
 }
 
+void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
+{
+   pvMin->clear();
+   pvMax->clear();
+
+   UnitLiveLoadResult& unitLiveLoadResult = GetUnitLiveLoadResult(pierID,poi);
+
+   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyMinLoadCases)
+   {
+      pvMin->push_back(lcid - FIRST_LIVELOAD_ID);
+   }
+
+   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyMaxLoadCases)
+   {
+      pvMax->push_back(lcid - FIRST_LIVELOAD_ID);
+   }
+}
+
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
 Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi)
@@ -1413,24 +1431,130 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    }
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,sysSectionValue* pVpermit,sysSectionValue* pVlegal)
 {
-#pragma Reminder("WORKING HERE - what is this method for?")
-   ATLASSERT(false); // does this get called?
+   ATLASSERT(::IsPermitRatingType(permitRatingType));
+#if defined _DEBUG
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
+   // This method is only used for WSDOT permit ratings
+#endif
+
+   IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
+   if ( nLoadedLanes == 1 )
+   {
+      // if there is only one loaded lane, it is the permit vehicle... just use the regular implementation
+      *pVpermit = GetShear(pierID,permitRatingType,vehicleIdx,llConfigIdx,poi);
+      *pVlegal = 0;
+      return;
+   }
+
+   // This strategy for this method is as follows:
+   // The specified live load configuration is for multiple loaded lanes.
+   // The results for this live load configuration assumes the same live load in all lanes
+   // We want all lanes loaded with the governing legal load reaction except for the
+   // permit lane, which has the permit reaction in it.
+   //
+   // The legal load moment is the moment for legal load in all lanes mines the legal load moment
+   // in the permit lane.
+
+   ModelData* pModelData = GetModelData(pierID);
+
+   std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
+   ATLASSERT(found != pModelData->m_PoiMap.end());
+   PoiIDType femPoiID = found->second;
+
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
+
+   // Get the results for all loaded lanes having the same vehicle reaction
+   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
+
+   Float64 FxLeft, FyLeft, MzLeft;
+   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   Float64 FxRight, FyRight, MzRight;
+   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   sysSectionValue Fy_MultiLane;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Fy_MultiLane = -FyRight;
+   }
+   else
+   {
+      Fy_MultiLane = FyLeft;
+   }
+
+   //Fy_MultiLane = IsZero(Fy_MultiLane) ? 0 : Fy_MultiLane;
+
+   // Get the results for the specified lane having a single vehicle
+   LoadCaseIDType lcidSingle = llConfig.m_LaneConfiguration[permitLaneIdx].m_SingleLaneLoadCaseID;
+
+   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
+   ATLASSERT(SUCCEEDED(hr));
+
+   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
+   ATLASSERT(SUCCEEDED(hr));
+
+   sysSectionValue Fy_SingleLane;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Fy_SingleLane = -FyRight;
+   }
+   else
+   {
+      Fy_SingleLane = FyLeft;
+   }
+
+   //Fy_SingleLane = IsZero(Fy_SingleLane) ? 0 : Fy_SingleLane;
+
+   GET_IFACE(IXBRProject,pProject);
+   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
+   Float64 Rlegal  = GetMaxLegalReaction(pierID);
+
+   sysSectionValue Vlegal_in_all_lanes    = Rlegal*Fy_MultiLane;   // legal loads in all lanes
+   sysSectionValue Vlegal_in_permit_lane  = Rlegal*Fy_SingleLane;  // legal load in permit lane
+   sysSectionValue Vpermit_in_permit_lane = Rpermit*Fy_SingleLane; // permit load in permit lane
+
+   *pVlegal  = Vlegal_in_all_lanes - Vlegal_in_permit_lane;
+   *pVpermit = Vpermit_in_permit_lane;
+
+   //*pVlegal  = IsZero(*pVlegal)  ? 0 : *pVlegal;
+   //*pVpermit = IsZero(*pVpermit) ? 0 : *pVpermit;
+   
+   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   if ( nLoadedLanes == 1 )
+   {
+      mpf = 1.0;
+   }
+
+   // NOTE: Multiple presense factor is applied to both the permit and legal loads. Consider the following
+   // (ignore load factors)
+   // Q = DC + DW + mpf(LL)
+   // LL = LL_Permit + LL_Legal
+   // therefore Q = DC + DW + mpf(LL_Permit + LL_Legal);
+   // Re-arrange into the rating factor equation
+   // RF = [Q - DC - DW - mpf(LL_Legal)]/[mpf(LL_Permit)]
+
+   *pVlegal  *= mpf;
+   *pVpermit *= mpf;
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvVpermit,std::vector<sysSectionValue>* pvVlegal)
 {
-   pvMpermit->clear();
-   pvMpermit->resize(vPoi.size());
-   pvMlegal->clear();
-   pvMlegal->resize(vPoi.size());
+   pvVpermit->clear();
+   pvVpermit->resize(vPoi.size());
+   pvVlegal->clear();
+   pvVlegal->resize(vPoi.size());
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      Float64 Mpermit,Mlegal;
-      GetMoment(pierID,permitRatingType,vehicleIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
-      pvMpermit->push_back(Mpermit);
-      pvMlegal->push_back(Mlegal);
+      sysSectionValue Vpermit,Vlegal;
+      GetShear(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
+      pvVpermit->push_back(Vpermit);
+      pvVlegal->push_back(Vlegal);
    }
 }
 
@@ -2313,10 +2437,10 @@ std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveL
 
 struct Result
 {
-   Float64 M;
+   Float64 Value;
    LoadCaseIDType lcid;
-   Result(Float64 m,LoadCaseIDType l) : M(m), lcid(l) {}
-   bool operator<(const Result& result)const { return M < result.M; }
+   Result(Float64 v,LoadCaseIDType l) : Value(v), lcid(l) {}
+   bool operator<(const Result& result)const { return Value < result.Value; }
 };
 
 void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
@@ -2352,6 +2476,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    PoiIDType femPoiID = found->second;
 
    std::set<Result> moments;
+   std::set<Result> shears;
 
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
    for ( LoadCaseIDType lcid = FIRST_LIVELOAD_ID; lcid < pModelData->m_NextLiveLoadCaseID; lcid++ )
@@ -2415,6 +2540,8 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       sysSectionValue Fy(-FyLeft,FyRight);
 
       Fy *= mpf;
+
+      shears.insert(Result(MaxMagnitude(Fy.Left(),Fy.Right()),lcid));
 
       if ( Fy.Left() < FyMin.Left() )
       {
@@ -2526,21 +2653,31 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    // the end of the sequence.
    // Use forward iterator at start of sequence
    int N = 50; // using 50 min/max moments
-   std::set<Result>::iterator fIter(moments.begin());
-   std::set<Result>::iterator fEnd(moments.end());
-   for ( int i = 0; i < N && fIter != fEnd; i++, fIter++ )
+   std::set<Result>::iterator fmIter(moments.begin());
+   std::set<Result>::iterator fmEnd(moments.end());
+   std::set<Result>::iterator fvIter(shears.begin());
+   std::set<Result>::iterator fvEnd(shears.end());
+   for ( int i = 0; i < N && fmIter != fmEnd && fvIter != fvEnd; i++, fmIter++, fvIter++)
    {
-      Result& r(*fIter);
-      liveLoadResult.m_MzMinLoadCases.push_back(r.lcid);
+      Result& mr(*fmIter);
+      liveLoadResult.m_MzMinLoadCases.push_back(mr.lcid);
+
+      Result& vr(*fvIter);
+      liveLoadResult.m_FyMinLoadCases.push_back(vr.lcid);
    }
 
    // Use reverse iterator at end of sequence
-   std::set<Result>::reverse_iterator rIter(moments.rbegin());
-   std::set<Result>::reverse_iterator rEnd(moments.rend());
-   for ( int i = 0; i < N && rIter != rEnd; i++, rIter++ )
+   std::set<Result>::reverse_iterator rmIter(moments.rbegin());
+   std::set<Result>::reverse_iterator rmEnd(moments.rend());
+   std::set<Result>::reverse_iterator rvIter(shears.rbegin());
+   std::set<Result>::reverse_iterator rvEnd(shears.rend());
+   for ( int i = 0; i < N && rmIter != rmEnd && rvIter != rvEnd; i++, rmIter++, rvIter++ )
    {
-      Result& r(*rIter);
-      liveLoadResult.m_MzMaxLoadCases.push_back(r.lcid);
+      Result& mr(*rmIter);
+      liveLoadResult.m_MzMaxLoadCases.push_back(mr.lcid);
+
+      Result& vr(*rvIter);
+      liveLoadResult.m_FyMaxLoadCases.push_back(vr.lcid);
    }
 
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);

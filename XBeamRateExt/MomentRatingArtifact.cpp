@@ -66,9 +66,17 @@ m_strVehicleName(_T("Unknown"))
    m_Mn = 0;
    m_gDC = 1;
    m_gDW = 1;
+   m_gCR = 1;
+   m_gSH = 1;
+   m_gRE = 1;
+   m_gPS = 1;
    m_gLL = 1;
    m_Mdc = 0;
    m_Mdw = 0;
+   m_Mcr = 0;
+   m_Msh = 0;
+   m_Mre = 0;
+   m_Mps = 0;
    m_Mllim = 0;
 }
 

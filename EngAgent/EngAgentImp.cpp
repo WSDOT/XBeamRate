@@ -329,8 +329,13 @@ Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInteres
 
    Float64 Vn1 = Vc + Vs;
    Float64 Vn2 = 0.25*fc*bv*dv;
+#pragma Reminder("WORKING HERE - Need to capture shear capacity details for reporting")
 
-   return Min(Vn1,Vn2);
+#pragma Reminder("WORKING HERE - make shear phi factor user input")
+   Float64 Vn = Min(Vn1,Vn2);
+   Float64 phi = 0.9;
+   Float64 Vr = phi*Vn;
+   return Vr;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -403,6 +408,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
       phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
       phi = ::ForceIntoRange(0.75,phi,0.9);
+#pragma Reminder("WORKING HERE - make moment phi factor user input")
 
       Float64 Cweb, Cflange, Yweb, Yflange;
       solution->get_Cweb(&Cweb);
@@ -763,9 +769,14 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
       CComPtr<IPoint2d> pntRebar;
       rebarSectionItem->get_Location(&pntRebar);
 
-      Float64 Ybar = pRebar->GetRebarDepth(pierID,poi,pntRebar); // depth from top of cross beam to rebar
+      Float64 Ybar = pRebar->GetRebarDepth(pierID,poi,stage,pntRebar); // depth from top of cross beam to rebar
 
-      ATLASSERT(Ybar < h);
+      if ( Ybar < 0 )
+      {
+         // rebar is not in the cross section (not applicable in this stage)
+         rebarSectionItem.Release();
+         continue;
+      }
 
       // if continous or expansion pier, the upper cross beam doesn't contribute
       // to capacity. but the rebar are measured from the top down of the entire
@@ -775,6 +786,8 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
       {
          Ybar -= d;
       }
+
+      ATLASSERT(0 < Ybar && Ybar < h); // if this fires, the rebar is not in the cross section
 
       if ( !bPositiveMoment )
       {
@@ -827,6 +840,7 @@ Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPoi
 
 Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
 {
+#pragma Reminder("WORKING HERE - need to capture AvOverS details and store in cache for reporting")
    GET_IFACE(IXBRProject,pProject);
    if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {

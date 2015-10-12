@@ -55,6 +55,9 @@ public:
 
    xbrShearRatingArtifact& operator = (const xbrShearRatingArtifact& rOther);
 
+   void SetPierID(PierIDType pierID);
+   PierIDType GetPierID() const;
+
    void SetPointOfInterest(const xbrPointOfInterest& poi);
    const xbrPointOfInterest& GetPointOfInterest() const;
 
@@ -97,30 +100,63 @@ public:
    void SetWearingSurfaceShear(Float64 Vdw);
    Float64 GetWearingSurfaceShear() const;
 
+   void SetCreepFactor(Float64 gCR);
+   Float64 GetCreepFactor() const;
+
+   void SetCreepShear(Float64 Vcr);
+   Float64 GetCreepShear() const;
+
+   void SetShrinkageFactor(Float64 gSH);
+   Float64 GetShrinkageFactor() const;
+
+   void SetShrinkageShear(Float64 Vsh);
+   Float64 GetShrinkageShear() const;
+
+   void SetRelaxationFactor(Float64 gRE);
+   Float64 GetRelaxationFactor() const;
+
+   void SetRelaxationShear(Float64 Vre);
+   Float64 GetRelaxationShear() const;
+
+   void SetSecondaryEffectsFactor(Float64 gPS);
+   Float64 GetSecondaryEffectsFactor() const;
+
+   void SetSecondaryEffectsShear(Float64 Vps);
+   Float64 GetSecondaryEffectsShear() const;
+
    void SetLiveLoadFactor(Float64 gLL);
    Float64 GetLiveLoadFactor() const;
 
    void SetLiveLoadShear(Float64 Vllim);
    Float64 GetLiveLoadShear() const;
 
-   void SetAdjacentLaneLiveLoadShear(Float64 Vllim);
-   Float64 GetAdjacentLaneLiveLoadShear() const;
-
    Float64 GetRatingFactor() const;
+
+   void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pVpermit,Float64* pVlegal) const;
 
 protected:
    void MakeCopy(const xbrShearRatingArtifact& rOther);
    virtual void MakeAssignment(const xbrShearRatingArtifact& rOther);
 
+   Float64 GetRatingFactor(Float64 Vllim,Float64 VllimAdj) const;
+
    mutable bool m_bRFComputed;
    mutable Float64 m_RF;
+   // loading configuration, for the WSDOT method, that
+   // results in the minimum rating factor
+   mutable IndexType m_LLConfigIdx; // live load configuration for min rating factor
+   mutable IndexType m_PermitLaneIdx; // lane position of permit vehicle within the live load configuration for min rating factor
+   mutable VehicleIndexType m_PermitVehicleIdx; // index of the vehicles, for this rating type, associted with the min rating factor
+   mutable Float64 m_Vpermit; // permit load response associated with min rating factor
+   mutable Float64 m_Vlegal; // legal load response associated with min rating factor
 
+   PierIDType m_PierID;
    xbrPointOfInterest m_POI;
 
    pgsTypes::LoadRatingType m_RatingType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
-   VehicleIndexType m_VehicleIndex;
+   VehicleIndexType m_VehicleIdx;
    Float64 m_VehicleWeight;
    std::_tstring m_strVehicleName;
 
@@ -130,9 +166,16 @@ protected:
    Float64 m_Vn;
    Float64 m_gDC;
    Float64 m_gDW;
+   Float64 m_gCR;
+   Float64 m_gSH;
+   Float64 m_gRE;
+   Float64 m_gPS;
    Float64 m_gLL;
    Float64 m_Vdc;
    Float64 m_Vdw;
+   Float64 m_Vcr;
+   Float64 m_Vsh;
+   Float64 m_Vre;
+   Float64 m_Vps;
    Float64 m_Vllim;
-   Float64 m_AdjVllim;
 };

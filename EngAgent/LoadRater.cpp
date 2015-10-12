@@ -196,230 +196,122 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
 void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
 #pragma Reminder("WORKING HERE - shear rating")
-   //GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   //GET_IFACE(IProgress, pProgress);
-   //CEAFAutoProgress ap(pProgress);
-   //pProgress->UpdateMessage(_T("Load rating for shear"));
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IProgress, pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Load rating for shear"));
 
-   //CGirderKey thisGirderKey(girderKey);
-   //if ( thisGirderKey.groupIndex == ALL_GROUPS )
-   //{
-   //   thisGirderKey.groupIndex = 0;
-   //}
+   GET_IFACE(IXBRAnalysisResults,pAnalysisResults);
+   GET_IFACE(IXBRShearCapacity,pShearCapacity);
 
-   //pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
+   GET_IFACE(IXBRProject,pProject);
+   Float64 system_factor    = pProject->GetSystemFactorFlexure();
+   Float64 condition_factor = pProject->GetConditionFactor(pierID);
 
-   //GET_IFACE(IIntervals,pIntervals);
-   //IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
+   pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
 
-   //std::vector<sysSectionValue> vDCmin, vDCmax;
-   //std::vector<sysSectionValue> vDWmin, vDWmax;
-   //std::vector<sysSectionValue> vCRmin, vCRmax;
-   //std::vector<sysSectionValue> vSHmin, vSHmax;
-   //std::vector<sysSectionValue> vREmin, vREmax;
-   //std::vector<sysSectionValue> vPSmin, vPSmax;
-   //std::vector<sysSectionValue> vLLIMmin,vLLIMmax;
-   //std::vector<sysSectionValue> vUnused;
-   //std::vector<VehicleIndexType> vMinTruckIndex, vMaxTruckIndex, vUnusedIndex;
-   //std::vector<sysSectionValue> vPLmin, vPLmax;
+   xbrTypes::Stage stage = xbrTypes::Stage2;
 
-   //pgsTypes::LiveLoadType llType = GetLiveLoadType(ratingType);
+   Float64 gDC = pProject->GetDCLoadFactor(ls);
+   Float64 gDW = pProject->GetDWLoadFactor(ls);
+   Float64 gCR = pProject->GetCRLoadFactor(ls);
+   Float64 gSH = pProject->GetSHLoadFactor(ls);
+   Float64 gRE = pProject->GetRELoadFactor(ls);
+   Float64 gPS = pProject->GetPSLoadFactor(ls);
+   Float64 gLL = pProject->GetLiveLoadFactor(pierID,ls,vehicleIdx);
 
-   //GET_IFACE(IProductForces,pProdForces);
-   //pgsTypes::BridgeAnalysisType batMin = pProdForces->GetBridgeAnalysisType(pgsTypes::Minimize);
-   //pgsTypes::BridgeAnalysisType batMax = pProdForces->GetBridgeAnalysisType(pgsTypes::Maximize);
+   std::_tstring strVehicleName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
 
-   //GET_IFACE(ICombinedForces2,pCombinedForces);
-   //GET_IFACE(IProductForces2,pProductForces);
-   //vDCmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcDC,vPoi,batMin,rtCumulative);
-   //vDCmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcDC,vPoi,batMax,rtCumulative);
+   Float64 W = (vehicleIdx == INVALID_INDEX ? 0 : pProject->GetVehicleWeight(pierID,ratingType,vehicleIdx));
 
-   //vDWmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcDWRating,vPoi,batMin,rtCumulative);
-   //vDWmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcDWRating,vPoi,batMax,rtCumulative);
+   CollectionIndexType nPOI = vPoi.size();
+   for ( CollectionIndexType i = 0; i < nPOI; i++ )
+   {
+      const xbrPointOfInterest& poi = vPoi[i];
 
-   //vCRmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcCR,vPoi,batMin,rtCumulative);
-   //vCRmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcCR,vPoi,batMax,rtCumulative);
+      sysSectionValue vDC = pAnalysisResults->GetShear(pierID,xbrTypes::lcDC,poi);
+      sysSectionValue vDW = pAnalysisResults->GetShear(pierID,xbrTypes::lcDW,poi);
+      sysSectionValue vCR = pAnalysisResults->GetShear(pierID,xbrTypes::lcCR,poi);
+      sysSectionValue vSH = pAnalysisResults->GetShear(pierID,xbrTypes::lcSH,poi);
+      sysSectionValue vRE = pAnalysisResults->GetShear(pierID,xbrTypes::lcRE,poi);
+      sysSectionValue vPS = pAnalysisResults->GetShear(pierID,xbrTypes::lcPS,poi);
 
-   //vSHmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcSH,vPoi,batMin,rtCumulative);
-   //vSHmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcSH,vPoi,batMax,rtCumulative);
+      Float64 DC   = MaxMagnitude(vDC.Left(),vDC.Right());
+      Float64 DW   = MaxMagnitude(vDW.Left(),vDW.Right());
+      Float64 CR   = MaxMagnitude(vCR.Left(),vCR.Right());
+      Float64 SH   = MaxMagnitude(vSH.Left(),vSH.Right());
+      Float64 RE   = MaxMagnitude(vRE.Left(),vRE.Right());
+      Float64 PS   = MaxMagnitude(vPS.Left(),vPS.Right());
 
-   //vREmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcRE,vPoi,batMin,rtCumulative);
-   //vREmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcRE,vPoi,batMax,rtCumulative);
+      Float64 LLIM = 0;
+      bool bPermitRating = ::IsPermitRatingType(ratingType);
+      if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
+      {
+         // moments include multiple presence factor
+         if ( vehicleIdx == INVALID_INDEX )
+         {
+            sysSectionValue vLLIMmin, vLLIMmax;
+            pAnalysisResults->GetShear(pierID,ratingType,poi,&vLLIMmin,&vLLIMmax,NULL,NULL,NULL,NULL);
+            LLIM = MaxMagnitude(vLLIMmin.Left(),vLLIMmin.Right(),vLLIMmax.Left(),vLLIMmax.Right());
+         }
+         else
+         {
+            sysSectionValue vLLIMmin, vLLIMmax;
+            pAnalysisResults->GetShear(pierID,ratingType,vehicleIdx,poi,&vLLIMmin,&vLLIMmax,NULL,NULL,NULL,NULL);
+            LLIM = MaxMagnitude(vLLIMmin.Left(),vLLIMmin.Right(),vLLIMmax.Left(),vLLIMmax.Right());
+         }
+      }
+      else
+      {
+         // for WSDOT permit rating, the analysis is done in the rating artifact object
+         ATLASSERT(bPermitRating && permitRatingMethod == xbrTypes::prmWSDOT);
+         LLIM = 0;
+      }
 
-   //vPSmin = pCombinedForces->GetShear(loadRatingIntervalIdx,lcPS,vPoi,batMin,rtCumulative);
-   //vPSmax = pCombinedForces->GetShear(loadRatingIntervalIdx,lcPS,vPoi,batMax,rtCumulative);
+      CString strProgress;
+      strProgress.Format(_T("Load rating %s for shear at %s"),
+                         strVehicleName.c_str(),
+                         ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+      pProgress->UpdateMessage(strProgress);
 
-   //if ( vehicleIdx == INVALID_INDEX )
-   //{
-   //   pProductForces->GetLiveLoadShear( loadRatingIntervalIdx, llType, vPoi, batMin, true, true, &vLLIMmin, &vUnused, &vMinTruckIndex, &vUnusedIndex );
-   //   pProductForces->GetLiveLoadShear( loadRatingIntervalIdx, llType, vPoi, batMax, true, true, &vUnused, &vLLIMmax, &vUnusedIndex, &vMaxTruckIndex );
-   //}
-   //else
-   //{
-   //   pProductForces->GetVehicularLiveLoadShear( loadRatingIntervalIdx, llType, vehicleIdx, vPoi, batMin, true, true, &vLLIMmin, &vUnused, NULL,NULL,NULL,NULL);
-   //   pProductForces->GetVehicularLiveLoadShear( loadRatingIntervalIdx, llType, vehicleIdx, vPoi, batMax, true, true, &vUnused, &vLLIMmax, NULL,NULL,NULL,NULL);
-   //}
+#pragma Reminder("WORKING HERE - make shear phi factor user input")
+      Float64 phi_shear = 0.9;
+      Float64 Vr = pShearCapacity->GetShearCapacity(pierID,poi);
 
-   //pCombinedForces->GetCombinedLiveLoadShear( loadRatingIntervalIdx, pgsTypes::lltPedestrian, vPoi, batMax, false, &vUnused, &vPLmax );
-   //pCombinedForces->GetCombinedLiveLoadShear( loadRatingIntervalIdx, pgsTypes::lltPedestrian, vPoi, batMin, false, &vPLmin, &vUnused );
-
-   //GET_IFACE(IShearCapacity,pShearCapacity);
-   //std::vector<SHEARCAPACITYDETAILS> vVn = pShearCapacity->GetShearCapacityDetails(ls,loadRatingIntervalIdx,vPoi);
-
-   //ATLASSERT(vPoi.size()     == vDCmax.size());
-   //ATLASSERT(vPoi.size()     == vDWmax.size());
-   //ATLASSERT(vPoi.size()     == vLLIMmax.size());
-   //ATLASSERT(vPoi.size()     == vVn.size());
-   //ATLASSERT(vDCmin.size()   == vDCmax.size());
-   //ATLASSERT(vDWmin.size()   == vDWmax.size());
-   //ATLASSERT(vCRmin.size()   == vCRmax.size());
-   //ATLASSERT(vSHmin.size()   == vSHmax.size());
-   //ATLASSERT(vREmin.size()   == vREmax.size());
-   //ATLASSERT(vPSmin.size()   == vPSmax.size());
-   //ATLASSERT(vLLIMmin.size() == vLLIMmax.size());
-   //ATLASSERT(vPLmin.size()   == vPLmax.size());
-
-   //GET_IFACE(IRatingSpecification,pRatingSpec);
-   //Float64 system_factor    = pRatingSpec->GetSystemFactorShear();
-   //bool bIncludePL = pRatingSpec->IncludePedestrianLiveLoad();
-   //   Float64 condition_factor = pProject->GetConditionFactor(pierID);
-
-   //Float64 gDC = pRatingSpec->GetDeadLoadFactor(ls);
-   //Float64 gDW = pRatingSpec->GetWearingSurfaceFactor(ls);
-   //Float64 gCR = pRatingSpec->GetCreepFactor(ls);
-   //Float64 gSH = pRatingSpec->GetShrinkageFactor(ls);
-   //Float64 gRE = pRatingSpec->GetRelaxationFactor(ls);
-   //Float64 gPS = pRatingSpec->GetSecondaryEffectsFactor(ls);
-
-   //GET_IFACE(IProductLoads,pProductLoads);
-   //std::vector<std::_tstring> strLLNames = pProductLoads->GetVehicleNames(llType,girderKey);
-
-   //CollectionIndexType nPOI = vPoi.size();
-   //for ( CollectionIndexType i = 0; i < nPOI; i++ )
-   //{
-   //   const pgsPointOfInterest& poi = vPoi[i];
-
-   //   Float64 DCmin   = Min(vDCmin[i].Left(),  vDCmin[i].Right());
-   //   Float64 DCmax   = Max(vDCmax[i].Left(),  vDCmax[i].Right());
-   //   Float64 DWmin   = Min(vDWmin[i].Left(),  vDWmin[i].Right());
-   //   Float64 DWmax   = Max(vDWmax[i].Left(),  vDWmax[i].Right());
-   //   Float64 CRmin   = Min(vCRmin[i].Left(),  vCRmin[i].Right());
-   //   Float64 CRmax   = Max(vCRmax[i].Left(),  vCRmax[i].Right());
-   //   Float64 SHmin   = Min(vSHmin[i].Left(),  vSHmin[i].Right());
-   //   Float64 SHmax   = Max(vSHmax[i].Left(),  vSHmax[i].Right());
-   //   Float64 REmin   = Min(vREmin[i].Left(),  vREmin[i].Right());
-   //   Float64 REmax   = Max(vREmax[i].Left(),  vREmax[i].Right());
-   //   Float64 PSmin   = Min(vPSmin[i].Left(),  vPSmin[i].Right());
-   //   Float64 PSmax   = Max(vPSmax[i].Left(),  vPSmax[i].Right());
-   //   Float64 LLIMmin = Min(vLLIMmin[i].Left(),vLLIMmin[i].Right());
-   //   Float64 LLIMmax = Max(vLLIMmax[i].Left(),vLLIMmax[i].Right());
-   //   Float64 PLmin   = Min(vPLmin[i].Left(),  vPLmin[i].Right());
-   //   Float64 PLmax   = Max(vPLmax[i].Left(),  vPLmax[i].Right());
-
-   //   Float64 DC   = Max(fabs(DCmin),fabs(DCmax));
-   //   Float64 DW   = Max(fabs(DWmin),fabs(DWmax));
-   //   Float64 CR   = Max(fabs(CRmin),fabs(CRmax));
-   //   Float64 SH   = Max(fabs(SHmin),fabs(SHmax));
-   //   Float64 RE   = Max(fabs(REmin),fabs(REmax));
-   //   Float64 PS   = Max(fabs(PSmin),fabs(PSmax));
-   //   Float64 LLIM = Max(fabs(LLIMmin),fabs(LLIMmax));
-   //   Float64 PL   = (bIncludePL ? Max(fabs(PLmin),fabs(PLmax)) : 0);
-   //   VehicleIndexType truck_index = vehicleIdx;
-   //   if ( vehicleIdx == INVALID_INDEX )
-   //   {
-   //      truck_index = (fabs(LLIMmin) < fabs(LLIMmax) ? vMaxTruckIndex[i] : vMinTruckIndex[i]);
-   //   }
-
-   //   std::_tstring strVehicleName = strLLNames[truck_index];
-
-   //   CString strProgress;
-   //   if ( poi.HasGirderCoordinate() )
-   //   {
-   //      strProgress.Format(_T("Load rating %s for shear at %s"),strVehicleName.c_str(),
-   //         ::FormatDimension(poi.GetGirderCoordinate(),pDisplayUnits->GetSpanLengthUnit()));
-   //   }
-   //   else
-   //   {
-   //      strProgress.Format(_T("Load rating %s for shear"),strVehicleName.c_str());
-   //   }
-   //   pProgress->UpdateMessage(strProgress);
-
-   //   Float64 gLL = pRatingSpec->GetLiveLoadFactor(ls,true);
-   //   if ( gLL < 0 )
-   //   {
-   //      // need to compute gLL based on axle weights
-   //      if ( ::IsStrengthLimitState(ls) )
-   //      {
-   //         GET_IFACE(IProductForces,pProductForce);
-   //         pgsTypes::BridgeAnalysisType batMin = pProductForce->GetBridgeAnalysisType(pgsTypes::Minimize);
-   //         pgsTypes::BridgeAnalysisType batMax = pProductForce->GetBridgeAnalysisType(pgsTypes::Maximize);
-
-   //         sysSectionValue Vmin, Vmax, Dummy;
-   //         AxleConfiguration MinLeftAxleConfig, MaxLeftAxleConfig, MinRightAxleConfig, MaxRightAxleConfig, DummyLeftAxleConfig, DummyRightAxleConfig;
-   //         pProductForce->GetVehicularLiveLoadShear(loadRatingIntervalIdx,llType,truck_index,poi,batMin,true,true,&Vmin,&Dummy,&MinLeftAxleConfig,&MinRightAxleConfig,&DummyLeftAxleConfig,&DummyRightAxleConfig);
-   //         pProductForce->GetVehicularLiveLoadShear(loadRatingIntervalIdx,llType,truck_index,poi,batMax,true,true,&Dummy,&Vmax,&DummyLeftAxleConfig,&DummyRightAxleConfig,&MaxLeftAxleConfig,&MaxRightAxleConfig);
-
-   //         if ( fabs(LLIMmin) < fabs(LLIMmax) )
-   //         {
-   //            if (IsEqual(fabs(vLLIMmax[i].Left()),fabs(LLIMmax)))
-   //            {
-   //               gLL = GetStrengthLiveLoadFactor(ratingType,MaxLeftAxleConfig);
-   //            }
-   //            else
-   //            {
-   //               gLL = GetStrengthLiveLoadFactor(ratingType,MaxRightAxleConfig);
-   //            }
-   //         }
-   //         else
-   //         {
-   //            if (IsEqual(fabs(vLLIMmin[i].Left()),fabs(LLIMmin)))
-   //            {
-   //               gLL = GetStrengthLiveLoadFactor(ratingType,MinLeftAxleConfig);
-   //            }
-   //            else
-   //            {
-   //               gLL = GetStrengthLiveLoadFactor(ratingType,MinRightAxleConfig);
-   //            }
-   //         }
-   //      }
-   //      else
-   //      {
-   //         gLL = GetServiceLiveLoadFactor(ratingType);
-   //      }
-   //   }
+#pragma Reminder("WORKING HERE - Need to capture shear capacity details for reporting")
+      Float64 Vn = Vr/phi_shear; // when we have shear capacity details, we can get Vn directly
 
    //   Float64 phi_shear = vVn[i].Phi; 
    //   Float64 Vn = vVn[i].Vn;
 
-   //   Float64 W = pProductLoads->GetVehicleWeight(llType,truck_index);
+      xbrShearRatingArtifact shearArtifact;
+      shearArtifact.SetRatingType(ratingType);
+      shearArtifact.SetPermitRatingMethod(permitRatingMethod);
+      shearArtifact.SetPierID(pierID);
+      shearArtifact.SetPointOfInterest(poi);
+      shearArtifact.SetVehicleIndex(vehicleIdx);
+      shearArtifact.SetVehicleWeight(W);
+      shearArtifact.SetVehicleName(strVehicleName.c_str());
+      shearArtifact.SetSystemFactor(system_factor);
+      shearArtifact.SetConditionFactor(condition_factor);
+      shearArtifact.SetCapacityReductionFactor(phi_shear);
+      shearArtifact.SetNominalShearCapacity(Vn);
+      shearArtifact.SetDeadLoadFactor(gDC);
+      shearArtifact.SetDeadLoadShear(DC);
+      shearArtifact.SetWearingSurfaceFactor(gDW);
+      shearArtifact.SetWearingSurfaceShear(DW);
+      shearArtifact.SetCreepFactor(gCR);
+      shearArtifact.SetCreepShear(CR);
+      shearArtifact.SetShrinkageFactor(gSH);
+      shearArtifact.SetShrinkageShear(SH);
+      shearArtifact.SetRelaxationFactor(gRE);
+      shearArtifact.SetRelaxationShear(RE);
+      shearArtifact.SetSecondaryEffectsFactor(gPS);
+      shearArtifact.SetSecondaryEffectsShear(PS);
+      shearArtifact.SetLiveLoadFactor(gLL);
+      shearArtifact.SetLiveLoadShear(LLIM);
 
-   //   pgsShearRatingArtifact shearArtifact;
-   //   shearArtifact.SetRatingType(ratingType);
-   //   shearArtifact.SetPermitRatingMethod(permitRatingMethod);
-   //   shearArtifact.SetPierID(pierID);
-   //   shearArtifact.SetPointOfInterest(poi);
-   //   shearArtifact.SetVehicleIndex(truck_index);
-   //   shearArtifact.SetVehicleWeight(W);
-   //   shearArtifact.SetVehicleName(strVehicleName.c_str());
-   //   shearArtifact.SetSystemFactor(system_factor);
-   //   shearArtifact.SetConditionFactor(condition_factor);
-   //   shearArtifact.SetCapacityReductionFactor(phi_shear);
-   //   shearArtifact.SetNominalShearCapacity(Vn);
-   //   shearArtifact.SetDeadLoadFactor(gDC);
-   //   shearArtifact.SetDeadLoadShear(DC);
-   //   shearArtifact.SetWearingSurfaceFactor(gDW);
-   //   shearArtifact.SetWearingSurfaceShear(DW);
-   //   shearArtifact.SetCreepFactor(gCR);
-   //   shearArtifact.SetCreepShear(CR);
-   //   shearArtifact.SetShrinkageFactor(gSH);
-   //   shearArtifact.SetShrinkageShear(SH);
-   //   shearArtifact.SetRelaxationFactor(gRE);
-   //   shearArtifact.SetRelaxationShear(RE);
-   //   shearArtifact.SetSecondaryEffectsFactor(gPS);
-   //   shearArtifact.SetSecondaryEffectsShear(PS);
-   //   shearArtifact.SetLiveLoadFactor(gLL);
-   //   shearArtifact.SetLiveLoadShear(LLIM+PL);
-
+#pragma Reminder("WORKING HERE - add longitudinal reinforcement for shear check")
    //   // longitudinal steel check
    //   pgsLongReinfShearArtifact l_artifact;
    //   SHEARCAPACITYDETAILS scd;
@@ -430,8 +322,8 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    //   designer.CheckLongReinfShear(poi,loadRatingIntervalIdx,ls,scd,NULL,&l_artifact);
    //   shearArtifact.SetLongReinfShearArtifact(l_artifact);
 
-   //   ratingArtifact.AddArtifact(poi,shearArtifact);
-   //}
+      ratingArtifact.AddArtifact(poi,shearArtifact);
+   }
 }
 
 void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,bool bPositiveMoment,xbrRatingArtifact& ratingArtifact)
@@ -452,9 +344,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRSectionProperties,pSectProps);
-
-   GET_IFACE(IXBRMaterial,pMaterial);
-   Float64 Exbm = pMaterial->GetXBeamEc(pierID);
 
    // Get load factors
    Float64 gDC = pProject->GetDCLoadFactor(ls);
@@ -494,7 +383,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       Float64 RE = pMomentRatingArtifact->GetRelaxationMoment();
       Float64 PS = pMomentRatingArtifact->GetSecondaryEffectsMoment();
 
-      // NOTE, moments include multiple presence factor
+      // NOTE: live load moments include multiple presence factor
       Float64 LLIMpermit = 0;
       Float64 LLIMlegal = 0;
       if ( pMomentRatingArtifact->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
@@ -510,9 +399,9 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
          pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&LLIMpermit,&LLIMlegal,&K);
       }
 
-      // NOTE: not sure if we need to do this part of the analysis (rebar stress)
       Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
+      GET_IFACE(IXBRMaterial,pMaterial);
       Float64 Es, fy, fu;
       pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
 
@@ -529,7 +418,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       {
         CComPtr<IPoint2d> location;
         rebarSectionItem->get_Location(&location);
-        Float64 y = pRebar->GetRebarDepth(pierID,poi,location);
+        Float64 y = pRebar->GetRebarDepth(pierID,poi,stage,location);
         ATLASSERT(0 <= y);
         Y = (bPositiveMoment ? Max(Y,y) : Min(Y,y));
         rebarSectionItem.Release();
@@ -540,7 +429,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       // Get allowable
       Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
 
-      // NOTE: stresses are computed in artifact (Es/Exbr)(M)c/Icr use 2n for permanet load stresses
       xbrYieldStressRatioArtifact stressRatioArtifact;
       stressRatioArtifact.SetRatingType(ratingType);
       stressRatioArtifact.SetPermitRatingMethod(pMomentRatingArtifact->GetPermitRatingMethod());

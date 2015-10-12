@@ -1083,7 +1083,7 @@ void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest&
    rebarSectionItem->get_Location(ppPoint);
 }
 
-Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,IPoint2d* pRebarLocation)
+Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation)
 {
    Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID,poi.GetDistFromStart());
    Float64 Ydeck = GetElevation(pierID,Xcl);
@@ -1097,6 +1097,23 @@ Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest&
    pRebarLocation->get_Y(&Y);
 
    Float64 Yb = Ydeck - Y - tDeck;
+
+   if ( stage == xbrTypes::Stage1 )
+   {
+      // for Stage 1, measure from the top of the lower cross beam
+      CComPtr<ICrossBeam> xbeam;
+      pier->get_CrossBeam(&xbeam);
+      
+      Float64 lower_depth;
+      xbeam->get_Depth(0,poi.GetDistFromStart(),&lower_depth);
+      
+      Float64 full_depth;
+      xbeam->get_FullDepth(poi.GetDistFromStart(),&full_depth);
+
+      Float64 upper_depth = full_depth - lower_depth;
+
+      Yb -= upper_depth;
+   }
 
    return Yb;
 }

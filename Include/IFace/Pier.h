@@ -140,7 +140,8 @@ interface IXBRRebar : public IUnknown
    virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) = 0;
 
    // Returns the depth of the rebar, measured down from top of the cross beam
-   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,IPoint2d* pRebarLocation) = 0;
+   // for stage 1, measures from the top of the lower cross beam
+   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation) = 0;
 };
 
 // {025A63FF-9FE0-4733-8AB9-B1B6B96E0F7B}
