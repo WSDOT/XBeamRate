@@ -31,7 +31,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-//#define COMPARE_WITH_FULL_ANALYSIS
+#define COMPARE_WITH_FULL_ANALYSIS
 
 /****************************************************************************
 CLASS
@@ -454,7 +454,9 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
                sysSectionValue Vpermit, Vlegal;
                pAnalysisResults->GetShear(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Vpermit,&Vlegal);
 
-               rf = GetRatingFactor(Vpermit,Vlegal);
+               Float64 vp = MaxMagnitude(Vpermit.Left(),Vpermit.Right());
+               Float64 vl = MaxMagnitude(Vlegal.Left(),Vlegal.Right());
+               rf = GetRatingFactor(vp,vl);
 
                if ( rf < _RFmin || _bFirst )
                {
@@ -462,8 +464,8 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
                   _LLConfigIdx      = llConfigIdx;
                   _PermitLaneIdx    = permitLaneIdx;
                   _PermitVehicleIdx = vehicleIdx;
-                  _Vpermit          = Vpermit;
-                  _Vlegal           = Vlegal;
+                  _Vpermit          = vp;
+                  _Vlegal           = vl;
 
                   _bFirst = false;
                }
