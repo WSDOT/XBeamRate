@@ -384,7 +384,6 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
       Float64 RFmin = DBL_MAX;
       bool bFirst = true;
       pgsTypes::LimitState ls = ::GetStrengthLimitStateType(m_RatingType);
-      bool bPositiveMoment = (0 <= m_Vn ? true : false);
 
 #if defined COMPARE_WITH_FULL_ANALYSIS
       Float64 _RFmin = DBL_MAX;
@@ -408,8 +407,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
 
       std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
       pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vMinLLConfigIdx,&vMaxLLConfigIdx);
-      std::vector<IndexType>* pvLLConfigIdx = (bPositiveMoment ? &vMaxLLConfigIdx : &vMinLLConfigIdx);
-      BOOST_FOREACH(IndexType llConfigIdx,*pvLLConfigIdx)
+      BOOST_FOREACH(IndexType llConfigIdx,vMaxLLConfigIdx)
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
@@ -494,7 +492,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
             )
       {
          CString strMsg1;
-         strMsg1.Format(_T("Full and simplified analysis results don't match.\r\n%s\r\nPOI %d @ %f\r\nRF %f (Full), %f (Simplified)"),(bPositiveMoment ? _T("+M") : _T("-M")),m_POI.GetID(),m_POI.GetDistFromStart(),_RFmin,RFmin);
+         strMsg1.Format(_T("Full and simplified analysis results don't match.\r\nPOI %d @ %f\r\nRF %f (Full), %f (Simplified)"),m_POI.GetID(),m_POI.GetDistFromStart(),_RFmin,RFmin);
 
          CString strMsg2;
          strMsg2.Format(_T("LLConfigIdx %d (Full), %d (Simplified)"),_LLConfigIdx,m_LLConfigIdx);
@@ -597,14 +595,14 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
       }
 
       Float64 C = p * m_CapacityRedutionFactor * m_Vn;
-      Float64 RFtop = C - m_gDC*m_Vdc - m_gDW*m_Vdw - m_gCR*m_Vcr - m_gSH*m_Vsh - m_gRE*m_Vre - m_gPS*m_Vps;
+      Float64 RFtop = C - fabs(m_gDC*m_Vdc - m_gDW*m_Vdw - m_gCR*m_Vcr - m_gSH*m_Vsh - m_gRE*m_Vre - m_gPS*m_Vps);
 
       if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
       {
-         RFtop -= m_gLL*VllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
+         RFtop -= fabs(m_gLL*VllimAdj); // WSDOT BDM Eqn. 13.1.1A-2
       }
 
-      Float64 RFbot = m_gLL*Vllim;
+      Float64 RFbot = fabs(m_gLL*Vllim);
 
       if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
       {

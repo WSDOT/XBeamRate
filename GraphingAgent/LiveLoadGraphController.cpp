@@ -358,7 +358,7 @@ void CXBRLiveLoadGraphController::LoadingChanged()
       int curPos = pSpin->GetPos32();
       pSpin->SetRange32(1,(int)nLoadedLanes);
 
-      if ( curPos < nLoadedLanes )
+      if ( (IndexType)curPos < nLoadedLanes )
       {
          pSpin->SetPos32(curPos);
       }
