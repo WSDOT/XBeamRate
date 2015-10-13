@@ -20,20 +20,27 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
 #pragma once
 
+// CRatingOptionsPage dialog
 
-#include <XBeamRateAll.h>
+class CRatingOptionsPage : public CPropertyPage
+{
+	DECLARE_DYNAMIC(CRatingOptionsPage)
 
-#include <EAF\EAFUtilities.h>
+public:
+	CRatingOptionsPage();   // standard constructor
+	virtual ~CRatingOptionsPage();
 
-#include <MFCTools\MFCTools.h>
+// Dialog Data
+	enum { IDD = IDD_RATING_OPTIONS };
 
-#include <grid\gxall.h>
-#include <afxwin.h>
-#include <afxdlgs.h>
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+   void FillPermitFactorList();
+
+	DECLARE_MESSAGE_MAP()
+public:
+   virtual BOOL OnInitDialog();
+};

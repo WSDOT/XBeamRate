@@ -47,6 +47,9 @@ interface IReinforcementPageParent
    virtual xbrLongitudinalRebarData& GetLongitudinalRebar() = 0;
    virtual xbrStirrupData& GetLowerXBeamStirrups() = 0;
    virtual xbrStirrupData& GetFullDepthStirrups() = 0;
+
+   virtual pgsTypes::ConditionFactorType& GetConditionFactorType() = 0;
+   virtual Float64& GetConditionFactor() = 0;
 };
 
 // CReinforcementPage dialog
@@ -95,6 +98,7 @@ protected:
    afx_msg void OnChangeFc();
    afx_msg void OnLowerXBeamSymmetry();
    afx_msg void OnFullDepthSymmetry();
+   afx_msg void OnConditionFactorTypeChanged();
    afx_msg void OnHelp();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

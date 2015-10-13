@@ -108,7 +108,9 @@ public:
 
 // IXBRShearCapacity
 public:
-   virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi);
+   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
 
 // IXBRArtifact
 public:
@@ -124,7 +126,7 @@ private:
    DWORD m_dwProjectCookie;
 
 
-   // PierID is not used to store moment capacity because the POI ID is sufficent
+   // PierID is not used to store results because the POI ID is sufficent
    // POI IDs are not duplicated between piers
    std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pPositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
    std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pNegativeMomentCapacity[2];
@@ -138,8 +140,8 @@ private:
    std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pPositiveMomentCrackedSection[2][2]; // key = POI ID, array index = [xbrTypes::Stage][xbrTypes::LoadType]
    std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pNegativeMomentCrackedSection[2][2];
 
-#pragma Reminder("WORKING HERE: need to have shear capacity by pier")
-   // need to cache shear capacity
+   std::auto_ptr<std::map<IDType,ShearCapacityDetails>> m_pShearCapacity[2];
+   std::auto_ptr<std::map<IDType,AvOverSDetails>> m_pShearFailurePlane[2];
 
    MomentCapacityDetails ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    CrackingMomentDetails ComputeCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
@@ -149,8 +151,9 @@ private:
    CrackedSectionDetails ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType);
    void BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,IRCBeam2** ppModel,Float64* pdt);
 
+   ShearCapacityDetails ComputeShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   Float64 GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
+   AvOverSDetails ComputeAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
 
 
    // rating artifacts for vehicleIdx == INVALID_INDEX are the governing artifacts for a load rating type
@@ -183,6 +186,9 @@ private:
       std::map<IDType,CrackedSectionDetails>* m_pNegativeMomentCrackedSection[2][2];
 
       std::map<PierIDType,RatingArtifacts>* m_pRatingArtifacts[6];
+
+      std::map<IDType,ShearCapacityDetails>* m_pShearCapacity[2];
+      std::map<IDType,AvOverSDetails>* m_pShearFailurePlane[2];
    };
    static UINT DeleteDataStructures(LPVOID pParam);
    void CreateDataStructures();

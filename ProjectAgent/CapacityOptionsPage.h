@@ -20,20 +20,24 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
 #pragma once
 
 
-#include <XBeamRateAll.h>
+// CCapacityOptionsPage dialog
 
-#include <EAF\EAFUtilities.h>
+class CCapacityOptionsPage : public CPropertyPage
+{
+	DECLARE_DYNAMIC(CCapacityOptionsPage)
 
-#include <MFCTools\MFCTools.h>
+public:
+	CCapacityOptionsPage();
+	virtual ~CCapacityOptionsPage();
 
-#include <grid\gxall.h>
-#include <afxwin.h>
-#include <afxdlgs.h>
+// Dialog Data
+	enum { IDD = IDD_CAPACITY_OPTIONS };
+
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
+};

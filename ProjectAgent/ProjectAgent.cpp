@@ -53,12 +53,14 @@
 #include <IFace\XBeamRateAgent.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <\ARP\PGSuper\Include\IFace\EditByUI.h>
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\RatingSpecification.h>
+#include <\ARP\PGSuper\Include\IFace\ResistanceFactors.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
 /////////////////////////////////////////////////////////////////////////////

@@ -37,6 +37,13 @@ struct txnEditOptionsData
    bool m_bCheckYieldStress;
    Float64 m_YieldStressCoefficient;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+
+   Float64 m_SystemFactorFlexure;
+   Float64 m_SystemFactorShear;
+
+   Float64 m_PhiC;
+   Float64 m_PhiT;
+   Float64 m_PhiV;
 };
 
 class txnEditOptions :

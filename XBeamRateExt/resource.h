@@ -1,25 +1,3 @@
-///////////////////////////////////////////////////////////////////////
-// XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2015  Washington State Department of Transportation
-//                        Bridge and Structures Office
-//
-// This program is free software; you can redistribute it and/or modify
-// it under the terms of the Alternate Route Open Source License as 
-// published by the Washington State Department of Transportation, 
-// Bridge and Structures Office.
-//
-// This program is distributed in the hope that it will be useful, but 
-// distribution is AS IS, WITHOUT ANY WARRANTY; without even the implied 
-// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See 
-// the Alternate Route Open Source License for more details.
-//
-// You should have received a copy of the Alternate Route Open Source 
-// License along with this program; if not, write to the Washington 
-// State Department of Transportation, Bridge and Structures Office, 
-// P.O. Box  47340, Olympia, WA 98503, USA or e-mail 
-// Bridge_Support@wsdot.wa.gov
-///////////////////////////////////////////////////////////////////////
-
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by XBeamRateExt.rc
@@ -51,6 +29,12 @@
 #define IDC_ADD_FULL_DEPTH              122
 #define IDC_REMOVE_FULL_DEPTH           123
 #define IDC_MESSAGE                     1001
+#define IDC_CONDITION_FACTOR_GROUP      1002
+#define IDC_CONDITION_FACTOR_TYPE       1003
+#define IDC_CONDITION_FACTOR            1004
+#define IDC_MATERIAL_GROUP              1005
+#define IDC_REINFORCEMENT_LABEL         1006
+#define IDC_LONGITUDINAL_REINFORCEMENT_LABEL 1007
 
 // Next default values for new objects
 // 
@@ -58,7 +42,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1002
+#define _APS_NEXT_CONTROL_VALUE         1008
 #define _APS_NEXT_SYMED_VALUE           124
 #endif
 #endif

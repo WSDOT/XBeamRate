@@ -53,6 +53,8 @@ public:
    virtual xbrLongitudinalRebarData& GetLongitudinalRebar();
    virtual xbrStirrupData& GetLowerXBeamStirrups();
    virtual xbrStirrupData& GetFullDepthStirrups();
+   virtual pgsTypes::ConditionFactorType& GetConditionFactorType();
+   virtual Float64& GetConditionFactor();
 
 protected:
 	DECLARE_MESSAGE_MAP()

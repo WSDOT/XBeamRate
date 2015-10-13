@@ -86,3 +86,13 @@ xbrStirrupData& CReinforcementPageParent::GetFullDepthStirrups()
 {
    return m_PierData.GetFullDepthStirrups();
 }
+
+pgsTypes::ConditionFactorType& CReinforcementPageParent::GetConditionFactorType()
+{
+   return m_PierData.GetConditionFactorType();
+}
+
+Float64& CReinforcementPageParent::GetConditionFactor()
+{
+   return m_PierData.GetConditionFactor();
+}

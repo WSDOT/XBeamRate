@@ -144,6 +144,9 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_Check_Bool(pDX,IDC_LOWER_XBEAM_SYMMETRY,m_pParent->GetLowerXBeamStirrups().Symmetric);
    DDX_Check_Bool(pDX,IDC_FULL_DEPTH_SYMMETRY, m_pParent->GetFullDepthStirrups().Symmetric);
+
+   DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, m_pParent->GetConditionFactorType());
+   DDX_Text(pDX,   IDC_CONDITION_FACTOR,      m_pParent->GetConditionFactor());
 }
 
 
@@ -159,6 +162,7 @@ BEGIN_MESSAGE_MAP(CReinforcementPage, CPropertyPage)
 	ON_EN_CHANGE(IDC_FC, OnChangeFc)
    ON_BN_CLICKED(IDC_LOWER_XBEAM_SYMMETRY,OnLowerXBeamSymmetry)
    ON_BN_CLICKED(IDC_FULL_DEPTH_SYMMETRY,OnFullDepthSymmetry)
+   ON_CBN_SELCHANGE(IDC_CONDITION_FACTOR_TYPE, OnConditionFactorTypeChanged)
    ON_COMMAND(ID_HELP,OnHelp)
 END_MESSAGE_MAP()
 
@@ -176,6 +180,13 @@ BOOL CReinforcementPage::OnInitDialog()
    m_pFullDepthGrid->SubclassDlgItem(IDC_FULL_DEPTH_STIRRUP_GRID,this);
    m_pFullDepthGrid->CustomInit();
 
+   CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
+   pcbConditionFactor->AddString(_T("Good or Satisfactory (Structure condition rating 6 or higher)"));
+   pcbConditionFactor->AddString(_T("Fair (Structure condition rating of 5)"));
+   pcbConditionFactor->AddString(_T("Poor (Structure condition rating 4 or lower)"));
+   pcbConditionFactor->AddString(_T("Other"));
+   pcbConditionFactor->SetCurSel(0);
+
    CPropertyPage::OnInitDialog();
 
    OnEnableDelete(IDC_LOWER_XBEAM_STIRRUP_GRID,false);
@@ -186,6 +197,7 @@ BOOL CReinforcementPage::OnInitDialog()
       m_ctrlEc.GetWindowText(m_strUserEc);
    }
 
+   OnConditionFactorTypeChanged();
    UpdateConcreteTypeLabel();
    OnBnClickedEc();
 
@@ -207,17 +219,20 @@ BOOL CReinforcementPage::OnSetActive()
    const CPierData2* pPier = m_pParent->GetPierData();
    if ( pPier )
    {
+      int nShowCmd;
       if ( pPier->GetPierModelType() == pgsTypes::pmtIdealized )
       {
          EnumChildWindows(GetSafeHwnd(),ShowChildWindow,SW_HIDE);
          CWnd* pWnd = GetDlgItem(IDC_MESSAGE);
          pWnd->ShowWindow(SW_SHOW);
+         nShowCmd = SW_HIDE;
       }
       else
       {
          EnumChildWindows(GetSafeHwnd(),ShowChildWindow,SW_SHOW);
          CWnd* pWnd = GetDlgItem(IDC_MESSAGE);
          pWnd->ShowWindow(SW_HIDE);
+         nShowCmd = SW_SHOW;
       }
 
       // Not editing concrete properties when this dialog is an extension page
@@ -232,6 +247,30 @@ BOOL CReinforcementPage::OnSetActive()
       GetDlgItem(IDC_EC_UNIT)->ShowWindow(SW_HIDE);
 
       GetDlgItem(IDC_MORE_PROPERTIES)->ShowWindow(SW_HIDE);
+
+
+      GetDlgItem(IDC_CONDITION_FACTOR_GROUP)->ShowWindow(nShowCmd);
+      GetDlgItem(IDC_CONDITION_FACTOR_TYPE)->ShowWindow(nShowCmd);
+      GetDlgItem(IDC_CONDITION_FACTOR)->ShowWindow(nShowCmd);
+
+      // resize the material group box
+      CWnd* pMaterial = GetDlgItem(IDC_MATERIAL_GROUP);
+      CRect rMaterial;
+      pMaterial->GetWindowRect(&rMaterial);
+
+      CWnd* pCondition = GetDlgItem(IDC_CONDITION_FACTOR_GROUP);
+      CRect rCondition;
+      pCondition->GetWindowRect(&rCondition);
+
+      rMaterial.right = rCondition.left - 7;
+      ScreenToClient(rMaterial);
+      pMaterial->MoveWindow(rMaterial);
+   }
+   else
+   {
+      GetDlgItem(IDC_CONDITION_FACTOR_GROUP)->ShowWindow(SW_HIDE);
+      GetDlgItem(IDC_CONDITION_FACTOR_TYPE)->ShowWindow(SW_HIDE);
+      GetDlgItem(IDC_CONDITION_FACTOR)->ShowWindow(SW_HIDE);
    }
 
    UpdateStirrupGrids();
@@ -415,6 +454,13 @@ void CReinforcementPage::UpdateEc()
 void CReinforcementPage::UpdateStirrupGrids()
 {
    int showWindow = (m_pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral ? SW_SHOW : SW_HIDE);
+   
+   const CPierData2* pPier = m_pParent->GetPierData();
+   if ( pPier && pPier->GetPierModelType() == pgsTypes::pmtIdealized )
+   {
+      showWindow = SW_HIDE;
+   }
+
    GetDlgItem(IDC_FULL_DEPTH_LABEL)->ShowWindow(showWindow);
    GetDlgItem(IDC_FULL_DEPTH_STIRRUP_GRID)->ShowWindow(showWindow);
    GetDlgItem(IDC_ADD_FULL_DEPTH)->ShowWindow(showWindow);
@@ -428,6 +474,32 @@ void CReinforcementPage::UpdateStirrupGrids()
    else
    {
       GetDlgItem(IDC_LOWER_XBEAM_LABEL)->SetWindowText(_T("Stirrups"));
+   }
+}
+
+void CReinforcementPage::OnConditionFactorTypeChanged()
+{
+   CEdit* pEdit = (CEdit*)GetDlgItem(IDC_CONDITION_FACTOR);
+   CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
+
+   int idx = pcbConditionFactor->GetCurSel();
+   switch(idx)
+   {
+   case 0:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("1.00"));
+      break;
+   case 1:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("0.95"));
+      break;
+   case 2:
+      pEdit->EnableWindow(FALSE);
+      pEdit->SetWindowText(_T("0.85"));
+      break;
+   case 3:
+      pEdit->EnableWindow(TRUE);
+      break;
    }
 }
 

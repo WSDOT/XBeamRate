@@ -34,6 +34,8 @@ struct xbrEditReinforcementData
    xbrLongitudinalRebarData LongitudinalRebar;
    xbrStirrupData LowerXBeamStirrups;
    xbrStirrupData FullDepthStirrups;
+   pgsTypes::ConditionFactorType ConditionFactorType;
+   Float64 ConditionFactor;
 };
 
 class txnEditReinforcement :

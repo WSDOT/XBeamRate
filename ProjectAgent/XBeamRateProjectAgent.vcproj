@@ -729,6 +729,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CapacityOptionsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ColumnLayoutGrid.cpp"
 				>
 			</File>
@@ -943,6 +947,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\RatingOptionsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -1032,6 +1040,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CapacityOptionsPage.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ColumnLayoutGrid.h"
 				>
 			</File>
@@ -1084,6 +1096,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\RatingOptionsPage.h"
+				>
+			</File>
+			<File
 				RelativePath="Resource.h"
 				>
 			</File>
@@ -1130,6 +1146,14 @@
 			</File>
 			<File
 				RelativePath=".\res\Dimensions_BridgeLine_Integral.emf"
+				>
+			</File>
+			<File
+				RelativePath=".\res\EditOptions.bmp"
+				>
+			</File>
+			<File
+				RelativePath=".\res\EditPier.bmp"
 				>
 			</File>
 			<File

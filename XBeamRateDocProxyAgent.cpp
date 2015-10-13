@@ -140,6 +140,8 @@ STDMETHODIMP CXBeamRateDocProxyAgent::RegInterfaces()
    pBrokerInit->RegInterface( IID_IXBeamRate,      this );
    pBrokerInit->RegInterface( IID_IXBRUIEvents,    this );
    pBrokerInit->RegInterface( IID_IXBRVersionInfo, this );
+   pBrokerInit->RegInterface( IID_IXBRViews,       this );
+   pBrokerInit->RegInterface( IID_IXBREditByUI,    this );
    return S_OK;
 }
 
@@ -376,6 +378,7 @@ CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
 }
 
 /////////////////////////////////////////////////////////////////////
+// IXBRViews
 void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec)
 {
    CEAFReportViewCreationData data;
@@ -404,6 +407,13 @@ void CXBeamRateDocProxyAgent::CreatePierView()
 {
    GET_IFACE(IEAFViewRegistrar,pViewReg);
    pViewReg->CreateView(m_PierViewKey);
+}
+
+/////////////////////////////////////////////////////////////////////
+// IXBREditByUI
+UINT CXBeamRateDocProxyAgent::GetStdToolBarID()
+{
+   return m_StdToolBarID;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -458,9 +468,4 @@ void CXBeamRateDocProxyAgent::RemoveToolBars()
 {
    GET_IFACE(IEAFToolbars,pToolBars);
    pToolBars->DestroyToolBar(m_StdToolBarID);
-}
-
-UINT CXBeamRateDocProxyAgent::GetStdToolBarID()
-{
-   return m_StdToolBarID;
 }

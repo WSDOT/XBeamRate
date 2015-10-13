@@ -12,12 +12,13 @@
 #define IDS_NWC_MESSAGE                 101
 #define IDR_PROJECTAGENTMODULE          102
 #define IDS_LWC_MESSAGE                 102
+#define IDD_CAPACITY_OPTIONS            102
 #define IDD_PIER_LAYOUT_PAGE            106
 #define IDR_EDIT_MENU                   201
 #define IDD_BEARINGS_PAGE               202
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDD_LIVE_LOAD_REACTIONS         205
-#define IDD_OPTIONS                     206
+#define IDD_RATING_OPTIONS              206
 #define IDC_LF_PERMIT_ROUTINE           208
 #define IDC_LF_PERMIT_ROUTINE_SERVICEI  209
 #define IDC_DECK_ELEVATION              211
@@ -143,8 +144,17 @@
 #define IDC_ALLOWABLE_STRESS_LABEL      312
 #define IDC_ALLOWABLE_STRESS            313
 #define IDC_ALLOWABLE_STRESS_TAG        314
+#define IDC_PHI_COMPRESSION             315
+#define IDC_PHI_TENSION                 316
+#define IDC_EDIT3                       317
+#define IDC_PHI_SHEAR                   317
+#define IDC_SYSTEM_FACTOR_FLEXURE       319
+#define IDC_EDIT2                       320
+#define IDC_SYSTEM_FACTOR_SHEAR         320
 #define IDD_AASHTO_CONCRETE             500
+#define IDB_EDIT_PIER                   500
 #define IDC_EC_K1_LABEL                 501
+#define IDB_EDIT_OPTIONS                501
 #define IDC_EC_K1                       502
 #define IDC_EC_K2_LABEL                 503
 #define IDC_EC_K2                       504
@@ -215,7 +225,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        207
 #define _APS_NEXT_COMMAND_VALUE         50005
-#define _APS_NEXT_CONTROL_VALUE         315
+#define _APS_NEXT_CONTROL_VALUE         321
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

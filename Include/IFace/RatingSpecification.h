@@ -44,16 +44,8 @@ interface IXBRRatingSpecification : IUnknown
    //virtual std::_tstring GetRatingSpecification() = 0;
    //virtual void SetRatingSpecification(const std::_tstring& spec) = 0;
 
-   //virtual void SetADTT(Int16 adtt) = 0;
-   //virtual Int16 GetADTT() = 0; // < 0 = Unknown
-
    virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
    virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
-
-   //// Per last paragraph in MBE 6A.4.4.2.1a, the lane load may be excluded and the 0.75 truck factor taken as 1.0
-   //// for ADTT < 500 and in the Engineer's judgement it is warranted
-   //virtual void ExcludeLegalLoadLaneLoading(bool bExclude) = 0;
-   //virtual bool ExcludeLegalLoadLaneLoading() = 0;
 
    // Evalute yield stress in reinforcement MBE 6A.5.4.2.2b
    virtual void CheckYieldStressLimit(bool bCheckYieldStress) = 0;
@@ -63,10 +55,6 @@ interface IXBRRatingSpecification : IUnknown
    // a permit load rating evaluation MBE 6A.5.4.2.2b
    virtual void SetYieldStressLimitCoefficient(Float64 x) = 0;
    virtual Float64 GetYieldStressLimitCoefficient() = 0;
-
-   //// Permit type for rating for special/limited crossing permit vehicle
-   //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
-   //virtual pgsTypes::SpecialPermitType GetSpecialPermitType() = 0;
 
    // Controls the analysis type to be used for superstructure reactions obtained
    // from PGSuper when PGSuper is in Envelope mode

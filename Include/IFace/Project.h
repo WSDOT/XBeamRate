@@ -200,6 +200,15 @@ interface IXBRProject : IUnknown
    virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups) = 0;
    virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID) = 0;
 
+   // Resistance factors for compression controlled and tension controlled sections
+   // LRFD 5.5.4.2.1
+   virtual void SetFlexureResistanceFactors(Float64 phiC,Float64 phiT) = 0;
+   virtual void GetFlexureResistanceFactors(Float64* phiC,Float64* phiT) = 0;
+
+   // Resistance factors for shear LRFD 5.5.4.2.1
+   virtual void SetShearResistanceFactor(Float64 phi) = 0;
+   virtual Float64 GetShearResistanceFactor() = 0;
+
    virtual void SetSystemFactorFlexure(Float64 sysFactor) = 0;
    virtual Float64 GetSystemFactorFlexure() = 0;
    

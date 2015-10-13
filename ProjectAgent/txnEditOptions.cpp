@@ -76,6 +76,12 @@ void txnEditOptions::Execute(int i)
    pRatingSpec->SetYieldStressLimitCoefficient(m_Options[i].m_YieldStressCoefficient);
    pRatingSpec->SetPermitRatingMethod(m_Options[i].m_PermitRatingMethod);
 
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   pProject->SetSystemFactorFlexure(m_Options[i].m_SystemFactorFlexure);
+   pProject->SetSystemFactorShear(m_Options[i].m_SystemFactorShear);
+   pProject->SetFlexureResistanceFactors(m_Options[i].m_PhiC,m_Options[i].m_PhiT);
+   pProject->SetShearResistanceFactor(m_Options[i].m_PhiV);
+
    pEvents->FirePendingEvents();
 }
 

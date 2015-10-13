@@ -108,6 +108,16 @@ xbrStirrupData& CPierDlg::GetFullDepthStirrups()
    return m_PierData.m_PierData.GetFullDepthStirrups();
 }
 
+pgsTypes::ConditionFactorType& CPierDlg::GetConditionFactorType()
+{
+   return m_PierData.m_PierData.GetConditionFactorType();
+}
+
+Float64& CPierDlg::GetConditionFactor()
+{
+   return m_PierData.m_PierData.GetConditionFactor();
+}
+
 //////////////////////////////////////////////////
 void CPierDlg::Init()
 {

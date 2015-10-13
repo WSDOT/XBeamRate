@@ -149,18 +149,35 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
-   rptParagraph* pPara = new rptParagraph;
+   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
    *pChapter << pPara;
 
-#pragma Reminder("WORKING HERE - add rating equations")
-
-   CString strTitle;
-   strTitle.Format(_T("Rating for %s Moment"),(bPositiveMoment ? _T("Positive") : _T("Negative")));
+   if ( bPositiveMoment )
+   {
+      *pPara << _T("Rating for Positive Moment") << rptNewLine;
+   }
+   else
+   {
+      *pPara << _T("Rating for Negative Moment") << rptNewLine;
+   }
 
    bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+
+   pPara = new rptParagraph;
+   *pChapter << pPara;
+
+   if ( bIsWSDOTPermitRating )
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentRatingEquation_WSDOT.png") ) << rptNewLine;
+   }
+   else
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentRatingEquation_LRFD.png") ) << rptNewLine;
+   }
+
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
+   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
    pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
    pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
@@ -221,8 +238,8 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       }
 
       (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
-      (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetConditionFactor();
+      (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
        if ( bIsWSDOTPermitRating )
        {
@@ -282,17 +299,27 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
-   rptParagraph* pPara = new rptParagraph;
+   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
    *pChapter << pPara;
-
-#pragma Reminder("WORKING HERE - add rating equations")
-
-   CString strTitle(_T("Rating for Shear"));
+   *pPara << _T("Rating for Shear") << rptNewLine;
 
    bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+
+   pPara = new rptParagraph;
+   *pChapter << pPara;
+
+   if ( bIsWSDOTPermitRating )
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamShearRatingEquation_WSDOT.png") ) << rptNewLine;
+   }
+   else
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamShearRatingEquation_LRFD.png") ) << rptNewLine;
+   }
+
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 21 : 20);
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
+   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
    pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
    pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
@@ -351,8 +378,8 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       }
 
       (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
-      (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetConditionFactor();
+      (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
       (*pTable)(row,col++) << shear.SetValue(artifact.GetNominalShearCapacity());
       (*pTable)(row,col++) << artifact.GetDeadLoadFactor();

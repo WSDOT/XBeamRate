@@ -227,6 +227,11 @@ public:
    virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups);
    virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID);
    
+   virtual void SetFlexureResistanceFactors(Float64 phiC,Float64 phiT);
+   virtual void GetFlexureResistanceFactors(Float64* phiC,Float64* phiT);
+   virtual void SetShearResistanceFactor(Float64 phi);
+   virtual Float64 GetShearResistanceFactor();
+
    virtual void SetSystemFactorFlexure(Float64 sysFactor);
    virtual Float64 GetSystemFactorFlexure();
    
@@ -345,6 +350,8 @@ private:
 
    Float64 m_SysFactorFlexure;
    Float64 m_SysFactorShear;
+   Float64 m_PhiC, m_PhiT; // resistance factors for flexure (compress,tension controlled section)
+   Float64 m_PhiV; // resistance factor for shear
    bool m_bRatingEnabled[6]; // array index is pgsTypes::LoadRatingType
    bool m_bRateForShear[6]; // array index is pgsTypes::LoadRatingType
    bool m_bCheckYieldStress;
@@ -407,6 +414,9 @@ private:
 
    void CreateMenus();
    void RemoveMenus();
+
+   void CreateToolbars();
+   void RemoveToolbars();
 
    void UpdatePiers();
    void UpdatePierData(const CPierData2* pPier,xbrPierData& pierData);

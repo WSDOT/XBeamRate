@@ -20,20 +20,41 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
+#include "stdafx.h"
+#include "resource.h"
+#include "CapacityOptionsPage.h"
+#include "OptionsDlg.h"
 
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
-#pragma once
+#include <txnEditOptions.h>
 
 
-#include <XBeamRateAll.h>
+// CCapacityOptionsPage dialog
 
-#include <EAF\EAFUtilities.h>
+IMPLEMENT_DYNAMIC(CCapacityOptionsPage, CPropertyPage)
 
-#include <MFCTools\MFCTools.h>
+CCapacityOptionsPage::CCapacityOptionsPage()
+	: CPropertyPage(CCapacityOptionsPage::IDD)
+{
 
-#include <grid\gxall.h>
-#include <afxwin.h>
-#include <afxdlgs.h>
+}
+
+CCapacityOptionsPage::~CCapacityOptionsPage()
+{
+}
+
+void CCapacityOptionsPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+
+   COptionsDlg* pParent = (COptionsDlg*)GetParent();
+   DDX_Text(pDX,IDC_PHI_COMPRESSION,pParent->m_Options.m_PhiC);
+   DDX_Text(pDX,IDC_PHI_TENSION,pParent->m_Options.m_PhiT);
+   DDX_Text(pDX,IDC_PHI_SHEAR,pParent->m_Options.m_PhiV);
+}
+
+
+BEGIN_MESSAGE_MAP(CCapacityOptionsPage, CPropertyPage)
+END_MESSAGE_MAP()
+
+
+// CCapacityOptionsPage message handlers

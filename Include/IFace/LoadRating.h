@@ -65,10 +65,45 @@ typedef struct MinMomentCapacityDetails
 typedef struct CrackedSectionDetails
 {
    Float64 n;   // modular ratio used to compute properties (LRFD 5.7.1)
-   Float64 c;   // distance from top of section to crack (crack depth)
+   Float64 c; // distance from compression face to crack (crack depth)
+   Float64 Ycr;   // distance from top of section to crack (crack location)
    Float64 Icr; // cracked section moment of inertia
    CComPtr<ICrackedSectionSolution> CrackedSectionSolution;
 } CrackedSectionDetails;
+
+typedef struct ShearCapacityDetails
+{
+   Float64 beta;
+   Float64 theta;
+   Float64 bv;
+   Float64 dv1; // shear depth for stage 1 reinforcement
+   Float64 dv2; // shear depth for stage 2 reinforcement
+   Float64 dv;  // shear depth used to compute shear capacity (max of dv1,dv2)
+   Float64 Av_over_S1; // average Av/S for stage 1 reinforcement
+   Float64 Av_over_S2; // average Av/S for stage 2 reinforcement
+   Float64 Vc;
+   Float64 Vs;
+   Float64 Vn1; // LRFD Eq 5.8.3.3-1
+   Float64 Vn2; // LRFD Eq 5.8.3.3-2
+   Float64 Vn;  // Min of Vn1 and Vn2 (LRFD 5.8.3.3)
+   Float64 phi;
+   Float64 Vr; // phi*Vn
+} ShearCapacityDetails;
+
+typedef struct AvOverSZone
+{
+   Float64 Start;
+   Float64 End;
+   Float64 Length;
+   Float64 AvOverS;
+} AvOverSZone;
+
+typedef struct AvOverSDetails
+{
+   std::vector<AvOverSZone> Zones;
+   Float64 ShearFailurePlaneLength;
+   Float64 AvgAvOverS;
+} AvOverSDetails;
 
 
 /*****************************************************************************
@@ -108,7 +143,10 @@ DEFINE_GUID(IID_IXBRShearCapacity,
 0xbd0d6dbc, 0x2127, 0x4413, 0xbb, 0x1d, 0x16, 0xbb, 0xd3, 0x3b, 0x5, 0x4d);
 interface IXBRShearCapacity : IUnknown
 {
-   virtual Float64 GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi) = 0;
+   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+
+   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 };
 
 /*****************************************************************************

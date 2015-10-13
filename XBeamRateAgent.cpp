@@ -294,12 +294,12 @@ void CXBeamRateAgent::RemoveToolbar()
 
 void CXBeamRateAgent::RegisterUIExtensions()
 {
-   // Tell PGSuper/PGSplice that we want to add stuff to the dialogs
+   // Tell PGSuper/PGSplice that we want to add stuff to its dialogs
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
    m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
    m_EditLoadRatingOptionsCallbackID = pExtendUI->RegisterEditLoadRatingOptionsCallback(this);
 
-   // Add a command handler for to the bridge view
+   // Add a command callback to the bridge view
    GET_IFACE(IRegisterViewEvents,pBridgeViewEvents);
    m_BridgePlanViewCallbackID = pBridgeViewEvents->RegisterBridgePlanViewCallback(&m_CommandTarget);
 }
@@ -581,6 +581,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditP
    oldReinforcement.LongitudinalRebar  = pierData.GetLongitudinalRebar();
    oldReinforcement.LowerXBeamStirrups = pierData.GetLowerXBeamStirrups();
    oldReinforcement.FullDepthStirrups  = pierData.GetFullDepthStirrups();
+   oldReinforcement.ConditionFactorType = pierData.GetConditionFactorType();
+   oldReinforcement.ConditionFactor = pierData.GetConditionFactor();
 
    CReinforcementPage* pReinforcementPage = (CReinforcementPage*)pPage;
    xbrEditReinforcementData newReinforcement;
@@ -591,6 +593,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditP
    newReinforcement.LongitudinalRebar  = pParent->GetLongitudinalRebar();
    newReinforcement.LowerXBeamStirrups = pParent->GetLowerXBeamStirrups();
    newReinforcement.FullDepthStirrups  = pParent->GetFullDepthStirrups();
+   newReinforcement.ConditionFactorType = pParent->GetConditionFactorType();
+   newReinforcement.ConditionFactor = pParent->GetConditionFactor();
 
    txnEditReinforcement* pTxn = new txnEditReinforcement(pEditPierData->GetPierData()->GetID(),oldReinforcement,newReinforcement);
    return pTxn;

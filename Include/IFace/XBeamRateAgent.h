@@ -57,3 +57,23 @@ interface IXBeamRate : IUnknown
 {
    virtual void GetUnitServer(IUnitServer** ppUnitServer) = 0;
 };
+
+// IXBRViews
+// {49B3DFCF-5611-42d7-8B19-A1FC52778846}
+DEFINE_GUID(IID_IXBRViews, 
+0x49b3dfcf, 0x5611, 0x42d7, 0x8b, 0x19, 0xa1, 0xfc, 0x52, 0x77, 0x88, 0x46);
+interface IXBRViews : IUnknown
+{
+   virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true) = 0;
+   virtual void CreateGraphView(CollectionIndexType graphIdx) = 0;
+   virtual void CreatePierView() = 0;
+};
+
+// IXBREditByUI
+// {C0FA29DA-CCA6-4a49-A21C-16F97DA3DED4}
+DEFINE_GUID(IID_IXBREditByUI, 
+0xc0fa29da, 0xcca6, 0x4a49, 0xa2, 0x1c, 0x16, 0xf9, 0x7d, 0xa3, 0xde, 0xd4);
+interface IXBREditByUI : IUnknown
+{
+   virtual UINT GetStdToolBarID() = 0;
+};

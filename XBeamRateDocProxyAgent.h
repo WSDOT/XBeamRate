@@ -32,9 +32,9 @@
 class CXBeamRateDoc;
 struct IBroker;
 
-// {E5744BFC-68DE-4c00-93BA-7643A1167ABB}
+// {0AA45B23-96C9-431c-BBC9-1D8CCC2BE5FC}
 DEFINE_GUID(CLSID_XBeamRateDocProxyAgent, 
-0xe5744bfc, 0x68de, 0x4c00, 0x93, 0xba, 0x76, 0x43, 0xa1, 0x16, 0x7a, 0xbb);
+0xaa45b23, 0x96c9, 0x431c, 0xbb, 0xc9, 0x1d, 0x8c, 0xcc, 0x2b, 0xe5, 0xfc);
 
 /*****************************************************************************
 CLASS 
@@ -58,7 +58,9 @@ class CXBeamRateDocProxyAgent :
    public IXBRProjectEventSink,
    public IXBRRatingSpecificationEventSink,
    public IEAFDisplayUnitsEventSink,
-   public IXBRVersionInfo
+   public IXBRVersionInfo,
+   public IXBRViews,
+   public IXBREditByUI
 {
 public:
    CXBeamRateDocProxyAgent();
@@ -75,6 +77,8 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IXBRRatingSpecificationEventSink)
    COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    COM_INTERFACE_ENTRY(IXBRVersionInfo)
+   COM_INTERFACE_ENTRY(IXBRViews)
+   COM_INTERFACE_ENTRY(IXBREditByUI)
 END_COM_MAP()
 
 BEGIN_CONNECTION_POINT_MAP(CXBeamRateDocProxyAgent)
@@ -127,12 +131,15 @@ public:
    virtual CString GetVersionString(bool bIncludeBuildNumber=false);
    virtual CString GetVersion(bool bIncludeBuildNumber=false);
 
-// IViews ??? 
+// IXBRViews
+public:
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
    virtual void CreatePierView();
 
-   UINT GetStdToolBarID();
+// IXBREditByUI
+public:
+   virtual UINT GetStdToolBarID();
 
 private:
    DECLARE_EAF_AGENT_DATA;

@@ -23,32 +23,33 @@
 #pragma once
 
 #include <txnEditOptions.h>
+#include "RatingOptionsPage.h"
+#include "CapacityOptionsPage.h"
 
 
 // COptionsDlg dialog
 
-class COptionsDlg : public CDialog
+class COptionsDlg : public CPropertySheet
 {
 	DECLARE_DYNAMIC(COptionsDlg)
 
 public:
-	COptionsDlg(CWnd* pParent = NULL);   // standard constructor
+	COptionsDlg(CWnd* pParentWnd = NULL, UINT iSelectPage = 0);   // standard constructor
 	virtual ~COptionsDlg();
-
-// Dialog Data
-	enum { IDD = IDD_OPTIONS };
 
    void SetOptions(const txnEditOptionsData& options);
    const txnEditOptionsData& GetOptions() const;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	DECLARE_MESSAGE_MAP()
+
+   void Init();
 
    txnEditOptionsData m_Options;
 
-   void FillPermitFactorList();
+   CRatingOptionsPage m_RatingOptions;
+   CCapacityOptionsPage m_CapacityOptions;
 
-	DECLARE_MESSAGE_MAP()
-public:
-   virtual BOOL OnInitDialog();
+   friend CRatingOptionsPage;
+   friend CCapacityOptionsPage;
 };

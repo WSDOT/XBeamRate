@@ -426,14 +426,14 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
 
       Float64 C = GetAllowableStress();
 
-      Float64 SRtop = C - fabs(m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS));
+      Float64 SRtop = C - m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS);
 
       if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
       {
-         SRtop -= fabs(m_n[xbrTypes::ltTransient]*fLLIM_Adj); // WSDOT BDM Eqn. 13.1.1A-2
+         SRtop -= m_n[xbrTypes::ltTransient]*fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
       }
 
-      Float64 SRbot = fabs(m_n[xbrTypes::ltTransient]*fLLIM);
+      Float64 SRbot = m_n[xbrTypes::ltTransient]*fLLIM;
 
       if ( IsZero(C) || (0 < C && SRtop < 0) || (C < 0 && 0 < SRtop) )
       {

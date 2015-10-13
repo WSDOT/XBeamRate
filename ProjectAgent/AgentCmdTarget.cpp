@@ -159,6 +159,13 @@ void CAgentCmdTarget::OnEditOptions()
    oldOptions.m_YieldStressCoefficient = pRatingSpec->GetYieldStressLimitCoefficient();
    oldOptions.m_PermitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
+   GET_IFACE(IXBRProject,pProject);
+   oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
+   oldOptions.m_SystemFactorShear   = pProject->GetSystemFactorShear();
+
+   pProject->GetFlexureResistanceFactors(&oldOptions.m_PhiC,&oldOptions.m_PhiT);
+   oldOptions.m_PhiV = pProject->GetShearResistanceFactor();
+
    COptionsDlg dlg;
    dlg.SetOptions(oldOptions);
    if ( dlg.DoModal() == IDOK )

@@ -404,9 +404,9 @@ BEGIN
     LTEXT           "Modulus of Elasticity",IDC_STATIC,7,4,66,8
 END
 
-IDD_OPTIONS DIALOGEX 0, 0, 316, 199
+IDD_RATING_OPTIONS DIALOGEX 0, 0, 316, 224
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Options"
+CAPTION "Rating"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     GROUPBOX        "Design Rating (Inventory/Operating)",IDC_STATIC,7,7,302,40
@@ -425,10 +425,37 @@ BEGIN
     LTEXT           "fy",IDC_ALLOWABLE_STRESS_TAG,258,130,8,8
     LTEXT           "Compute permit rating factors using",IDC_STATIC,16,148,116,8
     COMBOBOX        IDC_PERMIT_FACTORS,136,146,166,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    DEFPUSHBUTTON   "OK",IDOK,205,178,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,259,178,50,14
+    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,7,167,302,50
+    LTEXT           "Flexure",IDC_STATIC,21,189,25,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_FLEXURE,50,187,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Shear",IDC_STATIC,108,189,20,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_SHEAR,130,187,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
+IDD_CAPACITY_OPTIONS DIALOGEX 0, 0, 262, 160
+STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Capacity"
+FONT 8, "MS Shell Dlg", 400, 0, 0x0
+BEGIN
+    GROUPBOX        "Flexure",IDC_STATIC,7,7,248,64
+    EDITTEXT        IDC_PHI_COMPRESSION,136,31,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_PHI_TENSION,136,50,40,14,ES_AUTOHSCROLL
+    LTEXT           "Resistance Factors (LRFD 5.5.4.2.1)",IDC_STATIC,16,18,118,8
+    LTEXT           "Compression Controlled Sections",IDC_STATIC,27,34,105,8
+    LTEXT           "Tension Controlled Sections",IDC_STATIC,27,52,89,8
+    GROUPBOX        "Shear",IDC_STATIC,7,76,248,77
+    LTEXT           "Resistance Factors (LRFD 5.5.4.2.1)",IDC_STATIC,16,92,118,8
+    EDITTEXT        IDC_PHI_SHEAR,140,89,40,14,ES_AUTOHSCROLL
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_EDIT_OPTIONS        BITMAP                  "res\\EditOptions.bmp"
+IDB_EDIT_PIER           BITMAP                  "res\\EditPier.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -487,12 +514,20 @@ BEGIN
         BOTTOMMARGIN, 139
     END
 
-    IDD_OPTIONS, DIALOG
+    IDD_RATING_OPTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 309
         TOPMARGIN, 7
-        BOTTOMMARGIN, 192
+        BOTTOMMARGIN, 217
+    END
+
+    IDD_CAPACITY_OPTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 255
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 153
     END
 END
 #endif    // APSTUDIO_INVOKED

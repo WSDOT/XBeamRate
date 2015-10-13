@@ -62,6 +62,7 @@ void txnEditReinforcement::Execute(int i)
    pProject->SetLongitudinalRebar(m_PierID,m_Reinforcement[i].LongitudinalRebar);
    pProject->SetLowerXBeamStirrups(m_PierID,m_Reinforcement[i].LowerXBeamStirrups);
    pProject->SetFullDepthStirrups(m_PierID,m_Reinforcement[i].FullDepthStirrups);
+   pProject->SetConditionFactor(m_PierID,m_Reinforcement[i].ConditionFactorType,m_Reinforcement[i].ConditionFactor);
 
    pEvents->FirePendingEvents();
 }

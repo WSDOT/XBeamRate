@@ -194,7 +194,6 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
 
 void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
-#pragma Reminder("WORKING HERE - shear rating")
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
@@ -204,7 +203,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    GET_IFACE(IXBRShearCapacity,pShearCapacity);
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 system_factor    = pProject->GetSystemFactorFlexure();
+   Float64 system_factor    = pProject->GetSystemFactorShear();
    Float64 condition_factor = pProject->GetConditionFactor(pierID);
 
    pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
@@ -273,15 +272,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
                          ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
       pProgress->UpdateMessage(strProgress);
 
-#pragma Reminder("WORKING HERE - make shear phi factor user input")
-      Float64 phi_shear = 0.9;
-      Float64 Vr = pShearCapacity->GetShearCapacity(pierID,poi);
-
-#pragma Reminder("WORKING HERE - Need to capture shear capacity details for reporting")
-      Float64 Vn = Vr/phi_shear; // when we have shear capacity details, we can get Vn directly
-
-   //   Float64 phi_shear = vVn[i].Phi; 
-   //   Float64 Vn = vVn[i].Vn;
+      const ShearCapacityDetails& details = pShearCapacity->GetShearCapacityDetails(pierID,stage,poi);
 
       xbrShearRatingArtifact shearArtifact;
       shearArtifact.SetRatingType(ratingType);
@@ -293,8 +284,8 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
       shearArtifact.SetVehicleName(strVehicleName.c_str());
       shearArtifact.SetSystemFactor(system_factor);
       shearArtifact.SetConditionFactor(condition_factor);
-      shearArtifact.SetCapacityReductionFactor(phi_shear);
-      shearArtifact.SetNominalShearCapacity(Vn);
+      shearArtifact.SetCapacityReductionFactor(details.phi);
+      shearArtifact.SetNominalShearCapacity(details.Vn);
       shearArtifact.SetDeadLoadFactor(gDC);
       shearArtifact.SetDeadLoadShear(DC);
       shearArtifact.SetWearingSurfaceFactor(gDW);
@@ -408,7 +399,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       GET_IFACE(IXBRRebar,pRebar);
       CComPtr<IRebarSection> rebarSection;
       pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
-      Float64 Y = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
+      Float64 Yb = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
       CComPtr<IEnumRebarSectionItem> enumRebarSectionItem;
       rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
 
@@ -419,12 +410,10 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
         rebarSectionItem->get_Location(&location);
         Float64 y = pRebar->GetRebarDepth(pierID,poi,stage,location);
         ATLASSERT(0 <= y);
-        Y = (bPositiveMoment ? Max(Y,y) : Min(Y,y));
+        Yb = (bPositiveMoment ? Max(Yb,y) : Min(Yb,y));
         rebarSectionItem.Release();
      }
 
-      Float64 ds = (bPositiveMoment ? Y : Hxb-Y); // depth to rebar layer, measured from compression face
-      
       // Get allowable
       Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
 
@@ -453,11 +442,11 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
       stressRatioArtifact.SetAdjLiveLoadMoment(LLIMlegal);
       stressRatioArtifact.SetIcr(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Icr);
       stressRatioArtifact.SetIcr(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Icr);
-      stressRatioArtifact.SetCrackDepth(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.c); // distance from compression face to cracked centroid
-      stressRatioArtifact.SetCrackDepth(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.c); // distance from compression face to cracked centroid
+      stressRatioArtifact.SetCrackDepth(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Ycr);
+      stressRatioArtifact.SetCrackDepth(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Ycr);
       stressRatioArtifact.SetModularRatio(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.n);
       stressRatioArtifact.SetModularRatio(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.n);
-      stressRatioArtifact.SetYbar(ds);
+      stressRatioArtifact.SetYbar(Yb);
       stressRatioArtifact.SetYieldStrength(fy);
       ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
    } // next poi

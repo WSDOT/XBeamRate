@@ -553,6 +553,8 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
    GET_IFACE2_NOCHECK(pBroker,IXBRMomentCapacity,pMomentCapacity);
    GET_IFACE2_NOCHECK(pBroker,IXBRShearCapacity,pShearCapacity);
 
+   xbrTypes::Stage stage = xbrTypes::Stage2;
+
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
@@ -560,19 +562,19 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
 
       if ( actionType == actionMoment )
       {
-         Float64 Mz = pMomentCapacity->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,true);
+         Float64 Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,true);
          Mz = pVerticalAxisFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
          graph.AddPoint(maxGraphIdx,point);
 
-         Mz = pMomentCapacity->GetMomentCapacity(pierID,xbrTypes::Stage2,poi,false);
+         Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,false);
          Mz = pVerticalAxisFormat->Convert(Mz);
          point.Y() = Mz;
          graph.AddPoint(minGraphIdx,point);
       }
       else
       {
-         Float64 V = pShearCapacity->GetShearCapacity(pierID,poi);
+         Float64 V = pShearCapacity->GetShearCapacity(pierID,stage,poi);
          V = pVerticalAxisFormat->Convert(V);
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,V));
          graph.AddPoint(minGraphIdx,gpPoint2d(X,-V));

@@ -36,14 +36,18 @@
 
 #include <PgsExt\BridgeDescription2.h>
 
-#include <IFace\Bridge.h>
-#include <IFace\Alignment.h>
-#include <IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\IFace\Bridge.h>
+#include <\ARP\PGSuper\Include\IFace\Alignment.h>
+#include <\ARP\PGSuper\Include\IFace\Intervals.h>
 #include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\RatingSpecification.h>
-#include <IFace\BeamFactory.h>
+#include <\ARP\PGSuper\Include\IFace\ResistanceFactors.h>
+#include <\ARP\PGSuper\Include\IFace\EditByUI.h>
+#include <\ARP\PGSuper\Include\IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
+
+#include "..\resource.h" // for ID_VIEW_PIER
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -67,6 +71,10 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_SysFactorFlexure = 1.0;
    m_SysFactorShear   = 1.0;
+
+   m_PhiC = 0.75;
+   m_PhiT = 0.90;
+   m_PhiV = 0.90;
 
    m_bRatingEnabled[pgsTypes::lrDesign_Inventory] = true;
    m_bRatingEnabled[pgsTypes::lrDesign_Operating] = true;
@@ -275,10 +283,12 @@ STDMETHODIMP CProjectAgentImp::IntegrateWithUI(BOOL bIntegrate)
    if ( bIntegrate )
    {
       CreateMenus();
+      CreateToolbars();
    }
    else
    {
       RemoveMenus();
+      RemoveToolbars();
    }
 
    return S_OK;
@@ -320,6 +330,9 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(m_SysFactorFlexure));
          pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(m_SysFactorShear));
+         pStrSave->put_Property(_T("PhiC"),CComVariant(m_PhiC));
+         pStrSave->put_Property(_T("PhiT"),CComVariant(m_PhiT));
+         pStrSave->put_Property(_T("PhiV"),CComVariant(m_PhiV));
 
          pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Inventory]));
          pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Operating]));
@@ -563,6 +576,16 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("SystemFactorShear"),&var);
             m_SysFactorShear = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PhiC"),&var);
+            m_PhiC = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PhiT"),&var);
+            m_PhiT = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("PhiV"),&var);
+            m_PhiV = var.dblVal;
+
 
             var.vt = VT_BOOL;
             hr = pStrLoad->get_Property(_T("RatingEnabled_Design_Inventory"),&var);
@@ -1841,6 +1864,49 @@ const xbrStirrupData& CProjectAgentImp::GetFullDepthStirrups(PierIDType pierID)
 {
    return GetPrivatePierData(pierID).GetFullDepthStirrups();
 }
+   
+void CProjectAgentImp::SetFlexureResistanceFactors(Float64 phiC,Float64 phiT)
+{
+   m_PhiC = phiC;
+   m_PhiT = phiT;
+   Fire_OnProjectChanged();
+}
+
+void CProjectAgentImp::GetFlexureResistanceFactors(Float64* phiC,Float64* phiT)
+{
+   if ( IsStandAlone() )
+   {
+      *phiC = m_PhiC;
+      *phiT = m_PhiT;
+   }
+   else
+   {
+      GET_IFACE(IResistanceFactors,pResistanceFactors);
+      Float64 PhiRC,PhiPS,PhiSP,PhiC;
+      pResistanceFactors->GetFlexureResistanceFactors(pgsTypes::Normal,&PhiPS,&PhiRC,&PhiSP,&PhiC);
+      *phiC = PhiC;
+      *phiT = PhiRC;
+   }
+}
+   
+void CProjectAgentImp::SetShearResistanceFactor(Float64 phi)
+{
+   m_PhiV = phi;
+   Fire_OnProjectChanged();
+}
+
+Float64 CProjectAgentImp::GetShearResistanceFactor()
+{
+   if ( IsStandAlone() )
+   {
+      return m_PhiV;
+   }
+   else
+   {
+      GET_IFACE(IResistanceFactors,pResistanceFactors);
+      return pResistanceFactors->GetShearResistanceFactor(pgsTypes::Normal);
+   }
+}
 
 void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 {
@@ -1850,7 +1916,15 @@ void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure()
 {
-   return m_SysFactorFlexure;
+   if ( IsStandAlone() )
+   {
+      return m_SysFactorFlexure;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetSystemFactorFlexure();
+   }
 }
 
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
@@ -1861,7 +1935,15 @@ void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorShear()
 {
-   return m_SysFactorShear;
+   if ( IsStandAlone() )
+   {
+      return m_SysFactorShear;
+   }
+   else
+   {
+      GET_IFACE(IRatingSpecification,pRatingSpec);
+      return pRatingSpec->GetSystemFactorShear();
+   }
 }
 
 void CProjectAgentImp::SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
@@ -2486,6 +2568,30 @@ void CProjectAgentImp::RemoveMenus()
    ATLASSERT(filePos+1 == editPos);
 #endif
    VERIFY(pMenu->RemoveMenu(editPos,MF_BYPOSITION,this));
+}
+
+void CProjectAgentImp::CreateToolbars()
+{
+   // add a button to the standard XBeamRate toolbar to view a pier
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   GET_IFACE(IEAFToolbars,pToolBars);
+   GET_IFACE(IXBREditByUI,pEditUI);
+   UINT stdID = pEditUI->GetStdToolBarID();
+   CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
+
+   int idx = pStdToolBar->CommandToIndex(ID_VIEW_PIER,NULL); 
+   pStdToolBar->InsertButton(idx-1,ID_EDIT_OPTIONS,IDB_EDIT_OPTIONS,NULL,this);
+   pStdToolBar->InsertButton(idx-1,ID_EDIT_PIER,IDB_EDIT_PIER,NULL,this);
+}
+
+void CProjectAgentImp::RemoveToolbars()
+{
+   // Remove all the buttons we added to the standard toolbar
+   GET_IFACE(IEAFToolbars,pToolBars);
+   GET_IFACE(IXBREditByUI,pEditUI);
+   UINT stdID = pEditUI->GetStdToolBarID();
+   CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
+   pStdToolBar->RemoveButtons(this);
 }
 
 xbrPierData& CProjectAgentImp::GetPrivatePierData(PierIDType pierID)

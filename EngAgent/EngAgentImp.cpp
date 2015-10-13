@@ -294,48 +294,49 @@ const CrackedSectionDetails& CEngAgentImp::GetCrackedSectionDetails(PierIDType p
 
 //////////////////////////////////////////////////////////////////////
 // IXBRShearCapacity
-Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,const xbrPointOfInterest& poi)
+Float64 CEngAgentImp::GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
-   // LRFD 5.8.3.4.1
-   Float64 beta = 2.0;
+   const ShearCapacityDetails& details = GetShearCapacityDetails(pierID,stage,poi);
+   return details.Vr;
+}
+
+const ShearCapacityDetails& CEngAgentImp::GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   std::map<IDType,ShearCapacityDetails>* pDetails = m_pShearCapacity[stage].get();
+   std::map<IDType,ShearCapacityDetails>::iterator found(pDetails->find(poi.GetID()));
+   if ( found != pDetails->end() )
+   {
+      return found->second;
+   }
+
+   ShearCapacityDetails details = ComputeShearCapacity(pierID,stage,poi);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,ShearCapacityDetails>::iterator,bool> result = pDetails->insert(std::make_pair(poi.GetID(),details));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,ShearCapacityDetails>::iterator iter = result.first;
+   return iter->second;
+}
+
+const AvOverSDetails& CEngAgentImp::GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   std::map<IDType,AvOverSDetails>* pDetails = m_pShearFailurePlane[stage].get();
+   std::map<IDType,AvOverSDetails>::iterator found(pDetails->find(poi.GetID()));
+   if ( found != pDetails->end() )
+   {
+      return found->second;
+   }
+
    Float64 theta = M_PI/4; // 45 deg
+   AvOverSDetails details = ComputeAverageAvOverS(pierID,stage,poi,theta);
+   ATLASSERT(poi.GetID() != INVALID_ID);
 
-   GET_IFACE(IXBRProject,pProject);
+   std::pair<std::map<IDType,AvOverSDetails>::iterator,bool> result = pDetails->insert(std::make_pair(poi.GetID(),details));
+   ATLASSERT(result.second == true);
 
-   matRebar::Type type;
-   matRebar::Grade grade;
-   pProject->GetRebarMaterial(pierID,&type,&grade);
-   Float64 fy = matRebar::GetYieldStrength(type,grade);
-
-
-   Float64 dv1 = GetDv(pierID,xbrTypes::Stage1,poi);
-   Float64 dv2 = GetDv(pierID,xbrTypes::Stage2,poi);
-   Float64 Av_over_S1 = GetAverageAvOverS(pierID,xbrTypes::Stage1,poi,theta);
-   Float64 Av_over_S2 = GetAverageAvOverS(pierID,xbrTypes::Stage2,poi,theta);
-
-   // if non-integralpier, dv2 is zero so dv1 will be the max, 
-   // otherwise dv2 will be the max
-   Float64 dv = Max(dv1,dv2);
-
-   // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
-   Float64 fc = pProject->GetConcrete(pierID).Fc;
-   Float64 bv = pProject->GetXBeamWidth(pierID);
-   Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
-   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*dv;
-   Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
-   Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
-   Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
-   Float64 Vs = Vs1 + Vs2; // total capacity due to reinforcement
-
-   Float64 Vn1 = Vc + Vs;
-   Float64 Vn2 = 0.25*fc*bv*dv;
-#pragma Reminder("WORKING HERE - Need to capture shear capacity details for reporting")
-
-#pragma Reminder("WORKING HERE - make shear phi factor user input")
-   Float64 Vn = Min(Vn1,Vn2);
-   Float64 phi = 0.9;
-   Float64 Vr = phi*Vn;
-   return Vr;
+   std::map<IDType,AvOverSDetails>::iterator iter = result.first;
+   return iter->second;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -398,17 +399,20 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 c;
       solution->get_NeutralAxisDepth(&c);
 
+      GET_IFACE(IXBRProject,pProject);
+
       matRebar::Type rebarType;
       matRebar::Grade rebarGrade;
-      GET_IFACE(IXBRProject,pProject);
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
+
+      Float64 PhiC, PhiT;
+      pProject->GetFlexureResistanceFactors(&PhiC,&PhiT);
 
       Float64 et = (dt - c)*0.003/c;
       Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
       Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
-      phi = 0.75 + 0.15*(et - ecl)/(etl-ecl);
-      phi = ::ForceIntoRange(0.75,phi,0.9);
-#pragma Reminder("WORKING HERE - make moment phi factor user input")
+      phi = PhiC + (PhiT - PhiC)*(et - ecl)/(etl-ecl);
+      phi = ::ForceIntoRange(PhiC,phi,PhiT);
 
       Float64 Cweb, Cflange, Yweb, Yflange;
       solution->get_Cweb(&Cweb);
@@ -698,12 +702,84 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
    shape_properties->get_Ixx(&Icr);
    csd.Icr = Icr;
 
-   // distance from compression face to the cracked centroid
+   // distance from top face to the cracked centroid
    Float64 c;
    shape_properties->get_Ytop(&c);
    csd.c = c;
+   if ( bPositiveMoment )
+   {
+      csd.Ycr = c;
+   }
+   else
+   {
+      GET_IFACE(IXBRSectionProperties,pSectProps);
+      Float64 h = pSectProps->GetDepth(pierID,stage,poi);
+      csd.Ycr = h - c;
+   }
 
    return csd;
+}
+
+ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   // LRFD 5.8.3.4.1
+   Float64 beta = 2.0;
+   Float64 theta = M_PI/4; // 45 deg
+
+   GET_IFACE(IXBRProject,pProject);
+
+   matRebar::Type type;
+   matRebar::Grade grade;
+   pProject->GetRebarMaterial(pierID,&type,&grade);
+   Float64 fy = matRebar::GetYieldStrength(type,grade);
+
+   Float64 dv1 = GetDv(pierID,xbrTypes::Stage1,poi);
+   Float64 dv2 = GetDv(pierID,stage,poi);
+   
+   const AvOverSDetails& avs1 = GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
+   const AvOverSDetails& avs2 = GetAverageAvOverSDetails(pierID,stage,poi);
+   Float64 Av_over_S1 = avs1.AvgAvOverS;
+   Float64 Av_over_S2 = (stage == xbrTypes::Stage1 ? 0 : avs2.AvgAvOverS);
+
+   // if non-integral pier, dv2 is zero so dv1 will be the max, 
+   // otherwise dv2 will be the max
+   Float64 dv = Max(dv1,dv2);
+
+   // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
+   Float64 fc = pProject->GetConcrete(pierID).Fc;
+   Float64 bv = pProject->GetXBeamWidth(pierID);
+   Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
+   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*dv;
+   Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
+   Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
+   Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
+   Float64 Vs = Vs1 + Vs2; // total capacity due to reinforcement
+
+   Float64 Vn1 = Vc + Vs;
+   Float64 Vn2 = 0.25*fc*bv*dv;
+
+   Float64 Vn = Min(Vn1,Vn2);
+   Float64 phi = pProject->GetShearResistanceFactor();
+   Float64 Vr = phi*Vn;
+
+   ShearCapacityDetails details;
+   details.beta = beta;
+   details.theta = theta;
+   details.bv = bv;
+   details.dv1 = dv1;
+   details.dv2 = dv2;
+   details.dv = dv;
+   details.Vc = Vc;
+   details.Av_over_S1 = Av_over_S1;
+   details.Av_over_S2 = Av_over_S2;
+   details.Vs = Vs;
+   details.Vn1 = Vn1;
+   details.Vn2 = Vn2;
+   details.Vn = Vn;
+   details.phi = phi;
+   details.Vr = Vr;
+
+   return details;
 }
 
 void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,IRCBeam2** ppModel,Float64* pdt)
@@ -838,23 +914,29 @@ Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPoi
    return dv;
 }
 
-Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
+AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
 {
-#pragma Reminder("WORKING HERE - need to capture AvOverS details and store in cache for reporting")
+   // This procedure is based on MBE 6A.5.8 (2nd Edition, 2015 interims).
+
    GET_IFACE(IXBRProject,pProject);
    if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {
       // there isn't stage 2 for non-integral cross beams
-      return 0;
+      AvOverSDetails details;
+      details.ShearFailurePlaneLength = 0;
+      details.AvgAvOverS = 0;
+      return details;
    }
 
    GET_IFACE(IXBRPier,pPier);
    Float64 L = pPier->GetXBeamLength(pierID);
 
-   // Get start/end of the shear failur plane at the poi
+   // Get start/end of the shear failure plane at the poi
    Float64 dv = GetDv(pierID,stage,poi);
    Float64 sfpStart = Max(poi.GetDistFromStart() - dv/(2*tan(theta)),0.0);
    Float64 sfpEnd   = Min(poi.GetDistFromStart() + dv/(2*tan(theta)),L);
+
+   AvOverSDetails details;
 
    Float64 Avg_Av_over_S = 0;
    GET_IFACE(IXBRStirrups,pStirrups);
@@ -884,7 +966,16 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
       Float64 end   = Min(szEnd,  sfpEnd,  L);
       Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(pierID,stage,zoneIdx);
 
-      Avg_Av_over_S += Av_over_S*(end-start);
+      Float64 length = end - start;
+
+      AvOverSZone zone;
+      zone.Start = start;
+      zone.End = end;
+      zone.Length = length;
+      zone.AvOverS = Av_over_S;
+      details.Zones.push_back(zone);
+
+      Avg_Av_over_S += Av_over_S*(length);
    }
 
    // average Av/S over the length of the shear failure plane
@@ -893,7 +984,9 @@ Float64 CEngAgentImp::GetAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,
    ATLASSERT(::IsLE(Lsfp,dv/tan(theta)));
    Avg_Av_over_S /= Lsfp;
 
-   return Avg_Av_over_S;
+   details.ShearFailurePlaneLength = Lsfp;
+   details.AvgAvOverS = Avg_Av_over_S;
+   return details;
 }
 
 CEngAgentImp::RatingArtifacts& CEngAgentImp::GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
@@ -957,6 +1050,9 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
 
       pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient].release();
       pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient].release();
+
+      pDataStructures->m_pShearCapacity[i] = m_pShearCapacity[i].release();
+      pDataStructures->m_pShearFailurePlane[i] = m_pShearFailurePlane[i].release();
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -1011,7 +1107,13 @@ void CEngAgentImp::CreateDataStructures()
 
       m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
       m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+
+      m_pShearCapacity[i] = std::auto_ptr<std::map<IDType,ShearCapacityDetails>>(new std::map<IDType,ShearCapacityDetails>());
+
+      m_pShearFailurePlane[i] = std::auto_ptr<std::map<IDType,AvOverSDetails>>(new std::map<IDType,AvOverSDetails>());
+
    }
+
 
    for ( int i = 0; i < 6; i++ )
    {
@@ -1054,6 +1156,11 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
 
       delete pDataStructures->m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient];
       delete pDataStructures->m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient];
+
+      delete pDataStructures->m_pShearCapacity[i];
+
+      delete pDataStructures->m_pShearFailurePlane[i];
+
    }
 
    for ( int i = 0; i < 6; i++ )
