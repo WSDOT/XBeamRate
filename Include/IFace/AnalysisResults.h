@@ -64,7 +64,7 @@ interface IXBRProductForces : public IUnknown
    // Returns vectors contain the live load configuration indicies associated with the N min/max moments
    // Used only for WSDOT Permit rating method
    virtual void GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax) = 0;
-   virtual void GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax) = 0;
+   virtual void GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig) = 0;
 };
 
 

@@ -1059,21 +1059,15 @@ void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pier
    }
 }
 
-void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
+void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig)
 {
-   pvMin->clear();
-   pvMax->clear();
+   pvLLConfig->clear();
 
    UnitLiveLoadResult& unitLiveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
-   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyMinLoadCases)
+   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyLoadCases)
    {
-      pvMin->push_back(lcid - FIRST_LIVELOAD_ID);
-   }
-
-   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyMaxLoadCases)
-   {
-      pvMax->push_back(lcid - FIRST_LIVELOAD_ID);
+      pvLLConfig->push_back(lcid - FIRST_LIVELOAD_ID);
    }
 }
 
@@ -1259,6 +1253,8 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
    ATLASSERT(SUCCEEDED(hr));
 
+   FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
+   FyRight = IsZero(FyRight) ? 0 : FyRight;
    sysSectionValue Fy(-FyLeft,FyRight);
 
    GET_IFACE(IXBRProject,pProject);
@@ -1478,6 +1474,9 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
    ATLASSERT(SUCCEEDED(hr));
 
+   FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
+   FyRight = IsZero(FyRight) ? 0 : FyRight;
+
    sysSectionValue Fy_MultiLane;
    if ( IsZero(poi.GetDistFromStart()) )
    {
@@ -1488,8 +1487,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
       Fy_MultiLane = FyLeft;
    }
 
-   //Fy_MultiLane = IsZero(Fy_MultiLane) ? 0 : Fy_MultiLane;
-
    // Get the results for the specified lane having a single vehicle
    LoadCaseIDType lcidSingle = llConfig.m_LaneConfiguration[permitLaneIdx].m_SingleLaneLoadCaseID;
 
@@ -1498,6 +1495,9 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
 
    hr = results->ComputePOIForces(lcidSingle,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
    ATLASSERT(SUCCEEDED(hr));
+
+   FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
+   FyRight = IsZero(FyRight) ? 0 : FyRight;
 
    sysSectionValue Fy_SingleLane;
    if ( IsZero(poi.GetDistFromStart()) )
@@ -1509,8 +1509,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
       Fy_SingleLane = FyLeft;
    }
 
-   //Fy_SingleLane = IsZero(Fy_SingleLane) ? 0 : Fy_SingleLane;
-
    GET_IFACE(IXBRProject,pProject);
    Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
    Float64 Rlegal  = GetMaxLegalReaction(pierID);
@@ -1521,9 +1519,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
 
    *pVlegal  = Vlegal_in_all_lanes - Vlegal_in_permit_lane;
    *pVpermit = Vpermit_in_permit_lane;
-
-   //*pVlegal  = IsZero(*pVlegal)  ? 0 : *pVlegal;
-   //*pVpermit = IsZero(*pVpermit) ? 0 : *pVpermit;
    
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
@@ -2541,7 +2536,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
       Fy *= mpf;
 
-      shears.insert(Result(MaxMagnitude(Fy.Left(),Fy.Right()),lcid));
+      shears.insert(Result(Max(fabs(Fy.Left()),fabs(Fy.Right())),lcid)); // want shear with maximum magnitude
 
       if ( Fy.Left() < FyMin.Left() )
       {
@@ -2655,15 +2650,10 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    int N = 50; // using 50 min/max moments
    std::set<Result>::iterator fmIter(moments.begin());
    std::set<Result>::iterator fmEnd(moments.end());
-   std::set<Result>::iterator fvIter(shears.begin());
-   std::set<Result>::iterator fvEnd(shears.end());
-   for ( int i = 0; i < N && fmIter != fmEnd && fvIter != fvEnd; i++, fmIter++, fvIter++)
+   for ( int i = 0; i < N && fmIter != fmEnd; i++, fmIter++)
    {
       Result& mr(*fmIter);
       liveLoadResult.m_MzMinLoadCases.push_back(mr.lcid);
-
-      Result& vr(*fvIter);
-      liveLoadResult.m_FyMinLoadCases.push_back(vr.lcid);
    }
 
    // Use reverse iterator at end of sequence
@@ -2677,7 +2667,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       liveLoadResult.m_MzMaxLoadCases.push_back(mr.lcid);
 
       Result& vr(*rvIter);
-      liveLoadResult.m_FyMaxLoadCases.push_back(vr.lcid);
+      liveLoadResult.m_FyLoadCases.push_back(vr.lcid);
    }
 
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);

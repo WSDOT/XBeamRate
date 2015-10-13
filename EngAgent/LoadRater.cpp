@@ -59,22 +59,21 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
-   // Rate for positive moment - flexure
-   MomentRating(pierID,vPoi,true,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   // Rate for flexure
+   MomentRating(pierID,vPoi,true /*positive moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vPoi,false/*negative moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
 
-   // Rate for negative moment - flexure
-   MomentRating(pierID,vPoi,false,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
-
-   // Rate for shear if applicable
-   if ( pRatingSpec->RateForShear(ratingType) )
-   {
-      ShearRating(pierID,vPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
-   }
-
+   // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
    {
       CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,true /*positive moment*/,ratingArtifact);
       CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,false/*negative moment*/,ratingArtifact);
+   }
+
+   // Rate for shear, if applicable
+   if ( pRatingSpec->RateForShear(ratingType) )
+   {
+      ShearRating(pierID,vPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
    }
 
    return ratingArtifact;

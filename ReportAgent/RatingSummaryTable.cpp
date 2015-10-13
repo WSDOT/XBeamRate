@@ -334,60 +334,58 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
          }
 
          // Service I
-         /*
          if ( ratingTableType == Permit )
          {
-            if ( pRatingSpec->RateForStress(ratingType) )
+            if ( pRatingSpec->CheckYieldStressLimit() )
             {
-#pragma Reminder("WORKING HERE - need yield stress rating")
-               //const xbrYieldStressRatioArtifact* pYieldStressArtifact;
-               //Float64 RF = pRatingArtifact->GetYieldStressRatioEx(true, &pYieldStressArtifact);
-               //if ( RF < 1 )
-               //{
-               //   (*table)(row,col) << RF_FAIL(rating_factor,RF);
-               //}
-               //else
-               //{
-               //   (*table)(row,col) << RF_PASS(rating_factor,RF);
-               //}
+               const xbrYieldStressRatioArtifact* pYieldStressArtifact;
+               Float64 RF = pRatingArtifact->GetYieldStressRatioEx(true, &pYieldStressArtifact);
+               if ( RF < 1 )
+               {
+                  (*table)(row,col) << RF_FAIL(rating_factor,RF);
+               }
+               else
+               {
+                  (*table)(row,col) << RF_PASS(rating_factor,RF);
+               }
 
-               //if ( pYieldStressArtifact )
-               //{
-               //   (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
+               if ( pYieldStressArtifact )
+               {
+                  (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
 
-               //   xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
-               //   (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
-               //}
-               //else
-               //{
-               //   (*table)(row,col+1) << _T("");
-               //   (*table)(row,col+2) << _T("");
-               //}
-               //row++;
+                  xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
+                  (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               }
+               else
+               {
+                  (*table)(row,col+1) << _T("");
+                  (*table)(row,col+2) << _T("");
+               }
+               row++;
 
-               //RF = pRatingArtifact->GetYieldStressRatioEx(false, &pYieldStressArtifact);
-               //if ( RF < 1 )
-               //{
-               //   (*table)(row,col) << RF_FAIL(rating_factor,RF);
-               //}
-               //else
-               //{
-               //   (*table)(row,col) << RF_PASS(rating_factor,RF);
-               //}
+               RF = pRatingArtifact->GetYieldStressRatioEx(false, &pYieldStressArtifact);
+               if ( RF < 1 )
+               {
+                  (*table)(row,col) << RF_FAIL(rating_factor,RF);
+               }
+               else
+               {
+                  (*table)(row,col) << RF_PASS(rating_factor,RF);
+               }
 
-               //if ( pYieldStressArtifact )
-               //{
-               //   (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
+               if ( pYieldStressArtifact )
+               {
+                  (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
 
-               //   xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
-               //   (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
-               //}
-               //else
-               //{
-               //   (*table)(row,col+1) << _T("");
-               //   (*table)(row,col+2) << _T("");
-               //}
-               //row++;
+                  xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
+                  (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               }
+               else
+               {
+                  (*table)(row,col+1) << _T("");
+                  (*table)(row,col+2) << _T("");
+               }
+               row++;
             }
             else
             {
@@ -397,58 +395,6 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                row++;
             }
          }
-      }
-      else
-      {
-         if ( ratingTableType == Design || ratingTableType == Legal )
-         {
-            // Strength I
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-         }
-
-         if ( ratingTableType == Permit )
-         {
-            // Strength II
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            // Service I
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-
-            (*table)(row,col)   << _T("");
-            (*table)(row,col+1) << _T("");
-            (*table)(row,col+2) << _T("");
-            row++;
-         }
-      */
       }
 
       col += 3;

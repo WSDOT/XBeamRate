@@ -31,7 +31,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define COMPARE_WITH_FULL_ANALYSIS
+//#define COMPARE_WITH_FULL_ANALYSIS
 
 /****************************************************************************
 CLASS
@@ -405,9 +405,9 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
       VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
       VehicleIndexType lastVehicleIdx  = (m_VehicleIdx == INVALID_INDEX ? nVehicles-1 : firstVehicleIdx);
 
-      std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
-      pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vMinLLConfigIdx,&vMaxLLConfigIdx);
-      BOOST_FOREACH(IndexType llConfigIdx,vMaxLLConfigIdx)
+      std::vector<IndexType> vLLConfigIdx;
+      pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vLLConfigIdx);
+      BOOST_FOREACH(IndexType llConfigIdx,vLLConfigIdx)
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
