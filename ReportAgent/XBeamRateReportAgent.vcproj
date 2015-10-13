@@ -36,7 +36,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -143,7 +143,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -251,7 +251,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -357,7 +357,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -463,7 +463,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -576,7 +576,7 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying Images to BridgeLink\Image folder"
-				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images"
+				CommandLine="xcopy /y /d \ARP\XBeamRate\Images\*.* \ARP\BridgeLink\Images&#x0D;&#x0A;"
 				AdditionalDependencies="$(ProjectDir)Images\*.*"
 				Outputs="\ARP\BridgeLink\Images\*.*"
 			/>
@@ -689,6 +689,10 @@
 			</File>
 			<File
 				RelativePath=".\LoadRatingDetailsChapterBuilder.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\MomentCapacityDetailsChapterBuilder.cpp"
 				>
 			</File>
 			<File
@@ -980,6 +984,10 @@
 			</File>
 			<File
 				RelativePath=".\LoadRatingDetailsChapterBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\MomentCapacityDetailsChapterBuilder.h"
 				>
 			</File>
 			<File

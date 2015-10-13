@@ -34,9 +34,13 @@
 
 #include "XBeamRateReportBuilder.h"
 #include "XBeamRateTitlePageBuilder.h"
+
 #include "TestChapterBuilder.h"
+
 #include "LoadRatingChapterBuilder.h"
 #include "LoadRatingDetailsChapterBuilder.h"
+
+#include "MomentCapacityDetailsChapterBuilder.h"
 
 #include <\ARP\PGSuper\Include\IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>
@@ -184,6 +188,7 @@ void CReportAgentImp::InitReportBuilders()
    pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
 }
 
