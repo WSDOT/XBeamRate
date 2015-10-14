@@ -61,6 +61,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IXBRRatingSpecification,
    public IXBRProjectEdit,
    public IXBREvents,
+   public IXBRExport,
    public IBridgeDescriptionEventSink
 {  
 public:
@@ -84,6 +85,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY_IID(IID_IXBRRatingSpecification,IXBRRatingSpecification)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectEdit,IXBRProjectEdit)
    COM_INTERFACE_ENTRY_IID(IID_IXBREvents,IXBREvents)
+   COM_INTERFACE_ENTRY_IID(IID_IXBRExport,IXBRExport)
    COM_INTERFACE_ENTRY(IBridgeDescriptionEventSink)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
@@ -320,6 +322,10 @@ public:
    virtual HRESULT OnLiveLoadChanged();
    virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName);
    virtual HRESULT OnConstructionLoadChanged();
+
+// IXBRExport
+public:
+   virtual HRESULT Export(PierIndexType pierIdx,LPCTSTR strFile);
 
 #ifdef _DEBUG
    bool AssertValid() const;

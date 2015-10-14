@@ -29,6 +29,7 @@
 import "oaidl.idl";
 import "ocidl.idl";
 import "WBFLCore.idl"; // for the Agent plugin
+import "PGSuperIEPlugin.idl";  // for the Importer/Exporter plugins
 
 
 [
@@ -86,4 +87,12 @@ library XBeamRateLibrary
 		[default] interface IUnknown;
    };
 
+	[
+		uuid(B3773B17-08A0-4f2b-99E8-C8077C3D2166),
+		helpstring("PGSuperDataExporter Class")
+	]
+	coclass PGSuperDataExporter
+	{
+		[default] interface IPGSuperDataExporter;
+	};
 };

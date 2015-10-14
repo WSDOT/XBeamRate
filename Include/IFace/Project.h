@@ -329,3 +329,17 @@ interface IXBRUIEvents : IUnknown
    virtual void CancelPendingEvents() = 0;
    virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>()) = 0;
 };
+
+/*****************************************************************************
+INTERFACE
+   IXBRExport
+
+   Interface to export a PGS pier model to a stand alone file
+*****************************************************************************/
+// {DD3B518E-1CFE-45b7-AA7B-426ADE3138D6}
+DEFINE_GUID(IID_IXBRExport, 
+0xdd3b518e, 0x1cfe, 0x45b7, 0xaa, 0x7b, 0x42, 0x6a, 0xde, 0x31, 0x38, 0xd6);
+interface IXBRExport : IUnknown
+{
+   virtual HRESULT Export(PierIndexType pierIdx,LPCTSTR strFile) = 0;
+};

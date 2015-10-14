@@ -38,10 +38,10 @@
 #include <WBFLReportManagerAgent.h>
 #include <WBFLGraphManagerAgent.h>
 
-#include "XBeamRatePlugin_i.h"
 
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
+#include "XBeamRatePlugin_i.h"
 #include "XBeamRatePlugin_i.c"
 #include "SectionCut.h"
 
@@ -87,18 +87,21 @@
 #include <PGSuperCatCom.h>
 #include <PGSpliceCatCom.h>
 #include <System\ComCatMgr.h>
+#include <PGSuperIEPlugin_i.c>
 
 #include "XBeamRatePluginApp.h"
 
 #include <EAF\EAFDocTemplate.h>
 #include "XBeamRateDoc.h"
 #include "ComponentInfo.h"
+#include "PGSuperExporter.h"
 
 CComModule _Module;
 
 BEGIN_OBJECT_MAP(ObjectMap)
-OBJECT_ENTRY(CLSID_XBeamRateAppPlugin, CXBeamRateAppPlugin)
-OBJECT_ENTRY(CLSID_XBeamRateComponentInfo, CXBeamRateComponentInfo)
+   OBJECT_ENTRY(CLSID_XBeamRateAppPlugin, CXBeamRateAppPlugin)
+   OBJECT_ENTRY(CLSID_XBeamRateComponentInfo, CXBeamRateComponentInfo)
+   OBJECT_ENTRY(CLSID_PGSuperDataExporter,    CPGSuperDataExporter)
 END_OBJECT_MAP()
 
 BEGIN_MESSAGE_MAP(CXBeamRatePluginApp, CWinApp)
@@ -204,6 +207,10 @@ void RegisterComponents(bool bRegister)
    // These components are for the PGSuper and PGSplice extension agents
    sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSuperExtensionAgent,  bRegister);
    sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSpliceExtensionAgent, bRegister);
+
+   // These components are exporter plugins
+   sysComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSuperDataExporter,    bRegister);
+   sysComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSpliceDataExporter,   bRegister);
 }
 
 STDAPI DllRegisterServer(void)

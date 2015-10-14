@@ -1,0 +1,26 @@
+HKCR
+{
+	XBeamRate.PGSuperDataExporter.1 = s 'XBeam Rate Pier Exporter'
+	{
+		CLSID = s '{B3773B17-08A0-4f2b-99E8-C8077C3D2166}'
+	}
+	XBeamRate.PGSuperDataExporter = s 'XBeam Rate Pier Exporter'
+	{
+		CLSID = s '{B3773B17-08A0-4f2b-99E8-C8077C3D2166}'
+		CurVer = s 'XBeamRate.PGSuperDataExporter.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B3773B17-08A0-4f2b-99E8-C8077C3D2166} = s 'XBeam Rate Pier Exporter'
+		{
+			ProgID = s 'XBeamRate.PGSuperDataExporter.1'
+			VersionIndependentProgID = s 'XBeamRate.PGSuperDataExporter'
+			ForceRemove 'Programmable'
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			'TypeLib' = s '{CDAAC48F-11E7-46a3-B186-8C5418EB611F}'
+		}
+	}
+}

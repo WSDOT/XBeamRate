@@ -49,6 +49,8 @@
 #define ID_VIEW_REPORTS                 32777
 #define ID_BUTTON32782                  32782
 #define ID_VIEW_PIER                    33030
+#define IDR_PGSUPEREXPORTER             200
+#define IDR_PGSPLICEEXPORTER             201
 
 // Next default values for new objects
 // 

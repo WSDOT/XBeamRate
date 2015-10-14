@@ -96,6 +96,7 @@ IDR_COMPONENTINFO       REGISTRY                "ComponentInfo.rgs"
 IDR_XBEAMRATEAGENT      REGISTRY                "XBeamRateAgent.rgs"
 IDR_PGSUPERCOMPONENTINFO REGISTRY                "PGSuperComponentInfo.rgs"
 IDR_PGSPLICECOMPONENTINFO REGISTRY                "PGSpliceComponentInfo.rgs"
+IDR_PGSUPEREXPORTER      REGISTRY               "PGSuperExporter.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -204,6 +204,7 @@ STDMETHODIMP CProjectAgentImp::RegInterfaces()
    pBrokerInit->RegInterface( IID_IXBRRatingSpecification, this );
    pBrokerInit->RegInterface( IID_IXBRProjectEdit,         this );
    pBrokerInit->RegInterface( IID_IXBREvents,              this );
+   pBrokerInit->RegInterface( IID_IXBRExport,              this );
 
    return S_OK;
 };
@@ -2538,6 +2539,26 @@ HRESULT CProjectAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNe
 
 HRESULT CProjectAgentImp::OnConstructionLoadChanged()
 {
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////
+// IXBRExport
+HRESULT CProjectAgentImp::Export(PierIndexType pierIdx,LPCTSTR strFile)
+{
+   ATLASSERT(ISPGSExtension());
+#pragma Reminder("WORKING HERE - export pier data")
+   // Use the broker to do the storage...
+   // Before storing, set a member data to the ID of the pier we are saving
+   // Re-work Save so that it calls a new function SaveStandAlone()
+   // SaveStandAlone is basically what is in Save now, except that instead
+   // of directly accessing the data structures, it uses all the get methods
+   // with the ID of the pier we are saving.
+
+   // m_SavePierID = GetPierID(pierIdx);
+   //GET_IFACE(IEAFDocument,pDoc);
+   //pDoc->SaveAs(strFile,FALSE); // implement with CDocument::DoSave(lpszPathName,bReplace)
+
    return S_OK;
 }
 

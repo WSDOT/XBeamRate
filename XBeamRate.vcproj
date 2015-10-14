@@ -48,12 +48,13 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TypeLibraryName=".\Release/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -142,13 +143,14 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TargetEnvironment="3"
 				TypeLibraryName=".\Release/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -236,13 +238,14 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TypeLibraryName=".\Debug/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -332,6 +335,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TargetEnvironment="3"
 				TypeLibraryName=".\Debug/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
@@ -339,7 +343,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -430,6 +434,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TypeLibraryName=".\Release/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
 			/>
@@ -437,7 +442,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -526,6 +531,7 @@
 			/>
 			<Tool
 				Name="VCMIDLTool"
+				AdditionalIncludeDirectories="\ARP\PGSuper\Include\Plugins;\ARP\WBFL\Include"
 				TargetEnvironment="3"
 				TypeLibraryName=".\Release/BridgeLinkTestPlugin.tlb"
 				HeaderFileName=""
@@ -534,7 +540,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="1"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\"
+				AdditionalIncludeDirectories=".\;.\Include;\ARP\WBFL\Include;&quot;\ARP\WBFL\Include\$(PlatformName)&quot;;\ARP\BridgeLink\Include;\ARP\PGSuper\Include\;\ARP\PGSuper\Include\Plugins"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_ATL_NO_UUIDOF"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -632,6 +638,10 @@
 			</File>
 			<File
 				RelativePath=".\PGSuperComponentInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSuperExporter.cpp"
 				>
 			</File>
 			<File
@@ -1120,6 +1130,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PGSuperExporter.h"
+				>
+			</File>
+			<File
 				RelativePath=".\ReinforcementPageParent.h"
 				>
 			</File>
@@ -1222,6 +1236,10 @@
 			</File>
 			<File
 				RelativePath=".\PGSuperComponentInfo.rgs"
+				>
+			</File>
+			<File
+				RelativePath=".\PGSuperExporter.rgs"
 				>
 			</File>
 			<File
