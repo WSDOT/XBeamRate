@@ -2546,7 +2546,7 @@ HRESULT CProjectAgentImp::OnConstructionLoadChanged()
 // IXBRExport
 HRESULT CProjectAgentImp::Export(PierIndexType pierIdx,LPCTSTR strFile)
 {
-   ATLASSERT(ISPGSExtension());
+   ATLASSERT(IsPGSExtension());
 #pragma Reminder("WORKING HERE - export pier data")
    // Use the broker to do the storage...
    // Before storing, set a member data to the ID of the pier we are saving
