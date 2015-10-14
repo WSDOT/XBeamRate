@@ -52,6 +52,7 @@
 #include <IFace\LoadRating.h>
 #include <IFace\RatingSpecification.h>
 #include <IFace\VersionInfo.h>
+#include <IFace\Pier.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <\ARP\PGSuper\Include\IFace\Selection.h>

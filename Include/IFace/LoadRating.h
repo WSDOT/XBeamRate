@@ -35,7 +35,7 @@ typedef struct MomentCapacityDetails
    Float64 Mn; // nominal capacity
    Float64 Mr; // nominal resistance (phi*Mn)
    CComPtr<IRCBeam2> rcBeam; // need this for cracked section analysis, so cache it here
-   CComPtr<IRCSolutionEx> solution;
+   CComPtr<ILRFDSolutionEx> solution;
 } MomentCapacityDetails;
 
 
@@ -105,6 +105,14 @@ typedef struct AvOverSDetails
    Float64 AvgAvOverS;
 } AvOverSDetails;
 
+typedef struct DvDetails
+{
+   // NOTE: array index 0, positive moment, 1, negative moment
+   Float64 h; // height of the section
+   Float64 de[2]; // depth to resultant tensile force
+   Float64 MomentArm[2]; // moment arm
+   Float64 dv; // dv, per LRFD 5.8.2.9
+} DvDetails;
 
 /*****************************************************************************
 INTERFACE
@@ -147,6 +155,9 @@ interface IXBRShearCapacity : IUnknown
    virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 
    virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+
+   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
+   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) = 0;
 };
 
 /*****************************************************************************

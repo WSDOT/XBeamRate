@@ -66,9 +66,13 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
+   INIT_UV_PROTOTYPE( rptAreaUnitValue, area, pDisplayUnits->GetAreaUnit(), false);
+   INIT_UV_PROTOTYPE( rptStressUnitValue, stress, pDisplayUnits->GetStressUnit(), false);
 
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
+
+   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity.png")) << rptNewLine;
 
    for ( int i = 0; i < 2; i++ )
    {
@@ -77,19 +81,21 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
       CString strTitle;
       strTitle.Format(_T("%s Moment"),(bPositiveMoment ? _T("Positive") : _T("Negative")));
 
-      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(5,strTitle);
+      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(9,strTitle);
       *pPara << pTable << rptNewLine;
 
-#pragma Reminder("WORKING HERE")
-      // Need alpha 1 in moment capacity details
-      // Need beta 1 in moment capacity details
-      // Need moment capacity equation
-      // Need to report something for the reinforcement
-      // Need equation graphics
+#pragma Reminder("WORKING HERE - need to get LRFD Version and Units Mode correct")
+      // need to look at LRFD code version
+      // the equations are different and the alpha1 column isn't needed
+      // if the LRFD version is before (2015??? - not sure of the exact version)
 
       ColumnIndexType col = 0;
       (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      (*pTable)(0,col++) << Sub2(symbol(alpha),_T("1"));
+      (*pTable)(0,col++) << Sub2(symbol(beta),_T("1"));
       (*pTable)(0,col++) << COLHDR(_T("c"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pTable)(0,col++) << COLHDR(_T("b"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pTable)(0,col++) << _T("Reinforcement");
       (*pTable)(0,col++) << symbol(phi);
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("n")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("r")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
@@ -105,14 +111,68 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
 
          const MomentCapacityDetails& mcd = pMomentCapacity->GetMomentCapacityDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment);
 
-         Float64 c;
+         Float64 alpha1,beta1,c;
+         mcd.solution->get_Alpha1(&alpha1);
+         mcd.solution->get_Beta1(&beta1);
          mcd.solution->get_NeutralAxisDepth(&c);
 
+         Float64 bw;
+         mcd.rcBeam->get_bw(&bw);
+
+#if defined _DEBUG
+         Float64 b;
+         mcd.rcBeam->get_b(&b);
+         ATLASSERT(IsEqual(b,bw));
+         Float64 hf;
+         mcd.rcBeam->get_hf(&hf);
+         ATLASSERT(IsZero(hf));
+#endif
+
          (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
+         (*pTable)(row,col++) << alpha1;
+         (*pTable)(row,col++) << beta1;
          (*pTable)(row,col++) << dim.SetValue(c);
+         (*pTable)(row,col++) << dim.SetValue(bw);
+
+         rptRcTable* pReinfTable = pgsReportStyleHolder::CreateDefaultTable(4);
+         (*pTable)(row,col++) << pReinfTable;
+
          (*pTable)(row,col++) << mcd.phi;
          (*pTable)(row,col++) << moment.SetValue(mcd.Mn);
          (*pTable)(row,col++) << moment.SetValue(mcd.Mr);
+
+
+         (*pReinfTable)(0,0) << _T("");
+         (*pReinfTable)(0,1) << COLHDR(Sub2(_T("A"),_T("s")),rptAreaUnitTag,pDisplayUnits->GetAreaUnit());
+         (*pReinfTable)(0,2) << COLHDR(Sub2(_T("d"),_T("s")),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
+         (*pReinfTable)(0,3) << COLHDR(Sub2(_T("f"),_T("s")),rptStressUnitTag,pDisplayUnits->GetStressUnit());
+
+         IndexType nRebarLayers;
+         mcd.rcBeam->get_RebarLayerCount(&nRebarLayers);
+
+         CComPtr<IDblArray> vfs;
+         mcd.solution->get_fs(&vfs);
+#if defined _DEBUG
+         IndexType vfs_size;
+         vfs->get_Count(&vfs_size);
+         ATLASSERT(vfs_size == nRebarLayers);
+#endif
+         RowIndexType reinfTableRow = pReinfTable->GetNumberOfHeaderRows();
+
+         for ( IndexType rebarLayerIdx = 0; rebarLayerIdx < nRebarLayers; rebarLayerIdx++, reinfTableRow++ )
+         {
+            Float64 As, ds, devFactor;
+            mcd.rcBeam->GetRebarLayer(rebarLayerIdx,&ds,&As,&devFactor);
+
+            Float64 fs;
+            vfs->get_Item(rebarLayerIdx,&fs);
+
+            (*pReinfTable)(reinfTableRow,0) << (rebarLayerIdx+1);
+            (*pReinfTable)(reinfTableRow,1) << area.SetValue(devFactor*As);
+            (*pReinfTable)(reinfTableRow,2) << dim.SetValue(ds);
+            (*pReinfTable)(reinfTableRow,3) << stress.SetValue(fs);
+         }
+
 
          row++;
       }

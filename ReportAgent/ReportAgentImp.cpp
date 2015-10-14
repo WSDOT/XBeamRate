@@ -41,6 +41,7 @@
 #include "LoadRatingDetailsChapterBuilder.h"
 
 #include "MomentCapacityDetailsChapterBuilder.h"
+#include "ShearCapacityDetailsChapterBuilder.h"
 
 #include <\ARP\PGSuper\Include\IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>
@@ -189,6 +190,7 @@ void CReportAgentImp::InitReportBuilders()
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
 }
 

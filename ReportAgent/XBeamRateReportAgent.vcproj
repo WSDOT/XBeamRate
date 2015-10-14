@@ -882,6 +882,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ShearCapacityDetailsChapterBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath="StdAfx.cpp"
 				>
 				<FileConfiguration
@@ -1012,6 +1016,10 @@
 			</File>
 			<File
 				RelativePath="Resource.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ShearCapacityDetailsChapterBuilder.h"
 				>
 			</File>
 			<File

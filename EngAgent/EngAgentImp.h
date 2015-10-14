@@ -111,6 +111,8 @@ public:
    virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
 
 // IXBRArtifact
 public:
@@ -143,6 +145,8 @@ private:
    std::auto_ptr<std::map<IDType,ShearCapacityDetails>> m_pShearCapacity[2];
    std::auto_ptr<std::map<IDType,AvOverSDetails>> m_pShearFailurePlane[2];
 
+   std::auto_ptr<std::map<IDType,DvDetails>> m_pDvDetails[2];
+
    MomentCapacityDetails ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    CrackingMomentDetails ComputeCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    MinMomentCapacityDetails ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
@@ -151,8 +155,8 @@ private:
    CrackedSectionDetails ComputeCrackedSectionProperties(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType);
    void BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,IRCBeam2** ppModel,Float64* pdt);
 
+   DvDetails ComputeDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    ShearCapacityDetails ComputeShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    AvOverSDetails ComputeAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta);
 
 
@@ -162,7 +166,7 @@ private:
    RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
-   CComPtr<IMomentCapacitySolver> m_MomentCapacitySolver;
+   CComPtr<IRCSolver2> m_MomentCapacitySolver;
    CComPtr<IRCCrackedSectionSolver2> m_CrackedSectionSolver;
 
 
@@ -189,6 +193,8 @@ private:
 
       std::map<IDType,ShearCapacityDetails>* m_pShearCapacity[2];
       std::map<IDType,AvOverSDetails>* m_pShearFailurePlane[2];
+
+      std::map<IDType,DvDetails>* m_pDvDetails[2];
    };
    static UINT DeleteDataStructures(LPVOID pParam);
    void CreateDataStructures();

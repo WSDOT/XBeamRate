@@ -68,15 +68,20 @@ HRESULT CEngAgentImp::FinalConstruct()
    CreateDataStructures();
 
    HRESULT hr;
-   hr = m_MomentCapacitySolver.CoCreateInstance(CLSID_MomentCapacitySolver);
+   hr = m_MomentCapacitySolver.CoCreateInstance(CLSID_LRFDSolver2);
    ATLASSERT(SUCCEEDED(hr));
+
+   // base equations on US units of LRFD
+#pragma Reminder("WORKING HERE - need to get LRFD Units Mode correct")
+   CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
+   solver->put_UnitMode(suUS);
 
    hr = m_CrackedSectionSolver.CoCreateInstance(CLSID_NLSolver);
    ATLASSERT(SUCCEEDED(hr));
 
    // use only one slice for cracked section analysis
-   CComQIPtr<INLSolver> solver(m_CrackedSectionSolver);
-   solver->put_Slices(1);
+   CComQIPtr<INLSolver> nlsolver(m_CrackedSectionSolver);
+   nlsolver->put_Slices(1);
 
 
    return S_OK;
@@ -339,6 +344,31 @@ const AvOverSDetails& CEngAgentImp::GetAverageAvOverSDetails(PierIDType pierID,x
    return iter->second;
 }
 
+Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   const DvDetails& details = GetDvDetails(pierID,stage,poi);
+   return details.dv;
+}
+
+const DvDetails& CEngAgentImp::GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   std::map<IDType,DvDetails>* pDetails = m_pDvDetails[stage].get();
+   std::map<IDType,DvDetails>::iterator found(pDetails->find(poi.GetID()));
+   if ( found != pDetails->end() )
+   {
+      return found->second;
+   }
+
+   DvDetails details = ComputeDv(pierID,stage,poi);
+   ATLASSERT(poi.GetID() != INVALID_ID);
+
+   std::pair<std::map<IDType,DvDetails>::iterator,bool> result = pDetails->insert(std::make_pair(poi.GetID(),details));
+   ATLASSERT(result.second == true);
+
+   std::map<IDType,DvDetails>::iterator iter = result.first;
+   return iter->second;
+}
+
 //////////////////////////////////////////////////////////////////////
 // IXBRArtifactCapacity
 const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
@@ -376,16 +406,13 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
    Float64 dt;
    BuildMomentCapacityModel(pierID,stage,poi,bPositiveMoment,&rcBeam,&dt);
 
-   CComPtr<IRCSolver2> solver;
-   HRESULT hr = solver.CoCreateInstance(CLSID_LRFDSolver2);
-   ATLASSERT(SUCCEEDED(hr));
-
    CComPtr<IRCSolutionEx> solution;
-   hr = solver->Solve(rcBeam,&solution); 
+   HRESULT hr = m_MomentCapacitySolver->Solve(rcBeam,&solution); 
    ATLASSERT(SUCCEEDED(hr));
 
    Float64 Mn;
    solution->get_Mn(&Mn);
+   ATLASSERT(0 <= Mn);
    if ( !bPositiveMoment )
    {
       Mn *= -1;
@@ -408,10 +435,10 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 PhiC, PhiT;
       pProject->GetFlexureResistanceFactors(&PhiC,&PhiT);
 
-      Float64 et = (dt - c)*0.003/c;
+      Float64 et  = (dt - c)*0.003/c;
       Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
       Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
-      phi = PhiC + (PhiT - PhiC)*(et - ecl)/(etl-ecl);
+      phi = PhiC + (PhiT - PhiC)*(et - ecl)/(etl - ecl);
       phi = ::ForceIntoRange(PhiC,phi,PhiT);
 
       Float64 Cweb, Cflange, Yweb, Yflange;
@@ -429,6 +456,8 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 
    MomentCapacityDetails capacityDetails;
    capacityDetails.rcBeam = rcBeam;
+   hr = solution.QueryInterface(&capacityDetails.solution);
+   ATLASSERT(SUCCEEDED(hr));
    capacityDetails.solution = solution;
    capacityDetails.dc = dc;
    capacityDetails.de = de;
@@ -809,19 +838,19 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    Float64 fc = pMaterial->GetXBeamFc(pierID);
    rcBeam->put_FcBeam(fc);
 
-   if ( IsStandAlone() )
-   {
+   //if ( IsStandAlone() )
+   //{
       rcBeam->put_FcSlab(fc);
-   }
-   else
-   {
-      GET_IFACE(IIntervals,pIntervals);
-      IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
+   //}
+   //else
+   //{
+   //   GET_IFACE(IIntervals,pIntervals);
+   //   IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
 
-      GET_IFACE(IMaterials,pMaterials);
-      Float64 fcSlab = pMaterials->GetDeckDesignFc(loadRatingIntervalIdx);
-      rcBeam->put_FcSlab(fcSlab);
-   }
+   //   GET_IFACE(IMaterials,pMaterials);
+   //   Float64 fcSlab = pMaterials->GetDeckDesignFc(loadRatingIntervalIdx);
+   //   rcBeam->put_FcSlab(fcSlab);
+   //}
 
    Float64 Es, fy, fu;
    pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
@@ -893,25 +922,39 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    *pdt = dt;
 }
 
-Float64 CEngAgentImp::GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+DvDetails CEngAgentImp::ComputeDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
 {
    GET_IFACE(IXBRProject,pProject);
    if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {
       // there isn't stage 2 for non-integral cross beams
-      return 0;
+      DvDetails details;
+      details.h = 0;
+      details.de[0] = 0;
+      details.MomentArm[0] = 0;
+      details.de[1] = 0;
+      details.MomentArm[1] = 0;
+      details.dv = 0;
    }
 
    GET_IFACE(IXBRSectionProperties,pSectProps);
    Float64 h = pSectProps->GetDepth(pierID,stage,poi);
-   MomentCapacityDetails posCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,true);
-   MomentCapacityDetails negCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,false);
+   const MomentCapacityDetails& posCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,true);
+   const MomentCapacityDetails& negCapacityDetails = GetMomentCapacityDetails(pierID,stage,poi,false);
    Float64 posMomentArm = posCapacityDetails.de - posCapacityDetails.dc;
    Float64 posDv = Max(posMomentArm,0.9*posCapacityDetails.de,0.72*h);
    Float64 negMomentArm = negCapacityDetails.de - negCapacityDetails.dc;
    Float64 negDv = Max(negMomentArm,0.9*negCapacityDetails.de,0.72*h);
    Float64 dv = Min(posDv,negDv);
-   return dv;
+
+   DvDetails details;
+   details.h = h;
+   details.de[0] = posCapacityDetails.de;
+   details.de[1] = negCapacityDetails.de;
+   details.MomentArm[0] = posMomentArm;
+   details.MomentArm[1] = negMomentArm;
+   details.dv = dv;
+   return details;
 }
 
 AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
@@ -1053,6 +1096,8 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
 
       pDataStructures->m_pShearCapacity[i] = m_pShearCapacity[i].release();
       pDataStructures->m_pShearFailurePlane[i] = m_pShearFailurePlane[i].release();
+
+      pDataStructures->m_pDvDetails[i] = m_pDvDetails[i].release();
    }
 
    for ( int i = 0; i < 6; i++ )
@@ -1112,8 +1157,8 @@ void CEngAgentImp::CreateDataStructures()
 
       m_pShearFailurePlane[i] = std::auto_ptr<std::map<IDType,AvOverSDetails>>(new std::map<IDType,AvOverSDetails>());
 
+      m_pDvDetails[i] = std::auto_ptr<std::map<IDType,DvDetails>>(new std::map<IDType,DvDetails>());
    }
-
 
    for ( int i = 0; i < 6; i++ )
    {
@@ -1161,6 +1206,7 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
 
       delete pDataStructures->m_pShearFailurePlane[i];
 
+      delete pDataStructures->m_pDvDetails[i];
    }
 
    for ( int i = 0; i < 6; i++ )
