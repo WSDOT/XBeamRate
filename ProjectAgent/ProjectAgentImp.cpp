@@ -31,6 +31,7 @@
 
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\VersionInfo.h>
 
 #include <WBFLUnitServer\OpenBridgeML.h>
 
@@ -46,6 +47,12 @@
 #include <\ARP\PGSuper\Include\IFace\EditByUI.h>
 #include <\ARP\PGSuper\Include\IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
+
+#include <IFace\Bridge.h>
+#include <MFCTools\Prompts.h>
+#include <PgsExt\GirderLabel.h>
+#include <EAF\EAFApp.h>
+#include <EAF\EAFAutoProgress.h>
 
 #include "..\resource.h" // for ID_VIEW_PIER
 
@@ -301,21 +308,30 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 {
    HRESULT hr = S_OK;
 
-   bool bIsStandAlone = IsStandAlone();
-
    // Save project data, properties, reactions, settings, etc if we are in "stand alone" mode
-   // otherwise we are a plug-in and all we want to save is the pier description
-   if ( bIsStandAlone )
+   // or we are exporting a pier model from PGS.
+   // Otherwise we are a PGS plug-in and all we want to save is the pier description
+   if ( IsStandAlone() || m_bExportingModel )
    {
+      // if we are exporting, m_SavePierID is set in Export(), so leave it alone,
+      // otherwise, set it to INVALID_ID (the ID of the agent local pier model in stand alone mode)
+      if ( !m_bExportingModel )
+      {
+         m_SavePierID = INVALID_ID;
+      }
+
+      // NOTE: Use the accessor methods to get data during the save instead of accessing the data members directly
+      // The accessor methods know how to read agent local data and get data from PGS in a polymorphic way
+
       pStrSave->BeginUnit(_T("ProjectData"),1.0);
 
       pStrSave->BeginUnit(_T("ProjectProperties"),1.0);
-         pStrSave->put_Property(_T("BridgeName"), CComVariant(m_strBridgeName));
-         pStrSave->put_Property(_T("BridgeId"),CComVariant(m_strBridgeId));
-         pStrSave->put_Property(_T("JobNumber"),CComVariant(m_strJobNumber));
-         pStrSave->put_Property(_T("Engineer"),CComVariant(m_strEngineer));
-         pStrSave->put_Property(_T("Company"),CComVariant(m_strCompany));
-         pStrSave->put_Property(_T("Comments"),CComVariant(m_strComments));
+         pStrSave->put_Property(_T("BridgeName"), CComVariant(GetBridgeName()));
+         pStrSave->put_Property(_T("BridgeId"),   CComVariant(GetBridgeID()));
+         pStrSave->put_Property(_T("JobNumber"),  CComVariant(GetJobNumber()));
+         pStrSave->put_Property(_T("Engineer"),   CComVariant(GetEngineer()));
+         pStrSave->put_Property(_T("Company"),    CComVariant(GetCompany()));
+         pStrSave->put_Property(_T("Comments"),   CComVariant(GetComments()));
       pStrSave->EndUnit(); // ProjectProperties
 
       pStrSave->BeginUnit(_T("ProjectSettings"),1.0);
@@ -328,81 +344,88 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
-         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
-         pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(m_SysFactorFlexure));
-         pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(m_SysFactorShear));
-         pStrSave->put_Property(_T("PhiC"),CComVariant(m_PhiC));
-         pStrSave->put_Property(_T("PhiT"),CComVariant(m_PhiT));
-         pStrSave->put_Property(_T("PhiV"),CComVariant(m_PhiV));
+         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(GetPermitRatingMethod()));
+         pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(GetSystemFactorFlexure()));
+         pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(GetSystemFactorShear()));
+         Float64 phiC,phiT;
+         GetFlexureResistanceFactors(&phiC,&phiT);
+         pStrSave->put_Property(_T("PhiC"),CComVariant(phiC));
+         pStrSave->put_Property(_T("PhiT"),CComVariant(phiT));
+         pStrSave->put_Property(_T("PhiV"),CComVariant(GetShearResistanceFactor()));
 
-         pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Inventory]));
-         pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(m_bRatingEnabled[pgsTypes::lrDesign_Operating]));
-         pStrSave->put_Property(_T("RatingEnabled_Legal_Routine"),   CComVariant(m_bRatingEnabled[pgsTypes::lrLegal_Routine]));
-         pStrSave->put_Property(_T("RatingEnabled_Legal_Special"),   CComVariant(m_bRatingEnabled[pgsTypes::lrLegal_Special]));
-         pStrSave->put_Property(_T("RatingEnabled_Permit_Routine"),  CComVariant(m_bRatingEnabled[pgsTypes::lrPermit_Routine]));
-         pStrSave->put_Property(_T("RatingEnabled_Permit_Special"),  CComVariant(m_bRatingEnabled[pgsTypes::lrPermit_Special]));
+         pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Inventory)));
+         pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Operating)));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Routine"),   CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Routine)));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Special"),   CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RatingEnabled_Permit_Routine"),  CComVariant(IsRatingEnabled(pgsTypes::lrPermit_Routine)));
+         pStrSave->put_Property(_T("RatingEnabled_Permit_Special"),  CComVariant(IsRatingEnabled(pgsTypes::lrPermit_Special)));
 
-         pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(m_bRateForShear[pgsTypes::lrDesign_Inventory]));
-         pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(m_bRateForShear[pgsTypes::lrDesign_Operating]));
-         pStrSave->put_Property(_T("RateForShear_Legal_Routine"),   CComVariant(m_bRateForShear[pgsTypes::lrLegal_Routine]));
-         pStrSave->put_Property(_T("RateForShear_Legal_Special"),   CComVariant(m_bRateForShear[pgsTypes::lrLegal_Special]));
-         pStrSave->put_Property(_T("RateForShear_Permit_Routine"),  CComVariant(m_bRateForShear[pgsTypes::lrPermit_Routine]));
-         pStrSave->put_Property(_T("RateForShear_Permit_Special"),  CComVariant(m_bRateForShear[pgsTypes::lrPermit_Special]));
+         pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(RateForShear(pgsTypes::lrDesign_Inventory)));
+         pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(RateForShear(pgsTypes::lrDesign_Operating)));
+         pStrSave->put_Property(_T("RateForShear_Legal_Routine"),   CComVariant(RateForShear(pgsTypes::lrLegal_Routine)));
+         pStrSave->put_Property(_T("RateForShear_Legal_Special"),   CComVariant(RateForShear(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RateForShear_Permit_Routine"),  CComVariant(RateForShear(pgsTypes::lrPermit_Routine)));
+         pStrSave->put_Property(_T("RateForShear_Permit_Special"),  CComVariant(RateForShear(pgsTypes::lrPermit_Special)));
 
-         pStrSave->put_Property(_T("CheckYieldStressLimit"), CComVariant(m_bCheckYieldStress));
-         pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(m_YieldStressCoefficient));
+         pStrSave->put_Property(_T("CheckYieldStressLimit"), CComVariant(CheckYieldStressLimit()));
+         pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(GetYieldStressLimitCoefficient()));
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
-         pStrSave->put_Property(_T("DC_StrengthI"),CComVariant(m_gDC_StrengthI));
-         pStrSave->put_Property(_T("DW_StrengthI"),CComVariant(m_gDW_StrengthI));
-         pStrSave->put_Property(_T("CR_StrengthI"),CComVariant(m_gCR_StrengthI));
-         pStrSave->put_Property(_T("SH_StrengthI"),CComVariant(m_gSH_StrengthI));
-         pStrSave->put_Property(_T("PS_StrengthI"),CComVariant(m_gPS_StrengthI));
-         pStrSave->put_Property(_T("RE_StrengthI"),CComVariant(m_gRE_StrengthI));
+#pragma Reminder("WORKING HERE - review this load factors") 
+      // do we have all the load factors modeled in stand alone mode? is there a good conversion from plug-in to stand alone?
+         pStrSave->put_Property(_T("DC_StrengthI"),CComVariant(GetDCLoadFactor(pgsTypes::StrengthI_Inventory)));
+         pStrSave->put_Property(_T("DW_StrengthI"),CComVariant(GetDWLoadFactor(pgsTypes::StrengthI_Inventory)));
+         pStrSave->put_Property(_T("CR_StrengthI"),CComVariant(GetCRLoadFactor(pgsTypes::StrengthI_Inventory)));
+         pStrSave->put_Property(_T("SH_StrengthI"),CComVariant(GetSHLoadFactor(pgsTypes::StrengthI_Inventory)));
+         pStrSave->put_Property(_T("PS_StrengthI"),CComVariant(GetPSLoadFactor(pgsTypes::StrengthI_Inventory)));
+         pStrSave->put_Property(_T("RE_StrengthI"),CComVariant(GetRELoadFactor(pgsTypes::StrengthI_Inventory)));
 
-         pStrSave->put_Property(_T("DC_StrengthII"),CComVariant(m_gDC_StrengthII));
-         pStrSave->put_Property(_T("DW_StrengthII"),CComVariant(m_gDW_StrengthII));
-         pStrSave->put_Property(_T("CR_StrengthII"),CComVariant(m_gCR_StrengthII));
-         pStrSave->put_Property(_T("SH_StrengthII"),CComVariant(m_gSH_StrengthII));
-         pStrSave->put_Property(_T("PS_StrengthII"),CComVariant(m_gPS_StrengthII));
-         pStrSave->put_Property(_T("RE_StrengthII"),CComVariant(m_gRE_StrengthII));
+         pStrSave->put_Property(_T("DC_StrengthII"),CComVariant(GetDCLoadFactor(pgsTypes::StrengthII_PermitRoutine)));
+         pStrSave->put_Property(_T("DW_StrengthII"),CComVariant(GetDWLoadFactor(pgsTypes::StrengthII_PermitRoutine)));
+         pStrSave->put_Property(_T("CR_StrengthII"),CComVariant(GetCRLoadFactor(pgsTypes::StrengthII_PermitRoutine)));
+         pStrSave->put_Property(_T("SH_StrengthII"),CComVariant(GetSHLoadFactor(pgsTypes::StrengthII_PermitRoutine)));
+         pStrSave->put_Property(_T("PS_StrengthII"),CComVariant(GetPSLoadFactor(pgsTypes::StrengthII_PermitRoutine)));
+         pStrSave->put_Property(_T("RE_StrengthII"),CComVariant(GetRELoadFactor(pgsTypes::StrengthII_PermitRoutine)));
 
-         pStrSave->put_Property(_T("DC_ServiceI"),CComVariant(m_gDC_ServiceI));
-         pStrSave->put_Property(_T("DW_ServiceI"),CComVariant(m_gDW_ServiceI));
-         pStrSave->put_Property(_T("CR_ServiceI"),CComVariant(m_gCR_ServiceI));
-         pStrSave->put_Property(_T("SH_ServiceI"),CComVariant(m_gSH_ServiceI));
-         pStrSave->put_Property(_T("PS_ServiceI"),CComVariant(m_gPS_ServiceI));
-         pStrSave->put_Property(_T("RE_ServiceI"),CComVariant(m_gRE_ServiceI));
+         pStrSave->put_Property(_T("DC_ServiceI"),CComVariant(GetDCLoadFactor(pgsTypes::ServiceI_PermitRoutine)));
+         pStrSave->put_Property(_T("DW_ServiceI"),CComVariant(GetDWLoadFactor(pgsTypes::ServiceI_PermitRoutine)));
+         pStrSave->put_Property(_T("CR_ServiceI"),CComVariant(GetCRLoadFactor(pgsTypes::ServiceI_PermitRoutine)));
+         pStrSave->put_Property(_T("SH_ServiceI"),CComVariant(GetSHLoadFactor(pgsTypes::ServiceI_PermitRoutine)));
+         pStrSave->put_Property(_T("PS_ServiceI"),CComVariant(GetPSLoadFactor(pgsTypes::ServiceI_PermitRoutine)));
+         pStrSave->put_Property(_T("RE_ServiceI"),CComVariant(GetRELoadFactor(pgsTypes::ServiceI_PermitRoutine)));
 
-         pStrSave->put_Property(_T("LL_StrengthI_Inventory"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_StrengthI_Operating"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_StrengthI_LegalRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_StrengthII_PermitRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_StrengthII_PermitSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_ServiceI_PermitRoutine"),CComVariant(m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)][INVALID_ID]));
-         pStrSave->put_Property(_T("LL_ServiceI_PermitSpecial"),CComVariant(m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)][INVALID_ID]));
+         pStrSave->put_Property(_T("LL_StrengthI_Inventory"),      CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_Inventory,      INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthI_Operating"),      CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_Operating,      INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalRoutine"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_LegalRoutine,   INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_LegalSpecial,   INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthII_PermitRoutine"), CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthII_PermitRoutine, INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthII_PermitSpecial"), CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthII_PermitSpecial, INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_ServiceI_PermitRoutine"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::ServiceI_PermitRoutine,   INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_ServiceI_PermitSpecial"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::ServiceI_PermitSpecial,   INVALID_INDEX)));
       pStrSave->EndUnit(); // LoadFactors
 
       pStrSave->BeginUnit(_T("Reactions"),1.0);
          pStrSave->BeginUnit(_T("DeadLoad"),1.0);
-         IndexType nBearingLines = m_PierData[INVALID_ID].GetBearingLineCount();
+         IndexType nBearingLines = GetBearingLineCount(m_SavePierID);
          for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
          {
-            std::vector<BearingReactions>& vBearingReactions = m_BearingReactions[brgLineIdx][INVALID_ID];
             pStrSave->BeginUnit(_T("BearingLine"),1.0);
-            pStrSave->put_Property(_T("ReactionType"),CComVariant(m_BearingReactionType[brgLineIdx][INVALID_ID]));
-            BOOST_FOREACH(BearingReactions& brgReaction,vBearingReactions)
+            pStrSave->put_Property(_T("ReactionType"),CComVariant(GetBearingReactionType(m_SavePierID,brgLineIdx)));
+          
+            IndexType nBearings = GetBearingCount(m_SavePierID,brgLineIdx);
+            for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
             {
+               Float64 DC,DW,CR,SH,PS,RE,W;
+               GetBearingReactions(m_SavePierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
                pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("DC"),CComVariant(brgReaction.DC));
-                  pStrSave->put_Property(_T("DW"),CComVariant(brgReaction.DW));
-                  pStrSave->put_Property(_T("CR"),CComVariant(brgReaction.CR));
-                  pStrSave->put_Property(_T("SH"),CComVariant(brgReaction.SH));
-                  pStrSave->put_Property(_T("PS"),CComVariant(brgReaction.PS));
-                  pStrSave->put_Property(_T("RE"),CComVariant(brgReaction.RE));
-                  pStrSave->put_Property(_T("W"), CComVariant(brgReaction.W));
+                  pStrSave->put_Property(_T("DC"),CComVariant(DC));
+                  pStrSave->put_Property(_T("DW"),CComVariant(DW));
+                  pStrSave->put_Property(_T("CR"),CComVariant(CR));
+                  pStrSave->put_Property(_T("SH"),CComVariant(SH));
+                  pStrSave->put_Property(_T("PS"),CComVariant(PS));
+                  pStrSave->put_Property(_T("RE"),CComVariant(RE));
+                  pStrSave->put_Property(_T("W"), CComVariant(W));
                pStrSave->EndUnit(); // Reaction
             }
             pStrSave->EndUnit(); // BearingLine
@@ -410,70 +433,95 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->EndUnit(); // DeadLoad
 
          pStrSave->BeginUnit(_T("LiveLoad"),1.0);
-            pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetPrivateReactionLoadApplication(INVALID_ID)));
+            pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetPrivateReactionLoadApplication(m_SavePierID)));
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID])
+
+            std::vector<xbrLiveLoadReactionData> vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrDesign_Inventory);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Design_Inventory
 
             pStrSave->BeginUnit(_T("Design_Operating"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID])
+            vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrDesign_Operating);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Design_Operating
 
             pStrSave->BeginUnit(_T("Legal_Routine"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID])
+            vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrLegal_Routine);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Legal_Routine
 
             pStrSave->BeginUnit(_T("Legal_Special"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID])
+            vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrLegal_Special);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Legal_Special
 
             pStrSave->BeginUnit(_T("Permit_Routine"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID])
+            vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrPermit_Routine);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Permit_Routine
 
             pStrSave->BeginUnit(_T("Permit_Special"),1.0);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,m_LiveLoadReactions[pgsTypes::lrPermit_Special][INVALID_ID])
+            vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrPermit_Special);
+            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
             {
-               pStrSave->BeginUnit(_T("Reaction"),1.0);
-                  pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
-                  pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
-                  pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
-               pStrSave->EndUnit(); // Reaction
+               if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
+               {
+                  pStrSave->BeginUnit(_T("Reaction"),1.0);
+                     pStrSave->put_Property(_T("Name"),CComVariant(llReaction.Name.c_str()));
+                     pStrSave->put_Property(_T("LLIM"),CComVariant(llReaction.LLIM));
+                     pStrSave->put_Property(_T("W"),CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
             }
             pStrSave->EndUnit(); // Permit_Special
 
@@ -481,10 +529,10 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->EndUnit(); // Reactions
 
       // Save the pier description information
-      m_PierData[INVALID_ID].Save(pStrSave,NULL);
+      m_PierData[m_SavePierID].Save(pStrSave,NULL);
 
       pStrSave->EndUnit(); // ProjectData
-   } // end if bIsStandAlone
+   } // end if bIsStandAlone or bExportingModel
    else
    {
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
@@ -1632,7 +1680,7 @@ std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::Load
       std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
       if ( vLLReactions.size() == 0 )
       {
-         return NO_LIVE_LOADS_DEFINED;
+         return NO_LIVE_LOAD_DEFINED;
       }
       return vLLReactions[vehicleIdx].Name;
    }
@@ -2544,20 +2592,143 @@ HRESULT CProjectAgentImp::OnConstructionLoadChanged()
 
 //////////////////////////////////////////////////////////
 // IXBRExport
-HRESULT CProjectAgentImp::Export(PierIndexType pierIdx,LPCTSTR strFile)
+HRESULT CProjectAgentImp::Export(PierIndexType pierIdx)
 {
    ATLASSERT(IsPGSExtension());
-#pragma Reminder("WORKING HERE - export pier data")
-   // Use the broker to do the storage...
-   // Before storing, set a member data to the ID of the pier we are saving
-   // Re-work Save so that it calls a new function SaveStandAlone()
-   // SaveStandAlone is basically what is in Save now, except that instead
-   // of directly accessing the data structures, it uses all the get methods
-   // with the ID of the pier we are saving.
 
-   // m_SavePierID = GetPierID(pierIdx);
-   //GET_IFACE(IEAFDocument,pDoc);
-   //pDoc->SaveAs(strFile,FALSE); // implement with CDocument::DoSave(lpszPathName,bReplace)
+   if ( pierIdx == INVALID_INDEX )
+   {
+      // Prompt for pier
+      GET_IFACE(IBridge,pBridge);
+      PierIndexType nPiers = pBridge->GetPierCount();
+      CString strPiers;
+      for ( PierIndexType pIdx = 1; pIdx < nPiers-1; pIdx++ )
+      {
+         pgsTypes::PierModelType modelType = pBridge->GetPierModelType(pIdx);
+         if ( modelType == pgsTypes::pmtPhysical )
+         {
+            CString str;
+            str.Format(_T("Pier %d"),LABEL_PIER(pIdx));
+            if ( strPiers.GetLength() == 0 )
+            {
+               strPiers = str;
+            }
+            else
+            {
+               strPiers += _T("\n") + str;
+            }
+         }
+      }
+
+      if ( strPiers.GetLength() == 0 )
+      {
+         AfxMessageBox(_T("There aren't any physical pier models for this bridge. There is nothing to export."));
+         return S_OK;
+      }
+      else
+      {
+         int result = AfxChoose(_T("Select Pier"),_T("Select pier model to export to XBeam Rate"),strPiers,0,TRUE);
+         if ( result < 0 )
+         {
+            // Cancel button was pressed
+            return S_OK;
+         }
+
+         pierIdx = (PierIndexType)(result+1);
+      }
+   }
+
+   CString strDefaultFileName;
+   GET_IFACE(IEAFDocument,pDoc);
+
+   strDefaultFileName.Format(_T("%s%s_Pier_%d.xbr"),
+                                       pDoc->GetFileRoot(), // path to the file
+                                       pDoc->GetFileTitle(), // the file name without path or extension
+                                       LABEL_PIER(pierIdx));
+
+	CFileDialog  fileDlg(FALSE,_T("xbr"),strDefaultFileName,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("XBeam Rate File (*.xbr)|*.xbr||"));
+	if (fileDlg.DoModal() == IDOK)
+   {
+	   CString strFileName = fileDlg.GetPathName();
+
+      HRESULT hr = ExportPierModel(pierIdx,strFileName);
+      if ( SUCCEEDED(hr) )
+      {
+         if ( AfxMessageBox(_T("Export Complete.\r\nWould you like to open the XBeam Rate file?"),MB_ICONQUESTION | MB_YESNO) == IDYES )
+         {
+            CEAFApp* pApp = EAFGetApp();
+
+            // Use ReplaceDocumentFile instead of OpenDocumentFile
+            // OpenDocumentFile opens the document right now... we are in the middle of an agent method call
+            // closing the current file attempts to shutdown the broker and destroy all the agents... 
+            // this agent isn't ready to die yet.
+            // ReplaceDocumentFile delays opening the document file until this agent method call is done
+            // and the call stack gets back to the message loop.
+            pApp->ReplaceDocumentFile(strFileName);
+         }
+      }
+      else
+      {
+         AfxMessageBox(_T("An error occured while exporting the pier data."),MB_ICONEXCLAMATION | MB_OK);
+         return E_FAIL;
+      }
+   }
+
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPathName)
+{
+   ATLASSERT(IsPGSExtension());
+
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
+   PierIDType pierID = pPier->GetID();
+
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
+   CString strMsg;
+   strMsg.Format(_T("Exporting Pier %d to XBeam Rate"),LABEL_PIER(pierIdx));
+   pProgress->UpdateMessage(strMsg);
+
+   m_SavePierID = pierID; // this is the ID of the pier we are saving
+   m_bExportingModel = true; // set this to true so Save() knows not to change m_SavePierID
+
+   // We can't tap directly into the IEAFDocument::SaveAs or into IBrokerPersist, because they will
+   // save the current PGS document. We want to create a XBR document. To accomplish this, we have to
+   // replicate the prologue information that IEAFDocument and IBrokerPersist would write into the file.
+   // This is a little brittle, but that prologue information is very stable so it isn't likely to change.
+
+   CComPtr<IStructuredSave> pStrSave;
+   HRESULT hr = ::CoCreateInstance(CLSID_StructuredSave, NULL, CLSCTX_INPROC_SERVER, IID_IStructuredSave, (void**)&pStrSave);
+   ATLASSERT(SUCCEEDED(hr));
+
+   hr = pStrSave->Open(lpszPathName);
+   ATLASSERT(SUCCEEDED(hr));
+
+   pStrSave->BeginUnit(_T("XBeamRate"),1.0);
+
+   GET_IFACE(IXBRVersionInfo,pVersionInfo);
+   CString strVersion = pVersionInfo->GetVersion(true);
+   pStrSave->put_Property(_T("Version"),CComVariant(strVersion));
+
+   pStrSave->BeginUnit(_T("Broker"),1.0);
+   pStrSave->BeginUnit(_T("Agent"),1.0);
+
+   LPOLESTR postr;
+   StringFromCLSID(CLSID_ProjectAgent,&postr);
+   pStrSave->put_Property(_T("CLSID"),CComVariant(postr));
+   CoTaskMemFree(postr);
+
+   Save(pStrSave);
+
+   pStrSave->EndUnit(); // Agent
+   pStrSave->EndUnit(); // Broker
+   pStrSave->EndUnit(); // XBeamRate
+
+   m_bExportingModel = false;
+   m_SavePierID = INVALID_ID;
 
    return S_OK;
 }

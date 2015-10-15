@@ -87,7 +87,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
       *pPara << pPara->GetName() << rptNewLine;
 
       std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,0);
-      if ( strName == NO_LIVE_LOADS_DEFINED )
+      if ( strName == NO_LIVE_LOAD_DEFINED )
       {
          pPara = new rptParagraph;
          *pChapter << pPara;

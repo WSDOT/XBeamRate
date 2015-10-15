@@ -81,8 +81,8 @@
 // view by this amount.
 const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
 
-//const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
-const SelectionType selectionType = stAll;
+const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
+//const SelectionType selectionType = stAll;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

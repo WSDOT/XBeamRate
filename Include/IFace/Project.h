@@ -341,5 +341,5 @@ DEFINE_GUID(IID_IXBRExport,
 0xdd3b518e, 0x1cfe, 0x45b7, 0xaa, 0x7b, 0x42, 0x6a, 0xde, 0x31, 0x38, 0xd6);
 interface IXBRExport : IUnknown
 {
-   virtual HRESULT Export(PierIndexType pierIdx,LPCTSTR strFile) = 0;
+   virtual HRESULT Export(PierIndexType pierIdx) = 0;
 };

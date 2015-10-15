@@ -325,7 +325,7 @@ public:
 
 // IXBRExport
 public:
-   virtual HRESULT Export(PierIndexType pierIdx,LPCTSTR strFile);
+   virtual HRESULT Export(PierIndexType pierIdx);
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -335,6 +335,9 @@ private:
    DECLARE_EAF_AGENT_DATA;
 
    CAgentCmdTarget m_CommandTarget;
+
+   PierIDType m_SavePierID; // contains the ID for the pier data that is being saved
+   bool m_bExportingModel; // set to true, when exporting a pier model from PGS
 
    DWORD m_dwBridgeDescCookie;
    StatusGroupIDType m_XBeamRateStatusGroupID; // ID used to identify status items created by this agent
@@ -431,6 +434,8 @@ private:
    bool UseUniformLoads(PierIDType pierID,IndexType brgLineIdx);
 
    GirderIndexType GetLongestGirderLine();
+
+   HRESULT ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPathName);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

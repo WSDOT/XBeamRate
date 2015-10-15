@@ -26,9 +26,6 @@
 #include "PGSuperExporter.h"
 
 #include <IFace\Project.h>
-#include <IFace\Bridge.h>
-#include <MFCTools\Prompts.h>
-#include <PgsExt\GirderLabel.h>
 
 HRESULT CPGSuperDataExporter::FinalConstruct()
 {
@@ -63,54 +60,6 @@ STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText)
 
 STDMETHODIMP CPGSuperDataExporter::Export(IBroker* pBroker)
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-   GET_IFACE2(pBroker,IBridge,pBridge);
-   PierIndexType nPiers = pBridge->GetPierCount();
-   CString strPiers;
-   for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
-   {
-      pgsTypes::PierModelType modelType = pBridge->GetPierModelType(pierIdx);
-      if ( modelType == pgsTypes::pmtPhysical )
-      {
-         CString str;
-         str.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
-         if ( strPiers.GetLength() == 0 )
-         {
-            strPiers = str;
-         }
-         else
-         {
-            strPiers += _T("\n") + str;
-         }
-      }
-   }
-
-   if ( strPiers.GetLength() == 0 )
-   {
-      AfxMessageBox(_T("There aren't any physical pier models for this bridge. There is nothing to export."));
-      return S_OK;
-   }
-   else
-   {
-      int result = AfxChoose(_T("Select Pier"),_T("Select pier model to export to XBeam Rate"),strPiers,0,TRUE);
-      if ( result < 0 )
-      {
-         // Cancel button was pressed
-         return S_OK;
-      }
-
-      PierIndexType pierIdx = (PierIndexType)result;
-      CString str;
-      str.Format(_T("Pier_%d.xbr"),LABEL_PIER(pierIdx));
-   	CFileDialog  fileDlg(FALSE,_T("xbr"),str,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("XBeam Rate File (*.xbr)|*.xbr||"));
-   	if (fileDlg.DoModal() == IDOK)
-	   {
-		   CString strFileName = fileDlg.GetPathName();
-
-         GET_IFACE2(pBroker,IXBRExport,pExport);
-         HRESULT hr = pExport->Export(pierIdx,strFileName);
-      }
-   }
-   return S_OK;
+   GET_IFACE2(pBroker,IXBRExport,pExport);
+   return pExport->Export(INVALID_INDEX); // INVALID_INDEX means prompt for pier
 }

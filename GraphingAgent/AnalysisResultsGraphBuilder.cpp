@@ -215,7 +215,7 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
       for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
       {
          std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-         if ( strName != NO_LIVE_LOADS_DEFINED )
+         if ( strName != NO_LIVE_LOAD_DEFINED )
          {
             m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,strName.c_str(),ratingType,vehicleIdx));
          }

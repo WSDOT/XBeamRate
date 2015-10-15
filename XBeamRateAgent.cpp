@@ -70,7 +70,9 @@
 
 BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
 	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
-   ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnViewPierUpdate)
+   ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnPierCommandUpdate)
+   ON_COMMAND(ID_EXPORT_PIER,OnExportPier)
+   ON_UPDATE_COMMAND_UI(ID_EXPORT_PIER,OnPierCommandUpdate)
 END_MESSAGE_MAP()
 
 void CMyCommandTarget::OnViewPier()
@@ -78,7 +80,19 @@ void CMyCommandTarget::OnViewPier()
    m_pMyAgent->CreatePierView();
 }
 
-void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
+void CMyCommandTarget::OnExportPier()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   GET_IFACE2(pBroker,ISelection,pSelection);
+   PierIndexType selPierIdx = pSelection->GetSelectedPier();
+
+   GET_IFACE2(pBroker,IXBRExport,pExport);
+   pExport->Export(selPierIdx);
+}
+
+void CMyCommandTarget::OnPierCommandUpdate(CCmdUI* pCmdUI)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -105,6 +119,7 @@ void CMyCommandTarget::OnViewPierUpdate(CCmdUI* pCmdUI)
    }
 }
 
+
 // IBridgePlanViewEventCallback
 void CMyCommandTarget::OnBackgroundContextMenu(CEAFMenu* pMenu)
 {
@@ -119,6 +134,7 @@ void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
    if ( 0 < pierIdx && pierIdx < nPiers-1 )
    {
       pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
+      pMenu->AppendMenu(ID_EXPORT_PIER,_T("Export to XBeam Rate"),m_pMyAgent);
    }
 }
 

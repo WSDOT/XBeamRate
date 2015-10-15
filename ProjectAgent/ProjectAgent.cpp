@@ -51,6 +51,7 @@
 #include <EAF\EAFStatusCenter.h>
 
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\VersionInfo.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <\ARP\PGSuper\Include\IFace\EditByUI.h>

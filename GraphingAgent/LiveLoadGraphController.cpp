@@ -259,7 +259,7 @@ void CXBRLiveLoadGraphController::FillVehicleType()
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoads; vehicleIdx++ )
    {
       std::_tstring strLiveLoad = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-      if ( strLiveLoad != NO_LIVE_LOADS_DEFINED )
+      if ( strLiveLoad != NO_LIVE_LOAD_DEFINED )
       {
          int idx = pcbVehicle->AddString(strLiveLoad.c_str());
          pcbVehicle->SetItemData(idx,(DWORD_PTR)vehicleIdx);
