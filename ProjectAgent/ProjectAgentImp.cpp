@@ -372,8 +372,13 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),1.0);
-#pragma Reminder("WORKING HERE - review this load factors") 
-      // do we have all the load factors modeled in stand alone mode? is there a good conversion from plug-in to stand alone?
+         // NOTE: This note applies to exporting a pier model from PGSuper
+         // PGSuper has DC, DW, etc load factors for every load rating limit state,
+         // however, XBeamRate only has these load factors for StrengthI, StrengthII, and ServiceIII
+         // regardless of the load rating type. It is assumed that the same load factor is used for
+         // each rating type in PGSuper, however this may not be correct. Some data may be lost during
+         // the export, but in most all practical cases the load factors will be the same for each
+         // rating type.
          pStrSave->put_Property(_T("DC_StrengthI"),CComVariant(GetDCLoadFactor(pgsTypes::StrengthI_Inventory)));
          pStrSave->put_Property(_T("DW_StrengthI"),CComVariant(GetDWLoadFactor(pgsTypes::StrengthI_Inventory)));
          pStrSave->put_Property(_T("CR_StrengthI"),CComVariant(GetCRLoadFactor(pgsTypes::StrengthI_Inventory)));
