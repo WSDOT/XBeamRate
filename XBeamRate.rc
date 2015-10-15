@@ -96,7 +96,7 @@ IDR_COMPONENTINFO       REGISTRY                "ComponentInfo.rgs"
 IDR_XBEAMRATEAGENT      REGISTRY                "XBeamRateAgent.rgs"
 IDR_PGSUPERCOMPONENTINFO REGISTRY                "PGSuperComponentInfo.rgs"
 IDR_PGSPLICECOMPONENTINFO REGISTRY                "PGSpliceComponentInfo.rgs"
-IDR_PGSUPEREXPORTER      REGISTRY               "PGSuperExporter.rgs"
+IDR_PGSUPEREXPORTER     REGISTRY                "PGSuperExporter.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -164,6 +164,18 @@ BEGIN
     BEGIN
         MENUITEM SEPARATOR
     END
+END
+
+IDR_PGS_PIER_VIEW_CTX MENU 
+BEGIN
+    MENUITEM "Edit Pier...",        ID_EDIT_PIER
+    MENUITEM "Export to XBeam Rate",        ID_VIEW_PIER
+END
+
+IDR_XBR_PIER_VIEW_CTX MENU 
+BEGIN
+    MENUITEM "Edit Pier...",        ID_EDIT_PIER
+    MENUITEM SEPARATOR
 END
 
 
@@ -377,6 +389,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_VIEW_PIER            "View Pier\nView Pier"
+    ID_EXPORT_PIER          "Export pier model to XBeam Rate\nExport"
 END
 
 STRINGTABLE 

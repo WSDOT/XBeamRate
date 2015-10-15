@@ -140,7 +140,6 @@
 #define IDC_PS_STRENGTH_I2              310
 #define IDC_PS_STRENGTH_II              310
 #define IDC_PERMIT_YIELD_STRESS         311
-#define IDC_YIELD_STRESS_LABEL          312
 #define IDC_ALLOWABLE_STRESS_LABEL      312
 #define IDC_ALLOWABLE_STRESS            313
 #define IDC_ALLOWABLE_STRESS_TAG        314
@@ -149,7 +148,6 @@
 #define IDC_EDIT3                       317
 #define IDC_PHI_SHEAR                   317
 #define IDC_SYSTEM_FACTOR_FLEXURE       319
-#define IDC_EDIT2                       320
 #define IDC_SYSTEM_FACTOR_SHEAR         320
 #define IDD_AASHTO_CONCRETE             500
 #define IDB_EDIT_PIER                   500

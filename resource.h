@@ -20,6 +20,8 @@
 #define IDR_GRAPHS                      134
 #define IDR_GRAPHING                    139
 #define IDC_APPICON                     140
+#define IDR_PGSUPEREXPORTER             200
+#define IDR_PGSPLICEEXPORTER            201
 #define IDC_COMBO1                      202
 #define IDC_PIERS                       202
 #define IDC_ANALYSIS_MODE               202
@@ -34,6 +36,8 @@
 #define IDI_PIERVIEW                    210
 #define ID_HELP_ABOUT                   211
 #define IDD_SECTION_CUT                 211
+#define IDR_PGS_PIER_VIEW_CTX                       212
+#define IDR_XBR_PIER_VIEW_CTX                       213
 #define IDR_PGSUPERCOMPONENTINFO        300
 #define IDR_PGSPLICECOMPONENTINFO       301
 #define IDC_PERMIT_FACTORS              304
@@ -50,14 +54,13 @@
 #define ID_BUTTON32782                  32782
 #define ID_VIEW_PIER                    33030
 #define ID_EXPORT_PIER                  33031
-#define IDR_PGSUPEREXPORTER             200
-#define IDR_PGSPLICEEXPORTER             201
+#define ID_EDIT_PIER                    33032
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        212
+#define _APS_NEXT_RESOURCE_VALUE        213
 #define _APS_NEXT_COMMAND_VALUE         32783
 #define _APS_NEXT_CONTROL_VALUE         204
 #define _APS_NEXT_SYMED_VALUE           103

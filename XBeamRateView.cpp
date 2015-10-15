@@ -24,6 +24,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 
 #include "XBeamRateDoc.h"
 #include "XBeamRateView.h"
@@ -105,6 +106,8 @@ BEGIN_MESSAGE_MAP(CXBeamRateView, CDisplayView)
 	ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_DIRECT, CView::OnFilePrint)
 	ON_COMMAND(ID_FILE_PRINT_PREVIEW, CView::OnFilePrintPreview)
+   ON_COMMAND(ID_EXPORT_PIER, OnExportPier)
+   ON_COMMAND(ID_EDIT_PIER, OnEditPier)
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
@@ -1637,11 +1640,7 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
    else
    {
       GET_IFACE2(pBroker,IEditByUI,pEditByUI);
-      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
-      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
-      PierIDType pierID = GetPierID();
-      const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
-      pEditByUI->EditPierDescription(pPier->GetIndex(),0/*pageIdx*/);
+      pEditByUI->EditPierDescription(GetPierIndex(),0/*pageIdx*/);
    }
 }
 
@@ -1759,4 +1758,80 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,I
 
    CComQIPtr<IShape> s(polyShape);
    s.CopyTo(ppSkewedShape);
+}
+
+void CXBeamRateView::HandleContextMenu(CWnd* pWnd,CPoint logPoint)
+{
+   CDisplayView::HandleContextMenu(pWnd,logPoint);
+
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   CEAFBrokerDocument* pDoc = (CEAFBrokerDocument*)GetDocument();
+   CEAFMenu* pContextMenu = NULL;
+
+   PierIndexType pierIdx = GetPierIndex();
+   if ( IsPGSExtension() )
+   {
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+      const CPierData2* pPierData = pIBridgeDesc->GetPier(pierIdx);
+      if ( pPierData->GetPierModelType() == pgsTypes::pmtIdealized )
+      {
+         return;
+      }
+      else
+      {
+         pContextMenu = CEAFMenu::CreateContextMenu(pDoc->GetPluginCommandManager());
+         pContextMenu->LoadMenu(IDR_PGS_PIER_VIEW_CTX,NULL);
+      }
+   }
+   else
+   {
+      pContextMenu = CEAFMenu::CreateContextMenu(pDoc->GetPluginCommandManager());
+      pContextMenu->LoadMenu(IDR_XBR_PIER_VIEW_CTX,NULL);
+      pDoc->BuildReportMenu(pContextMenu,true);
+   }
+
+   if ( logPoint.x < 0 || logPoint.y < 0 )
+   {
+      // the context menu key or Shift+F10 was pressed
+      // need some real coordinates (how about the center of the client area)
+      CRect rClient;
+      GetClientRect(&rClient);
+      CPoint center = rClient.TopLeft();
+      ClientToScreen(&center);
+      logPoint = center;
+   }
+
+   pContextMenu->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, logPoint.x, logPoint.y, this);
+   delete pContextMenu;
+}
+
+void CXBeamRateView::OnExportPier()
+{
+   PierIndexType pierIdx = GetPierIndex();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRExport,pExport);
+   pExport->Export(pierIdx);
+
+}
+
+void CXBeamRateView::OnEditPier()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   if ( IsStandAlone() )
+   {
+      GET_IFACE2(pBroker,IXBRProjectEdit,pProjectEdit);
+      pProjectEdit->EditPier(INVALID_ID);
+   }
+   else
+   {
+      GET_IFACE2(pBroker,IEditByUI,pEditByUI);
+      pEditByUI->EditPierDescription(GetPierIndex(),0/*pageIdx*/);
+   }
 }
