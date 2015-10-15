@@ -213,9 +213,8 @@
 #define EAF_RESERVED_COMMAND_BASE       0x8000
 #define EAFID_EDIT_UNITS                32774
 #define ID_EDIT_PROJECT_NAME            50000
-#define ID_EDIT_PIER                    50002
-#define ID_OPTIONS                      50003
-#define ID_EDIT_OPTIONS                 50004
+#define ID_EDIT_PIER                    50001
+#define ID_EDIT_OPTIONS                 50002
 
 // Next default values for new objects
 // 

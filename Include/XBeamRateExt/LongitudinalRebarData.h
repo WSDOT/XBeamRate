@@ -61,34 +61,8 @@ public:
       bool bHookStart;
       bool bHookEnd;
 
-      RebarRow():
-         Datum(xbrTypes::Bottom), 
-         LayoutType(xbrTypes::blLeftEnd), 
-         Start(0), 
-         Length(0), 
-         BarSize(matRebar::bs3), 
-         NumberOfBars(0), 
-         Cover(0), 
-         BarSpacing(0),
-         bHookStart(false),
-         bHookEnd(false)
-      {;}
-
-      bool operator==(const RebarRow& rOther) const
-      {
-         if(Datum != rOther.Datum) return false;
-         if(LayoutType != rOther.LayoutType) return false;
-         if ( !IsEqual(Start,rOther.Start) ) return false;
-         if ( !IsEqual(Length,rOther.Length) ) return false;
-         if(BarSize != rOther.BarSize) return false;
-         if ( !IsEqual(Cover,  rOther.Cover) ) return false;
-         if ( !IsEqual(BarSpacing,  rOther.BarSpacing) ) return false;
-         if ( NumberOfBars != rOther.NumberOfBars ) return false;
-         if ( bHookStart != rOther.bHookStart) return false;
-         if ( bHookEnd   != rOther.bHookEnd) return false;
-
-         return true;
-      };
+      RebarRow();
+      bool operator==(const RebarRow&) const;
    };
 
    std::vector<RebarRow> RebarRows;

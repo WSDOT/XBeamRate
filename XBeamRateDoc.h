@@ -52,6 +52,9 @@ public:
 public:
    virtual BOOL Init();
    virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
+   virtual void OnChangedFavoriteReports(bool isFavorites, bool fromMenu);
+   virtual void OnCustomReportError(custReportErrorType error, const std::_tstring& reportName, const std::_tstring& otherName);
+   virtual void OnCustomReportHelp(custRepportHelpType helpType);
 
 // Attributes
 public:
@@ -67,6 +70,7 @@ public:
 	//{{AFX_VIRTUAL(CXBeamRateDoc)
 	public:
 	virtual BOOL OnNewDocument();
+   virtual void OnCloseDocument();
 	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
 	//}}AFX_VIRTUAL	//}}AFX_VIRTUAL
 
@@ -103,6 +107,10 @@ protected:
    afx_msg BOOL OnViewReports(NMHDR* pnmhdr,LRESULT* plr);
    afx_msg void OnViewPier();
 	DECLARE_MESSAGE_MAP()
+
+   // callback IDs for any status callbacks we register
+   StatusCallbackIDType m_scidInformationalError;
+   StatusGroupIDType m_StatusGroupID;
 
    friend CXBeamRateDocProxyAgent;
    CXBeamRateDocProxyAgent* m_pMyDocProxyAgent;

@@ -696,6 +696,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PierDescriptionDetailsChapterBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierReportDlg.cpp"
 				>
 			</File>
@@ -992,6 +996,10 @@
 			</File>
 			<File
 				RelativePath=".\MomentCapacityDetailsChapterBuilder.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PierDescriptionDetailsChapterBuilder.h"
 				>
 			</File>
 			<File

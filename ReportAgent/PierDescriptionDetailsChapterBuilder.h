@@ -21,18 +21,27 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
 #pragma once
 
+#include <ReportManager\ChapterBuilder.h>
+#include "XBeamRateChapterBuilder.h"
 
-#include <XBeamRateAll.h>
+/*****************************************************************************
+CLASS 
+   CPierDescriptionDetailsChapterBuilder
 
-#include <Reporter\Reporter.h>
-#include <ReportManager\ReportManager.h>
-#include <EAF\EAFBrokerReportSpecification.h>
-#include <PgsExt\ReportStyleHolder.h>
+*****************************************************************************/
 
-#include <LRFD\LRFD.h>
+class CPierDescriptionDetailsChapterBuilder : public CXBeamRateChapterBuilder
+{
+public:
+   CPierDescriptionDetailsChapterBuilder();
+   virtual LPCTSTR GetName() const;
+   rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
+   virtual CChapterBuilder* Clone() const;
+
+private:
+   // Prevent accidental copying and assignment
+   CPierDescriptionDetailsChapterBuilder(const CPierDescriptionDetailsChapterBuilder&);
+   CPierDescriptionDetailsChapterBuilder& operator=(const CPierDescriptionDetailsChapterBuilder&);
+};

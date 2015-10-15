@@ -68,6 +68,8 @@ BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
 
    //int i = pApp->GetProfileInt(_T("Settings"),_T("Placeholder"),0);
 
+   LoadRegistryValues();
+
    return TRUE;
 }
 
@@ -79,6 +81,7 @@ void CXBeamRateAppPlugin::Terminate()
    //CAutoRegistry autoReg(GetAppName());
 
    //pApp->WriteProfileInt(_T("Settings"),_T("Placeholder"),1);
+   SaveRegistryValues();
 }
 
 void CXBeamRateAppPlugin::IntegrateWithUI(BOOL bIntegrate)
@@ -119,4 +122,103 @@ UINT CXBeamRateAppPlugin::GetDocumentResourceID()
 CString CXBeamRateAppPlugin::GetName()
 {
    return CString("XBeam Rate");
+}
+
+
+void CXBeamRateAppPlugin::LoadRegistryValues()
+{
+   LoadReportOptions();
+}
+
+void CXBeamRateAppPlugin::LoadReportOptions()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+
+   CAutoRegistry autoReg(GetAppName());
+
+   // Favorite reports
+   m_bDisplayFavoriteReports = pApp->GetProfileInt(_T("Options"),_T("DisplayFavoriteReports"),FALSE);
+
+   // Favorite report names are stored as Tab separated values
+   CString ReportList = pApp->GetProfileString(_T("Options"),_T("FavoriteReportsList"),_T(""));
+   m_FavoriteReports.clear();
+   sysTokenizer tokenizer(_T("\t"));
+   tokenizer.push_back(ReportList);
+   sysTokenizer::iterator it = tokenizer.begin();
+   while( it != tokenizer.end() )
+   {
+      m_FavoriteReports.push_back( *it );
+      it++;
+   }
+
+   // Custom Reports
+   m_CustomReports.LoadFromRegistry(pApp);
+}
+
+void CXBeamRateAppPlugin::SaveRegistryValues()
+{
+   SaveReportOptions();
+}
+
+void CXBeamRateAppPlugin::SaveReportOptions()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
+
+   CAutoRegistry autoReg(GetAppName());
+
+   // Favorite reports
+   pApp->WriteProfileInt(_T("Options"),_T("DisplayFavoriteReports"),m_bDisplayFavoriteReports);
+
+   // report names are stored as Tab separated values
+   CString Favorites;
+   std::vector<std::_tstring>::const_iterator it = m_FavoriteReports.begin();
+   while (it != m_FavoriteReports.end())
+   {
+      if (it!= m_FavoriteReports.begin())
+      {
+         Favorites += _T("\t");
+      }
+
+      Favorites += it->c_str();
+
+      it++;
+   }
+
+   pApp->WriteProfileString(_T("Options"),_T("FavoriteReportsList"),Favorites);
+
+   // Custom Reports
+   m_CustomReports.SaveToRegistry(pApp);
+}
+
+
+bool CXBeamRateAppPlugin::GetDoDisplayFavoriteReports() const
+{
+   return m_bDisplayFavoriteReports!=FALSE;
+}
+
+void CXBeamRateAppPlugin::SetDoDisplayFavoriteReports(bool doDisplay)
+{
+   m_bDisplayFavoriteReports = doDisplay ? TRUE : FALSE;
+}
+
+const std::vector<std::_tstring>& CXBeamRateAppPlugin::GetFavoriteReports() const
+{
+   return m_FavoriteReports;
+}
+
+void CXBeamRateAppPlugin::SetFavoriteReports(const std::vector<std::_tstring>& reports)
+{
+   m_FavoriteReports = reports;
+}
+
+const CEAFCustomReports& CXBeamRateAppPlugin::GetCustomReports() const
+{
+   return m_CustomReports;
+}
+
+void CXBeamRateAppPlugin::SetCustomReports(const CEAFCustomReports& reports)
+{
+   m_CustomReports = reports;
 }

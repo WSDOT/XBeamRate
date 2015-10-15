@@ -40,6 +40,8 @@
 #include <WBFLReportManagerAgent.h>
 #include <WBFLGraphManagerAgent.h>
 
+#include <PgsExt\StatusItem.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -129,16 +131,6 @@ BOOL CXBeamRateDoc::Init()
    pXBeamRate->GetAppUnitSystem(&appUnitSystem);
    EAFCreateDocUnitSystem(appUnitSystem,&m_DocUnitSystem);
 
-   //// Transfer report favorites and custom reports data from CPGSuperBaseAppPlugin to CEAFBrokerDocument (this)
-   //bool doDisplayFavorites = pPGSuper->GetDoDisplayFavoriteReports();
-   //std::vector<std::_tstring> Favorites = pPGSuper->GetFavoriteReports();
-
-   //SetDoDisplayFavoriteReports(doDisplayFavorites);
-   //SetFavoriteReports(Favorites);
-
-   //CEAFCustomReports customs = pPGSuper->GetCustomReports();
-   //SetCustomReports(customs);
-
    return TRUE;
 }
 
@@ -170,6 +162,66 @@ BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
    }
 
    return TRUE;
+}
+
+void CXBeamRateDoc::OnChangedFavoriteReports(bool isFavorites,bool fromMenu)
+{
+#pragma Reminder("WORKING HERE - need to implement hints system")
+   //// Prompt user with hint about how this menu item works
+   //if (fromMenu)
+   //{
+   //   int mask = UIHINT_FAVORITES_MENU;
+   //   Uint32 hintSettings = GetUIHintSettings();
+   //   if ( sysFlags<Uint32>::IsClear(hintSettings,mask) )
+   //   {
+   //      AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   //      CUIHintsDlg dlg;
+   //      dlg.m_strTitle = _T("Hint");
+   //      dlg.m_strText = _T("This menu item allows you to display only your favorite reports in the Reports menus, or display all available reports. The change will occur the next time you open a Report menu.");
+   //      dlg.DoModal();
+   //      if ( dlg.m_bDontShowAgain )
+   //      {
+   //         sysFlags<Uint32>::Set(&hintSettings,mask);
+   //         SetUIHintSettings(hintSettings);
+   //      }
+   //   }
+   //}
+
+   // update main menu submenu
+   PopulateReportMenu();
+}
+
+void CXBeamRateDoc::OnCustomReportError(custReportErrorType error, const std::_tstring& reportName, const std::_tstring& otherName)
+{
+   std::_tostringstream os;
+
+   switch(error)
+   {
+      case creParentMissingAtLoad:
+         os << _T("For custom report \"")<<reportName<<_T("\": the parent report ")<<otherName<<_T(" could not be found at program load time. The custom report was deleted.");
+         break;
+      case creParentMissingAtImport:
+         os << _T("For custom report \"")<<reportName<<_T("\": the parent report ")<<otherName<<_T(" could not be found. The report may have depended on one of PGSuper's plug-ins. The custom report was deleted.");
+         break;
+      case creChapterMissingAtLoad:
+      case creChapterMissingAtImport:
+         os << _T("For custom report \"")<<reportName<<_T("\": the following chapter ")<<otherName<<_T(" does not exist in the pareent report. The chapter was removed. Perhaps the chapter name changed? You may want to edit the report.");
+         break;
+      default:
+         ATLASSERT(false);
+   };
+
+   GET_IFACE(IEAFStatusCenter,pStatusCenter);
+   pgsInformationalStatusItem* pStatusItem = new pgsInformationalStatusItem(m_StatusGroupID,m_scidInformationalError,os.str().c_str());
+   pStatusCenter->Add(pStatusItem);
+}
+
+void CXBeamRateDoc::OnCustomReportHelp(custRepportHelpType helpType)
+{
+#pragma Reminder("WORKING HERE - custom report help")
+   //UINT helpID = helpType==crhCustomReport ? IDH_CUSTOM_REPORT : IDH_FAVORITE_REPORT;
+   //::HtmlHelp( NULL, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, helpID );
 }
 
 CATID CXBeamRateDoc::GetAgentCategoryID()
@@ -263,6 +315,27 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	// (SDI documents will reuse this document)
 
 	return TRUE;
+}
+
+void CXBeamRateDoc::OnCloseDocument()
+{
+   // Put report favorites options back into CPGSuperBaseAppPlugin
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRateAppPlugin = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
+
+   bool doDisplayFavorites = GetDoDisplayFavoriteReports();
+   std::vector<std::_tstring> vFavorites = GetFavoriteReports();
+
+   pXBeamRateAppPlugin->SetDoDisplayFavoriteReports(doDisplayFavorites);
+   pXBeamRateAppPlugin->SetFavoriteReports(vFavorites);
+
+   // user-defined custom reports
+   CEAFCustomReports reports = GetCustomReports();
+   pXBeamRateAppPlugin->SetCustomReports(reports);
+
+   CEAFBrokerDocument::OnCloseDocument();
 }
 
 BOOL CXBeamRateDoc::OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo)
@@ -359,6 +432,28 @@ BOOL CXBeamRateDoc::OpenTheDocument(LPCTSTR lpszPathName)
 void CXBeamRateDoc::OnCreateFinalize()
 {
    CEAFBrokerDocument::OnCreateFinalize();
+
+   GET_IFACE(IEAFStatusCenter,pStatusCenter);
+   m_scidInformationalError  = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusWarning)); 
+   m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
+
+   // Transfer report favorites and custom reports data from CXBeamRateAppPlugin to CEAFBrokerDocument (this)
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRate = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
+
+   bool doDisplayFavorites = pXBeamRate->GetDoDisplayFavoriteReports();
+   std::vector<std::_tstring> vFavorites = pXBeamRate->GetFavoriteReports();
+
+   SetDoDisplayFavoriteReports(doDisplayFavorites);
+   SetFavoriteReports(vFavorites);
+
+   CEAFCustomReports customs = pXBeamRate->GetCustomReports();
+   SetCustomReports(customs);
+
+   IntegrateCustomReports();
+
    PopulateReportMenu();
    PopulateGraphMenu();
 

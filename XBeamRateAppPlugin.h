@@ -29,6 +29,7 @@
 #include "XBeamRatePlugin_i.h"
 #include <EAF\EAFAppPlugIn.h>
 #include <WBFLUnitServer.h>
+#include <EAF\EAFCustomReport.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
@@ -40,6 +41,7 @@ class ATL_NO_VTABLE CXBeamRateAppPlugin :
 public:
 	CXBeamRateAppPlugin()
 	{
+      m_bDisplayFavoriteReports = FALSE;
 	}
 
    HRESULT FinalConstruct();
@@ -67,8 +69,30 @@ public:
    virtual UINT GetDocumentResourceID();
    virtual CString GetName();
 
+   // Determine whether to display favorite reports or all reports in menu dropdowns
+   bool GetDoDisplayFavoriteReports() const;
+   void SetDoDisplayFavoriteReports(bool doDisplay);
+
+   // Current list of favorite reports
+   const std::vector<std::_tstring>& GetFavoriteReports() const;
+   void SetFavoriteReports(const std::vector<std::_tstring>& reports);
+
+   // Custom, user-defined reports
+   const CEAFCustomReports& GetCustomReports() const;
+   void SetCustomReports(const CEAFCustomReports& reports);
+
 private:
    CComPtr<IAppUnitSystem> m_AppUnitSystem;
+
+   BOOL m_bDisplayFavoriteReports;
+   std::vector<std::_tstring> m_FavoriteReports;
+   CEAFCustomReports m_CustomReports;
+
+   void LoadRegistryValues();
+   void LoadReportOptions();
+
+   void SaveRegistryValues();
+   void SaveReportOptions();
 };
 
 #endif //__PLUGIN_H_

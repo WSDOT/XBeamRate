@@ -317,10 +317,10 @@ LPCTSTR CLongitudinalRebarGrid::GetRebarLayoutType(xbrTypes::LongitudinalRebarLa
       return _T("Right End");
 
    case xbrTypes::blFullLength:
-      return _T("None");
+      return _T("Full Length");
    }
    ATLASSERT(false);
-   return _T("None");
+   return _T("Full Length");
 }
 
 xbrTypes::LongitudinalRebarLayoutType CLongitudinalRebarGrid::GetRebarLayoutType(LPCTSTR lpszLayoutType)
@@ -330,7 +330,7 @@ xbrTypes::LongitudinalRebarLayoutType CLongitudinalRebarGrid::GetRebarLayoutType
       return xbrTypes::blLeftEnd;
    else if ( str == _T("Right End") )
       return xbrTypes::blRightEnd;
-   else if ( str == _T("None") )
+   else if ( str == _T("Full Length") )
       return xbrTypes::blFullLength;
 
    ATLASSERT(false);
@@ -367,7 +367,7 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
       .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
-      .SetChoiceList(_T("Left End\nRight End\nNone"))
+      .SetChoiceList(_T("Left End\nRight End\nFull Length"))
       .SetValue(GetRebarLayoutType(rebarData.LayoutType))
       );
 

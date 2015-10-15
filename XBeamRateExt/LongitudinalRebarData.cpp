@@ -29,6 +29,35 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+xbrLongitudinalRebarData::RebarRow::RebarRow():
+   Datum(xbrTypes::Bottom), 
+   LayoutType(xbrTypes::blFullLength), 
+   Start(0), 
+   Length(0), 
+   BarSize(matRebar::bs10), 
+   NumberOfBars(1), 
+   Cover(::ConvertToSysUnits(2.0,unitMeasure::Inch)), 
+   BarSpacing(::ConvertToSysUnits(6.0,unitMeasure::Inch)),
+   bHookStart(false),
+   bHookEnd(false)
+{;}
+
+bool xbrLongitudinalRebarData::RebarRow::operator==(const xbrLongitudinalRebarData::RebarRow& rOther) const
+{
+   if(Datum != rOther.Datum) return false;
+   if(LayoutType != rOther.LayoutType) return false;
+   if ( !IsEqual(Start,rOther.Start) ) return false;
+   if ( !IsEqual(Length,rOther.Length) ) return false;
+   if(BarSize != rOther.BarSize) return false;
+   if ( !IsEqual(Cover,  rOther.Cover) ) return false;
+   if ( !IsEqual(BarSpacing,  rOther.BarSpacing) ) return false;
+   if ( NumberOfBars != rOther.NumberOfBars ) return false;
+   if ( bHookStart != rOther.bHookStart) return false;
+   if ( bHookEnd   != rOther.bHookEnd) return false;
+
+   return true;
+};
+
 /****************************************************************************
 CLASS
    xbrLongitudinalRebarData

@@ -2,11 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by XBeamRate.rc
 //
-#define EAFID_INDICATOR_MODIFIED        1
-#define EAFID_INDICATOR_STATUS          2
-#define EAF_TOOLBAR_MENU_COUNT          40
-#define EAF_REPORT_MENU_COUNT           50
-#define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_XBEAMRATE                   102
 #define IDD_PIER_VIEW_CONTROLS          103
@@ -36,32 +31,28 @@
 #define IDI_PIERVIEW                    210
 #define ID_HELP_ABOUT                   211
 #define IDD_SECTION_CUT                 211
-#define IDR_PGS_PIER_VIEW_CTX                       212
-#define IDR_XBR_PIER_VIEW_CTX                       213
+#define IDR_PGS_PIER_VIEW_CTX           212
+#define IDR_XBR_PIER_VIEW_CTX           213
 #define IDR_PGSUPERCOMPONENTINFO        300
 #define IDR_PGSPLICECOMPONENTINFO       301
 #define IDC_PERMIT_FACTORS              304
 #define IDC_LOCATION                    1260
 #define IDC_SLIDER                      1807
-#define EAF_RESERVED_COMMAND_BASE       0x8000
 #define ID_EDIT_PROJECTNAME             32771
-#define EAFID_UNITS_SI                  32772
-#define EAFID_UNITS_US                  32773
 #define ID_REPORTS_THISISAPLACEHOLDER   32774
 #define ID_VIEW_GRAPHS                  32775
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
 #define ID_VIEW_REPORTS                 32777
-#define ID_BUTTON32782                  32782
 #define ID_VIEW_PIER                    33030
 #define ID_EXPORT_PIER                  33031
-#define ID_EDIT_PIER                    33032
+#define IDM_EDIT_PIER                   33032
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        213
-#define _APS_NEXT_COMMAND_VALUE         32783
+#define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         204
 #define _APS_NEXT_SYMED_VALUE           103
 #endif

@@ -561,7 +561,8 @@ END
 STRINGTABLE 
 BEGIN
     ID_EDIT_PROJECT_NAME    "Edit Project Name\nproject name"
-    ID_OPTIONS              "Options\nOptions"
+    ID_EDIT_PIER            "Edit Pier\nEdit Pier"
+    ID_EDIT_OPTIONS         "Edit Options\nEdit Options"
 END
 
 #endif    // English (U.S.) resources

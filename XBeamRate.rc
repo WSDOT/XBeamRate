@@ -8,6 +8,7 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
+#include <EAF\EAFResources.h>
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -135,6 +136,10 @@ BEGIN
         END
         MENUITEM "View Pier",                   ID_VIEW_PIER
     END
+    POPUP "&Options"
+    BEGIN
+        MENUITEM "Reporting...",                EAFID_OPTIONS_REPORTING
+    END
     POPUP "&Window"
     BEGIN
         MENUITEM "&Cascade",                    ID_WINDOW_CASCADE
@@ -168,13 +173,13 @@ END
 
 IDR_PGS_PIER_VIEW_CTX MENU 
 BEGIN
-    MENUITEM "Edit Pier...",        ID_EDIT_PIER
+    MENUITEM "Edit Pier...",                IDM_EDIT_PIER
     MENUITEM "Export to XBeam Rate",        ID_VIEW_PIER
 END
 
 IDR_XBR_PIER_VIEW_CTX MENU 
 BEGIN
-    MENUITEM "Edit Pier...",        ID_EDIT_PIER
+    MENUITEM "Edit Pier...",                IDM_EDIT_PIER
     MENUITEM SEPARATOR
 END
 
