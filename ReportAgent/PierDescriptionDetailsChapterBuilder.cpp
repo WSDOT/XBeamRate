@@ -578,7 +578,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
    {
       col = 0;
 
-      (*pTable)(row,col++) << (zoneIdx+1);
+      (*pTable)(row,col++) << LABEL_INDEX(zoneIdx);
       if ( zoneIdx == pStirrups->Zones.size()-1 )
       {
          if ( pStirrups->Symmetric )
@@ -608,7 +608,7 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 {
    rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
    *pChapter << pPara;
-   *pPara << _T("Bearing Layout") << rptNewLine;
+   *pPara << _T("Bearing Layout and Reactions") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
@@ -674,7 +674,7 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++, row++ )
       {
          col = 0;
-         (*pTable)(row,col++) << (brgIdx+1);
+         (*pTable)(row,col++) << LABEL_INDEX(brgIdx);
 
    
          Float64 DC, DW, CR, SH, PS, RE, W;
@@ -730,4 +730,73 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 
 void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
+   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   *pChapter << pPara;
+   *pPara << _T("Live Load Reactions") << rptNewLine;
+
+   pPara = new rptParagraph;
+   *pChapter << pPara;
+   *pPara << _T("Live load reactions are per lane.") << rptNewLine;
+
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
+   {
+      *pPara << _T("Reactions are applied directly to the cross beam.") << rptNewLine;
+   }
+   else
+   {
+      *pPara << _T("Reactions are applied through the bearings.") << rptNewLine;
+   }
+
+   pPara = new rptParagraph;
+   *pChapter << pPara;
+
+   INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptForceUnitValue, force, pDisplayUnits->GetGeneralForceUnit(), false );
+
+   for ( int i = 0; i < 6; i++ )
+   {
+      pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
+      if ( nVehicles == 0 )
+      {
+         continue;
+      }
+
+      ColumnIndexType nColumns = 3;
+      if ( ::IsLegalRatingType(ratingType) )
+      {
+         nColumns++;
+      }
+
+      rptParagraph* pPara = new rptParagraph;
+      *pChapter << pPara;
+
+      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,pProject->GetLiveLoadName(pierID,ratingType,INVALID_INDEX).c_str());
+      pTable->SetColumnStyle(1, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
+      pTable->SetStripeRowColumnStyle(1, pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
+      *pPara << pTable << rptNewLine;
+
+      ColumnIndexType col = 0;
+      (*pTable)(0,col++) << _T("");
+      (*pTable)(0,col++) << _T("Name");
+      (*pTable)(0,col++) << COLHDR(_T("LL+IM"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit() );
+      if ( ::IsLegalRatingType(ratingType) )
+      {
+         (*pTable)(0,col++) << COLHDR(_T("Vehicle") << rptNewLine << _T("Weight"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit() );
+      }
+
+      RowIndexType row = pTable->GetNumberOfHeaderRows();
+      for (IndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++, row++ )
+      {
+         col = 0;
+         (*pTable)(row,col++) << LABEL_INDEX(vehicleIdx);
+         (*pTable)(row,col++) << pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
+         (*pTable)(row,col++) << force.SetValue(pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx));
+         if ( ::IsLegalRatingType(ratingType) )
+         {
+            (*pTable)(row,col++) << force.SetValue(pProject->GetVehicleWeight(pierID,ratingType,vehicleIdx));
+         }
+      }
+   }
 }
