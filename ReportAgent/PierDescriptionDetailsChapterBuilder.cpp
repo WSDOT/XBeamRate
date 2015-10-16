@@ -47,6 +47,7 @@ void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,r
 void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
 void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID,xbrTypes::Stage stage);
 void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
+void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
 
 /****************************************************************************
 CLASS
@@ -87,6 +88,7 @@ rptChapter* CPierDescriptionDetailsChapterBuilder::Build(CReportSpecification* p
    write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,xbrTypes::Stage1);
    write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,xbrTypes::Stage2);
    write_bearing_layout_data(pBroker,pDisplayUnits,pChapter,pierID);
+   write_live_load_data(pBroker,pDisplayUnits,pChapter,pierID);
 
    return pChapter;
 }
@@ -612,13 +614,21 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
    *pChapter << pPara;
 
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptForceUnitValue, force, pDisplayUnits->GetGeneralForceUnit(), false );
+   INIT_UV_PROTOTYPE( rptForcePerLengthUnitValue, fpl, pDisplayUnits->GetForcePerLengthUnit(), false );
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
    IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
+      ColumnIndexType nColumns = 8;
+      xbrTypes::ReactionLoadType bearingReactionType = pProject->GetBearingReactionType(pierID,brgLineIdx);
+      if ( bearingReactionType == xbrTypes::rltUniform )
+      {
+         nColumns++;
+      }
+
       rptRcTable* pTable;
-      ColumnIndexType nColumns = 2;
       if ( nBearingLines == 1 )
       {
          pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
@@ -631,30 +641,93 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
       }
       *pPara << pTable << rptNewLine;
 
+
       ColumnIndexType col = 0;
       (*pTable)(0,col++) << _T("Bearing");
+      if ( bearingReactionType == xbrTypes::rltUniform )
+      {
+         (*pTable)(0,col++) << COLHDR(_T("DC"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("DW"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("CR"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("SH"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("PS"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("RE"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
+         (*pTable)(0,col++) << COLHDR(_T("Width"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit() );
+      }
+      else
+      {
+         (*pTable)(0,col++) << COLHDR(_T("DC"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+         (*pTable)(0,col++) << COLHDR(_T("DW"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+         (*pTable)(0,col++) << COLHDR(_T("CR"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+         (*pTable)(0,col++) << COLHDR(_T("SH"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+         (*pTable)(0,col++) << COLHDR(_T("PS"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+         (*pTable)(0,col++) << COLHDR(_T("RE"), rptForceUnitTag, pDisplayUnits->GetGeneralForceUnit());
+      }
+
       (*pTable)(0,col++) << COLHDR(_T("Spacing"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit() );
 
-      xbrTypes::ReactionLoadType bearingReactionType = pProject->GetBearingReactionType(pierID,brgLineIdx);
-
-      IndexType refBrgIdx;
-      Float64 refBrgOffset;
-      pgsTypes::OffsetMeasurementType refBearingDatum;
-      pProject->GetReferenceBearing(pierID,brgLineIdx,&refBrgIdx,&refBrgOffset,&refBearingDatum);
-
       RowIndexType row = pTable->GetNumberOfHeaderRows();
+
+      length.ShowUnitTag(false);
 
       IndexType nBearings = pProject->GetBearingCount(pierID,brgLineIdx);
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++, row++ )
       {
-         Float64 S = pProject->GetBearingSpacing(pierID,brgLineIdx,brgIdx);
+         col = 0;
+         (*pTable)(row,col++) << (brgIdx+1);
+
    
          Float64 DC, DW, CR, SH, PS, RE, W;
          pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
 
-         col = 0;
-         (*pTable)(row,col++) << (brgIdx+1);
-         (*pTable)(row,col++) << length.SetValue(S);
+         if ( bearingReactionType == xbrTypes::rltUniform )
+         {
+            (*pTable)(row,col++) << fpl.SetValue(DC);
+            (*pTable)(row,col++) << fpl.SetValue(DW);
+            (*pTable)(row,col++) << fpl.SetValue(CR);
+            (*pTable)(row,col++) << fpl.SetValue(SH);
+            (*pTable)(row,col++) << fpl.SetValue(PS);
+            (*pTable)(row,col++) << fpl.SetValue(RE);
+            (*pTable)(row,col++) << length.SetValue(W);
+         }
+         else
+         {
+            (*pTable)(row,col++) << force.SetValue(DC);
+            (*pTable)(row,col++) << force.SetValue(DW);
+            (*pTable)(row,col++) << force.SetValue(CR);
+            (*pTable)(row,col++) << force.SetValue(SH);
+            (*pTable)(row,col++) << force.SetValue(PS);
+            (*pTable)(row,col++) << force.SetValue(RE);
+         }
+
+         if ( brgIdx < nBearings-1 )
+         {
+            Float64 S = pProject->GetBearingSpacing(pierID,brgLineIdx,brgIdx);
+            (*pTable)(row,col++) << length.SetValue(S);
+         }
+         else
+         {
+            (*pTable)(row,col++) << _T("");
+         }
+      }
+
+      length.ShowUnitTag(true);
+      IndexType refBrgIdx;
+      Float64 refBrgOffset;
+      pgsTypes::OffsetMeasurementType refBearingDatum;
+      pProject->GetReferenceBearing(pierID,brgLineIdx,&refBrgIdx,&refBrgOffset,&refBearingDatum);
+      *pPara << _T("Bearing ") << (refBrgIdx+1) << _T(" is located ") << RPT_OFFSET(refBrgOffset,length) << _T(" of the ");
+      if ( refBearingDatum == pgsTypes::omtAlignment )
+      {
+         *pPara << _T("Alignment") << rptNewLine;
+      }
+      else
+      {
+         *pPara << _T("Bridge Line") << rptNewLine;
       }
    }
+}
+
+void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
+{
 }
