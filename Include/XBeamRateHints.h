@@ -22,6 +22,9 @@
 
 #pragma once
 
+// Hint Dialog states
+#define XBR_UIHINT_FAVORITES_MENU         0x0002
+
 // Pier-wide hints that are results of Agent events
 #define MIN_RESULTS_HINT              100
 

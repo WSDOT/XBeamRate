@@ -46,6 +46,7 @@
 #define ID_VIEW_PIER                    33030
 #define ID_EXPORT_PIER                  33031
 #define IDM_EDIT_PIER                   33032
+#define IDM_OPTIONS_HINTS               33033
 
 // Next default values for new objects
 // 

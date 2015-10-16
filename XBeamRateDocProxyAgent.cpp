@@ -469,3 +469,10 @@ void CXBeamRateDocProxyAgent::RemoveToolBars()
    GET_IFACE(IEAFToolbars,pToolBars);
    pToolBars->DestroyToolBar(m_StdToolBarID);
 }
+
+void CXBeamRateDocProxyAgent::OnResetHints()
+{
+   // Do nothing for now
+//   // we'll need this method if XBeam Rate ever supports extensions
+//   Fire_OnHintsReset();
+}

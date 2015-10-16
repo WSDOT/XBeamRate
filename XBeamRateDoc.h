@@ -52,9 +52,9 @@ public:
 public:
    virtual BOOL Init();
    virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
-   virtual void OnChangedFavoriteReports(bool isFavorites, bool fromMenu);
-   virtual void OnCustomReportError(custReportErrorType error, const std::_tstring& reportName, const std::_tstring& otherName);
-   virtual void OnCustomReportHelp(custRepportHelpType helpType);
+
+   virtual void OnChangedFavoriteReports(BOOL bIsFavorites, BOOL bFromMenu);
+   virtual void ShowCustomReportHelp(eafTypes::CustomReportHelp helpType);
 
 // Attributes
 public:
@@ -96,6 +96,9 @@ protected:
    virtual void CreateReportView(CollectionIndexType rptIdx,bool bPrompt);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
 
+   virtual void LoadDocumentSettings();
+   virtual void SaveDocumentSettings();
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CXBeamRateDoc)
@@ -122,6 +125,9 @@ protected:
    virtual BOOL OpenTheDocument(LPCTSTR lpszPathName);
    virtual void OnCreateFinalize();
    virtual void BrokerShutDown();
+
+   // called when the UI Hints have been reset
+   virtual void ResetUIHints();
 
    void PopulateReportMenu();
    void PopulateGraphMenu();

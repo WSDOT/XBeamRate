@@ -139,6 +139,7 @@ BEGIN
     POPUP "&Options"
     BEGIN
         MENUITEM "Reporting...",                EAFID_OPTIONS_REPORTING
+        MENUITEM "Hints...",                    EAFID_OPTIONS_HINTS
     END
     POPUP "&Window"
     BEGIN
@@ -395,6 +396,7 @@ STRINGTABLE
 BEGIN
     ID_VIEW_PIER            "View Pier\nView Pier"
     ID_EXPORT_PIER          "Export pier model to XBeam Rate\nExport"
+    IDM_EDIT_PIER           "Edit Pier\nEdit Pier"
 END
 
 STRINGTABLE 
