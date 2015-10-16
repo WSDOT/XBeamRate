@@ -269,7 +269,7 @@ HRESULT CXBeamRateDoc::WriteTheDocument(IStructuredSave* pStrSave)
    return S_OK;
 }
 
-void CXBeamRateDoc::CreateReportView(CollectionIndexType rptIdx,bool bPrompt)
+void CXBeamRateDoc::CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt)
 {
    m_pMyDocProxyAgent->CreateReportView(rptIdx,bPrompt);
 }

@@ -134,7 +134,7 @@ public:
 
 // IXBRViews
 public:
-   virtual void CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec=true);
+   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec=TRUE);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
    virtual void CreatePierView();
 

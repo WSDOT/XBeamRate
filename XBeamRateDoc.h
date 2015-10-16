@@ -93,7 +93,7 @@ protected:
    virtual HINSTANCE GetResourceInstance();
    virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
    virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
-   virtual void CreateReportView(CollectionIndexType rptIdx,bool bPrompt);
+   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt);
    virtual void CreateGraphView(CollectionIndexType graphIdx);
 
    virtual void LoadDocumentSettings();

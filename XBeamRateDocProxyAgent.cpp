@@ -379,7 +379,7 @@ CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
 
 /////////////////////////////////////////////////////////////////////
 // IXBRViews
-void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,bool bPromptForSpec)
+void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec)
 {
    CEAFReportViewCreationData data;
    data.m_RptIdx = rptIdx;
