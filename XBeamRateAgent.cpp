@@ -71,8 +71,8 @@
 BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
 	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
    ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnPierCommandUpdate)
-   ON_COMMAND(ID_EXPORT_PIER,OnExportPier)
-   ON_UPDATE_COMMAND_UI(ID_EXPORT_PIER,OnPierCommandUpdate)
+   ON_COMMAND(IDM_EXPORT_PIER,OnExportPier)
+   ON_UPDATE_COMMAND_UI(IDM_EXPORT_PIER,OnPierCommandUpdate)
 END_MESSAGE_MAP()
 
 void CMyCommandTarget::OnViewPier()
@@ -134,7 +134,7 @@ void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
    if ( 0 < pierIdx && pierIdx < nPiers-1 )
    {
       pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
-      pMenu->AppendMenu(ID_EXPORT_PIER,_T("Export to XBeam Rate"),m_pMyAgent);
+      pMenu->AppendMenu(IDM_EXPORT_PIER,_T("Export to XBeam Rate"),m_pMyAgent);
    }
 }
 

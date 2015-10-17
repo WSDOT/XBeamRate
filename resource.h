@@ -44,7 +44,7 @@
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
 #define ID_VIEW_REPORTS                 32777
 #define ID_VIEW_PIER                    33030
-#define ID_EXPORT_PIER                  33031
+#define IDM_EXPORT_PIER                 33031
 #define IDM_EDIT_PIER                   33032
 #define IDM_OPTIONS_HINTS               33033
 
