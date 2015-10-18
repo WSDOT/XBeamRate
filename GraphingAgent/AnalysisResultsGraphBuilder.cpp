@@ -228,19 +228,19 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),     pgsTypes::lrPermit_Routine));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Special)"),     pgsTypes::lrPermit_Special));
 
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
+   //m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
+   //m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
+   //m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
+   //m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
 
-   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
-   if ( pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT )
-   {
-      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
-      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
-   }
-   // NOTE: Strength II limit state doesn't make sense for WSDOT method. The graphs show the limit state based on a controlling envelope. For the WSDOT method
-   // we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combinatin of Legal and Permit loads
+   //GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
+   //if ( pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT )
+   //{
+   //   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
+   //   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
+   //}
+   //// NOTE: Strength II limit state doesn't make sense for WSDOT method. The graphs show the limit state based on a controlling envelope. For the WSDOT method
+   //// we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combinatin of Legal and Permit loads
 
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 
@@ -457,7 +457,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
       else
       {
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,NULL,NULL,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,NULL,NULL);
          Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
          Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
          Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());

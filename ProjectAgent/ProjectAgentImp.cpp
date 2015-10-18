@@ -146,10 +146,10 @@ CProjectAgentImp::CProjectAgentImp()
    m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
 
    m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,::ConvertToSysUnits(54.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,::ConvertToSysUnits(54.0,unitMeasure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
@@ -171,6 +171,8 @@ CProjectAgentImp::CProjectAgentImp()
    m_AnalysisType = pgsTypes::Envelope;
 
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
+
+   m_bExportingModel = false;
 }
 
 CProjectAgentImp::~CProjectAgentImp()
@@ -534,7 +536,17 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->EndUnit(); // Reactions
 
       // Save the pier description information
-      m_PierData[m_SavePierID].Save(pStrSave,NULL);
+      if (m_bExportingModel )
+      {
+         PierIDType pierID = m_PierData[m_SavePierID].GetID();
+         m_PierData[m_SavePierID].SetID(INVALID_ID); // set the pier ID to that of a stand alone pier
+         m_PierData[m_SavePierID].Save(pStrSave,NULL);
+         m_PierData[m_SavePierID].SetID(pierID);
+      }
+      else
+      {
+         m_PierData[m_SavePierID].Save(pStrSave,NULL);
+      }
 
       pStrSave->EndUnit(); // ProjectData
    } // end if bIsStandAlone or bExportingModel
@@ -983,6 +995,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
          // Load the basic pier information
          hr = m_PierData[INVALID_ID].Load(pStrLoad,NULL);
+         ATLASSERT(m_PierData[INVALID_ID].GetID() == INVALID_ID);
 
          hr = pStrLoad->EndUnit(); // ProjectData
       } // end if bIsStandAlone

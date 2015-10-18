@@ -337,21 +337,21 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 
       pTable->SetColumnSpan(0,7,2);
       pTable->SetColumnSpan(0,8,SKIP_CELL);
-      (*pTable)(0,10) << Sub2(_T("E"),_T("c"));
-      (*pTable)(1,10) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,11) << Sub2(_T("K"),_T("2"));
+      (*pTable)(0,7) << Sub2(_T("E"),_T("c"));
+      (*pTable)(1,7) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,8) << Sub2(_T("K"),_T("2"));
 
       pTable->SetColumnSpan(0,9,2);
       pTable->SetColumnSpan(0,10,SKIP_CELL);
-      (*pTable)(0,12) << _T("Creep");
-      (*pTable)(1,12) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,13) << Sub2(_T("K"),_T("2"));
+      (*pTable)(0,9) << _T("Creep");
+      (*pTable)(1,9) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,10) << Sub2(_T("K"),_T("2"));
 
       pTable->SetColumnSpan(0,11,2);
       pTable->SetColumnSpan(0,12,SKIP_CELL);
-      (*pTable)(0,14) << _T("Shrinkage");
-      (*pTable)(1,14) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,15) << Sub2(_T("K"),_T("2"));
+      (*pTable)(0,11) << _T("Shrinkage");
+      (*pTable)(1,11) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,12) << Sub2(_T("K"),_T("2"));
    }
 
 

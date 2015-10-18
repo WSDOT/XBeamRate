@@ -130,6 +130,9 @@ public:
    void SetLiveLoadShear(Float64 Vllim);
    Float64 GetLiveLoadShear() const;
 
+   void SetLiveLoadConfigurationIndex(IndexType llConfigIdx);
+   IndexType GetLiveLoadConfigurationIndex() const;
+
    Float64 GetRatingFactor() const;
 
    void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pVpermit,Float64* pVlegal) const;

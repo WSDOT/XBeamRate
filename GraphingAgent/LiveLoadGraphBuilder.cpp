@@ -358,7 +358,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
       else
       {
          sysSectionValue FyMin, FyMax;
-         pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,NULL,NULL,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,NULL,NULL);
          Float64 Vlmin = pVerticalAxisFormat->Convert(FyMin.Left());
          Float64 Vrmin = pVerticalAxisFormat->Convert(FyMin.Right());
          Float64 Vlmax = pVerticalAxisFormat->Convert(FyMax.Left());

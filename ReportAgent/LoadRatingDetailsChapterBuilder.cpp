@@ -31,6 +31,7 @@
 #include "XBeamRateReportSpecification.h"
 
 #include <PgsExt\CapacityToDemand.h>
+#include <PgsExt\GirderLabel.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -183,6 +184,29 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
 
    *pPara << pTable << rptNewLine;
 
+   pPara = new rptParagraph(pgsReportStyleHolder::GetFootnoteStyle());
+   *pChapter << pPara;
+   if ( bIsWSDOTPermitRating )
+   {
+      *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+   }
+   else
+   {
+      *pPara << _T("LCn = Live Load Configuration n") << rptNewLine;
+   }
+
+   if ( ::IsDesignRatingType(ratingType) )
+   {
+      GET_IFACE2(pBroker,IXBRProject,pProject);
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
+      for ( VehicleIndexType vehIdx = 0; vehIdx < nVehicles; vehIdx++ )
+      {
+         std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehIdx);
+         *pPara << _T("D") << LABEL_INDEX(vehIdx) << _T(" = ") << strName.c_str() << rptNewLine;
+      }
+   }
+
+
    ColumnIndexType col = 0;
    (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
    (*pTable)(0,col++) << Sub2(symbol(phi),_T("c"));
@@ -268,13 +292,18 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       {
          (*pTable)(row,col++) << moment.SetValue(Mpermit);
          (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
          (*pTable)(row,col++) << moment.SetValue(Mlegal);
       }
       else
       {
          (*pTable)(row,col++) << moment.SetValue(artifact.GetLiveLoadMoment());
+         (*pTable)(row,col-1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
+         if ( ::IsDesignRatingType(ratingType) )
+         {
+            (*pTable)(row,col-1) << _T(", D") << LABEL_INDEX(artifact.GetVehicleIndex());
+         }
       }
 
       Float64 RF = artifact.GetRatingFactor();
@@ -324,6 +353,29 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    *pPara << pTable << rptNewLine;
+
+   pPara = new rptParagraph(pgsReportStyleHolder::GetFootnoteStyle());
+   *pChapter << pPara;
+   if ( bIsWSDOTPermitRating )
+   {
+      *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+   }
+   else
+   {
+      *pPara << _T("LCn = Live Load Configuration n") << rptNewLine;
+   }
+ 
+   if ( ::IsDesignRatingType(ratingType) )
+   {
+      GET_IFACE2(pBroker,IXBRProject,pProject);
+      IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
+      for ( VehicleIndexType vehIdx = 0; vehIdx < nVehicles; vehIdx++ )
+      {
+         std::_tstring strName = pProject->GetLiveLoadName(pierID,ratingType,vehIdx);
+         *pPara << _T("D") << LABEL_INDEX(vehIdx) << _T(" = ") << strName.c_str() << rptNewLine;
+      }
+   }
+
 
    ColumnIndexType col = 0;
    (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
@@ -400,13 +452,18 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       {
          (*pTable)(row,col++) << shear.SetValue(Vpermit);
          (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("Live Load Configuration ") << (llConfigIdx+1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("Permit Vehicle in Lane ") << (permitLaneIdx+1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
          (*pTable)(row,col++) << shear.SetValue(Vlegal);
       }
       else
       {
          (*pTable)(row,col++) << shear.SetValue(artifact.GetLiveLoadShear());
+         (*pTable)(row,col-1) << rptNewLine;
+         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
+         if ( ::IsDesignRatingType(ratingType) )
+         {
+            (*pTable)(row,col-1) << _T(", D") << LABEL_INDEX(artifact.GetVehicleIndex());
+         }
       }
 
       Float64 RF = artifact.GetRatingFactor();

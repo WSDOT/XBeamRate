@@ -1555,7 +1555,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
 
 //////////////////////////////////
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration*/)
 {
    UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
@@ -1588,30 +1588,41 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
-   ModelData* pModelData = GetModelData(pierID);
-
-   LiveLoadConfiguration& llMinConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMin_SingleLane : liveLoadResult.m_lcidMzMin));
-   LiveLoadConfiguration& llMaxConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMax_SingleLane : liveLoadResult.m_lcidMzMax));
-
    *pMin *= R;
    *pMax *= R;
 
-   // NOTE: This method should not be used for permit rating cases with the WSDOT method
-   // for that reason, we don't need to know which lane the permit truck is in and hence
-   // we use INVALID_INDEX for the permit truck lane index
+   if ( pMinLLConfigIdx )
+   {
+      *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidMzMin_SingleLane : liveLoadResult.m_lcidMzMin) - FIRST_LIVELOAD_ID;
+   }
 
-   if ( pMinConfiguration )
+   if ( pMaxLLConfigIdx )
    {
-      *pMinConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinConfig,INVALID_INDEX);
+      *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidMzMax_SingleLane : liveLoadResult.m_lcidMzMax) - FIRST_LIVELOAD_ID;
    }
-   
-   if ( pMaxConfiguration )
-   {
-      *pMaxConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxConfig,INVALID_INDEX);
-   }
+
+   //ModelData* pModelData = GetModelData(pierID);
+
+   //LiveLoadConfiguration& llMinConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMin_SingleLane : liveLoadResult.m_lcidMzMin));
+   //LiveLoadConfiguration& llMaxConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidMzMax_SingleLane : liveLoadResult.m_lcidMzMax));
+
+
+   //// NOTE: This method should not be used for permit rating cases with the WSDOT method
+   //// for that reason, we don't need to know which lane the permit truck is in and hence
+   //// we use INVALID_INDEX for the permit truck lane index
+
+   //if ( pMinConfiguration )
+   //{
+   //   *pMinConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinConfig,INVALID_INDEX);
+   //}
+   //
+   //if ( pMaxConfiguration )
+   //{
+   //   *pMaxConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxConfig,INVALID_INDEX);
+   //}
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration*/)
 {
    UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
@@ -1643,128 +1654,197 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
-   ModelData* pModelData = GetModelData(pierID);
-
-   LiveLoadConfiguration& llMinLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMin));
-   LiveLoadConfiguration& llMinRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMin_SingleLane : liveLoadResult.m_lcidFyRightMin));
-
-   LiveLoadConfiguration& llMaxLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMax));
-   LiveLoadConfiguration& llMaxRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMax_SingleLane : liveLoadResult.m_lcidFyRightMax));
-
    pMin->Left()  *= R;
    pMin->Right() *= R;
    
    pMax->Left()  *= R;
    pMax->Right() *= R;
 
-   // NOTE: This method should not be used for permit rating cases with the WSDOT method
-   // for that reason, we don't need to know which lane the permit truck is in and hence
-   // we use INVALID_INDEX for the permit truck lane index
-
-   if ( pMinLeftConfiguration )
+   if ( pMinLLConfigIdx )
    {
-      *pMinLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinLeftConfig,INVALID_INDEX);
+      if ( IsEqual(MaxMagnitude(pMin->Left(),pMin->Right()),pMin->Left()) )
+      {
+         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyLeftMin_SingleLane : liveLoadResult.m_lcidFyLeftMin) - FIRST_LIVELOAD_ID;
+      }
+      else
+      {
+         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyRightMin_SingleLane : liveLoadResult.m_lcidFyRightMin) - FIRST_LIVELOAD_ID;
+      }
    }
 
-   if ( pMinRightConfiguration )
+   if ( pMaxLLConfigIdx )
    {
-      *pMinRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinRightConfig,INVALID_INDEX);
+      if ( IsEqual(MaxMagnitude(pMax->Left(),pMax->Right()),pMax->Left()) )
+      {
+         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMax) - FIRST_LIVELOAD_ID;
+      }
+      else
+      {
+         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyRightMax_SingleLane : liveLoadResult.m_lcidFyRightMax) - FIRST_LIVELOAD_ID;
+      }
    }
-   
-   if ( pMaxLeftConfiguration )
-   {
-      *pMaxLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxLeftConfig,INVALID_INDEX);
-   }
-   
-   if ( pMaxRightConfiguration )
-   {
-      *pMaxRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxRightConfig,INVALID_INDEX);
-   }
+
+   //ModelData* pModelData = GetModelData(pierID);
+
+   //LiveLoadConfiguration& llMinLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMin));
+   //LiveLoadConfiguration& llMinRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMin_SingleLane : liveLoadResult.m_lcidFyRightMin));
+
+   //LiveLoadConfiguration& llMaxLeftConfig  = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMax));
+   //LiveLoadConfiguration& llMaxRightConfig = GetLiveLoadConfiguration(pModelData,(bIsPermitRating ? liveLoadResult.m_lcidFyRightMax_SingleLane : liveLoadResult.m_lcidFyRightMax));
+
+   //// NOTE: This method should not be used for permit rating cases with the WSDOT method
+   //// for that reason, we don't need to know which lane the permit truck is in and hence
+   //// we use INVALID_INDEX for the permit truck lane index
+
+   //if ( pMinLeftConfiguration )
+   //{
+   //   *pMinLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinLeftConfig,INVALID_INDEX);
+   //}
+
+   //if ( pMinRightConfiguration )
+   //{
+   //   *pMinRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMinRightConfig,INVALID_INDEX);
+   //}
+   //
+   //if ( pMaxLeftConfiguration )
+   //{
+   //   *pMaxLeftConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxLeftConfig,INVALID_INDEX);
+   //}
+   //
+   //if ( pMaxRightConfiguration )
+   //{
+   //   *pMaxRightConfiguration = GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llMaxRightConfig,INVALID_INDEX);
+   //}
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<WheelLineConfiguration>* pvMinConfiguration,std::vector<WheelLineConfiguration>* pvMaxConfiguration)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx/*std::vector<WheelLineConfiguration>* pvMinConfiguration,std::vector<WheelLineConfiguration>* pvMaxConfiguration*/)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
    pvMax->clear();
    pvMax->reserve(vPoi.size());
-   if ( pvMinConfiguration )
+
+   if ( pvMinLLConfigIdx )
    {
-      pvMinConfiguration->clear();
-      pvMinConfiguration->reserve(vPoi.size());
+      pvMinLLConfigIdx->clear();
+      pvMinLLConfigIdx->reserve(vPoi.size());
    }
-   if ( pvMaxConfiguration )
+
+   if ( pvMaxLLConfigIdx )
    {
-      pvMaxConfiguration->clear();
-      pvMaxConfiguration->reserve(vPoi.size());
+      pvMaxLLConfigIdx->clear();
+      pvMaxLLConfigIdx->reserve(vPoi.size());
    }
+
+   //if ( pvMinConfiguration )
+   //{
+   //   pvMinConfiguration->clear();
+   //   pvMinConfiguration->reserve(vPoi.size());
+   //}
+   //if ( pvMaxConfiguration )
+   //{
+   //   pvMaxConfiguration->clear();
+   //   pvMaxConfiguration->reserve(vPoi.size());
+   //}
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 min,max;
-      WheelLineConfiguration minConfig, maxConfig;
-      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinConfiguration ? &minConfig : NULL,pvMaxConfiguration ? &maxConfig : NULL);
+      //WheelLineConfiguration minConfig, maxConfig;
+      IndexType minLLConfigIdx, maxLLConfigIdx;
+      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL/*pvMinConfiguration ? &minConfig : NULL,pvMaxConfiguration ? &maxConfig : NULL*/);
       pvMin->push_back(min);
       pvMax->push_back(max);
-      if ( pvMinConfiguration )
+      if ( pvMinLLConfigIdx )
       {
-         pvMinConfiguration->push_back(minConfig);
+         pvMinLLConfigIdx->push_back(minLLConfigIdx);
       }
-      if ( pvMaxConfiguration )
+      if ( pvMaxLLConfigIdx )
       {
-         pvMaxConfiguration->push_back(maxConfig);
+         pvMaxLLConfigIdx->push_back(maxLLConfigIdx);
       }
+
+      //if ( pvMinConfiguration )
+      //{
+      //   pvMinConfiguration->push_back(minConfig);
+      //}
+      //if ( pvMaxConfiguration )
+      //{
+      //   pvMaxConfiguration->push_back(maxConfig);
+      //}
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<WheelLineConfiguration>* pvMinLeftConfiguration,std::vector<WheelLineConfiguration>* pvMinRightConfiguration,std::vector<WheelLineConfiguration>* pvMaxLeftConfiguration,std::vector<WheelLineConfiguration>* pvMaxRightConfiguration)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx/*std::vector<WheelLineConfiguration>* pvMinLeftConfiguration,std::vector<WheelLineConfiguration>* pvMinRightConfiguration,std::vector<WheelLineConfiguration>* pvMaxLeftConfiguration,std::vector<WheelLineConfiguration>* pvMaxRightConfiguration*/)
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
    pvMax->clear();
    pvMax->reserve(vPoi.size());
-   if ( pvMinLeftConfiguration )
+   if ( pvMinLLConfigIdx )
    {
-      pvMinLeftConfiguration->clear();
-      pvMinLeftConfiguration->reserve(vPoi.size());
+      pvMinLLConfigIdx->clear();
+      pvMinLLConfigIdx->reserve(vPoi.size());
    }
-   if ( pvMinRightConfiguration )
+   if ( pvMaxLLConfigIdx )
    {
-      pvMinRightConfiguration->clear();
-      pvMinRightConfiguration->reserve(vPoi.size());
+      pvMaxLLConfigIdx->clear();
+      pvMaxLLConfigIdx->reserve(vPoi.size());
    }
-   if ( pvMaxLeftConfiguration )
-   {
-      pvMaxLeftConfiguration->clear();
-      pvMaxLeftConfiguration->reserve(vPoi.size());
-   }
-   if ( pvMaxRightConfiguration )
-   {
-      pvMaxRightConfiguration->clear();
-      pvMaxRightConfiguration->reserve(vPoi.size());
-   }
+
+   //if ( pvMinLeftConfiguration )
+   //{
+   //   pvMinLeftConfiguration->clear();
+   //   pvMinLeftConfiguration->reserve(vPoi.size());
+   //}
+   //if ( pvMinRightConfiguration )
+   //{
+   //   pvMinRightConfiguration->clear();
+   //   pvMinRightConfiguration->reserve(vPoi.size());
+   //}
+   //if ( pvMaxLeftConfiguration )
+   //{
+   //   pvMaxLeftConfiguration->clear();
+   //   pvMaxLeftConfiguration->reserve(vPoi.size());
+   //}
+   //if ( pvMaxRightConfiguration )
+   //{
+   //   pvMaxRightConfiguration->clear();
+   //   pvMaxRightConfiguration->reserve(vPoi.size());
+   //}
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       sysSectionValue min,max;
-      WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
-      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLeftConfiguration ? &minLeftConfig : NULL,pvMinRightConfiguration ? &minRightConfig : NULL,pvMaxLeftConfiguration ? &maxLeftConfig : NULL,pvMaxRightConfiguration ? &maxRightConfig : NULL);
+      //WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
+      IndexType minLLConfigIdx, maxLLConfigIdx;
+      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL/*pvMinLeftConfiguration ? &minLeftConfig : NULL,pvMinRightConfiguration ? &minRightConfig : NULL,pvMaxLeftConfiguration ? &maxLeftConfig : NULL,pvMaxRightConfiguration ? &maxRightConfig : NULL*/);
       pvMin->push_back(min);
       pvMax->push_back(max);
-      if ( pvMinLeftConfiguration )
+
+      if ( pvMinLLConfigIdx )
       {
-         pvMinLeftConfiguration->push_back(minLeftConfig);
+         pvMinLLConfigIdx->push_back(minLLConfigIdx);
       }
-      if ( pvMinRightConfiguration )
+
+      if ( pvMaxLLConfigIdx )
       {
-         pvMinRightConfiguration->push_back(minRightConfig);
+         pvMaxLLConfigIdx->push_back(maxLLConfigIdx);
       }
-      if ( pvMaxLeftConfiguration )
-      {
-         pvMaxLeftConfiguration->push_back(maxLeftConfig);
-      }
-      if ( pvMaxRightConfiguration )
-      {
-         pvMaxRightConfiguration->push_back(maxRightConfig);
-      }
+      //if ( pvMinLeftConfiguration )
+      //{
+      //   pvMinLeftConfiguration->push_back(minLeftConfig);
+      //}
+      //if ( pvMinRightConfiguration )
+      //{
+      //   pvMinRightConfiguration->push_back(minRightConfig);
+      //}
+      //if ( pvMaxLeftConfiguration )
+      //{
+      //   pvMaxLeftConfiguration->push_back(maxLeftConfig);
+      //}
+      //if ( pvMaxRightConfiguration )
+      //{
+      //   pvMaxRightConfiguration->push_back(maxRightConfig);
+      //}
    }
 }
 
@@ -1852,7 +1932,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoadReactions; vehicleIdx++ )
    {
       sysSectionValue min,max;
-      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,NULL,NULL,NULL,NULL);
+      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,NULL,NULL);
       if ( min.Left() < (*pMin).Left() )
       {
          pMin->Left() = min.Left();

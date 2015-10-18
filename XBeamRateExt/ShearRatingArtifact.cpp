@@ -366,6 +366,17 @@ Float64 xbrShearRatingArtifact::GetLiveLoadShear() const
    return m_Vllim;
 }
 
+void xbrShearRatingArtifact::SetLiveLoadConfigurationIndex(IndexType llConfigIdx)
+{
+   m_LLConfigIdx = llConfigIdx;
+   m_bRFComputed = false;
+}
+
+IndexType xbrShearRatingArtifact::GetLiveLoadConfigurationIndex() const
+{
+   return m_LLConfigIdx;
+}
+
 Float64 xbrShearRatingArtifact::GetRatingFactor() const
 {
    if ( m_bRFComputed )

@@ -58,7 +58,6 @@
 #include <\ARP\PGSuper\Include\IFace\Selection.h>
 #include <\ARP\PGSuper\Include\IFace\Views.h>
 
-
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE
 

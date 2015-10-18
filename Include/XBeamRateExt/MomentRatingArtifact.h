@@ -133,6 +133,9 @@ public:
    void SetLiveLoadMoment(Float64 Mllim);
    Float64 GetLiveLoadMoment() const;
 
+   void SetLiveLoadConfigurationIndex(IndexType llConfigIdx);
+   IndexType GetLiveLoadConfigurationIndex() const;
+
    Float64 GetRatingFactor() const;
 
    void GetWSDOTPermitConfiguration(IndexType* pLLConfigIdx,IndexType* pPermitLaneIdx,VehicleIndexType* pVehicleIdx,Float64 *pMpermit,Float64* pMlegal,Float64* pK) const;
@@ -147,7 +150,7 @@ protected:
 
    // loading configuration, for the WSDOT method, that
    // results in the minimum rating factor
-   mutable IndexType m_LLConfigIdx; // live load configuration for min rating factor
+   mutable IndexType m_LLConfigIdx; // live load configuration for min rating factor (also used to track the controlling configuration for a non-WSDOT method rating)
    mutable IndexType m_PermitLaneIdx; // lane position of permit vehicle within the live load configuration for min rating factor
    mutable VehicleIndexType m_PermitVehicleIdx; // index of the vehicles, for this rating type, associted with the min rating factor
    mutable Float64 m_Mpermit; // permit load response associated with min rating factor

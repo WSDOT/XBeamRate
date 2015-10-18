@@ -684,6 +684,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LoadingDetailsChapterBuilder.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\LoadRatingChapterBuilder.cpp"
 				>
 			</File>
@@ -984,6 +988,10 @@
 			>
 			<File
 				RelativePath=".\dllmain.h"
+				>
+			</File>
+			<File
+				RelativePath=".\LoadingDetailsChapterBuilder.h"
 				>
 			</File>
 			<File

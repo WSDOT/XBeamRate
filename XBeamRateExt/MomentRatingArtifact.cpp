@@ -78,6 +78,8 @@ m_strVehicleName(_T("Unknown"))
    m_Mre = 0;
    m_Mps = 0;
    m_Mllim = 0;
+
+   m_LLConfigIdx = INVALID_INDEX;
 }
 
 xbrMomentRatingArtifact::xbrMomentRatingArtifact(const xbrMomentRatingArtifact& rOther)
@@ -381,6 +383,17 @@ void xbrMomentRatingArtifact::SetLiveLoadMoment(Float64 Mllim)
 Float64 xbrMomentRatingArtifact::GetLiveLoadMoment() const
 {
    return m_Mllim;
+}
+
+void xbrMomentRatingArtifact::SetLiveLoadConfigurationIndex(IndexType llConfigIdx)
+{
+   m_LLConfigIdx = llConfigIdx;
+   m_bRFComputed = false;
+}
+
+IndexType xbrMomentRatingArtifact::GetLiveLoadConfigurationIndex() const
+{
+   return m_LLConfigIdx;
 }
 
 Float64 xbrMomentRatingArtifact::GetRatingFactor() const

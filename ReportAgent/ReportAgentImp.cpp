@@ -37,11 +37,10 @@
 
 #include "TestChapterBuilder.h"
 
-#include "PierDescriptionDetailsChapterBuilder.h"
-
 #include "LoadRatingChapterBuilder.h"
 #include "LoadRatingDetailsChapterBuilder.h"
-
+#include "PierDescriptionDetailsChapterBuilder.h"
+#include "LoadingDetailsChapterBuilder.h"
 #include "MomentCapacityDetailsChapterBuilder.h"
 #include "ShearCapacityDetailsChapterBuilder.h"
 
@@ -192,6 +191,7 @@ void CReportAgentImp::InitReportBuilders()
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CPierDescriptionDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CLoadingDetailsChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
    pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);

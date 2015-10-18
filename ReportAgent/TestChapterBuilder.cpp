@@ -147,7 +147,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    }
 
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
-   const std::vector<LowerXBeamLoad>& loads = pProductForces->GetLowerCrossBeamLoading(pierID);
+   const std::vector<LowerXBeamLoad>& vLoads = pProductForces->GetLowerCrossBeamLoading(pierID);
    pTable = new rptRcTable(4,0);
    pTable->TableCaption() << _T("Lower XBeam Dead Load");
    *pPara << pTable << rptNewLine;
@@ -157,7 +157,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
    (*pTable)(0,2) << COLHDR(_T("Wstart"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
    (*pTable)(0,3) << COLHDR(_T("Wend"), rptForcePerLengthUnitTag, pDisplayUnits->GetForcePerLengthUnit());
    row = 1;
-   BOOST_FOREACH(const LowerXBeamLoad& load,loads)
+   BOOST_FOREACH(const LowerXBeamLoad& load,vLoads)
    {
       (*pTable)(row,0) << length.SetValue(load.Xs);
       (*pTable)(row,1) << length.SetValue(load.Xe);
@@ -183,7 +183,7 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
       }
 
       std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,INVALID_INDEX);
-
+/*
       // Live Load Moment Results
       pTable = new rptRcTable(6,0);
       pTable->TableCaption() << strLiveLoadName.c_str();
@@ -301,8 +301,8 @@ rptChapter* CTestChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 lev
 
          row++;
       }
+*/
    }
-
    pTable = new rptRcTable(4,0);
    pTable->TableCaption() << _T("Capacity");
    *pPara << pTable << rptNewLine;
