@@ -1,6 +1,7 @@
 [OPTIONS]
 Compiled File=XBeamRate.chm
 Title=XBeamRate
+Contents File=XBeamRate.hhc
 Index File=XBeamRate.hhk
 Default topic=Welcome.htm
 Default Window=NewWindow
@@ -19,6 +20,11 @@ NewWindow="XBeamRate","XBeamRate.hhc","XBeamRate.hhk","","",,,,,0x40080420,0,0x3
 
 [FILES]
 Welcome.htm
+support.htm
+license_agreement.htm
+Tutorials\PGS_Rating.htm
+Tutorials\General_Features.htm
+Tutorials\Tutorials.htm
 eHelp.xml
 RoboHHRE.lng
 
