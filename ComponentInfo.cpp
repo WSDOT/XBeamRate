@@ -49,7 +49,7 @@ void CXBeamRateComponentInfo::Terminate()
 
 CString CXBeamRateComponentInfo::GetName()
 {
-   return _T("XBeam Rate");
+   return _T("XBRate");
 }
 
 CString CXBeamRateComponentInfo::GetDescription()
@@ -64,7 +64,7 @@ CString CXBeamRateComponentInfo::GetDescription()
    CString strCopyright = verInfo.GetLegalCopyright();
 
    CString strDesc;
-   strDesc.Format(_T("XBeam Rate Application\nVersion %s\n%s"),strVersion,strCopyright);
+   strDesc.Format(_T("XBRate Application\nVersion %s\n%s"),strVersion,strCopyright);
    return strDesc;
 }
 

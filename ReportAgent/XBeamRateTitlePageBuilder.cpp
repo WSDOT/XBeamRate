@@ -101,9 +101,9 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
    *pTitlePage << pPara;
 #if defined _WIN64
-   *pPara << _T("XBeam Rate") << Super(symbol(TRADEMARK)) << _T(" (x64)") << rptNewLine;
+   *pPara << _T("XBRate") << Super(symbol(TRADEMARK)) << _T(" (x64)") << rptNewLine;
 #else
-   *pPara << _T("XBeam Rate") << Super(symbol(TRADEMARK)) << _T(" (x86)") << rptNewLine;
+   *pPara << _T("XBRate") << Super(symbol(TRADEMARK)) << _T(" (x86)") << rptNewLine;
 #endif
 
    pPara = new rptParagraph(pgsReportStyleHolder::GetCopyrightStyle());

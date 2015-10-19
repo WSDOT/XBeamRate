@@ -52,6 +52,6 @@ CXBeamRateDocTemplate::CXBeamRateDocTemplate(UINT nIDResource,
 
 CString CXBeamRateDocTemplate::GetTemplateGroupItemDescription(const CEAFTemplateItem* pItem) const
 {
-   CString strDescription(_T("Create a new XBeam Rate project (Cross Beam Load Rating). "));
+   CString strDescription(_T("Create a new XBRate project (Cross Beam Load Rating). "));
    return strDescription;
 }

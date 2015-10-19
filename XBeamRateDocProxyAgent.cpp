@@ -473,6 +473,6 @@ void CXBeamRateDocProxyAgent::RemoveToolBars()
 void CXBeamRateDocProxyAgent::OnResetHints()
 {
    // Do nothing for now
-//   // we'll need this method if XBeam Rate ever supports extensions
+//   // we'll need this method if XBRate ever supports extensions
 //   Fire_OnHintsReset();
 }

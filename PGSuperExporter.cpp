@@ -42,7 +42,7 @@ STDMETHODIMP CPGSuperDataExporter::Init(UINT nCmdID)
 
 STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText)
 {
-   *bstrText = CComBSTR("Pier to XBeam Rate");
+   *bstrText = CComBSTR("Pier to XBRate");
    return S_OK;
 }
 
@@ -54,7 +54,7 @@ STDMETHODIMP CPGSuperDataExporter::GetBitmapHandle(HBITMAP* phBmp)
 
 STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText)
 {
-   *bstrText = CComBSTR("Export a pier to XBeam Rate\nTool tip text");
+   *bstrText = CComBSTR("Export a pier to XBRate\nTool tip text");
    return S_OK;   
 }
 

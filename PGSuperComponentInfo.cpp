@@ -46,7 +46,7 @@ void CPGSuperComponentInfo::Terminate()
 
 CString CPGSuperComponentInfo::GetName()
 {
-   return _T("XBeam Rate Extensions");
+   return _T("XBRate Extensions");
 }
 
 CString CPGSuperComponentInfo::GetDescription()

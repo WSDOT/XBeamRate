@@ -83,7 +83,7 @@ BEGIN
             VALUE "InternalName", "ProjectAgent"
             VALUE "LegalCopyright", "Copyright © 1999-2015, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "ProjectAgent.dll"
-            VALUE "ProductName", "XBeam Rate"
+            VALUE "ProductName", "XBRate"
             VALUE "ProductVersion", "1.0.0.1"
         END
     END

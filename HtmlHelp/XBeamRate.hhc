@@ -7,5 +7,31 @@
   <param name="ExWindow Styles" value="0x100">
 </object>
 <ul>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Welcome">
+    <param name="Local" value="Welcome.htm">
+  </object>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Alternate Route Open Source License">
+    <param name="Local" value="license_agreement.htm">
+  </object>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Support">
+    <param name="Local" value="support.htm">
+  </object>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Tutorials">
+    <param name="Local" value="Tutorials\Tutorials.htm">
+  </object>
+  <ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="General Features">
+      <param name="Local" value="Tutorials\General_Features.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Load Rating with PGSuper/PGSplice">
+      <param name="Local" value="Tutorials\PGS_Rating.htm">
+    </object>
+    </ul>
 </ul>
 </html>

@@ -1,17 +1,17 @@
 HKCR
 {
-	XBeamRate.PGSuperDataExporter.1 = s 'XBeam Rate Pier Exporter'
+	XBeamRate.PGSuperDataExporter.1 = s 'XBRate Pier Exporter'
 	{
 		CLSID = s '{B3773B17-08A0-4f2b-99E8-C8077C3D2166}'
 	}
-	XBeamRate.PGSuperDataExporter = s 'XBeam Rate Pier Exporter'
+	XBeamRate.PGSuperDataExporter = s 'XBRate Pier Exporter'
 	{
 		CLSID = s '{B3773B17-08A0-4f2b-99E8-C8077C3D2166}'
 		CurVer = s 'XBeamRate.PGSuperDataExporter.1'
 	}
 	NoRemove CLSID
 	{
-		ForceRemove {B3773B17-08A0-4f2b-99E8-C8077C3D2166} = s 'XBeam Rate Pier Exporter'
+		ForceRemove {B3773B17-08A0-4f2b-99E8-C8077C3D2166} = s 'XBRate Pier Exporter'
 		{
 			ProgID = s 'XBeamRate.PGSuperDataExporter.1'
 			VersionIndependentProgID = s 'XBeamRate.PGSuperDataExporter'

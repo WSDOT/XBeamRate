@@ -2645,7 +2645,7 @@ HRESULT CProjectAgentImp::Export(PierIndexType pierIdx)
       }
       else
       {
-         int result = AfxChoose(_T("Select Pier"),_T("Select pier model to export to XBeam Rate"),strPiers,0,TRUE);
+         int result = AfxChoose(_T("Select Pier"),_T("Select pier model to export to XBRate"),strPiers,0,TRUE);
          if ( result < 0 )
          {
             // Cancel button was pressed
@@ -2664,7 +2664,7 @@ HRESULT CProjectAgentImp::Export(PierIndexType pierIdx)
                                        pDoc->GetFileTitle(), // the file name without path or extension
                                        LABEL_PIER(pierIdx));
 
-	CFileDialog  fileDlg(FALSE,_T("xbr"),strDefaultFileName,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("XBeam Rate File (*.xbr)|*.xbr||"));
+	CFileDialog  fileDlg(FALSE,_T("xbr"),strDefaultFileName,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("XBRate File (*.xbr)|*.xbr||"));
 	if (fileDlg.DoModal() == IDOK)
    {
 	   CString strFileName = fileDlg.GetPathName();
@@ -2672,7 +2672,7 @@ HRESULT CProjectAgentImp::Export(PierIndexType pierIdx)
       HRESULT hr = ExportPierModel(pierIdx,strFileName);
       if ( SUCCEEDED(hr) )
       {
-         if ( AfxMessageBox(_T("Export Complete.\r\nWould you like to open the XBeam Rate file?"),MB_ICONQUESTION | MB_YESNO) == IDYES )
+         if ( AfxMessageBox(_T("Export Complete.\r\nWould you like to open the XBRate file?"),MB_ICONQUESTION | MB_YESNO) == IDYES )
          {
             CEAFApp* pApp = EAFGetApp();
 
@@ -2707,7 +2707,7 @@ HRESULT CProjectAgentImp::ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPath
    CEAFAutoProgress ap(pProgress);
 
    CString strMsg;
-   strMsg.Format(_T("Exporting Pier %d to XBeam Rate"),LABEL_PIER(pierIdx));
+   strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
    pProgress->UpdateMessage(strMsg);
 
    m_SavePierID = pierID; // this is the ID of the pier we are saving

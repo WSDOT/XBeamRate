@@ -1,17 +1,17 @@
 HKCR
 {
-	XBeamRate.XBeamRateExtension.1 = s 'XBeamRate Extension'
+	XBeamRate.XBeamRateExtension.1 = s 'XBRate Extension'
 	{
 		CLSID = s '{60BF2930-673C-4d29-B654-8A2E0879DE2B}'
 	}
-	XBeamRate.XBeamRateExtension = s 'XBeamRate Extension'
+	XBeamRate.XBeamRateExtension = s 'XBRate Extension'
 	{
 		CLSID = s '{60BF2930-673C-4d29-B654-8A2E0879DE2B}'
 		CurVer = s 'XBeamRate.XBeamRateExtension.1'
 	}
 	NoRemove CLSID
 	{
-		ForceRemove {60BF2930-673C-4d29-B654-8A2E0879DE2B} = s 'XBeamRate Extension'
+		ForceRemove {60BF2930-673C-4d29-B654-8A2E0879DE2B} = s 'XBRate Extension'
 		{
 			ProgID = s 'XBeamRate.XBeamRateExtension.1'
 			VersionIndependentProgID = s 'XBeamRate.XBeamRateExtension'

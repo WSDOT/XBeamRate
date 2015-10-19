@@ -121,7 +121,7 @@ UINT CXBeamRateAppPlugin::GetDocumentResourceID()
 
 CString CXBeamRateAppPlugin::GetName()
 {
-   return CString("XBeam Rate");
+   return CString("XBRate");
 }
 
 

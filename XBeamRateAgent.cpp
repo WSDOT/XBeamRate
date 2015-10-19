@@ -134,7 +134,7 @@ void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
    if ( 0 < pierIdx && pierIdx < nPiers-1 )
    {
       pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
-      pMenu->AppendMenu(IDM_EXPORT_PIER,_T("Export to XBeam Rate"),m_pMyAgent);
+      pMenu->AppendMenu(IDM_EXPORT_PIER,_T("Export to XBRate"),m_pMyAgent);
    }
 }
 

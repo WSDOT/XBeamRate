@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="windows-1252"?>
 <rhpml majorversion="1" minorversion="0">
-	<folders>
-		<folder>
-			<name>Tutorials</name>
-		</folder>
-	</folders>
+	<folders/>
 	<topics>
 		<topic>
-			<name>Welcome.htm</name>
+			<name>Tutorials.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>
 		<topic>
-			<name>license_agreement.htm</name>
+			<name>General_Features.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>
 		<topic>
-			<name>support.htm</name>
+			<name>PGS_Rating.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>

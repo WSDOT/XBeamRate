@@ -27,6 +27,7 @@
 #include <IFace\LoadRating.h>
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
+#include <IFace\Pier.h>
 
 #include "XBeamRateReportSpecification.h"
 
@@ -525,6 +526,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    INIT_UV_PROTOTYPE( rptLengthUnitValue,  location, pDisplayUnits->GetSpanLengthUnit(),      false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue,  dim,      pDisplayUnits->GetComponentDimUnit(),    false );
    INIT_UV_PROTOTYPE( rptStressUnitValue,  stress,   pDisplayUnits->GetStressUnit(),          false );
+   INIT_UV_PROTOTYPE( rptStressUnitValue,  modE,     pDisplayUnits->GetModEUnit(),            false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue,  moment,   pDisplayUnits->GetMomentUnit(),          false );
    INIT_UV_PROTOTYPE( rptLength4UnitValue, mom_i,    pDisplayUnits->GetMomentOfInertiaUnit(), false );
 
@@ -564,6 +566,11 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
+   GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
+   Float64 Es, fy, fu;
+   pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
+
+
    dim.ShowUnitTag(true);
    
    *pPara << Sub2(_T("f"),_T("r")) << _T(" = ") << _T("k") << Sub2(_T("f"),_T("y")) << _T(" = ") << artifacts.begin()->second.GetAllowableStressRatio() << Sub2(_T("f"),_T("y")) << rptNewLine;
@@ -574,8 +581,10 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    *pPara << Sub2(symbol(gamma),_T("RE")) << _T(" = ") << scalar.SetValue(artifacts.begin()->second.GetRelaxationFactor()) << rptNewLine;
    *pPara << Sub2(symbol(gamma),_T("PS")) << _T(" = ") << scalar.SetValue(artifacts.begin()->second.GetSecondaryEffectsFactor()) << rptNewLine;
    *pPara << Sub2(symbol(gamma),_T("LL")) << _T(" = ") << scalar.SetValue(artifacts.begin()->second.GetLiveLoadFactor()) << rptNewLine;
-   *pPara << Sub2(_T("n"),_T("p")) << _T(" = modular ratio, permanent loads = ") << artifacts.begin()->second.GetModularRatio(xbrTypes::ltPermanent) << rptNewLine;
-   *pPara << Sub2(_T("n"),_T("t")) << _T(" = modular ratio, transient loads = ") << artifacts.begin()->second.GetModularRatio(xbrTypes::ltTransient) << rptNewLine;
+   *pPara << RPT_EC << _T(" = ") << modE.SetValue(pMaterial->GetXBeamEc(pierID)) << rptNewLine;
+   *pPara << RPT_ES << _T(" = ") << modE.SetValue(Es) << rptNewLine;
+   *pPara << Sub2(_T("n"),_T("t")) << _T(" = modular ratio, transient loads = ") << artifacts.begin()->second.GetModularRatio(xbrTypes::ltTransient) << _T(" (LRFD 5.7.1, n = ") << RPT_ES << _T("/") << RPT_EC << _T(", rounded to the nearest integer number)") << rptNewLine;
+   *pPara << Sub2(_T("n"),_T("p")) << _T(" = modular ratio, permanent loads = ") << artifacts.begin()->second.GetModularRatio(xbrTypes::ltPermanent) << _T(" (LRFD 5.7.1, an effective modular ratio of 2n is applicable to permanent loads)") << rptNewLine;
    *pPara << Sub2(_T("Y"),_T("bar")) << _T(" = depth to extreme tension reinforcement = ") << dim.SetValue(artifacts.begin()->second.GetYbar()) << rptNewLine;
    *pPara << Sub2(_T("c"),_T("p")) << _T(" = depth to neutral axis, permanent loads") << rptNewLine;
    *pPara << Sub2(_T("c"),_T("t")) << _T(" = depth to neutral axis, transient loads") << rptNewLine;

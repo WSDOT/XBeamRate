@@ -163,7 +163,7 @@ bool CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,StatusCallba
 
 
       CString strMsg;
-      strMsg.Format(_T("XBeam Rate cannot model Pier %d\r\n%s"),LABEL_PIER(pPier->GetIndex()),strReason);
+      strMsg.Format(_T("XBRate cannot model Pier %d\r\n%s"),LABEL_PIER(pPier->GetIndex()),strReason);
       xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(statusGroupID,callbackID,strMsg);
 
       GET_IFACE2(pBroker,IEAFStatusCenter,pStatusCenter);

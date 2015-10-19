@@ -46,7 +46,7 @@ void CPGSpliceComponentInfo::Terminate()
 
 CString CPGSpliceComponentInfo::GetName()
 {
-   return _T("XBeam Rate Extensions");
+   return _T("XBRate Extensions");
 }
 
 CString CPGSpliceComponentInfo::GetDescription()

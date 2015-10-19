@@ -170,7 +170,7 @@ void CReportAgentImp::InitReportBuilders()
    boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CXBeamRateReportSpecificationBuilder(m_pBroker) );
 
 
-   CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(_T("XBeam Rate Test Report"));
+   CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(_T("XBRate Test Report"));
    m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();

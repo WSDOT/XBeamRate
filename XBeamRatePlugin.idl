@@ -35,7 +35,7 @@ import "PGSuperIEPlugin.idl";  // for the Importer/Exporter plugins
 [
 	uuid(CDAAC48F-11E7-46a3-B186-8C5418EB611F),
 	version(1.0),
-	helpstring("XBeam Rate Type Library")
+	helpstring("XBRate Type Library")
 ]
 library XBeamRateLibrary
 {
@@ -44,7 +44,7 @@ library XBeamRateLibrary
 
 	[
 		uuid(B195CE70-2D27-4fa6-B0E5-99D09022D662),
-		helpstring("XBeam Rate Application Plugin")
+		helpstring("XBRate Application Plugin")
 	]
 	coclass XBeamRateAppPlugin
 	{
@@ -53,7 +53,7 @@ library XBeamRateLibrary
 
    [
       uuid(8CB5644D-5CC5-4fca-A86C-0A1D566D30CB),
-		helpstring("XBeam Rate Component Information")
+		helpstring("XBRate Component Information")
    ]
    coclass XBeamRateComponentInfo
    {
