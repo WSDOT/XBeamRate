@@ -308,7 +308,7 @@ void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
          )
       {
          maxGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
-         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,BLUE);
+         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,RED);
       }
       else
       {
