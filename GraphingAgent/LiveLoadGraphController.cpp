@@ -86,23 +86,17 @@ void CXBRLiveLoadGraphController::UpdatePermitLaneLabel()
    GetDlgItem(IDC_PERMIT_LANE_NOTE)->SetWindowText(strLabel);
 }
 
-std::vector<IndexType> CXBRLiveLoadGraphController::GetSelectedLiveLoadConfigurations()
+IndexType CXBRLiveLoadGraphController::GetSelectedLiveLoadConfiguration()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int nSel = plbLoading->GetSelCount();
-   CArray<int,int> selectedItems;
-   selectedItems.SetSize(nSel);
-   plbLoading->GetSelItems(nSel,selectedItems.GetData());
-
-   std::vector<IndexType> vLiveLoadConfigs;
-   for ( int i = 0; i < nSel; i++ )
+   int curSel = plbLoading->GetCurSel();
+   if (curSel == LB_ERR )
    {
-      int idx = selectedItems.GetAt(i);
-      IndexType llConfigIdx = (IndexType)plbLoading->GetItemData(idx);
-      vLiveLoadConfigs.push_back(llConfigIdx);
+      return INVALID_INDEX;
    }
 
-   return vLiveLoadConfigs;
+   IndexType llConfigIdx = (IndexType)plbLoading->GetItemData(curSel);
+   return llConfigIdx;
 }
 
 ActionType CXBRLiveLoadGraphController::GetActionType()
@@ -225,15 +219,27 @@ void CXBRLiveLoadGraphController::FillPierList()
 
 void CXBRLiveLoadGraphController::FillRatingType()
 {
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+
+   PierIDType pierID = GetPierID();
+
    CComboBox* pcbRatingType = (CComboBox*)GetDlgItem(IDC_RATING_TYPE);
    int curSel = pcbRatingType->GetCurSel();
    pcbRatingType->ResetContent();
    for ( int i = 0; i < 6; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
-      int idx = pcbRatingType->AddString(GetLiveLoadTypeName(ratingType));
-      pcbRatingType->SetItemData(idx,(DWORD_PTR)ratingType);
+
+      std::_tstring strLiveLoad = pProject->GetLiveLoadName(pierID,ratingType,0);
+      if ( strLiveLoad != NO_LIVE_LOAD_DEFINED )
+      {
+         int idx = pcbRatingType->AddString(GetLiveLoadTypeName(ratingType));
+         pcbRatingType->SetItemData(idx,(DWORD_PTR)ratingType);
+      }
    }
+
    curSel = pcbRatingType->SetCurSel(curSel);
    if ( curSel == CB_ERR )
    {
@@ -273,38 +279,30 @@ void CXBRLiveLoadGraphController::FillVehicleType()
    }
 }
 
-void CXBRLiveLoadGraphController::SelectAll()
-{
-   CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   plbLoading->SelItemRange(TRUE,0,plbLoading->GetCount());
-}
-
 void CXBRLiveLoadGraphController::Next()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int nSel = plbLoading->GetSelCount();
-   CArray<int,int> selectedItems;
-   selectedItems.SetSize(nSel);
-   plbLoading->GetSelItems(nSel,selectedItems.GetData());
-
-   int curSel = selectedItems.GetAt(selectedItems.GetCount()-1);
+   int curSel = plbLoading->GetCurSel();
    curSel++;
-   plbLoading->SetSel(-1,FALSE);
-   plbLoading->SetSel(curSel);
+   curSel = plbLoading->SetCurSel(curSel);
+   if ( curSel == LB_ERR )
+   {
+      plbLoading->SetCurSel(0);
+   }
+   LoadingChanged();
 }
 
 void CXBRLiveLoadGraphController::Prev()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int nSel = plbLoading->GetSelCount();
-   CArray<int,int> selectedItems;
-   selectedItems.SetSize(nSel);
-   plbLoading->GetSelItems(nSel,selectedItems.GetData());
-
-   int curSel = selectedItems.GetAt(0);
+   int curSel = plbLoading->GetCurSel();
    curSel--;
-   plbLoading->SetSel(-1,FALSE);
-   plbLoading->SetSel(curSel);
+   curSel = plbLoading->SetCurSel(curSel);
+   if ( curSel == LB_ERR )
+   {
+      plbLoading->SetCurSel(plbLoading->GetCount()-1);
+   }
+   LoadingChanged();
 }
 
 void CXBRLiveLoadGraphController::RatingTypeChanged()
@@ -315,7 +313,7 @@ void CXBRLiveLoadGraphController::RatingTypeChanged()
    pgsTypes::LoadRatingType ratingType = GetLoadRatingType();
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
+   GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
    {
       GetDlgItem(IDC_PERMIT_LANE_NOTE)->ShowWindow(SW_SHOW);
@@ -333,45 +331,35 @@ void CXBRLiveLoadGraphController::RatingTypeChanged()
 void CXBRLiveLoadGraphController::LoadingChanged()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int nSel = plbLoading->GetSelCount();
-   if ( nSel == 1 )
+   GetDlgItem(IDC_PERMIT_LANE_NOTE)->EnableWindow(TRUE);
+   GetDlgItem(IDC_PERMIT_LANE)->EnableWindow(TRUE);
+   GetDlgItem(IDC_PERMIT_LANE_SPINNER)->EnableWindow(TRUE);
+
+   int curSel = plbLoading->GetCurSel();
+   if ( curSel == LB_ERR )
    {
-      GetDlgItem(IDC_PERMIT_LANE_NOTE)->EnableWindow(TRUE);
-      GetDlgItem(IDC_PERMIT_LANE)->EnableWindow(TRUE);
-      GetDlgItem(IDC_PERMIT_LANE_SPINNER)->EnableWindow(TRUE);
+      return;
+   }
+   IndexType llConfigIdx = (IndexType)plbLoading->GetItemData(curSel);
 
-      CArray<int,int> selectedItems;
-      selectedItems.SetSize(nSel);
-      plbLoading->GetSelItems(nSel,selectedItems.GetData());
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
 
-      int curSel = selectedItems.GetAt(0);
-      IndexType llConfigIdx = (IndexType)plbLoading->GetItemData(curSel);
+   PierIDType pierID = GetPierID();
+   IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(pierID,llConfigIdx);
 
-      CComPtr<IBroker> pBroker;
-      EAFGetBroker(&pBroker);
-      GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+   CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_PERMIT_LANE_SPINNER);
+   int curPos = pSpin->GetPos32();
+   pSpin->SetRange32(1,(int)nLoadedLanes);
 
-      PierIDType pierID = GetPierID();
-      IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(pierID,llConfigIdx);
-
-      CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_PERMIT_LANE_SPINNER);
-      int curPos = pSpin->GetPos32();
-      pSpin->SetRange32(1,(int)nLoadedLanes);
-
-      if ( (IndexType)curPos < nLoadedLanes )
-      {
-         pSpin->SetPos32(curPos);
-      }
-      else
-      {
-         pSpin->SetPos32(0);
-      }
+   if ( (IndexType)curPos <= nLoadedLanes )
+   {
+      pSpin->SetPos32(curPos);
    }
    else
    {
-      GetDlgItem(IDC_PERMIT_LANE_NOTE)->EnableWindow(FALSE);
-      GetDlgItem(IDC_PERMIT_LANE)->EnableWindow(FALSE);
-      GetDlgItem(IDC_PERMIT_LANE_SPINNER)->EnableWindow(FALSE);
+      pSpin->SetPos32(0);
    }
 }
 
@@ -400,6 +388,4 @@ void CXBRLiveLoadGraphController::FillLoadingList()
       int idx = plbLoading->AddString(str);
       plbLoading->SetItemData(idx,llConfigIdx);
    }
-
-   plbLoading->SetCurSel(0);
 }

@@ -32,7 +32,6 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFAutoProgress.h>
 #include <MathEx.h>
-#include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
 #include <IFace\XBeamRateAgent.h>
@@ -47,13 +46,6 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
-#include <Colors.h>
-#define GRAPH_BACKGROUND WHITE //RGB(220,255,220)
-#define GRAPH_GRID_PEN_STYLE PS_DOT
-#define GRAPH_GRID_PEN_WEIGHT 1
-#define GRAPH_GRID_COLOR GREY50 //RGB(0,150,0)
-#define GRAPH_PEN_WEIGHT 2
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -63,7 +55,6 @@ static char THIS_FILE[] = __FILE__;
 BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFGraphBuilderBase)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
-   ON_BN_CLICKED(IDC_SELECT_ALL, &CXBRLiveLoadGraphBuilder::OnSelectAll)
    ON_BN_CLICKED(IDC_NEXT, &CXBRLiveLoadGraphBuilder::OnNext)
    ON_BN_CLICKED(IDC_PREV, &CXBRLiveLoadGraphBuilder::OnPrev)
    ON_LBN_SELCHANGE(IDC_LOADING,&CXBRLiveLoadGraphBuilder::OnLbnSelChanged)
@@ -118,12 +109,6 @@ void CXBRLiveLoadGraphBuilder::OnGraphTypeChanged()
 void CXBRLiveLoadGraphBuilder::OnLbnSelChanged()
 {
    m_GraphController.LoadingChanged();
-   OnGraphTypeChanged();
-}
-
-void CXBRLiveLoadGraphBuilder::OnSelectAll()
-{
-   m_GraphController.SelectAll();
    OnGraphTypeChanged();
 }
 
@@ -238,19 +223,42 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
 
-   std::vector<IndexType> vLiveLoadConfigs = m_GraphController.GetSelectedLiveLoadConfigurations();
+   IndexType llConfigIdx = m_GraphController.GetSelectedLiveLoadConfiguration();
 
-   graph.DrawLegend(vLiveLoadConfigs.size() < 1 ? true : false);
+   if ( !::IsPermitRatingType(ratingType) || ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT ) )
+   {
+      // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method
+      // envelope doesn't make sense with WSDOT method.
 
-   BOOST_FOREACH(IndexType llConfigIdx,vLiveLoadConfigs)
+      // Controlling envelope for all trucks for this rating type
+      CString strLiveLoadName = GetLiveLoadTypeName(ratingType);
+      IndexType minGraphIdx = graph.CreateDataSeries(strLiveLoadName,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+      IndexType maxGraphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+      BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+
+      GET_IFACE2(pBroker,IXBRProject,pProject);
+      std::_tstring strLiveLoad = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
+      if ( strLiveLoad != NO_LIVE_LOAD_DEFINED )
+      {
+         IndexType minVehGraphIdx = graph.CreateDataSeries(strLiveLoad.c_str(),PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
+         IndexType maxVehGraphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
+         BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      }
+   }
+
+   if ( llConfigIdx != INVALID_INDEX )
    {
       CString strName;
-      strName.Format(_T("%d"),(llConfigIdx+1));
-      IndexType graphIdx = graph.CreateDataSeries(strName,PS_SOLID,1,RED);
+      strName.Format(_T("Live Load Configuration %d"),LABEL_INDEX(llConfigIdx));
+      graph.SetSubtitle(strName);
+
+      IndexType graphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
 
       if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
       {
-         IndexType permitGraphIdx = graph.CreateDataSeries(strName,PS_SOLID,1,GREEN);
+         graph.SetDataLabel(graphIdx,_T("Legal"));
+
+         IndexType permitGraphIdx = graph.CreateDataSeries(_T("Permit"),PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
          BuildWSDOTPermitLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,actionType,permitGraphIdx,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
       }
       else
@@ -259,26 +267,13 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
       }
    }
 
-   if ( !::IsPermitRatingType(ratingType) || ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT ) )
-   {
-      // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method
-      // envelope doesn't make sense with WSDOT method.
-      IndexType minGraphIdx = graph.CreateDataSeries(_T("Min"),PS_SOLID,2,BLUE);
-      IndexType maxGraphIdx = graph.CreateDataSeries(_T("Max"),PS_SOLID,2,GREEN);
-      BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-
-      IndexType minVehGraphIdx = graph.CreateDataSeries(_T("Min"),PS_DASH,2,BLUE);
-      IndexType maxVehGraphIdx = graph.CreateDataSeries(_T("Max"),PS_DASH,2,GREEN);
-      BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-   }
-
    CRect rect = GetView()->GetDrawingRect();
    graph.SetOutputRect(rect);
    graph.Draw(pDC->GetSafeHdc());
 
-   if ( vLiveLoadConfigs.size() == 1 )
+   if ( llConfigIdx != INVALID_INDEX )
    {
-      DrawLiveLoadConfig(pGraphWnd,pDC,graph,pierID,ratingType,vehicleIdx,vLiveLoadConfigs.front(),pHorizontalAxisFormat,pVerticalAxisFormat);
+      DrawLiveLoadConfig(pGraphWnd,pDC,graph,pierID,ratingType,vehicleIdx,llConfigIdx,pHorizontalAxisFormat,pVerticalAxisFormat);
    }
 
    delete pVerticalAxisFormat;
@@ -476,9 +471,9 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    // change the device origin
    mapper.SetDeviceOrg(dox,doy);
 
-   CPen pen(PS_SOLID,2,BLACK);
-   CPen permit_pen(PS_SOLID,2,GREEN);
-   CPen* pOldPen = pDC->SelectObject(&pen);
+   CPen legal_pen(PS_SOLID,1,RED);
+   CPen permit_pen(PS_SOLID,1,GREEN);
+   CPen* pOldPen = pDC->SelectObject(&legal_pen);
 
    LONG dx_last, dy_last;
    std::vector<WheelLinePlacement>::iterator iter(wheelLineConfig.begin());
@@ -493,7 +488,7 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
       }
       else
       {
-         pDC->SelectObject(&pen);
+         pDC->SelectObject(&legal_pen);
       }
 
       WheelLinePlacement& placement = *iter;

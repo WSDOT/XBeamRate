@@ -32,7 +32,6 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFAutoProgress.h>
 #include <MathEx.h>
-#include <GraphicsLib\GraphicsLib.h>
 #include <UnitMgt\UnitValueNumericalFormatTools.h>
 
 #include <IFace\XBeamRateAgent.h>
@@ -47,12 +46,6 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
-#include <Colors.h>
-#define GRAPH_BACKGROUND WHITE //RGB(220,255,220)
-#define GRAPH_GRID_PEN_STYLE PS_DOT
-#define GRAPH_GRID_PEN_WEIGHT 1
-#define GRAPH_GRID_COLOR GREY50 //RGB(0,150,0)
-#define GRAPH_PEN_WEIGHT 2
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -245,6 +238,8 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 
    m_GraphController.FillLoadingList();
+
+   m_GraphColor.SetGraphCount(m_GraphDefinitions.GetGraphDefinitionCount());
 }
 
 void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
@@ -300,6 +295,9 @@ void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    {
       CXBRAnalysisResultsGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
 
+      IndexType selectedGraphIdx = m_GraphDefinitions.GetGraphIndex(graphDef.m_ID);
+      COLORREF color = m_GraphColor.GetColor(selectedGraphIdx);
+
       IndexType graphIdx, maxGraphIdx, minGraphIdx;
       if ( graphDef.m_GraphType == graphCapacity ||
            graphDef.m_GraphType == graphVehicularLiveLoad ||
@@ -307,12 +305,12 @@ void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
            graphDef.m_GraphType == graphLimitState
          )
       {
-         maxGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
-         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,RED);
+         maxGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
+         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,color);
       }
       else
       {
-         graphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,RED);
+         graphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
       }
 
       GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);

@@ -44,7 +44,6 @@ protected:
 
    afx_msg void OnGraphTypeChanged();
    afx_msg void OnLbnSelChanged();
-   afx_msg void OnSelectAll();
    afx_msg void OnPierChanged();
    afx_msg void OnNext();
    afx_msg void OnPrev();

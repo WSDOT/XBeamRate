@@ -60,6 +60,8 @@ protected:
 
    LPCTSTR GetGraphTitle(ActionType actionType);
 
+   grGraphColor m_GraphColor;
+
    DECLARE_MESSAGE_MAP()
 
 private:

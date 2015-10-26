@@ -35,7 +35,7 @@ public:
    DECLARE_DYNCREATE(CXBRLiveLoadGraphController);
 
    void UpdatePermitLaneLabel();
-   std::vector<IndexType> GetSelectedLiveLoadConfigurations();
+   IndexType GetSelectedLiveLoadConfiguration();
    ActionType GetActionType();
    PierIDType GetPierID();
    pgsTypes::LoadRatingType GetLoadRatingType();
@@ -47,7 +47,6 @@ public:
    virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
 
    void FillLoadingList();
-   void SelectAll();
    void Next();
    void Prev();
 
