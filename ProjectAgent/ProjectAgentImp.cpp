@@ -1638,6 +1638,10 @@ void CProjectAgentImp::SetReactionLoadApplicationType(PierIDType pierID,xbrTypes
 
 xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicationType(PierIDType pierID)
 {
+#pragma Reminder("WORKING HERE")
+   // if stand alone, return GetPrivateReactionLoadApplication(pierID), otherwise, look at the pier connection
+   // type... use through bearings for hinge/roller type, use directly to xbeam for
+   // continuous/integral types.
    return GetPrivateReactionLoadApplication(pierID);
 }
 
@@ -2494,10 +2498,6 @@ Float64 CProjectAgentImp::GetYieldStressLimitCoefficient()
 
 pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions()
 {
-#pragma Reminder("WORKING HERE")
-   // if stand alone, return m_AnalysisType, otherwise, look at the pier connection
-   // type... use through bearings for hinge/roller type, use directly to xbeam for
-   // continuous/integral types.
    return m_AnalysisType;
 }
 
