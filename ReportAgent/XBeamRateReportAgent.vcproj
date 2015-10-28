@@ -958,10 +958,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\TestChapterBuilder.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\XBeamRateChapterBuilder.cpp"
 				>
 			</File>
@@ -1040,10 +1036,6 @@
 			</File>
 			<File
 				RelativePath="StdAfx.h"
-				>
-			</File>
-			<File
-				RelativePath=".\TestChapterBuilder.h"
 				>
 			</File>
 			<File

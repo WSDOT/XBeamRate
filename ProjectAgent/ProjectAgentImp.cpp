@@ -170,7 +170,7 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_AnalysisType = pgsTypes::Envelope;
 
-   m_PermitRatingMethod = xbrTypes::prmAASHTO;
+   m_PermitRatingMethod = xbrTypes::prmWSDOT;
 
    m_bExportingModel = false;
 }
@@ -2494,6 +2494,10 @@ Float64 CProjectAgentImp::GetYieldStressLimitCoefficient()
 
 pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions()
 {
+#pragma Reminder("WORKING HERE")
+   // if stand alone, return m_AnalysisType, otherwise, look at the pier connection
+   // type... use through bearings for hinge/roller type, use directly to xbeam for
+   // continuous/integral types.
    return m_AnalysisType;
 }
 

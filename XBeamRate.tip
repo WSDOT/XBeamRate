@@ -1,2 +1,5 @@
 XBRate is an engineering tool. It should not be considered a substitute for knowledge, judgement, or experience.
-XBRate is a stand alone BridgeLink application as well as a PGSuper/PGSplice Extension
+XBRate is a stand-alone BridgeLink application as well as a PGSuper/PGSplice Extension
+You can export your pier model from PGSuper/PGSplice to a stand-alone XBRate model
+XBRate can be used for many different kinds of piers. The pier defintion does not depend on bridge type.
+XBRate supports AASHTO MBE LRFR requirements as well as WSDOT BDM requirements

@@ -35,8 +35,6 @@
 #include "XBeamRateReportBuilder.h"
 #include "XBeamRateTitlePageBuilder.h"
 
-#include "TestChapterBuilder.h"
-
 #include "LoadRatingChapterBuilder.h"
 #include "LoadRatingDetailsChapterBuilder.h"
 #include "PierDescriptionDetailsChapterBuilder.h"
@@ -169,19 +167,7 @@ void CReportAgentImp::InitReportBuilders()
 
    boost::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder( new CXBeamRateReportSpecificationBuilder(m_pBroker) );
 
-
-   CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(_T("XBRate Test Report"));
-   m_ReportNames.insert(pReportBuilder->GetName());
-#if defined _DEBUG || defined _BETA_VERSION
-   pReportBuilder->IncludeTimingChapter();
-#endif
-   pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
-   pReportBuilder->AddTitlePageBuilder(boost::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
-   pReportBuilder->AddChapterBuilder(boost::shared_ptr<CChapterBuilder>(new CTestChapterBuilder()));
-   pRptMgr->AddReportBuilder(pReportBuilder);
-
-
-   pReportBuilder = new CXBeamRateReportBuilder(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report"));
+   CXBeamRateReportBuilder* pReportBuilder = new CXBeamRateReportBuilder(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report"));
    m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
