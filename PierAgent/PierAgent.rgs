@@ -2,16 +2,16 @@ HKCR
 {
 	XBeamRate.PierAgent.1 = s 'PierAgent Class'
 	{
-		CLSID = s '{F5F56C70-715B-4a8c-B81F-65CB93FF2DD5}'
+		CLSID = s '{23184501-3882-4e40-BF05-DD96D84F991B}'
 	}
 	XBeamRate.PierAgent = s 'PierAgent Class'
 	{
-		CLSID = s '{F5F56C70-715B-4a8c-B81F-65CB93FF2DD5}'
+		CLSID = s '{23184501-3882-4e40-BF05-DD96D84F991B}'
 		CurVer = s 'XBeamRate.PierAgent.1'
 	}
 	NoRemove CLSID
 	{
-		ForceRemove {F5F56C70-715B-4a8c-B81F-65CB93FF2DD5} = s 'PierAgent Class'
+		ForceRemove {23184501-3882-4e40-BF05-DD96D84F991B} = s 'PierAgent Class'
 		{
 			ProgID = s 'XBeamRate.PierAgent.1'
 			VersionIndependentProgID = s 'XBeamRate.PierAgent'

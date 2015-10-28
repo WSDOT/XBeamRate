@@ -62,7 +62,8 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public IXBRProjectEdit,
    public IXBREvents,
    public IXBRExport,
-   public IBridgeDescriptionEventSink
+   public IBridgeDescriptionEventSink,
+   public IEventsSink
 {  
 public:
 	CProjectAgentImp(); 
@@ -87,6 +88,7 @@ BEGIN_COM_MAP(CProjectAgentImp)
    COM_INTERFACE_ENTRY_IID(IID_IXBREvents,IXBREvents)
    COM_INTERFACE_ENTRY_IID(IID_IXBRExport,IXBRExport)
    COM_INTERFACE_ENTRY(IBridgeDescriptionEventSink)
+   COM_INTERFACE_ENTRY(IEventsSink)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -323,6 +325,13 @@ public:
    virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName);
    virtual HRESULT OnConstructionLoadChanged();
 
+// IEventsSink
+public:
+   virtual HRESULT OnHoldEvents();
+   virtual HRESULT OnFirePendingEvents();
+   virtual HRESULT OnCancelPendingEvents();
+
+
 // IXBRExport
 public:
    virtual HRESULT Export(PierIndexType pierIdx);
@@ -340,6 +349,8 @@ private:
    bool m_bExportingModel; // set to true, when exporting a pier model from PGS
 
    DWORD m_dwBridgeDescCookie;
+   DWORD m_dwEventsCookie;
+
    StatusGroupIDType m_XBeamRateStatusGroupID; // ID used to identify status items created by this agent
    StatusCallbackIDType m_scidBridgeError;
 

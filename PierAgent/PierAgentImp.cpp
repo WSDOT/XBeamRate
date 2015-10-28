@@ -1882,9 +1882,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          if ( reactionType == xbrTypes::rltConcentrated )
          {
             // POI at CL Bearing
-            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-delta));
+            //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-delta));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg,POI_BRG));
-            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+delta));
+            //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+delta));
          }
          else
          {

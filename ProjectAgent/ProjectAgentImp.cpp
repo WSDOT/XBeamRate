@@ -247,6 +247,14 @@ STDMETHODIMP CProjectAgentImp::Init2()
       pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
+   hr = pBrokerInit->FindConnectionPoint( IID_IEventsSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Advise( GetUnknown(), &m_dwEventsCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
+   }
+
    return S_OK;
 }
 
@@ -271,6 +279,14 @@ STDMETHODIMP CProjectAgentImp::ShutDown()
    if ( SUCCEEDED(hr) )
    {
       hr = pCP->Unadvise( m_dwBridgeDescCookie );
+      ATLASSERT( SUCCEEDED(hr) );
+      pCP.Release(); // Recycle the connection point
+   }
+
+   hr = pBrokerInit->FindConnectionPoint(IID_IEventsSink, &pCP );
+   if ( SUCCEEDED(hr) )
+   {
+      hr = pCP->Unadvise( m_dwEventsCookie );
       ATLASSERT( SUCCEEDED(hr) );
       pCP.Release(); // Recycle the connection point
    }
@@ -2605,6 +2621,26 @@ HRESULT CProjectAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNe
 
 HRESULT CProjectAgentImp::OnConstructionLoadChanged()
 {
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////
+// IEventsSink
+HRESULT CProjectAgentImp::OnHoldEvents()
+{
+   HoldEvents();
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnFirePendingEvents()
+{
+   FirePendingEvents();
+   return S_OK;
+}
+
+HRESULT CProjectAgentImp::OnCancelPendingEvents()
+{
+   CancelPendingEvents();
    return S_OK;
 }
 

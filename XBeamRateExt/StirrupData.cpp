@@ -104,6 +104,7 @@ HRESULT xbrStirrupData::Load(IStructuredLoad* pStrLoad)
       hr = pStrLoad->get_Property(_T("Symmetric"),&var);
       Symmetric = (var.boolVal == VARIANT_TRUE ? true : false);
 
+      Zones.clear();
       while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Zone"))) )
       {
          StirrupZone zone;
@@ -124,6 +125,8 @@ HRESULT xbrStirrupData::Load(IStructuredLoad* pStrLoad)
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("nBars"),&var);
          zone.nBars = var.dblVal;
+
+         Zones.push_back(zone);
 
          hr = pStrLoad->EndUnit(); // Zone
       }
