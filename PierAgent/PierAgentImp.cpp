@@ -31,6 +31,7 @@
 
 #include <PsgLib\UnitServer.h>
 #include <Lrfd\Lrfd.h>
+#include <EAF\EAFAutoProgress.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1813,6 +1814,9 @@ std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType p
 
 void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 {
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress progress(pProgress);
+
    GET_IFACE(IXBRProject,pProject);
 
    Float64 delta = ::ConvertToSysUnits(0.001,unitMeasure::Feet);

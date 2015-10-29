@@ -419,8 +419,6 @@ void CXBeamRateView::UpdateDisplayObjects()
 
 void CXBeamRateView::UpdateRoadwayDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
@@ -647,8 +645,6 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
 
 void CXBeamRateView::UpdateXBeamDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
@@ -761,8 +757,6 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
 void CXBeamRateView::UpdateColumnDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
@@ -873,8 +867,6 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
 void CXBeamRateView::UpdateRebarDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
@@ -951,8 +943,6 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
 void CXBeamRateView::UpdateStirrupDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 
@@ -1079,7 +1069,11 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
 void CXBeamRateView::UpdateBearingDisplayObjects()
 {
-   CWaitCursor wait;
+   if ( !IsStandAlone() )
+   {
+      // don't show "dots" for bearing location if the girders are drawn
+      return;
+   }
 
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
@@ -1134,8 +1128,6 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
       // not in PGSuper/PGSplice so we don't know anything about the shape of the girder
       return;
    }
-
-   CWaitCursor wait;
 
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
@@ -1305,8 +1297,6 @@ void CXBeamRateView::UpdateSectionCutDisplayObjects()
 
 void CXBeamRateView::UpdateDimensionsDisplayObjects()
 {
-   CWaitCursor wait;
-
    CComPtr<iDisplayMgr> dispMgr;
    GetDisplayMgr(&dispMgr);
 

@@ -1600,7 +1600,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          }
          else
          {
-            W = pIGirder->GetBottomFlangeWidth(poi,0);
+            W = 0;
+            for ( FlangeIndexType flgIdx = 0; flgIdx < nBottomFlanges; flgIdx++ )
+            {
+               W += pIGirder->GetBottomFlangeWidth(poi,flgIdx);
+            }
          }
 
          *pDC /= W;
@@ -1638,11 +1642,21 @@ void CProjectAgentImp::SetReactionLoadApplicationType(PierIDType pierID,xbrTypes
 
 xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicationType(PierIDType pierID)
 {
-#pragma Reminder("WORKING HERE")
-   // if stand alone, return GetPrivateReactionLoadApplication(pierID), otherwise, look at the pier connection
-   // type... use through bearings for hinge/roller type, use directly to xbeam for
-   // continuous/integral types.
-   return GetPrivateReactionLoadApplication(pierID);
+   if ( pierID == INVALID_ID )
+   {
+      return GetPrivateReactionLoadApplication(pierID);
+   }
+   else
+   {
+      if ( GetPierType(pierID) == xbrTypes::pctExpansion )
+      {
+         return xbrTypes::rlaBearings;
+      }
+      else
+      {
+         return xbrTypes::rlaCrossBeam;
+      }
+   }
 }
 
 IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
