@@ -58,6 +58,9 @@ void txnEditOptions::Execute(int i)
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
+   lrfdVersionMgr::SetVersion(m_Options[i].m_LRFDVersion);
+   lrfrVersionMgr::SetVersion(m_Options[i].m_LRFRVersion);
+
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);
    pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRateForShear);

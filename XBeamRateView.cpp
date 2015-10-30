@@ -965,7 +965,7 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
-   xbrTypes::SuperstructureConnectionType pierType = pProject->GetPierType(pierID);
+   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
    for ( int i = 0; i < 2; i++ )
@@ -1316,7 +1316,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
-   xbrTypes::SuperstructureConnectionType pierType = pProject->GetPierType(pierID);
+   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
 
    Float64 CPO = pPier->GetCrownPointOffset(pierID);
    Float64 Xcrown = pPier->GetCrownPointLocation(pierID);
@@ -1806,7 +1806,6 @@ void CXBeamRateView::OnExportPier()
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRExport,pExport);
    pExport->Export(pierIdx);
-
 }
 
 void CXBeamRateView::OnEditPier()

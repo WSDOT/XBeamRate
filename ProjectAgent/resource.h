@@ -149,6 +149,11 @@
 #define IDC_PHI_SHEAR                   317
 #define IDC_SYSTEM_FACTOR_FLEXURE       319
 #define IDC_SYSTEM_FACTOR_SHEAR         320
+#define IDC_LRFD_LABEL                  321
+#define IDC_LRFR_LABEL                  322
+#define IDC_LRFD                        323
+#define IDC_COMBO3                      324
+#define IDC_LRFR                        324
 #define IDD_AASHTO_CONCRETE             500
 #define IDB_EDIT_PIER                   500
 #define IDC_EC_K1_LABEL                 501
@@ -222,7 +227,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        207
 #define _APS_NEXT_COMMAND_VALUE         50005
-#define _APS_NEXT_CONTROL_VALUE         321
+#define _APS_NEXT_CONTROL_VALUE         324
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

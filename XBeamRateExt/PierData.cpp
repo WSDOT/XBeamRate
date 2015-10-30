@@ -209,17 +209,17 @@ Float64& xbrPierData::GetBridgeLineOffset()
    return m_BridgeLineOffset;
 }
 
-void xbrPierData::SetSuperstructureConnectionType(xbrTypes::SuperstructureConnectionType type)
+void xbrPierData::SetPierType(xbrTypes::PierType type)
 {
    m_ConnectionType = type;
 }
 
-xbrTypes::SuperstructureConnectionType xbrPierData::GetSuperstructureConnectionType() const
+xbrTypes::PierType xbrPierData::GetPierType() const
 {
    return m_ConnectionType;
 }
 
-xbrTypes::SuperstructureConnectionType& xbrPierData::GetSuperstructureConnectionType()
+xbrTypes::PierType& xbrPierData::GetPierType()
 {
    return m_ConnectionType;
 }
@@ -823,7 +823,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
          hr = pStrLoad->BeginUnit(_T("Layout"));
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("SuperstructureConnectionType"),&var);
-         m_ConnectionType = (xbrTypes::SuperstructureConnectionType)(var.lVal);
+         m_ConnectionType = (xbrTypes::PierType)(var.lVal);
 
          var.vt = VT_BSTR;
          hr = pStrLoad->get_Property(_T("Skew"),&var);

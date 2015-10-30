@@ -336,14 +336,14 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    ROWCOL col = 1;
 
    // DC
-   Float64 value;
+   CString value;
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(DC,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(DC,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(DC,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -356,11 +356,11 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // DW
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(DW,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(DW,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(DW,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -373,11 +373,11 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // CR
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(CR,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(CR,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(CR,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(CR,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -390,11 +390,11 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // SH
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(SH,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(SH,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(SH,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(SH,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -407,11 +407,11 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // PS
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(PS,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(PS,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(PS,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(PS,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -424,11 +424,11 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // RE
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      value = ::ConvertFromSysUnits(RE,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      value = ::FormatDimension(RE,pDisplayUnits->GetGeneralForceUnit(),false);
    }
    else
    {
-      value = ::ConvertFromSysUnits(RE,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      value = ::FormatDimension(RE,pDisplayUnits->GetForcePerLengthUnit(),false);
    }
 
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -439,7 +439,7 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
       );
 
    // W
-   value = ::ConvertFromSysUnits(W,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   value = ::FormatDimension(W,pDisplayUnits->GetSpanLengthUnit(),false);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -450,7 +450,7 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
    // Spacing
    // Set the value for the spacing to the next bearing and disable this cell
    // This assumes this bearing is in the last row and spacing to next isn't applicable
-   value = ::ConvertFromSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   value = ::FormatDimension(S,pDisplayUnits->GetSpanLengthUnit(),false);
    SetStyleRange(CGXRange(row,col), CGXStyle()
       .SetEnabled(FALSE)
       .SetReadOnly(TRUE)
@@ -471,6 +471,8 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
         .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
          );
    }
+
+   ResizeColWidthsToFit(CGXRange(GetRowCount(),GetColCount()));
 
    col++;
 }
@@ -563,7 +565,7 @@ void CBearingLayoutGrid::AddBearingRow(Float64 DC,Float64 DW,Float64 CR,Float64 
    ROWCOL row = GetRowCount();
    SetBearingData(row,DC,DW,CR,SH,PS,RE,W,S);
 
-   ResizeColWidthsToFit(CGXRange(0,0,0,GetColCount()));
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
 void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW,Float64* pS)

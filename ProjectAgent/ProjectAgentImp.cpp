@@ -33,6 +33,9 @@
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\VersionInfo.h>
 
+#include <PgsExt\GirderLabel.h>
+#include <EAF\EAFAutoProgress.h>
+
 #include <WBFLUnitServer\OpenBridgeML.h>
 
 #include <PgsExt\BridgeDescription2.h>
@@ -48,13 +51,9 @@
 #include <\ARP\PGSuper\Include\IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
-#include <IFace\Bridge.h>
-#include <MFCTools\Prompts.h>
-#include <PgsExt\GirderLabel.h>
-#include <EAF\EAFApp.h>
-#include <EAF\EAFAutoProgress.h>
-
 #include "..\resource.h" // for ID_VIEW_PIER
+
+#include "PierExporter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -186,6 +185,60 @@ HRESULT CProjectAgentImp::FinalConstruct()
 
 void CProjectAgentImp::FinalRelease()
 {
+}
+
+HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
+{
+   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
+   PierIDType pierID = pPier->GetID();
+
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
+   CString strMsg;
+   strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
+   pProgress->UpdateMessage(strMsg);
+
+   m_SavePierID = pierID; // this is the ID of the pier we are saving
+   m_bExportingModel = true; // set this to true so Save() knows not to change m_SavePierID
+
+   // We can't tap directly into the IEAFDocument::SaveAs or into IBrokerPersist, because they will
+   // save the current PGS document. We want to create a XBR document. To accomplish this, we have to
+   // replicate the prologue information that IEAFDocument and IBrokerPersist would write into the file.
+   // This is a little brittle, but that prologue information is very stable so it isn't likely to change.
+
+   CComPtr<IStructuredSave> pStrSave;
+   HRESULT hr = ::CoCreateInstance(CLSID_StructuredSave, NULL, CLSCTX_INPROC_SERVER, IID_IStructuredSave, (void**)&pStrSave);
+   ATLASSERT(SUCCEEDED(hr));
+
+   hr = pStrSave->Open(lpszPathName);
+   ATLASSERT(SUCCEEDED(hr));
+
+   pStrSave->BeginUnit(_T("XBeamRate"),1.0);
+
+   GET_IFACE(IXBRVersionInfo,pVersionInfo);
+   CString strVersion = pVersionInfo->GetVersion(true);
+   pStrSave->put_Property(_T("Version"),CComVariant(strVersion));
+
+   pStrSave->BeginUnit(_T("Broker"),1.0);
+   pStrSave->BeginUnit(_T("Agent"),1.0);
+
+   LPOLESTR postr;
+   StringFromCLSID(CLSID_ProjectAgent,&postr);
+   pStrSave->put_Property(_T("CLSID"),CComVariant(postr));
+   CoTaskMemFree(postr);
+
+   Save(pStrSave);
+
+   pStrSave->EndUnit(); // Agent
+   pStrSave->EndUnit(); // Broker
+   pStrSave->EndUnit(); // XBeamRate
+
+   m_bExportingModel = false;
+   m_SavePierID = INVALID_ID;
+
+   return S_OK;
 }
 
 #if defined _DEBUG
@@ -362,6 +415,9 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+         pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
+         pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
+
          pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(GetPermitRatingMethod()));
          pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(GetSystemFactorFlexure()));
          pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(GetSystemFactorShear()));
@@ -456,7 +512,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->EndUnit(); // DeadLoad
 
          pStrSave->BeginUnit(_T("LiveLoad"),1.0);
-            pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetPrivateReactionLoadApplication(m_SavePierID)));
+            pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetReactionLoadApplicationType(m_SavePierID)));
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
 
             std::vector<xbrLiveLoadReactionData> vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrDesign_Inventory);
@@ -648,6 +704,16 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          {
             hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
 
+            var.vt = VT_BSTR;
+            pStrLoad->get_Property(_T("LRFD"),&var);
+            lrfdVersionMgr::Version lrfdVersion = lrfdVersionMgr::GetVersion(OLE2T(var.bstrVal));
+            lrfdVersionMgr::SetVersion(lrfdVersion);
+
+            var.vt = VT_BSTR;
+            pStrLoad->get_Property(_T("LRFR"),&var);
+            lrfrVersionMgr::Version lrfrVersion = lrfrVersionMgr::GetVersion(OLE2T(var.bstrVal));
+            lrfrVersionMgr::SetVersion(lrfrVersion);
+
             var.vt = VT_I4;
             hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
             m_PermitRatingMethod = (xbrTypes::PermitRatingMethod)var.lVal;
@@ -688,6 +754,26 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("RatingEnabled_Permit_Special"),&var);
             m_bRatingEnabled[pgsTypes::lrPermit_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
 
+            // XBRate doesn't enable/disable the same as PGS, however we've match the input parameters
+            // make sure the pairing of design, legal, and permit ratings match. If the values aren't
+            // equal, one is enabled, so enable both
+            if ( m_bRatingEnabled[pgsTypes::lrDesign_Inventory] != m_bRatingEnabled[pgsTypes::lrDesign_Operating] )
+            {
+               m_bRatingEnabled[pgsTypes::lrDesign_Inventory] = true;
+               m_bRatingEnabled[pgsTypes::lrDesign_Operating] = true;
+            }
+
+            if ( m_bRatingEnabled[pgsTypes::lrLegal_Routine] != m_bRatingEnabled[pgsTypes::lrLegal_Special] )
+            {
+               m_bRatingEnabled[pgsTypes::lrLegal_Routine] = true;
+               m_bRatingEnabled[pgsTypes::lrLegal_Special] = true;
+            }
+
+            if ( m_bRatingEnabled[pgsTypes::lrPermit_Routine] != m_bRatingEnabled[pgsTypes::lrPermit_Special] )
+            {
+               m_bRatingEnabled[pgsTypes::lrPermit_Routine] = true;
+               m_bRatingEnabled[pgsTypes::lrPermit_Special] = true;
+            }
 
             var.vt = VT_BOOL;
             hr = pStrLoad->get_Property(_T("RateForShear_Design_Inventory"),&var);
@@ -1300,14 +1386,14 @@ const xbrPierData& CProjectAgentImp::GetPierData(PierIDType pierID)
    return GetPrivatePierData(pierID);
 }
 
-xbrTypes::SuperstructureConnectionType CProjectAgentImp::GetPierType(PierIDType pierID)
+xbrTypes::PierType CProjectAgentImp::GetPierType(PierIDType pierID)
 {
-   return GetPrivatePierData(pierID).GetSuperstructureConnectionType();
+   return GetPrivatePierData(pierID).GetPierType();
 }
 
-void CProjectAgentImp::SetPierType(PierIDType pierID,xbrTypes::SuperstructureConnectionType pierType)
+void CProjectAgentImp::SetPierType(PierIDType pierID,xbrTypes::PierType pierType)
 {
-   GetPrivatePierData(pierID).SetSuperstructureConnectionType(pierType);
+   GetPrivatePierData(pierID).SetPierType(pierType);
    Fire_OnProjectChanged();
 }
 
@@ -1515,7 +1601,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       ResultsType resultsType = rtCumulative;
 
       xbrPierData& pierData = GetPrivatePierData(pierID);
-      if ( pierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+      if ( pierData.GetPierType() == xbrTypes::pctExpansion )
       {
          GET_IFACE(IBearingDesign,pBearingDesign);
 
@@ -1623,6 +1709,60 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
    }
 }
 
+Float64 CProjectAgentImp::GetBearingWidth(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
+{
+   if ( pierID == INVALID_ID )
+   {
+#if defined _DEBUG
+      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
+      // when in stand-alone mode, IXBeamRateAgent interface isn't available
+      ATLASSERT(IsStandAlone());
+#endif
+
+      std::vector<BearingReactions>& vReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
+      return vReactions[brgIdx].W;
+   }
+   else
+   {
+      // We are in PGSuper/PGSplice Extension mode...
+      CGirderKey girderKey = GetGirderKey(pierID,brgLineIdx,brgIdx);
+      PierIndexType pierIdx = GetPierIndex(pierID);
+      if ( UseUniformLoads(pierID,brgLineIdx) )
+      {
+         // the beam belongs to the type of family where we want to spread the reaction out
+         // as a uniform load
+         GET_IFACE(IGirder,pIGirder);
+         GET_IFACE(IBridge,pBridge);
+         CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
+
+         GET_IFACE(IPointOfInterest,pPoi);
+         pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(girderKey,pierIdx);
+
+         Float64 W;
+         if ( nBottomFlanges == 0 )
+         {
+            W = pIGirder->GetBottomWidth(poi);
+         }
+         else
+         {
+            W = 0;
+            for ( FlangeIndexType flgIdx = 0; flgIdx < nBottomFlanges; flgIdx++ )
+            {
+               W += pIGirder->GetBottomFlangeWidth(poi,flgIdx);
+            }
+         }
+
+         return W;
+      }
+      else
+      {
+         return 0;
+      }
+   }
+}
+
 void CProjectAgentImp::GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum)
 {
    GetPrivatePierData(pierID).GetBearingLineData(brgLineIdx).GetReferenceBearing(pRefBearingDatum,pRefIdx,pRefBearingOffset);
@@ -1648,7 +1788,7 @@ xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicati
    }
    else
    {
-      if ( GetPierType(pierID) == xbrTypes::pctExpansion )
+      if ( GetPierType(pierID) == xbrTypes::pctExpansion && !UseUniformLoads(pierID,0) )
       {
          return xbrTypes::rlaBearings;
       }
@@ -2667,142 +2807,15 @@ HRESULT CProjectAgentImp::OnCancelPendingEvents()
 HRESULT CProjectAgentImp::Export(PierIndexType pierIdx)
 {
    ATLASSERT(IsPGSExtension());
-
-   if ( pierIdx == INVALID_INDEX )
-   {
-      // Prompt for pier
-      GET_IFACE(IBridge,pBridge);
-      PierIndexType nPiers = pBridge->GetPierCount();
-      CString strPiers;
-      for ( PierIndexType pIdx = 1; pIdx < nPiers-1; pIdx++ )
-      {
-         pgsTypes::PierModelType modelType = pBridge->GetPierModelType(pIdx);
-         if ( modelType == pgsTypes::pmtPhysical )
-         {
-            CString str;
-            str.Format(_T("Pier %d"),LABEL_PIER(pIdx));
-            if ( strPiers.GetLength() == 0 )
-            {
-               strPiers = str;
-            }
-            else
-            {
-               strPiers += _T("\n") + str;
-            }
-         }
-      }
-
-      if ( strPiers.GetLength() == 0 )
-      {
-         AfxMessageBox(_T("There aren't any physical pier models for this bridge. There is nothing to export."));
-         return S_OK;
-      }
-      else
-      {
-         int result = AfxChoose(_T("Select Pier"),_T("Select pier model to export to XBRate"),strPiers,0,TRUE);
-         if ( result < 0 )
-         {
-            // Cancel button was pressed
-            return S_OK;
-         }
-
-         pierIdx = (PierIndexType)(result+1);
-      }
-   }
-
-   CString strDefaultFileName;
-   GET_IFACE(IEAFDocument,pDoc);
-
-   strDefaultFileName.Format(_T("%s%s_Pier_%d.xbr"),
-                                       pDoc->GetFileRoot(), // path to the file
-                                       pDoc->GetFileTitle(), // the file name without path or extension
-                                       LABEL_PIER(pierIdx));
-
-	CFileDialog  fileDlg(FALSE,_T("xbr"),strDefaultFileName,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, _T("XBRate File (*.xbr)|*.xbr||"));
-	if (fileDlg.DoModal() == IDOK)
-   {
-	   CString strFileName = fileDlg.GetPathName();
-
-      HRESULT hr = ExportPierModel(pierIdx,strFileName);
-      if ( SUCCEEDED(hr) )
-      {
-         if ( AfxMessageBox(_T("Export Complete.\r\nWould you like to open the XBRate file?"),MB_ICONQUESTION | MB_YESNO) == IDYES )
-         {
-            CEAFApp* pApp = EAFGetApp();
-
-            // Use ReplaceDocumentFile instead of OpenDocumentFile
-            // OpenDocumentFile opens the document right now... we are in the middle of an agent method call
-            // closing the current file attempts to shutdown the broker and destroy all the agents... 
-            // this agent isn't ready to die yet.
-            // ReplaceDocumentFile delays opening the document file until this agent method call is done
-            // and the call stack gets back to the message loop.
-            pApp->ReplaceDocumentFile(strFileName);
-         }
-      }
-      else
-      {
-         AfxMessageBox(_T("An error occured while exporting the pier data."),MB_ICONEXCLAMATION | MB_OK);
-         return E_FAIL;
-      }
-   }
-
-   return S_OK;
+   CPierExporter exporter(m_pBroker,this);
+   return exporter.Export(pierIdx);
 }
 
-HRESULT CProjectAgentImp::ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPathName)
+HRESULT CProjectAgentImp::BatchExport()
 {
    ATLASSERT(IsPGSExtension());
-
-   GET_IFACE(IBridgeDescription,pIBridgeDesc);
-   const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
-   PierIDType pierID = pPier->GetID();
-
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
-
-   CString strMsg;
-   strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
-   pProgress->UpdateMessage(strMsg);
-
-   m_SavePierID = pierID; // this is the ID of the pier we are saving
-   m_bExportingModel = true; // set this to true so Save() knows not to change m_SavePierID
-
-   // We can't tap directly into the IEAFDocument::SaveAs or into IBrokerPersist, because they will
-   // save the current PGS document. We want to create a XBR document. To accomplish this, we have to
-   // replicate the prologue information that IEAFDocument and IBrokerPersist would write into the file.
-   // This is a little brittle, but that prologue information is very stable so it isn't likely to change.
-
-   CComPtr<IStructuredSave> pStrSave;
-   HRESULT hr = ::CoCreateInstance(CLSID_StructuredSave, NULL, CLSCTX_INPROC_SERVER, IID_IStructuredSave, (void**)&pStrSave);
-   ATLASSERT(SUCCEEDED(hr));
-
-   hr = pStrSave->Open(lpszPathName);
-   ATLASSERT(SUCCEEDED(hr));
-
-   pStrSave->BeginUnit(_T("XBeamRate"),1.0);
-
-   GET_IFACE(IXBRVersionInfo,pVersionInfo);
-   CString strVersion = pVersionInfo->GetVersion(true);
-   pStrSave->put_Property(_T("Version"),CComVariant(strVersion));
-
-   pStrSave->BeginUnit(_T("Broker"),1.0);
-   pStrSave->BeginUnit(_T("Agent"),1.0);
-
-   LPOLESTR postr;
-   StringFromCLSID(CLSID_ProjectAgent,&postr);
-   pStrSave->put_Property(_T("CLSID"),CComVariant(postr));
-   CoTaskMemFree(postr);
-
-   Save(pStrSave);
-
-   pStrSave->EndUnit(); // Agent
-   pStrSave->EndUnit(); // Broker
-   pStrSave->EndUnit(); // XBeamRate
-
-   m_bExportingModel = false;
-   m_SavePierID = INVALID_ID;
-
-   return S_OK;
+   CPierExporter exporter(m_pBroker,this);
+   return exporter.BatchExport();
 }
 
 //////////////////////////////////////////////////////////
@@ -2951,11 +2964,11 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
    if ( pPier->IsBoundaryPier() )
    {
-      pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetBoundaryConditionType()) );
+      pierData.SetPierType( ::GetPierType(pPier->GetBoundaryConditionType()) );
    }
    else
    {
-      pierData.SetSuperstructureConnectionType( GetSuperstructureConnectionType(pPier->GetSegmentConnectionType()) );
+      pierData.SetPierType( ::GetPierType(pPier->GetSegmentConnectionType()) );
    }
 
    PierIndexType pierIdx = pPier->GetIndex();
@@ -3054,7 +3067,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetConcreteMaterial(pPier->GetConcrete());
 
    // Bearing Lines and Bearing Locations
-   if ( pierData.GetSuperstructureConnectionType() == xbrTypes::pctExpansion )
+   if ( pierData.GetPierType() == xbrTypes::pctExpansion )
    {
       // two bearing lines
       pierData.SetBearingLineCount(2);

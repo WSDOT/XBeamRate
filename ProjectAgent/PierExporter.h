@@ -22,16 +22,20 @@
 
 #pragma once
 
-#include <XBeamRateExt\XBRExtExp.h>
-#include <PgsExt\PierData2.h>
+class CProjectAgentImp;
 
-xbrTypes::PierType XBREXTFUNC GetPierType(pgsTypes::BoundaryConditionType bcType);
-xbrTypes::PierType XBREXTFUNC GetPierType(pgsTypes::PierSegmentConnectionType connType);
-bool XBREXTFUNC IsStandAlone();
-bool XBREXTFUNC IsPGSExtension();
-bool XBREXTFUNC CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,StatusCallbackIDType callbackID);
+class CPierExporter
+{
+public:
+   CPierExporter(IBroker* pBroker,CProjectAgentImp* pProjectAgent);
+   HRESULT Export(PierIndexType pierIdx);
+   HRESULT BatchExport();
 
-void XBREXTFUNC GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloadedLane);
+private:
+   IBroker* m_pBroker; // weak reference
+   CProjectAgentImp* m_pProjectAgent;
 
-#define GET_INDEX(ls) GetIndexFromLimitState(ls)
-int XBREXTFUNC GetIndexFromLimitState(pgsTypes::LimitState ls);
+   INT_PTR GetFileName(const CString& strDefaultFileName,CString& strFileName);
+   CString GetDefaultPierExportFile(PierIndexType pierIdx);
+   HRESULT ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPathName);
+};

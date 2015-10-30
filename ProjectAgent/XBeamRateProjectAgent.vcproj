@@ -765,6 +765,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\PierExporter.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\PierLayoutPage.cpp"
 				>
 			</File>
@@ -1077,6 +1081,10 @@
 			</File>
 			<File
 				RelativePath=".\PierDlg.h"
+				>
+			</File>
+			<File
+				RelativePath=".\PierExporter.h"
 				>
 			</File>
 			<File

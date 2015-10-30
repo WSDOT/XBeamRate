@@ -27,6 +27,7 @@
 #include <IFace\LoadRating.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\Pier.h>
+#include <IFace\Project.h>
 
 #include "XBeamRateReportSpecification.h"
 
@@ -63,6 +64,9 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
@@ -78,7 +82,14 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
    *pChapter << pPara;
-   *pPara << _T("Effective Shear Dimension - Lower Cross Beam - LRFD 5.8.2.9") << rptNewLine;
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      *pPara << _T("Effective Shear Dimension - Lower Cross Beam - LRFD 5.8.2.9") << rptNewLine;
+   }
+   else
+   {
+      *pPara << _T("Effective Shear Dimension - LRFD 5.8.2.9") << rptNewLine;
+   }
 
    pPara = new rptParagraph;
    *pChapter << pPara;
@@ -88,24 +99,63 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    rptRcTable* pDvTable1 = pgsReportStyleHolder::CreateDefaultTable(10);
    *pPara << pDvTable1 << rptNewLine;
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
-   *pChapter << pPara;
-   *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD 5.8.2.9") << rptNewLine;
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+      *pChapter << pPara;
+      *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD 5.8.2.9") << rptNewLine;
+   }
 
-   pPara = new rptParagraph;
-   *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("EffectiveShearDepth.png")) << rptNewLine;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_dv.png")) << rptNewLine;
+   rptRcTable* pDvTable2 = NULL;
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      pPara = new rptParagraph;
+      *pChapter << pPara;
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("EffectiveShearDepth.png")) << rptNewLine;
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_dv.png")) << rptNewLine;
 
-   rptRcTable* pDvTable2 = pgsReportStyleHolder::CreateDefaultTable(10);
-   *pPara << pDvTable2 << rptNewLine;
+      pDvTable2 = pgsReportStyleHolder::CreateDefaultTable(10);
+      *pPara << pDvTable2 << rptNewLine;
+   }
 
-   pPara = new rptParagraph;
-   *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_AvOverS.png")) << rptNewLine;
+   rptRcTable* pAvSTable1 = NULL;
+   rptRcTable* pAvSTable2 = NULL;
+   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   {
+      pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+      *pChapter << pPara;
+      if ( pierType == xbrTypes::pctIntegral )
+      {
+         *pPara << _T("Average shear reinforcement - Lower Cross Beam - MBE 6A.5.8") << rptNewLine;
+      }
+      else
+      {
+         *pPara << _T("Average shear reinforcement - MBE 6A.5.8") << rptNewLine;
+      }
 
-   rptRcTable* pAvSTable = pgsReportStyleHolder::CreateDefaultTable(4);
-   *pPara << pAvSTable << rptNewLine;
+      pPara = new rptParagraph;
+      *pChapter << pPara;
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
+
+      pAvSTable1 = pgsReportStyleHolder::CreateDefaultTable(4);
+      *pPara << pAvSTable1 << rptNewLine;
+
+      if ( pierType == xbrTypes::pctIntegral )
+      {
+         pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+         *pChapter << pPara;
+
+         *pPara << _T("Average shear reinforcement - Upper Cross Beam - MBE 6A.5.8") << rptNewLine;
+         pPara = new rptParagraph;
+         *pChapter << pPara;
+         *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
+         *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
+
+         pAvSTable2 = pgsReportStyleHolder::CreateDefaultTable(4);
+         *pPara << pAvSTable2 << rptNewLine;
+      }
+   }
 
    pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
    *pChapter << pPara;
@@ -113,7 +163,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVc.png")) << rptNewLine << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
+   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVc.png"),rptRcImage::Middle) << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
 
    rptRcTable* pVcTable = pgsReportStyleHolder::CreateDefaultTable(6);
    *pPara << pVcTable << rptNewLine;
@@ -125,9 +175,16 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVs.png")) << rptNewLine << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
+   }
+   else
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
+   }
 
-   rptRcTable* pVsTable = pgsReportStyleHolder::CreateDefaultTable(8);
+   rptRcTable* pVsTable = pgsReportStyleHolder::CreateDefaultTable((pierType == xbrTypes::pctIntegral ? 8 : 6));
    *pPara << pVsTable << rptNewLine;
 
 
@@ -137,15 +194,10 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVn.png")) << rptNewLine << _T(" LRFD Eqns 5.8.3.3-1 and 5.8.3.3-2") << rptNewLine;
+   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVn.png"),rptRcImage::Middle) << _T(" LRFD Eqns 5.8.3.3-1 and 5.8.3.3-2") << rptNewLine;
 
    rptRcTable* pVnTable = pgsReportStyleHolder::CreateDefaultTable(11);
    *pPara << pVnTable << rptNewLine;
-
-#pragma Reminder("WORKING HERE - need to get LRFD Version and Units Mode correct")
-   // need to look at LRFD code version
-   // the equations are different and the alpha1 column isn't needed
-   // if the LRFD version is before (2015??? - not sure of the exact version)
 
    ColumnIndexType DvTableCol = 0;
    pDvTable1->SetNumberOfHeaderRows(2);
@@ -183,47 +235,61 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    //
-   DvTableCol = 0;
-   pDvTable2->SetNumberOfHeaderRows(2);
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      DvTableCol = 0;
+      pDvTable2->SetNumberOfHeaderRows(2);
 
-   pDvTable2->SetRowSpan(0,DvTableCol,2);
-   (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
+      pDvTable2->SetRowSpan(0,DvTableCol,2);
+      (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
-   pDvTable2->SetRowSpan(0,DvTableCol,2);
-   (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
+      pDvTable2->SetRowSpan(0,DvTableCol,2);
+      (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
-   pDvTable2->SetRowSpan(0,DvTableCol,2);
-   (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
+      pDvTable2->SetRowSpan(0,DvTableCol,2);
+      (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
-   pDvTable2->SetColumnSpan(0,DvTableCol,3);
-   (*pDvTable2)(0,DvTableCol) << _T("Positive Moment");
-   pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      pDvTable2->SetColumnSpan(0,DvTableCol,3);
+      (*pDvTable2)(0,DvTableCol) << _T("Positive Moment");
+      pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
+      pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
-   pDvTable2->SetColumnSpan(0,DvTableCol,3);
-   (*pDvTable2)(0,DvTableCol) << _T("Negative Moment");
-   pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      pDvTable2->SetColumnSpan(0,DvTableCol,3);
+      (*pDvTable2)(0,DvTableCol) << _T("Negative Moment");
+      pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
+      pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
-   pDvTable2->SetRowSpan(0,DvTableCol,2);
-   (*pDvTable2)(0,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
+      pDvTable2->SetRowSpan(0,DvTableCol,2);
+      (*pDvTable2)(0,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
+   }
 
    ColumnIndexType AvSTableCol = 0;
-   (*pAvSTable)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   (*pAvSTable)(0,AvSTableCol++) << _T("Stirrup Zones");
-   (*pAvSTable)(0,AvSTableCol++) << COLHDR(Sub2(_T("L"),_T("shear failure plane")), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   (*pAvSTable)(0,AvSTableCol++) << COLHDR(_T("Avg. ") << Sub2(_T("A"),_T("v")) << _T("/s"), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
+   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   {
+      (*pAvSTable1)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      (*pAvSTable1)(0,AvSTableCol++) << _T("Stirrup Zones");
+      (*pAvSTable1)(0,AvSTableCol++) << COLHDR(Sub2(_T("L"),_T("shear failure plane")), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      (*pAvSTable1)(0,AvSTableCol++) << COLHDR(_T("Avg. ") << Sub2(_T("A"),_T("v")) << _T("/s"), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
 
+      if ( pierType == xbrTypes::pctIntegral )
+      {
+         AvSTableCol = 0;
+         (*pAvSTable2)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+         (*pAvSTable2)(0,AvSTableCol++) << _T("Stirrup Zones");
+         (*pAvSTable2)(0,AvSTableCol++) << COLHDR(Sub2(_T("L"),_T("shear failure plane")), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+         (*pAvSTable2)(0,AvSTableCol++) << COLHDR(_T("Avg. ") << Sub2(_T("A"),_T("v")) << _T("/s"), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
+      }
+   }
 
    ColumnIndexType VcTableCol = 0;
    (*pVcTable)(0,VcTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
@@ -235,10 +301,18 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    ColumnIndexType VsTableCol = 0;
    (*pVsTable)(0,VsTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   (*pVsTable)(0,VsTableCol++) << COLHDR(_T("(") << Sub2(_T("A"),_T("v")) << _T("/S)") << Sub(_T("1")), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
-   (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v1")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   (*pVsTable)(0,VsTableCol++) << COLHDR(_T("(") << Sub2(_T("A"),_T("v")) << _T("/S)") << Sub(_T("2")), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
-   (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v2")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   if ( pierType == xbrTypes::pctIntegral )
+   {
+      (*pVsTable)(0,VsTableCol++) << COLHDR(_T("(") << Sub2(_T("A"),_T("v")) << _T("/S)") << Sub(_T("1")), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
+      (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v1")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pVsTable)(0,VsTableCol++) << COLHDR(_T("(") << Sub2(_T("A"),_T("v")) << _T("/S)") << Sub(_T("2")), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
+      (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v2")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   }
+   else
+   {
+      (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/S"), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
+      (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   }
    (*pVsTable)(0,VsTableCol++) << COLHDR(RPT_FY, rptStressUnitTag, pDisplayUnits->GetStressUnit());
    (*pVsTable)(0,VsTableCol++) << COLHDR(symbol(theta), rptAngleUnitTag, pDisplayUnits->GetAngleUnit());
    (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("V"),_T("s")), rptForceUnitTag, pDisplayUnits->GetShearUnit());
@@ -278,8 +352,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       VsTableCol = 0;
       VnTableCol = 0;
 
-      const DvDetails& dvDetails1 = pShearCapacity->GetDvDetails(pierID,xbrTypes::Stage1,poi);
-      const DvDetails& dvDetails2 = pShearCapacity->GetDvDetails(pierID,xbrTypes::Stage2,poi);
+      const DvDetails& dvDetails1 = pShearCapacity->GetDvDetails(pierID,(pierType == xbrTypes::pctIntegral ? xbrTypes::Stage1 : xbrTypes::Stage2),poi);
 
       (*pDvTable1)(DvTableRow,DvTableCol++) << location.SetValue(poi.GetDistFromStart());
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.h);
@@ -292,41 +365,77 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[1]);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.dv);
 
-      DvTableCol = 0;
-      (*pDvTable2)(DvTableRow,DvTableCol++) << location.SetValue(poi.GetDistFromStart());
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.h);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails2.h);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[0]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[0]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[0]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[1]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[1]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[1]);
-      (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.dv);
-
-      const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
-      (*pAvSTable)(row,AvSTableCol++) << location.SetValue(poi.GetDistFromStart());
-
-      rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
-      (*pAvSTable)(row,AvSTableCol++) << pAvTable;
-
-      (*pAvSTable)(row,AvSTableCol++) << location.SetValue(avsDetails.ShearFailurePlaneLength);
-      (*pAvSTable)(row,AvSTableCol++) << avs.SetValue(avsDetails.AvgAvOverS);
-
-      (*pAvTable)(0,0) << _T("");
-      (*pAvTable)(0,1) << COLHDR(Sub2(_T("x"),_T("start")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
-      (*pAvTable)(0,2) << COLHDR(Sub2(_T("x"),_T("end")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
-      (*pAvTable)(0,3) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/s"),rptLengthUnitTag,pDisplayUnits->GetAvOverSUnit());
-      RowIndexType avRow = pAvTable->GetNumberOfHeaderRows();
-      IndexType ZoneIdx = 1;
-      BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
+      if ( pierType == xbrTypes::pctIntegral )
       {
-         (*pAvTable)(avRow,0) << ZoneIdx;
-         (*pAvTable)(avRow,1) << location.SetValue(zone.Start);
-         (*pAvTable)(avRow,2) << location.SetValue(zone.End);
-         (*pAvTable)(avRow,3) << avs.SetValue(zone.AvOverS);
-         avRow++;
-         ZoneIdx++;
+         DvTableCol = 0;
+         const DvDetails& dvDetails2 = pShearCapacity->GetDvDetails(pierID,xbrTypes::Stage2,poi);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << location.SetValue(poi.GetDistFromStart());
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.h);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails2.h);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[0]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[0]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[0]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[1]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[1]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[1]);
+         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.dv);
+      }
+
+      if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+      {
+         const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
+         (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi.GetDistFromStart());
+
+         rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
+         (*pAvSTable1)(row,AvSTableCol++) << pAvTable;
+
+         (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(avsDetails.ShearFailurePlaneLength);
+         (*pAvSTable1)(row,AvSTableCol++) << avs.SetValue(avsDetails.AvgAvOverS);
+
+         (*pAvTable)(0,0) << _T("");
+         (*pAvTable)(0,1) << COLHDR(Sub2(_T("x"),_T("start")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
+         (*pAvTable)(0,2) << COLHDR(Sub2(_T("x"),_T("end")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
+         (*pAvTable)(0,3) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/s"),rptLengthUnitTag,pDisplayUnits->GetAvOverSUnit());
+         RowIndexType avRow = pAvTable->GetNumberOfHeaderRows();
+         IndexType ZoneIdx = 1;
+         BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
+         {
+            (*pAvTable)(avRow,0) << ZoneIdx;
+            (*pAvTable)(avRow,1) << location.SetValue(zone.Start);
+            (*pAvTable)(avRow,2) << location.SetValue(zone.End);
+            (*pAvTable)(avRow,3) << avs.SetValue(zone.AvOverS);
+            avRow++;
+            ZoneIdx++;
+         }
+
+         if ( pierType == xbrTypes::pctIntegral )
+         {
+            AvSTableCol = 0;
+            const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
+            (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(poi.GetDistFromStart());
+
+            rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
+            (*pAvSTable2)(row,AvSTableCol++) << pAvTable;
+
+            (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(avsDetails.ShearFailurePlaneLength);
+            (*pAvSTable2)(row,AvSTableCol++) << avs.SetValue(avsDetails.AvgAvOverS);
+
+            (*pAvTable)(0,0) << _T("");
+            (*pAvTable)(0,1) << COLHDR(Sub2(_T("x"),_T("start")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
+            (*pAvTable)(0,2) << COLHDR(Sub2(_T("x"),_T("end")),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
+            (*pAvTable)(0,3) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/s"),rptLengthUnitTag,pDisplayUnits->GetAvOverSUnit());
+            RowIndexType avRow = pAvTable->GetNumberOfHeaderRows();
+            IndexType ZoneIdx = 1;
+            BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
+            {
+               (*pAvTable)(avRow,0) << ZoneIdx;
+               (*pAvTable)(avRow,1) << location.SetValue(zone.Start);
+               (*pAvTable)(avRow,2) << location.SetValue(zone.End);
+               (*pAvTable)(avRow,3) << avs.SetValue(zone.AvOverS);
+               avRow++;
+               ZoneIdx++;
+            }
+         }
       }
 
 
@@ -340,10 +449,18 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       (*pVcTable)(row,VcTableCol++) << shear.SetValue(scd.Vc);
 
       (*pVsTable)(row,VsTableCol++) << location.SetValue(poi.GetDistFromStart());
-      (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S1);
-      (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv1);
-      (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S2);
-      (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv2);
+      if ( pierType == xbrTypes::pctIntegral )
+      {
+         (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S1);
+         (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv1);
+         (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S2);
+         (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv2);
+      }
+      else
+      {
+         (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S1);
+         (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv1);
+      }
       (*pVsTable)(row,VsTableCol++) << stress.SetValue(fy);
       (*pVsTable)(row,VsTableCol++) << angle.SetValue(scd.theta);
       (*pVsTable)(row,VsTableCol++) << shear.SetValue(scd.Vs);

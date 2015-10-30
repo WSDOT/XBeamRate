@@ -273,7 +273,7 @@ CString CLongitudinalRebarGrid::GetDatumOptions()
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
 
    CString strBeamFaceChoiceList;
-   if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral )
+   if ( pParent->GetPierType() == xbrTypes::pctIntegral )
    {
       strBeamFaceChoiceList = _T("Top\nTop Lower XBeam\nBottom\n");
    }
@@ -292,7 +292,7 @@ CString CLongitudinalRebarGrid::GetDatum(xbrTypes::LongitudinalRebarDatumType da
    }
 
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
-   if ( pParent->GetSuperstructureConnectionType() != xbrTypes::pctIntegral && datum == xbrTypes::TopLowerXBeam )
+   if ( pParent->GetPierType() != xbrTypes::pctIntegral && datum == xbrTypes::TopLowerXBeam )
    {
       // For non-integral superstructure connections, map TopLowerXBeam into Top.
       return _T("Top");
@@ -536,7 +536,7 @@ xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row
    if ( strDatum == _T("Top") )
    {
       IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
-      if ( pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral )
+      if ( pParent->GetPierType() == xbrTypes::pctIntegral )
       {
          return xbrTypes::Top;
       }

@@ -161,6 +161,7 @@ public:
 
 // IXBRStirrups
 public:
+   virtual ZoneIndexType FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
    virtual ZoneIndexType GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage);
    virtual void GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend);
    virtual Float64 GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx);

@@ -1121,6 +1121,26 @@ Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest&
 
 //////////////////////////////////////////
 // IXBRStirrups
+ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+{
+   ATLASSERT(!poi.IsColumnPOI());
+
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   ZoneIndexType zoneIdx = INVALID_INDEX;
+   ZoneIndexType zIdx = 0;
+   BOOST_FOREACH(StirrupZone& zone,vStirrupZones)
+   {
+      if (::InRange(zone.Xstart,poi.GetDistFromStart(),zone.Xend) )
+      {
+         zoneIdx = zIdx;
+         break;
+      }
+      zIdx++;
+   }
+   ATLASSERT(zoneIdx != INVALID_INDEX); // zone wasn't found???
+   return zoneIdx;
+}
+
 ZoneIndexType CPierAgentImp::GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage)
 {
    std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
@@ -1319,7 +1339,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    GET_IFACE(IXBRProject,pProject);
    const xbrPierData& pierData = pProject->GetPierData(pierID);
 
-   xbrTypes::SuperstructureConnectionType pierType = pProject->GetPierType(pierID);
+   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
    pierModel->put_Type((PierType)pierType);
 
    // Superstructure Information
@@ -1893,8 +1913,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
          else
          {
             // POI at start/end of distributed load
-            Float64 DC, DW, CR, SH, PS, RE, W;
-            pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
+            Float64 W = pProject->GetBearingWidth(pierID,brgLineIdx,brgIdx);
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg-W/2));
             vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xbrg+W/2));
          }

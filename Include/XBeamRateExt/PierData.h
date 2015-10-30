@@ -90,9 +90,9 @@ public:
    void GetDeckProfile(IPoint2dCollection** ppProfile) const;
 
    // Defines the general superstructure connectivity at this pier
-   void SetSuperstructureConnectionType(xbrTypes::SuperstructureConnectionType type);
-   xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType() const;
-   xbrTypes::SuperstructureConnectionType& GetSuperstructureConnectionType();
+   void SetPierType(xbrTypes::PierType type);
+   xbrTypes::PierType GetPierType() const;
+   xbrTypes::PierType& GetPierType();
 
    // Defines the datum for measuring the curb line locations
    pgsTypes::OffsetMeasurementType GetCurbLineDatum() const;
@@ -206,7 +206,7 @@ protected:
    PierIDType m_ID;
    std::_tstring m_strSkew;
    Float64 m_BridgeLineOffset; // offset from alignment to bridge line
-   xbrTypes::SuperstructureConnectionType m_ConnectionType;
+   xbrTypes::PierType m_ConnectionType;
    pgsTypes::OffsetMeasurementType m_CurbLineDatum;
    Float64 m_LeftCurbOffset, m_RightCurbOffset; 
    Float64 m_H, m_W; // diaphragm dimensions

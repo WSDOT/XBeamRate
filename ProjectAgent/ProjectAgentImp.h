@@ -74,6 +74,8 @@ public:
    HRESULT FinalConstruct();
    void FinalRelease();
 
+   HRESULT SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName);
+
 DECLARE_REGISTRY_RESOURCEID(IDR_PROJECTAGENT)
 
 BEGIN_COM_MAP(CProjectAgentImp)
@@ -146,8 +148,8 @@ public:
    virtual void SetPierData(const xbrPierData& pierData);
    virtual const xbrPierData& GetPierData(PierIDType pierID);
 
-   virtual xbrTypes::SuperstructureConnectionType GetPierType(PierIDType pierID);
-   virtual void SetPierType(PierIDType pierID,xbrTypes::SuperstructureConnectionType pierType);
+   virtual xbrTypes::PierType GetPierType(PierIDType pierID);
+   virtual void SetPierType(PierIDType pierID,xbrTypes::PierType pierType);
 
    virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation);
    virtual Float64 GetDeckElevation(PierIDType pierID);
@@ -187,6 +189,7 @@ public:
 
    virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W);
    virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW);
+   virtual Float64 GetBearingWidth(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
 
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
    virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
@@ -335,6 +338,7 @@ public:
 // IXBRExport
 public:
    virtual HRESULT Export(PierIndexType pierIdx);
+   virtual HRESULT BatchExport();
 
 #ifdef _DEBUG
    bool AssertValid() const;
@@ -445,8 +449,6 @@ private:
    bool UseUniformLoads(PierIDType pierID,IndexType brgLineIdx);
 
    GirderIndexType GetLongestGirderLine();
-
-   HRESULT ExportPierModel(PierIndexType pierIdx,LPCTSTR lpszPathName);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

@@ -33,7 +33,7 @@
 
 #include <MFCTools\Exceptions.h>
 
-xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType(pgsTypes::BoundaryConditionType bcType)
+xbrTypes::PierType GetPierType(pgsTypes::BoundaryConditionType bcType)
 {
    switch( bcType )
    {
@@ -60,7 +60,7 @@ xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType(pgsTypes:
    return xbrTypes::pctIntegral;
 }
 
-xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType(pgsTypes::PierSegmentConnectionType connType)
+xbrTypes::PierType GetPierType(pgsTypes::PierSegmentConnectionType connType)
 {
    switch ( connType )
    {

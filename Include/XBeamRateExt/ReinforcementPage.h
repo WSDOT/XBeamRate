@@ -39,7 +39,7 @@ interface IReinforcementPageParent
    // Return NULL if a pier object (part of a bridge object) is not being edited
    virtual CPierData2* GetPierData() = 0;
    virtual CConcreteMaterial& GetConcrete() = 0;
-   virtual xbrTypes::SuperstructureConnectionType GetSuperstructureConnectionType() = 0;
+   virtual xbrTypes::PierType GetPierType() = 0;
 
    virtual matRebar::Type& GetRebarType() = 0;
    virtual matRebar::Grade& GetRebarGrade() = 0;

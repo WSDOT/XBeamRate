@@ -58,7 +58,7 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    CPierDlg* pParent = (CPierDlg*)GetParent();
 
-   DDX_CBEnum(pDX,IDC_PIER_TYPE,pParent->m_PierData.m_PierData.GetSuperstructureConnectionType());
+   DDX_CBEnum(pDX,IDC_PIER_TYPE,pParent->m_PierData.m_PierData.GetPierType());
    DDX_UnitValueAndTag(pDX,IDC_DECK_ELEVATION,IDC_DECK_ELEVATION_UNIT,pParent->m_PierData.m_PierData.GetDeckElevation(),pDisplayUnits->GetSpanLengthUnit());
    DDX_OffsetAndTag(pDX,IDC_CPO,IDC_CPO_UNIT,pParent->m_PierData.m_PierData.GetCrownPointOffset(),pDisplayUnits->GetSpanLengthUnit());
    DDX_OffsetAndTag(pDX,IDC_BLO,IDC_BLO_UNIT,pParent->m_PierData.m_PierData.GetBridgeLineOffset(),pDisplayUnits->GetSpanLengthUnit());
@@ -118,7 +118,7 @@ CString CSuperstructureLayoutPage::GetImageName()
 
    CComboBox* pcbPierType = (CComboBox*)GetDlgItem(IDC_PIER_TYPE);
    idx = pcbPierType->GetCurSel();
-   xbrTypes::SuperstructureConnectionType pierType = (xbrTypes::SuperstructureConnectionType)pcbPierType->GetItemData(idx);
+   xbrTypes::PierType pierType = (xbrTypes::PierType)pcbPierType->GetItemData(idx);
 
    if ( datum == pgsTypes::omtAlignment )
    {

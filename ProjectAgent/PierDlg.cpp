@@ -73,9 +73,9 @@ CConcreteMaterial& CPierDlg::GetConcrete()
    return m_PierData.m_PierData.GetConcreteMaterial();
 }
 
-xbrTypes::SuperstructureConnectionType CPierDlg::GetSuperstructureConnectionType()
+xbrTypes::PierType CPierDlg::GetPierType()
 {
-   return m_PierData.m_PierData.GetSuperstructureConnectionType();
+   return m_PierData.m_PierData.GetPierType();
 }
 
 matRebar::Type& CPierDlg::GetRebarType()

@@ -39,6 +39,8 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
    void FillPermitFactorList();
+   void FillLRFDList();
+   void FillLRFRList();
 
 	DECLARE_MESSAGE_MAP()
 public:

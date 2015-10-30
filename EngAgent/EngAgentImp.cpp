@@ -830,7 +830,7 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    rcBeam->put_bw(w);
    rcBeam->put_b(w); // model the top flange width equal to the web (maybe change this in the future for T-section capacity)
 
-   xbrTypes::SuperstructureConnectionType connectionType = pProject->GetPierType(pierID);
+   xbrTypes::PierType connectionType = pProject->GetPierType(pierID);
    Float64 d;
    pProject->GetDiaphragmDimensions(pierID,&d,&w); // dimensions of upper diaphragm/xbeam
 
@@ -959,76 +959,87 @@ DvDetails CEngAgentImp::ComputeDv(PierIDType pierID,xbrTypes::Stage stage,const 
 
 AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,Float64 theta)
 {
-   // This procedure is based on MBE 6A.5.8 (2nd Edition, 2015 interims).
+   AvOverSDetails details;
 
    GET_IFACE(IXBRProject,pProject);
    if ( pProject->GetPierType(pierID) != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
    {
       // there isn't stage 2 for non-integral cross beams
-      AvOverSDetails details;
       details.ShearFailurePlaneLength = 0;
       details.AvgAvOverS = 0;
       return details;
    }
 
-   GET_IFACE(IXBRPier,pPier);
-   Float64 L = pPier->GetXBeamLength(pierID);
-
-   // Get start/end of the shear failure plane at the poi
-   Float64 dv = GetDv(pierID,stage,poi);
-   Float64 sfpStart = Max(poi.GetDistFromStart() - dv/(2*tan(theta)),0.0);
-   Float64 sfpEnd   = Min(poi.GetDistFromStart() + dv/(2*tan(theta)),L);
-
-   AvOverSDetails details;
-
-   Float64 Avg_Av_over_S = 0;
-   GET_IFACE(IXBRStirrups,pStirrups);
-   ZoneIndexType nZones = pStirrups->GetStirrupZoneCount(pierID,stage);
-   for ( ZoneIndexType zoneIdx = 0; zoneIdx < nZones; zoneIdx++ )
+   if ( lrfrVersionMgr::GetVersion() < lrfrVersionMgr::SecondEditionWith2015Interims )
    {
-      Float64 szStart, szEnd;
-      pStirrups->GetStirrupZoneBoundary(pierID,stage,zoneIdx,&szStart,&szEnd);
-
-      if ( szEnd <= sfpStart )
-      {
-         // The shear failure plane starts after this zone ends
-         // This zone does not contribute stirrups to average Av/S
-         // Continue with the next zone
-         continue;
-      }
-
-      if ( sfpEnd <= szStart )
-      {
-         // The shear failure plane ends before this zone starts
-         // This zone, and all zones that come after it, does not contribute stirrups to average Av/S
-         // Break here so we don't have to process the remaining zones
-         break;
-      }
-
-      Float64 start = Max(szStart,sfpStart,0.0);
-      Float64 end   = Min(szEnd,  sfpEnd,  L);
+      // before 2015, shear capacity was based strictly on stirrups at a section
+      GET_IFACE(IXBRStirrups,pStirrups);
+      ZoneIndexType zoneIdx = pStirrups->FindStirrupZone(pierID,stage,poi);
+      ATLASSERT(zoneIdx != INVALID_INDEX);
       Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(pierID,stage,zoneIdx);
-
-      Float64 length = end - start;
-
-      AvOverSZone zone;
-      zone.Start = start;
-      zone.End = end;
-      zone.Length = length;
-      zone.AvOverS = Av_over_S;
-      details.Zones.push_back(zone);
-
-      Avg_Av_over_S += Av_over_S*(length);
+      details.AvgAvOverS = Av_over_S;
+      return details;
    }
+   else
+   {
+      // This procedure is based on MBE 6A.5.8 (2nd Edition, 2015 interims).
+      GET_IFACE(IXBRPier,pPier);
+      Float64 L = pPier->GetXBeamLength(pierID);
 
-   // average Av/S over the length of the shear failure plane
-   // (if we are near the ends, it can be less than dv)
-   Float64 Lsfp = sfpEnd - sfpStart;
-   ATLASSERT(::IsLE(Lsfp,dv/tan(theta)));
-   Avg_Av_over_S /= Lsfp;
+      // Get start/end of the shear failure plane at the poi
+      Float64 dv = GetDv(pierID,stage,poi);
+      Float64 sfpStart = Max(poi.GetDistFromStart() - dv/(2*tan(theta)),0.0);
+      Float64 sfpEnd   = Min(poi.GetDistFromStart() + dv/(2*tan(theta)),L);
 
-   details.ShearFailurePlaneLength = Lsfp;
-   details.AvgAvOverS = Avg_Av_over_S;
+      Float64 Avg_Av_over_S = 0;
+      GET_IFACE(IXBRStirrups,pStirrups);
+      ZoneIndexType nZones = pStirrups->GetStirrupZoneCount(pierID,stage);
+      for ( ZoneIndexType zoneIdx = 0; zoneIdx < nZones; zoneIdx++ )
+      {
+         Float64 szStart, szEnd;
+         pStirrups->GetStirrupZoneBoundary(pierID,stage,zoneIdx,&szStart,&szEnd);
+
+         if ( szEnd <= sfpStart )
+         {
+            // The shear failure plane starts after this zone ends
+            // This zone does not contribute stirrups to average Av/S
+            // Continue with the next zone
+            continue;
+         }
+
+         if ( sfpEnd <= szStart )
+         {
+            // The shear failure plane ends before this zone starts
+            // This zone, and all zones that come after it, does not contribute stirrups to average Av/S
+            // Break here so we don't have to process the remaining zones
+            break;
+         }
+
+         Float64 start = Max(szStart,sfpStart,0.0);
+         Float64 end   = Min(szEnd,  sfpEnd,  L);
+         Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(pierID,stage,zoneIdx);
+
+         Float64 length = end - start;
+
+         AvOverSZone zone;
+         zone.Start = start;
+         zone.End = end;
+         zone.Length = length;
+         zone.AvOverS = Av_over_S;
+         details.Zones.push_back(zone);
+
+         Avg_Av_over_S += Av_over_S*(length);
+      }
+
+      // average Av/S over the length of the shear failure plane
+      // (if we are near the ends, it can be less than dv)
+      Float64 Lsfp = sfpEnd - sfpStart;
+      ATLASSERT(::IsLE(Lsfp,dv/tan(theta)));
+      Avg_Av_over_S /= Lsfp;
+
+      details.ShearFailurePlaneLength = Lsfp;
+      details.AvgAvOverS = Avg_Av_over_S;
+   }
    return details;
 }
 

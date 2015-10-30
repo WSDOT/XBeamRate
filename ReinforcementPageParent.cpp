@@ -45,15 +45,15 @@ CConcreteMaterial& CReinforcementPageParent::GetConcrete()
    return m_pEditPierData->GetPierData()->GetConcrete();
 }
 
-xbrTypes::SuperstructureConnectionType CReinforcementPageParent::GetSuperstructureConnectionType()
+xbrTypes::PierType CReinforcementPageParent::GetPierType()
 {
    if ( m_pEditPierData->GetPierData()->IsBoundaryPier() )
    {
-      return ::GetSuperstructureConnectionType(m_pEditPierData->GetPierData()->GetBoundaryConditionType());
+      return ::GetPierType(m_pEditPierData->GetPierData()->GetBoundaryConditionType());
    }
    else
    {
-      return ::GetSuperstructureConnectionType(m_pEditPierData->GetPierData()->GetSegmentConnectionType());
+      return ::GetPierType(m_pEditPierData->GetPierData()->GetSegmentConnectionType());
    }
 }
 

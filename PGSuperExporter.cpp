@@ -42,7 +42,7 @@ STDMETHODIMP CPGSuperDataExporter::Init(UINT nCmdID)
 
 STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText)
 {
-   *bstrText = CComBSTR("Pier to XBRate");
+   *bstrText = CComBSTR("Piers to XBRate");
    return S_OK;
 }
 
@@ -60,6 +60,12 @@ STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText)
 
 STDMETHODIMP CPGSuperDataExporter::Export(IBroker* pBroker)
 {
-   GET_IFACE2(pBroker,IXBRExport,pExport);
-   return pExport->Export(INVALID_INDEX); // INVALID_INDEX means prompt for pier
+   CComPtr<IXBRExport> pExport;
+   if ( FAILED(pBroker->GetInterface(IID_IXBRExport,(IUnknown**)&pExport)) )
+   {
+      AfxMessageBox(_T("XBRate Extension is not enabled. Piers cannot be exported"),MB_ICONEXCLAMATION | MB_OK);
+      return E_FAIL;
+   }
+
+   return pExport->BatchExport();
 }

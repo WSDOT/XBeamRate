@@ -51,6 +51,10 @@ void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    COptionsDlg* pParent = (COptionsDlg*)GetParent();
 
+   DDX_CBItemData(pDX,IDC_LRFD,pParent->m_Options.m_LRFDVersion);
+   DDX_CBItemData(pDX,IDC_LRFR,pParent->m_Options.m_LRFRVersion);
+
+
    DDX_Check_Bool(pDX,IDC_DESIGN_RATING,pParent->m_Options.m_bDesignRating);
    DDX_Check_Bool(pDX,IDC_DESIGN_SHEAR,pParent->m_Options.m_bDesignRateForShear);
 
@@ -79,6 +83,12 @@ BOOL CRatingOptionsPage::OnInitDialog()
 {
    FillPermitFactorList();
 
+   GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(lrfdVersionMgr::GetCodeString());
+   GetDlgItem(IDC_LRFR_LABEL)->SetWindowText(lrfrVersionMgr::GetCodeString());
+
+   FillLRFDList();
+   FillLRFRList();
+
    CPropertyPage::OnInitDialog();
 
    // TODO:  Add extra initialization here
@@ -97,4 +107,26 @@ void CRatingOptionsPage::FillPermitFactorList()
 
    idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
    pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmWSDOT);
+}
+
+void CRatingOptionsPage::FillLRFDList()
+{
+   CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFD);
+   int idx;
+   for ( int i = 1; i < (int)lrfdVersionMgr::LastVersion; i++ )
+   {
+      idx = pSpec->AddString(lrfdVersionMgr::GetVersionString((lrfdVersionMgr::Version)(i)));
+      pSpec->SetItemData(idx,(DWORD)(i));
+   }
+}
+
+void CRatingOptionsPage::FillLRFRList()
+{
+   CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFR);
+   int idx;
+   for ( int i = 1; i < (int)lrfrVersionMgr::LastVersion; i++ )
+   {
+      idx = pSpec->AddString(lrfrVersionMgr::GetVersionString((lrfrVersionMgr::Version)(i)));
+      pSpec->SetItemData(idx,(DWORD)(i));
+   }
 }

@@ -138,6 +138,7 @@ void CLiveLoadReactionGrid::CustomInit()
 
    // make it so that text fits correctly in header row
 	ResizeRowHeightsToFit(CGXRange(0,0,0,num_cols));
+   ResizeColWidthsToFit(CGXRange(0,0,0,num_cols));
 
    // don't allow users to resize grids
    GetParam( )->EnableTrackColWidth(0); 
@@ -250,12 +251,12 @@ void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const xbrLiveLoadReaction
       .SetValue(reactionData.Name.c_str())
       );
 
-   Float64 value = ::ConvertFromSysUnits(reactionData.LLIM,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   CString value = ::FormatDimension(reactionData.LLIM,pDisplayUnits->GetGeneralForceUnit(),false);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetValue(value)
       );
 
-   value = ::ConvertFromSysUnits(reactionData.W,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   value = ::FormatDimension(reactionData.W,pDisplayUnits->GetGeneralForceUnit(),false);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetValue(value)
       );

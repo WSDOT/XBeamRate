@@ -88,8 +88,8 @@ interface IXBRProject : IUnknown
    virtual void SetPierData(const xbrPierData& pierData) = 0;
    virtual const xbrPierData& GetPierData(PierIDType pierID) = 0;
 
-   virtual xbrTypes::SuperstructureConnectionType GetPierType(PierIDType pierID) = 0;
-   virtual void SetPierType(PierIDType pierID,xbrTypes::SuperstructureConnectionType pierType) = 0;
+   virtual xbrTypes::PierType GetPierType(PierIDType pierID) = 0;
+   virtual void SetPierType(PierIDType pierID,xbrTypes::PierType pierType) = 0;
 
    // Elevation of the deck on the alignment at the CL Pier
    virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation) = 0;
@@ -148,6 +148,9 @@ interface IXBRProject : IUnknown
    // W = bearing reaction width if uniform load (e.g. slabs) ... use W = 0 for point load reactions
    virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W) = 0;
    virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) = 0;
+
+   // returns the width of the bearing reaction, without having to compute the reaction values when extending PGS
+   virtual Float64 GetBearingWidth(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) = 0;
 
    // Reference bearing
    virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) = 0;
@@ -341,5 +344,11 @@ DEFINE_GUID(IID_IXBRExport,
 0xdd3b518e, 0x1cfe, 0x45b7, 0xaa, 0x7b, 0x42, 0x6a, 0xde, 0x31, 0x38, 0xd6);
 interface IXBRExport : IUnknown
 {
+   // Exports the pier model, for the specified pier, into a stand alone XBRate file
+   // if pierIdx is INVALID_INDEX, the user is prompted to select the pier model to export
    virtual HRESULT Export(PierIndexType pierIdx) = 0;
+
+   // Exports several pier models into stand alone XBRate files
+   // the user is prompted to select one or more piers to export
+   virtual HRESULT BatchExport() = 0;
 };

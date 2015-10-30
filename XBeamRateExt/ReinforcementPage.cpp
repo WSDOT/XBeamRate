@@ -453,7 +453,7 @@ void CReinforcementPage::UpdateEc()
 
 void CReinforcementPage::UpdateStirrupGrids()
 {
-   int showWindow = (m_pParent->GetSuperstructureConnectionType() == xbrTypes::pctIntegral ? SW_SHOW : SW_HIDE);
+   int showWindow = (m_pParent->GetPierType() == xbrTypes::pctIntegral ? SW_SHOW : SW_HIDE);
    
    const CPierData2* pPier = m_pParent->GetPierData();
    if ( pPier && pPier->GetPierModelType() == pgsTypes::pmtIdealized )
