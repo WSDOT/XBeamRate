@@ -33,6 +33,36 @@
 #include <EAF\EAFApp.h>
 #include <PgsExt\BridgeDescription2.h>
 
+
+
+class CPierChoiceValidator : public CMultiChoiceValidator
+{
+public:
+   virtual BOOL IsValid(const std::vector<int>& options);
+   virtual void DisplayValidationErrorMessage();
+
+private:
+   CString m_strMessage;
+};
+
+BOOL CPierChoiceValidator::IsValid(const std::vector<int>& options)
+{
+   if ( options.size() == 0 )
+   {
+      m_strMessage = _T("Please select at least one pier to export");
+      return FALSE;
+   }
+   return TRUE;
+}
+
+void CPierChoiceValidator::DisplayValidationErrorMessage()
+{
+   AfxMessageBox(m_strMessage,MB_OK | MB_ICONEXCLAMATION);
+}
+
+
+////////////////////////////////////////////////
+
 CPierExporter::CPierExporter(IBroker* pBroker,CProjectAgentImp* pProjectAgent)
 {
    m_pBroker = pBroker;
@@ -144,7 +174,8 @@ HRESULT CPierExporter::BatchExport()
    vDefChoices.resize(vPiers.size());
    std::generate(vDefChoices.begin(),vDefChoices.end(),IncrementValue<int>(0));
 
-   std::vector<int> vChoices = AfxMultiChoice(_T("Export Piers to XBRate"),_T("Select Piers to Export"),strPiers,NULL,vDefChoices,TRUE);
+   CPierChoiceValidator validator;
+   std::vector<int> vChoices = AfxMultiChoice(_T("Export Piers to XBRate"),_T("Select Piers to Export"),strPiers,&validator,vDefChoices,TRUE,TRUE);
 
    BOOST_FOREACH(int i,vChoices)
    {
@@ -163,7 +194,10 @@ HRESULT CPierExporter::BatchExport()
       }
    }
 
-   AfxMessageBox(__T("Export Complete"),MB_ICONINFORMATION | MB_OK);
+   if ( 0 < vChoices.size() )
+   {
+      AfxMessageBox(__T("Export Complete"),MB_ICONINFORMATION | MB_OK);
+   }
 
    return S_OK;
 }
@@ -185,9 +219,9 @@ CString CPierExporter::GetDefaultPierExportFile(PierIndexType pierIdx)
    GET_IFACE(IEAFDocument,pDoc);
 
    strDefaultFileName.Format(_T("%s%s_Pier_%d.xbr"),
-                                       pDoc->GetFileRoot(), // path to the file
-                                       pDoc->GetFileTitle(), // the file name without path or extension
-                                       LABEL_PIER(pierIdx));
+                             pDoc->GetFileRoot(), // path to the file
+                             pDoc->GetFileTitle(), // the file name without path or extension
+                             LABEL_PIER(pierIdx));
 
    return strDefaultFileName;
 }
