@@ -36,6 +36,8 @@
 #include <PgsExt\GirderLabel.h>
 #include <PgsExt\BridgeDescription2.h>
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -153,42 +155,51 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
    EAFGetBroker(&pBroker);
    if ( pBroker != NULL )
    {
-      // we only get a broker at this point if we a PGSuper/PGSplice plugin
-
-      // add the control bar
-      if ( !m_ControlBar.Create(this,IDD_PIER_VIEW_CONTROLS,CBRS_TOP,100) )
+      // NOTE: We can't do 
+      // if ( pBroker != NULL || IsPGSExtension() ) {...}
+      // because IsPGSExtension must have a valid broker. if pBroker is NULL the evaluation goes
+      // to IsPGSExtension and we crash....
+      //
+      // If there is a broker, we must make sure we are a PGS extension to create the control bar, 
+      // and use the current pier selection. We don't use the control bar and there isn't a current
+      // pier selection in stand alone mode
+      if ( IsPGSExtension() )
       {
-         return FALSE;
-      }
-
-      GET_IFACE2(pBroker,ISelection,pSelection);
-      PierIndexType selPierIdx = pSelection->GetSelectedPier();
-
-      CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
-      GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
-      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
-      PierIndexType nPiers = pBridgeDesc->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
-      {
-         CString strPierLabel;
-         strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
-         int idx = pcbPiers->AddString(strPierLabel);
-
-         PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
-         pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
-
-         if ( pierIdx == selPierIdx )
+         // add the control bar
+         if ( !m_ControlBar.Create(this,IDD_PIER_VIEW_CONTROLS,CBRS_TOP,100) )
          {
-            pcbPiers->SetCurSel(idx);
+            return FALSE;
          }
-      }
 
-      if ( selPierIdx == INVALID_INDEX || selPierIdx == 0 || selPierIdx == nPiers-1 )
-      {
-         pcbPiers->SetCurSel(0);
-      }
+         GET_IFACE2(pBroker,ISelection,pSelection);
+         PierIndexType selPierIdx = pSelection->GetSelectedPier();
 
-      OnPierChanged();
+         CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
+         GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+         const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+         PierIndexType nPiers = pBridgeDesc->GetPierCount();
+         for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+         {
+            CString strPierLabel;
+            strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+            int idx = pcbPiers->AddString(strPierLabel);
+
+            PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
+
+            if ( pierIdx == selPierIdx )
+            {
+               pcbPiers->SetCurSel(idx);
+            }
+         }
+
+         if ( selPierIdx == INVALID_INDEX || selPierIdx == 0 || selPierIdx == nPiers-1 )
+         {
+            pcbPiers->SetCurSel(0);
+         }
+
+         OnPierChanged();
+      }
    }
 
    return TRUE;
