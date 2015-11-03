@@ -1,6 +1,7 @@
 // Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
+#include <EAF\EAFResources.h>
 
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
@@ -8,7 +9,6 @@
 // Generated from the TEXTINCLUDE 2 resource.
 //
 #include "afxres.h"
-#include <EAF\EAFResources.h>
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -152,7 +152,7 @@ BEGIN
         MENUITEM "&Help Topics",                ID_HELP_FINDER
         MENUITEM SEPARATOR
         MENUITEM "&About BridgeLink...",        ID_APP_ABOUT
-        MENUITEM "About &XBRate...",        ID_HELP_ABOUT
+        MENUITEM "About &XBRate...",            ID_HELP_ABOUT
     END
 END
 
@@ -175,7 +175,7 @@ END
 IDR_PGS_PIER_VIEW_CTX MENU 
 BEGIN
     MENUITEM "Edit Pier...",                IDM_EDIT_PIER
-    MENUITEM "Export to XBRate",        IDM_EXPORT_PIER
+    MENUITEM "Export to XBRate",            IDM_EXPORT_PIER
 END
 
 IDR_XBR_PIER_VIEW_CTX MENU 
@@ -284,6 +284,9 @@ BEGIN
     LTEXT           "for the Pier reactions",IDC_STATIC,257,20,68,8
     LTEXT           "Compute permit rating factors using",IDC_STATIC,14,37,116,8
     COMBOBOX        IDC_PERMIT_FACTORS,136,36,180,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Maximum Live Load Step Size",IDC_STATIC,14,60,94,8
+    EDITTEXT        IDC_LL_STEP,113,58,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_LL_STEP_UNIT,154,60,19,8
 END
 
 
@@ -395,7 +398,7 @@ END
 STRINGTABLE 
 BEGIN
     ID_VIEW_PIER            "View Pier\nView Pier"
-    IDM_EXPORT_PIER          "Export pier model to XBRate\nExport"
+    IDM_EXPORT_PIER         "Export pier model to XBRate\nExport"
     IDM_EDIT_PIER           "Edit Pier\nEdit Pier"
 END
 

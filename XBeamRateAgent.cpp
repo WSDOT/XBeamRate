@@ -632,6 +632,9 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
    pPage->m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
    pPage->m_PermitRatingMethod = pSpec->GetPermitRatingMethod();
 
+   GET_IFACE(IXBRProject,pProject);
+   pPage->m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
+
    return pPage;
 }
 
@@ -640,13 +643,20 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    CLoadRatingOptionsPage* pLROPage = (CLoadRatingOptionsPage*)pPage;
 
    GET_IFACE(IXBRRatingSpecification,pSpec);
-   pgsTypes::AnalysisType oldAnalysisType = pSpec->GetAnalysisMethodForReactions();
-   pgsTypes::AnalysisType newAnalysisType = pLROPage->m_AnalysisType;
 
-   xbrTypes::PermitRatingMethod oldMethod = pSpec->GetPermitRatingMethod();
-   xbrTypes::PermitRatingMethod newMethod = pLROPage->m_PermitRatingMethod;
+   txnLoadRatingOptions oldOptions;
+   oldOptions.m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
+   oldOptions.m_PermitRatingMethod = pSpec->GetPermitRatingMethod();
 
-   txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldAnalysisType,newAnalysisType,oldMethod,newMethod);
+   GET_IFACE(IXBRProject,pProject);
+   oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
+
+   txnLoadRatingOptions newOptions;
+   newOptions.m_AnalysisType = pLROPage->m_AnalysisType;
+   newOptions.m_PermitRatingMethod = pLROPage->m_PermitRatingMethod;
+   newOptions.m_MaxLLStepSize = pLROPage->m_MaxLLStepSize;
+
+   txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldOptions,newOptions);
    return pTxn;
 }
 

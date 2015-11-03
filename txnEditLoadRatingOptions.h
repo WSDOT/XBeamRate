@@ -22,12 +22,18 @@
 
 #pragma once
 
+struct txnLoadRatingOptions
+{
+   pgsTypes::AnalysisType m_AnalysisType;
+   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+   Float64 m_MaxLLStepSize;
+};
+
 class txnEditLoadRatingOptions :
    public txnTransaction
 {
 public:
-   txnEditLoadRatingOptions(pgsTypes::AnalysisType oldAnalysisType,pgsTypes::AnalysisType newAnalysisType,
-                            xbrTypes::PermitRatingMethod oldMethod,xbrTypes::PermitRatingMethod newMethod);
+   txnEditLoadRatingOptions(const txnLoadRatingOptions& oldOptions,const txnLoadRatingOptions& newOptions);
    ~txnEditLoadRatingOptions(void);
 
    virtual bool Execute();
@@ -40,6 +46,5 @@ public:
 private:
    void Execute(int i);
 
-   pgsTypes::AnalysisType m_AnalysisType[2];
-   xbrTypes::PermitRatingMethod m_PermitRatingMethod[2];
+   txnLoadRatingOptions m_Options[2];
 };

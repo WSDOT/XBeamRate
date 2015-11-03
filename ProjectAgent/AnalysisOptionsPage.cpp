@@ -56,6 +56,7 @@ void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
    COptionsDlg* pParent = (COptionsDlg*)GetParent();
 
    DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,pParent->m_Options.m_MaxLLStepSize,pDisplayUnits->GetSpanLengthUnit());
+   DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,pParent->m_Options.m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
 }
 
 

@@ -27,14 +27,10 @@
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
 
-txnEditLoadRatingOptions::txnEditLoadRatingOptions(pgsTypes::AnalysisType oldAnalysisType,pgsTypes::AnalysisType newAnalysisType,
-                            xbrTypes::PermitRatingMethod oldMethod,xbrTypes::PermitRatingMethod newMethod)
+txnEditLoadRatingOptions::txnEditLoadRatingOptions(const txnLoadRatingOptions& oldOptions,const txnLoadRatingOptions& newOptions)
 {
-   m_AnalysisType[0] = oldAnalysisType;
-   m_AnalysisType[1] = newAnalysisType;
-
-   m_PermitRatingMethod[0] = oldMethod;
-   m_PermitRatingMethod[1] = newMethod;
+   m_Options[0] = oldOptions;
+   m_Options[1] = newOptions;
 }
 
 txnEditLoadRatingOptions::~txnEditLoadRatingOptions(void)
@@ -61,15 +57,18 @@ void txnEditLoadRatingOptions::Execute(int i)
    pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pSpec);
-   pSpec->SetAnalysisMethodForReactions(m_AnalysisType[i]);
-   pSpec->SetPermitRatingMethod(m_PermitRatingMethod[i]);
+   pSpec->SetAnalysisMethodForReactions(m_Options[i].m_AnalysisType);
+   pSpec->SetPermitRatingMethod(m_Options[i].m_PermitRatingMethod);
+
+   GET_IFACE2(pBroker,IXBRProject,pProject);
+   pProject->SetMaxLiveLoadStepSize(m_Options[i].m_MaxLLStepSize);
 
    pEvents->FirePendingEvents();
 }
 
 txnTransaction* txnEditLoadRatingOptions::CreateClone() const
 {
-   return new txnEditLoadRatingOptions(m_AnalysisType[0],m_AnalysisType[1],m_PermitRatingMethod[0],m_PermitRatingMethod[1]);
+   return new txnEditLoadRatingOptions(m_Options[0],m_Options[1]);
 }
 
 std::_tstring txnEditLoadRatingOptions::Name() const

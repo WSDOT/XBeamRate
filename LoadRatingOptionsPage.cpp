@@ -28,6 +28,7 @@
 #include "LoadRatingOptionsPage.h"
 
 #include <MFCTools\CustomDDX.h>
+#include <EAF\EAFDisplayUnits.h>
 
 // CLoadRatingOptionsPage dialog
 
@@ -47,9 +48,16 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
    DDX_CBEnum(pDX,IDC_ANALYSIS_MODE,m_AnalysisType);
 
    DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_PermitRatingMethod);
+
+   DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,m_MaxLLStepSize, pDisplayUnits->GetSpanLengthUnit());
+   DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
 }
 
 
