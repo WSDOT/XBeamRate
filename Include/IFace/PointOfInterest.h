@@ -37,4 +37,6 @@ interface IXBRPointOfInterest : public IUnknown
    virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi) = 0;
    virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID) = 0;
    virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID) = 0;
+
+   virtual void SetWheelLineLocations(PierIDType pierID,const std::vector<Float64> vWheelLineLocations) = 0;
 };

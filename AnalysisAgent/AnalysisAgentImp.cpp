@@ -213,270 +213,254 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID)
 
    ModelData* pModelData = &(found->second);
 
-   if ( pModelData->m_Model != NULL && 0 < pModelData->m_PoiMap.size() )
+   if ( pModelData->m_Model != NULL )
    {
-      // model is fully build if it exists and there are poi
       return;
    }
 
-   // phase 1 validation... build basic model
-   if ( pModelData->m_Model == NULL )
+   pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
+   pModelData->m_Model->put_Name(CComBSTR(_T("XBeamRate")));
+
+   // Build the frame model
+   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IXBRPier,pPier);
+   GET_IFACE(IXBRMaterial,pMaterial);
+   GET_IFACE(IXBRSectionProperties,pSectProp);
+
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+   pProgress->UpdateMessage(_T("Building pier analysis model"));
+
+   Float64 LCO, RCO;
+   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+
+   IndexType nColumns = pProject->GetColumnCount(pierID);
+
+   Float64 L = pPier->GetXBeamLength(pierID);
+
+   // Get the location of all the cross beam nodes
+
+   // beginning/end of cross beam
+   std::vector<XBeamNode> vXBeamNodes;
+   XBeamNode n;
+   n.X = 0;
+   n.Type = 0;
+   vXBeamNodes.push_back(n);
+
+   n.X = L;
+   n.Type = 0;
+   vXBeamNodes.push_back(n);
+
+   // curb line
+   n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
+   n.Type = CURB;
+   vXBeamNodes.push_back(n);
+
+   n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
+   n.Type = CURB;
+   vXBeamNodes.push_back(n);
+
+   // top of columns
+   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
-      pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
-      pModelData->m_Model->put_Name(CComBSTR(_T("XBeamRate")));
-
-      // Build the frame model
-      GET_IFACE(IXBRProject,pProject);
-      GET_IFACE(IXBRPier,pPier);
-      GET_IFACE(IXBRMaterial,pMaterial);
-      GET_IFACE(IXBRSectionProperties,pSectProp);
-
-      GET_IFACE(IProgress,pProgress);
-      CEAFAutoProgress ap(pProgress);
-      pProgress->UpdateMessage(_T("Building pier analysis model"));
-
-      Float64 LCO, RCO;
-      pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
-
-      IndexType nColumns = pProject->GetColumnCount(pierID);
-
-      Float64 L = pPier->GetXBeamLength(pierID);
-
-      // Get the location of all the cross beam nodes
-
-      // beginning/end of cross beam
-      std::vector<XBeamNode> vXBeamNodes;
-      XBeamNode n;
-      n.X = 0;
-      n.Type = 0;
+      n.X = pPier->GetColumnLocation(pierID,colIdx);
+      n.Type = COLUMN;
       vXBeamNodes.push_back(n);
+   }
 
-      n.X = L;
-      n.Type = 0;
-      vXBeamNodes.push_back(n);
-
-      // curb line
-      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
-      n.Type = CURB;
-      vXBeamNodes.push_back(n);
-
-      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
-      n.Type = CURB;
-      vXBeamNodes.push_back(n);
-
-      // top of columns
-      for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   // bearings
+   IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
+   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+   {
+      IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
+      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
-         n.X = pPier->GetColumnLocation(pierID,colIdx);
-         n.Type = COLUMN;
+         n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+         n.Type = BEARING;
          vXBeamNodes.push_back(n);
       }
+   }
 
-      // bearings
-      IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
-      for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+   // sort in left-to-right order
+   std::sort(vXBeamNodes.begin(),vXBeamNodes.end());
+
+   // eliminate duplicates... if or more nodes are at the same location, merge the Type
+   // attribute and eliminate the redundant node record
+   std::vector<XBeamNode>::iterator result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
+   while ( result != vXBeamNodes.end() )
+   {
+      XBeamNode& n1 = *result;
+      XBeamNode& n2 = *(result+1);
+      n1.Type |= n2.Type;
+      vXBeamNodes.erase(result+1);
+      result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
+   }
+
+   // Get properties
+   Float64 Exb = pMaterial->GetXBeamEc(pierID);
+   Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+   Float64 EAb = Exb*Axb;
+   Float64 EIb = Exb*Ixb;
+
+   // build the model
+   CComPtr<IFem2dJointCollection> joints;
+   pModelData->m_Model->get_Joints(&joints);
+
+   CComPtr<IFem2dMemberCollection> members;
+   pModelData->m_Model->get_Members(&members);
+
+   JointIDType jntID = 0;
+   MemberIDType xbeamMbrID = 0;
+   MemberIDType columnMbrID = -1;
+
+   std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
+   std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
+
+   XBeamNode* pPrevNode = &(*iter);;
+   JointIDType prevJointID = jntID++;
+   pPrevNode->jntID = prevJointID;
+   CComPtr<IFem2dJoint> joint;
+   joints->Create(prevJointID,pPrevNode->X,0,&joint);
+   ColumnIndexType colIdx = 0;
+
+   iter++;
+   for ( ; iter != end; iter++ )
+   {
+      XBeamNode* pThisNode = &(*iter);
+      JointIDType thisJointID = jntID++;
+      pThisNode->jntID = thisJointID;
+
+      joint.Release();
+      joints->Create(thisJointID,pThisNode->X,0,&joint);
+      
+      CComPtr<IFem2dMember> mbr;
+      members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
+      BeamMember capMbr;
+      capMbr.Xs = pPrevNode->X;
+      capMbr.Xe = pThisNode->X;
+      capMbr.mbrID = xbeamMbrID-1;
+      pModelData->m_XBeamMembers.push_back(capMbr);
+
+      if ( sysFlags<Int32>::IsSet(pThisNode->Type,COLUMN) )
       {
-         IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
-         for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+         Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
+
+         // create joint at bottom of column
+         joint.Release();
+         joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
+
+         pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
+         joint->Support(); // fully fixed
+         if ( columnFixity == pgsTypes::cftPinned )
          {
-            n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
-            n.Type = BEARING;
-            vXBeamNodes.push_back(n);
+            joint->ReleaseDof(jrtMz);
          }
+
+         // create column member
+         Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
+         Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+         Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+         mbr.Release();
+         members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
+
+         colIdx++;
       }
 
-      // sort in left-to-right order
-      std::sort(vXBeamNodes.begin(),vXBeamNodes.end());
+      pPrevNode = pThisNode;
+      prevJointID = thisJointID;
+   }
 
-      // eliminate duplicates... if or more nodes are at the same location, merge the Type
-      // attribute and eliminate the redundant node record
-      std::vector<XBeamNode>::iterator result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
-      while ( result != vXBeamNodes.end() )
-      {
-         XBeamNode& n1 = *result;
-         XBeamNode& n2 = *(result+1);
-         n1.Type |= n2.Type;
-         vXBeamNodes.erase(result+1);
-         result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
-      }
+   // create the "superstructure" model upon which we will run the live load
+   if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
+   {
+      // live load is applied directly to the cross beam... the superstruture members
+      // and the XBeam members are one in the same
+      pModelData->m_SuperstructureMembers = pModelData->m_XBeamMembers;
+   }
+   else
+   {
+      // live load is applied to a load transfer model.
 
-      // Get properties
-      Float64 Exb = pMaterial->GetXBeamEc(pierID);
-      Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-      Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-      Float64 EAb = Exb*Axb;
-      Float64 EIb = Exb*Ixb;
-
-      // build the model
-      CComPtr<IFem2dJointCollection> joints;
-      pModelData->m_Model->get_Joints(&joints);
-
-      CComPtr<IFem2dMemberCollection> members;
-      pModelData->m_Model->get_Members(&members);
-
-      JointIDType jntID = 0;
-      MemberIDType xbeamMbrID = 0;
-      MemberIDType columnMbrID = -1;
+      // dummy properties of the transfer model
+      Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
+      Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
+      Float64 EA = EAb*10000;
 
       std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
       std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
 
       XBeamNode* pPrevNode = &(*iter);;
       JointIDType prevJointID = jntID++;
-      pPrevNode->jntID = prevJointID;
       CComPtr<IFem2dJoint> joint;
-      joints->Create(prevJointID,pPrevNode->X,0,&joint);
-      ColumnIndexType colIdx = 0;
+      joints->Create(prevJointID,pPrevNode->X,Y,&joint);
 
       iter++;
       for ( ; iter != end; iter++ )
       {
          XBeamNode* pThisNode = &(*iter);
          JointIDType thisJointID = jntID++;
-         pThisNode->jntID = thisJointID;
 
          joint.Release();
-         joints->Create(thisJointID,pThisNode->X,0,&joint);
+         joints->Create(thisJointID,pThisNode->X,Y,&joint);
          
          CComPtr<IFem2dMember> mbr;
          members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
-         BeamMember capMbr;
-         capMbr.Xs = pPrevNode->X;
-         capMbr.Xe = pThisNode->X;
-         capMbr.mbrID = xbeamMbrID-1;
-         pModelData->m_XBeamMembers.push_back(capMbr);
+         BeamMember ssMbr;
+         ssMbr.Xs = pPrevNode->X;
+         ssMbr.Xe = pThisNode->X;
+         ssMbr.mbrID = xbeamMbrID-1;
+         pModelData->m_SuperstructureMembers.push_back(ssMbr);
 
-         if ( sysFlags<Int32>::IsSet(pThisNode->Type,COLUMN) )
+         if ( sysFlags<Int32>::IsSet(pThisNode->Type,BEARING) )
          {
-            Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
-
-            // create joint at bottom of column
-            joint.Release();
-            joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
-
-            pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
-            joint->Support(); // fully fixed
-            if ( columnFixity == pgsTypes::cftPinned )
-            {
-               joint->ReleaseDof(jrtMz);
-            }
-
-            // create column member
-            Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
-            Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
-            Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
             mbr.Release();
-            members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
+            members->Create(columnMbrID--,thisJointID,pThisNode->jntID,EA,EI,&mbr);
 
-            colIdx++;
+            mbr->ReleaseEnd(metEnd,mbrReleaseMz);
          }
 
          pPrevNode = pThisNode;
          prevJointID = thisJointID;
       }
-
-      // create the "superstructure" model upon which we will run the live load
-      if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
-      {
-         // live load is applied directly to the cross beam... the superstruture members
-         // and the XBeam members are one in the same
-         pModelData->m_SuperstructureMembers = pModelData->m_XBeamMembers;
-      }
-      else
-      {
-         // live load is applied to a load transfer model.
-
-         // dummy properties of the transfer model
-         Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
-         Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
-         Float64 EA = EAb*10000;
-
-         std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
-         std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
-
-         XBeamNode* pPrevNode = &(*iter);;
-         JointIDType prevJointID = jntID++;
-         CComPtr<IFem2dJoint> joint;
-         joints->Create(prevJointID,pPrevNode->X,Y,&joint);
-
-         iter++;
-         for ( ; iter != end; iter++ )
-         {
-            XBeamNode* pThisNode = &(*iter);
-            JointIDType thisJointID = jntID++;
-
-            joint.Release();
-            joints->Create(thisJointID,pThisNode->X,Y,&joint);
-            
-            CComPtr<IFem2dMember> mbr;
-            members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
-            BeamMember ssMbr;
-            ssMbr.Xs = pPrevNode->X;
-            ssMbr.Xe = pThisNode->X;
-            ssMbr.mbrID = xbeamMbrID-1;
-            pModelData->m_SuperstructureMembers.push_back(ssMbr);
-
-            if ( sysFlags<Int32>::IsSet(pThisNode->Type,BEARING) )
-            {
-               mbr.Release();
-               members->Create(columnMbrID--,thisJointID,pThisNode->jntID,EA,EI,&mbr);
-
-               mbr->ReleaseEnd(metEnd,mbrReleaseMz);
-            }
-
-            pPrevNode = pThisNode;
-            prevJointID = thisJointID;
-         }
-      }
-
-
-      ApplyUnitLiveLoad(pierID,pModelData);
-      ApplyDeadLoad(pierID,pModelData);
    }
-   else
+
+   ApplyUnitLiveLoad(pierID,pModelData);
+   ApplyDeadLoad(pierID,pModelData);
+
+   // Tell the agent responsible for POIs where the while line locations are
+   // so they can be in the POI list.
+   std::vector<Float64> vWheelLineLocations = GetWheelLineLocations(pModelData);
+   GET_IFACE(IXBRPointOfInterest,pPoi);
+   pPoi->SetWheelLineLocations(pierID,vWheelLineLocations);
+
+   // Assign POIs
+   CComPtr<IFem2dPOICollection> femPois;
+   pModelData->m_Model->get_POIs(&femPois);
+   PoiIDType femPoiID = 0;
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      ATLASSERT(pModelData->m_Model != NULL);
-      ATLASSERT(pModelData->m_PoiMap.size() == 0);
+      MemberIDType mbrID;
+      Float64 mbrLocation;
+      GetFemModelLocation(pModelData,poi,&mbrID,&mbrLocation);
 
-      static bool bIsValidating = false;
-      if ( bIsValidating )
-      {
-         return;
-      }
-      bIsValidating = true;
-
-      // Phase 2...
-      // Assign POIs
-      CComPtr<IFem2dPOICollection> femPois;
-      pModelData->m_Model->get_POIs(&femPois);
-      PoiIDType femPoiID = 0;
-      GET_IFACE(IXBRPointOfInterest,pPoi);
-      std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
-      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
-      {
-         MemberIDType mbrID;
-         Float64 mbrLocation;
-         GetFemModelLocation(pModelData,poi,&mbrID,&mbrLocation);
-
-         CComPtr<IFem2dPOI> femPoi;
-         femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
-         pModelData->m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
-         femPoiID++;
-      }
-
-      bIsValidating = false;
+      CComPtr<IFem2dPOI> femPoi;
+      femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
+      pModelData->m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
+      femPoiID++;
+   }
 
 #if defined _DEBUG
-      CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
-      CComPtr<IStructuredSave2> save;
-      save.CoCreateInstance(CLSID_StructuredSave2);
-      save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
-      ss->Save(save);
-      save->Close();
-      save.Release();
-      ss.Release();
+   CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
+   CComPtr<IStructuredSave2> save;
+   save.CoCreateInstance(CLSID_StructuredSave2);
+   save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
+   ss->Save(save);
+   save->Close();
+   save.Release();
+   ss.Release();
 #endif // _DEBUG
-   }
 }
 
 void CAnalysisAgentImp::ApplyDeadLoad(PierIDType pierID,ModelData* pModelData)
@@ -1062,21 +1046,6 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
 #endif
 
    return GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llConfig,permitLaneIdx);
-}
-
-std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(PierIDType pierID)
-{
-   std::vector<Float64> vWheelLineLocations;
-   ModelData* pModelData = GetModelData(pierID);
-   BOOST_FOREACH(LiveLoadConfiguration& llConfig,pModelData->m_LiveLoadConfigurations)
-   {
-      BOOST_FOREACH(LaneConfiguration& laneConfig,llConfig.m_LaneConfiguration)
-      {
-         vWheelLineLocations.push_back(laneConfig.Xleft);
-         vWheelLineLocations.push_back(laneConfig.Xright);
-      }
-   }
-   return vWheelLineLocations;
 }
 
 void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
@@ -2203,13 +2172,8 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
    Wcc /= cos(skew);
    wLoadedLane /= cos(skew);
 
-   // We want all cases of number of loaded lanes to use the same step size
-   // The smallest step size is found using the widest lane configuration (nLanes case)
    GET_IFACE(IXBRProject,pProject);
    Float64 maxStepSize = pProject->GetMaxLiveLoadStepSize();
-   Float64 WllTotal = nLanes*wLoadedLane; // width of live load, measured in the plane of the pier
-   IndexType nSteps = (IndexType)ceil((Wcc - WllTotal)/maxStepSize); // total number of steps to move live load from left to right curb lines
-   Float64 stepSize = (0 < nSteps ? (Wcc - WllTotal)/nSteps : 0); // actual step size
 
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
@@ -2218,8 +2182,9 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
    for ( IndexType nLoadedLanes = 1; nLoadedLanes <= nLanes; nLoadedLanes++ )
    {
       IndexType nLaneGaps = nLoadedLanes-1; // number of "gaps" between loaded lanes
-      Float64 Wll = nLoadedLanes*wLoadedLane; // width of live load, measured in the plane of the pier for this case of nLoadedLanes
-      IndexType nTotalSteps = (IndexType)ceil((Wcc - Wll)/stepSize); // total number of steps to move live load from left to right curb lines for this case
+      Float64 Wll = nLoadedLanes*wLoadedLane; // width of live load, measured in the plane of the pier
+      IndexType nTotalSteps = (IndexType)ceil((Wcc - Wll)/maxStepSize); // total number of steps to move live load from left to right curb lines
+      Float64 stepSize = (0 < nTotalSteps ? (Wcc-Wll)/nTotalSteps : 0); // actual step size
 
       // Get the position of the loaded lanes, defined as a sequence of "gap indicies".
       // The size of the gap between loaded lanes is the gap index times the step size
@@ -2236,96 +2201,88 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       // and analyze the structure for the configuration. The configuration, in general,
       // will not be as wide as the curb-to-curb width, so step the configuration until
       // it reaches the right curb line.
-      // Actually, the right-most wheel line wont always reach the right curb line,
-      // so we have to run the loading in both directions to get symmetrical results
       BOOST_FOREACH(std::vector<IndexType>& vGapPosition,vGapPositions)
       {
-         for ( int dir = 0; dir < 2; dir++ )
+         // location of wheel lines measured from the left curb line... with the first wheel line being 
+         // at its left-most position
+         std::vector<Float64> vWheelLinePositions = GetWheelLinePositions(skew,stepSize,wLoadedLane,vGapPosition);
+         ATLASSERT(vWheelLinePositions.size() % 2 == 0);
+         ATLASSERT(vWheelLinePositions.size()/2 == nLoadedLanes);
+
+         // get the number of steps used to make the wheel line reaction configuration.
+         IndexType nStepsUsed = std::accumulate(vGapPosition.begin(),vGapPosition.end(),(IndexType)0);
+
+         // the number of times we need to step the wheel line reaction configuration towards the right curb line
+         // is equal to the total number of steps less the number of steps used by the configuration.
+         IndexType nStepsRemaining = nTotalSteps - nStepsUsed;
+
+#if defined _DEBUG
+         // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
+         Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet); // 2' shy distance from curb-line
+         w2 /= cos(skew);
+         ATLASSERT(IsEqual(vWheelLinePositions.back() + stepSize*nStepsRemaining + w2,Wcc));
+#endif
+
+         // Step the wheel line reaction configuration towards the right curb line, analyzing the
+         // cross beam for each loading position.
+         for ( IndexType stepIdx = 0; stepIdx <= nStepsRemaining; stepIdx++ )
          {
-            // location of wheel lines measured from the left curb line... with the first wheel line being 
-            // at its left-most position
-            std::vector<Float64> vWheelLinePositions = GetWheelLinePositions(skew,stepSize,wLoadedLane,vGapPosition);
-            if ( dir == 1 )
+            Float64 Xoffset = stepSize*stepIdx; // amount to shift the wheel line configuration towards the right curb line
+            Xoffset += XcurbLine;
+
+            LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vWheelLinePositions);
+
+            LiveLoadConfiguration llconfig;
+            llconfig.m_LoadCaseID = lcid;
+            llconfig.m_nLoadedLanes = nLoadedLanes;
+            
+            for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
             {
-               // we are going right to left
-               // change the position so the last wheel line is at its right-most position
-               Float64 Xfirst = vWheelLinePositions.front();
-               Float64 Xlast = vWheelLinePositions.back();
-               Float64 X = Wcc - Xlast - Xfirst;
-               std::transform(vWheelLinePositions.begin(),vWheelLinePositions.end(),vWheelLinePositions.begin(),IncrementElements<Float64>(X));
+               LaneConfiguration laneConfig;
+               Float64 Xleft  = vWheelLinePositions[2*laneIdx]   + Xoffset;
+               Float64 Xright = vWheelLinePositions[2*laneIdx+1] + Xoffset;
+               laneConfig.Xleft  = Xleft;
+               laneConfig.Xright = Xright;
+
+               if ( nLoadedLanes == 1 )
+               {
+                  // if this is the one loaded lane case, we have the information
+                  laneConfig.m_SingleLaneLoadCaseID = lcid;
+                  pModelData->m_SingleLaneLoadCaseIDs.insert(std::make_pair(stepIdx,lcid));
+               }
+               else
+               {
+                  // this is the multiple loaded lane case
+                  // we need to relate the location of the current laneIdx for the multi-lane loading condition
+                  // to the exact same lane location for the single lane case
+
+                  // |<-- Left Curb Line
+                  // |
+                  // |<------------- Xcenter --------->|
+                  // |                      |                      |
+                  // |                      |      P        P      |
+                  // |                      |      |        |      |
+                  // |                      |<-2'->|<--6'-->|<-2'->| (not skew adjusted... sketch assumes standard 10' wide truck in 12' lane)
+                  // |                      |      |        |      |
+                  // |   XlaneEdge =        |      V        V      |
+                  // |<- stepIdx*stepSize ->|<---- wLoadedLane --->|
+
+                  // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
+
+                  Float64 Xcenter = (Xleft-XcurbLine + Xright-XcurbLine)/2; // center of lane from left curb line
+                  Float64 XlaneEdge = Xcenter - wLoadedLane/2;
+                  XlaneEdge = IsZero(XlaneEdge) ? 0 : XlaneEdge;
+                  IndexType singleLaneStepIdx = IsZero(stepSize) ? 0 : (IndexType)floor(XlaneEdge/stepSize);
+                  std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
+                  ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
+                  laneConfig.m_SingleLaneLoadCaseID = found->second;
+               }
+               
+               llconfig.m_LaneConfiguration.push_back(laneConfig);
             }
 
-            ATLASSERT(vWheelLinePositions.size() % 2 == 0);
-            ATLASSERT(vWheelLinePositions.size()/2 == nLoadedLanes);
-
-            // get the number of steps used to make the wheel line reaction configuration.
-            IndexType nStepsUsed = std::accumulate(vGapPosition.begin(),vGapPosition.end(),(IndexType)0);
-
-            // the number of times we need to step the wheel line reaction configuration towards the right curb line
-            // is equal to the total number of steps less the number of steps used by the configuration.
-            IndexType nStepsRemaining = nTotalSteps - nStepsUsed;
-
-            // Step the wheel line reaction configuration towards the right curb line, analyzing the
-            // cross beam for each loading position.
-            for ( IndexType stepIdx = 0; stepIdx < nStepsRemaining; stepIdx++ )
-            {
-               Float64 Xoffset = (dir == 0 ? 1 : -1)*stepSize*stepIdx; // amount to shift the wheel line configuration towards the right curb line
-               Xoffset += XcurbLine;
-
-               LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vWheelLinePositions);
-
-               LiveLoadConfiguration llconfig;
-               llconfig.m_LoadCaseID = lcid;
-               llconfig.m_nLoadedLanes = nLoadedLanes;
-               
-               for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
-               {
-                  LaneConfiguration laneConfig;
-                  Float64 Xleft  = vWheelLinePositions[2*laneIdx]   + Xoffset;
-                  Float64 Xright = vWheelLinePositions[2*laneIdx+1] + Xoffset;
-                  laneConfig.Xleft  = Xleft;
-                  laneConfig.Xright = Xright;
-
-                  if ( nLoadedLanes == 1 )
-                  {
-                     // if this is the one loaded lane case, we have the information
-                     laneConfig.m_SingleLaneLoadCaseID = lcid;
-                     pModelData->m_SingleLaneLoadCaseIDs.insert(std::make_pair(stepIdx,lcid));
-                  }
-                  else
-                  {
-                     // this is the multiple loaded lane case
-                     // we need to relate the location of the current laneIdx for the multi-lane loading condition
-                     // to the exact same lane location for the single lane case
-
-                     // |<-- Left Curb Line
-                     // |
-                     // |<------------- Xcenter --------->|
-                     // |                      |                      |
-                     // |                      |      P        P      |
-                     // |                      |      |        |      |
-                     // |                      |<-2'->|<--6'-->|<-2'->| (not skew adjusted... sketch assumes standard 10' wide truck in 12' lane)
-                     // |                      |      |        |      |
-                     // |   XlaneEdge =        |      V        V      |
-                     // |<- stepIdx*stepSize ->|<---- wLoadedLane --->|
-
-                     // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
-
-                     Float64 Xcenter = (Xleft-XcurbLine + Xright-XcurbLine)/2; // center of lane from left curb line
-                     Float64 XlaneEdge = Xcenter - wLoadedLane/2;
-                     XlaneEdge = IsZero(XlaneEdge) ? 0 : XlaneEdge;
-                     IndexType singleLaneStepIdx = IsZero(stepSize) ? 0 : (IndexType)floor(XlaneEdge/stepSize);
-                     std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
-                     ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
-                     laneConfig.m_SingleLaneLoadCaseID = found->second;
-                  }
-                  
-                  llconfig.m_LaneConfiguration.push_back(laneConfig);
-               }
-
-               pModelData->m_LiveLoadConfigurations.insert(llconfig);
-            } // next step
-         } // next dir
+            pModelData->m_LiveLoadConfigurations.insert(llconfig);
+         } // next step
       } // next gap position
    } // next number of loaded lanes
 }
@@ -2800,6 +2757,20 @@ CAnalysisAgentImp::LiveLoadConfiguration& CAnalysisAgentImp::GetLiveLoadConfigur
    std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
    ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
    return (*foundLLConfig);
+}
+
+std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(ModelData* pModelData)
+{
+   std::vector<Float64> vWheelLineLocations;
+   BOOST_FOREACH(LiveLoadConfiguration& llConfig,pModelData->m_LiveLoadConfigurations)
+   {
+      BOOST_FOREACH(LaneConfiguration& laneConfig,llConfig.m_LaneConfiguration)
+      {
+         vWheelLineLocations.push_back(laneConfig.Xleft);
+         vWheelLineLocations.push_back(laneConfig.Xright);
+      }
+   }
+   return vWheelLineLocations;
 }
 
 void CAnalysisAgentImp::InvalidateModels(bool bCreateNewDataStructures)

@@ -1318,6 +1318,19 @@ xbrPointOfInterest CPierAgentImp::GetPrevPointOfInterest(PierIDType pierID,PoiID
    return poi;
 }
 
+void CPierAgentImp::SetWheelLineLocations(PierIDType pierID,const std::vector<Float64> vWheelLineLocations)
+{
+   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+
+   // Put POI at every place a wheel line load is applied
+   BOOST_FOREACH(Float64 X,vWheelLineLocations)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X));
+   }
+
+   SimplifyPOIList(vPoi); // sorts, merges, and removes duplicates
+}
+
 //////////////////////////////////////////
 // IXBRProjectEventSink
 HRESULT CPierAgentImp::OnProjectChanged()
@@ -1837,9 +1850,6 @@ std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType p
 
 void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 {
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress progress(pProgress);
-
    GET_IFACE(IXBRProject,pProject);
 
    Float64 delta = ::ConvertToSysUnits(0.001,unitMeasure::Feet);
@@ -1923,20 +1933,6 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
       }
    }
 
-   //// Left/Right Curb lines
-   //Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet);
-   //Float64 LCO, RCO;
-   //pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
-   //Float64 Xcl = ConvertPierToCrossBeamCoordinate(pierID,LCO);
-   //Xcl += w2;
-   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl-0.001));
-   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl));
-
-   //Xcl = ConvertPierToCrossBeamCoordinate(pierID,RCO);
-   //Xcl -= w2;
-   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl));
-   //vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xcl+0.001));
-
    // Need POI on a one-foot grid
    Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    Float64 Xpoi = 0;
@@ -1949,14 +1945,13 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    }
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L/2));
 
-   // Put POI at every place a wheel line load is applied
-   GET_IFACE(IXBRProductForces,pProductForces);
-   std::vector<Float64> vWheelLineLocations = pProductForces->GetWheelLineLocations(pierID);
-   BOOST_FOREACH(Float64 X,vWheelLineLocations)
-   {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X));
-   }
+   SimplifyPOIList(vPoi); // sorts, merges, and removes duplicates
 
+   m_XBeamPoi.insert(std::make_pair(pierID,vPoi));
+}
+
+void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
+{
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());
 
@@ -1979,8 +1974,6 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 
    // remove any duplicates
    vPoi.erase(std::unique(vPoi.begin(),vPoi.end(),ComparePoiLocation),vPoi.end());
-
-   m_XBeamPoi.insert(std::make_pair(pierID,vPoi));
 }
 
 bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)

@@ -177,6 +177,7 @@ public:
    virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi);
    virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID);
    virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID);
+   virtual void SetWheelLineLocations(PierIDType pierID,const std::vector<Float64> vWheelLineLocations);
 
 // IXBRProjectEventSink
 public:
@@ -198,6 +199,7 @@ private:
 
    PoiIDType m_NextPoiID;
    void ValidatePointsOfInterest(PierIDType pierID);
+   void SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi);
    std::vector<xbrPointOfInterest>& GetPointsOfInterest(PierIDType pierID);
    std::map<PierIDType,std::vector<xbrPointOfInterest>> m_XBeamPoi;
    bool FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi);

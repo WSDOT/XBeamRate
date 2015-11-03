@@ -224,10 +224,10 @@ HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
    AFX_MANAGE_STATE(AfxGetAppModuleState());
    m_pMyDocument->SetModifiedFlag();
 
-   m_pMyDocument->UpdateAllViews(0,0,0);
+   //m_pMyDocument->UpdateAllViews(0,0,0);
 
-   //boost::shared_ptr<CObject> pnull;
-   //FireEvent( 0, HINT_PROJECTPROPERTIESCHANGED, pnull );
+   boost::shared_ptr<CObject> pnull;
+   FireEvent( 0, HINT_PROJECTCHANGED, pnull );
    return S_OK;
 }
 
@@ -238,10 +238,10 @@ HRESULT CXBeamRateDocProxyAgent::OnRatingSpecificationChanged()
    AFX_MANAGE_STATE(AfxGetAppModuleState());
    m_pMyDocument->SetModifiedFlag();
 
-   m_pMyDocument->UpdateAllViews(0,0,0);
+   //m_pMyDocument->UpdateAllViews(0,0,0);
 
-   //boost::shared_ptr<CObject> pnull;
-   //FireEvent( 0, HINT_PROJECTPROPERTIESCHANGED, pnull );
+   boost::shared_ptr<CObject> pnull;
+   FireEvent( 0, HINT_RATINGSPECCHANGED, pnull );
    return S_OK;
 }
 

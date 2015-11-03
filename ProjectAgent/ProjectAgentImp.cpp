@@ -2719,6 +2719,12 @@ void CProjectAgentImp::HoldEvents()
    m_EventHoldCount++;
 
    Fire_OnHoldEvents();
+
+   if ( IsStandAlone() )
+   {
+      GET_IFACE(IXBRUIEvents,pUIEvents);
+      pUIEvents->HoldEvents(true);
+   }
 }
 
 void CProjectAgentImp::FirePendingEvents()
@@ -2755,6 +2761,12 @@ void CProjectAgentImp::FirePendingEvents()
    {
       m_EventHoldCount--;
    }
+
+   if ( IsStandAlone() )
+   {
+      GET_IFACE(IXBRUIEvents,pUIEvents);
+      pUIEvents->FirePendingEvents();
+   }
 }
 
 void CProjectAgentImp::CancelPendingEvents()
@@ -2764,6 +2776,12 @@ void CProjectAgentImp::CancelPendingEvents()
    {
       m_EventHoldCount = 0;
       Fire_OnCancelPendingEvents();
+   }
+
+   if ( IsStandAlone() )
+   {
+      GET_IFACE(IXBRUIEvents,pUIEvents);
+      pUIEvents->CancelPendingEvents();
    }
 }
 
