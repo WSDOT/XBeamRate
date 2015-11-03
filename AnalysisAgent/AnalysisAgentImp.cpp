@@ -2186,8 +2186,10 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       IndexType nTotalSteps = (IndexType)ceil((Wcc - Wll)/maxStepSize); // total number of steps to move live load from left to right curb lines
       Float64 stepSize = (0 < nTotalSteps ? (Wcc-Wll)/nTotalSteps : 0); // actual step size
 
-      // Get the position of the loaded lanes, defined as a sequence of "gap indicies".
-      // The size of the gap between loaded lanes is the gap index times the step size
+      // The lane configuration (position of the loaded lanes) is defined as a sequence of "gap indicies".
+      // The size of the gap between lanes is the gap position index times the step size.
+      // The step size of the gaps is equal to the step size for movig the lane configuration 
+      // along the cross beam
       //
       //  wLoadedLane      wLoadedLane         wLoadedLane
       //  |<------>|       |<------>|          |<------>|
@@ -2201,13 +2203,25 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
       // and analyze the structure for the configuration. The configuration, in general,
       // will not be as wide as the curb-to-curb width, so step the configuration until
       // it reaches the right curb line.
+
+      //
+      //  wLoadedLanewLoadedLane         wLoadedLane
+      //  |<------>|<------>|           |<------>|
+      //  ===================           ==========   ---->>> move configuration by (stepIdx)*(step size) until the right lane gets to the right edge of the XBeam
+      //           |         |<------->|
+      //           gap=0         gap = (gap position idx)*(step size)
+      //
+      // Increment the gap position and repeat...
+
       BOOST_FOREACH(std::vector<IndexType>& vGapPosition,vGapPositions)
       {
          // location of wheel lines measured from the left curb line... with the first wheel line being 
-         // at its left-most position
+         // at its left-most position. The position of the second wheel line is governed by
+         // the gage spacing of the live load (6', adjusted for skew). The position of the remaining
+         // wheel lines are governed by the position of the lane (gap position).
          std::vector<Float64> vWheelLinePositions = GetWheelLinePositions(skew,stepSize,wLoadedLane,vGapPosition);
-         ATLASSERT(vWheelLinePositions.size() % 2 == 0);
-         ATLASSERT(vWheelLinePositions.size()/2 == nLoadedLanes);
+         ATLASSERT(vWheelLinePositions.size() % 2 == 0); // must be even number... two wheel lines per lane
+         ATLASSERT(vWheelLinePositions.size()/2 == nLoadedLanes); // must be 2 times as many wheel lines as loaded lanes
 
          // get the number of steps used to make the wheel line reaction configuration.
          IndexType nStepsUsed = std::accumulate(vGapPosition.begin(),vGapPosition.end(),(IndexType)0);
@@ -2227,9 +2241,14 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
          // cross beam for each loading position.
          for ( IndexType stepIdx = 0; stepIdx <= nStepsRemaining; stepIdx++ )
          {
-            Float64 Xoffset = stepSize*stepIdx; // amount to shift the wheel line configuration towards the right curb line
+            // Xoffset is the amount to shift the wheel line configuration towards the right curb line.
+            // Remember the vWheelLinePositions is a configuration with the lanes all shifted to the
+            // left curb line. Xoffset moves the entire configuration towards the right curb line
+            Float64 Xoffset = stepSize*stepIdx; 
             Xoffset += XcurbLine;
 
+            // Apply the wheel line loads to the FEM model, adjusting the default position by Xoffset,
+            // and returns the FEM model load case ID.
             LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vWheelLinePositions);
 
             LiveLoadConfiguration llconfig;
