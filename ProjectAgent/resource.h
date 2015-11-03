@@ -152,12 +152,15 @@
 #define IDC_LRFD_LABEL                  321
 #define IDC_LRFR_LABEL                  322
 #define IDC_LRFD                        323
-#define IDC_COMBO3                      324
 #define IDC_LRFR                        324
+#define IDC_EDIT1                       324
+#define IDC_LL_STEP                     324
+#define IDC_LL_STEP_UNIT                325
 #define IDD_AASHTO_CONCRETE             500
 #define IDB_EDIT_PIER                   500
 #define IDC_EC_K1_LABEL                 501
 #define IDB_EDIT_OPTIONS                501
+#define IDD_ANALYSIS_OPTIONS            501
 #define IDC_EC_K1                       502
 #define IDC_EC_K2_LABEL                 503
 #define IDC_EC_K2                       504
@@ -225,9 +228,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        207
+#define _APS_NEXT_RESOURCE_VALUE        208
 #define _APS_NEXT_COMMAND_VALUE         50005
-#define _APS_NEXT_CONTROL_VALUE         324
+#define _APS_NEXT_CONTROL_VALUE         326
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

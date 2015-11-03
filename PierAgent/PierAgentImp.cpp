@@ -26,12 +26,15 @@
 #include "PierAgentImp.h"
 
 #include <IFace\Project.h>
+#include <IFace\AnalysisResults.h>
 #include <algorithm>
 #include <Math\Math.h>
 
 #include <PsgLib\UnitServer.h>
 #include <Lrfd\Lrfd.h>
 #include <EAF\EAFAutoProgress.h>
+
+#include <XBeamRateExt\XBeamRateUtilities.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1945,6 +1948,14 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
       Xpoi += step;
    }
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L/2));
+
+   // Put POI at every place a wheel line load is applied
+   GET_IFACE(IXBRProductForces,pProductForces);
+   std::vector<Float64> vWheelLineLocations = pProductForces->GetWheelLineLocations(pierID);
+   BOOST_FOREACH(Float64 X,vWheelLineLocations)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X));
+   }
 
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());

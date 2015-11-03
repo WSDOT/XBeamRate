@@ -24,6 +24,7 @@
 
 #include <txnEditOptions.h>
 #include "RatingOptionsPage.h"
+#include "AnalysisOptionsPage.h"
 #include "CapacityOptionsPage.h"
 
 
@@ -48,8 +49,10 @@ protected:
    txnEditOptionsData m_Options;
 
    CRatingOptionsPage m_RatingOptions;
+   CAnalysisOptionsPage m_AnalysisOptions;
    CCapacityOptionsPage m_CapacityOptions;
 
    friend CRatingOptionsPage;
+   friend CAnalysisOptionsPage;
    friend CCapacityOptionsPage;
 };

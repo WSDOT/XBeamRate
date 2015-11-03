@@ -242,6 +242,9 @@ interface IXBRProject : IUnknown
 
    virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll) = 0;
    virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx) = 0;
+
+   virtual void SetMaxLiveLoadStepSize(Float64 stepSize) = 0;
+   virtual Float64 GetMaxLiveLoadStepSize() = 0;
 };
 
 /*****************************************************************************

@@ -49,6 +49,7 @@
 
 #include <EAF\EAFTransactions.h>
 
+#include <IFace\AnalysisResults.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // Used to determine whether the DLL can be unloaded by OLE

@@ -20,51 +20,47 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// OptionsDlg.cpp : implementation file
+// RatingOptionsPage.cpp : implementation file
 //
 
 #include "stdafx.h"
 #include "resource.h"
+#include "AnalysisOptionsPage.h"
 #include "OptionsDlg.h"
 
+#include <EAF\EAFDisplayUnits.h>
 
-// COptionsDlg dialog
 
-IMPLEMENT_DYNAMIC(COptionsDlg, CPropertySheet)
+// CAnalysisOptionsPage dialog
 
-COptionsDlg::COptionsDlg(CWnd* pParentWnd, UINT iSelectPage)
-	: CPropertySheet(_T("Load Rating Options"),pParentWnd,iSelectPage)
+IMPLEMENT_DYNAMIC(CAnalysisOptionsPage, CPropertyPage)
+
+CAnalysisOptionsPage::CAnalysisOptionsPage()
+	: CPropertyPage(CAnalysisOptionsPage::IDD)
 {
-   Init();
+
 }
 
-COptionsDlg::~COptionsDlg()
+CAnalysisOptionsPage::~CAnalysisOptionsPage()
 {
 }
 
-void COptionsDlg::Init()
+void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
 {
-   m_psh.dwFlags |= PSH_HASHELP | PSH_NOAPPLYNOW;
+	CPropertyPage::DoDataExchange(pDX);
 
-   m_RatingOptions.m_psp.dwFlags  |= PSP_HASHELP;
-   m_AnalysisOptions.m_psp.dwFlags  |= PSP_HASHELP;
-   m_CapacityOptions.m_psp.dwFlags  |= PSP_HASHELP;
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   AddPage(&m_RatingOptions);
-   AddPage(&m_AnalysisOptions);
-   AddPage(&m_CapacityOptions);
+   COptionsDlg* pParent = (COptionsDlg*)GetParent();
+
+   DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,pParent->m_Options.m_MaxLLStepSize,pDisplayUnits->GetSpanLengthUnit());
 }
 
-void COptionsDlg::SetOptions(const txnEditOptionsData& options)
-{
-   m_Options = options;
-}
 
-const txnEditOptionsData& COptionsDlg::GetOptions() const
-{
-   return m_Options;
-}
-
-BEGIN_MESSAGE_MAP(COptionsDlg, CPropertySheet)
+BEGIN_MESSAGE_MAP(CAnalysisOptionsPage, CPropertyPage)
 END_MESSAGE_MAP()
 
+
+// CAnalysisOptionsPage message handlers

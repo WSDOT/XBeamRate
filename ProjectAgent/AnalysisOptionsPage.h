@@ -20,51 +20,24 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// OptionsDlg.cpp : implementation file
-//
-
-#include "stdafx.h"
-#include "resource.h"
-#include "OptionsDlg.h"
+#pragma once
 
 
-// COptionsDlg dialog
+// CAnalysisOptionsPage dialog
 
-IMPLEMENT_DYNAMIC(COptionsDlg, CPropertySheet)
-
-COptionsDlg::COptionsDlg(CWnd* pParentWnd, UINT iSelectPage)
-	: CPropertySheet(_T("Load Rating Options"),pParentWnd,iSelectPage)
+class CAnalysisOptionsPage : public CPropertyPage
 {
-   Init();
-}
+	DECLARE_DYNAMIC(CAnalysisOptionsPage)
 
-COptionsDlg::~COptionsDlg()
-{
-}
+public:
+	CAnalysisOptionsPage();
+	virtual ~CAnalysisOptionsPage();
 
-void COptionsDlg::Init()
-{
-   m_psh.dwFlags |= PSH_HASHELP | PSH_NOAPPLYNOW;
+// Dialog Data
+	enum { IDD = IDD_ANALYSIS_OPTIONS };
 
-   m_RatingOptions.m_psp.dwFlags  |= PSP_HASHELP;
-   m_AnalysisOptions.m_psp.dwFlags  |= PSP_HASHELP;
-   m_CapacityOptions.m_psp.dwFlags  |= PSP_HASHELP;
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-   AddPage(&m_RatingOptions);
-   AddPage(&m_AnalysisOptions);
-   AddPage(&m_CapacityOptions);
-}
-
-void COptionsDlg::SetOptions(const txnEditOptionsData& options)
-{
-   m_Options = options;
-}
-
-const txnEditOptionsData& COptionsDlg::GetOptions() const
-{
-   return m_Options;
-}
-
-BEGIN_MESSAGE_MAP(COptionsDlg, CPropertySheet)
-END_MESSAGE_MAP()
-
+	DECLARE_MESSAGE_MAP()
+};

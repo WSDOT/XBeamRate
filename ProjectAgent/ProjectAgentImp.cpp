@@ -171,6 +171,8 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
 
+   m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+
    m_bExportingModel = false;
 }
 
@@ -426,6 +428,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("PhiC"),CComVariant(phiC));
          pStrSave->put_Property(_T("PhiT"),CComVariant(phiT));
          pStrSave->put_Property(_T("PhiV"),CComVariant(GetShearResistanceFactor()));
+
+         pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(GetMaxLiveLoadStepSize()));
 
          pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Inventory)));
          pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Operating)));
@@ -734,6 +738,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("PhiV"),&var);
             m_PhiV = var.dblVal;
 
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("MaxLiveLoadStepSize"),&var);
+            m_MaxLLStepSize = var.dblVal;
 
             var.vt = VT_BOOL;
             hr = pStrLoad->get_Property(_T("RatingEnabled_Design_Inventory"),&var);
@@ -2571,6 +2578,20 @@ Float64 CProjectAgentImp::GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitSta
          return pRatingSpec->GetReactionServiceLiveLoadFactor(pierIdx,gdrIdx,ratingType,vehicleIdx);
       }
    }
+}
+
+void CProjectAgentImp::SetMaxLiveLoadStepSize(Float64 stepSize)
+{
+   if ( !IsEqual(m_MaxLLStepSize,stepSize) )
+   {
+      m_MaxLLStepSize = stepSize;
+      Fire_OnProjectChanged();
+   }
+}
+
+Float64 CProjectAgentImp::GetMaxLiveLoadStepSize()
+{
+   return m_MaxLLStepSize;
 }
 
 //////////////////////////////////////////////////////////

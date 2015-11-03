@@ -46,6 +46,8 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
+#include <MFCTools\Format.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -322,6 +324,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
          Float64 Vrmin = pVerticalAxisFormat->Convert(FyMin.Right());
          Float64 Vlmax = pVerticalAxisFormat->Convert(FyMax.Left());
          Float64 Vrmax = pVerticalAxisFormat->Convert(FyMax.Right());
+
          graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
          graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
          graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
@@ -442,6 +445,7 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
    WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
@@ -475,6 +479,12 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    CPen permit_pen(PS_SOLID,1,GREEN);
    CPen* pOldPen = pDC->SelectObject(&legal_pen);
 
+   HFONT hFont = grGraphTool::CreateRotatedFont(pDC->GetSafeHdc(),900,8);
+   HGDIOBJ hOldFont = pDC->SelectObject(hFont);
+
+   UINT oldTextAlign = pDC->GetTextAlign();
+   int nBkMode = pDC->SetBkMode(TRANSPARENT);
+
    LONG dx_last, dy_last;
    std::vector<WheelLinePlacement>::iterator iter(wheelLineConfig.begin());
    std::vector<WheelLinePlacement>::iterator end(wheelLineConfig.end());
@@ -504,11 +514,13 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
       // draw the crossbar connecting wheel lines
       if ( idx % 2 == 0 )
       {
+         pDC->SetTextAlign(TA_LEFT | TA_TOP);
          dx_last = dx;
          dy_last = dy-30;
       }
       else
       {
+         pDC->SetTextAlign(TA_LEFT | TA_BOTTOM);
          pDC->MoveTo(dx_last,dy_last);
          pDC->LineTo(dx,dy-30);
       }
@@ -519,7 +531,14 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
       pDC->MoveTo(dx,dy);
       pDC->LineTo(dx+10,dy-10);
 
+      CString str;
+      str.Format(_T("%s"),::FormatDimension(placement.Xxb,pDisplayUnits->GetSpanLengthUnit()));
+      pDC->TextOut(dx,dy-30,str);
+
    }
 
    pDC->SelectObject(pOldPen);
+   pDC->SelectObject(hOldFont);
+   pDC->SetTextAlign(oldTextAlign);
+   pDC->SetBkMode(nBkMode);
 }

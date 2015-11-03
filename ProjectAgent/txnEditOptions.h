@@ -44,6 +44,8 @@ struct txnEditOptionsData
    Float64 m_SystemFactorFlexure;
    Float64 m_SystemFactorShear;
 
+   Float64 m_MaxLLStepSize;
+
    Float64 m_PhiC;
    Float64 m_PhiT;
    Float64 m_PhiV;

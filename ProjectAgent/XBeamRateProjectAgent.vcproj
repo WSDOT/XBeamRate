@@ -721,6 +721,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\AnalysisOptionsPage.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\BearingLayoutGrid.cpp"
 				>
 			</File>
@@ -1033,6 +1037,10 @@
 			</File>
 			<File
 				RelativePath=".\AgentCmdTarget.h"
+				>
+			</File>
+			<File
+				RelativePath=".\AnalysisOptionsPage.h"
 				>
 			</File>
 			<File

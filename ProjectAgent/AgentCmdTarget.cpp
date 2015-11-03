@@ -163,6 +163,7 @@ void CAgentCmdTarget::OnEditOptions()
    oldOptions.m_PermitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
    GET_IFACE(IXBRProject,pProject);
+   oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
    oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
    oldOptions.m_SystemFactorShear   = pProject->GetSystemFactorShear();
 

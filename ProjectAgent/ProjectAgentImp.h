@@ -270,6 +270,9 @@ public:
    virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll);
    virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx);
 
+   virtual void SetMaxLiveLoadStepSize(Float64 stepSize);
+   virtual Float64 GetMaxLiveLoadStepSize();
+
 // IXBRRatingSpecification
 public:
    virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType);
@@ -380,6 +383,8 @@ private:
    bool m_bRateForShear[6]; // array index is pgsTypes::LoadRatingType
    bool m_bCheckYieldStress;
    Float64 m_YieldStressCoefficient;
+
+   Float64 m_MaxLLStepSize; // maximum step size for moving live load
 
    // Load Factors
    Float64 m_gDC_StrengthI;
