@@ -208,7 +208,7 @@ HRESULT CXBeamRateAgent::FinalConstruct()
 void CXBeamRateAgent::RegisterViews()
 {
    GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-   m_PierViewKey = pViewRegistrar->RegisterView(IDR_XBEAMRATE,this,RUNTIME_CLASS(CXBeamRateChildFrame),RUNTIME_CLASS(CXBeamRateView),NULL,1);
+   m_PierViewKey = pViewRegistrar->RegisterView(IDR_XBEAMRATE,this,RUNTIME_CLASS(CXBeamRateChildFrame),RUNTIME_CLASS(CXBeamRateView));
 }
 
 void CXBeamRateAgent::UnregisterViews()
@@ -222,24 +222,7 @@ void CXBeamRateAgent::CreatePierView()
    GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
    pViewRegistrar->CreateView(m_PierViewKey,NULL);
 }
-//
-//void CXBeamRateAgent::RegisterGraphs()
-//{
-//   GET_IFACE(IGraphManager,pGraphMgr);
-//
-//   CTestGraphBuilder* pTestGraphBuilder = new CTestGraphBuilder;
-//   pTestGraphBuilder->SetMenuBitmap(&m_bmpMenu);
-//   pGraphMgr->AddGraphBuilder(pTestGraphBuilder);
-//
-//   CTestGraphBuilder2* pTestGraphBuilder2 = new CTestGraphBuilder2;
-//   pTestGraphBuilder2->SetMenuBitmap(&m_bmpMenu);
-//   pGraphMgr->AddGraphBuilder(pTestGraphBuilder2);
-//
-//   CTestGraphBuilder3* pTestGraphBuilder3 = new CTestGraphBuilder3;
-//   pTestGraphBuilder3->SetMenuBitmap(&m_bmpMenu);
-//   pGraphMgr->AddGraphBuilder(pTestGraphBuilder3);
-//}
-//
+
 void CXBeamRateAgent::CreateMenus()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -523,36 +506,6 @@ STDMETHODIMP CXBeamRateAgent::IntegrateWithUI(BOOL bIntegrate)
       UnregisterViews();
       UnregisterUIExtensions();
    }
-
-   return S_OK;
-}
-
-////////////////////////////////////////////////////////////////////
-// IAgentReportingIntegration
-STDMETHODIMP CXBeamRateAgent::IntegrateWithReporting(BOOL bIntegrate)
-{
-   //if ( bIntegrate )
-   //{
-   //   RegisterReports();
-   //}
-   //else
-   //{
-   //}
-
-   return S_OK;
-}
-
-////////////////////////////////////////////////////////////////////
-// IAgentGraphingIntegration
-STDMETHODIMP CXBeamRateAgent::IntegrateWithGraphing(BOOL bIntegrate)
-{
-   //if ( bIntegrate )
-   //{
-   //   RegisterGraphs();
-   //}
-   //else
-   //{
-   //}
 
    return S_OK;
 }

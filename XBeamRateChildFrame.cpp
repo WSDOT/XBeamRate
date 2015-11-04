@@ -219,8 +219,18 @@ BOOL CXBeamRateChildFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWn
 
 BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs) 
 {
-   // force this window to be maximized (not sure why WS_VISIBLE is required)
-   cs.style |= WS_MAXIMIZE | WS_VISIBLE;
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   if ( pBroker == NULL )
+   {
+      // If the broker is NULL, it has been initialized yet. This only happens during
+      // start up in stand alone mode. In PGS Extension model, this viewframe doesn't
+      // get created until long after the broker is alive and well.
+      // 
+      // In stand alone mode, force this window to be maximized (not sure why WS_VISIBLE is required)
+      // so it fill the entire main frame
+      cs.style |= WS_MAXIMIZE | WS_VISIBLE;
+   }
 	
 	return CEAFChildFrame::PreCreateWindow(cs);
 }

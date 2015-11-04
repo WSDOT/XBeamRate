@@ -59,6 +59,7 @@ interface IXBRProductForces : public IUnknown
 
    virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) = 0;
    virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx) = 0;
+   virtual std::vector<Float64> GetWheelLineLocations(PierIDType pierID) = 0;
    virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx) = 0;
 
    // Returns vectors contain the live load configuration indicies associated with the N min/max moments

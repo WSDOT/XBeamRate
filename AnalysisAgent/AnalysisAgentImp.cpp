@@ -40,8 +40,6 @@
 #include <System\Flags.h>
 #include <LRFD\Utility.h>
 
-#include <WBFLSTL.h>
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -178,9 +176,9 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    return S_OK;
 }
 
-CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID)
+CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,int level)
 {
-   BuildModel(pierID); // builds or updates the model if necessary
+   BuildModel(pierID,level); // builds or updates the model if necessary
    std::map<PierIDType,ModelData>::iterator found = m_pModelData->find(pierID);
    ATLASSERT( found != m_pModelData->end() ); // should always find it!
    ModelData* pModelData = &(*found).second;
@@ -199,7 +197,7 @@ struct XBeamNode
    bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X); }
 };
 
-void CAnalysisAgentImp::BuildModel(PierIDType pierID)
+void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
 {
    CanModelPier(pierID,m_StatusGroupID,m_scidBridgeError); // if this is not the kind of pier we can model, an Unwind exception will be thrown
 
@@ -213,254 +211,262 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID)
 
    ModelData* pModelData = &(found->second);
 
-   if ( pModelData->m_Model != NULL )
+   if ( level <= pModelData->m_InitLevel )
    {
       return;
    }
 
-   pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
-   pModelData->m_Model->put_Name(CComBSTR(_T("XBeamRate")));
-
-   // Build the frame model
-   GET_IFACE(IXBRProject,pProject);
-   GET_IFACE(IXBRPier,pPier);
-   GET_IFACE(IXBRMaterial,pMaterial);
-   GET_IFACE(IXBRSectionProperties,pSectProp);
-
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
-   pProgress->UpdateMessage(_T("Building pier analysis model"));
-
-   Float64 LCO, RCO;
-   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
-
-   IndexType nColumns = pProject->GetColumnCount(pierID);
-
-   Float64 L = pPier->GetXBeamLength(pierID);
-
-   // Get the location of all the cross beam nodes
-
-   // beginning/end of cross beam
-   std::vector<XBeamNode> vXBeamNodes;
-   XBeamNode n;
-   n.X = 0;
-   n.Type = 0;
-   vXBeamNodes.push_back(n);
-
-   n.X = L;
-   n.Type = 0;
-   vXBeamNodes.push_back(n);
-
-   // curb line
-   n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
-   n.Type = CURB;
-   vXBeamNodes.push_back(n);
-
-   n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
-   n.Type = CURB;
-   vXBeamNodes.push_back(n);
-
-   // top of columns
-   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
+   if ( MODEL_INIT_TOPOLOGY <= level && pModelData->m_InitLevel < MODEL_INIT_TOPOLOGY )
    {
-      n.X = pPier->GetColumnLocation(pierID,colIdx);
-      n.Type = COLUMN;
+      pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
+      pModelData->m_Model->put_Name(CComBSTR(_T("XBeamRate")));
+
+      // Build the frame model
+      GET_IFACE(IXBRProject,pProject);
+      GET_IFACE(IXBRPier,pPier);
+      GET_IFACE(IXBRMaterial,pMaterial);
+      GET_IFACE(IXBRSectionProperties,pSectProp);
+
+      GET_IFACE(IProgress,pProgress);
+      CEAFAutoProgress ap(pProgress);
+      pProgress->UpdateMessage(_T("Building pier analysis model"));
+
+      Float64 LCO, RCO;
+      pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+
+      IndexType nColumns = pProject->GetColumnCount(pierID);
+
+      Float64 L = pPier->GetXBeamLength(pierID);
+
+      // Get the location of all the cross beam nodes
+
+      // beginning/end of cross beam
+      std::vector<XBeamNode> vXBeamNodes;
+      XBeamNode n;
+      n.X = 0;
+      n.Type = 0;
       vXBeamNodes.push_back(n);
-   }
 
-   // bearings
-   IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
-   for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
-   {
-      IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
-      for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+      n.X = L;
+      n.Type = 0;
+      vXBeamNodes.push_back(n);
+
+      // curb line
+      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
+      n.Type = CURB;
+      vXBeamNodes.push_back(n);
+
+      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
+      n.Type = CURB;
+      vXBeamNodes.push_back(n);
+
+      // top of columns
+      for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
       {
-         n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
-         n.Type = BEARING;
+         n.X = pPier->GetColumnLocation(pierID,colIdx);
+         n.Type = COLUMN;
          vXBeamNodes.push_back(n);
       }
-   }
 
-   // sort in left-to-right order
-   std::sort(vXBeamNodes.begin(),vXBeamNodes.end());
-
-   // eliminate duplicates... if or more nodes are at the same location, merge the Type
-   // attribute and eliminate the redundant node record
-   std::vector<XBeamNode>::iterator result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
-   while ( result != vXBeamNodes.end() )
-   {
-      XBeamNode& n1 = *result;
-      XBeamNode& n2 = *(result+1);
-      n1.Type |= n2.Type;
-      vXBeamNodes.erase(result+1);
-      result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
-   }
-
-   // Get properties
-   Float64 Exb = pMaterial->GetXBeamEc(pierID);
-   Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-   Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-   Float64 EAb = Exb*Axb;
-   Float64 EIb = Exb*Ixb;
-
-   // build the model
-   CComPtr<IFem2dJointCollection> joints;
-   pModelData->m_Model->get_Joints(&joints);
-
-   CComPtr<IFem2dMemberCollection> members;
-   pModelData->m_Model->get_Members(&members);
-
-   JointIDType jntID = 0;
-   MemberIDType xbeamMbrID = 0;
-   MemberIDType columnMbrID = -1;
-
-   std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
-   std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
-
-   XBeamNode* pPrevNode = &(*iter);;
-   JointIDType prevJointID = jntID++;
-   pPrevNode->jntID = prevJointID;
-   CComPtr<IFem2dJoint> joint;
-   joints->Create(prevJointID,pPrevNode->X,0,&joint);
-   ColumnIndexType colIdx = 0;
-
-   iter++;
-   for ( ; iter != end; iter++ )
-   {
-      XBeamNode* pThisNode = &(*iter);
-      JointIDType thisJointID = jntID++;
-      pThisNode->jntID = thisJointID;
-
-      joint.Release();
-      joints->Create(thisJointID,pThisNode->X,0,&joint);
-      
-      CComPtr<IFem2dMember> mbr;
-      members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
-      BeamMember capMbr;
-      capMbr.Xs = pPrevNode->X;
-      capMbr.Xe = pThisNode->X;
-      capMbr.mbrID = xbeamMbrID-1;
-      pModelData->m_XBeamMembers.push_back(capMbr);
-
-      if ( sysFlags<Int32>::IsSet(pThisNode->Type,COLUMN) )
+      // bearings
+      IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
+      for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
       {
-         Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
-
-         // create joint at bottom of column
-         joint.Release();
-         joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
-
-         pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
-         joint->Support(); // fully fixed
-         if ( columnFixity == pgsTypes::cftPinned )
+         IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
+         for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
          {
-            joint->ReleaseDof(jrtMz);
+            n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+            n.Type = BEARING;
+            vXBeamNodes.push_back(n);
          }
-
-         // create column member
-         Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
-         Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
-         Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
-         mbr.Release();
-         members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
-
-         colIdx++;
       }
 
-      pPrevNode = pThisNode;
-      prevJointID = thisJointID;
-   }
+      // sort in left-to-right order
+      std::sort(vXBeamNodes.begin(),vXBeamNodes.end());
 
-   // create the "superstructure" model upon which we will run the live load
-   if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
-   {
-      // live load is applied directly to the cross beam... the superstruture members
-      // and the XBeam members are one in the same
-      pModelData->m_SuperstructureMembers = pModelData->m_XBeamMembers;
-   }
-   else
-   {
-      // live load is applied to a load transfer model.
+      // eliminate duplicates... if or more nodes are at the same location, merge the Type
+      // attribute and eliminate the redundant node record
+      std::vector<XBeamNode>::iterator result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
+      while ( result != vXBeamNodes.end() )
+      {
+         XBeamNode& n1 = *result;
+         XBeamNode& n2 = *(result+1);
+         n1.Type |= n2.Type;
+         vXBeamNodes.erase(result+1);
+         result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
+      }
 
-      // dummy properties of the transfer model
-      Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
-      Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
-      Float64 EA = EAb*10000;
+      // Get properties
+      Float64 Exb = pMaterial->GetXBeamEc(pierID);
+      Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+      Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+      Float64 EAb = Exb*Axb;
+      Float64 EIb = Exb*Ixb;
+
+      // build the model
+      CComPtr<IFem2dJointCollection> joints;
+      pModelData->m_Model->get_Joints(&joints);
+
+      CComPtr<IFem2dMemberCollection> members;
+      pModelData->m_Model->get_Members(&members);
+
+      JointIDType jntID = 0;
+      MemberIDType xbeamMbrID = 0;
+      MemberIDType columnMbrID = -1;
 
       std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
       std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
 
       XBeamNode* pPrevNode = &(*iter);;
       JointIDType prevJointID = jntID++;
+      pPrevNode->jntID = prevJointID;
       CComPtr<IFem2dJoint> joint;
-      joints->Create(prevJointID,pPrevNode->X,Y,&joint);
+      joints->Create(prevJointID,pPrevNode->X,0,&joint);
+      ColumnIndexType colIdx = 0;
 
       iter++;
       for ( ; iter != end; iter++ )
       {
          XBeamNode* pThisNode = &(*iter);
          JointIDType thisJointID = jntID++;
+         pThisNode->jntID = thisJointID;
 
          joint.Release();
-         joints->Create(thisJointID,pThisNode->X,Y,&joint);
+         joints->Create(thisJointID,pThisNode->X,0,&joint);
          
          CComPtr<IFem2dMember> mbr;
          members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
-         BeamMember ssMbr;
-         ssMbr.Xs = pPrevNode->X;
-         ssMbr.Xe = pThisNode->X;
-         ssMbr.mbrID = xbeamMbrID-1;
-         pModelData->m_SuperstructureMembers.push_back(ssMbr);
+         BeamMember capMbr;
+         capMbr.Xs = pPrevNode->X;
+         capMbr.Xe = pThisNode->X;
+         capMbr.mbrID = xbeamMbrID-1;
+         pModelData->m_XBeamMembers.push_back(capMbr);
 
-         if ( sysFlags<Int32>::IsSet(pThisNode->Type,BEARING) )
+         if ( sysFlags<Int32>::IsSet(pThisNode->Type,COLUMN) )
          {
-            mbr.Release();
-            members->Create(columnMbrID--,thisJointID,pThisNode->jntID,EA,EI,&mbr);
+            Float64 columnHeight = pPier->GetColumnHeight(pierID,colIdx);
 
-            mbr->ReleaseEnd(metEnd,mbrReleaseMz);
+            // create joint at bottom of column
+            joint.Release();
+            joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
+
+            pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
+            joint->Support(); // fully fixed
+            if ( columnFixity == pgsTypes::cftPinned )
+            {
+               joint->ReleaseDof(jrtMz);
+            }
+
+            // create column member
+            Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
+            Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+            Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+            mbr.Release();
+            members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
+
+            colIdx++;
          }
 
          pPrevNode = pThisNode;
          prevJointID = thisJointID;
       }
+
+      // create the "superstructure" model upon which we will run the live load
+      if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
+      {
+         // live load is applied directly to the cross beam... the superstruture members
+         // and the XBeam members are one in the same
+         pModelData->m_SuperstructureMembers = pModelData->m_XBeamMembers;
+      }
+      else
+      {
+         // live load is applied to a load transfer model.
+
+         // dummy properties of the transfer model
+         Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
+         Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
+         Float64 EA = EAb*10000;
+
+         std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
+         std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
+
+         XBeamNode* pPrevNode = &(*iter);;
+         JointIDType prevJointID = jntID++;
+         CComPtr<IFem2dJoint> joint;
+         joints->Create(prevJointID,pPrevNode->X,Y,&joint);
+
+         iter++;
+         for ( ; iter != end; iter++ )
+         {
+            XBeamNode* pThisNode = &(*iter);
+            JointIDType thisJointID = jntID++;
+
+            joint.Release();
+            joints->Create(thisJointID,pThisNode->X,Y,&joint);
+            
+            CComPtr<IFem2dMember> mbr;
+            members->Create(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb,&mbr);
+            BeamMember ssMbr;
+            ssMbr.Xs = pPrevNode->X;
+            ssMbr.Xe = pThisNode->X;
+            ssMbr.mbrID = xbeamMbrID-1;
+            pModelData->m_SuperstructureMembers.push_back(ssMbr);
+
+            if ( sysFlags<Int32>::IsSet(pThisNode->Type,BEARING) )
+            {
+               mbr.Release();
+               members->Create(columnMbrID--,thisJointID,pThisNode->jntID,EA,EI,&mbr);
+
+               mbr->ReleaseEnd(metEnd,mbrReleaseMz);
+            }
+
+            pPrevNode = pThisNode;
+            prevJointID = thisJointID;
+         }
+      }
+
+      ComputeLiveLoadLocations(pierID,pModelData);
+
+      pModelData->m_InitLevel = MODEL_INIT_TOPOLOGY;
    }
 
-   ApplyUnitLiveLoad(pierID,pModelData);
-   ApplyDeadLoad(pierID,pModelData);
-
-   // Tell the agent responsible for POIs where the while line locations are
-   // so they can be in the POI list.
-   std::vector<Float64> vWheelLineLocations = GetWheelLineLocations(pModelData);
-   GET_IFACE(IXBRPointOfInterest,pPoi);
-   pPoi->SetWheelLineLocations(pierID,vWheelLineLocations);
-
-   // Assign POIs
-   CComPtr<IFem2dPOICollection> femPois;
-   pModelData->m_Model->get_POIs(&femPois);
-   PoiIDType femPoiID = 0;
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   if ( MODEL_INIT_LOADS <= level && pModelData->m_InitLevel < MODEL_INIT_LOADS )
    {
-      MemberIDType mbrID;
-      Float64 mbrLocation;
-      GetFemModelLocation(pModelData,poi,&mbrID,&mbrLocation);
+      ApplyWheelLineLoadsToFemModel(pModelData);
+      ApplyDeadLoad(pierID,pModelData);
 
-      CComPtr<IFem2dPOI> femPoi;
-      femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
-      pModelData->m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
-      femPoiID++;
-   }
+      // Assign POIs
+      CComPtr<IFem2dPOICollection> femPois;
+      pModelData->m_Model->get_POIs(&femPois);
+      PoiIDType femPoiID = 0;
+
+      GET_IFACE(IXBRPointOfInterest,pPoi);
+      std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+      {
+         MemberIDType mbrID;
+         Float64 mbrLocation;
+         GetFemModelLocation(pModelData,poi,&mbrID,&mbrLocation);
+
+         CComPtr<IFem2dPOI> femPoi;
+         femPois->Create(femPoiID,mbrID,mbrLocation,&femPoi);
+         pModelData->m_PoiMap.insert(std::make_pair(poi.GetID(),femPoiID));
+         femPoiID++;
+      }
+
+      pModelData->m_InitLevel = MODEL_INIT_LOADS;
 
 #if defined _DEBUG
-   CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
-   CComPtr<IStructuredSave2> save;
-   save.CoCreateInstance(CLSID_StructuredSave2);
-   save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
-   ss->Save(save);
-   save->Close();
-   save.Release();
-   ss.Release();
+      CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
+      CComPtr<IStructuredSave2> save;
+      save.CoCreateInstance(CLSID_StructuredSave2);
+      save->Open(CComBSTR(_T("XBeamRate_Fem2d.xml")));
+      ss->Save(save);
+      save->Close();
+      save.Release();
+      ss.Release();
 #endif // _DEBUG
+   }
 }
 
 void CAnalysisAgentImp::ApplyDeadLoad(PierIDType pierID,ModelData* pModelData)
@@ -1016,36 +1022,111 @@ IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgs
    GET_IFACE_NOCHECK(IXBRRatingSpecification,pRatingSpec);
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
    {
-      return (IndexType)(pModelData->m_LastSingleLaneLoadCaseID - FIRST_LIVELOAD_ID + 1);
+      return pModelData->m_LastSingleLaneLLConfigIdx + 1;
    }
    else
    {
-      return (IndexType)(pModelData->m_NextLiveLoadCaseID - FIRST_LIVELOAD_ID);
+      return pModelData->m_LiveLoadConfigurations.size();
    }
 }
 
 IndexType CAnalysisAgentImp::GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx)
 {
    ModelData* pModelData = GetModelData(pierID);
-   LoadCaseIDType lcid = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
-   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
-   return llConfig.m_nLoadedLanes;
+   return pModelData->m_LiveLoadConfigurations[liveLoadConfigIdx].m_LoadCases.size();
+}
+
+std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(PierIDType pierID)
+{
+   ModelData* pModelData = GetModelData(pierID,MODEL_INIT_TOPOLOGY);
+   return GetWheelLineLocations(pModelData);
 }
 
 WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx)
 {
    ModelData* pModelData = GetModelData(pierID);
-   LoadCaseIDType lcid = FIRST_LIVELOAD_ID + liveLoadConfigIdx;
-   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
+   LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[liveLoadConfigIdx];
 
 #if defined _DEBUG
-   if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
+   if ( liveLoadConfigIdx <= pModelData->m_LastSingleLaneLLConfigIdx )
    {
-      ATLASSERT(llConfig.m_nLoadedLanes == 1);
+      ATLASSERT(llConfig.m_LoadCases.size() == 1);
    }
 #endif
 
-   return GetWheelLineConfiguration(pierID,ratingType,vehicleIdx,llConfig,permitLaneIdx);
+   GET_IFACE(IXBRProject,pProject);
+   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
+
+   bool bIsPermit = ::IsPermitRatingType(ratingType);
+
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   bool bIsWSDOTMethod = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT ? true : false);
+
+   Float64 Rlgl = 0;
+   if ( bIsPermit && bIsWSDOTMethod )
+   {
+      Rlgl = GetMaxLegalReaction(pierID);
+   }
+#if defined _DEBUG
+   else
+   {
+      ATLASSERT(permitLaneIdx == INVALID_INDEX); // permit lane idx isn't used for this case, expecting it to be INVALID_INDEX
+   }
+#endif
+
+   WheelLineConfiguration wheelConfig;
+   IndexType laneIdx = 0;
+   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   {
+      std::map<LoadCaseIDType,LaneConfiguration>::iterator found = pModelData->m_LaneConfigurations.find(lcid);
+      ATLASSERT(found != pModelData->m_LaneConfigurations.end());
+
+      LaneConfiguration& laneConfig = found->second;
+
+      if ( bIsPermit && bIsWSDOTMethod )
+      {
+         if ( laneIdx == permitLaneIdx )
+         {
+            WheelLinePlacement leftWheelLinePlacement;
+            leftWheelLinePlacement.P = -0.5*R;
+            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+            wheelConfig.push_back(leftWheelLinePlacement);
+
+            WheelLinePlacement rightWheelLinePlacement;
+            rightWheelLinePlacement.P = -0.5*R;
+            rightWheelLinePlacement.Xxb = laneConfig.Xright;
+            wheelConfig.push_back(rightWheelLinePlacement);
+         }
+         else
+         {
+            WheelLinePlacement leftWheelLinePlacement;
+            leftWheelLinePlacement.P = -0.5*Rlgl;
+            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+            wheelConfig.push_back(leftWheelLinePlacement);
+
+            WheelLinePlacement rightWheelLinePlacement;
+            rightWheelLinePlacement.P = -0.5*Rlgl;
+            rightWheelLinePlacement.Xxb = laneConfig.Xright;
+            wheelConfig.push_back(rightWheelLinePlacement);
+         }
+      }
+      else
+      {
+         WheelLinePlacement leftWheelLinePlacement;
+         leftWheelLinePlacement.P = -0.5*R;
+         leftWheelLinePlacement.Xxb = laneConfig.Xleft;
+         wheelConfig.push_back(leftWheelLinePlacement);
+
+         WheelLinePlacement rightWheelLinePlacement;
+         rightWheelLinePlacement.P = -0.5*R;
+         rightWheelLinePlacement.Xxb = laneConfig.Xright;
+         wheelConfig.push_back(rightWheelLinePlacement);
+      }
+
+      laneIdx++;
+   }
+
+   return wheelConfig;
 }
 
 void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
@@ -1055,15 +1136,8 @@ void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pier
 
    UnitLiveLoadResult& unitLiveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
-   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_MzMinLoadCases)
-   {
-      pvMin->push_back(lcid - FIRST_LIVELOAD_ID);
-   }
-
-   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_MzMaxLoadCases)
-   {
-      pvMax->push_back(lcid - FIRST_LIVELOAD_ID);
-   }
+   *pvMin = unitLiveLoadResult.m_MzMinLiveLoadConfigs;
+   *pvMax = unitLiveLoadResult.m_MzMaxLiveLoadConfigs;
 }
 
 void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig)
@@ -1071,11 +1145,7 @@ void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierI
    pvLLConfig->clear();
 
    UnitLiveLoadResult& unitLiveLoadResult = GetUnitLiveLoadResult(pierID,poi);
-
-   BOOST_FOREACH(LoadCaseIDType lcid,unitLiveLoadResult.m_FyLoadCases)
-   {
-      pvLLConfig->push_back(lcid - FIRST_LIVELOAD_ID);
-   }
+   *pvLLConfig = unitLiveLoadResult.m_FyLiveLoadConfigs;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -1198,20 +1268,36 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
 {
    ModelData* pModelData = GetModelData(pierID);
 
+   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
+
    std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
    ATLASSERT(found != pModelData->m_PoiMap.end());
    PoiIDType femPoiID = found->second;
 
-   CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
-   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+   LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
 
-   Float64 FxLeft, FyLeft, MzLeft;
-   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeft(0), FxRight(0);
+   Float64 FyLeft(0), FyRight(0);
+   Float64 MzLeft(0), MzRight(0);
 
-   Float64 FxRight, FyRight, MzRight;
-   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
+   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   {
+      Float64 fxLeft, fyLeft, mzLeft;
+      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
+      ATLASSERT(SUCCEEDED(hr));
+
+      Float64 fxRight, fyRight, mzRight;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+      ATLASSERT(SUCCEEDED(hr));
+
+      FxLeft += fxLeft;
+      FyLeft += fyLeft;
+      MzLeft += mzLeft;
+
+      FxRight += fxRight;
+      FyRight += fyRight;
+      MzRight += mzRight;
+   }
 
    Float64 Mz;
    if ( IsZero(poi.GetDistFromStart()) )
@@ -1250,15 +1336,30 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    PoiIDType femPoiID = found->second;
 
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
-   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
+   LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
 
-   Float64 FxLeft, FyLeft, MzLeft;
-   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeft(0), FxRight(0);
+   Float64 FyLeft(0), FyRight(0);
+   Float64 MzLeft(0), MzRight(0);
 
-   Float64 FxRight, FyRight, MzRight;
-   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
+   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   {
+      Float64 fxLeft, fyLeft, mzLeft;
+      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
+      ATLASSERT(SUCCEEDED(hr));
+
+      Float64 fxRight, fyRight, mzRight;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+      ATLASSERT(SUCCEEDED(hr));
+
+      FxLeft += fxLeft;
+      FyLeft += fyLeft;
+      MzLeft += mzLeft;
+
+      FxRight += fxRight;
+      FyRight += fyRight;
+      MzRight += mzRight;
+   }
 
    FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
    FyRight = IsZero(FyRight) ? 0 : FyRight;
@@ -1325,15 +1426,6 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
       return;
    }
 
-   // This strategy for this method is as follows:
-   // The specified live load configuration is for multiple loaded lanes.
-   // The results for this live load configuration assumes the same live load in all lanes
-   // We want all lanes loaded with the governing legal load reaction except for the
-   // permit lane, which has the permit reaction in it.
-   //
-   // The legal load moment is the moment for legal load in all lanes mines the legal load moment
-   // in the permit lane.
-
    ModelData* pModelData = GetModelData(pierID);
 
    std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
@@ -1343,64 +1435,74 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
 
    // Get the results for all loaded lanes having the same vehicle reaction
-   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
-   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
+   LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
+   ATLASSERT(llConfig.m_LoadCases.size() == nLoadedLanes);
 
-   Float64 FxLeft, FyLeft, MzLeft;
-   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeftLegal(0), FxRightLegal(0);
+   Float64 FyLeftLegal(0), FyRightLegal(0);
+   Float64 MzLeftLegal(0), MzRightLegal(0);
 
-   Float64 FxRight, FyRight, MzRight;
-   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeftPermit(0), FxRightPermit(0);
+   Float64 FyLeftPermit(0), FyRightPermit(0);
+   Float64 MzLeftPermit(0), MzRightPermit(0);
 
-   Float64 Mz_MultiLane;
+   HRESULT hr = S_OK;
+
+   for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
+   {
+      // get unit lane load forces
+      LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
+      Float64 fxLeft, fyLeft, mzLeft;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
+      ATLASSERT(SUCCEEDED(hr));
+
+      Float64 fxRight, fyRight, mzRight;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+      ATLASSERT(SUCCEEDED(hr));
+
+      if ( laneIdx == permitLaneIdx )
+      {
+         FxLeftPermit += fxLeft;
+         FyLeftPermit += fyLeft;
+         MzLeftPermit += mzLeft;
+
+         FxRightPermit += fxRight;
+         FyRightPermit += fyRight;
+         MzRightPermit += mzRight;
+      }
+      else
+      {
+         FxLeftLegal += fxLeft;
+         FyLeftLegal += fyLeft;
+         MzLeftLegal += mzLeft;
+
+         FxRightLegal += fxRight;
+         FyRightLegal += fyRight;
+         MzRightLegal += mzRight;
+      }
+   }
+
    if ( IsZero(poi.GetDistFromStart()) )
    {
-      Mz_MultiLane = -MzRight;
+      *pMpermit = -MzRightPermit;
+      *pMlegal  = -MzRightLegal;
    }
    else
    {
-      Mz_MultiLane = MzLeft;
+      *pMpermit = MzLeftPermit;
+      *pMlegal  = MzLeftLegal;
    }
-
-   Mz_MultiLane = IsZero(Mz_MultiLane) ? 0 : Mz_MultiLane;
-
-   // Get the results for the specified lane having a single vehicle
-   LoadCaseIDType lcidSingle = llConfig.m_LaneConfiguration[permitLaneIdx].m_SingleLaneLoadCaseID;
-
-   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
-
-   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
-
-   Float64 Mz_SingleLane;
-   if ( IsZero(poi.GetDistFromStart()) )
-   {
-      Mz_SingleLane = -MzRight;
-   }
-   else
-   {
-      Mz_SingleLane = MzLeft;
-   }
-
-   Mz_SingleLane = IsZero(Mz_SingleLane) ? 0 : Mz_SingleLane;
 
    GET_IFACE(IXBRProject,pProject);
    Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
    Float64 Rlegal  = GetMaxLegalReaction(pierID);
 
-   Float64 Mlegal_in_all_lanes    = Rlegal*Mz_MultiLane;   // legal loads in all lanes
-   Float64 Mlegal_in_permit_lane  = Rlegal*Mz_SingleLane;  // legal load in permit lane
-   Float64 Mpermit_in_permit_lane = Rpermit*Mz_SingleLane; // permit load in permit lane
+   *pMpermit *= Rpermit;
+   *pMlegal  *= Rlegal;
 
-   *pMlegal  = Mlegal_in_all_lanes - Mlegal_in_permit_lane;
-   *pMpermit = Mpermit_in_permit_lane;
-
-   *pMlegal  = IsZero(*pMlegal)  ? 0 : *pMlegal;
    *pMpermit = IsZero(*pMpermit) ? 0 : *pMpermit;
-   
+   *pMlegal  = IsZero(*pMlegal)  ? 0 : *pMlegal;
+
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
    {
@@ -1452,15 +1554,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
       return;
    }
 
-   // This strategy for this method is as follows:
-   // The specified live load configuration is for multiple loaded lanes.
-   // The results for this live load configuration assumes the same live load in all lanes
-   // We want all lanes loaded with the governing legal load reaction except for the
-   // permit lane, which has the permit reaction in it.
-   //
-   // The legal load moment is the moment for legal load in all lanes mines the legal load moment
-   // in the permit lane.
-
    ModelData* pModelData = GetModelData(pierID);
 
    std::map<PoiIDType,PoiIDType>::iterator found = pModelData->m_PoiMap.find(poi.GetID());
@@ -1470,63 +1563,68 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
 
    // Get the results for all loaded lanes having the same vehicle reaction
-   LoadCaseIDType lcid = llConfigIdx + FIRST_LIVELOAD_ID;
-   LiveLoadConfiguration& llConfig = GetLiveLoadConfiguration(pModelData,lcid);
+   LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
+   ATLASSERT(llConfig.m_LoadCases.size() == nLoadedLanes);
 
-   Float64 FxLeft, FyLeft, MzLeft;
-   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeftLegal(0), FxRightLegal(0);
+   Float64 FyLeftLegal(0), FyRightLegal(0);
+   Float64 MzLeftLegal(0), MzRightLegal(0);
 
-   Float64 FxRight, FyRight, MzRight;
-   hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxLeftPermit(0), FxRightPermit(0);
+   Float64 FyLeftPermit(0), FyRightPermit(0);
+   Float64 MzLeftPermit(0), MzRightPermit(0);
 
-   FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
-   FyRight = IsZero(FyRight) ? 0 : FyRight;
+   HRESULT hr = S_OK;
 
-   sysSectionValue Fy_MultiLane;
-   if ( IsZero(poi.GetDistFromStart()) )
+   for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
    {
-      Fy_MultiLane = -FyRight;
+      // get unit lane load forces
+      LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
+      Float64 fxLeft, fyLeft, mzLeft;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
+      ATLASSERT(SUCCEEDED(hr));
+
+      Float64 fxRight, fyRight, mzRight;
+      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+      ATLASSERT(SUCCEEDED(hr));
+
+      if ( laneIdx == permitLaneIdx )
+      {
+         FxLeftPermit += fxLeft;
+         FyLeftPermit += fyLeft;
+         MzLeftPermit += mzLeft;
+
+         FxRightPermit += fxRight;
+         FyRightPermit += fyRight;
+         MzRightPermit += mzRight;
+      }
+      else
+      {
+         FxLeftLegal += fxLeft;
+         FyLeftLegal += fyLeft;
+         MzLeftLegal += mzLeft;
+
+         FxRightLegal += fxRight;
+         FyRightLegal += fyRight;
+         MzRightLegal += mzRight;
+      }
    }
-   else
-   {
-      Fy_MultiLane = FyLeft;
-   }
 
-   // Get the results for the specified lane having a single vehicle
-   LoadCaseIDType lcidSingle = llConfig.m_LaneConfiguration[permitLaneIdx].m_SingleLaneLoadCaseID;
-
-   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-   ATLASSERT(SUCCEEDED(hr));
-
-   hr = results->ComputePOIForces(lcidSingle,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-   ATLASSERT(SUCCEEDED(hr));
-
-   FyLeft  = IsZero(FyLeft)  ? 0 : FyLeft;
-   FyRight = IsZero(FyRight) ? 0 : FyRight;
-
-   sysSectionValue Fy_SingleLane;
-   if ( IsZero(poi.GetDistFromStart()) )
-   {
-      Fy_SingleLane = -FyRight;
-   }
-   else
-   {
-      Fy_SingleLane = FyLeft;
-   }
+   *pVpermit = sysSectionValue(-FyLeftPermit,FyRightPermit);
+   *pVlegal  = sysSectionValue(-FyLeftLegal, FyRightLegal );
 
    GET_IFACE(IXBRProject,pProject);
    Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
    Float64 Rlegal  = GetMaxLegalReaction(pierID);
 
-   sysSectionValue Vlegal_in_all_lanes    = Rlegal*Fy_MultiLane;   // legal loads in all lanes
-   sysSectionValue Vlegal_in_permit_lane  = Rlegal*Fy_SingleLane;  // legal load in permit lane
-   sysSectionValue Vpermit_in_permit_lane = Rpermit*Fy_SingleLane; // permit load in permit lane
+   *pVpermit *= Rpermit;
+   *pVlegal  *= Rlegal;
 
-   *pVlegal  = Vlegal_in_all_lanes - Vlegal_in_permit_lane;
-   *pVpermit = Vpermit_in_permit_lane;
-   
+   pVpermit->Left()  = IsZero(pVpermit->Left())  ? 0 : pVpermit->Left();
+   pVpermit->Right() = IsZero(pVpermit->Right()) ? 0 : pVpermit->Right();
+   pVlegal->Left()   = IsZero(pVlegal->Left())   ? 0 : pVlegal->Left();
+   pVlegal->Right()  = IsZero(pVlegal->Right())  ? 0 : pVlegal->Right();
+
    Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
    {
@@ -1589,12 +1687,12 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
 
    if ( pMinLLConfigIdx )
    {
-      *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidMzMin_SingleLane : liveLoadResult.m_lcidMzMin) - FIRST_LIVELOAD_ID;
+      *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_MzMin_SingleLane : liveLoadResult.m_llConfigIdx_MzMin);
    }
 
    if ( pMaxLLConfigIdx )
    {
-      *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidMzMax_SingleLane : liveLoadResult.m_lcidMzMax) - FIRST_LIVELOAD_ID;
+      *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_MzMax_SingleLane : liveLoadResult.m_llConfigIdx_MzMax);
    }
 }
 
@@ -1640,11 +1738,11 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    {
       if ( IsEqual(MaxMagnitude(pMin->Left(),pMin->Right()),pMin->Left()) )
       {
-         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyLeftMin_SingleLane : liveLoadResult.m_lcidFyLeftMin) - FIRST_LIVELOAD_ID;
+         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_FyLeftMin_SingleLane : liveLoadResult.m_llConfigIdx_FyLeftMin);
       }
       else
       {
-         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyRightMin_SingleLane : liveLoadResult.m_lcidFyRightMin) - FIRST_LIVELOAD_ID;
+         *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_FyRightMin_SingleLane : liveLoadResult.m_llConfigIdx_FyRightMin);
       }
    }
 
@@ -1652,11 +1750,11 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    {
       if ( IsEqual(MaxMagnitude(pMax->Left(),pMax->Right()),pMax->Left()) )
       {
-         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyLeftMax_SingleLane : liveLoadResult.m_lcidFyLeftMax) - FIRST_LIVELOAD_ID;
+         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_FyLeftMax_SingleLane : liveLoadResult.m_llConfigIdx_FyLeftMax);
       }
       else
       {
-         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_lcidFyRightMax_SingleLane : liveLoadResult.m_lcidFyRightMax) - FIRST_LIVELOAD_ID;
+         *pMaxLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_FyRightMax_SingleLane : liveLoadResult.m_llConfigIdx_FyRightMax);
       }
    }
 }
@@ -2157,7 +2255,7 @@ std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::Co
    return vPFTypes;
 }
 
-void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData)
 {
    GET_IFACE(IXBRPier,pPier);
    Float64 Wcc = pPier->GetCurbToCurbWidth(pierID); // normal to alignment
@@ -2247,60 +2345,13 @@ void CAnalysisAgentImp::ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelDat
             Float64 Xoffset = stepSize*stepIdx; 
             Xoffset += XcurbLine;
 
-            // Apply the wheel line loads to the FEM model, adjusting the default position by Xoffset,
-            // and returns the FEM model load case ID.
-            LoadCaseIDType lcid = ApplyWheelLineLoadsToFemModel(pModelData,Xoffset,vWheelLinePositions);
+            // Create the information for the wheel line loads that are to be applied to the FEM model.
+            // Wheel line position is adjusted from default position by Xoffset.
+            LiveLoadConfiguration llConfig;
+            llConfig.m_LoadCases = InitializeWheelLineLoads(pModelData,Xoffset,vWheelLinePositions);
+            ATLASSERT(llConfig.m_LoadCases.size() == nLoadedLanes);
 
-            LiveLoadConfiguration llconfig;
-            llconfig.m_LoadCaseID = lcid;
-            llconfig.m_nLoadedLanes = nLoadedLanes;
-            
-            for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
-            {
-               LaneConfiguration laneConfig;
-               Float64 Xleft  = vWheelLinePositions[2*laneIdx]   + Xoffset;
-               Float64 Xright = vWheelLinePositions[2*laneIdx+1] + Xoffset;
-               laneConfig.Xleft  = Xleft;
-               laneConfig.Xright = Xright;
-
-               if ( nLoadedLanes == 1 )
-               {
-                  // if this is the one loaded lane case, we have the information
-                  laneConfig.m_SingleLaneLoadCaseID = lcid;
-                  pModelData->m_SingleLaneLoadCaseIDs.insert(std::make_pair(stepIdx,lcid));
-               }
-               else
-               {
-                  // this is the multiple loaded lane case
-                  // we need to relate the location of the current laneIdx for the multi-lane loading condition
-                  // to the exact same lane location for the single lane case
-
-                  // |<-- Left Curb Line
-                  // |
-                  // |<------------- Xcenter --------->|
-                  // |                      |                      |
-                  // |                      |      P        P      |
-                  // |                      |      |        |      |
-                  // |                      |<-2'->|<--6'-->|<-2'->| (not skew adjusted... sketch assumes standard 10' wide truck in 12' lane)
-                  // |                      |      |        |      |
-                  // |   XlaneEdge =        |      V        V      |
-                  // |<- stepIdx*stepSize ->|<---- wLoadedLane --->|
-
-                  // stepIdx = (Xcenter - wLoadedLane/2)/stepSize
-
-                  Float64 Xcenter = (Xleft-XcurbLine + Xright-XcurbLine)/2; // center of lane from left curb line
-                  Float64 XlaneEdge = Xcenter - wLoadedLane/2;
-                  XlaneEdge = IsZero(XlaneEdge) ? 0 : XlaneEdge;
-                  IndexType singleLaneStepIdx = IsZero(stepSize) ? 0 : (IndexType)floor(XlaneEdge/stepSize);
-                  std::map<IndexType,LoadCaseIDType>::iterator found = pModelData->m_SingleLaneLoadCaseIDs.find(singleLaneStepIdx);
-                  ATLASSERT(found != pModelData->m_SingleLaneLoadCaseIDs.end());
-                  laneConfig.m_SingleLaneLoadCaseID = found->second;
-               }
-               
-               llconfig.m_LaneConfiguration.push_back(laneConfig);
-            }
-
-            pModelData->m_LiveLoadConfigurations.insert(llconfig);
+            pModelData->m_LiveLoadConfigurations.push_back(llConfig);
          } // next step
       } // next gap position
    } // next number of loaded lanes
@@ -2368,41 +2419,100 @@ std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float
    return vLoadPositions;
 }
 
-LoadCaseIDType CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vLoadPositions)
+std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vWheelLinePositions)
+{
+   // keep track of the last load case ID used for one loaded lane
+   // vLoadPositions has two point loads per lane, so the number of loaded lanes
+   // is half the size of the container
+   IndexType nLoadedLanes = vWheelLinePositions.size()/2;
+
+   if ( nLoadedLanes == 1 )
+   {
+      pModelData->m_LastSingleLaneLLConfigIdx = pModelData->m_LiveLoadConfigurations.size();
+   }
+
+   // for each loaded lane, create a FEM2D load case that has the two
+   // wheel line loads
+   std::vector<LoadCaseIDType> vLoadCases;
+   std::vector<Float64>::iterator iter(vWheelLinePositions.begin());
+   std::vector<Float64>::iterator end(vWheelLinePositions.end());
+   for ( ; iter != end; iter += 2 )
+   {
+      // these are the left curb line justified position of the wheel lines
+      Float64 Xleft  = *iter;
+      Float64 Xright = *(iter+1);
+
+      // adjust the wheel line positions for the current step
+      Xleft  += Xoffset;
+      Xright += Xoffset;
+
+      // Check to see if we've previously had a vehicle in this position (stored based on Xcenter)
+      Float64 Xcenter = (Xleft + Xright)/2;
+      std::map<Float64,LoadCaseIDType,Float64_less>::iterator found = pModelData->m_LiveLoadCases.find(Xcenter);
+      if ( found != pModelData->m_LiveLoadCases.end() )
+      {
+         // there is already a load case for this lane position... simply reference it
+         LoadCaseIDType lcid = found->second;
+         vLoadCases.push_back(lcid);
+         continue;
+      }
+
+      // This is a new position... create a FEM2d load case
+
+      LoadCaseIDType lcid = pModelData->m_NextLiveLoadCaseID++;
+      vLoadCases.push_back(lcid);
+
+      // save the lane position and load case ID for future reference
+      pModelData->m_LiveLoadCases.insert(std::make_pair(Xcenter,lcid));
+
+      // save the lane configuration for future reference
+      LaneConfiguration laneConfig;
+      laneConfig.Xleft  = Xleft;
+      laneConfig.Xright = Xright;
+      pModelData->m_LaneConfigurations.insert(std::make_pair(lcid,laneConfig));
+   }
+
+   return vLoadCases;
+}
+
+void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData)
 {
    CComPtr<IFem2dLoadingCollection> loadings;
    pModelData->m_Model->get_Loadings(&loadings);
 
-   LoadCaseIDType loadCaseID = pModelData->m_NextLiveLoadCaseID++; 
-
-   // keep track of the last load case ID used for one loaded lane
-   // vLoadPositions has two point loads per lane, so the number of loaded lanes
-   // is half the size of the container
-   IndexType nLoadedLanes = vLoadPositions.size()/2;
-   if ( nLoadedLanes == 1 )
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator iter(pModelData->m_LaneConfigurations.begin());
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator end(pModelData->m_LaneConfigurations.end());
+   for ( ; iter != end; iter++ )
    {
-      pModelData->m_LastSingleLaneLoadCaseID = loadCaseID;
-   }
+      LoadCaseIDType lcid = iter->first;
+      LaneConfiguration& laneConfig = iter->second;
 
-   CComPtr<IFem2dLoading> loading;
-   loadings->Create(loadCaseID,&loading);
+      // create the load case
+      CComPtr<IFem2dLoading> loading;
+      loadings->Create(lcid,&loading);
 
-   CComPtr<IFem2dPointLoadCollection> pointLoads;
-   loading->get_PointLoads(&pointLoads);
+      CComPtr<IFem2dPointLoadCollection> pointLoads;
+      loading->get_PointLoads(&pointLoads);
 
-   LoadIDType loadID = 0;
-   Float64 P = -0.5; // unit lane load = 0.5 per wheel line
-   BOOST_FOREACH(Float64 X,vLoadPositions)
-   {
+      // create the loading for each wheel line
+      LoadIDType loadID = 0;
+      Float64 P = -0.5; // unit lane load = 0.5 per wheel line
+
       MemberIDType mbrID;
       Float64 mbrLocation;
-      GetSuperstructureFemModelLocation(pModelData,X+Xoffset,&mbrID,&mbrLocation);
+
+      // left wheel line load
+      GetSuperstructureFemModelLocation(pModelData,laneConfig.Xleft,&mbrID,&mbrLocation);
 
       CComPtr<IFem2dPointLoad> pointLoad;
       pointLoads->Create(loadID++,mbrID,mbrLocation,0.0,P,0.0,lotGlobal,&pointLoad);
-   }
 
-   return loadCaseID;
+      // right wheel line load
+      GetSuperstructureFemModelLocation(pModelData,laneConfig.Xright,&mbrID,&mbrLocation);
+
+      pointLoad.Release();
+      pointLoads->Create(loadID++,mbrID,mbrLocation,0.0,P,0.0,lotGlobal,&pointLoad);
+   }
 }
 
 std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveLoadResults(PierIDType pierID)
@@ -2423,8 +2533,8 @@ std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveL
 struct Result
 {
    Float64 Value;
-   LoadCaseIDType lcid;
-   Result(Float64 v,LoadCaseIDType l) : Value(v), lcid(l) {}
+   IndexType llConfigIdx;
+   Result(Float64 v,IndexType l) : Value(v), llConfigIdx(l) {}
    bool operator<(const Result& result)const { return Value < result.Value; }
 };
 
@@ -2432,27 +2542,27 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 {
    Float64 MzMin = DBL_MAX;
    Float64 MzMax = -DBL_MAX;
-   LoadCaseIDType minMzLCID = INVALID_ID;
-   LoadCaseIDType maxMzLCID = INVALID_ID;
+   IndexType minMz_llConfigIdx = INVALID_INDEX;
+   IndexType maxMz_llConfigIdx = INVALID_INDEX;
 
    Float64 MzMin_SingleLane = DBL_MAX;
    Float64 MzMax_SingleLane = -DBL_MAX;
-   LoadCaseIDType minMzLCID_SingleLane = INVALID_ID;
-   LoadCaseIDType maxMzLCID_SingleLane = INVALID_ID;
+   IndexType minMz_llConfigIdx_SingleLane = INVALID_INDEX;
+   IndexType maxMz_llConfigIdx_SingleLane = INVALID_INDEX;
 
    sysSectionValue FyMin = DBL_MAX;
    sysSectionValue FyMax = -DBL_MAX;
-   LoadCaseIDType minFyLeftLCID = INVALID_ID;
-   LoadCaseIDType maxFyLeftLCID = INVALID_ID;
-   LoadCaseIDType minFyRightLCID = INVALID_ID;
-   LoadCaseIDType maxFyRightLCID = INVALID_ID;
+   IndexType minFyLeft_llConfigIdx = INVALID_INDEX;
+   IndexType maxFyLeft_llConfigIdx = INVALID_INDEX;
+   IndexType minFyRight_llConfigIdx = INVALID_INDEX;
+   IndexType maxFyRight_llConfigIdx = INVALID_INDEX;
 
    sysSectionValue FyMin_SingleLane = DBL_MAX;
    sysSectionValue FyMax_SingleLane = -DBL_MAX;
-   LoadCaseIDType minFyLeftLCID_SingleLane = INVALID_ID;
-   LoadCaseIDType maxFyLeftLCID_SingleLane = INVALID_ID;
-   LoadCaseIDType minFyRightLCID_SingleLane = INVALID_ID;
-   LoadCaseIDType maxFyRightLCID_SingleLane = INVALID_ID;
+   IndexType minFyLeft_llConfigIdx_SingleLane = INVALID_INDEX;
+   IndexType maxFyLeft_llConfigIdx_SingleLane = INVALID_INDEX;
+   IndexType minFyRight_llConfigIdx_SingleLane = INVALID_INDEX;
+   IndexType maxFyRight_llConfigIdx_SingleLane = INVALID_INDEX;
 
    ModelData* pModelData = GetModelData(pierID);
 
@@ -2464,18 +2574,38 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    std::set<Result> shears;
 
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
-   for ( LoadCaseIDType lcid = FIRST_LIVELOAD_ID; lcid < pModelData->m_NextLiveLoadCaseID; lcid++ )
+   IndexType nLiveLoadConfigs = pModelData->m_LiveLoadConfigurations.size();
+   for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigs; llConfigIdx++ )
    {
-      IndexType nLoadedLanes = GetLoadedLaneCount(pierID,lcid-FIRST_LIVELOAD_ID);
+      LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
+
+      IndexType nLoadedLanes = llConfig.m_LoadCases.size();
+
       Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
 
-      Float64 FxLeft, FyLeft, MzLeft;
-      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&FxLeft,&FyLeft,&MzLeft);
-      ATLASSERT(SUCCEEDED(hr));
+      Float64 FxLeft(0), FyLeft(0), MzLeft(0);
+      Float64 FxRight(0), FyRight(0), MzRight(0);
 
-      Float64 FxRight, FyRight, MzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&FxRight,&FyRight,&MzRight);
-      ATLASSERT(SUCCEEDED(hr));
+      for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
+      {
+         LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
+
+         Float64 fxLeft, fyLeft, mzLeft;
+         HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
+         ATLASSERT(SUCCEEDED(hr));
+
+         Float64 fxRight, fyRight, mzRight;
+         hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+         ATLASSERT(SUCCEEDED(hr));
+
+         FxLeft += fxLeft;
+         FyLeft += fyLeft;
+         MzLeft += mzLeft;
+
+         FxRight += fxRight;
+         FyRight += fyRight;
+         MzRight += mzRight;
+      }
 
       Float64 Mz;
       if ( IsZero(poi.GetDistFromStart()) )
@@ -2490,33 +2620,33 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
       Mz = IsZero(Mz) ? 0 : Mz;
       Mz *= mpf;
 
-      moments.insert(Result(Mz,lcid));
+      moments.insert(Result(Mz,llConfigIdx));
 
       if ( Mz < MzMin )
       {
          MzMin = Mz;
-         minMzLCID = lcid;
+         minMz_llConfigIdx = llConfigIdx;
       }
 
       if ( MzMax < Mz )
       {
          MzMax = Mz;
-         maxMzLCID = lcid;
+         maxMz_llConfigIdx = llConfigIdx;
       }
 
 
-      if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
+      if ( llConfigIdx <= pModelData->m_LastSingleLaneLLConfigIdx )
       {
          if ( Mz < MzMin_SingleLane )
          {
             MzMin_SingleLane = Mz;
-            minMzLCID_SingleLane = lcid;
+            minMz_llConfigIdx_SingleLane = llConfigIdx;
          }
 
          if ( MzMax_SingleLane < Mz )
          {
             MzMax_SingleLane = Mz;
-            maxMzLCID_SingleLane = lcid;
+            maxMz_llConfigIdx_SingleLane = llConfigIdx;
          }
       }
 
@@ -2526,74 +2656,74 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
       Fy *= mpf;
 
-      shears.insert(Result(Max(fabs(Fy.Left()),fabs(Fy.Right())),lcid)); // want shear with maximum magnitude
+      shears.insert(Result(Max(fabs(Fy.Left()),fabs(Fy.Right())),llConfigIdx)); // want shear with maximum magnitude
 
       if ( Fy.Left() < FyMin.Left() )
       {
          FyMin.Left() = Fy.Left();
-         minFyLeftLCID = lcid;
+         minFyLeft_llConfigIdx = llConfigIdx;
       }
 
       if ( Fy.Right() < FyMin.Right() )
       {
          FyMin.Right() = Fy.Right();
-         minFyRightLCID = lcid;
+         minFyRight_llConfigIdx = llConfigIdx;
       }
 
       if ( FyMax.Left() < Fy.Left() )
       {
          FyMax.Left() = Fy.Left();
-         maxFyLeftLCID = lcid;
+         maxFyLeft_llConfigIdx = llConfigIdx;
       }
 
       if ( FyMax.Right() < Fy.Right() )
       {
          FyMax.Right() = Fy.Right();
-         maxFyRightLCID = lcid;
+         maxFyRight_llConfigIdx = llConfigIdx;
       }
 
 
-      if ( lcid <= pModelData->m_LastSingleLaneLoadCaseID )
+      if ( llConfigIdx <= pModelData->m_LastSingleLaneLLConfigIdx )
       {
          if ( Fy.Left() < FyMin_SingleLane.Left() )
          {
             FyMin_SingleLane.Left() = Fy.Left();
-            minFyLeftLCID_SingleLane = lcid;
+            minFyLeft_llConfigIdx_SingleLane = llConfigIdx;
          }
 
          if ( Fy.Right() < FyMin_SingleLane.Right() )
          {
             FyMin_SingleLane.Right() = Fy.Right();
-            minFyRightLCID_SingleLane = lcid;
+            minFyRight_llConfigIdx_SingleLane = llConfigIdx;
          }
 
          if ( FyMax_SingleLane.Left() < Fy.Left() )
          {
             FyMax_SingleLane.Left() = Fy.Left();
-            maxFyLeftLCID_SingleLane = lcid;
+            maxFyLeft_llConfigIdx_SingleLane = llConfigIdx;
          }
 
          if ( FyMax_SingleLane.Right() < Fy.Right() )
          {
             FyMax_SingleLane.Right() = Fy.Right();
-            maxFyRightLCID_SingleLane = lcid;
+            maxFyRight_llConfigIdx_SingleLane = llConfigIdx;
          }
       }
    }
 
-   ATLASSERT(minMzLCID != INVALID_ID);
-   ATLASSERT(maxMzLCID != INVALID_ID);
-   ATLASSERT(minFyLeftLCID != INVALID_ID);
-   ATLASSERT(maxFyLeftLCID != INVALID_ID);
-   ATLASSERT(minFyRightLCID != INVALID_ID);
-   ATLASSERT(maxFyRightLCID != INVALID_ID);
+   ATLASSERT(minMz_llConfigIdx != INVALID_INDEX);
+   ATLASSERT(maxMz_llConfigIdx != INVALID_INDEX);
+   ATLASSERT(minFyLeft_llConfigIdx != INVALID_INDEX);
+   ATLASSERT(maxFyLeft_llConfigIdx != INVALID_INDEX);
+   ATLASSERT(minFyRight_llConfigIdx != INVALID_INDEX);
+   ATLASSERT(maxFyRight_llConfigIdx != INVALID_INDEX);
 
-   ATLASSERT(minMzLCID_SingleLane != INVALID_ID);
-   ATLASSERT(maxMzLCID_SingleLane != INVALID_ID);
-   ATLASSERT(minFyLeftLCID_SingleLane != INVALID_ID);
-   ATLASSERT(maxFyLeftLCID_SingleLane != INVALID_ID);
-   ATLASSERT(minFyRightLCID_SingleLane != INVALID_ID);
-   ATLASSERT(maxFyRightLCID_SingleLane != INVALID_ID);
+   ATLASSERT(minMz_llConfigIdx_SingleLane != INVALID_INDEX);
+   ATLASSERT(maxMz_llConfigIdx_SingleLane != INVALID_INDEX);
+   ATLASSERT(minFyLeft_llConfigIdx_SingleLane != INVALID_INDEX);
+   ATLASSERT(maxFyLeft_llConfigIdx_SingleLane != INVALID_INDEX);
+   ATLASSERT(minFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
+   ATLASSERT(maxFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
 
    // Use the following if we need the number of loaded lanes associated with the min/max value
    //LiveLoadConfiguration key;
@@ -2613,25 +2743,25 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    liveLoadResult.m_idPOI = poi.GetID();
    liveLoadResult.m_MzMax = MzMax;
    liveLoadResult.m_MzMin = MzMin;
-   liveLoadResult.m_lcidMzMin = minMzLCID;
-   liveLoadResult.m_lcidMzMax = maxMzLCID;
+   liveLoadResult.m_llConfigIdx_MzMin = minMz_llConfigIdx;
+   liveLoadResult.m_llConfigIdx_MzMax = maxMz_llConfigIdx;
    liveLoadResult.m_FyMax = FyMax;
    liveLoadResult.m_FyMin = FyMin;
-   liveLoadResult.m_lcidFyLeftMin = minFyLeftLCID;
-   liveLoadResult.m_lcidFyLeftMax = maxFyLeftLCID;
-   liveLoadResult.m_lcidFyRightMin = minFyRightLCID;
-   liveLoadResult.m_lcidFyRightMax = maxFyRightLCID;
+   liveLoadResult.m_llConfigIdx_FyLeftMin = minFyLeft_llConfigIdx;
+   liveLoadResult.m_llConfigIdx_FyLeftMax = maxFyLeft_llConfigIdx;
+   liveLoadResult.m_llConfigIdx_FyRightMin = minFyRight_llConfigIdx;
+   liveLoadResult.m_llConfigIdx_FyRightMax = maxFyRight_llConfigIdx;
 
    liveLoadResult.m_MzMax_SingleLane = MzMax_SingleLane;
    liveLoadResult.m_MzMin_SingleLane = MzMin_SingleLane;
-   liveLoadResult.m_lcidMzMin_SingleLane = minMzLCID_SingleLane;
-   liveLoadResult.m_lcidMzMax_SingleLane = maxMzLCID_SingleLane;
+   liveLoadResult.m_llConfigIdx_MzMin_SingleLane = minMz_llConfigIdx_SingleLane;
+   liveLoadResult.m_llConfigIdx_MzMax_SingleLane = maxMz_llConfigIdx_SingleLane;
    liveLoadResult.m_FyMax_SingleLane = FyMax_SingleLane;
    liveLoadResult.m_FyMin_SingleLane = FyMin_SingleLane;
-   liveLoadResult.m_lcidFyLeftMin_SingleLane = minFyLeftLCID_SingleLane;
-   liveLoadResult.m_lcidFyLeftMax_SingleLane = maxFyLeftLCID_SingleLane;
-   liveLoadResult.m_lcidFyRightMin_SingleLane = minFyRightLCID_SingleLane;
-   liveLoadResult.m_lcidFyRightMax_SingleLane = maxFyRightLCID_SingleLane;
+   liveLoadResult.m_llConfigIdx_FyLeftMin_SingleLane = minFyLeft_llConfigIdx_SingleLane;
+   liveLoadResult.m_llConfigIdx_FyLeftMax_SingleLane = maxFyLeft_llConfigIdx_SingleLane;
+   liveLoadResult.m_llConfigIdx_FyRightMin_SingleLane = minFyRight_llConfigIdx_SingleLane;
+   liveLoadResult.m_llConfigIdx_FyRightMax_SingleLane = maxFyRight_llConfigIdx_SingleLane;
 
    // moments is sorted least to greatest... N minimum moments are
    // at the begining of the sequence... the N maximum moments are at
@@ -2643,7 +2773,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    for ( int i = 0; i < N && fmIter != fmEnd; i++, fmIter++)
    {
       Result& mr(*fmIter);
-      liveLoadResult.m_MzMinLoadCases.push_back(mr.lcid);
+      liveLoadResult.m_MzMinLiveLoadConfigs.push_back(mr.llConfigIdx);
    }
 
    // Use reverse iterator at end of sequence
@@ -2654,10 +2784,10 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    for ( int i = 0; i < N && rmIter != rmEnd && rvIter != rvEnd; i++, rmIter++, rvIter++ )
    {
       Result& mr(*rmIter);
-      liveLoadResult.m_MzMaxLoadCases.push_back(mr.lcid);
+      liveLoadResult.m_MzMaxLiveLoadConfigs.push_back(mr.llConfigIdx);
 
       Result& vr(*rvIter);
-      liveLoadResult.m_FyLoadCases.push_back(vr.lcid);
+      liveLoadResult.m_FyLiveLoadConfigs.push_back(vr.llConfigIdx);
    }
 
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);
@@ -2680,77 +2810,6 @@ CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(
    return *found;
 }
 
-WheelLineConfiguration CAnalysisAgentImp::GetWheelLineConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const LiveLoadConfiguration& llConfig,IndexType permitLaneIdx)
-{
-   GET_IFACE(IXBRProject,pProject);
-   Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
-
-   bool bIsPermit = ::IsPermitRatingType(ratingType);
-
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   bool bIsWSDOTMethod = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT ? true : false);
-
-   Float64 Rlgl = 0;
-   if ( bIsPermit && bIsWSDOTMethod )
-   {
-      Rlgl = GetMaxLegalReaction(pierID);
-   }
-#if defined _DEBUG
-   else
-   {
-      ATLASSERT(permitLaneIdx == INVALID_INDEX); // permit lane idx isn't used for this case, expecting it to be INVALID_INDEX
-   }
-#endif
-
-   WheelLineConfiguration wheelConfig;
-   IndexType laneIdx = 0;
-   BOOST_FOREACH(const LaneConfiguration& laneConfig,llConfig.m_LaneConfiguration)
-   {
-      if ( bIsPermit && bIsWSDOTMethod )
-      {
-         if ( laneIdx == permitLaneIdx )
-         {
-            WheelLinePlacement leftWheelLinePlacement;
-            leftWheelLinePlacement.P = -0.5*R;
-            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
-            wheelConfig.push_back(leftWheelLinePlacement);
-
-            WheelLinePlacement rightWheelLinePlacement;
-            rightWheelLinePlacement.P = -0.5*R;
-            rightWheelLinePlacement.Xxb = laneConfig.Xright;
-            wheelConfig.push_back(rightWheelLinePlacement);
-         }
-         else
-         {
-            WheelLinePlacement leftWheelLinePlacement;
-            leftWheelLinePlacement.P = -0.5*Rlgl;
-            leftWheelLinePlacement.Xxb = laneConfig.Xleft;
-            wheelConfig.push_back(leftWheelLinePlacement);
-
-            WheelLinePlacement rightWheelLinePlacement;
-            rightWheelLinePlacement.P = -0.5*Rlgl;
-            rightWheelLinePlacement.Xxb = laneConfig.Xright;
-            wheelConfig.push_back(rightWheelLinePlacement);
-         }
-      }
-      else
-      {
-         WheelLinePlacement leftWheelLinePlacement;
-         leftWheelLinePlacement.P = -0.5*R;
-         leftWheelLinePlacement.Xxb = laneConfig.Xleft;
-         wheelConfig.push_back(leftWheelLinePlacement);
-
-         WheelLinePlacement rightWheelLinePlacement;
-         rightWheelLinePlacement.P = -0.5*R;
-         rightWheelLinePlacement.Xxb = laneConfig.Xright;
-         wheelConfig.push_back(rightWheelLinePlacement);
-      }
-
-      laneIdx++;
-   }
-   return wheelConfig;
-}
-
 Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
@@ -2769,25 +2828,17 @@ Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
    return Rlgl;
 }
 
-CAnalysisAgentImp::LiveLoadConfiguration& CAnalysisAgentImp::GetLiveLoadConfiguration(ModelData* pModelData,LoadCaseIDType lcid)
-{
-   LiveLoadConfiguration key;
-   key.m_LoadCaseID = lcid;
-   std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   return (*foundLLConfig);
-}
-
 std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(ModelData* pModelData)
 {
    std::vector<Float64> vWheelLineLocations;
-   BOOST_FOREACH(LiveLoadConfiguration& llConfig,pModelData->m_LiveLoadConfigurations)
+
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator iter(pModelData->m_LaneConfigurations.begin());
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator end(pModelData->m_LaneConfigurations.end());
+   for ( ; iter != end; iter++ )
    {
-      BOOST_FOREACH(LaneConfiguration& laneConfig,llConfig.m_LaneConfiguration)
-      {
-         vWheelLineLocations.push_back(laneConfig.Xleft);
-         vWheelLineLocations.push_back(laneConfig.Xright);
-      }
+      LaneConfiguration& laneConfig(iter->second);
+      vWheelLineLocations.push_back(laneConfig.Xleft);
+      vWheelLineLocations.push_back(laneConfig.Xright);
    }
    return vWheelLineLocations;
 }

@@ -27,7 +27,6 @@
 #include "LiveLoadGraphDefinition.h"
 
 class CEAFGraphChildFrame;
-class grGraphXY;
 class arvPhysicalConverter;
 
 class CXBRLiveLoadGraphBuilder : public CEAFGraphBuilderBase
@@ -35,6 +34,8 @@ class CXBRLiveLoadGraphBuilder : public CEAFGraphBuilderBase
 public:
    CXBRLiveLoadGraphBuilder();
    CXBRLiveLoadGraphBuilder(const CXBRLiveLoadGraphBuilder& other);
+   virtual ~CXBRLiveLoadGraphBuilder();
+
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
    virtual CGraphBuilder* Clone();
@@ -51,15 +52,23 @@ protected:
    afx_msg void OnVehicleTypeChanged();
 
    virtual bool UpdateNow();
+   void InitGraph();
+   void UpdateYAxisUnits();
+   void UpdateGraphTitle();
+   void UpdateGraphData();
 
-   void BuildControllingLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
-   void BuildControllingVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
-   void BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
-   void BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,ActionType actionType,IndexType permitGraphIdx,IndexType legalGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
+   void BuildControllingLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx);
+   void BuildControllingVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx);
+   void BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,ActionType actionType,IndexType graphIdx);
+   void BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,ActionType actionType,IndexType permitGraphIdx,IndexType legalGraphIdx);
 
-   void DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGraphXY& graph,PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat);
+   void DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx);
 
    LPCTSTR GetGraphTitle(ActionType actionType);
+
+   grGraphXY m_Graph;
+   arvPhysicalConverter* m_pXFormat;
+   arvPhysicalConverter* m_pYFormat;
 
    DECLARE_MESSAGE_MAP()
 

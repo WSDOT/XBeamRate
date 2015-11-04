@@ -28,8 +28,10 @@
 typedef Uint32 PoiAttributeType; // NOTE: if more bits are needed use a 64-bit type
 
 #define POI_SECTIONCHANGE 0x00000001
-#define POI_COLUMN        0x00000002 // POI at in XBeam at CL of Column
+#define POI_COLUMN        0x00000002 // POI in XBeam at CL of Column
 #define POI_BRG           0x00000004 // POI in XBeam at CL Girder Bearing Point
+#define POI_WHEELLINE     0x00000008 // POI in XBeam at the location of a wheel line load
+#define POI_GRID          0x00000010 // POI in XBeam at a one foot grid location
 
 class XBREXTCLASS xbrPointOfInterest
 {
@@ -54,9 +56,16 @@ public:
 
    bool HasAttribute(PoiAttributeType attribute) const;
 
+   void ClearAttributes();
+
 protected:
    PoiIDType m_ID;
    ColumnIndexType m_ColumnIndex;
    Float64 m_Xpoi;
    PoiAttributeType m_Attributes;
+
+#if defined _DEBUG
+   std::_tstring m_strAttributes;
+   void UpdateAttributeString();
+#endif // _DEBUG
 };

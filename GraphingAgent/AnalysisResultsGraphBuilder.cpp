@@ -53,6 +53,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// create a dummy unit conversion tool to pacify the graph constructor
+static unitmgtLengthData DUMMY(unitMeasure::Meter);
+static LengthTool        DUMMY_TOOL(DUMMY);
+
 BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFGraphBuilderBase)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
@@ -61,14 +65,38 @@ BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFGraphBuilderBase)
 END_MESSAGE_MAP()
 
 
-CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder()
+CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder() :
+CEAFGraphBuilderBase(),
+m_Graph(DUMMY_TOOL,DUMMY_TOOL),
+m_pXFormat(0),
+m_pYFormat(0)
 {
    SetName(_T("Analysis Results"));
+   InitGraph();
 }
 
 CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder(const CXBRAnalysisResultsGraphBuilder& other) :
-CEAFGraphBuilderBase(other)
+CEAFGraphBuilderBase(other),
+m_Graph(DUMMY_TOOL,DUMMY_TOOL),
+m_pXFormat(0),
+m_pYFormat(0)
 {
+   InitGraph();
+}
+
+CXBRAnalysisResultsGraphBuilder::~CXBRAnalysisResultsGraphBuilder()
+{
+   if ( m_pXFormat != NULL )
+   {
+      delete m_pXFormat;
+      m_pXFormat = NULL;
+   }
+
+   if ( m_pYFormat != NULL )
+   {
+      delete m_pYFormat;
+      m_pYFormat = NULL;
+   }
 }
 
 CEAFGraphControlWindow* CXBRAnalysisResultsGraphBuilder::GetGraphControlWindow()
@@ -105,9 +133,8 @@ BOOL CXBRAnalysisResultsGraphBuilder::CreateGraphController(CWnd* pParent,UINT n
 
 void CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged()
 {
-   CEAFGraphView* pGraphView = m_pFrame->GetGraphView();
-   pGraphView->Invalidate();
-   pGraphView->UpdateWindow();
+   InvalidateGraph();
+   Update();
 }
 
 void CXBRAnalysisResultsGraphBuilder::OnLbnSelChanged()
@@ -122,16 +149,14 @@ void CXBRAnalysisResultsGraphBuilder::OnPierChanged()
 
 bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
 {
-   if ( IsStandAlone() )
-   {
-      return true;
-   }
-   else
-   {
-      CComPtr<IBroker> pBroker;
-      EAFGetBroker(&pBroker);
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
 
+   if ( IsPGSExtension() )
+   {
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+
+      bool bCanUpdate = false;
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
       {
@@ -139,12 +164,155 @@ bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
          if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
          {
             m_GraphController.EnableControls(TRUE);
-            return true;
+            bCanUpdate = true;
+            break;
          }
       }
-      m_GraphController.EnableControls(FALSE);
-      m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
-      return false;
+
+      if ( !bCanUpdate )
+      {
+         m_GraphController.EnableControls(FALSE);
+         m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
+         return false;
+      }
+   }
+
+   GET_IFACE2(pBroker,IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress,0);
+
+   pProgress->UpdateMessage(_T("Building Graph"));
+
+   CWaitCursor wait;
+
+   // Update graph properties
+   UpdateYAxisUnits();
+   UpdateGraphTitle();
+   UpdateGraphData();
+
+   return true;
+}
+
+void CXBRAnalysisResultsGraphBuilder::InitGraph()
+{
+   m_Graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
+   m_Graph.SetClientAreaColor(GRAPH_BACKGROUND);
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   m_pXFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   m_Graph.SetXAxisValueFormat(*m_pXFormat);
+   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
+}
+
+void CXBRAnalysisResultsGraphBuilder::UpdateYAxisUnits()
+{
+   delete m_pYFormat;
+
+   ActionType actionType = m_GraphController.GetActionType();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   switch(actionType)
+   {
+   case actionMoment:
+      {
+      const unitmgtMomentData& momentUnit = pDisplayUnits->GetMomentUnit();
+      m_pYFormat = new MomentTool(momentUnit);
+      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)m_pYFormat)->UnitTag() + _T(")");
+      m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
+      break;
+      }
+   case actionShear:
+      {
+      const unitmgtForceData& shearUnit = pDisplayUnits->GetShearUnit();
+      m_pYFormat = new ShearTool(shearUnit);
+      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Shear (") + ((ShearTool*)m_pYFormat)->UnitTag() + _T(")");
+      m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
+      break;
+      }
+   default:
+      ASSERT(0); 
+   }
+}
+
+void CXBRAnalysisResultsGraphBuilder::UpdateGraphTitle()
+{
+   ActionType actionType = m_GraphController.GetActionType();
+   m_Graph.SetTitle(GetGraphTitle(actionType));
+}
+
+void CXBRAnalysisResultsGraphBuilder::UpdateGraphData()
+{
+   m_Graph.ClearData();
+
+   ActionType actionType = m_GraphController.GetActionType();
+
+   PierIDType pierID = m_GraphController.GetPierID();
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+
+   CXBRAnalysisResultsGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
+   IndexType nGraphs = graphDefs.GetGraphDefinitionCount();
+   for ( IndexType idx = 0; idx < nGraphs; idx++ )
+   {
+      CXBRAnalysisResultsGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
+
+      IndexType selectedGraphIdx = m_GraphDefinitions.GetGraphIndex(graphDef.m_ID);
+      COLORREF color = m_GraphColor.GetColor(selectedGraphIdx);
+
+      IndexType graphIdx, maxGraphIdx, minGraphIdx;
+      if ( graphDef.m_GraphType == graphCapacity ||
+           graphDef.m_GraphType == graphVehicularLiveLoad ||
+           graphDef.m_GraphType == graphLiveLoad ||
+           graphDef.m_GraphType == graphLimitState
+         )
+      {
+         maxGraphIdx = m_Graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
+         minGraphIdx = m_Graph.CreateDataSeries(_T(""),PS_SOLID,2,color);
+      }
+      else
+      {
+         graphIdx = m_Graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
+      }
+
+
+      if ( graphDef.m_GraphType == graphProduct )
+      {
+         BuildProductForceGraph(pierID,vPoi,graphDef,actionType,graphIdx);
+      }
+      else if ( graphDef.m_GraphType == graphCombined )
+      {
+         BuildCombinedForceGraph(pierID,vPoi,graphDef,actionType,graphIdx);
+      }
+      else if ( graphDef.m_GraphType == graphVehicularLiveLoad )
+      {
+         BuildVehicularLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx);
+      }
+      else if ( graphDef.m_GraphType == graphLiveLoad )
+      {
+         BuildLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx);
+      }
+      else if ( graphDef.m_GraphType == graphLimitState )
+      {
+         BuildLimitStateGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx);
+      }
+      else if ( graphDef.m_GraphType == graphCapacity )
+      {
+         BuildCapacityGraph(pierID,vPoi,actionType,minGraphIdx,maxGraphIdx);
+      }
+      else
+      {
+         ATLASSERT(false);
+      }
    }
 }
 
@@ -244,114 +412,19 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
 
 void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-   GET_IFACE2(pBroker,IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
-   pProgress->UpdateMessage(_T("Building Graph"));
-   CWaitCursor wait;
+   int save = pDC->SaveDC();
 
-   ActionType actionType = m_GraphController.GetActionType();
-
-   arvPhysicalConverter* pVerticalAxisFormat;
-   if ( actionType == actionMoment )
-   {
-      pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
-   }
-   else
-   {
-      pVerticalAxisFormat = new ShearTool(pDisplayUnits->GetShearUnit());
-   }
-
-   arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
-   grGraphXY graph(*pHorizontalAxisFormat,*pVerticalAxisFormat);
-
-   graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
-   graph.SetClientAreaColor(GRAPH_BACKGROUND);
-
-   graph.SetTitle(GetGraphTitle(actionType));
-
-   std::_tstring strYAxisTitle;
-   if ( actionType == actionMoment )
-   {
-      strYAxisTitle = _T("Moment (") + ((MomentTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
-   }
-   else
-   {
-      strYAxisTitle = _T("Shear (") + ((ShearTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
-   }
-
-   graph.SetYAxisTitle(strYAxisTitle.c_str());
-
-   graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")")).c_str());
-
-   PierIDType pierID = m_GraphController.GetPierID();
-
-   CXBRAnalysisResultsGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
-   IndexType nGraphs = graphDefs.GetGraphDefinitionCount();
-   for ( IndexType idx = 0; idx < nGraphs; idx++ )
-   {
-      CXBRAnalysisResultsGraphDefinition& graphDef = graphDefs.GetGraphDefinition(idx);
-
-      IndexType selectedGraphIdx = m_GraphDefinitions.GetGraphIndex(graphDef.m_ID);
-      COLORREF color = m_GraphColor.GetColor(selectedGraphIdx);
-
-      IndexType graphIdx, maxGraphIdx, minGraphIdx;
-      if ( graphDef.m_GraphType == graphCapacity ||
-           graphDef.m_GraphType == graphVehicularLiveLoad ||
-           graphDef.m_GraphType == graphLiveLoad ||
-           graphDef.m_GraphType == graphLimitState
-         )
-      {
-         maxGraphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
-         minGraphIdx = graph.CreateDataSeries(_T(""),PS_SOLID,2,color);
-      }
-      else
-      {
-         graphIdx = graph.CreateDataSeries(graphDef.m_Name.c_str(),PS_SOLID,2,color);
-      }
-
-      GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-      std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
-
-      if ( graphDef.m_GraphType == graphProduct )
-      {
-         BuildProductForceGraph(pierID,vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else if ( graphDef.m_GraphType == graphCombined )
-      {
-         BuildCombinedForceGraph(pierID,vPoi,graphDef,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else if ( graphDef.m_GraphType == graphVehicularLiveLoad )
-      {
-         BuildVehicularLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else if ( graphDef.m_GraphType == graphLiveLoad )
-      {
-         BuildLiveLoadGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else if ( graphDef.m_GraphType == graphLimitState )
-      {
-         BuildLimitStateGraph(pierID,vPoi,graphDef,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else if ( graphDef.m_GraphType == graphCapacity )
-      {
-         BuildCapacityGraph(pierID,vPoi,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
-      }
-      else
-      {
-         ATLASSERT(false);
-      }
-   }
-
+   // The graph is valided and there was not an error
+   // updating data.... draw the graph
    CRect rect = GetView()->GetDrawingRect();
-   graph.SetOutputRect(rect);
-   graph.Draw(pDC->GetSafeHdc());
 
-   delete pVerticalAxisFormat;
-   delete pHorizontalAxisFormat;
+   m_Graph.SetOutputRect(rect);
+   m_Graph.UpdateGraphMetrics(pDC->GetSafeHdc());
+   m_Graph.Draw(pDC->GetSafeHdc());
+
+   pDC->RestoreDC(save);
 }
 
 LPCTSTR CXBRAnalysisResultsGraphBuilder::GetGraphTitle(ActionType actionType)
@@ -368,7 +441,7 @@ LPCTSTR CXBRAnalysisResultsGraphBuilder::GetGraphTitle(ActionType actionType)
    return _T("Unknown Graph Type");
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx)
 {
    xbrTypes::ProductForceType pfType = graphDef.m_LoadType.ProductLoadType;
 
@@ -379,27 +452,27 @@ void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,c
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mz = pResults->GetMoment(pierID,pfType,poi);
-         Mz = pVerticalAxisFormat->Convert(Mz);
+         Mz = m_pYFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
-         graph.AddPoint(graphIdx,point);
+         m_Graph.AddPoint(graphIdx,point);
       }
       else
       {
          sysSectionValue V = pResults->GetShear(pierID,pfType,poi);
-         Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
-         Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+         Float64 Vl = m_pYFormat->Convert(V.Left());
+         Float64 Vr = m_pYFormat->Convert(V.Right());
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
       }
    }
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType graphIdx)
 {
    xbrTypes::CombinedForceType comboType = graphDef.m_LoadType.CombinedLoadType;
 
@@ -410,27 +483,27 @@ void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mz = pResults->GetMoment(pierID,comboType,poi);
-         Mz = pVerticalAxisFormat->Convert(Mz);
+         Mz = m_pYFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
-         graph.AddPoint(graphIdx,point);
+         m_Graph.AddPoint(graphIdx,point);
       }
       else
       {
          sysSectionValue V = pResults->GetShear(pierID,comboType,poi);
-         Float64 Vl = pVerticalAxisFormat->Convert(V.Left());
-         Float64 Vr = pVerticalAxisFormat->Convert(V.Right());
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+         Float64 Vl = m_pYFormat->Convert(V.Left());
+         Float64 Vr = m_pYFormat->Convert(V.Right());
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
       }
    }
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
 
@@ -441,34 +514,34 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
          pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax,NULL,NULL);
-         Mmin = pVerticalAxisFormat->Convert(Mmin);
-         Mmax = pVerticalAxisFormat->Convert(Mmax);
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+         Mmin = m_pYFormat->Convert(Mmin);
+         Mmax = m_pYFormat->Convert(Mmax);
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
       }
       else
       {
          sysSectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,NULL,NULL);
-         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
-         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
-         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
-         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+         Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
+         Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
+         Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
+         Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    pgsTypes::LoadRatingType ratingType = graphDef.m_LoadType.LiveLoadType;
 
@@ -479,34 +552,34 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
          pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,NULL,NULL);
-         Mmin = pVerticalAxisFormat->Convert(Mmin);
-         Mmax = pVerticalAxisFormat->Convert(Mmax);
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+         Mmin = m_pYFormat->Convert(Mmin);
+         Mmax = m_pYFormat->Convert(Mmax);
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
       }
       else
       {
          sysSectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,NULL,NULL,NULL,NULL);
-         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
-         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
-         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
-         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+         Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
+         Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
+         Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
+         Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,const CXBRAnalysisResultsGraphDefinition& graphDef,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    pgsTypes::LimitState limitState = graphDef.m_LoadType.LimitStateType;
 
@@ -517,34 +590,34 @@ void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,con
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
          pResults->GetMoment(pierID,limitState,poi,&Mmin,&Mmax);
-         Mmin = pVerticalAxisFormat->Convert(Mmin);
-         Mmax = pVerticalAxisFormat->Convert(Mmax);
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+         Mmin = m_pYFormat->Convert(Mmin);
+         Mmax = m_pYFormat->Convert(Mmax);
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
       }
       else
       {
          sysSectionValue Vmin, Vmax;
          pResults->GetShear(pierID,limitState,poi,&Vmin,&Vmax);
-         Float64 Vlmax = pVerticalAxisFormat->Convert(Vmax.Left());
-         Float64 Vrmax = pVerticalAxisFormat->Convert(Vmax.Right());
-         Float64 Vlmin = pVerticalAxisFormat->Convert(Vmin.Left());
-         Float64 Vrmin = pVerticalAxisFormat->Convert(Vmin.Right());
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+         Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
+         Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
+         Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
+         Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
       }
    }
 }
 
-void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -556,26 +629,26 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,true);
-         Mz = pVerticalAxisFormat->Convert(Mz);
+         Mz = m_pYFormat->Convert(Mz);
          gpPoint2d point(X,Mz);
-         graph.AddPoint(maxGraphIdx,point);
+         m_Graph.AddPoint(maxGraphIdx,point);
 
          Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,false);
-         Mz = pVerticalAxisFormat->Convert(Mz);
+         Mz = m_pYFormat->Convert(Mz);
          point.Y() = Mz;
-         graph.AddPoint(minGraphIdx,point);
+         m_Graph.AddPoint(minGraphIdx,point);
       }
       else
       {
          Float64 V = pShearCapacity->GetShearCapacity(pierID,stage,poi);
-         V = pVerticalAxisFormat->Convert(V);
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,V));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,-V));
+         V = m_pYFormat->Convert(V);
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,V));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,-V));
       }
    }
 }

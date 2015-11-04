@@ -1318,19 +1318,6 @@ xbrPointOfInterest CPierAgentImp::GetPrevPointOfInterest(PierIDType pierID,PoiID
    return poi;
 }
 
-void CPierAgentImp::SetWheelLineLocations(PierIDType pierID,const std::vector<Float64> vWheelLineLocations)
-{
-   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
-
-   // Put POI at every place a wheel line load is applied
-   BOOST_FOREACH(Float64 X,vWheelLineLocations)
-   {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X));
-   }
-
-   SimplifyPOIList(vPoi); // sorts, merges, and removes duplicates
-}
-
 //////////////////////////////////////////
 // IXBRProjectEventSink
 HRESULT CPierAgentImp::OnProjectChanged()
@@ -1938,12 +1925,22 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    Float64 Xpoi = 0;
    while ( ::IsLE(Xpoi,(L/2 - step)) )
    {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xpoi));
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-Xpoi));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,Xpoi,POI_GRID));
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L-Xpoi,POI_GRID));
 
       Xpoi += step;
    }
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L/2));
+
+   GET_IFACE(IXBRProductForces,pProductForces);
+   std::vector<Float64> vWheelLineLocations = pProductForces->GetWheelLineLocations(pierID);
+
+   // Put POI at every place a wheel line load is applied
+   BOOST_FOREACH(Float64 X,vWheelLineLocations)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_WHEELLINE));
+   }
+
 
    SimplifyPOIList(vPoi); // sorts, merges, and removes duplicates
 
@@ -1962,13 +1959,15 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
    std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
    for ( ; iter2 != end; iter1++, iter2++ )
    {
-      if ( ComparePoiLocation(*iter1,*iter2) )
+      xbrPointOfInterest& poi1(*iter1);
+      xbrPointOfInterest& poi2(*iter2);
+      if ( ComparePoiLocation(poi1,poi2) )
       {
-         PoiAttributeType attribute = iter1->GetAttributes();
-         attribute |= iter2->GetAttributes();
+         PoiAttributeType attribute = poi1.GetAttributes();
+         attribute |= poi2.GetAttributes();
 
-         iter1->SetAttributes(attribute);
-         iter2->SetAttributes(attribute);
+         poi1.SetAttributes(attribute);
+         poi2.SetAttributes(attribute);
       }
    }
 

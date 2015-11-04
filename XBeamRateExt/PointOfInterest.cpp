@@ -25,14 +25,23 @@
 
 #include <System\Flags.h>
 
+#if defined _DEBUG
+#define UPDATE_ATTRIBUTES UpdateAttributeString()
+#else
+#define UPDATE_ATTRIBUTES
+#endif
+
+
 xbrPointOfInterest::xbrPointOfInterest(PoiIDType id,ColumnIndexType colIdx,Float64 Xpoi,PoiAttributeType attribute) :
 m_ID(id),m_ColumnIndex(colIdx),m_Xpoi(Xpoi),m_Attributes(attribute)
 {
+   UPDATE_ATTRIBUTES;
 }
 
 xbrPointOfInterest::xbrPointOfInterest(PoiIDType id,Float64 Xpoi,PoiAttributeType attribute) :
 m_ID(id),m_ColumnIndex(INVALID_INDEX),m_Xpoi(Xpoi),m_Attributes(attribute)
 {
+   UPDATE_ATTRIBUTES;
 }
 
 bool xbrPointOfInterest::operator==(const xbrPointOfInterest& other) const
@@ -90,6 +99,7 @@ Float64 xbrPointOfInterest::GetDistFromStart() const
 void xbrPointOfInterest::SetAttributes(PoiAttributeType attribute)
 {
    m_Attributes = attribute;
+   UPDATE_ATTRIBUTES;
 }
 
 PoiAttributeType xbrPointOfInterest::GetAttributes() const
@@ -101,3 +111,47 @@ bool xbrPointOfInterest::HasAttribute(PoiAttributeType attribute) const
 {
    return sysFlags<PoiAttributeType>::IsSet(m_Attributes,attribute) ? true : false;
 }
+
+void xbrPointOfInterest::ClearAttributes()
+{
+   m_Attributes = 0;
+   UPDATE_ATTRIBUTES;
+}
+
+#if defined _DEBUG
+void xbrPointOfInterest::UpdateAttributeString()
+{
+   m_strAttributes.clear();
+   std::_tostringstream os;
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_SECTIONCHANGE) )
+   {
+      os << _T("POI_SECTIONCHANGE | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN) )
+   {
+      os << _T("POI_COLUMN | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )
+   {
+      os << _T("POI_BRG | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_WHEELLINE) )
+   {
+      os << _T("POI_WHEELLINE | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_GRID) )
+   {
+      os << _T("POI_GRID | ");
+   }
+
+   os << std::endl;
+
+   m_strAttributes = os.str();
+}
+#endif // _DEBUG
+

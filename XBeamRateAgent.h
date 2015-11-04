@@ -84,8 +84,6 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    //public IAgentPersist,
    public IXBeamRateAgent,
    public IAgentUIIntegration,
-   public IAgentReportingIntegration,
-   public IAgentGraphingIntegration,
    public IEditPierCallback, // not a COM interface
    public IEditLoadRatingOptionsCallback, // not a COM interface
    public IProjectPropertiesEventSink,
@@ -111,8 +109,6 @@ BEGIN_COM_MAP(CXBeamRateAgent)
 	//COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY(IXBeamRateAgent)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
-   COM_INTERFACE_ENTRY(IAgentReportingIntegration)
-   COM_INTERFACE_ENTRY(IAgentGraphingIntegration)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
@@ -164,14 +160,6 @@ public:
 // IAgentUIIntegration
 public:
    STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
-
-// IAgentReportingIntegration
-public:
-   STDMETHOD(IntegrateWithReporting)(BOOL bIntegrate);
-
-// IAgentGraphingIntegration
-public:
-   STDMETHOD(IntegrateWithGraphing)(BOOL bIntegrate);
 
 // IEditPierCallback
 public:

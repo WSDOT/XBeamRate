@@ -177,7 +177,6 @@ public:
    virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi);
    virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID);
    virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID);
-   virtual void SetWheelLineLocations(PierIDType pierID,const std::vector<Float64> vWheelLineLocations);
 
 // IXBRProjectEventSink
 public:

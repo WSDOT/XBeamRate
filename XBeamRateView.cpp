@@ -370,6 +370,7 @@ void CXBeamRateView::UpdateDisplayObjects()
       const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
       if ( pPier->GetPierModelType() == pgsTypes::pmtIdealized )
       {
+         // there is nothing to draw when the pier is idealized
          m_bIsIdealized = true;
          return;
       }
@@ -489,7 +490,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       drawBridgeLineStrategy->SetColor(BRIDGE_COLOR);
       drawBridgeLineStrategy->SetLineStyle(lsCenterline);
 
-      displayList->AddDisplayObject(doBridgeLine);
+      //displayList->AddDisplayObject(doBridgeLine); // do this at the end
    }
 
    // Draw Roadway Surface
@@ -1383,32 +1384,34 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    lxbBR2->Move(x-X3,y-H4);
 
    // Horizontal Cross Beam Dimensions
-   if ( pierType == xbrTypes::pctExpansion )
-   {
-      CComPtr<IPoint2d> lxbTLC, lxbTRC;
-      lxbTLC.CoCreateInstance(CLSID_Point2d);
-      lxbTRC.CoCreateInstance(CLSID_Point2d);
-      Float64 x1,y1;
-      uxbBL->Location(&x1,&y1);
-      Float64 x2,y2;
-      uxbBR->Location(&x2,&y2);
-      lxbTLC->Move(x1,Max(y1,y2));
-      lxbTRC->Move(x2,Max(y1,y2));
-      BuildDimensionLine(displayList,lxbTLC,lxbTRC);
-   }
-   else
-   {
-      CComPtr<IPoint2d> uxbTLC, uxbTRC;
-      uxbTLC.CoCreateInstance(CLSID_Point2d);
-      uxbTRC.CoCreateInstance(CLSID_Point2d);
-      Float64 x1,y1;
-      uxbTL->Location(&x1,&y1);
-      Float64 x2,y2;
-      uxbTR->Location(&x2,&y2);
-      uxbTLC->Move(x1,Max(y1,y2));
-      uxbTRC->Move(x2,Max(y1,y2));
-      BuildDimensionLine(displayList,uxbTLC,uxbTRC);
-   }
+
+   // Length of top of lower cross beam
+   //if ( pierType == xbrTypes::pctExpansion )
+   //{
+   //   CComPtr<IPoint2d> lxbTLC, lxbTRC;
+   //   lxbTLC.CoCreateInstance(CLSID_Point2d);
+   //   lxbTRC.CoCreateInstance(CLSID_Point2d);
+   //   Float64 x1,y1;
+   //   uxbBL->Location(&x1,&y1);
+   //   Float64 x2,y2;
+   //   uxbBR->Location(&x2,&y2);
+   //   lxbTLC->Move(x1,Max(y1,y2));
+   //   lxbTRC->Move(x2,Max(y1,y2));
+   //   BuildDimensionLine(displayList,lxbTLC,lxbTRC);
+   //}
+   //else
+   //{
+   //   CComPtr<IPoint2d> uxbTLC, uxbTRC;
+   //   uxbTLC.CoCreateInstance(CLSID_Point2d);
+   //   uxbTRC.CoCreateInstance(CLSID_Point2d);
+   //   Float64 x1,y1;
+   //   uxbTL->Location(&x1,&y1);
+   //   Float64 x2,y2;
+   //   uxbTR->Location(&x2,&y2);
+   //   uxbTLC->Move(x1,Max(y1,y2));
+   //   uxbTRC->Move(x2,Max(y1,y2));
+   //   BuildDimensionLine(displayList,uxbTLC,uxbTRC);
+   //}
 
    BuildDimensionLine(displayList,lxbBL2,lxbBLC);
    BuildDimensionLine(displayList,lxbBRC,lxbBR2);
@@ -1536,6 +1539,27 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pntTop->Offset(EndOffset+Lxb,0);
    pntBot->Offset(EndOffset+Lxb,0);
    BuildDimensionLine(displayList,pntTop,pntBot);
+
+   // Curb-to-curb width
+   Float64 skew = pPier->GetSkewAngle(pierID);
+
+   Float64 LCO, RCO;
+   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+
+   Float64 Ylc = pPier->GetElevation(pierID,0);
+   Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
+
+   CComPtr<IPoint2d> pntLC;
+   pntLC.CoCreateInstance(CLSID_Point2d);
+   LCO /= cos(skew); // skew adjust
+   pntLC->Move(LCO,Ylc);
+
+   CComPtr<IPoint2d> pntRC;
+   pntRC.CoCreateInstance(CLSID_Point2d);
+   RCO /= cos(skew); // skew adjust
+   pntRC->Move(RCO,Yrc);
+
+   BuildDimensionLine(displayList,pntLC,pntRC);
 }
 
 void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)

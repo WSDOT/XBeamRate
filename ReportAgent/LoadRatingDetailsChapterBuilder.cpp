@@ -239,15 +239,26 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    }
    (*pTable)(0,col++) << _T("RF");
 
-   RowIndexType row = pTable->GetNumberOfHeaderRows();
+   const xbrMomentRatingArtifact* pControllingRating;
+   pRatingArtifact->GetMomentRatingFactorEx(bPositiveMoment,&pControllingRating);
+   xbrPointOfInterest controllingPoi = pControllingRating->GetPointOfInterest();
+
    const xbrRatingArtifact::MomentRatings& momentRatings = pRatingArtifact->GetMomentRatings(bPositiveMoment);
+
+   RowIndexType row = pTable->GetNumberOfHeaderRows();
    xbrRatingArtifact::MomentRatings::const_iterator iter(momentRatings.begin());
    xbrRatingArtifact::MomentRatings::const_iterator end(momentRatings.end());
-   for ( ; iter != end; iter++, row++ )
+   for ( ; iter != end; iter++ )
    {
       col = 0;
       const xbrPointOfInterest& poi = iter->first;
       const xbrMomentRatingArtifact& artifact = iter->second;
+      Float64 RF = artifact.GetRatingFactor();
+
+      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi) )
+      {
+         continue;
+      }
 
       ATLASSERT(poi == artifact.GetPointOfInterest());
 
@@ -307,8 +318,6 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
          }
       }
 
-      Float64 RF = artifact.GetRatingFactor();
-
       if ( RF < 1 )
       {
          (*pTable)(row,col++) << RF_FAIL(rating_factor,RF);
@@ -317,6 +326,8 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       {
          (*pTable)(row,col++) << RF_PASS(rating_factor,RF);
       }
+
+      row++;
    } // next poi
 }
 
@@ -408,15 +419,28 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    }
    (*pTable)(0,col++) << _T("RF");
 
-   RowIndexType row = pTable->GetNumberOfHeaderRows();
+
+   const xbrShearRatingArtifact* pControllingRating;
+   pRatingArtifact->GetShearRatingFactorEx(&pControllingRating);
+   xbrPointOfInterest controllingPoi = pControllingRating->GetPointOfInterest();
+
    const xbrRatingArtifact::ShearRatings& shearRatings = pRatingArtifact->GetShearRatings();
+
+   RowIndexType row = pTable->GetNumberOfHeaderRows();
    xbrRatingArtifact::ShearRatings::const_iterator iter(shearRatings.begin());
    xbrRatingArtifact::ShearRatings::const_iterator end(shearRatings.end());
-   for ( ; iter != end; iter++, row++ )
+   for ( ; iter != end; iter++ )
    {
       col = 0;
       const xbrPointOfInterest& poi = iter->first;
       const xbrShearRatingArtifact& artifact = iter->second;
+
+      Float64 RF = artifact.GetRatingFactor();
+
+      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi) )
+      {
+         continue;
+      }
 
       ATLASSERT(poi == artifact.GetPointOfInterest());
 
@@ -467,8 +491,6 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
          }
       }
 
-      Float64 RF = artifact.GetRatingFactor();
-
       if ( RF < 1 )
       {
          (*pTable)(row,col++) << RF_FAIL(rating_factor,RF);
@@ -477,6 +499,8 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       {
          (*pTable)(row,col++) << RF_PASS(rating_factor,RF);
       }
+
+      row++;
    } // next poi
 }
 
@@ -597,7 +621,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    // Add table here
    *pPara << table << rptNewLine;
 
-   RowIndexType row = 1;
+   RowIndexType row = table->GetNumberOfHeaderRows();
    xbrRatingArtifact::YieldStressRatios::const_iterator iter(artifacts.begin());
    xbrRatingArtifact::YieldStressRatios::const_iterator end(artifacts.end());
    for ( ; iter != end; iter++ )
@@ -608,10 +632,10 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
       Float64 SR = artifact.GetStressRatio();
 
-      //if ( 1 <= SR && !ReportAtThisPoi(poi,controllingPoi) )
-      //{
-      //   continue;
-      //}
+      if ( 1.0 <= SR && !ReportAtThisPoi(poi,controllingPoi) )
+      {
+         continue;
+      }
 
 
       (*table)(row,col++) << location.SetValue( poi.GetDistFromStart() );
@@ -704,5 +728,19 @@ void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,I
    else
    {
       (*table)(row,col++) << _T("-");
+   }
+}
+
+bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest& poi,const xbrPointOfInterest& controllingPoi) const
+{
+   if ( poi == controllingPoi || 
+        poi.HasAttribute(POI_GRID)
+      )
+   {
+      return true;
+   }
+   else
+   {
+      return false;
    }
 }

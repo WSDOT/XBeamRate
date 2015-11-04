@@ -45,6 +45,11 @@
 
 #define FIRST_LIVELOAD_ID 10000
 
+#define MODEL_INIT_NONE    -1
+#define MODEL_INIT_TOPOLOGY 0
+#define MODEL_INIT_LOADS    1
+#define MODEL_INIT_ALL      MODEL_INIT_LOADS
+
 /////////////////////////////////////////////////////////////////////////////
 // CAnalysisAgentImp
 class ATL_NO_VTABLE CAnalysisAgentImp : 
@@ -102,6 +107,7 @@ public:
 
    virtual IndexType GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
    virtual IndexType GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx);
+   virtual std::vector<Float64> GetWheelLineLocations(PierIDType pierID);
    virtual WheelLineConfiguration GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx);
    virtual void GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax);
    virtual void GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig);
@@ -181,20 +187,17 @@ private:
 
    struct LaneConfiguration
    {
-      Float64 Xleft; // location of left wheel line
+      // locations are measured from the left curb line
+      Float64 Xleft;  // location of left wheel line
       Float64 Xright; // location of right wheel line
-      LoadCaseIDType m_SingleLaneLoadCaseID; // load case ID when this lane configuration is used for the single loaded lane case
    };
 
    struct LiveLoadConfiguration
    {
-      bool operator<(const LiveLoadConfiguration& other)const { return m_LoadCaseID < other.m_LoadCaseID;} 
+      // a live load configuration consists of one or more live load cases
+      // each live load case models a single lane (two wheel lines)
 
-      LoadCaseIDType m_LoadCaseID; // FEM load case id for this live load configuration
-      IndexType m_nLoadedLanes; // number of loaded lanes for this configuration
-      
-      std::vector<LaneConfiguration> m_LaneConfiguration; // each element in the vector is the configuration for a loaded lane
-      // e.g. at index 1 in the vector is the configuration for loaded lane 1 (zero-based index, of course)
+      std::vector<LoadCaseIDType> m_LoadCases; // FEM load case IDs that make up the loads for this configuration.
    };
 
    typedef struct ModelData
@@ -210,19 +213,34 @@ private:
       // value is the FEM model poi ID
       std::map<PoiIDType,PoiIDType> m_PoiMap;
 
-      LoadCaseIDType m_LastSingleLaneLoadCaseID; // Load case ID of the last load case where a single lane is loaded
-      LoadCaseIDType m_NextLiveLoadCaseID;
-      std::set<LiveLoadConfiguration> m_LiveLoadConfigurations;
+      LoadCaseIDType m_NextLiveLoadCaseID; // ID of the next live load case
 
-      std::map<IndexType,LoadCaseIDType> m_SingleLaneLoadCaseIDs;
-      // index is the step index that positions the single lane
-      // load case ID is the FEM load case for a single load in that position
+      // this vector contains all of the live load configurations
+      // each configuration represents the some number of loaded lanes,
+      // the position of the loaded lanes, and the position of the
+      // group of loaded lanes transversely on the cross beam
+      std::vector<LiveLoadConfiguration> m_LiveLoadConfigurations;
 
-      ModelData() { m_NextLiveLoadCaseID = FIRST_LIVELOAD_ID; }
+      IndexType m_LastSingleLaneLLConfigIdx; // Index of the last live load configuration where a single lane is loaded
+                                             // This is needed because for MBE permit ratings, only the one loaded lane case is needed
+                                             // This is the index of the last entry in m_LiveLoadConfigruations that is for a single loaded lane case
+
+      // this map keeps track of the live load cases
+      // the key is the location of the center of the lane
+      std::map<Float64,LoadCaseIDType,Float64_less> m_LiveLoadCases;
+
+      // this map keeps track of the lane configurations corresponding
+      // to each live load case.
+      std::map<LoadCaseIDType,LaneConfiguration> m_LaneConfigurations;
+
+      int m_InitLevel;
+
+      ModelData() { m_InitLevel = MODEL_INIT_NONE; 
+                    m_NextLiveLoadCaseID = FIRST_LIVELOAD_ID; }
    } ModelData;
    std::auto_ptr<std::map<PierIDType,ModelData>> m_pModelData;
-   ModelData* GetModelData(PierIDType pierID);
-   void BuildModel(PierIDType pierID);
+   ModelData* GetModelData(PierIDType pierID,int level = MODEL_INIT_ALL);
+   void BuildModel(PierIDType pierID,int level);
    void GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation);
    void GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
    void GetSuperstructureFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation);
@@ -233,10 +251,11 @@ private:
    void ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData);
    void ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData);
 
-   void ApplyUnitLiveLoad(PierIDType pierID,ModelData* pModelData);
+   void ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData);
    void GetLaneGapConfiguration(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions);
    std::vector<Float64> GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition);
-   LoadCaseIDType ApplyWheelLineLoadsToFemModel(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vLoadPositions);
+   std::vector<LoadCaseIDType> InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vLoadPositions);
+   void ApplyWheelLineLoadsToFemModel(ModelData* pModelData);
 
 
    struct UnitLiveLoadResult
@@ -249,18 +268,18 @@ private:
       PoiIDType m_idPOI;
 
       // controlling moment for one loaded lane
-      LoadCaseIDType m_lcidMzMin_SingleLane; // controlling FEM load case for min moment
-      LoadCaseIDType m_lcidMzMax_SingleLane; // controlling FEM load case for max moment
+      IndexType m_llConfigIdx_MzMin_SingleLane; // live load configuration for the controlling min moment
+      IndexType m_llConfigIdx_MzMax_SingleLane; // live load configuration for the controlling max moment
       Float64 m_MzMin_SingleLane;
       Float64 m_MzMax_SingleLane;
 
       // controlling moment for multiple loaded lanes
-      LoadCaseIDType m_lcidMzMin; // controlling FEM load case for min moment
-      LoadCaseIDType m_lcidMzMax; // controlling FEM load case for max moment
+      IndexType m_llConfigIdx_MzMin; // live load configuration for the controlling min moment
+      IndexType m_llConfigIdx_MzMax; // live load configuration for the controlling max moment
       Float64 m_MzMin;
       Float64 m_MzMax;
 
-      // Load case IDs for the load cases that cause the N max/min moments
+      // Live load configuration index for the configurations that cause the N max/min moments
       // Used only when permit rating factors are computed by the WSDOT method.
       // WSDOT permit rating factor method requires that multiple combinations
       // of permit load in one lane and legal load in all remaining lanes be
@@ -268,22 +287,22 @@ private:
       // this is considerably time-consuming. Instead, the rating factor
       // will be computed based the N load cases that cause the max/min
       // moments at this section.
-      std::vector<LoadCaseIDType> m_MzMaxLoadCases;
-      std::vector<LoadCaseIDType> m_MzMinLoadCases;
+      std::vector<IndexType> m_MzMaxLiveLoadConfigs;
+      std::vector<IndexType> m_MzMinLiveLoadConfigs;
 
       // controlling shear for one loaded lane
-      LoadCaseIDType m_lcidFyLeftMin_SingleLane, m_lcidFyRightMin_SingleLane; // controlling FEM load cases for min shear
-      LoadCaseIDType m_lcidFyLeftMax_SingleLane, m_lcidFyRightMax_SingleLane; // controlling FEM load cases for max shear
+      IndexType m_llConfigIdx_FyLeftMin_SingleLane, m_llConfigIdx_FyRightMin_SingleLane; // live load configuration for the controlling min shear
+      IndexType m_llConfigIdx_FyLeftMax_SingleLane, m_llConfigIdx_FyRightMax_SingleLane; // live load configuration for the controlling max shear
       sysSectionValue m_FyMin_SingleLane;
       sysSectionValue m_FyMax_SingleLane;
 
       // controlling shear for multiple loaded lanes
-      LoadCaseIDType m_lcidFyLeftMin, m_lcidFyRightMin; // controlling FEM load cases for min shear
-      LoadCaseIDType m_lcidFyLeftMax, m_lcidFyRightMax; // controlling FEM load cases for max shear
+      IndexType m_llConfigIdx_FyLeftMin, m_llConfigIdx_FyRightMin; // live load configuration for the controlling min shear
+      IndexType m_llConfigIdx_FyLeftMax, m_llConfigIdx_FyRightMax; // live load configuration for the controlling max shear
       sysSectionValue m_FyMin;
       sysSectionValue m_FyMax;
 
-      // Load case IDs for the load cases that cause the N max shears.
+      // Live load configuration index for the configurations that cause the N max shears
       // Max shear is based on the magnitude of the shear.
       // Used only when permit rating factors are computed by the WSDOT method.
       // WSDOT permit rating factor method requires that multiple combinations
@@ -292,17 +311,14 @@ private:
       // this is considerably time-consuming. Instead, the rating factor
       // will be computed based the N load cases that cause the max
       // shears at this section.
-      std::vector<LoadCaseIDType> m_FyLoadCases;
+      std::vector<IndexType> m_FyLiveLoadConfigs;
    };
    std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>> m_pUnitLiveLoadResults;
    std::set<UnitLiveLoadResult>& GetUnitLiveLoadResults(PierIDType pierID);
    void ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
    UnitLiveLoadResult& GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
 
-   WheelLineConfiguration GetWheelLineConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const LiveLoadConfiguration& llConfig,IndexType permitLaneIdx);
-
    Float64 GetMaxLegalReaction(PierIDType pierID);
-   LiveLoadConfiguration& GetLiveLoadConfiguration(ModelData* pModelData,LoadCaseIDType lcid);
    std::vector<Float64> GetWheelLineLocations(ModelData* pModelData);
 
 

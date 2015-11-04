@@ -54,6 +54,10 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// create a dummy unit conversion tool to pacify the graph constructor
+static unitmgtLengthData DUMMY(unitMeasure::Meter);
+static LengthTool        DUMMY_TOOL(DUMMY);
+
 BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFGraphBuilderBase)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
@@ -66,14 +70,38 @@ BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFGraphBuilderBase)
 END_MESSAGE_MAP()
 
 
-CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder()
+CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder() :
+CEAFGraphBuilderBase(),
+m_Graph(DUMMY_TOOL,DUMMY_TOOL),
+m_pXFormat(0),
+m_pYFormat(0)
 {
    SetName(_T("Live Load Results"));
+   InitGraph();
 }
 
 CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder(const CXBRLiveLoadGraphBuilder& other) :
-CEAFGraphBuilderBase(other)
+CEAFGraphBuilderBase(other),
+m_Graph(DUMMY_TOOL,DUMMY_TOOL),
+m_pXFormat(0),
+m_pYFormat(0)
 {
+   InitGraph();
+}
+
+CXBRLiveLoadGraphBuilder::~CXBRLiveLoadGraphBuilder()
+{
+   if ( m_pXFormat != NULL )
+   {
+      delete m_pXFormat;
+      m_pXFormat = NULL;
+   }
+
+   if ( m_pYFormat != NULL )
+   {
+      delete m_pYFormat;
+      m_pYFormat = NULL;
+   }
 }
 
 CEAFGraphControlWindow* CXBRLiveLoadGraphBuilder::GetGraphControlWindow()
@@ -103,9 +131,8 @@ BOOL CXBRLiveLoadGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
 
 void CXBRLiveLoadGraphBuilder::OnGraphTypeChanged()
 {
-   CEAFGraphView* pGraphView = m_pFrame->GetGraphView();
-   pGraphView->Invalidate();
-   pGraphView->UpdateWindow();
+   InvalidateGraph();
+   Update();
 }
 
 void CXBRLiveLoadGraphBuilder::OnLbnSelChanged()
@@ -144,16 +171,14 @@ void CXBRLiveLoadGraphBuilder::OnVehicleTypeChanged()
 
 bool CXBRLiveLoadGraphBuilder::UpdateNow()
 {
-   if ( IsStandAlone() )
-   {
-      return true;
-   }
-   else
-   {
-      CComPtr<IBroker> pBroker;
-      EAFGetBroker(&pBroker);
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
 
+   if ( IsPGSExtension() )
+   {
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
+
+      bool bCanUpdate = false;
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
       {
@@ -161,60 +186,98 @@ bool CXBRLiveLoadGraphBuilder::UpdateNow()
          if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
          {
             m_GraphController.EnableControls(TRUE);
-            return true;
+            bCanUpdate = true;
+            break;
          }
       }
-      m_GraphController.EnableControls(FALSE);
-      m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
-      return false;
+
+      if ( !bCanUpdate )
+      {
+         m_GraphController.EnableControls(FALSE);
+         m_ErrorMsg = _T("Cross Beam results are not available.\nThe bridge model has only idealized piers.");
+         return false;
+      }
    }
+
+   GET_IFACE2(pBroker,IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress,0);
+
+   pProgress->UpdateMessage(_T("Building Graph"));
+
+   CWaitCursor wait;
+
+   // Update graph properties
+   UpdateYAxisUnits();
+   UpdateGraphTitle();
+   UpdateGraphData();
+
+   return true;
 }
 
-void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
+void CXBRLiveLoadGraphBuilder::InitGraph()
 {
+   m_Graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
+   m_Graph.SetClientAreaColor(GRAPH_BACKGROUND);
+
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
 
-   GET_IFACE2(pBroker,IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
-   pProgress->UpdateMessage(_T("Building Graph"));
-   CWaitCursor wait;
+   m_pXFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   m_Graph.SetXAxisValueFormat(*m_pXFormat);
+   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
+}
+
+void CXBRLiveLoadGraphBuilder::UpdateYAxisUnits()
+{
+   delete m_pYFormat;
 
    ActionType actionType = m_GraphController.GetActionType();
 
-   arvPhysicalConverter* pVerticalAxisFormat;
-   if ( actionType == actionMoment )
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+
+   switch(actionType)
    {
-      pVerticalAxisFormat = new MomentTool(pDisplayUnits->GetMomentUnit());
+   case actionMoment:
+      {
+      const unitmgtMomentData& momentUnit = pDisplayUnits->GetMomentUnit();
+      m_pYFormat = new MomentTool(momentUnit);
+      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)m_pYFormat)->UnitTag() + _T(")");
+      m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
+      break;
+      }
+   case actionShear:
+      {
+      const unitmgtForceData& shearUnit = pDisplayUnits->GetShearUnit();
+      m_pYFormat = new ShearTool(shearUnit);
+      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Shear (") + ((ShearTool*)m_pYFormat)->UnitTag() + _T(")");
+      m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
+      break;
+      }
+   default:
+      ASSERT(0); 
    }
-   else
-   {
-      pVerticalAxisFormat = new ShearTool(pDisplayUnits->GetShearUnit());
-   }
+}
 
-   arvPhysicalConverter* pHorizontalAxisFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
-   grGraphXY graph(*pHorizontalAxisFormat,*pVerticalAxisFormat);
+void CXBRLiveLoadGraphBuilder::UpdateGraphTitle()
+{
+   ActionType actionType = m_GraphController.GetActionType();
+   m_Graph.SetTitle(GetGraphTitle(actionType));
+}
 
-   graph.SetGridPenStyle(GRAPH_GRID_PEN_STYLE, GRAPH_GRID_PEN_WEIGHT, GRAPH_GRID_COLOR);
-   graph.SetClientAreaColor(GRAPH_BACKGROUND);
+void CXBRLiveLoadGraphBuilder::UpdateGraphData()
+{
+   m_Graph.ClearData();
 
-   graph.SetTitle(GetGraphTitle(actionType));
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
 
-   std::_tstring strYAxisTitle;
-   if ( actionType == actionMoment )
-   {
-      strYAxisTitle = _T("Moment (") + ((MomentTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
-   }
-   else
-   {
-      strYAxisTitle = _T("Shear (") + ((ShearTool*)pVerticalAxisFormat)->UnitTag() + _T(")");
-   }
-
-   graph.SetYAxisTitle(strYAxisTitle.c_str());
-
-   graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)pHorizontalAxisFormat)->UnitTag() + _T(")")).c_str());
+   ActionType actionType = m_GraphController.GetActionType();
 
    PierIDType pierID = m_GraphController.GetPierID();
 
@@ -234,17 +297,17 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
 
       // Controlling envelope for all trucks for this rating type
       CString strLiveLoadName = GetLiveLoadTypeName(ratingType);
-      IndexType minGraphIdx = graph.CreateDataSeries(strLiveLoadName,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
-      IndexType maxGraphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
-      BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+      IndexType minGraphIdx = m_Graph.CreateDataSeries(strLiveLoadName,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+      IndexType maxGraphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+      BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx);
 
       GET_IFACE2(pBroker,IXBRProject,pProject);
       std::_tstring strLiveLoad = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
       if ( strLiveLoad != NO_LIVE_LOAD_DEFINED )
       {
-         IndexType minVehGraphIdx = graph.CreateDataSeries(strLiveLoad.c_str(),PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
-         IndexType maxVehGraphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
-         BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         IndexType minVehGraphIdx = m_Graph.CreateDataSeries(strLiveLoad.c_str(),PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
+         IndexType maxVehGraphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
+         BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx);
       }
    }
 
@@ -252,34 +315,50 @@ void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
    {
       CString strName;
       strName.Format(_T("Live Load Configuration %d"),LABEL_INDEX(llConfigIdx));
-      graph.SetSubtitle(strName);
+      m_Graph.SetSubtitle(strName);
 
-      IndexType graphIdx = graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
+      IndexType graphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
 
       if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
       {
-         graph.SetDataLabel(graphIdx,_T("Legal"));
+         m_Graph.SetDataLabel(graphIdx,_T("Legal"));
 
-         IndexType permitGraphIdx = graph.CreateDataSeries(_T("Permit"),PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
-         BuildWSDOTPermitLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,actionType,permitGraphIdx,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         IndexType permitGraphIdx = m_Graph.CreateDataSeries(_T("Permit"),PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+         BuildWSDOTPermitLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,actionType,permitGraphIdx,graphIdx);
       }
       else
       {
-         BuildLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,actionType,graphIdx,graph,pHorizontalAxisFormat,pVerticalAxisFormat);
+         BuildLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,actionType,graphIdx);
       }
    }
+}
 
+void CXBRLiveLoadGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+   int save = pDC->SaveDC();
+
+   // The graph is valided and there was not an error
+   // updating data.... draw the graph
    CRect rect = GetView()->GetDrawingRect();
-   graph.SetOutputRect(rect);
-   graph.Draw(pDC->GetSafeHdc());
 
+   m_Graph.SetOutputRect(rect);
+   m_Graph.UpdateGraphMetrics(pDC->GetSafeHdc());
+   m_Graph.DrawBackground(pDC->GetSafeHdc());
+
+   IndexType llConfigIdx = m_GraphController.GetSelectedLiveLoadConfiguration();
    if ( llConfigIdx != INVALID_INDEX )
    {
-      DrawLiveLoadConfig(pGraphWnd,pDC,graph,pierID,ratingType,vehicleIdx,llConfigIdx,pHorizontalAxisFormat,pVerticalAxisFormat);
+      PierIDType pierID = m_GraphController.GetPierID();
+      pgsTypes::LoadRatingType ratingType = m_GraphController.GetLoadRatingType();
+      VehicleIndexType vehicleIdx = m_GraphController.GetVehicleIndex();
+      DrawLiveLoadConfig(pGraphWnd,pDC,pierID,ratingType,vehicleIdx,llConfigIdx);
    }
 
-   delete pVerticalAxisFormat;
-   delete pHorizontalAxisFormat;
+   m_Graph.DrawDataSeries(pDC->GetSafeHdc());
+
+   pDC->RestoreDC(save);
 }
 
 LPCTSTR CXBRLiveLoadGraphBuilder::GetGraphTitle(ActionType actionType)
@@ -296,7 +375,7 @@ LPCTSTR CXBRLiveLoadGraphBuilder::GetGraphTitle(ActionType actionType)
    return _T("Unknown Graph Type");
 }
 
-void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -305,35 +384,35 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
          pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,NULL,NULL);
-         Mmin = pVerticalAxisFormat->Convert(Mmin);
-         Mmax = pVerticalAxisFormat->Convert(Mmax);
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         Mmin = m_pYFormat->Convert(Mmin);
+         Mmax = m_pYFormat->Convert(Mmax);
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
       }
       else
       {
          sysSectionValue FyMin, FyMax;
          pResults->GetShear(pierID,ratingType,poi,&FyMin,&FyMax,NULL,NULL,NULL,NULL);
-         Float64 Vlmin = pVerticalAxisFormat->Convert(FyMin.Left());
-         Float64 Vrmin = pVerticalAxisFormat->Convert(FyMin.Right());
-         Float64 Vlmax = pVerticalAxisFormat->Convert(FyMax.Left());
-         Float64 Vrmax = pVerticalAxisFormat->Convert(FyMax.Right());
+         Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
+         Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
+         Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
+         Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
 
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
       }
    }
 }
 
-void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,ActionType actionType,IndexType minGraphIdx,IndexType maxGraphIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -342,34 +421,34 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
          pResults->GetMoment(pierID,ratingType,vehicleIdx,poi,&Mmin,&Mmax,NULL,NULL);
-         Mmin = pVerticalAxisFormat->Convert(Mmin);
-         Mmax = pVerticalAxisFormat->Convert(Mmax);
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         Mmin = m_pYFormat->Convert(Mmin);
+         Mmax = m_pYFormat->Convert(Mmax);
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
       }
       else
       {
          sysSectionValue FyMin, FyMax;
          pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,NULL,NULL);
-         Float64 Vlmin = pVerticalAxisFormat->Convert(FyMin.Left());
-         Float64 Vrmin = pVerticalAxisFormat->Convert(FyMin.Right());
-         Float64 Vlmax = pVerticalAxisFormat->Convert(FyMax.Left());
-         Float64 Vrmax = pVerticalAxisFormat->Convert(FyMax.Right());
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
+         Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
+         Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
+         Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
       }
    }
 }
 
-void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,ActionType actionType,IndexType graphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,ActionType actionType,IndexType graphIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -378,26 +457,26 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mz = pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
-         Mz = pVerticalAxisFormat->Convert(Mz);
-         graph.AddPoint(graphIdx,gpPoint2d(X,Mz));
+         Mz = m_pYFormat->Convert(Mz);
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Mz));
       }
       else
       {
          sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
-         Float64 Vl = pVerticalAxisFormat->Convert(Fy.Left());
-         Float64 Vr = pVerticalAxisFormat->Convert(Fy.Right());
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
-         graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+         Float64 Vl = m_pYFormat->Convert(Fy.Left());
+         Float64 Vr = m_pYFormat->Convert(Fy.Right());
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
+         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
       }
    }
 }
 
-void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,ActionType actionType,IndexType permitGraphIdx,IndexType legalGraphIdx,grGraphXY& graph,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,ActionType actionType,IndexType permitGraphIdx,IndexType legalGraphIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -413,34 +492,34 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
       Float64 X = poi.GetDistFromStart();
-      X  = pHorizontalAxisFormat->Convert(X);
+      X  = m_pXFormat->Convert(X);
 
       if ( actionType == actionMoment )
       {
          Float64 Mpermit, Mlegal;
          pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
-         Mpermit = pVerticalAxisFormat->Convert(Mpermit);
-         Mlegal  = pVerticalAxisFormat->Convert(Mlegal);
-         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Mpermit));
-         graph.AddPoint(legalGraphIdx, gpPoint2d(X,Mlegal));
+         Mpermit = m_pYFormat->Convert(Mpermit);
+         Mlegal  = m_pYFormat->Convert(Mlegal);
+         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Mpermit));
+         m_Graph.AddPoint(legalGraphIdx, gpPoint2d(X,Mlegal));
       }
       else
       {
          sysSectionValue Vpermit, Vlegal;
          pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
-         Vpermit.Left() = pVerticalAxisFormat->Convert(Vpermit.Left());
-         Vpermit.Right() = pVerticalAxisFormat->Convert(Vpermit.Right());
-         Vlegal.Left() = pVerticalAxisFormat->Convert(Vlegal.Left());
-         Vlegal.Right() = pVerticalAxisFormat->Convert(Vlegal.Right());
-         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Left()));
-         graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Right()));
-         graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Left()));
-         graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Right()));
+         Vpermit.Left() = m_pYFormat->Convert(Vpermit.Left());
+         Vpermit.Right() = m_pYFormat->Convert(Vpermit.Right());
+         Vlegal.Left() = m_pYFormat->Convert(Vlegal.Left());
+         Vlegal.Right() = m_pYFormat->Convert(Vlegal.Right());
+         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Left()));
+         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Right()));
+         m_Graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Left()));
+         m_Graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Right()));
       }
    }
 }
 
-void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGraphXY& graph,PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,arvPhysicalConverter* pHorizontalAxisFormat,arvPhysicalConverter* pVerticalAxisFormat)
+void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -450,7 +529,7 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
    WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
 
-   grlibPointMapper mapper( graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );
+   grlibPointMapper mapper( m_Graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );
    LONG x,y;
    mapper.WPtoDP(0,0,&x,&y);
 
@@ -503,8 +582,8 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,grGra
 
       WheelLinePlacement& placement = *iter;
 
-      Float64 X = pHorizontalAxisFormat->Convert(placement.Xxb);
-      Float64 Y = pVerticalAxisFormat->Convert(0);
+      Float64 X = m_pXFormat->Convert(placement.Xxb);
+      Float64 Y = m_pYFormat->Convert(0);
       LONG dx,dy;
       mapper.WPtoDP(X,Y,&dx,&dy);
 
