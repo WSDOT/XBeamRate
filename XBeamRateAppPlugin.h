@@ -37,7 +37,8 @@ class ATL_NO_VTABLE CXBeamRateAppPlugin :
 	public CComObjectRootEx<CComSingleThreadModel>,
 	public CComCoClass<CXBeamRateAppPlugin, &CLSID_XBeamRateAppPlugin>,
    public CEAFCustomReportMixin,
-	public IEAFAppPlugin
+	public IEAFAppPlugin,
+   public IEAFAppCommandLine
 {
 public:
 	CXBeamRateAppPlugin()
@@ -58,6 +59,7 @@ DECLARE_PROTECT_FINAL_CONSTRUCT()
 
 BEGIN_COM_MAP(CXBeamRateAppPlugin)
 	COM_INTERFACE_ENTRY(IEAFAppPlugin)
+   COM_INTERFACE_ENTRY(IEAFAppCommandLine)
 END_COM_MAP()
 
 // IEAFAppPlugin
@@ -72,6 +74,11 @@ public:
 
    virtual void LoadCustomReportInformation();
    virtual void SaveCustomReportInformation();
+
+// IEAFAppCommandLine
+public:
+   virtual CString GetUsageMessage();
+   virtual BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo);
 
 private:
    CComPtr<IAppUnitSystem> m_AppUnitSystem;

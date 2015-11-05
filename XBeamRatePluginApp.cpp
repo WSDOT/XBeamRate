@@ -55,6 +55,7 @@
 #include <IFace\LoadRating.h>
 #include <IFace\Pier.h>
 #include <IFace\RatingSpecification.h>
+#include <IFace\Test.h>
 
 // PGSuper/PGSplice Interfaces
 #include <IFace\ExtendUI.h>

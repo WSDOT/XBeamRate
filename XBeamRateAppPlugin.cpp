@@ -38,6 +38,9 @@
 #include <EAF\EAFUnits.h>
 #include <MFCTools\AutoRegistry.h>
 
+#include "XBeamRateCommandLineInfo.h"
+#include "XBeamRateCommandLineProcessor.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
 HRESULT CXBeamRateAppPlugin::FinalConstruct()
@@ -145,4 +148,18 @@ void CXBeamRateAppPlugin::SaveCustomReportInformation()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    CEAFCustomReportMixin::SaveCustomReportInformation();
+}
+
+////////////////////////////////////////////////////////
+// IEAFCommandLineInfo
+CString CXBeamRateAppPlugin::GetUsageMessage()
+{
+   CXBRateCommandLineInfo cmdInfo;
+   return cmdInfo.GetUsageMessage();
+}
+
+BOOL CXBeamRateAppPlugin::ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo)
+{
+   CXBRateCommandLineProcessor processor;
+   return processor.ProcessCommandLineOptions(cmdInfo);
 }

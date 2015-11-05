@@ -47,6 +47,7 @@
 #include "LoadRatingOptionsPage.h"
 
 #include "XBeamRateVersionInfoImpl.h"
+#include "XBeamRateCommandLineProcessor.h"
 
 //
 //#include <IFace\Tools.h>
@@ -687,4 +688,12 @@ BOOL CXBeamRateAgent::GetToolTipMessageString(UINT nID, CString& rMessage) const
 	}
 
    return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// IEAFProcessCommandLine
+BOOL CXBeamRateAgent::ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo)
+{
+   CXBRateCommandLineProcessor processor;
+   return processor.ProcessCommandLineOptions(cmdInfo);
 }

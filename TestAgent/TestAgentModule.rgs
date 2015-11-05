@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'TestAgent'
+		'XBeamRateTestAgent.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

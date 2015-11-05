@@ -845,6 +845,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\XBeamRateCommandLineInfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateCommandLineProcessor.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\XBeamRateDoc.cpp"
 				>
 				<FileConfiguration
@@ -1175,6 +1183,14 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateChildFrame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateCommandLineInfo.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBeamRateCommandLineProcessor.h"
 				>
 			</File>
 			<File

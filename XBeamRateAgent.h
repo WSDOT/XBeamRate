@@ -90,7 +90,8 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    public IXBRProjectEventSink,
    public IXBeamRate,
    public IXBRVersionInfo,
-   public IEAFCommandCallback
+   public IEAFCommandCallback,
+   public IEAFProcessCommandLine
 {
 public:
    CXBeamRateAgent() :
@@ -115,6 +116,7 @@ BEGIN_COM_MAP(CXBeamRateAgent)
    COM_INTERFACE_ENTRY(IXBeamRate)
    COM_INTERFACE_ENTRY(IXBRVersionInfo)
    COM_INTERFACE_ENTRY(IEAFCommandCallback)
+   COM_INTERFACE_ENTRY(IEAFProcessCommandLine)
 END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
@@ -187,6 +189,9 @@ public:
    virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
    virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
 
+// IEAFProcessCommandLine
+public:
+   virtual BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo);
 
 private:
    DWORD m_dwProjectPropertiesCookie;
