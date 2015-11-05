@@ -43,7 +43,7 @@ public:
    virtual CString GetUsageMessage();
    virtual CString GetErrorMessage();
 
-   bool m_bMyParam;
+   bool m_bRegTests;
    Uint32 m_Count;
 
 private:

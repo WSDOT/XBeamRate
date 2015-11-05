@@ -45,6 +45,9 @@
 #include "XBeamRateCatCom.h"
 
 #include <IFace\Test.h>
+#include <IFace\VersionInfo.h>
+#include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

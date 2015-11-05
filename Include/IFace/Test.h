@@ -34,5 +34,5 @@ DEFINE_GUID(IID_IXBRTest,
 0xce8a4f81, 0xa616, 0x4ed7, 0x8a, 0x88, 0x99, 0x82, 0xc0, 0x9, 0x6b, 0x14);
 interface IXBRTest : public IUnknown
 {
-   virtual HRESULT RunTest(LPCTSTR lpszResultsFile) = 0;
+   virtual HRESULT RunTest(PierIDType pierID,LPCTSTR lpszResultsFile) = 0;
 };

@@ -40,6 +40,6 @@ public:
    BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo);
 
 protected:
-   BOOL GetResultsFileName(LPCTSTR lpszSourceFile,CString& strResultsFile);
+   BOOL GetResultsFileName(LPCTSTR lpszSourceFile,PierIndexType pierIdx,CString& strResultsFile);
 };
 

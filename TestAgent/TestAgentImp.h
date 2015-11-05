@@ -73,10 +73,14 @@ public:
 
 // IXBRTest
 public:
-   virtual HRESULT RunTest(LPCTSTR lpszResultsFile);
+   virtual HRESULT RunTest(PierIDType pierID,LPCTSTR lpszResultsFile);
 
 private:
    DECLARE_EAF_AGENT_DATA;
+
+   CString GetProcessID();
+
+   void RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_TestAgent, CTestAgentImp)

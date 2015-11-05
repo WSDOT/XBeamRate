@@ -25,6 +25,11 @@
 #include "TestAgent.h"
 #include "TestAgentImp.h"
 
+#include <EAF\EAFAutoProgress.h>
+#include <IFace\VersionInfo.h>
+#include <IFace\PointOfInterest.h>
+#include <IFace\AnalysisResults.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -100,7 +105,7 @@ STDMETHODIMP CTestAgentImp::ShutDown()
 
 //////////////////////////////////////////
 // IXBRTest
-HRESULT CTestAgentImp::RunTest(LPCTSTR lpszResultsFile)
+HRESULT CTestAgentImp::RunTest(PierIDType pierID,LPCTSTR lpszResultsFile)
 {
    std::_tofstream ofResults;
    ofResults.open(lpszResultsFile);
@@ -109,7 +114,47 @@ HRESULT CTestAgentImp::RunTest(LPCTSTR lpszResultsFile)
       return E_FAIL;
    }
 
-   ofResults << _T("Test");
+   // create progress window
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
+   CString strProcessID = GetProcessID();
+   RunProductLoadActionsTest(ofResults,strProcessID,pierID);
 
    return S_OK;
+}
+
+CString CTestAgentImp::GetProcessID()
+{
+   // the process ID is going to be the version number
+   GET_IFACE(IXBRVersionInfo,pVI);
+   return pVI->GetVersion(true);
+}
+
+void CTestAgentImp::RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID)
+{
+   GET_IFACE(IXBRPointOfInterest,pPoi);
+   std::vector<xbrPointOfInterest> vPoi( pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID) );
+
+   GET_IFACE(IXBRAnalysisResults,pResults);
+
+   for ( int i = 0; i < 8; i++ )
+   {
+      xbrTypes::ProductForceType pfType = (xbrTypes::ProductForceType)i;
+
+      CString strMomentTestID;
+      strMomentTestID.Format(_T("7770%d01"),i);
+
+      CString strShearTestID;
+      strShearTestID.Format(_T("7770%d02"),i);
+
+      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+      {
+         Float64 M = pResults->GetMoment(pierID,pfType,poi);
+         os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << M << std::endl;
+
+         sysSectionValue V = pResults->GetShear(pierID,pfType,poi);
+         os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << V.Right() << std::endl;
+      }
+   }
 }

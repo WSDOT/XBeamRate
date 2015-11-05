@@ -41,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 CXBRateCommandLineInfo::CXBRateCommandLineInfo() :
 CEAFCommandLineInfo(),
 m_Count(0),
-m_bMyParam(false)
+m_bRegTests(false)
 {
 }
 
@@ -79,7 +79,7 @@ void CXBRateCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLas
       }
       else if ( strParam.CompareNoCase(_T("XBRTest")) == 0 )
       {
-         m_bMyParam = true;
+         m_bRegTests = true;
          m_bCommandLineMode = true;
          bMyParameter = true;
       }

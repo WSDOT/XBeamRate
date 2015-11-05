@@ -31,7 +31,13 @@ CLASS
 #include <EAF\EAFApp.h>
 #include <EAF\EAFDocument.h>
 
+#include <XBeamRateExt\XBeamRateUtilities.h>
+
 #include <IFace\Test.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+
+#include <PgsExt\BridgeDescription2.h>
+#include <PgsExt\GirderLabel.h>
 
 CXBRateCommandLineProcessor::CXBRateCommandLineProcessor()
 {
@@ -55,25 +61,54 @@ BOOL CXBRateCommandLineProcessor::ProcessCommandLineOptions(CEAFCommandLineInfo&
    {
       return FALSE;
    }
-   else if (xbrCmdInfo.m_bMyParam)
+   else if (xbrCmdInfo.m_bRegTests)
    {
       CComPtr<IBroker> pBroker;
       EAFGetBroker(&pBroker);
       GET_IFACE2(pBroker,IXBRTest,pTest);
 
-      CString strResultsFile;
-      if ( !GetResultsFileName(xbrCmdInfo.m_strFileName,strResultsFile) )
+      if ( IsStandAlone() )
       {
-         CString msg = CString(_T("Error - Test input files must have .xbr extension"));
-         ::AfxMessageBox(msg);
-         return FALSE;
-      }
+         CString strResultsFile;
+         if ( !GetResultsFileName(xbrCmdInfo.m_strFileName,INVALID_INDEX,strResultsFile) )
+         {
+            CString msg = CString(_T("Error - Test input files must have .xbr extension"));
+            ::AfxMessageBox(msg);
+            return FALSE;
+         }
 
-      HRESULT hr = pTest->RunTest(strResultsFile);
-      if ( FAILED(hr) )
+         HRESULT hr = pTest->RunTest(INVALID_ID,strResultsFile);
+         if ( FAILED(hr) )
+         {
+            CString msg = CString(_T("Error - Running test on file "))+xbrCmdInfo.m_strFileName;
+            ::AfxMessageBox(msg);
+         }
+      }
+      else
       {
-         CString msg = CString(_T("Error - Running test on file "))+xbrCmdInfo.m_strFileName;
-         ::AfxMessageBox(msg);
+         GET_IFACE2(pBroker,IBridgeDescription,pBridgeDesc);
+         PierIndexType nPiers = pBridgeDesc->GetPierCount();
+         for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+         {
+            const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
+            if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
+            {
+               CString strResultsFile;
+               if ( !GetResultsFileName(xbrCmdInfo.m_strFileName,pierIdx,strResultsFile) )
+               {
+                  CString msg = CString(_T("Error - Test input files must have .pgs or .spl extension"));
+                  ::AfxMessageBox(msg);
+                  return FALSE;
+               }
+
+               HRESULT hr = pTest->RunTest(pPier->GetID(),strResultsFile);
+               if ( FAILED(hr) )
+               {
+                  CString msg = CString(_T("Error - Running test on file "))+xbrCmdInfo.m_strFileName;
+                  ::AfxMessageBox(msg);
+               }
+            }
+         }
       }
       return TRUE; // command line parameters handled
    }
@@ -97,14 +132,32 @@ BOOL CXBRateCommandLineProcessor::ProcessCommandLineOptions(CEAFCommandLineInfo&
    return bHandled;
 }
 
-BOOL CXBRateCommandLineProcessor::GetResultsFileName(LPCTSTR lpszSourceFile,CString& strResultsFile)
+BOOL CXBRateCommandLineProcessor::GetResultsFileName(LPCTSTR lpszSourceFile,PierIndexType pierIdx,CString& strResultsFile)
 {
    CString strSourceFile(lpszSourceFile);
    strSourceFile.MakeLower();
-   int loc = strSourceFile.Find(_T(".xbr"),0);
+   int loc = 0;
+   if ( pierIdx == INVALID_INDEX )
+   {
+      loc = strSourceFile.Find(_T(".xbr"),0);
+   }
+   else
+   {
+      int loc1 = strSourceFile.Find(_T(".pgs"),0);
+      int loc2 = strSourceFile.Find(_T(".spl"),0);
+      loc = Max(loc1,loc2);
+   }
+
    if ( 0 < loc )
    {
-      strResultsFile.Format(_T("%s.dbr"),strSourceFile.Left(strSourceFile.GetLength()-4));
+      if ( pierIdx == INVALID_INDEX )
+      {
+         strResultsFile.Format(_T("%s.dbr"),CString(lpszSourceFile).Left(strSourceFile.GetLength()-4));
+      }
+      else
+      {
+         strResultsFile.Format(_T("%s_Pier_%d.dbr"),CString(lpszSourceFile).Left(strSourceFile.GetLength()-4),LABEL_PIER(pierIdx));
+      }
       return TRUE;
    }
    return FALSE;
