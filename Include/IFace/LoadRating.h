@@ -103,6 +103,7 @@ typedef struct AvOverSDetails
    std::vector<AvOverSZone> Zones;
    Float64 ShearFailurePlaneLength;
    Float64 AvgAvOverS;
+   AvOverSDetails() { ShearFailurePlaneLength = 0; AvgAvOverS = 0; }
 } AvOverSDetails;
 
 typedef struct DvDetails

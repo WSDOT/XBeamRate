@@ -1034,6 +1034,7 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
       // average Av/S over the length of the shear failure plane
       // (if we are near the ends, it can be less than dv)
       Float64 Lsfp = sfpEnd - sfpStart;
+      ATLASSERT( !IsZero(Lsfp) );
       ATLASSERT(::IsLE(Lsfp,dv/tan(theta)));
       Avg_Av_over_S /= Lsfp;
 
