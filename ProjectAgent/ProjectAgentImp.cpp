@@ -1822,7 +1822,12 @@ IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes:
    {
       GET_IFACE(IProductLoads,pProductLoads);
       pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
-      return pProductLoads->GetVehicleCount(llType);
+      IndexType nVehicles = pProductLoads->GetVehicleCount(llType);
+      if ( pProductLoads->GetLiveLoadName(llType,0) == NO_LIVE_LOAD_DEFINED )
+      {
+         nVehicles = 0;
+      }
+      return nVehicles;
    }
 }
 

@@ -190,7 +190,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
       momentArtifact.SetLiveLoadFactor(gLL);
       momentArtifact.SetLiveLoadMoment(LLIM);
 
-      if ( vehicleIdx == INVALID_INDEX )
+      if ( vehicleIdx == INVALID_INDEX && llConfigIdx != INVALID_INDEX )
       {
          // llConfigIdx is actually the index of the vehicle that governs the load case... we now need to get the live load configuration
          GET_IFACE(IXBRAnalysisResults,pResults);

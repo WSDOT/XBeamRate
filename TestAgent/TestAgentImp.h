@@ -33,6 +33,8 @@
 
 #include <EAF\EAFInterfaceCache.h>
 
+class xbrPointOfInterest;
+
 /////////////////////////////////////////////////////////////////////////////
 // CTestAgentImp
 class ATL_NO_VTABLE CTestAgentImp : 
@@ -80,7 +82,14 @@ private:
 
    CString GetProcessID();
 
-   void RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID);
+   void RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunCombinedLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunLiveLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunLimitStateLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunMomentCapacityTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunShearCapacityTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunCrackedSectionTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi);
+   void RunLoadRatingTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_TestAgent, CTestAgentImp)

@@ -46,8 +46,10 @@
 
 #include <IFace\Test.h>
 #include <IFace\VersionInfo.h>
+#include <IFace\Project.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
 
 
 /////////////////////////////////////////////////////////////////////////////

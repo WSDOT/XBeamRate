@@ -1162,9 +1162,20 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceTyp
 
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
-   Float64 Fx, Fy, Mz;
-   HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&Fy,&Mz);
-   ATLASSERT(SUCCEEDED(hr));
+   Float64 FxL, FxR, FyL, FyR, MzL, MzR;
+   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
+   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
+
+   Float64 Mz;
+   if ( IsZero(poi.GetDistFromStart()) )
+   {
+      Mz = -MzR;
+   }
+   else
+   {
+      Mz = MzL;
+   }
+   Mz = IsZero(Mz) ? 0 : Mz;
    return Mz;
 }
 
@@ -1180,9 +1191,12 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductF
 
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
-   Float64 Fx, FyL, FyR, Mz;
-   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&Fx,&FyL,&Mz);
-   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&Fx,&FyR,&Mz);
+   Float64 FxL, FxR, FyL, FyR, MzL, MzR;
+   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
+   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
+
+   FyL = IsZero(FyL) ? 0 : FyL;
+   FyR = IsZero(FyR) ? 0 : FyR;
 
    sysSectionValue V(-FyL,FyR);
    return V;
@@ -1685,6 +1699,9 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    *pMin *= R;
    *pMax *= R;
 
+   *pMin = IsZero(*pMin) ? 0 : *pMin;
+   *pMax = IsZero(*pMax) ? 0 : *pMax;
+
    if ( pMinLLConfigIdx )
    {
       *pMinLLConfigIdx = (bIsPermitRating ? liveLoadResult.m_llConfigIdx_MzMin_SingleLane : liveLoadResult.m_llConfigIdx_MzMin);
@@ -1715,16 +1732,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       *pMax = liveLoadResult.m_FyMax;
    }
 
-#if defined _DEBUG
-   if ( bIsPermitRating )
-   {
-      GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-      ATLASSERT(pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT);
-      // Don't use this method for permit rating cases with the WSDOT method
-      // of computing rating factors is used.
-   }
-#endif
-
    GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
@@ -1733,6 +1740,11 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    
    pMax->Left()  *= R;
    pMax->Right() *= R;
+
+   pMin->Left()  = IsZero(pMin->Left())  ? 0 : pMin->Left();
+   pMin->Right() = IsZero(pMin->Right()) ? 0 : pMin->Right();
+   pMax->Left()  = IsZero(pMax->Left())  ? 0 : pMax->Left();
+   pMax->Right() = IsZero(pMax->Right()) ? 0 : pMax->Right();
 
    if ( pMinLLConfigIdx )
    {

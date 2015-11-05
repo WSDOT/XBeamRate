@@ -415,6 +415,10 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
       VehicleIndexType nVehicles = (m_VehicleIdx == INVALID_INDEX ? pProject->GetLiveLoadReactionCount(m_PierID,m_RatingType) : 1);
       VehicleIndexType firstVehicleIdx = (m_VehicleIdx == INVALID_INDEX ? 0 : m_VehicleIdx);
       VehicleIndexType lastVehicleIdx  = (m_VehicleIdx == INVALID_INDEX ? nVehicles-1 : firstVehicleIdx);
+      if ( nVehicles == 0 )
+      {
+         lastVehicleIdx = firstVehicleIdx;
+      }
 
       std::vector<IndexType> vLLConfigIdx;
       pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vLLConfigIdx);
