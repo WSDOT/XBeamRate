@@ -68,7 +68,8 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    xbrTypes::PierType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptLengthUnitValue, dist, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
    INIT_UV_PROTOTYPE( rptForceUnitValue, shear, pDisplayUnits->GetShearUnit(), false );
    INIT_UV_PROTOTYPE( rptStressUnitValue, stress, pDisplayUnits->GetStressUnit(), false );
@@ -354,7 +355,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       const DvDetails& dvDetails1 = pShearCapacity->GetDvDetails(pierID,(pierType == xbrTypes::pctIntegral ? xbrTypes::Stage1 : xbrTypes::Stage2),poi);
 
-      (*pDvTable1)(DvTableRow,DvTableCol++) << location.SetValue(poi.GetDistFromStart());
+      (*pDvTable1)(DvTableRow,DvTableCol++) << location.SetValue(poi);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.h);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails1.h);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.de[0]);
@@ -369,7 +370,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       {
          DvTableCol = 0;
          const DvDetails& dvDetails2 = pShearCapacity->GetDvDetails(pierID,xbrTypes::Stage2,poi);
-         (*pDvTable2)(DvTableRow,DvTableCol++) << location.SetValue(poi.GetDistFromStart());
+         (*pDvTable2)(DvTableRow,DvTableCol++) << location.SetValue(poi);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.h);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails2.h);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[0]);
@@ -384,12 +385,12 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
       {
          const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
-         (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi.GetDistFromStart());
+         (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi);
 
          rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
          (*pAvSTable1)(row,AvSTableCol++) << pAvTable;
 
-         (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(avsDetails.ShearFailurePlaneLength);
+         (*pAvSTable1)(row,AvSTableCol++) << dist.SetValue(avsDetails.ShearFailurePlaneLength);
          (*pAvSTable1)(row,AvSTableCol++) << avs.SetValue(avsDetails.AvgAvOverS);
 
          (*pAvTable)(0,0) << _T("");
@@ -401,8 +402,8 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
          {
             (*pAvTable)(avRow,0) << ZoneIdx;
-            (*pAvTable)(avRow,1) << location.SetValue(zone.Start);
-            (*pAvTable)(avRow,2) << location.SetValue(zone.End);
+            (*pAvTable)(avRow,1) << dist.SetValue(zone.Start);
+            (*pAvTable)(avRow,2) << dist.SetValue(zone.End);
             (*pAvTable)(avRow,3) << avs.SetValue(zone.AvOverS);
             avRow++;
             ZoneIdx++;
@@ -412,12 +413,12 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          {
             AvSTableCol = 0;
             const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
-            (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(poi.GetDistFromStart());
+            (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(poi);
 
             rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
             (*pAvSTable2)(row,AvSTableCol++) << pAvTable;
 
-            (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(avsDetails.ShearFailurePlaneLength);
+            (*pAvSTable2)(row,AvSTableCol++) << dist.SetValue(avsDetails.ShearFailurePlaneLength);
             (*pAvSTable2)(row,AvSTableCol++) << avs.SetValue(avsDetails.AvgAvOverS);
 
             (*pAvTable)(0,0) << _T("");
@@ -429,8 +430,8 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
             BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
             {
                (*pAvTable)(avRow,0) << ZoneIdx;
-               (*pAvTable)(avRow,1) << location.SetValue(zone.Start);
-               (*pAvTable)(avRow,2) << location.SetValue(zone.End);
+               (*pAvTable)(avRow,1) << dist.SetValue(zone.Start);
+               (*pAvTable)(avRow,2) << dist.SetValue(zone.End);
                (*pAvTable)(avRow,3) << avs.SetValue(zone.AvOverS);
                avRow++;
                ZoneIdx++;
@@ -441,14 +442,14 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       const ShearCapacityDetails& scd = pShearCapacity->GetShearCapacityDetails(pierID,xbrTypes::Stage2,poi);
       
-      (*pVcTable)(row,VcTableCol++) << location.SetValue(poi.GetDistFromStart());
+      (*pVcTable)(row,VcTableCol++) << location.SetValue(poi);
       (*pVcTable)(row,VcTableCol++) << scd.beta;
       (*pVcTable)(row,VcTableCol++) << stress.SetValue(fc);
       (*pVcTable)(row,VcTableCol++) << dim.SetValue(scd.bv);
       (*pVcTable)(row,VcTableCol++) << dim.SetValue(scd.dv);
       (*pVcTable)(row,VcTableCol++) << shear.SetValue(scd.Vc);
 
-      (*pVsTable)(row,VsTableCol++) << location.SetValue(poi.GetDistFromStart());
+      (*pVsTable)(row,VsTableCol++) << location.SetValue(poi);
       if ( pierType == xbrTypes::pctIntegral )
       {
          (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S1);
@@ -465,7 +466,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       (*pVsTable)(row,VsTableCol++) << angle.SetValue(scd.theta);
       (*pVsTable)(row,VsTableCol++) << shear.SetValue(scd.Vs);
 
-      (*pVnTable)(row,VnTableCol++) << location.SetValue(poi.GetDistFromStart());
+      (*pVnTable)(row,VnTableCol++) << location.SetValue(poi);
       (*pVnTable)(row,VnTableCol++) << shear.SetValue(scd.Vc);
       (*pVnTable)(row,VnTableCol++) << shear.SetValue(scd.Vs);
       (*pVnTable)(row,VnTableCol++) << shear.SetValue(scd.Vn1);

@@ -55,8 +55,8 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
 
    rptCapacityToDemand rating_factor;
 
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(),   true  );
    INIT_UV_PROTOTYPE( rptForceUnitValue,  force,    pDisplayUnits->GetGeneralForceUnit(), false );
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(),   true  );
 
    rptRcScalar scalar;
    scalar.SetFormat( sysNumericFormatTool::Fixed );
@@ -187,7 +187,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
             {
                (*table)(row,col+1) << scalar.SetValue(pMomentArtifact->GetLiveLoadFactor());
                const xbrPointOfInterest& poi = pMomentArtifact->GetPointOfInterest();
-               (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               (*table)(row,col+2) << location.SetValue(poi);
             }
             else
             {
@@ -211,7 +211,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                (*table)(row,col+1) << scalar.SetValue(pMomentArtifact->GetLiveLoadFactor());
 
                const xbrPointOfInterest& poi = pMomentArtifact->GetPointOfInterest();
-               (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               (*table)(row,col+2) << location.SetValue(poi);
             }
             else
             {
@@ -239,7 +239,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                (*table)(row,col+1) << scalar.SetValue(pShearArtifact->GetLiveLoadFactor());
 
                const xbrPointOfInterest& poi = pShearArtifact->GetPointOfInterest();
-               (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               (*table)(row,col+2) << location.SetValue(poi);
             }
             else
             {
@@ -267,7 +267,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
             {
                (*table)(row,col+1) << scalar.SetValue(pMomentArtifact->GetLiveLoadFactor());
                const xbrPointOfInterest& poi = pMomentArtifact->GetPointOfInterest();
-               (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               (*table)(row,col+2) << location.SetValue(poi);
             }
             else
             {
@@ -291,7 +291,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                (*table)(row,col+1) << scalar.SetValue(pMomentArtifact->GetLiveLoadFactor());
 
                const xbrPointOfInterest& poi = pMomentArtifact->GetPointOfInterest();
-               (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+               (*table)(row,col+2) << location.SetValue(poi);
             }
             else
             {
@@ -318,7 +318,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                   (*table)(row,col+1) << scalar.SetValue(pShearArtifact->GetLiveLoadFactor());
 
                   const xbrPointOfInterest& poi = pShearArtifact->GetPointOfInterest();
-                  (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+                  (*table)(row,col+2) << location.SetValue(poi);
                }
                else
                {
@@ -349,8 +349,8 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                {
                   (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
 
-                  xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
-                  (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+                  const xbrPointOfInterest& poi = pYieldStressArtifact->GetPointOfInterest();
+                  (*table)(row,col+2) << location.SetValue(poi);
                }
                else
                {
@@ -373,8 +373,8 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                {
                   (*table)(row,col+1) << scalar.SetValue(pYieldStressArtifact->GetLiveLoadFactor());
 
-                  xbrPointOfInterest poi = pYieldStressArtifact->GetPointOfInterest();
-                  (*table)(row,col+2) << location.SetValue(poi.GetDistFromStart());
+                  const xbrPointOfInterest& poi = pYieldStressArtifact->GetPointOfInterest();
+                  (*table)(row,col+2) << location.SetValue(poi);
                }
                else
                {
@@ -421,7 +421,7 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
    scalar.SetPrecision(3);
    scalar.SetTolerance(1.0e-6);
 
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), true );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), true );
 
    CString strTitle = ::GetLiveLoadTypeName(ratingType);
    rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(5,strTitle);
@@ -518,7 +518,7 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
      }
 
      (*pTable)(row,2) << scalar.SetValue(gLL);
-     (*pTable)(row,3) << location.SetValue(poi.GetDistFromStart());
+     (*pTable)(row,3) << location.SetValue(poi);
      (*pTable)(row,4) << strControlling;
 
      row++;

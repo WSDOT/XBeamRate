@@ -1228,13 +1228,18 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
    std::vector<xbrPointOfInterest> vFilteredPoi;
    BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
    {
-      if ( poi.HasAttribute(POI_FOC) )
+      if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
       {
          bOverColumn = !bOverColumn;
          vFilteredPoi.push_back(poi);
       }
 
-      if ( !bOverColumn )
+      if ( !bOverColumn && 
+           (poi.HasAttribute(POI_GRID) || 
+            poi.HasAttribute(POI_BRG)  || 
+            poi.HasAttribute(POI_MIDPOINT) || 
+            poi.HasAttribute(POI_SECTIONCHANGE)) 
+         )
       {
          vFilteredPoi.push_back(poi);
       }
@@ -1923,8 +1928,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    CColumnData::ColumnHeightMeasurementType measureType;
    Float64 H;
    pProject->GetColumnProperties(pierID,0,&shapeType,&D1,&D2,&measureType,&H);
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-D1/2,POI_FOC));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+D1/2,POI_FOC));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-D1/2,POI_FACEOFCOLUMN));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+D1/2,POI_FACEOFCOLUMN));
 
    ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    if ( 1 < nColumns )
@@ -1946,8 +1951,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 
          // put POI at faces of column
          pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-D1/2,POI_FOC));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+D1/2,POI_FOC));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-D1/2,POI_FACEOFCOLUMN));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+D1/2,POI_FACEOFCOLUMN));
       }
    }
 
@@ -2012,7 +2017,7 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());
 
-   // Merge the attributes of consecutive POI (at the same location) so when we remove
+   // Merge the attributes of POI thare are at the same location so when we remove
    // duplicates the attributes don't get lost
    std::pair<std::vector<xbrPointOfInterest>::iterator,std::vector<xbrPointOfInterest>::iterator> bounds;
    std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
@@ -2020,12 +2025,15 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
    for ( ; iter != end; iter++ )
    {
       bounds = std::equal_range(vPoi.begin(),vPoi.end(),*iter,PoiLess);
+
+      // merge the attributes for all the POI in the range
       PoiAttributeType attributes = 0;
       for ( iter = bounds.first; iter != bounds.second; iter++ )
       {
          attributes |= iter->GetAttributes();
       }
 
+      // set the merged attributes to all the POI at the same location
       for ( iter = bounds.first; iter != bounds.second; iter++ )
       {
          iter->SetAttributes(attributes);
@@ -2038,7 +2046,7 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
       }
    }
 
-   // remove any duplicates
+   // remove duplicates
    vPoi.erase(std::unique(vPoi.begin(),vPoi.end(),ComparePoiLocation),vPoi.end());
 }
 

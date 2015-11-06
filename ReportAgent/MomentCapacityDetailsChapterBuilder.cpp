@@ -63,7 +63,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), false );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
    INIT_UV_PROTOTYPE( rptAreaUnitValue, area, pDisplayUnits->GetAreaUnit(), false);
@@ -72,7 +72,16 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity.png")) << rptNewLine;
+   ColumnIndexType nColumns = 9;
+   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
+   }
+   else
+   {
+      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity.png")) << rptNewLine;
+      nColumns--; // no alpha column
+   }
 
    for ( int i = 0; i < 2; i++ )
    {
@@ -81,17 +90,16 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
       CString strTitle;
       strTitle.Format(_T("%s Moment"),(bPositiveMoment ? _T("Positive") : _T("Negative")));
 
-      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(9,strTitle);
+      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
       *pPara << pTable << rptNewLine;
 
-#pragma Reminder("WORKING HERE - need to get LRFD Version and Units Mode correct")
-      // need to look at LRFD code version
-      // the equations are different and the alpha1 column isn't needed
-      // if the LRFD version is before (2015??? - not sure of the exact version)
 
       ColumnIndexType col = 0;
       (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-      (*pTable)(0,col++) << Sub2(symbol(alpha),_T("1"));
+      if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+      {
+         (*pTable)(0,col++) << Sub2(symbol(alpha),_T("1"));
+      }
       (*pTable)(0,col++) << Sub2(symbol(beta),_T("1"));
       (*pTable)(0,col++) << COLHDR(_T("c"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << COLHDR(_T("b"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -128,8 +136,11 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
          ATLASSERT(IsZero(hf));
 #endif
 
-         (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
-         (*pTable)(row,col++) << alpha1;
+         (*pTable)(row,col++) << location.SetValue(poi);
+         if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+         {
+            (*pTable)(row,col++) << alpha1;
+         }
          (*pTable)(row,col++) << beta1;
          (*pTable)(row,col++) << dim.SetValue(c);
          (*pTable)(row,col++) << dim.SetValue(bw);
@@ -142,9 +153,9 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
          (*pTable)(row,col++) << moment.SetValue(mcd.Mr);
 
 
-         (*pReinfTable)(0,0) << _T("");
-         (*pReinfTable)(0,1) << COLHDR(Sub2(_T("A"),_T("s")),rptAreaUnitTag,pDisplayUnits->GetAreaUnit());
-         (*pReinfTable)(0,2) << COLHDR(Sub2(_T("d"),_T("s")),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
+         (*pReinfTable)(0,0) << _T("Layer");
+         (*pReinfTable)(0,1) << COLHDR(Sub2(_T("d"),_T("s")),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
+         (*pReinfTable)(0,2) << COLHDR(Sub2(_T("A"),_T("s")),rptAreaUnitTag,pDisplayUnits->GetAreaUnit());
          (*pReinfTable)(0,3) << COLHDR(Sub2(_T("f"),_T("s")),rptStressUnitTag,pDisplayUnits->GetStressUnit());
 
          IndexType nRebarLayers;
@@ -167,9 +178,9 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
             Float64 fs;
             vfs->get_Item(rebarLayerIdx,&fs);
 
-            (*pReinfTable)(reinfTableRow,0) << (rebarLayerIdx+1);
-            (*pReinfTable)(reinfTableRow,1) << area.SetValue(devFactor*As);
-            (*pReinfTable)(reinfTableRow,2) << dim.SetValue(ds);
+            (*pReinfTable)(reinfTableRow,0) << LABEL_INDEX(rebarLayerIdx);
+            (*pReinfTable)(reinfTableRow,1) << dim.SetValue(ds);
+            (*pReinfTable)(reinfTableRow,2) << area.SetValue(devFactor*As);
             (*pReinfTable)(reinfTableRow,3) << stress.SetValue(fs);
          }
 

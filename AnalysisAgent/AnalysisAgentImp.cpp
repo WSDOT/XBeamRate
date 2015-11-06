@@ -2819,9 +2819,9 @@ Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
    {
       pgsTypes::LoadRatingType legalRatingType = (i == 0 ? pgsTypes::lrLegal_Routine : pgsTypes::lrLegal_Special);
       VehicleIndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,legalRatingType);
-      for ( VehicleIndexType vIdx = 0; vIdx < nVehicles; vIdx++ )
+      for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
       {
-         Float64 r_legal = pProject->GetLiveLoadReaction(pierID,legalRatingType,vIdx);
+         Float64 r_legal = pProject->GetLiveLoadReaction(pierID,legalRatingType,vehicleIdx);
          Rlgl = Max(Rlgl,r_legal);
       }
    }

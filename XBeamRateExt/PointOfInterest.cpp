@@ -107,6 +107,11 @@ PoiAttributeType xbrPointOfInterest::GetAttributes() const
    return m_Attributes;
 }
 
+bool xbrPointOfInterest::HasAttributes() const
+{
+   return (m_Attributes != 0 ? true : false);
+}
+
 bool xbrPointOfInterest::HasAttribute(PoiAttributeType attribute) const
 {
    return sysFlags<PoiAttributeType>::IsSet(m_Attributes,attribute) ? true : false;
@@ -116,6 +121,96 @@ void xbrPointOfInterest::ClearAttributes()
 {
    m_Attributes = 0;
    UPDATE_ATTRIBUTES;
+}
+
+std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
+{
+   std::_tstring strAttrib;
+   if ( !HasAttributes() )
+   {
+      return strAttrib;
+   }
+
+   int nAttributes = 0;
+
+   if ( HasAttribute(POI_SECTIONCHANGE) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("ST");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_COLUMN) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("Col");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_BRG) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("Brg");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_WHEELLINE) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("WL");
+      nAttributes++;
+   }
+
+   //if ( HasAttribute(POI_GRID) )
+   //{
+   //   if ( 0 < nAttributes )
+   //   {
+   //      strAttrib += _T(", ");
+   //   }
+
+   //   strAttrib += _T("Grid");
+   //   nAttributes++;
+   //}
+
+   if ( HasAttribute(POI_FACEOFCOLUMN) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("FoC");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_MIDPOINT) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("MP");
+      nAttributes++;
+   }
+
+   return strAttrib;
 }
 
 #if defined _DEBUG
@@ -149,9 +244,9 @@ void xbrPointOfInterest::UpdateAttributeString()
       os << _T("POI_GRID | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC) )
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FACEOFCOLUMN) )
    {
-      os << _T("POI_FOC | ");
+      os << _T("POI_FACEOFCOLUMN | ");
    }
 
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )

@@ -580,6 +580,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ReportPointOfInterest.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ShearRatingArtifact.cpp"
 				>
 			</File>
@@ -699,6 +703,10 @@
 			</File>
 			<File
 				RelativePath="..\Include\XBeamRateExt\ReinforcementPage.h"
+				>
+			</File>
+			<File
+				RelativePath="..\Include\XBeamRateExt\ReportPointOfInterest.h"
 				>
 			</File>
 			<File

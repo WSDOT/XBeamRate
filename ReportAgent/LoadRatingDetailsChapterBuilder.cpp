@@ -145,7 +145,7 @@ CChapterBuilder* CLoadRatingDetailsChapterBuilder::Clone() const
 void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), true );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
    rptCapacityToDemand rating_factor;
 
@@ -177,7 +177,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
-   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
+   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 23 : 22);
 
    rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
    pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
@@ -237,6 +237,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    {
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
    }
+   (*pTable)(0,col++) << _T("Live") << rptNewLine << _T("Load") << rptNewLine << _T("Case");
    (*pTable)(0,col++) << _T("RF");
 
    const xbrMomentRatingArtifact* pControllingRating;
@@ -273,7 +274,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
          artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Mpermit,&Mlegal,&K);
       }
 
-      (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,col++) << location.SetValue(poi);
       (*pTable)(row,col++) << artifact.GetConditionFactor();
       (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
@@ -303,15 +304,13 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       if ( bIsWSDOTPermitRating )
       {
          (*pTable)(row,col++) << moment.SetValue(Mpermit);
-         (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
          (*pTable)(row,col++) << moment.SetValue(Mlegal);
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
       }
       else
       {
          (*pTable)(row,col++) << moment.SetValue(artifact.GetLiveLoadMoment());
-         (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
          if ( ::IsDesignRatingType(ratingType) )
          {
             (*pTable)(row,col-1) << _T(", D") << LABEL_INDEX(artifact.GetVehicleIndex());
@@ -334,7 +333,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
 void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   INIT_UV_PROTOTYPE( rptLengthUnitValue, location, pDisplayUnits->GetSpanLengthUnit(), true );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptForceUnitValue, shear, pDisplayUnits->GetShearUnit(), false );
    rptCapacityToDemand rating_factor;
 
@@ -358,7 +357,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamShearRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
-   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 21 : 20);
+   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
 
    rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
    pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
@@ -417,6 +416,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    {
       (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
    }
+   (*pTable)(0,col++) << _T("Live") << rptNewLine << _T("Load") << rptNewLine << _T("Case");
    (*pTable)(0,col++) << _T("RF");
 
 
@@ -454,7 +454,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
          artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Vpermit,&Vlegal);
       }
 
-      (*pTable)(row,col++) << location.SetValue(poi.GetDistFromStart());
+      (*pTable)(row,col++) << location.SetValue(poi);
       (*pTable)(row,col++) << artifact.GetConditionFactor();
       (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
@@ -476,15 +476,13 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       if ( bIsWSDOTPermitRating )
       {
          (*pTable)(row,col++) << shear.SetValue(Vpermit);
-         (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
          (*pTable)(row,col++) << shear.SetValue(Vlegal);
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
       }
       else
       {
          (*pTable)(row,col++) << shear.SetValue(artifact.GetLiveLoadShear());
-         (*pTable)(row,col-1) << rptNewLine;
-         (*pTable)(row,col-1) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(artifact.GetLiveLoadConfigurationIndex());
          if ( ::IsDesignRatingType(ratingType) )
          {
             (*pTable)(row,col-1) << _T(", D") << LABEL_INDEX(artifact.GetVehicleIndex());
@@ -547,7 +545,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   INIT_UV_PROTOTYPE( rptLengthUnitValue,  location, pDisplayUnits->GetSpanLengthUnit(),      false );
+   INIT_UV_PROTOTYPE( rptXBRPointOfInterest,  location, pDisplayUnits->GetSpanLengthUnit(),      false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue,  dim,      pDisplayUnits->GetComponentDimUnit(),    false );
    INIT_UV_PROTOTYPE( rptStressUnitValue,  stress,   pDisplayUnits->GetStressUnit(),          false );
    INIT_UV_PROTOTYPE( rptStressUnitValue,  modE,     pDisplayUnits->GetModEUnit(),            false );
@@ -638,7 +636,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
       }
 
 
-      (*table)(row,col++) << location.SetValue( poi.GetDistFromStart() );
+      (*table)(row,col++) << location.SetValue(poi);
       (*table)(row,col++) << moment.SetValue(artifact.GetDeadLoadMoment());
       (*table)(row,col++) << moment.SetValue(artifact.GetWearingSurfaceMoment());
       (*table)(row,col++) << moment.SetValue(artifact.GetCreepMoment());

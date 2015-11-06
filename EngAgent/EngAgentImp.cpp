@@ -268,10 +268,6 @@ const MinMomentCapacityDetails& CEngAgentImp::GetMinMomentCapacityDetails(PierID
 
 MinMomentCapacityDetails CEngAgentImp::GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx)
 {
-   GET_IFACE(IProgress, pProgress);
-   CEAFAutoProgress ap(pProgress);
-   pProgress->UpdateMessage(_T("Computing minimum moment capacity"));
-
    return ComputeMinMomentCapacity(pierID,limitState,stage,poi,bPositiveMoment,vehicleIdx,llConfigIdx,permitLaneIdx);
 }
 
@@ -597,9 +593,9 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx)
 {
    Float64 Mr;     // Nominal resistance (phi*Mn)
-   Float64 Mcr;    // Cracking moment
+   Float64 Mcrack; // Cracking moment
    Float64 MrMin;  // Minimum nominal resistance - Min(MrMin1,MrMin2)
-   Float64 MrMin1; // 1.2Mcr
+   Float64 MrMin1; // 1.Mcrack
    Float64 MrMin2; // 1.33Mu
    Float64 Mu;
 
@@ -610,11 +606,11 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
-      Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
+      Mcrack = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
    }
    else
    {
-      Mcr = McrDetails.Mcr;
+      Mcrack = McrDetails.Mcr;
    }
 
    Mr = MnDetails.phi * MnDetails.Mn;
@@ -623,7 +619,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
    Float64 Mdc = pAnalysisResults->GetMoment(pierID,xbrTypes::lcDC,poi);
    Float64 Mdw = pAnalysisResults->GetMoment(pierID,xbrTypes::lcDW,poi);
-   Float64 Mcreep = pAnalysisResults->GetMoment(pierID,xbrTypes::lcCR,poi);
+   Float64 Mcr = pAnalysisResults->GetMoment(pierID,xbrTypes::lcCR,poi);
    Float64 Msh = pAnalysisResults->GetMoment(pierID,xbrTypes::lcSH,poi);
    Float64 Mre = pAnalysisResults->GetMoment(pierID,xbrTypes::lcRE,poi);
    Float64 Mps = pAnalysisResults->GetMoment(pierID,xbrTypes::lcPS,poi);
@@ -642,15 +638,15 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    Float64 gPS = pProject->GetPSLoadFactor(limitState);
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,limitState,vehicleIdx);
 
-   Mu = gDC*Mdc + gDW*Mdw + gCR*Mcreep + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
+   Mu = gDC*Mdc + gDW*Mdw + gCR*Mcr + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
 
    if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
    {
-      MrMin1 = Mcr;
+      MrMin1 = Mcrack;
    }
    else
    {
-      MrMin1 = 1.20*Mcr;
+      MrMin1 = 1.20*Mcrack;
    }
 
    MrMin2 = 1.33*Mu;
@@ -659,7 +655,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
    MinMomentCapacityDetails MminDetails;
    MminDetails.Mr     = Mr;
-   MminDetails.Mcr    = Mcr;
+   MminDetails.Mcr    = Mcrack;
    MminDetails.MrMin  = MrMin;
    MminDetails.MrMin1 = MrMin1;
    MminDetails.MrMin2 = MrMin2;
@@ -683,13 +679,13 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
       n *= 2; // use 2n for permanent loads (LRFD 5.7.1)
    }
 
-   // The cracked section solver is going to use whatever Eb and Ec we give to it.
+   // The cracked section solver is going to use whatever Es and Ec we give to it.
    // We have to manipulate Ec so that the solver uses the correct modular ratio
-   // (The solver computes y = Sum(EAy)/Sum(EA) = (Ec*Ac*Yc + Eb*Ab*Yb)/(Ec*Ac + Eb*Ab)
-   // Below, use Ec to transform the elastic properties to transformed section properties
-   // and this is where the modular ratio comes into play. We have to alter Ec here
-   // so that when we divide through by Ec below (for TransformedProperties), Ec/Ec = 1
-   // and Es/Ec = 2
+   // (The solver computes y = Sum(EAy)/Sum(EA) = (Ec*Ac*Yc + Es*As*Yb)/(Ec*Ac + Es*As)
+   // Below, Ec is used to transform the elastic properties to transformed section properties
+   // and this is where the modular ratio comes into play. We will divide through by
+   // Ec so in the concrete terms Ec/Ec = 1 and Ec/Es = n. We have to alter Ec here
+   // so that when we divide through by Ec below we get the correct modular ratio.
    Ec = Es/n;
 
 
@@ -728,6 +724,7 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
    solution->get_ElasticProperties(&elastic_properties);
 
    // transform properties into concrete matieral
+   // Divides through by Ec
    CComPtr<IShapeProperties> shape_properties;
    elastic_properties->TransformProperties(Ec,&shape_properties);
 

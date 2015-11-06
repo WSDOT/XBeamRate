@@ -387,7 +387,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
-   pProgress->UpdateMessage(_T("Checking for reinforcement yielding"));
 
    ATLASSERT(::IsPermitRatingType(ratingType));
 

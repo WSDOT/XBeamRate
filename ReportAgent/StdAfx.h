@@ -34,5 +34,8 @@
 #include <ReportManager\ReportManager.h>
 #include <EAF\EAFBrokerReportSpecification.h>
 #include <PgsExt\ReportStyleHolder.h>
+#include <PgsExt\GirderLabel.h>
+
+#include <XBeamRateExt\ReportPointOfInterest.h>
 
 #include <LRFD\LRFD.h>

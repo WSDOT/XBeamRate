@@ -972,7 +972,9 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    xbrTypes::PierType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
-   for ( int i = 0; i < 2; i++ )
+   // work backwards when drawing stirrups so lower XBeam stirrups are 
+   // drawn second and not covered up by the full depth stirrups
+   for ( int i = 1; 0 <= i; i-- ) 
    {
       xbrTypes::Stage stage = (xbrTypes::Stage)i;
       COLORREF color = (stage == xbrTypes::Stage1 ? STAGE1_STIRRUP_COLOR : STAGE2_STIRRUP_COLOR);
