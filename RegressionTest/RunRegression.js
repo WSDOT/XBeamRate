@@ -136,8 +136,10 @@ function RunTest (currFolder, currCommand)
           for (; !fc.atEnd(); fc.moveNext()) {
               s = new String(fc.item());
 
-              idx = s.indexOf(".xbr");
-              if (-1 != idx) {
+              idx1 = s.indexOf(".xbr");
+              idx2 = s.indexOf(".pgs");
+              idx3 = s.indexOf(".spl");
+              if (idx1 != -1 || idx2 != -1 || idx3 != -1) {
                   cmd = Application + " /" + newCommand + " " + s;
 
                   if (ExecuteCommands) {
