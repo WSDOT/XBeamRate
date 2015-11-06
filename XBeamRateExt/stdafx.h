@@ -34,4 +34,6 @@
 #include <grid\gxall.h>
 
 
+//#define COMPARE_WITH_FULL_ANALYSIS
+
 // TODO: reference additional headers your program requires here

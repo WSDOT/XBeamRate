@@ -31,8 +31,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-//#define COMPARE_WITH_FULL_ANALYSIS
-
 /****************************************************************************
 CLASS
    xbrShearRatingArtifact

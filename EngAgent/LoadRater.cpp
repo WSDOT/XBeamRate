@@ -52,7 +52,7 @@ void xbrLoadRater::SetBroker(IBroker* pBroker)
 xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
    GET_IFACE(IXBRPointOfInterest,pPOI);
-   std::vector<xbrPointOfInterest> vPoi( pPOI->GetXBeamPointsOfInterest(pierID) );
+   std::vector<xbrPointOfInterest> vPoi( pPOI->GetRatingPointsOfInterest(pierID) );
 
    xbrRatingArtifact ratingArtifact;
 

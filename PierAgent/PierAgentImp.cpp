@@ -75,6 +75,11 @@ bool ComparePoiLocation(const xbrPointOfInterest& poi1,const xbrPointOfInterest&
    return true;
 }
 
+bool PoiLess(const xbrPointOfInterest& poi1,const xbrPointOfInterest& poi2)
+{
+   return IsLT(poi1.GetDistFromStart(),poi2.GetDistFromStart()) ? true : false;
+}
+
 StageIndexType GetStageIndex(xbrTypes::Stage stage)
 {
    return (stage == xbrTypes::Stage1 ? 0 : 1);
@@ -1172,6 +1177,13 @@ Float64 CPierAgentImp::GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::S
    return zone.Av_over_S;
 }
 
+Float64 CPierAgentImp::GetStirrupLegCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+{
+   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   return zone.nLegs;
+}
+
 IndexType CPierAgentImp::GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
 {
    std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
@@ -1205,6 +1217,32 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDT
 {
    ATLASSERT(false); // not really using column POI just yet
    return std::vector<xbrPointOfInterest>();
+}
+
+std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID)
+{
+   // load rate at all POI, except for those the fall between the face of columns
+   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+
+   bool bOverColumn = false;
+   std::vector<xbrPointOfInterest> vFilteredPoi;
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      if ( poi.HasAttribute(POI_FOC) )
+      {
+         bOverColumn = !bOverColumn;
+         vFilteredPoi.push_back(poi);
+      }
+
+      if ( !bOverColumn )
+      {
+         vFilteredPoi.push_back(poi);
+      }
+   }
+
+   ATLASSERT(bOverColumn == false);
+
+   return vFilteredPoi;
 }
 
 Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi)
@@ -1873,21 +1911,43 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 
    // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
    Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID); 
+
+   // left column
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta));
+
+   // put POI at faces of left column
+   CColumnData::ColumnShapeType shapeType;
+   Float64 D1, D2;
+   CColumnData::ColumnHeightMeasurementType measureType;
+   Float64 H;
+   pProject->GetColumnProperties(pierID,0,&shapeType,&D1,&D2,&measureType,&H);
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-D1/2,POI_FOC));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+D1/2,POI_FOC));
+
    ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
    if ( 1 < nColumns )
    {
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta));
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
-      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta));
       SpacingIndexType nSpaces = nColumns - 1;
       Float64 X = LeftOH;
       for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
       {
          Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
+  
+         // put POI at mid-point between columns
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+space/2,POI_MIDPOINT));
+
          X += space;
+
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta));
+
+         // put POI at faces of column
+         pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-D1/2,POI_FOC));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+D1/2,POI_FOC));
       }
    }
 
@@ -1952,22 +2012,29 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());
 
-   // Merge the attributes of two POI at the same location so when we remove
+   // Merge the attributes of consecutive POI (at the same location) so when we remove
    // duplicates the attributes don't get lost
-   std::vector<xbrPointOfInterest>::iterator iter1(vPoi.begin());
-   std::vector<xbrPointOfInterest>::iterator iter2(iter1+1);
+   std::pair<std::vector<xbrPointOfInterest>::iterator,std::vector<xbrPointOfInterest>::iterator> bounds;
+   std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
    std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   for ( ; iter2 != end; iter1++, iter2++ )
+   for ( ; iter != end; iter++ )
    {
-      xbrPointOfInterest& poi1(*iter1);
-      xbrPointOfInterest& poi2(*iter2);
-      if ( ComparePoiLocation(poi1,poi2) )
+      bounds = std::equal_range(vPoi.begin(),vPoi.end(),*iter,PoiLess);
+      PoiAttributeType attributes = 0;
+      for ( iter = bounds.first; iter != bounds.second; iter++ )
       {
-         PoiAttributeType attribute = poi1.GetAttributes();
-         attribute |= poi2.GetAttributes();
+         attributes |= iter->GetAttributes();
+      }
 
-         poi1.SetAttributes(attribute);
-         poi2.SetAttributes(attribute);
+      for ( iter = bounds.first; iter != bounds.second; iter++ )
+      {
+         iter->SetAttributes(attributes);
+      }
+
+      iter = bounds.second;
+      if ( iter == end )
+      {
+         break;
       }
    }
 

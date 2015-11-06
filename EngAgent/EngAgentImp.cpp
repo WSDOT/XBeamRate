@@ -45,6 +45,7 @@
 #include "LoadRater.h"
 
 #include <WBFLGenericBridge.h>
+#include <WBFLSTL.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -71,10 +72,15 @@ HRESULT CEngAgentImp::FinalConstruct()
    hr = m_MomentCapacitySolver.CoCreateInstance(CLSID_LRFDSolver2);
    ATLASSERT(SUCCEEDED(hr));
 
-   // base equations on US units of LRFD
-#pragma Reminder("WORKING HERE - need to get LRFD Units Mode correct")
    CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
-   solver->put_UnitMode(suUS);
+   if ( lrfdVersionMgr::GetUnits() == lrfdVersionMgr::US )
+   {
+      solver->put_UnitMode(suUS);
+   }
+   else
+   {
+      solver->put_UnitMode(suSI);
+   }
 
    hr = m_CrackedSectionSolver.CoCreateInstance(CLSID_NLSolver);
    ATLASSERT(SUCCEEDED(hr));
@@ -82,7 +88,6 @@ HRESULT CEngAgentImp::FinalConstruct()
    // use only one slice for cracked section analysis
    CComQIPtr<INLSolver> nlsolver(m_CrackedSectionSolver);
    nlsolver->put_Slices(1);
-
 
    return S_OK;
 }
@@ -707,7 +712,7 @@ CrackedSectionDetails CEngAgentImp::ComputeCrackedSectionProperties(PierIDType p
    // Get it from the cache
    const MomentCapacityDetails& mcd = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
 
-   // solver the cracked section problem
+   // solve the cracked section problem
    CComPtr<ICrackedSectionSolution> solution;
    HRESULT hr = m_CrackedSectionSolver->Solve(mcd.rcBeam,&solution); 
    ATLASSERT(SUCCEEDED(hr));
@@ -859,8 +864,6 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
-   Float64 dt = 0; // location of the extreme tension steel, measured from the top of the deck
-
    GET_IFACE(IXBRRebar,pRebar);
    CComPtr<IRebarSection> rebarSection;
    pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
@@ -868,6 +871,13 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    CComPtr<IEnumRebarSectionItem> enumRebar;
    rebarSection->get__EnumRebarSectionItem(&enumRebar);
 
+   // the capacity analysis goes faster if we lump all the rebar
+   // at a single elevation into one bar.
+   // this map keeps track of Ybar and As*devFactor
+   std::map<Float64,Float64,Float64_less> rebarMap;
+
+   // This loop accumulates As for each unique Ybar... it doesn't
+   // put the bar in the capacity model
    CComPtr<IRebarSectionItem> rebarSectionItem;
    while ( enumRebar->Next(1,&rebarSectionItem,NULL) != S_FALSE )
    {
@@ -903,8 +913,6 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
          Ybar = h - Ybar; // Ybar is measured from the bottom up for negative moment
       }
 
-      dt = Max(dt,Ybar);
-
       CComPtr<IRebar> rebar;
       rebarSectionItem->get_Rebar(&rebar);
 
@@ -913,9 +921,37 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
 
       Float64 devFactor = pRebar->GetDevLengthFactor(pierID,poi,rebarSectionItem);
       ATLASSERT(::InRange(0.0,devFactor,1.0));
-      rcBeam->AddRebarLayer(Ybar,As,devFactor);
+
+      As *= devFactor;
+
+      // do we already have bars at this elevation ?
+      std::map<Float64,Float64,Float64_less>::iterator found = rebarMap.find(Ybar);
+      if ( found == rebarMap.end() )
+      {
+         // no... add a new record
+         rebarMap.insert(std::make_pair(Ybar,As));
+      }
+      else
+      {
+         // yes... increment the area of bar
+         found->second += As;
+      }
 
       rebarSectionItem.Release();
+   }
+
+   // add the "lumped" bars to the capacity problem model
+   Float64 dt = 0; // location of the extreme tension steel, measured from the top of the deck
+   std::map<Float64,Float64,Float64_less>::iterator iter(rebarMap.begin());
+   std::map<Float64,Float64,Float64_less>::iterator end(rebarMap.end());
+   for ( ; iter != end; iter++ )
+   {
+      Float64 Ybar = iter->first;
+      Float64 As   = iter->second;
+
+      rcBeam->AddRebarLayer(Ybar,As,1.0);
+
+      dt = Max(dt,Ybar);
    }
 
    rcBeam.CopyTo(ppModel);

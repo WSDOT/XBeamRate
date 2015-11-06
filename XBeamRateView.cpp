@@ -75,6 +75,9 @@
 #define STIRRUP_DISPLAY_LIST_ID        7
 #define SECTION_CUT_DISPLAY_LIST_ID    8
 
+#define STAGE1_STIRRUP_COLOR    STIRRUP_COLOR
+#define STAGE2_STIRRUP_COLOR    OLIVEDRAB
+
 
 #define SECTION_CUT_ID                500
 
@@ -972,12 +975,20 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    for ( int i = 0; i < 2; i++ )
    {
       xbrTypes::Stage stage = (xbrTypes::Stage)i;
+      COLORREF color = (stage == xbrTypes::Stage1 ? STAGE1_STIRRUP_COLOR : STAGE2_STIRRUP_COLOR);
       IndexType nStirrupZones = pStirrups->GetStirrupZoneCount(pierID,stage);
       for ( IndexType zoneIdx = 0; zoneIdx < nStirrupZones; zoneIdx++ )
       {
          Float64 Xstart, Xend;
          pStirrups->GetStirrupZoneBoundary(pierID,stage,zoneIdx,&Xstart,&Xend);
          
+         Float64 nLegs = pStirrups->GetStirrupLegCount(pierID,stage,zoneIdx);
+
+         if ( nLegs == 0 )
+         {
+            continue;
+         }
+
          IndexType nStirrups = pStirrups->GetStirrupCount(pierID,stage,zoneIdx);
          Float64 S = pStirrups->GetStirrupZoneSpacing(pierID,stage,zoneIdx);
 
@@ -1021,7 +1032,7 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
             CComPtr<iDrawPointStrategy> draw_point_strategy;
             doTopPnt->GetDrawingStrategy(&draw_point_strategy);
             CComQIPtr<iSimpleDrawPointStrategy> thePointDrawStrategy(draw_point_strategy);
-            thePointDrawStrategy->SetColor(STIRRUP_COLOR);
+            thePointDrawStrategy->SetColor(color);
             thePointDrawStrategy->SetPointType(ptNone);
 
             CComPtr<IPoint2d> pntBottom;
@@ -1057,8 +1068,10 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
             CComPtr<iDrawLineStrategy> strategy;
             doLine->GetDrawLineStrategy(&strategy);
             CComQIPtr<iSimpleDrawLineStrategy> theStrategy(strategy);
-            theStrategy->SetColor(STIRRUP_COLOR);
+            theStrategy->SetColor(color);
             theStrategy->SetEndType(leNone);
+            theStrategy->SetLineStyle(lsSolid);
+            theStrategy->SetWidth((UINT)nLegs/2); // the more legs, the thicker the stirrup line
 
             displayList->AddDisplayObject(doTopPnt);
             displayList->AddDisplayObject(doBottomPnt);

@@ -101,7 +101,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("r")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
 
       GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-      std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+      std::vector<xbrPointOfInterest> vPoi = pPoi->GetRatingPointsOfInterest(pierID);
 
       GET_IFACE2(pBroker,IXBRMomentCapacity,pMomentCapacity);
       RowIndexType row = pTable->GetNumberOfHeaderRows();

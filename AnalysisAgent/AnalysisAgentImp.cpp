@@ -46,6 +46,8 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define MAX_CASES 10
+
 /////////////////////////////////////////////////////////////////////////////
 // NOTE: Any time you get live load results directly from the FEM model,
 // apply the multiple presence factor.
@@ -1795,7 +1797,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       Float64 min,max;
       //WheelLineConfiguration minConfig, maxConfig;
       IndexType minLLConfigIdx, maxLLConfigIdx;
-      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL/*pvMinConfiguration ? &minConfig : NULL,pvMaxConfiguration ? &maxConfig : NULL*/);
+      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL);
       pvMin->push_back(min);
       pvMax->push_back(max);
       if ( pvMinLLConfigIdx )
@@ -1831,7 +1833,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       sysSectionValue min,max;
       //WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
       IndexType minLLConfigIdx, maxLLConfigIdx;
-      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL/*pvMinLeftConfiguration ? &minLeftConfig : NULL,pvMinRightConfiguration ? &minRightConfig : NULL,pvMaxLeftConfiguration ? &maxLeftConfig : NULL,pvMaxRightConfiguration ? &maxRightConfig : NULL*/);
+      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL);
       pvMin->push_back(min);
       pvMax->push_back(max);
 
@@ -2737,20 +2739,6 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    ATLASSERT(minFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
    ATLASSERT(maxFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
 
-   // Use the following if we need the number of loaded lanes associated with the min/max value
-   //LiveLoadConfiguration key;
-   //key.m_LoadCaseID = minMzLCID;
-   //std::set<LiveLoadConfiguration>::iterator foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   //ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   //LiveLoadConfiguration& llMinConfig = (*foundLLConfig);
-   //IndexType minLoadedLanes = llMinConfig.m_nLoadedLanes;
-
-   //key.m_LoadCaseID = maxMzLCID;
-   //foundLLConfig = pModelData->m_LiveLoadConfigurations.find(key);
-   //ATLASSERT(foundLLConfig != pModelData->m_LiveLoadConfigurations.end());
-   //LiveLoadConfiguration& llMaxConfig = (*foundLLConfig);
-   //IndexType maxLoadedLanes = llMaxConfig.m_nLoadedLanes;
-
    UnitLiveLoadResult liveLoadResult;
    liveLoadResult.m_idPOI = poi.GetID();
    liveLoadResult.m_MzMax = MzMax;
@@ -2779,7 +2767,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    // at the begining of the sequence... the N maximum moments are at
    // the end of the sequence.
    // Use forward iterator at start of sequence
-   int N = 50; // using 50 min/max moments
+   int N = MAX_CASES; // using 50 min/max moments
    std::set<Result>::iterator fmIter(moments.begin());
    std::set<Result>::iterator fmEnd(moments.end());
    for ( int i = 0; i < N && fmIter != fmEnd; i++, fmIter++)

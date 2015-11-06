@@ -149,6 +149,16 @@ void xbrPointOfInterest::UpdateAttributeString()
       os << _T("POI_GRID | ");
    }
 
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC) )
+   {
+      os << _T("POI_FOC | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )
+   {
+      os << _T("POI_MIDPOINT | ");
+   }
+
    os << std::endl;
 
    m_strAttributes = os.str();
