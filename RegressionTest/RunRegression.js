@@ -58,6 +58,12 @@ if (st!=0)
    WScript.Quit(st);
 }
 
+// global vars
+var OldCatalogServer = new String;
+var NewCatalogServer = new String("Regression");
+var OldCatalogPublisher = new String;
+var NewCatalogPublisher = new String("Regression");
+
 var Application = XBRateDrive+"\\ARP\\BridgeLink\\RegFreeCOM\\" +XBRatePlatform+"\\"+XBRateVersion+"\\BridgeLink.exe ";
 var StartFolderSpec = new String( XBRateDrive+"\\ARP\\XBeamRate\\RegressionTest" );
 
@@ -174,7 +180,30 @@ function InitTest(currFolder)
        // clean up temporary files - only when actual test
        CleanFolder(currFolder);
     }
+   // Save initial server and publisher
+   OldCatalogServer = wsShell.RegRead("HKEY_CURRENT_USER\\Software\\Washington State Department of Transportation\\PGSuper\\Options\\CatalogServer2");
+   OldCatalogPublisher = wsShell.RegRead("HKEY_CURRENT_USER\\Software\\Washington State Department of Transportation\\PGSuper\\Options\\Publisher2");
+   
+   // Run PGSuper to set new server and publisher
+   SetPGSuperLibrary(NewCatalogServer, NewCatalogPublisher);
 }   
+
+function SetPGSuperLibrary(server, publisher)
+{
+   var cmd = new String;
+   cmd = Application + "/App=PGSuper /Configuration=\"" + server + "\":\"" + publisher + "\"";
+
+   if(ExecuteCommands)
+   {
+       DisplayMessage("Running: "+ cmd);
+       DisplayMessage("");
+       st = wsShell.Run(cmd,1,"TRUE"); 
+   }
+   else
+   {
+       DisplayMessage(cmd);
+   }
+}
 
 function CleanFolder(currFolder)
 {
@@ -211,6 +240,9 @@ function CleanFolder(currFolder)
 
 function CleanUpTest() 
 {
+   // Restore registry to where it was before we started
+   // Run PGSuper to set new server and publisher
+   SetPGSuperLibrary(OldCatalogServer, OldCatalogPublisher);
 }
 
 function CheckResults(currFolder) 
