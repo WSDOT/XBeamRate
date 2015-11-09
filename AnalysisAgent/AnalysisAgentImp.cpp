@@ -195,8 +195,8 @@ struct XBeamNode
    Float64 X;
    Int32 Type;
    JointIDType jntID;
-   bool operator<(const XBeamNode& other)const { return X < other.X; }
-   bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X); }
+   bool operator<(const XBeamNode& other)const { return IsLT(X,other.X,0.005); }
+   bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X,0.005); }
 };
 
 void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
@@ -218,6 +218,9 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
       return;
    }
 
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
    if ( MODEL_INIT_TOPOLOGY <= level && pModelData->m_InitLevel < MODEL_INIT_TOPOLOGY )
    {
       pModelData->m_Model.CoCreateInstance(CLSID_Fem2dModel);
@@ -229,8 +232,6 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
       GET_IFACE(IXBRMaterial,pMaterial);
       GET_IFACE(IXBRSectionProperties,pSectProp);
 
-      GET_IFACE(IProgress,pProgress);
-      CEAFAutoProgress ap(pProgress);
       pProgress->UpdateMessage(_T("Building pier analysis model"));
 
       Float64 LCO, RCO;
@@ -271,15 +272,20 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
       }
 
       // bearings
-      IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
-      for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
+      // if reactions are applied through bearings, we need a bearing transfer model
+      // the first step for that model is FEM2D nodes at the bearing locations
+      if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaBearings )
       {
-         IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
-         for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+         IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
+         for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
          {
-            n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
-            n.Type = BEARING;
-            vXBeamNodes.push_back(n);
+            IndexType nBearings = pPier->GetBearingCount(pierID,brgLineIdx);
+            for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
+            {
+               n.X = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+               n.Type = BEARING;
+               vXBeamNodes.push_back(n);
+            }
          }
       }
 

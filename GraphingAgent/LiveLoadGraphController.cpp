@@ -51,8 +51,10 @@ END_MESSAGE_MAP()
 BOOL CXBRLiveLoadGraphController::OnInitDialog()
 {
    FillPierList();
+   FillRatingType();
+   FillVehicleType();
    FillLoadingList();
-   
+     
    CEAFGraphControlWindow::OnInitDialog();
    CheckRadioButton(IDC_MOMENT,IDC_SHEAR,IDC_MOMENT);
 

@@ -75,11 +75,6 @@ bool ComparePoiLocation(const xbrPointOfInterest& poi1,const xbrPointOfInterest&
    return true;
 }
 
-bool PoiLess(const xbrPointOfInterest& poi1,const xbrPointOfInterest& poi2)
-{
-   return IsLT(poi1.GetDistFromStart(),poi2.GetDistFromStart()) ? true : false;
-}
-
 StageIndexType GetStageIndex(xbrTypes::Stage stage)
 {
    return (stage == xbrTypes::Stage1 ? 0 : 1);
@@ -2019,35 +2014,15 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
 
    // Merge the attributes of POI thare are at the same location so when we remove
    // duplicates the attributes don't get lost
-   std::pair<std::vector<xbrPointOfInterest>::iterator,std::vector<xbrPointOfInterest>::iterator> bounds;
-   std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
-   std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   for ( ; iter != end; iter++ )
+   std::vector<xbrPointOfInterest>::iterator result = std::adjacent_find(vPoi.begin(),vPoi.end());
+   while ( result != vPoi.end() )
    {
-      bounds = std::equal_range(vPoi.begin(),vPoi.end(),*iter,PoiLess);
-
-      // merge the attributes for all the POI in the range
-      PoiAttributeType attributes = 0;
-      for ( iter = bounds.first; iter != bounds.second; iter++ )
-      {
-         attributes |= iter->GetAttributes();
-      }
-
-      // set the merged attributes to all the POI at the same location
-      for ( iter = bounds.first; iter != bounds.second; iter++ )
-      {
-         iter->SetAttributes(attributes);
-      }
-
-      iter = bounds.second;
-      if ( iter == end )
-      {
-         break;
-      }
+      xbrPointOfInterest& poi1 = *result;
+      xbrPointOfInterest& poi2 = *(result+1);
+      poi1.SetAttributes(poi1.GetAttributes() | poi2.GetAttributes());
+      vPoi.erase(result+1);
+      result = std::adjacent_find(vPoi.begin(),vPoi.end());
    }
-
-   // remove duplicates
-   vPoi.erase(std::unique(vPoi.begin(),vPoi.end(),ComparePoiLocation),vPoi.end());
 }
 
 bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)

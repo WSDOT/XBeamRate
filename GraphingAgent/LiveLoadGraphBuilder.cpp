@@ -292,7 +292,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
 
    if ( !::IsPermitRatingType(ratingType) || ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT ) )
    {
-      // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method
+      // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method.
       // envelope doesn't make sense with WSDOT method.
 
       // Controlling envelope for all trucks for this rating type
