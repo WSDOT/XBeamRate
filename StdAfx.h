@@ -35,5 +35,6 @@ extern CComModule _Module;
 #include <atlcom.h>
 
 #include <EAF\EAFUtilities.h>
+#include <EAF\EAFResources.h>
 
 #include <Math\Math.h>

@@ -40,9 +40,9 @@
 
 
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
-   ON_COMMAND(ID_EDIT_PROJECT_NAME,OnEditProjectName)
    ON_COMMAND(ID_EDIT_PIER, &CAgentCmdTarget::OnEditPier)
    ON_COMMAND(ID_EDIT_OPTIONS,&CAgentCmdTarget::OnEditOptions)
+   ON_COMMAND(ID_EDIT_PROPERTIES,&CAgentCmdTarget::OnProjectProperties)
 END_MESSAGE_MAP()
 
 CAgentCmdTarget::CAgentCmdTarget()
@@ -52,22 +52,6 @@ CAgentCmdTarget::CAgentCmdTarget()
 void CAgentCmdTarget::Init(IBroker* pBroker)
 {
    m_pBroker = pBroker;
-}
-
-void CAgentCmdTarget::OnEditProjectName()
-{
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-   //CString strOldProjectName, strNewProjectName;
-   //GET_IFACE(IXBRProject,pProject);
-   //strOldProjectName = pProject->GetProjectName();
-
-   //if ( AfxQuestion(_T("Project Name"),_T("Enter project name"),strOldProjectName,strNewProjectName) )
-   //{
-   //   txnEditProject txn(strOldProjectName,strNewProjectName);
-   //   GET_IFACE(IEAFTransactions,pTransactions);
-   //   pTransactions->Execute(txn);
-   //}
 }
 
 void CAgentCmdTarget::OnEditPier()
@@ -180,4 +164,11 @@ void CAgentCmdTarget::OnEditOptions()
       GET_IFACE(IEAFTransactions,pTransactions);
       pTransactions->Execute(txn);
    }
+}
+
+void CAgentCmdTarget::OnProjectProperties()
+{
+#pragma Reminder("WORKING HERE - edit project properties")
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   AfxMessageBox(_T("Edit project properties"));
 }

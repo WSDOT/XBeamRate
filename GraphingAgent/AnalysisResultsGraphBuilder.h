@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include <EAF\EAFGraphBuilderBase.h>
+#include <EAF\EAFAutoCalcGraphBuilder.h>
 #include "AnalysisResultsGraphController.h"
 #include "AnalysisResultsGraphDefinition.h"
 
 class CEAFGraphChildFrame;
 class arvPhysicalConverter;
 
-class CXBRAnalysisResultsGraphBuilder : public CEAFGraphBuilderBase
+class CXBRAnalysisResultsGraphBuilder : public CEAFAutoCalcGraphBuilder
 {
 public:
    CXBRAnalysisResultsGraphBuilder();

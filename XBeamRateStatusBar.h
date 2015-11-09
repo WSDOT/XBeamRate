@@ -22,18 +22,21 @@
 
 #pragma once
 
-class CAgentCmdTarget : public CCmdTarget
+#include <EAF\EAFAutoCalcStatusBar.h>
+
+class CXBeamRateStatusBar : public CEAFAutoCalcStatusBar
 {
 public:
-   CAgentCmdTarget();
-   void Init(IBroker* pBroker);
+	CXBeamRateStatusBar();
+	virtual ~CXBeamRateStatusBar();
 
-private:
-   IBroker* m_pBroker; // weak reference
+   virtual void GetStatusIndicators(const UINT** lppIDArray,int* pnIDCount);
+   virtual BOOL SetStatusIndicators(const UINT* lpIDArray, int nIDCount);
 
-   DECLARE_MESSAGE_MAP()
-public:
-   afx_msg void OnEditPier();
-   afx_msg void OnEditOptions();
-   afx_msg void OnProjectProperties();
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CXBeamRateStatusBar)
+	//}}AFX_VIRTUAL
+
+	DECLARE_MESSAGE_MAP()
 };

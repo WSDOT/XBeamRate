@@ -163,11 +163,11 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
 
          CComPtr<IDblArray> vfs;
          mcd.solution->get_fs(&vfs);
-#if defined _DEBUG
-         IndexType vfs_size;
-         vfs->get_Count(&vfs_size);
-         ATLASSERT(vfs_size == nRebarLayers);
-#endif
+//#if defined _DEBUG
+//         IndexType vfs_size;
+//         vfs->get_Count(&vfs_size);
+//         ATLASSERT(vfs_size == nRebarLayers);
+//#endif
          RowIndexType reinfTableRow = pReinfTable->GetNumberOfHeaderRows();
 
          for ( IndexType rebarLayerIdx = 0; rebarLayerIdx < nRebarLayers; rebarLayerIdx++, reinfTableRow++ )

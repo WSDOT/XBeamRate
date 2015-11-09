@@ -75,29 +75,7 @@ void CXBeamRateReportView::Dump(CDumpContext& dc) const
 // CPGSuperReportView message handlers
 void CXBeamRateReportView::OnInitialUpdate()
 {
-   // Need to know if AutoCalc is turned on and if this is a Multi-View report
-   CDocument* pDoc = GetDocument();
-   CEAFAutoCalcDocMixin* pAutoCalcDoc = dynamic_cast<CEAFAutoCalcDocMixin*>(pDoc);
-   ATLASSERT(pAutoCalcDoc); // your document must use the autocalc mix in
-
-   // if autocalc is turned on just process this normally
-   // by calling the base class OnInitialUpdate method
-   if ( pAutoCalcDoc->IsAutoCalcEnabled() )
-   {
-      CEAFAutoCalcReportView::OnInitialUpdate();
-   }
-   else
-   {
-      // AutoCalc is off .... by-pass the base class OnInitialUpdate method as it will cause
-      // the reports to generate...
-
-      // The base class calls this method, and it is necessary so do it here since
-      // we are by-passing the base class
-      CEAFAutoCalcViewMixin::Initialize();
-
-      // Continue with initialization by skipping over the direct base of this class
-      CEAFReportView::OnInitialUpdate();
-   }
+   CEAFAutoCalcReportView::OnInitialUpdate();
 }
 
 void CXBeamRateReportView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) 

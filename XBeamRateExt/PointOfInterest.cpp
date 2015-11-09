@@ -166,16 +166,16 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
       nAttributes++;
    }
 
-   if ( HasAttribute(POI_WHEELLINE) )
-   {
-      if ( 0 < nAttributes )
-      {
-         strAttrib += _T(", ");
-      }
+   //if ( HasAttribute(POI_WHEELLINE) )
+   //{
+   //   if ( 0 < nAttributes )
+   //   {
+   //      strAttrib += _T(", ");
+   //   }
 
-      strAttrib += _T("WL");
-      nAttributes++;
-   }
+   //   strAttrib += _T("WL");
+   //   nAttributes++;
+   //}
 
    //if ( HasAttribute(POI_GRID) )
    //{

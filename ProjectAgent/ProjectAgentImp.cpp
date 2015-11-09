@@ -23,6 +23,7 @@
 
 // ProjectAgentImp.cpp : Implementation of CProjectAgentImp
 #include "stdafx.h"
+#include "resource.h"
 #include "ProjectAgent.h"
 #include "ProjectAgentImp.h"
 
@@ -2870,11 +2871,18 @@ void CProjectAgentImp::CreateMenus()
    GET_IFACE(IEAFMainMenu,pMainMenu);
    CEAFMenu* pMenu = pMainMenu->GetMainMenu();
 
-   // add an "Edit" menu to the right of the file menu
-   UINT filePos = pMenu->FindMenuItem(_T("&File"));
+   // Add our commands to the Edit menu
+   UINT editPos = pMenu->FindMenuItem(_T("&Edit"));
+   CEAFMenu* pEditMenu = pMenu->GetSubMenu(editPos);
+   pEditMenu->AppendMenu(ID_EDIT_PIER,_T("&Pier..."),this);
+   pEditMenu->AppendMenu(ID_EDIT_PROPERTIES,_T("P&roperties..."),this);
 
-   CEAFMenu* pEditMenu = pMenu->CreatePopupMenu(filePos+1,_T("&Edit"));
-   pEditMenu->LoadMenu(IDR_EDIT_MENU,this);
+   // Add our commands to the Project menu
+   UINT projPos = pMenu->FindMenuItem(_T("&Project"));
+   CEAFMenu* pProjectMenu = pMenu->GetSubMenu(projPos);
+   pProjectMenu->AppendMenu(EAFID_EDIT_UNITS,_T("&Units..."),NULL);
+   pProjectMenu->AppendMenu(ID_EDIT_OPTIONS,_T("Load Rating Options..."),this);
+   pProjectMenu->AppendMenu(ID_EDIT_PROPERTIES,_T("&Properties..."),this);
 }
 
 void CProjectAgentImp::RemoveMenus()
@@ -2882,13 +2890,17 @@ void CProjectAgentImp::RemoveMenus()
    GET_IFACE(IEAFMainMenu,pMainMenu);
    CEAFMenu* pMenu = pMainMenu->GetMainMenu();
 
-   // remove the Edit menu
+   // remove the our menus
    UINT editPos = pMenu->FindMenuItem(_T("&Edit"));
-#if defined _DEBUG
-   UINT filePos = pMenu->FindMenuItem(_T("&File"));
-   ATLASSERT(filePos+1 == editPos);
-#endif
-   VERIFY(pMenu->RemoveMenu(editPos,MF_BYPOSITION,this));
+   CEAFMenu* pEditMenu = pMenu->GetSubMenu(editPos);
+   pEditMenu->RemoveMenu(ID_EDIT_PIER,MF_BYCOMMAND,this);
+   pEditMenu->RemoveMenu(ID_EDIT_PROPERTIES,MF_BYCOMMAND,this);
+
+   UINT projPos = pMenu->FindMenuItem(_T("&Project"));
+   CEAFMenu* pProjectMenu = pMenu->GetSubMenu(projPos);
+   pProjectMenu->RemoveMenu(EAFID_EDIT_UNITS,MF_BYCOMMAND,NULL);
+   pProjectMenu->RemoveMenu(ID_EDIT_OPTIONS,MF_BYCOMMAND,this);
+   pProjectMenu->RemoveMenu(ID_EDIT_PROPERTIES,MF_BYCOMMAND,this);
 }
 
 void CProjectAgentImp::CreateToolbars()

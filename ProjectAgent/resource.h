@@ -2,11 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by ProjectAgent.rc
 //
-#define EAFID_INDICATOR_MODIFIED        1
-#define EAFID_INDICATOR_STATUS          2
-#define EAF_TOOLBAR_MENU_COUNT          40
-#define EAF_REPORT_MENU_COUNT           50
-#define EAF_GRAPH_MENU_COUNT            50
 #define IDS_PROJNAME                    100
 #define IDR_PROJECTAGENT                101
 #define IDS_NWC_MESSAGE                 101
@@ -14,7 +9,6 @@
 #define IDS_LWC_MESSAGE                 102
 #define IDD_CAPACITY_OPTIONS            102
 #define IDD_PIER_LAYOUT_PAGE            106
-#define IDR_EDIT_MENU                   201
 #define IDD_BEARINGS_PAGE               202
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDD_LIVE_LOAD_REACTIONS         205
@@ -153,7 +147,6 @@
 #define IDC_LRFR_LABEL                  322
 #define IDC_LRFD                        323
 #define IDC_LRFR                        324
-#define IDC_EDIT1                       324
 #define IDC_LL_STEP                     324
 #define IDC_LL_STEP_UNIT                325
 #define IDD_AASHTO_CONCRETE             500
@@ -218,18 +211,19 @@
 #define IDC_X5_LABEL                    1847
 #define IDC_X6_UNIT                     1848
 #define IDC_X6_LABEL                    1849
-#define EAF_RESERVED_COMMAND_BASE       0x8000
-#define EAFID_EDIT_UNITS                32774
 #define ID_EDIT_PROJECT_NAME            50000
 #define ID_EDIT_PIER                    50001
 #define ID_EDIT_OPTIONS                 50002
+#define ID_PROPERTIES                   50006
+#define ID_FILE_PROJECT_PROPERTIES      50007
+#define ID_EDIT_PROPERTIES              50008
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        208
-#define _APS_NEXT_COMMAND_VALUE         50005
+#define _APS_NEXT_RESOURCE_VALUE        209
+#define _APS_NEXT_COMMAND_VALUE         50009
 #define _APS_NEXT_CONTROL_VALUE         326
 #define _APS_NEXT_SYMED_VALUE           103
 #endif

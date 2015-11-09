@@ -22,14 +22,14 @@
 
 #pragma once
 
-#include <EAF\EAFGraphBuilderBase.h>
+#include <EAF\EAFAutoCalcGraphBuilder.h>
 #include "LiveLoadGraphController.h"
 #include "LiveLoadGraphDefinition.h"
 
 class CEAFGraphChildFrame;
 class arvPhysicalConverter;
 
-class CXBRLiveLoadGraphBuilder : public CEAFGraphBuilderBase
+class CXBRLiveLoadGraphBuilder : public CEAFAutoCalcGraphBuilder
 {
 public:
    CXBRLiveLoadGraphBuilder();

@@ -109,6 +109,10 @@ protected:
    afx_msg void OnUpdateViewReports(CCmdUI* pCmdUI);
    afx_msg BOOL OnViewReports(NMHDR* pnmhdr,LRESULT* plr);
    afx_msg void OnViewPier();
+   afx_msg void OnAutoCalc();
+   afx_msg void OnUpdateAutoCalc(CCmdUI* pCmdUI);
+   afx_msg void OnUpdateNow();
+	afx_msg void OnUpdateUpdateNow(CCmdUI* pCmdUI);
 	DECLARE_MESSAGE_MAP()
 
    // callback IDs for any status callbacks we register

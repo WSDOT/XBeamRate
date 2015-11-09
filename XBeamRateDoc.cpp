@@ -30,6 +30,8 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateDocProxyAgent.h"
 
+#include "XBeamRateStatusBar.h"
+
 #include "AboutDlg.h"
 
 #include <XBeamRateCatCom.h>
@@ -61,6 +63,10 @@ BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
    ON_UPDATE_COMMAND_UI(ID_VIEW_GRAPHS,OnUpdateViewGraphs)
    ON_UPDATE_COMMAND_UI(ID_VIEW_REPORTS,OnUpdateViewReports)
    ON_COMMAND(ID_VIEW_PIER, OnViewPier)
+   ON_COMMAND(EAFID_TOGGLE_AUTOCALC,OnAutoCalc)
+   ON_UPDATE_COMMAND_UI(EAFID_TOGGLE_AUTOCALC,OnUpdateAutoCalc)
+   ON_COMMAND(EAFID_AUTOCALC_UPDATENOW, OnUpdateNow)
+	ON_UPDATE_COMMAND_UI(EAFID_AUTOCALC_UPDATENOW, OnUpdateUpdateNow)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -101,9 +107,8 @@ void CXBeamRateDoc::EnableAutoCalc(bool bEnable)
       bool bWasDisabled = !IsAutoCalcEnabled();
       m_bAutoCalcEnabled = bEnable;
 
-#pragma Reminder("UPDATE: need our own status subclass to do the autocalc indicator")
-      //CPGSuperStatusBar* pStatusBar = ((CPGSuperStatusBar*)EAFGetMainFrame()->GetStatusBar());
-      //pStatusBar->AutoCalcEnabled( m_bAutoCalcEnabled );
+      CXBeamRateStatusBar* pStatusBar = ((CXBeamRateStatusBar*)EAFGetMainFrame()->GetStatusBar());
+      pStatusBar->AutoCalcEnabled( m_bAutoCalcEnabled );
 
       // If AutoCalc was off and now it is on,
       // Update the views.
@@ -283,12 +288,28 @@ void CXBeamRateDoc::LoadDocumentSettings()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    CEAFBrokerDocument::LoadDocumentSettings();
+
+   CWinApp* pApp = AfxGetApp();
+
+   CString strAutoCalc = pApp->GetProfileString(_T("Settings"),_T("AutoCalc"),_T("On"));
+   if ( strAutoCalc.CompareNoCase(_T("Off")) == 0 )
+   {
+      m_bAutoCalcEnabled = false;
+   }
+   else
+   {
+      m_bAutoCalcEnabled = true;
+   }
 }
 
 void CXBeamRateDoc::SaveDocumentSettings()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    CEAFBrokerDocument::SaveDocumentSettings();
+
+   CWinApp* pApp = AfxGetApp();
+
+   VERIFY(pApp->WriteProfileString( _T("Settings"),_T("AutoCalc"),m_bAutoCalcEnabled ? _T("On") : _T("Off") ));
 }
 
 void CXBeamRateDoc::ResetUIHints()
@@ -438,25 +459,29 @@ void CXBeamRateDoc::OnCreateFinalize()
    m_scidInformationalError  = pStatusCenter->RegisterCallback(new pgsInformationalStatusCallback(eafTypes::statusWarning)); 
    m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
 
-   //// Transfer report favorites and custom reports data from CXBeamRateAppPlugin to CEAFBrokerDocument (this)
-   //CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
-   //CComPtr<IEAFAppPlugin> pAppPlugin;
-   //pTemplate->GetPlugin(&pAppPlugin);
-   //CXBeamRateAppPlugin* pXBeamRate = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
+   // Transfer report favorites and custom reports data from CXBeamRateAppPlugin to CEAFBrokerDocument (this)
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRate = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
 
-   //bool doDisplayFavorites = pXBeamRate->GetDoDisplayFavoriteReports();
-   //std::vector<std::_tstring> vFavorites = pXBeamRate->GetFavoriteReports();
+   BOOL bDisplayFavorites = pXBeamRate->DisplayFavoriteReports();
+   std::vector<std::_tstring> vFavorites = pXBeamRate->GetFavoriteReports();
 
-   //SetDoDisplayFavoriteReports(doDisplayFavorites);
-   //SetFavoriteReports(vFavorites);
+   DisplayFavoriteReports(bDisplayFavorites);
+   SetFavoriteReports(vFavorites);
 
-   //CEAFCustomReports customs = pXBeamRate->GetCustomReports();
-   //SetCustomReports(customs);
+   CEAFCustomReports customs = pXBeamRate->GetCustomReports();
+   SetCustomReports(customs);
 
-   //IntegrateCustomReports();
+   IntegrateCustomReports();
 
    PopulateReportMenu();
    PopulateGraphMenu();
+
+   // Set the AutoCalc state on the status bar
+   CXBeamRateStatusBar* pStatusBar = ((CXBeamRateStatusBar*)EAFGetMainFrame()->GetStatusBar());
+   pStatusBar->AutoCalcEnabled( IsAutoCalcEnabled() );
 
    // views have been initilized so fire any pending events
    GET_IFACE(IXBREvents,pEvents);
@@ -607,4 +632,24 @@ BOOL CXBeamRateDoc::OnViewReports(NMHDR* pnmhdr,LRESULT* plr)
 void CXBeamRateDoc::OnViewPier()
 {
    m_pMyDocProxyAgent->CreatePierView();
+}
+
+void CXBeamRateDoc::OnAutoCalc()
+{
+   CEAFAutoCalcDocMixin::OnAutoCalc();   
+}
+
+void CXBeamRateDoc::OnUpdateAutoCalc(CCmdUI* pCmdUI)
+{
+   CEAFAutoCalcDocMixin::OnUpdateAutoCalc(pCmdUI);   
+}
+
+void CXBeamRateDoc::OnUpdateNow()
+{
+   CEAFAutoCalcDocMixin::OnUpdateNow();
+}
+
+void CXBeamRateDoc::OnUpdateUpdateNow(CCmdUI* pCmdUI)
+{
+   CEAFAutoCalcDocMixin::OnUpdateUpdateNow(pCmdUI);
 }

@@ -57,7 +57,7 @@ static char THIS_FILE[] = __FILE__;
 static unitmgtLengthData DUMMY(unitMeasure::Meter);
 static LengthTool        DUMMY_TOOL(DUMMY);
 
-BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFGraphBuilderBase)
+BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFAutoCalcGraphBuilder)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
    ON_LBN_SELCHANGE(IDC_LOADING,&CXBRAnalysisResultsGraphBuilder::OnLbnSelChanged)
@@ -66,7 +66,7 @@ END_MESSAGE_MAP()
 
 
 CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder() :
-CEAFGraphBuilderBase(),
+CEAFAutoCalcGraphBuilder(),
 m_Graph(DUMMY_TOOL,DUMMY_TOOL),
 m_pXFormat(0),
 m_pYFormat(0)
@@ -76,7 +76,7 @@ m_pYFormat(0)
 }
 
 CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder(const CXBRAnalysisResultsGraphBuilder& other) :
-CEAFGraphBuilderBase(other),
+CEAFAutoCalcGraphBuilder(other),
 m_Graph(DUMMY_TOOL,DUMMY_TOOL),
 m_pXFormat(0),
 m_pYFormat(0)

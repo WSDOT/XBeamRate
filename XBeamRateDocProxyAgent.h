@@ -155,6 +155,12 @@ private:
    void RemoveToolBars();
    UINT m_StdToolBarID;
 
+   void CreateAcceleratorKeys();
+   void RemoveAcceleratorKeys();
+
+   void CreateStatusBar();
+   void ResetStatusBar();
+
    void RegisterViews();
    void UnregisterViews();
    long m_ReportViewKey;

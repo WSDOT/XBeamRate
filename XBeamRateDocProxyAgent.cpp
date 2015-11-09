@@ -26,6 +26,8 @@
 #include "XBeamRateDoc.h"
 #include "XBeamRateAppPlugin.h"
 
+#include "XBeamRateStatusBar.h"
+
 #include <IFace\Project.h>
 
 #include "ReportViewChildFrame.h"
@@ -188,13 +190,13 @@ STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
    {
       RegisterViews();
       CreateToolBars();
-//      CreateAcceleratorKeys();
-//      CreateStatusBar();
+      CreateAcceleratorKeys();
+      CreateStatusBar();
    }
    else
    {
-//      ResetStatusBar();
-//      RemoveAcceleratorKeys();
+      ResetStatusBar();
+      RemoveAcceleratorKeys();
       RemoveToolBars();
       UnregisterViews();
    }
@@ -468,6 +470,33 @@ void CXBeamRateDocProxyAgent::RemoveToolBars()
 {
    GET_IFACE(IEAFToolbars,pToolBars);
    pToolBars->DestroyToolBar(m_StdToolBarID);
+}
+
+void CXBeamRateDocProxyAgent::CreateAcceleratorKeys()
+{
+   m_pMyDocument->CreateAcceleratorKeys();
+}
+
+void CXBeamRateDocProxyAgent::RemoveAcceleratorKeys()
+{
+   m_pMyDocument->RemoveAcceleratorKeys();
+}
+
+void CXBeamRateDocProxyAgent::CreateStatusBar()
+{
+   CEAFMainFrame* pFrame = EAFGetMainFrame();
+   CXBeamRateStatusBar* pStatusBar = new CXBeamRateStatusBar();
+   pStatusBar->Create(pFrame);
+   pFrame->SetStatusBar(pStatusBar);
+
+   m_pMyDocument->SetModifiedFlag(m_pMyDocument->IsModified());
+   m_pMyDocument->EnableAutoCalc(m_pMyDocument->IsAutoCalcEnabled());
+}
+
+void CXBeamRateDocProxyAgent::ResetStatusBar()
+{
+   CEAFMainFrame* pFrame = EAFGetMainFrame();
+   pFrame->SetStatusBar(NULL);
 }
 
 void CXBeamRateDocProxyAgent::OnResetHints()

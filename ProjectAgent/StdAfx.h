@@ -31,6 +31,7 @@
 #include <XBeamRateAll.h>
 
 #include <EAF\EAFUtilities.h>
+#include <EAF\EAFResources.h>
 
 #include <MFCTools\MFCTools.h>
 

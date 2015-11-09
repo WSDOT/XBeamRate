@@ -104,23 +104,6 @@ IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Menu
-//
-
-IDR_EDIT_MENU MENU 
-BEGIN
-    MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
-    MENUITEM "&Redo\tCtrl+Y",               ID_EDIT_REDO
-    MENUITEM SEPARATOR
-    MENUITEM "Project Name",                ID_EDIT_PROJECT_NAME
-    MENUITEM "Units",                       EAFID_EDIT_UNITS
-    MENUITEM "Pier",                        ID_EDIT_PIER
-    MENUITEM "Load Rating Options...",      ID_EDIT_OPTIONS
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
 //
 
@@ -586,6 +569,8 @@ BEGIN
     ID_EDIT_PROJECT_NAME    "Edit Project Name\nproject name"
     ID_EDIT_PIER            "Edit Pier\nEdit Pier"
     ID_EDIT_OPTIONS         "Edit Options\nEdit Options"
+    ID_FILE_PROJECT_PROPERTIES 
+                            "Shows the properties for the current project\nProject Properties"
 END
 
 #endif    // English (U.S.) resources

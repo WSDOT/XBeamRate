@@ -58,7 +58,7 @@ static char THIS_FILE[] = __FILE__;
 static unitmgtLengthData DUMMY(unitMeasure::Meter);
 static LengthTool        DUMMY_TOOL(DUMMY);
 
-BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFGraphBuilderBase)
+BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFAutoCalcGraphBuilder)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_SHEAR, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
    ON_BN_CLICKED(IDC_NEXT, &CXBRLiveLoadGraphBuilder::OnNext)
@@ -71,7 +71,7 @@ END_MESSAGE_MAP()
 
 
 CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder() :
-CEAFGraphBuilderBase(),
+CEAFAutoCalcGraphBuilder(),
 m_Graph(DUMMY_TOOL,DUMMY_TOOL),
 m_pXFormat(0),
 m_pYFormat(0)
@@ -81,7 +81,7 @@ m_pYFormat(0)
 }
 
 CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder(const CXBRLiveLoadGraphBuilder& other) :
-CEAFGraphBuilderBase(other),
+CEAFAutoCalcGraphBuilder(other),
 m_Graph(DUMMY_TOOL,DUMMY_TOOL),
 m_pXFormat(0),
 m_pYFormat(0)
