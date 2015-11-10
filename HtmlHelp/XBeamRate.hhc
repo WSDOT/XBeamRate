@@ -26,11 +26,35 @@
   <ul>
     <li><object type="text/sitemap">
       <param name="Name" value="General Features">
-      <param name="Local" value="Tutorials\General_Features.htm">
+      <param name="Local" value="Tutorials\General_Features\General_Features.htm">
     </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="General Features">
+        <param name="Local" value="Tutorials\General_Features\General_Features.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Creating a Project">
+        <param name="Local" value="Tutorials\General_Features\Creating_a_Project.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Editing">
+        <param name="Local" value="Tutorials\General_Features\Editing.htm">
+      </object>
+      </ul>
     <li><object type="text/sitemap">
       <param name="Name" value="Load Rating with PGSuper/PGSplice">
       <param name="Local" value="Tutorials\PGS_Rating.htm">
+    </object>
+    </ul>
+  <li><object type="text/sitemap">
+    <param name="Name" value="User Guide">
+    <param name="Local" value="UserGuide\Introduction.htm">
+  </object>
+  <ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Introduction">
+      <param name="Local" value="UserGuide\Introduction.htm">
     </object>
     </ul>
 </ul>
