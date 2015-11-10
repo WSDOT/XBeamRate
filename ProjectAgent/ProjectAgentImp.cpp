@@ -282,6 +282,18 @@ STDMETHODIMP CProjectAgentImp::Init()
    // Register status callbacks that we want to use
    m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
 
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CWinApp* pApp = AfxGetApp();
+   CString strProjectProperties = pApp->GetProfileString(_T("Settings"),_T("ShowProjectProperties"),_T("On"));
+   if ( strProjectProperties.CompareNoCase(_T("Off")) == 0 )
+   {
+      m_CommandTarget.ShowProjectPropertiesOnNewProject(false);
+   }
+   else
+   {
+      m_CommandTarget.ShowProjectPropertiesOnNewProject(true);
+   }
+
    return AGENT_S_SECONDPASSINIT;
 }
 
@@ -346,6 +358,10 @@ STDMETHODIMP CProjectAgentImp::ShutDown()
       ATLASSERT( SUCCEEDED(hr) );
       pCP.Release(); // Recycle the connection point
    }
+
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CWinApp* pApp = AfxGetApp();
+   VERIFY(pApp->WriteProfileString( _T("Settings"),_T("ShowProjectProperties"),m_CommandTarget.ShowProjectPropertiesOnNewProject() ? _T("On") : _T("Off") ));
 
    EAF_AGENT_CLEAR_INTERFACE_CACHE;
 
@@ -1347,6 +1363,22 @@ void CProjectAgentImp::SetComments(LPCTSTR comments)
       Fire_OnProjectPropertiesChanged();
    }
 }
+
+void CProjectAgentImp::ShowProjectPropertiesOnNewProject(bool bShow)
+{
+   m_CommandTarget.ShowProjectPropertiesOnNewProject(bShow);
+}
+
+bool CProjectAgentImp::ShowProjectPropertiesOnNewProject()
+{
+   return m_CommandTarget.ShowProjectPropertiesOnNewProject();
+}
+
+void CProjectAgentImp::PromptForProjectProperties()
+{
+   return m_CommandTarget.OnProjectProperties();
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // IXBRProject
@@ -2875,13 +2907,13 @@ void CProjectAgentImp::CreateMenus()
    UINT editPos = pMenu->FindMenuItem(_T("&Edit"));
    CEAFMenu* pEditMenu = pMenu->GetSubMenu(editPos);
    pEditMenu->AppendMenu(ID_EDIT_PIER,_T("&Pier..."),this);
-   pEditMenu->AppendMenu(ID_EDIT_PROPERTIES,_T("P&roperties..."),this);
 
    // Add our commands to the Project menu
    UINT projPos = pMenu->FindMenuItem(_T("&Project"));
    CEAFMenu* pProjectMenu = pMenu->GetSubMenu(projPos);
    pProjectMenu->AppendMenu(EAFID_EDIT_UNITS,_T("&Units..."),NULL);
    pProjectMenu->AppendMenu(ID_EDIT_OPTIONS,_T("Load Rating Options..."),this);
+   pProjectMenu->AppendSeparator();
    pProjectMenu->AppendMenu(ID_EDIT_PROPERTIES,_T("&Properties..."),this);
 }
 
@@ -2901,6 +2933,7 @@ void CProjectAgentImp::RemoveMenus()
    pProjectMenu->RemoveMenu(EAFID_EDIT_UNITS,MF_BYCOMMAND,NULL);
    pProjectMenu->RemoveMenu(ID_EDIT_OPTIONS,MF_BYCOMMAND,this);
    pProjectMenu->RemoveMenu(ID_EDIT_PROPERTIES,MF_BYCOMMAND,this);
+   pProjectMenu->RemoveMenu(pProjectMenu->GetMenuItemCount()-1,MF_BYPOSITION,NULL); // remove the separator
 }
 
 void CProjectAgentImp::CreateToolbars()

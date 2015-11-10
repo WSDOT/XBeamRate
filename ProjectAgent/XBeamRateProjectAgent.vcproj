@@ -955,6 +955,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ProjectPropertiesDlg.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\RatingOptionsPage.cpp"
 				>
 			</File>
@@ -1109,6 +1113,10 @@
 			</File>
 			<File
 				RelativePath="ProjectAgentImp.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ProjectPropertiesDlg.h"
 				>
 			</File>
 			<File

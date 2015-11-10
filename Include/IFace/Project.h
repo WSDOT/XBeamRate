@@ -53,6 +53,10 @@ interface IXBRProjectProperties : IUnknown
    virtual void SetCompany(LPCTSTR company) = 0;
    virtual LPCTSTR GetComments() const = 0;
    virtual void SetComments(LPCTSTR comments) = 0;
+
+   virtual void ShowProjectPropertiesOnNewProject(bool bShow) = 0;
+   virtual bool ShowProjectPropertiesOnNewProject() = 0;
+   virtual void PromptForProjectProperties() = 0;
 };
 
 /*****************************************************************************

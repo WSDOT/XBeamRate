@@ -24,12 +24,17 @@
 
 #include <WBFLCore.h>
 
-class txnEditProject :
-   public txnTransaction
+class txnEditProjectProperties : public txnTransaction
 {
 public:
-   txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName);
-   ~txnEditProject(void);
+   txnEditProjectProperties(const std::_tstring& oldBridgeName,const std::_tstring& newBridgeName,
+      const std::_tstring& oldBridgeID, const std::_tstring& newBridgeID,
+      const std::_tstring& oldJobNumber, const std::_tstring& newJobNumber,
+      const std::_tstring& oldEngineer, const std::_tstring& newEngineer,
+      const std::_tstring& oldCompany, const std::_tstring& newCompany,
+      const std::_tstring& oldComment, const std::_tstring& newComment);
+       
+   ~txnEditProjectProperties();
 
    virtual bool Execute();
    virtual void Undo();
@@ -41,5 +46,10 @@ public:
 private:
    void Execute(int i);
 
-	CString m_ProjectName[2];
+   std::_tstring m_BridgeName[2];
+   std::_tstring m_BridgeID[2];
+   std::_tstring m_JobNumber[2];
+   std::_tstring m_Engineer[2];
+   std::_tstring m_Company[2];
+   std::_tstring m_Comment[2];
 };

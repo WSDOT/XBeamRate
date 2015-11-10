@@ -22,23 +22,43 @@
 
 #pragma once
 
-class CAgentCmdTarget : public CCmdTarget
+#include "resource.h"
+
+/////////////////////////////////////////////////////////////////////////////
+// CProjectPropertiesDlg dialog
+
+class CProjectPropertiesDlg : public CDialog
 {
+// Construction
 public:
-   CAgentCmdTarget();
-   void Init(IBroker* pBroker);
+	CProjectPropertiesDlg(CWnd* pParent = NULL);   // standard constructor
 
-   void ShowProjectPropertiesOnNewProject(bool bShow);
-   bool ShowProjectPropertiesOnNewProject() const;
+// Dialog Data
+	//{{AFX_DATA(CProjectPropertiesDlg)
+	enum { IDD = IDD_PROJECTPROPERTIES };
+	//}}AFX_DATA
+	std::_tstring	m_Bridge;
+	std::_tstring	m_BridgeID;
+	std::_tstring	m_Comments;
+	std::_tstring	m_Company;
+	std::_tstring	m_Engineer;
+	std::_tstring	m_JobNumber;
+	bool	m_bShowProjectProperties;
 
-private:
-   IBroker* m_pBroker; // weak reference
 
-   bool m_bShowProjectProperties;
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CProjectPropertiesDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
 
-   DECLARE_MESSAGE_MAP()
-public:
-   afx_msg void OnEditPier();
-   afx_msg void OnEditOptions();
-   afx_msg void OnProjectProperties();
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(CProjectPropertiesDlg)
+	afx_msg void OnHelp();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
 };

@@ -180,32 +180,7 @@ void CXBeamRateDoc::OnChangedFavoriteReports(BOOL bIsFavorites,BOOL bFromMenu)
    __super::OnChangedFavoriteReports(bIsFavorites,bFromMenu);
    PopulateReportMenu();
 }
-//
-//void CXBeamRateDoc::OnCustomReportError(custReportErrorType error, const std::_tstring& reportName, const std::_tstring& otherName)
-//{
-//   std::_tostringstream os;
-//
-//   switch(error)
-//   {
-//      case creParentMissingAtLoad:
-//         os << _T("For custom report \"")<<reportName<<_T("\": the parent report ")<<otherName<<_T(" could not be found at program load time. The custom report was deleted.");
-//         break;
-//      case creParentMissingAtImport:
-//         os << _T("For custom report \"")<<reportName<<_T("\": the parent report ")<<otherName<<_T(" could not be found. The report may have depended on one of PGSuper's plug-ins. The custom report was deleted.");
-//         break;
-//      case creChapterMissingAtLoad:
-//      case creChapterMissingAtImport:
-//         os << _T("For custom report \"")<<reportName<<_T("\": the following chapter ")<<otherName<<_T(" does not exist in the pareent report. The chapter was removed. Perhaps the chapter name changed? You may want to edit the report.");
-//         break;
-//      default:
-//         ATLASSERT(false);
-//   };
-//
-//   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-//   pgsInformationalStatusItem* pStatusItem = new pgsInformationalStatusItem(m_StatusGroupID,m_scidInformationalError,os.str().c_str());
-//   pStatusCenter->Add(pStatusItem);
-//}
-//
+
 void CXBeamRateDoc::ShowCustomReportHelp(eafTypes::CustomReportHelp helpType)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
@@ -333,29 +308,32 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	if (!CEAFBrokerDocument::OnNewDocument())
 		return FALSE;
 
-	// TODO: add reinitialization code here
-	// (SDI documents will reuse this document)
+   GET_IFACE(IXBRProjectProperties,pProjectProperties);
+   if ( pProjectProperties->ShowProjectPropertiesOnNewProject() )
+   {
+      pProjectProperties->PromptForProjectProperties();
+   }
 
 	return TRUE;
 }
 
 void CXBeamRateDoc::OnCloseDocument()
 {
-   //// Put report favorites options back into CPGSuperBaseAppPlugin
-   //CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
-   //CComPtr<IEAFAppPlugin> pAppPlugin;
-   //pTemplate->GetPlugin(&pAppPlugin);
-   //CXBeamRateAppPlugin* pXBeamRateAppPlugin = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
+   // Put report favorites options back into CXBeamRateAppPlugin
+   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)GetDocTemplate();
+   CComPtr<IEAFAppPlugin> pAppPlugin;
+   pTemplate->GetPlugin(&pAppPlugin);
+   CXBeamRateAppPlugin* pXBeamRateAppPlugin = dynamic_cast<CXBeamRateAppPlugin*>(pAppPlugin.p);
 
-   //BOOL bDisplayFavorites = DisplayFavoriteReports();
-   //std::vector<std::_tstring> vFavorites = GetFavoriteReports();
+   BOOL bDisplayFavorites = DisplayFavoriteReports();
+   std::vector<std::_tstring> vFavorites = GetFavoriteReports();
 
-   //pXBeamRateAppPlugin->SetDoDisplayFavoriteReports(bDisplayFavorites);
-   //pXBeamRateAppPlugin->SetFavoriteReports(vFavorites);
+   pXBeamRateAppPlugin->DisplayFavoriteReports(bDisplayFavorites);
+   pXBeamRateAppPlugin->SetFavoriteReports(vFavorites);
 
-   //// user-defined custom reports
-   //CEAFCustomReports reports = GetCustomReports();
-   //pXBeamRateAppPlugin->SetCustomReports(reports);
+   // user-defined custom reports
+   CEAFCustomReports reports = GetCustomReports();
+   pXBeamRateAppPlugin->SetCustomReports(reports);
 
    CEAFBrokerDocument::OnCloseDocument();
 }

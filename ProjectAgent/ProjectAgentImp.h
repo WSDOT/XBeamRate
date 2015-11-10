@@ -142,6 +142,9 @@ public:
    virtual void SetCompany(LPCTSTR company);
    virtual LPCTSTR GetComments() const;
    virtual void SetComments(LPCTSTR comments);
+   virtual void ShowProjectPropertiesOnNewProject(bool bShow);
+   virtual bool ShowProjectPropertiesOnNewProject();
+   virtual void PromptForProjectProperties();
 
 // IXBRProject
 public:

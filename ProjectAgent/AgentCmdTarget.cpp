@@ -32,6 +32,7 @@
 
 #include "PierDlg.h"
 #include "OptionsDlg.h"
+#include "ProjectPropertiesDlg.h"
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
@@ -47,6 +48,7 @@ END_MESSAGE_MAP()
 
 CAgentCmdTarget::CAgentCmdTarget()
 {
+   m_bShowProjectProperties = true;
 }
 
 void CAgentCmdTarget::Init(IBroker* pBroker)
@@ -168,7 +170,45 @@ void CAgentCmdTarget::OnEditOptions()
 
 void CAgentCmdTarget::OnProjectProperties()
 {
-#pragma Reminder("WORKING HERE - edit project properties")
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   AfxMessageBox(_T("Edit project properties"));
+
+   GET_IFACE( IXBRProjectProperties, pProjProp );
+
+   CProjectPropertiesDlg dlg;
+
+   dlg.m_Bridge    = pProjProp->GetBridgeName();
+   dlg.m_BridgeID  = pProjProp->GetBridgeID();
+   dlg.m_JobNumber = pProjProp->GetJobNumber();
+   dlg.m_Engineer  = pProjProp->GetEngineer();
+   dlg.m_Company   = pProjProp->GetCompany();
+   dlg.m_Comments  = pProjProp->GetComments();
+   dlg.m_bShowProjectProperties = ShowProjectPropertiesOnNewProject();
+
+
+   if ( dlg.DoModal() == IDOK )
+   {
+      txnEditProjectProperties* pTxn = new txnEditProjectProperties( pProjProp->GetBridgeName(), dlg.m_Bridge,
+                                                                     pProjProp->GetBridgeID(),   dlg.m_BridgeID,
+                                                                     pProjProp->GetJobNumber(),  dlg.m_JobNumber,
+                                                                     pProjProp->GetEngineer(),   dlg.m_Engineer,
+                                                                     pProjProp->GetCompany(),    dlg.m_Company,
+                                                                     pProjProp->GetComments(),   dlg.m_Comments );
+
+         
+      ShowProjectPropertiesOnNewProject(dlg.m_bShowProjectProperties);
+
+      GET_IFACE(IEAFTransactions,pTransactions);
+      pTransactions->Execute(pTxn);
+   }
+
+}
+
+void CAgentCmdTarget::ShowProjectPropertiesOnNewProject(bool bShow)
+{
+   m_bShowProjectProperties = bShow;
+}
+
+bool CAgentCmdTarget::ShowProjectPropertiesOnNewProject() const
+{
+   return m_bShowProjectProperties;
 }

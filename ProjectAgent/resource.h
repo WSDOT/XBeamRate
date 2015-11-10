@@ -13,6 +13,7 @@
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
 #define IDD_LIVE_LOAD_REACTIONS         205
 #define IDD_RATING_OPTIONS              206
+#define IDD_PROJECTPROPERTIES           207
 #define IDC_LF_PERMIT_ROUTINE           208
 #define IDC_LF_PERMIT_ROUTINE_SERVICEI  209
 #define IDC_DECK_ELEVATION              211
@@ -211,6 +212,15 @@
 #define IDC_X5_LABEL                    1847
 #define IDC_X6_UNIT                     1848
 #define IDC_X6_LABEL                    1849
+
+#define IDC_BRIDGE                     1850
+#define IDC_BRIDGEID                   1851
+#define IDC_JOBNUMBER                  1852
+#define IDC_ENGINEER                   1853
+#define IDC_COMPANY                    1854
+#define IDC_COMMENTS                   1855
+#define IDC_SHOW_DIALOG                1856
+
 #define ID_EDIT_PROJECT_NAME            50000
 #define ID_EDIT_PIER                    50001
 #define ID_EDIT_OPTIONS                 50002

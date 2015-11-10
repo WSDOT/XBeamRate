@@ -26,57 +26,95 @@
 
 #include <IFace\Project.h>
 
-txnEditProject::txnEditProject(LPCTSTR strOldProjectName,LPCTSTR strNewProjectName)
+txnEditProjectProperties::txnEditProjectProperties(
+      const std::_tstring& oldBridgeName, const std::_tstring& newBridgeName,
+      const std::_tstring& oldBridgeID,   const std::_tstring& newBridgeID,
+      const std::_tstring& oldJobNumber,  const std::_tstring& newJobNumber,
+      const std::_tstring& oldEngineer,   const std::_tstring& newEngineer,
+      const std::_tstring& oldCompany,    const std::_tstring& newCompany,
+      const std::_tstring& oldComment,    const std::_tstring& newComment)
 {
-   m_ProjectName[0] = strOldProjectName;
-   m_ProjectName[1] = strNewProjectName;
+   m_BridgeName[0] = oldBridgeName;
+   m_BridgeName[1] = newBridgeName;
+
+   m_BridgeID[0] = oldBridgeID;
+   m_BridgeID[1] = newBridgeID;
+
+   m_JobNumber[0] = oldJobNumber;
+   m_JobNumber[1] = newJobNumber;
+
+   m_Engineer[0] = oldEngineer;
+   m_Engineer[1] = newEngineer;
+
+   m_Company[0] = oldCompany;
+   m_Company[1] = newCompany;
+
+   m_Comment[0] = oldComment;
+   m_Comment[1] = newComment;
 }
 
-txnEditProject::~txnEditProject(void)
+txnEditProjectProperties::~txnEditProjectProperties()
 {
 }
 
-bool txnEditProject::Execute()
+bool txnEditProjectProperties::Execute()
 {
    Execute(1);
    return true;
 }
 
-void txnEditProject::Undo()
+void txnEditProjectProperties::Undo()
 {
    Execute(0);
 }
 
-void txnEditProject::Execute(int i)
+void txnEditProjectProperties::Execute(int i)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
+   GET_IFACE2(pBroker,IXBRProjectProperties,pProjProp);
    GET_IFACE2(pBroker,IXBREvents, pEvents);
+
    pEvents->HoldEvents(); // don't fire any changed events until all changes are done
 
-   //GET_IFACE2(pBroker,IXBRProject,pProject);
-   //pProject->SetProjectName(m_ProjectName[i]);
+   pProjProp->SetBridgeName( m_BridgeName[i].c_str() );
+   pProjProp->SetBridgeID(   m_BridgeID[i].c_str()   );
+   pProjProp->SetJobNumber(  m_JobNumber[i].c_str()  );
+   pProjProp->SetEngineer(   m_Engineer[i].c_str()   );
+   pProjProp->SetCompany(    m_Company[i].c_str()    );
+   pProjProp->SetComments(   m_Comment[i].c_str()    );
 
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditProject::CreateClone() const
+txnTransaction* txnEditProjectProperties::CreateClone() const
 {
-   return new txnEditProject(m_ProjectName[0],m_ProjectName[1]);
+   return new txnEditProjectProperties(m_BridgeName[0],
+                                       m_BridgeName[1],
+                                       m_BridgeID[0],
+                                       m_BridgeID[1],
+                                       m_JobNumber[0],
+                                       m_JobNumber[1],
+                                       m_Engineer[0],
+                                       m_Engineer[1],
+                                       m_Company[0],
+                                       m_Company[1],
+                                       m_Comment[0],
+                                       m_Comment[1]);
 }
 
-std::_tstring txnEditProject::Name() const
+std::_tstring txnEditProjectProperties::Name() const
 {
-   return _T("Edit Project Name");
+   return _T("Edit Project Properties");
 }
 
-bool txnEditProject::IsUndoable()
+bool txnEditProjectProperties::IsUndoable()
 {
    return true;
 }
 
-bool txnEditProject::IsRepeatable()
+bool txnEditProjectProperties::IsRepeatable()
 {
    return false;
 }
