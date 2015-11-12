@@ -178,7 +178,7 @@ void CLongitudinalRebarGrid::CustomInit()
 
    SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
-         .SetValue(_T("Start\nHook"))
+         .SetValue(_T("Left\nHook"))
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -186,7 +186,7 @@ void CLongitudinalRebarGrid::CustomInit()
 
    SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
-         .SetValue(_T("End\nHook"))
+         .SetValue(_T("Right\nHook"))
          .SetHorizontalAlignment(DT_CENTER)
          .SetVerticalAlignment(DT_VCENTER)
 			.SetEnabled(FALSE)          // disables usage as current cell

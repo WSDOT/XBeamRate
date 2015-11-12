@@ -20,7 +20,7 @@
 <meta name=filetype content=kadov>
 <meta name=filetype-version content=1>
 <meta name=page-count content=1>
-<meta name=layout-height content=986>
+<meta name=layout-height content=1053>
 <meta name=layout-width content=1414>
 
 
@@ -48,22 +48,18 @@
 
 <p>XBRate performs load rating analysis for reinforced concrete cross beams 
  in accordance with the AASHTO Manual for Bridge Evaluation and the WSDOT 
- Bridge Design Manual. XBRate can model and load rate a cross beam independently 
- from a specific bridge model. The cross beam and pier model is described 
- and the superstructure permanent and live load reactions are input for 
- the rating analysis. This is referred to as a stand alone analysis.</p>
-
-<p>XBRate also integrates into PGSuper and PGSplice to provide a direct 
- cross beam load rating analysis for conventional precast-prestressed concrete 
- girder bridges as well as precast-spliced girder bridges. XBRate utilizes 
- the pier model defined in these programs, as well as permanent and live 
- load reactions to perform the load rating analysis. This is referred to 
- as an integrated analysis.</p>
+ Bridge Design Manual. XBRate can perform a stand alone load rating or 
+ an integrated load rating. A stand alone load rating occurs when a pier 
+ and cross beam are modeled independent from the bridge. An integrated 
+ load rating occurs when XBRate is used as an extension to PGSuper or PGSplice 
+ and the pier model and loadings are taken directly from the bridge model.</p>
 
 <p>This tutorial will focus on the general features of XBRate. In general, 
  the information is presented here is applicable to both stand alone and 
- integrated analyses. However, we will be working with a stand alone analysis 
- model.</p>
+ integrated modes. We will be working with a stand alone load rating model 
+ in this tutorial. The difference between stand alone and integrated modes 
+ will be noted. The <span style="background-color: #ffff00;">???</span> 
+ tutorial will focus on the integrated load ratings capabilities of XBRate..</p>
 
 <p>In this tutorial you will:</p>
 
@@ -74,7 +70,9 @@
 	
 	<li class=kadov-p><p>Edit the pier model</p></li>
 	
-	<li class=kadov-p><p>Define dead loads</p></li>
+	<li class=kadov-p><p>Define materials and reinforcement</p></li>
+	
+	<li class=kadov-p><p>Define permanent loads</p></li>
 	
 	<li class=kadov-p><p>Define live loads</p></li>
 	
@@ -89,12 +87,20 @@
 
 <h4>Pier Information</h4>
 
+<p>A schematic of the pier model is shown below. The superstructure is 
+ continuous over the pier, but does not have a moment connection with the 
+ substructure. The cross beam is reinforced with 5 #11 bars along the bottom 
+ face and 5 #10 bars along the top face. Double #6 stirrups at 6&quot; 
+ spacing are used for shear reinforcement.</p>
+
 <p><img src="PierLayout.jpg"
 		x-maintain-ratio=TRUE
 		style="border: none;
 				width: 595px;
 				height: 317px;
-				float: none;"
+				float: none;
+				border-style: none;
+				border-style: none;"
 		width=595
 		height=317
 		border=0></p>

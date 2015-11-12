@@ -30,7 +30,7 @@
     </object>
     <ul>
       <li><object type="text/sitemap">
-        <param name="Name" value="General Features">
+        <param name="Name" value="Introduction">
         <param name="Local" value="Tutorials\General_Features\General_Features.htm">
       </object>
       <li><object type="text/sitemap">
@@ -55,6 +55,16 @@
     <li><object type="text/sitemap">
       <param name="Name" value="Introduction">
       <param name="Local" value="UserGuide\Introduction.htm">
+    </object>
+    </ul>
+  <li><object type="text/sitemap">
+    <param name="Name" value="Technical Guide">
+    <param name="Local" value="TechincalGuide\Introduction.htm">
+  </object>
+  <ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Introduction">
+      <param name="Local" value="TechincalGuide\Introduction.htm">
     </object>
     </ul>
 </ul>

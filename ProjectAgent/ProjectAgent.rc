@@ -106,6 +106,7 @@ IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
 //
 // Dialog
 //
+
 IDD_PROJECTPROPERTIES DIALOG  0, 0, 241, 231
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Project Properties"
@@ -260,7 +261,7 @@ BEGIN
     EDITTEXT        IDC_AHEAD_BRG_OFFSET,100,422,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
-IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 365, 354
+IDD_SUPERSTRUCTURE_LAYOUT_PAGE DIALOGEX 0, 0, 365, 372
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Superstructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
@@ -270,41 +271,43 @@ BEGIN
     LTEXT           "Curb Line Measured from ",IDC_STATIC,7,29,83,8
     COMBOBOX        IDC_CURB_LINE_MEASUREMENT,94,27,86,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,44,351,156
-    LTEXT           "Skew",IDC_STATIC,7,211,18,8
-    EDITTEXT        IDC_SKEW,27,209,58,14,ES_AUTOHSCROLL
-    LTEXT           "Deck elevation at alignment",IDC_STATIC,7,228,89,8
-    EDITTEXT        IDC_DECK_ELEVATION,99,225,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,143,228,19,8
-    LTEXT           "Gross Slab Depth (TS)",IDC_STATIC,170,228,71,8
-    EDITTEXT        IDC_SLAB_DEPTH,250,226,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SLAB_DEPTH_UNIT,296,229,19,8
-    LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,7,248,274,8
-    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,7,261,84,8
-    EDITTEXT        IDC_CPO,99,258,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_CPO_UNIT,143,261,19,8
-    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,170,261,78,8
-    EDITTEXT        IDC_BLO,250,258,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_BLO_UNIT,296,261,19,8
-    LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,7,276,74,8
-    EDITTEXT        IDC_LCO,99,273,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_LCO_UNIT,143,276,19,8
-    LTEXT           "Right Curb Offset (RCO)",IDC_STATIC,170,276,80,8
-    EDITTEXT        IDC_RCO,250,273,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_RCO_UNIT,296,276,19,8
-    LTEXT           "Slopes are measured in the plane of the pier",IDC_STATIC,7,292,142,8
-    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,7,305,70,8
-    EDITTEXT        IDC_SL,99,302,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SL_UNIT,143,305,19,8
-    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,170,305,76,8
-    EDITTEXT        IDC_SR,250,302,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SR_UNIT,296,305,19,8
-    LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,7,321,184,8
-    LTEXT           "Diaphragm Width (W)",IDC_STATIC,7,334,70,8
-    EDITTEXT        IDC_W,99,331,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_W_UNIT,143,334,19,8
-    LTEXT           "Diaphragm Height (H)",IDC_STATIC,170,334,75,8
-    EDITTEXT        IDC_H,250,331,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_H_UNIT,296,334,19,8
+    GROUPBOX        "Roadway Layout",IDC_STATIC,7,201,351,104
+    LTEXT           "Skew",IDC_STATIC,23,215,18,8
+    EDITTEXT        IDC_SKEW,43,213,58,14,ES_AUTOHSCROLL
+    LTEXT           "Deck elevation at alignment",IDC_STATIC,113,216,89,8
+    EDITTEXT        IDC_DECK_ELEVATION,205,213,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,249,216,19,8
+    LTEXT           "Slopes are measured in the plane of the pier",IDC_STATIC,23,232,142,8
+    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,23,245,70,8
+    EDITTEXT        IDC_SL,115,242,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SL_UNIT,159,245,19,8
+    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,186,245,76,8
+    EDITTEXT        IDC_SR,266,242,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SR_UNIT,312,245,19,8
+    LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,23,260,274,8
+    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,23,273,84,8
+    EDITTEXT        IDC_CPO,115,270,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_CPO_UNIT,159,273,19,8
+    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,186,273,78,8
+    EDITTEXT        IDC_BLO,266,270,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_BLO_UNIT,312,273,19,8
+    LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,23,288,74,8
+    EDITTEXT        IDC_LCO,115,285,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_LCO_UNIT,159,288,19,8
+    LTEXT           "Right Curb Offset (RCO)",IDC_STATIC,186,288,80,8
+    EDITTEXT        IDC_RCO,266,285,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_RCO_UNIT,312,288,19,8
+    GROUPBOX        "Transverse Dimensions",IDC_STATIC,7,306,351,59
+    LTEXT           "Diaphragm dimensions are normal to the plane of the pier",IDC_STATIC,23,320,184,8
+    LTEXT           "Diaphragm Width (W)",IDC_STATIC,23,333,70,8
+    EDITTEXT        IDC_W,115,330,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_W_UNIT,159,333,19,8
+    LTEXT           "Diaphragm Height (H)",IDC_STATIC,186,333,75,8
+    EDITTEXT        IDC_H,266,330,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_H_UNIT,312,333,19,8
+    LTEXT           "Gross Slab Depth (TS)",IDC_STATIC,23,347,71,8
+    EDITTEXT        IDC_SLAB_DEPTH,115,345,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SLAB_DEPTH_UNIT,159,348,19,8
 END
 
 IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 428
@@ -486,6 +489,14 @@ IDB_EDIT_PIER           BITMAP                  "res\\EditPier.bmp"
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO 
 BEGIN
+    IDD_PROJECTPROPERTIES, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 234
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 224
+    END
+
     IDD_PIER_LAYOUT_PAGE, DIALOG
     BEGIN
         LEFTMARGIN, 7
@@ -493,14 +504,6 @@ BEGIN
         VERTGUIDE, 15
         TOPMARGIN, 7
         BOTTOMMARGIN, 407
-    END
-
-    IDD_PROJECTPROPERTIES, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 234
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 224
     END
 
     IDD_BEARINGS_PAGE, DIALOG
@@ -516,7 +519,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 358
         TOPMARGIN, 7
-        BOTTOMMARGIN, 347
+        BOTTOMMARGIN, 365
     END
 
     IDD_LIVE_LOAD_REACTIONS, DIALOG

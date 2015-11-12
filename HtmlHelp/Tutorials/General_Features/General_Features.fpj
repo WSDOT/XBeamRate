@@ -3,7 +3,7 @@
 	<folders/>
 	<topics>
 		<topic>
-			<name>General_Features.htm</name>
+			<name>Define_Materials_and_Reinforcement.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>
@@ -14,6 +14,16 @@
 		</topic>
 		<topic>
 			<name>Editing.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>General_Features.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>Define_Permanent_Loads.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>
