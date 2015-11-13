@@ -78,7 +78,8 @@ END_MESSAGE_MAP()
 CXBeamRateDoc::CXBeamRateDoc()
 {
 	// TODO: add one-time construction code here
-   GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
+   UINT nCommands = GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
+   ATLASSERT(nCommands == XBR_PLUGIN_COMMAND_COUNT);
 
    m_pMyDocProxyAgent = NULL;
    m_bAutoCalcEnabled = true;

@@ -4,15 +4,13 @@
 		<folder>
 			<name>General_Features</name>
 		</folder>
+		<folder>
+			<name>Integrated_Load_Ratings</name>
+		</folder>
 	</folders>
 	<topics>
 		<topic>
 			<name>Tutorials.htm</name>
-			<comments></comments>
-			<frameset>0</frameset>
-		</topic>
-		<topic>
-			<name>PGS_Rating.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>

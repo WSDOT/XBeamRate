@@ -3,6 +3,11 @@
 	<folders/>
 	<topics>
 		<topic>
+			<name>Define_Permanent_Loads.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
 			<name>Define_Materials_and_Reinforcement.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
@@ -23,7 +28,27 @@
 			<frameset>0</frameset>
 		</topic>
 		<topic>
-			<name>Define_Permanent_Loads.htm</name>
+			<name>Define_Live_Loads.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>Create_a_Load_Rating_Report.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>Review_Analysis_Results.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>AutoCalc_Mode.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
+		<topic>
+			<name>Wrapping_Up.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>

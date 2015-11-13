@@ -20,7 +20,7 @@
 <meta name=filetype content=kadov>
 <meta name=filetype-version content=1>
 <meta name=page-count content=1>
-<meta name=layout-height content=743>
+<meta name=layout-height content=1472>
 <meta name=layout-width content=1414>
 
 
@@ -42,20 +42,68 @@
 							x-value="Define Permanent Loads">}}-->Define 
  Permanent Loads<!--kadov_tag{{</variable>}}--></h1>
 
-<p>Our</p>
+<p>Because our pier is defined independently from the bridge, we have to 
+ supply the permanent load reactions from the superstructure. Permanent 
+ load reactions and permanent load factors are defined on the Permanent 
+ Loads page.</p>
 
-<p>This is placeholder text for your template. To add content to the body, 
- replace this text. To add a header or footer, click the <b>Header</b> 
- or <b>Footer</b> button on the toolbar.</p>
+<p><img src="PermanentLoads.jpg"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 701px;
+				height: 832px;
+				float: none;
+				border-style: none;
+				border-style: none;"
+		width=701
+		height=832
+		border=0></p>
 
-<p>&nbsp;</p>
+<h6>Load Factors</h6>
 
-<p>The heading in this template is a special field for topic titles, so 
- generally you do not need to edit it.</p>
+<p>The permanent load factors for the applicable LRFD limit states are 
+ entered in the Load Factors group. Enter load factors for the DC, DW, 
+ CR, SH, and PS load cases as applicable.</p>
 
-<p>&nbsp;</p>
+<h6>Bearings and Reactions</h6>
 
-<p>For information about applying templates to topics, press <b>F1</b>.</p>
+<p>The superstructure reactions are applied to the pier model through the 
+ bearing locations. There can be one or two bearing lines at a pier. One 
+ bearing line is typically used for Continuous and Integral piers while 
+ two bearing lines are typically used for Expansion piers. </p>
+
+<p>The superstructure reaction can be applied as a concentrated load at 
+ the bearing locations or as a uniform load, spread over a specified width, 
+ centered on each bearing location.</p>
+
+<p>Use the + and - buttons to add and remove bearing locations from the 
+ grid.</p>
+
+<p>For each bearing entry in the grid enter the DC, DW, CR, SH, RE, and 
+ PS reactions. Also enter the spacing (S) between each bearing location. 
+ For some girder types, such as precast slabs, the reactions are spread 
+ over a width, W.</p>
+
+<p>The location of the bearings with respect to the overall pier geometry 
+ is defined by entering the Centerline (CL) Bearing of a specific bearing 
+ as an offset from either the Alignment or Bridge Line.</p>
+
+<p>The permanent load consist of all the loads in the DC and DW load cases 
+ as well as any secondary effects from the CR, SH, RE, and PS load cases. 
+ The self weight of the cross beam and the upper diaphragm are automatically 
+ computed by XBRate and should not be included in the DC load.</p>
+
+<h6>Modeling our Pier</h6>
+
+<ol style="list-style: decimal;"
+	type=1>
+	
+	<li class=kadov-p><p>Enter the load factors, bearing geometry and reactions 
+ shown above.</p></li>
+	
+	<li class=kadov-p><p>Click on the Live Loads page to complete our pier 
+ model.</p></li>
+</ol>
 
 <!--kadov_tag{{<placeholder id="footer">}}-->
 </body>

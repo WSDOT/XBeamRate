@@ -8,7 +8,7 @@
 
 <head>
 
-<title>PGS Rating</title>
+<title>Create a Load Rating Report</title>
 
 <!--(Meta)==========================================================-->
 
@@ -20,13 +20,13 @@
 <meta name=filetype content=kadov>
 <meta name=filetype-version content=1>
 <meta name=page-count content=1>
-<meta name=layout-height content=687>
-<meta name=layout-width content=774>
+<meta name=layout-height content=743>
+<meta name=layout-width content=1414>
 
 
 <!--(Links)=========================================================-->
 
-<link rel="StyleSheet" href="..\default.css">
+<link rel="StyleSheet" href="..\..\default.css">
 
 
 
@@ -37,44 +37,34 @@
 
 <body>
 
-<h1>Load Rating with PGSuper/PGSplice</h1>
+<h1><!--kadov_tag{{<variable name=title
+							x-format=default
+							x-value="Create a Load Rating Report">}}-->Create 
+ a Load Rating Report<!--kadov_tag{{</variable>}}--></h1>
 
-<p>XBRate is also an extension for the PGSuper and PGSplice programs. </p>
+<p>The load rating reports are created are just like any other report in 
+ PGSuper/PGSplice. To create the cross beam load rating report:</p>
 
-<p>&nbsp;</p>
-
-<h2>Defining the pier model</h2>
-
-<p>&lt;uses PGSuper/PGSplice pier model... adds reinforcement&gt;</p>
-
-<p>&lt;adds pier view to PGS&gt;</p>
-
-<p>&nbsp;</p>
-
-<h2>Cross Beam Loading</h2>
-
-<p>&lt;discuss how the loads are extracted from PGSuper/PGSplice&gt;</p>
-
-<p>&lt;live load is taken from the longest girder line&gt;</p>
-
-<p>&nbsp;</p>
-
-<h2>Load Rating Analysis</h2>
-
-<p>&lt;same as stand alone mode, just open the report&gt;</p>
-
-<p>&lt;Analysis Results and Live Load Graphs... different name? Cross Beam 
- Analysis Results, Cross Beam Live Load Results&gt;</p>
-
-<p>&nbsp;</p>
-
-<h2>Load Rating Options</h2>
-
-<p>&lt;gets most options from PGS&gt;</p>
-
-<p>&lt;XBeam options on extensions tab&gt;</p>
-
-<p>&nbsp;</p>
+<ol style="list-style: decimal;"
+	type=1>
+	
+	<li class=kadov-p><p>Select <span style="font-weight: bold;">View &gt; 
+ Reports &gt; Cross Beam Load Rating Report</span></p></li>
+	
+	<li class=kadov-p><p>Select the subject pier in the Report Options 
+ window<br>
+	<img src="ReportOptions.jpg"
+		x-maintain-ratio=TRUE
+		style="border: none;
+				width: 375px;
+				height: 383px;
+				float: none;"
+		width=375
+		height=383
+		border=0></p></li>
+	
+	<li class=kadov-p><p>Press OK.</p></li>
+</ol>
 
 <p>&nbsp;</p>
 
