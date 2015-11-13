@@ -113,7 +113,7 @@
       <param name="Local" value="TechincalGuide\Introduction.htm">
     </object>
     <li><object type="text/sitemap">
-      <param name="Name" value="Computing Column Height and Bottom Elevation">
+      <param name="Name" value="Computing Column Height and Elevations">
       <param name="Local" value="TechincalGuide\Computing_Column_Height_and_Bottom_Elevation.htm">
     </object>
     </ul>
