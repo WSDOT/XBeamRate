@@ -52,7 +52,7 @@ void xbrLoadRater::SetBroker(IBroker* pBroker)
 xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
    GET_IFACE(IXBRPointOfInterest,pPOI);
-   std::vector<xbrPointOfInterest> vPoi( pPOI->GetRatingPointsOfInterest(pierID) );
+   std::vector<xbrPointOfInterest> vMomentPoi( pPOI->GetMomentRatingPointsOfInterest(pierID) );
 
    xbrRatingArtifact ratingArtifact;
 
@@ -60,20 +60,21 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
    // Rate for flexure
-   MomentRating(pierID,vPoi,true /*positive moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
-   MomentRating(pierID,vPoi,false/*negative moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vMomentPoi,true /*positive moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vMomentPoi,false/*negative moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
 
    // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
    {
-      CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,true /*positive moment*/,ratingArtifact);
-      CheckReinforcementYielding(pierID,vPoi,ratingType,vehicleIdx,false/*negative moment*/,ratingArtifact);
+      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,true /*positive moment*/,ratingArtifact);
+      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,false/*negative moment*/,ratingArtifact);
    }
 
    // Rate for shear, if applicable
    if ( pRatingSpec->RateForShear(ratingType) )
    {
-      ShearRating(pierID,vPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+      std::vector<xbrPointOfInterest> vShearPoi( pPOI->GetShearRatingPointsOfInterest(pierID) );
+      ShearRating(pierID,vShearPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
    }
 
    return ratingArtifact;

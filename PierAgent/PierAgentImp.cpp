@@ -1214,35 +1214,14 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDT
    return std::vector<xbrPointOfInterest>();
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID)
 {
-   // load rate at all POI, except for those the fall between the face of columns
-   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+   return GetRatingPointsOfInterest(pierID,false);
+}
 
-   bool bOverColumn = false;
-   std::vector<xbrPointOfInterest> vFilteredPoi;
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
-   {
-      if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
-      {
-         bOverColumn = !bOverColumn;
-         vFilteredPoi.push_back(poi);
-      }
-
-      if ( !bOverColumn && 
-           (poi.HasAttribute(POI_GRID) || 
-            poi.HasAttribute(POI_BRG)  || 
-            poi.HasAttribute(POI_MIDPOINT) || 
-            poi.HasAttribute(POI_SECTIONCHANGE)) 
-         )
-      {
-         vFilteredPoi.push_back(poi);
-      }
-   }
-
-   ATLASSERT(bOverColumn == false);
-
-   return vFilteredPoi;
+std::vector<xbrPointOfInterest> CPierAgentImp::GetShearRatingPointsOfInterest(PierIDType pierID)
+{
+   return GetRatingPointsOfInterest(pierID,true);
 }
 
 Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi)
@@ -2122,4 +2101,42 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
    ATLASSERT( !bFlat ); // should never get here if the profile is not flat
 
    deckProfile->get_Item(maxIdx,ppPoint);
+}
+
+std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear)
+{
+   // load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
+   // for shear, don't include any poi that are between faces of column
+   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+
+   bool bOverColumn = false;
+   std::vector<xbrPointOfInterest> vFilteredPoi;
+   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   {
+      if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
+      {
+         if ( bShear )
+         {
+            // only keep track if we are between faces of column
+            // if we are getting shear poi
+            bOverColumn = !bOverColumn;
+         }
+         vFilteredPoi.push_back(poi);
+      }
+
+      if ( !bOverColumn && 
+           (poi.HasAttribute(POI_GRID) || 
+            poi.HasAttribute(POI_BRG)  || 
+            poi.HasAttribute(POI_MIDPOINT) || 
+            poi.HasAttribute(POI_COLUMN) || 
+            poi.HasAttribute(POI_SECTIONCHANGE)) 
+         )
+      {
+         vFilteredPoi.push_back(poi);
+      }
+   }
+
+   ATLASSERT(bOverColumn == false);
+
+   return vFilteredPoi;
 }

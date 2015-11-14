@@ -173,7 +173,8 @@ public:
 public:
    virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib);
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx);
-   virtual std::vector<xbrPointOfInterest> GetRatingPointsOfInterest(PierIDType pierID);
+   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID);
+   virtual std::vector<xbrPointOfInterest> GetShearRatingPointsOfInterest(PierIDType pierID);
    virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi);
    virtual xbrPointOfInterest ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp);
    virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi);
@@ -221,6 +222,8 @@ private:
    std::vector<StirrupZone>& GetStirrupZones(PierIDType pierID,xbrTypes::Stage stage);
    void ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage);
    void ValidateStirrupZones(PierIDType pierID,const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones);
+
+   std::vector<xbrPointOfInterest> GetRatingPointsOfInterest(PierIDType pierID,bool bShear);
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)
