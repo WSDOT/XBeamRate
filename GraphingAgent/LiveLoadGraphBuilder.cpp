@@ -286,7 +286,11 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);
+   std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
+   vPoi.insert(vPoi.begin(),vWLPoi.front());
+   vPoi.insert(vPoi.end(),vWLPoi.back());
+   std::sort(vPoi.begin(),vPoi.end());
 
    IndexType llConfigIdx = m_GraphController.GetSelectedLiveLoadConfiguration();
 
@@ -318,6 +322,21 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
       m_Graph.SetSubtitle(strName);
 
       IndexType graphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
+
+      GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
+
+      IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
+      WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
+      std::vector<WheelLinePlacement>::iterator iter(wheelLineConfig.begin());
+      std::vector<WheelLinePlacement>::iterator end(wheelLineConfig.end());
+      for ( ; iter != end; iter++ )
+      {
+         WheelLinePlacement& placement = *iter;
+         xbrPointOfInterest poi(pPoi->GetNearestPointOfInterest(pierID,xbrPointOfInterest(INVALID_ID,placement.Xxb)));
+         ATLASSERT(poi.HasAttribute(POI_WHEELLINE));
+         vPoi.push_back(poi);
+      }
+      std::sort(vPoi.begin(),vPoi.end());
 
       if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
       {

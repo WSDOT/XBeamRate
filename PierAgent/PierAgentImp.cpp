@@ -1892,9 +1892,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID); 
 
    // left column
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta,POI_COLUMNDELTA));
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta,POI_COLUMNDELTA));
 
    // put POI at faces of left column
    CColumnData::ColumnShapeType shapeType;
@@ -1919,9 +1919,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
 
          X += space;
 
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta,POI_COLUMNDELTA));
          vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta,POI_COLUMNDELTA));
 
          // put POI at faces of column
          pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);

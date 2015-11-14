@@ -257,8 +257,13 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphData()
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
+
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);
+   std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
+   vPoi.insert(vPoi.begin(),vWLPoi.front());
+   vPoi.insert(vPoi.end(),vWLPoi.back());
+   std::sort(vPoi.begin(),vPoi.end());
 
    CXBRAnalysisResultsGraphDefinitions graphDefs = m_GraphController.GetSelectedGraphDefinitions();
    IndexType nGraphs = graphDefs.GetGraphDefinitionCount();

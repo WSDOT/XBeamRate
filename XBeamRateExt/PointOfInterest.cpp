@@ -229,6 +229,11 @@ void xbrPointOfInterest::UpdateAttributeString()
       os << _T("POI_COLUMN | ");
    }
 
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMNDELTA) )
+   {
+      os << _T("POI_COLUMNDELTA | ");
+   }
+
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )
    {
       os << _T("POI_BRG | ");
