@@ -30,6 +30,8 @@
 
 #include <txnEditOptions.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
+
 
 // CRatingOptionsPage dialog
 
@@ -73,6 +75,7 @@ void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CRatingOptionsPage, CPropertyPage)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -129,4 +132,9 @@ void CRatingOptionsPage::FillLRFRList()
       idx = pSpec->AddString(lrfrVersionMgr::GetVersionString((lrfrVersionMgr::Version)(i)));
       pSpec->SetItemData(idx,(DWORD)(i));
    }
+}
+
+void CRatingOptionsPage::OnHelp() 
+{
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_GENERAL );
 }

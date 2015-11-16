@@ -37,9 +37,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -133,9 +133,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -229,9 +229,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -327,9 +327,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -426,9 +426,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -523,9 +523,9 @@
 			<Tool
 				Name="VCCustomBuildTool"
 				Description="Copying files to BridgeLink"
-				CommandLine="xcopy /y/d \ARP\XBeamRate\XBeamRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
-				AdditionalDependencies="\ARP\XBeamRate\XBeamRate.tip"
-				Outputs="\ARP\BridgeLink\XBeamRate.tip"
+				CommandLine="xcopy /y/d \ARP\XBeamRate\XBRate.tip \ARP\BridgeLink\&#x0D;&#x0A;"
+				AdditionalDependencies="\ARP\XBeamRate\XBRate.tip"
+				Outputs="\ARP\BridgeLink\XBRate.tip"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"

@@ -42,6 +42,7 @@ protected:
 
    afx_msg void OnCurbLineDatumChanged();
    afx_msg void OnPierTypeChanged();
+   afx_msg void OnHelp();
 
    CString GetImageName();
 

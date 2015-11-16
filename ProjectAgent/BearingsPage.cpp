@@ -31,6 +31,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
+
 #pragma warning(disable:4244)
 
 void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,xbrBearingLineData& brgLineData,std::vector<txnDeadLoadReaction>& deadLoadReactions)
@@ -173,8 +175,7 @@ BOOL CBearingsPage::OnInitDialog()
 
 void CBearingsPage::OnHelp()
 {
-#pragma Reminder("UPDATE: Update the help context id")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PIERDETAILS_CONNECTIONS );
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PERMANENT_LOAD );
 }
 
 void CBearingsPage::OnAddBack()

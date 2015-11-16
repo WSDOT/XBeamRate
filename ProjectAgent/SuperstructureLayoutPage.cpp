@@ -31,6 +31,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
+
 
 // CSuperstructureLayoutPage dialog
 
@@ -90,6 +92,7 @@ void CSuperstructureLayoutPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CSuperstructureLayoutPage, CPropertyPage)
    ON_CBN_SELCHANGE(IDC_PIER_TYPE, OnPierTypeChanged)
    ON_CBN_SELCHANGE(IDC_CURB_LINE_MEASUREMENT, OnCurbLineDatumChanged)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -190,4 +193,9 @@ void CSuperstructureLayoutPage::OnCurbLineDatumChanged()
 void CSuperstructureLayoutPage::OnPierTypeChanged()
 {
    UpdateImage();
+}
+
+void CSuperstructureLayoutPage::OnHelp()
+{
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_SUPERSTRUCTURE );
 }

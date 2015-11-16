@@ -194,7 +194,7 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Permanent Loads"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Load Factors",IDC_STATIC,7,7,393,69
+    GROUPBOX        "Load Factors (LRFD 3.4.1)",IDC_STATIC,7,7,393,69
     LTEXT           "DC",IDC_STATIC,102,14,10,8
     LTEXT           "DW",IDC_STATIC,175,13,13,8
     LTEXT           "CR",IDC_STATIC,237,13,10,8
@@ -266,31 +266,31 @@ STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSM
 CAPTION "Superstructure"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Pier Type",IDC_STATIC,7,7,31,8
+    LTEXT           "Pier Type",IDC_STATIC,7,8,31,8
     COMBOBOX        IDC_PIER_TYPE,47,7,98,123,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Curb Line Measured from ",IDC_STATIC,7,29,83,8
-    COMBOBOX        IDC_CURB_LINE_MEASUREMENT,94,27,86,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,44,351,156
-    GROUPBOX        "Roadway Layout",IDC_STATIC,7,201,351,104
-    LTEXT           "Skew",IDC_STATIC,23,215,18,8
-    EDITTEXT        IDC_SKEW,43,213,58,14,ES_AUTOHSCROLL
-    LTEXT           "Deck elevation at alignment",IDC_STATIC,113,216,89,8
-    EDITTEXT        IDC_DECK_ELEVATION,205,213,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,249,216,19,8
-    LTEXT           "Slopes are measured in the plane of the pier",IDC_STATIC,23,232,142,8
-    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,23,245,70,8
-    EDITTEXT        IDC_SL,115,242,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SL_UNIT,159,245,19,8
-    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,186,245,76,8
-    EDITTEXT        IDC_SR,266,242,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_SR_UNIT,312,245,19,8
-    LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,23,260,274,8
-    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,23,273,84,8
-    EDITTEXT        IDC_CPO,115,270,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_CPO_UNIT,159,273,19,8
-    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,186,273,78,8
-    EDITTEXT        IDC_BLO,266,270,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_BLO_UNIT,312,273,19,8
+    CONTROL         "",IDC_DIMENSIONS,"Static",SS_ENHMETAFILE,7,26,351,156
+    GROUPBOX        "Roadway Layout",IDC_STATIC,7,186,351,119
+    LTEXT           "Skew",IDC_STATIC,26,200,18,8
+    EDITTEXT        IDC_SKEW,46,198,58,14,ES_AUTOHSCROLL
+    LTEXT           "Deck elevation at alignment",IDC_STATIC,116,201,89,8
+    EDITTEXT        IDC_DECK_ELEVATION,208,198,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_DECK_ELEVATION_UNIT,252,201,19,8
+    LTEXT           "Slopes are measured in the plane of the pier",IDC_STATIC,16,214,142,8
+    LTEXT           "Left Crown Slope (SL)",IDC_STATIC,23,227,70,8
+    EDITTEXT        IDC_SL,115,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SL_UNIT,159,227,19,8
+    LTEXT           "Right Crown Slope (SR)",IDC_STATIC,186,227,76,8
+    EDITTEXT        IDC_SR,266,224,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_SR_UNIT,312,227,19,8
+    LTEXT           "Dimensions are measured normal to the alignment",IDC_STATIC,16,242,274,8
+    LTEXT           "Crown Point Offset (CPO)",IDC_STATIC,23,255,84,8
+    EDITTEXT        IDC_CPO,115,252,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_CPO_UNIT,159,255,19,8
+    LTEXT           "Bridge Line Offset (BLO)",IDC_STATIC,186,255,78,8
+    EDITTEXT        IDC_BLO,266,252,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_BLO_UNIT,312,255,19,8
+    LTEXT           "Curb Line Measured from ",IDC_STATIC,17,271,83,8
+    COMBOBOX        IDC_CURB_LINE_MEASUREMENT,104,269,86,52,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Left Curb Offset (LCO)",IDC_STATIC,23,288,74,8
     EDITTEXT        IDC_LCO,115,285,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_LCO_UNIT,159,288,19,8

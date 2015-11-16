@@ -102,6 +102,132 @@
       <param name="Name" value="Introduction">
       <param name="Local" value="UserGuide\Introduction.htm">
     </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Chapter 1 - Introduction">
+      <param name="Local" value="UserGuide\Chapter_1\TOC.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Introduction">
+        <param name="Local" value="UserGuide\Chapter_1\Introduction.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Choosing Commands">
+        <param name="Local" value="UserGuide\Chapter_1\Choosing_Commands.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Menus">
+        <param name="Local" value="UserGuide\Chapter_1\Menus.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Toolbars">
+        <param name="Local" value="UserGuide\Chapter_1\Toolbars.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Context Menus">
+        <param name="Local" value="UserGuide\Chapter_1\Context_Menus.htm">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Chapter 2 - Projects">
+      <param name="Local" value="UserGuide\Chapter_2\TOC.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Introduction">
+        <param name="Local" value="UserGuide\Chapter_2\Introduction.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Creating a New Project">
+        <param name="Local" value="UserGuide\Chapter_2\Creating_a_New_Project.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Opening an Existing Project">
+        <param name="Local" value="UserGuide\Chapter_2\Opening_an_Existing_Project.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Saving Projects">
+        <param name="Local" value="UserGuide\Chapter_2\Saving_Projects.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Project Properties">
+        <param name="Local" value="UserGuide\Chapter_2\Project_Properties.htm">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Chapter 3 - Pier Modeling">
+      <param name="Local" value="UserGuide\Chapter_3\TOC.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Introduction">
+        <param name="Local" value="UserGuide\Chapter_3\Introduction.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Superstructure">
+        <param name="Local" value="UserGuide\Chapter_3\Superstructure.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Substructure">
+        <param name="Local" value="UserGuide\Chapter_3\Substructure.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Materials and Reinforcement">
+        <param name="Local" value="UserGuide\Chapter_3\Materials_and_Reinforcement.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Permanent Loads">
+        <param name="Local" value="UserGuide\Chapter_3\Permanent_Loads.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Live Loads">
+        <param name="Local" value="UserGuide\Chapter_3\Live_Loads.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Understanding the Pier View">
+        <param name="Local" value="UserGuide\Chapter_3\Understanding_the_Pier_View.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Exporting Pier Models">
+        <param name="Local" value="UserGuide\Chapter_3\Exporting_Pier_Models.htm">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Chapter 4 - Load Rating Options">
+      <param name="Local" value="UserGuide\Chapter_4\TOC.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Introduction">
+        <param name="Local" value="UserGuide\Chapter_4\Introduction.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Load Rating Options">
+        <param name="Local" value="UserGuide\Chapter_4\Load_Rating_Options.htm">
+      </object>
+      </ul>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Chapter 5 - Analysis Results">
+      <param name="Local" value="UserGuide\Chapter_5\TOC.htm">
+    </object>
+    <ul>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Introduction">
+        <param name="Local" value="UserGuide\Chapter_5\Introduction.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Load Rating Report">
+        <param name="Local" value="UserGuide\Chapter_5\Load_Rating_Report.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Analysis Results Graph">
+        <param name="Local" value="UserGuide\Chapter_5\Analysis_Results_Graph.htm">
+      </object>
+      <li><object type="text/sitemap">
+        <param name="Name" value="Live Load Results Graph">
+        <param name="Local" value="UserGuide\Chapter_5\Live_Load_Results_Graph.htm">
+      </object>
+      </ul>
     </ul>
   <li><object type="text/sitemap">
     <param name="Name" value="Technical Guide">
@@ -115,6 +241,14 @@
     <li><object type="text/sitemap">
       <param name="Name" value="Computing Column Height and Elevations">
       <param name="Local" value="TechincalGuide\Computing_Column_Height_and_Bottom_Elevation.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Computing Permit Rating Factors">
+      <param name="Local" value="TechincalGuide\Computing_Permit_Rating_Factors.htm">
+    </object>
+    <li><object type="text/sitemap">
+      <param name="Name" value="Computing the Reinforcement Yield Stress Ratio">
+      <param name="Local" value="TechincalGuide\Computing_the_Reinforcement_Yield_Stress_Ratio.htm">
     </object>
     </ul>
 </ul>

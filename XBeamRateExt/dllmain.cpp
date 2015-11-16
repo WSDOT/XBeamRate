@@ -100,7 +100,37 @@ BOOL CXBeamRateExt::InitInstance()
    CWinApp::InitInstance();
    ::GXInit();
 
-	return TRUE;
+
+   // Help file defaults to the location of the application
+   // In our development environment, it is in the \ARP\BridgeLink folder
+   //
+   // Change help file name
+   CString strHelpFile(m_pszHelpFilePath);
+#if defined _DEBUG
+#if defined _WIN64
+   strHelpFile.Replace(_T("RegFreeCOM\\x64\\Debug\\"),_T(""));
+#else
+   strHelpFile.Replace(_T("RegFreeCOM\\Win32\\Debug\\"),_T(""));
+#endif
+#else
+   // in a real release, the path doesn't contain RegFreeCOM\\Release, but that's
+   // ok... the replace will fail and the string wont be altered.
+#if defined _WIN64
+   strHelpFile.Replace(_T("RegFreeCOM\\x64\\Release\\"),_T(""));
+#else
+   strHelpFile.Replace(_T("RegFreeCOM\\Win32\\Release\\"),_T(""));
+#endif
+#endif
+
+   // rename the file itself
+   int loc = strHelpFile.ReverseFind('\\');
+   strHelpFile = strHelpFile.Left(loc+1);
+   strHelpFile += _T("XBRate.chm");
+
+   free((void*)m_pszHelpFilePath);
+   m_pszHelpFilePath = _tcsdup(strHelpFile);
+
+   return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////////

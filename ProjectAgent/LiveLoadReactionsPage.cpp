@@ -28,6 +28,7 @@
 #include "LiveLoadReactionsPage.h"
 #include "PierDlg.h"
 #include <XBeamRateExt\XBeamRateUtilities.h>
+#include "..\HtmlHelp\HelpTopics.hh"
 
 void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadReactions& llData)
 {
@@ -92,6 +93,7 @@ BEGIN_MESSAGE_MAP(CLiveLoadReactionsPage, CPropertyPage)
    ON_BN_CLICKED(IDC_PERMIT_ROUTINE_REMOVE,OnPermitRoutineRemove)
    ON_BN_CLICKED(IDC_PERMIT_SPECIAL_ADD,OnPermitSpecialAdd)
    ON_BN_CLICKED(IDC_PERMIT_SPECIAL_REMOVE,OnPermitSpecialRemove)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -181,4 +183,9 @@ void CLiveLoadReactionsPage::OnPermitSpecialAdd()
 void CLiveLoadReactionsPage::OnPermitSpecialRemove()
 {
    m_PermitSpecialGrid.RemoveSelectedVehicles();
+}
+
+void CLiveLoadReactionsPage::OnHelp()
+{
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_LIVE_LOAD );
 }

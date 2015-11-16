@@ -55,6 +55,8 @@ protected:
    afx_msg void OnPermitSpecialAdd();
    afx_msg void OnPermitSpecialRemove();
 
+   afx_msg void OnHelp();
+
 	DECLARE_MESSAGE_MAP()
 
    CLiveLoadReactionGrid m_DesignGrid;

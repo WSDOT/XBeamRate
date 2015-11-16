@@ -39,5 +39,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
+   afx_msg void OnHelp();
+
 	DECLARE_MESSAGE_MAP()
 };

@@ -12,9 +12,9 @@
 var HH_ChmFilename = "F:\\ARP\\XBeamRate\\HtmlHelp\\XBeamRate.chm";
 var HH_WindowName = "NewWindow";
 var HH_GlossaryFont = "";
-var HH_Glossary = "1";
-var HH_Avenue = "1";
-var HH_ActiveX = true;
+var HH_Glossary = "0";
+var HH_Avenue = "0";
+var HH_ActiveX = false;
 //}}HH_SYMBOL_SECTION
 
 //Begin to support previous generic parameters

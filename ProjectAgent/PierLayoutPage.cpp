@@ -33,6 +33,7 @@
 #include <MFCTools\CustomDDX.h>
 
 #include <PgsExt\GirderLabel.h>
+#include "..\HtmlHelp\HelpTopics.hh"
 
 // CPierLayoutPage dialog
 
@@ -268,8 +269,7 @@ void CPierLayoutPage::OnHeightMeasureChanged()
 
 void CPierLayoutPage::OnHelp() 
 {
-#pragma Reminder("UPDATE: Update the help context id")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PIERDETAILS_CONNECTIONS );
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_SUBSTRUCTURE );
 }
 
 void CPierLayoutPage::OnAddColumn()

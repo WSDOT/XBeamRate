@@ -4,22 +4,22 @@
 		<window>
 			<name>NewWindow</name>
 			<caption>XBeamRate</caption>
-			<tocfile/>
-			<indexfile/>
-			<defaultfile/>
-			<homefile/>
-			<jump1filename/>
-			<jump1text/>
-			<jump2filename/>
-			<jump2text/>
-			<flags>1074267168</flags>
+			<tocfile></tocfile>
+			<indexfile></indexfile>
+			<defaultfile></defaultfile>
+			<homefile></homefile>
+			<jump1filename></jump1filename>
+			<jump1text></jump1text>
+			<jump2filename></jump2filename>
+			<jump2text></jump2text>
+			<flags>1056</flags>
 			<navpanewidth>0</navpanewidth>
-			<buttons>12294</buttons>
+			<buttons>8206</buttons>
 			<windowplacement>
 				<left>5</left>
 				<top>5</top>
-				<right>512</right>
-				<bottom>384</bottom>
+				<right>926</right>
+				<bottom>711</bottom>
 			</windowplacement>
 			<windowstyle>0</windowstyle>
 			<windowstyleex>0</windowstyleex>

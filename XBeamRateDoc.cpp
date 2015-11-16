@@ -46,6 +46,8 @@
 
 #include "XBeamRateHints.h"
 
+#include "HtmlHelp\HelpTopics.hh"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -84,9 +86,8 @@ CXBeamRateDoc::CXBeamRateDoc()
    m_pMyDocProxyAgent = NULL;
    m_bAutoCalcEnabled = true;
 
-#pragma Reminder("WORKING HERE - need to add help topics for custom reporting")
-   //SetCustomReportHelpID(eafTypes::crhCustomReport,IDR_CUSTOM_HELP);
-   //SetCustomReportHelpID(eafTypes::crhFavoriteReport,IDR_FAVORITE_HELP);
+   SetCustomReportHelpID(eafTypes::crhCustomReport,IDH_CUSTOM_REPORT);
+   SetCustomReportHelpID(eafTypes::crhFavoriteReport,IDH_FAVORITE_REPORT);
 
    CEAFAutoCalcDocMixin::SetDocument(this);
 }

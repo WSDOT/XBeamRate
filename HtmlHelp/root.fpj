@@ -10,8 +10,16 @@
 		<folder>
 			<name>TechincalGuide</name>
 		</folder>
+		<folder>
+			<name>Dialogs</name>
+		</folder>
 	</folders>
 	<topics>
+		<topic>
+			<name>Welcome.htm</name>
+			<comments></comments>
+			<frameset>0</frameset>
+		</topic>
 		<topic>
 			<name>license_agreement.htm</name>
 			<comments></comments>
@@ -19,11 +27,6 @@
 		</topic>
 		<topic>
 			<name>support.htm</name>
-			<comments></comments>
-			<frameset>0</frameset>
-		</topic>
-		<topic>
-			<name>Welcome.htm</name>
 			<comments></comments>
 			<frameset>0</frameset>
 		</topic>

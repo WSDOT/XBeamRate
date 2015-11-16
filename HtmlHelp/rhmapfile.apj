@@ -5,5 +5,9 @@
 			<filename>BSSCDefault.h</filename>
 			<locked>false</locked>
 		</map>
+		<map>
+			<filename>HelpTopics.hh</filename>
+			<locked>false</locked>
+		</map>
 	</maps>
 </rhpml>

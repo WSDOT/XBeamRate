@@ -42,6 +42,8 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\CustomDDX.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
+
 
 void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,xbrLongitudinalRebarData& rebars)
 {
@@ -505,11 +507,7 @@ void CReinforcementPage::OnConditionFactorTypeChanged()
 
 void CReinforcementPage::OnHelp()
 {
-   //AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   //CString strHelpFile(AfxGetApp()->m_pszHelpFilePath);
-
-   //DWORD_PTR dwTopic = ??;
-
-   //::HtmlHelp( *this, strHelpFile, HH_HELP_CONTEXT, dwTopic);
-#pragma Reminder("IMPLEMENT: Need help topic")
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CString strHelpFile(AfxGetApp()->m_pszHelpFilePath);
+   ::HtmlHelp( *this, strHelpFile, HH_HELP_CONTEXT, IDH_MATERIAL);
 }

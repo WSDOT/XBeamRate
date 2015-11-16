@@ -30,6 +30,7 @@
 
 #include <EAF\EAFDisplayUnits.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
 
 // CAnalysisOptionsPage dialog
 
@@ -61,7 +62,13 @@ void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CAnalysisOptionsPage, CPropertyPage)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
 // CAnalysisOptionsPage message handlers
+
+void CAnalysisOptionsPage::OnHelp() 
+{
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_ANALYSIS );
+}

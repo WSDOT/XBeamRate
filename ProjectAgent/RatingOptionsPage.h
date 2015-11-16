@@ -42,6 +42,8 @@ protected:
    void FillLRFDList();
    void FillLRFRList();
 
+   afx_msg void OnHelp();
+
 	DECLARE_MESSAGE_MAP()
 public:
    virtual BOOL OnInitDialog();

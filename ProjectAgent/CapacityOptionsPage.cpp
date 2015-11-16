@@ -27,6 +27,7 @@
 
 #include <txnEditOptions.h>
 
+#include "..\HtmlHelp\HelpTopics.hh"
 
 // CCapacityOptionsPage dialog
 
@@ -54,7 +55,13 @@ void CCapacityOptionsPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CCapacityOptionsPage, CPropertyPage)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
 // CCapacityOptionsPage message handlers
+
+void CCapacityOptionsPage::OnHelp() 
+{
+   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_CAPACITY );
+}
