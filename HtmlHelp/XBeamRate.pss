@@ -18,15 +18,15 @@ SupportMas_MPJ=1
 [Target:Microsoft HTML Help]
 ResultFileName=F:\ARP\BridgeLink\XBRate.chm
 SSLayoutType=1
-CreateProjectTime=13:12, November 16, 2015
+CreateProjectTime=13:46, November 16, 2015
 CreateProjectUser=bricer
 SupportMas_MPJ=1
 ActionID For Generation=1002
 Remove Folder with prompt=1
 ViewFileName=F:\ARP\BridgeLink\XBRate.chm
 ResultStatus=0
-BuildTimeHi=30482611
-BuildTimeLow=1997254220
+BuildTimeHi=30482616
+BuildTimeLow=1242931416
 Enable Result Dialog=1
 [Target:FlashHelp]
 ResultFileName=!SSL!\FlashHelp\XBeamRate.htm
@@ -53,7 +53,7 @@ Skin List=F:\ARP\XBeamRate\HtmlHelp\XBeamRate.trk
 OriginalHhk=F:\ARP\XBeamRate\HtmlHelp\XBeamRate.hhk
 Active Layout Names=F:\ARP\XBeamRate\HtmlHelp\XBeamRate.trl
 Default Topic=F:\ARP\XBeamRate\HtmlHelp\Welcome.htm
-Build Tags0=18831;Print | Online
+Build Tags0=18512;Print | Online
 Build Tags=
 Build Expression=
 Language ID=1033
