@@ -397,9 +397,12 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    xbrTypes::Stage stage = xbrTypes::Stage2;
 
    GET_IFACE(IXBRCrackedSection,pCrackedSection);
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRSectionProperties,pSectProps);
+   GET_IFACE(IXBRRebar,pRebar);
+
+   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
+   Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
 
    // Get load factors
    Float64 gDC = pProject->GetDCLoadFactor(ls);
@@ -410,12 +413,14 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    Float64 gPS = pProject->GetPSLoadFactor(ls);
    Float64 gLL = pProject->GetLiveLoadFactor(pierID,ls,vehicleIdx);
 
-   // Create artifacts
-   CollectionIndexType nPOI = vPoi.size();
-   for ( CollectionIndexType i = 0; i < nPOI; i++ )
-   {
-      const xbrPointOfInterest& poi = vPoi[i];
 
+   GET_IFACE(IXBRMaterial,pMaterial);
+   Float64 Es, fy, fu;
+   pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
+
+   // Create artifacts
+   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   {
       // assume yield stress ratio is minimized for the controlling flexure rating at this location
       // this also gives us accees to Mlegal and Mpermit for the controlling case (WSDOT method)
       const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);
@@ -457,12 +462,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
 
       Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
-      GET_IFACE(IXBRMaterial,pMaterial);
-      Float64 Es, fy, fu;
-      pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
-
       // Get distance to reinforcement from extreme compression face
-      GET_IFACE(IXBRRebar,pRebar);
       CComPtr<IRebarSection> rebarSection;
       pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
       Float64 Yb = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
@@ -481,8 +481,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
      }
 
       // Get allowable
-      Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
-
       xbrYieldStressRatioArtifact stressRatioArtifact;
       stressRatioArtifact.SetRatingType(ratingType);
       stressRatioArtifact.SetPermitRatingMethod(pMomentRatingArtifact->GetPermitRatingMethod());
