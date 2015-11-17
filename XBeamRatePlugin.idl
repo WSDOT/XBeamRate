@@ -93,6 +93,6 @@ library XBeamRateLibrary
 	]
 	coclass PGSuperDataExporter
 	{
-		[default] interface IPGSuperDataExporter;
+		[default] interface IPGSDataExporter;
 	};
 };
