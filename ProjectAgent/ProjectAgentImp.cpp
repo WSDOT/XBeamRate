@@ -52,6 +52,8 @@
 #include <\ARP\PGSuper\Include\IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
+#include <MFCTools\AutoRegistry.h>
+
 #include "..\resource.h" // for ID_VIEW_PIER
 
 #include "PierExporter.h"
@@ -284,6 +286,7 @@ STDMETHODIMP CProjectAgentImp::Init()
 
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    CWinApp* pApp = AfxGetApp();
+   CAutoRegistry autoReg(_T("XBeamRate"));
    CString strProjectProperties = pApp->GetProfileString(_T("Settings"),_T("ShowProjectProperties"),_T("On"));
    if ( strProjectProperties.CompareNoCase(_T("Off")) == 0 )
    {
@@ -360,6 +363,7 @@ STDMETHODIMP CProjectAgentImp::ShutDown()
    }
 
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   CAutoRegistry autoReg(_T("XBeamRate"));
    CWinApp* pApp = AfxGetApp();
    VERIFY(pApp->WriteProfileString( _T("Settings"),_T("ShowProjectProperties"),m_CommandTarget.ShowProjectPropertiesOnNewProject() ? _T("On") : _T("Off") ));
 

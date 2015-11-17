@@ -27,6 +27,7 @@ CLASS
 #include "stdafx.h"
 #include "XBeamRateCommandLineProcessor.h"
 #include "XBeamRateCommandLineInfo.h"
+#include "XBeamRateDoc.h"
 
 #include <EAF\EAFApp.h>
 #include <EAF\EAFDocument.h>
@@ -116,7 +117,7 @@ BOOL CXBRateCommandLineProcessor::ProcessCommandLineOptions(CEAFCommandLineInfo&
    BOOL bHandled = FALSE;
    CEAFMainFrame* pFrame = EAFGetMainFrame();
    CEAFDocument* pDoc = pFrame->GetDocument();
-   if ( pDoc )
+   if ( pDoc && pDoc->IsKindOf(RUNTIME_CLASS(CXBeamRateDoc)) )
    {
       bHandled = pDoc->ProcessCommandLineOptions(cmdInfo);
    }
