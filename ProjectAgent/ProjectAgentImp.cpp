@@ -1841,27 +1841,8 @@ xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicati
 
 IndexType CProjectAgentImp::GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   if ( pierID == INVALID_ID )
-   {
-#if defined _DEBUG
-      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
-      // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      ATLASSERT(IsStandAlone());
-#endif
-      std::vector<xbrLiveLoadReactionData>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      return vReactions.size();
-   }
-   else
-   {
-      GET_IFACE(IProductLoads,pProductLoads);
-      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
-      IndexType nVehicles = pProductLoads->GetVehicleCount(llType);
-      if ( pProductLoads->GetLiveLoadName(llType,0) == NO_LIVE_LOAD_DEFINED )
-      {
-         nVehicles = 0;
-      }
-      return nVehicles;
-   }
+   std::vector<xbrLiveLoadReactionData>& vReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   return vReactions.size();
 }
 
 void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM)
@@ -1875,29 +1856,8 @@ void CProjectAgentImp::SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRati
 
 std::vector<xbrLiveLoadReactionData> CProjectAgentImp::GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
 {
-   if ( pierID == INVALID_ID )
-   {
-#if defined _DEBUG
-      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
-      // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      ATLASSERT(IsStandAlone());
-#endif
-      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      return vLLReactions;
-   }
-   else
-   {
-      std::vector<xbrLiveLoadReactionData> vReactions;
-      IndexType nReactions = GetLiveLoadReactionCount(pierID,ratingType);
-      for ( IndexType reactionIdx = 0; reactionIdx < nReactions; reactionIdx++ )
-      {
-         std::_tstring strName = GetLiveLoadName(pierID,ratingType,reactionIdx);
-         Float64 R = GetLiveLoadReaction(pierID,ratingType,reactionIdx);
-         Float64 W = GetVehicleWeight(pierID,ratingType,reactionIdx);
-         vReactions.push_back(xbrLiveLoadReactionData(strName,R,W));
-      }
-      return vReactions;
-   }
+   std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   return vLLReactions;
 }
 
 std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
@@ -1907,27 +1867,12 @@ std::_tstring CProjectAgentImp::GetLiveLoadName(PierIDType pierID,pgsTypes::Load
       return std::_tstring(::GetLiveLoadTypeName(ratingType));
    }
 
-   if ( pierID == INVALID_ID )
+   std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   if ( vLLReactions.size() == 0 )
    {
-#if defined _DEBUG
-      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
-      // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      ATLASSERT(IsStandAlone());
-#endif
-      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      if ( vLLReactions.size() == 0 )
-      {
-         return NO_LIVE_LOAD_DEFINED;
-      }
-      return vLLReactions[vehicleIdx].Name;
+      return NO_LIVE_LOAD_DEFINED;
    }
-   else
-   {
-      GET_IFACE(IProductLoads,pProductLoads);
-      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
-      std::_tstring strName = pProductLoads->GetLiveLoadName(llType,vehicleIdx);
-      return strName;
-   }
+   return vLLReactions[vehicleIdx].Name;
 }
 
 Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
@@ -1938,44 +1883,14 @@ Float64 CProjectAgentImp::GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRa
    // Throwns an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
 
-   if ( pierID == INVALID_ID )
+   std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   if ( 0 < vLLReactions.size() )
    {
-#if defined _DEBUG
-      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
-      // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      ATLASSERT(IsStandAlone());
-#endif
-      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      if ( 0 < vLLReactions.size() )
-      {
-         return vLLReactions[vehicleIdx].LLIM;
-      }
-      else
-      {
-         return 0;
-      }
+      return vLLReactions[vehicleIdx].LLIM;
    }
    else
    {
-      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
-      GET_IFACE(IReactions,pReactions);
-      GET_IFACE(IIntervals,pIntervals);
-      IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
-
-      PierIndexType pierIdx = GetPierIndex(pierID);
-      GirderIndexType gdrIdx = GetLongestGirderLine();
-
-      // assume a single bearing line at the pier and one bearing per girder
-      // when getting the girder key we'll use for live load reactions
-      CGirderKey girderKey = GetGirderKey(pierID,0,gdrIdx);
-
-      GET_IFACE(IProductForces,pProductForces);
-      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
-
-      Float64 Rmin,Rmax;
-      pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
-
-      return Rmax;
+      return 0;
    }
 }
 
@@ -1987,29 +1902,14 @@ Float64 CProjectAgentImp::GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatin
    // Throwns an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
 
-   if ( pierID == INVALID_ID )
+   std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
+   if ( 0 < vLLReactions.size() )
    {
-#if defined _DEBUG
-      // if pierID == INVALID_ID, then we should be doing a stand-alone analysis
-      // when in stand-alone mode, IXBeamRateAgent interface isn't available
-      ATLASSERT(IsStandAlone());
-#endif
-      std::vector<xbrLiveLoadReactionData>& vLLReactions = GetPrivateLiveLoadReactions(pierID,ratingType);
-      if ( 0 < vLLReactions.size() )
-      {
-         return vLLReactions[vehicleIdx].W;
-      }
-      else
-      {
-         return 0;
-      }
+      return vLLReactions[vehicleIdx].W;
    }
    else
    {
-      pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
-      GET_IFACE(IProductLoads,pProductLoads);
-      Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
-      return W;
+      return 0;
    }
 }
 
@@ -2997,6 +2897,47 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
    {
       std::vector<xbrLiveLoadReactionData> vReactions;
       m_LiveLoadReactions[ratingType].insert(std::make_pair(pierID,vReactions));
+
+      if ( pierID != INVALID_ID )
+      {
+         ATLASSERT(IsPGSExtension());
+         // It is kind of expensive to get the reactions over and over so we'll get
+         // them once and cache them.
+         GET_IFACE_NOCHECK(IReactions,pReactions); // not used when nVehicles = 0
+         GET_IFACE(IIntervals,pIntervals);
+         IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
+
+         PierIndexType pierIdx = GetPierIndex(pierID);
+         GirderIndexType gdrIdx = GetLongestGirderLine();
+
+         // assume a single bearing line at the pier and one bearing per girder
+         // when getting the girder key we'll use for live load reactions
+         CGirderKey girderKey = GetGirderKey(pierID,0,gdrIdx);
+
+         GET_IFACE(IProductForces,pProductForces);
+         pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
+
+         GET_IFACE(IProductLoads,pProductLoads);
+         pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
+         VehicleIndexType nVehicles = pProductLoads->GetVehicleCount(llType);
+         if ( pProductLoads->GetLiveLoadName(llType,0) == NO_LIVE_LOAD_DEFINED )
+         {
+            nVehicles = 0;
+         }
+
+         for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nVehicles; vehicleIdx++ )
+         {
+            std::_tstring strName = pProductLoads->GetLiveLoadName(llType,vehicleIdx);
+
+
+            Float64 Rmin,Rmax;
+            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
+
+            Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
+            
+            m_LiveLoadReactions[ratingType][pierID].push_back(xbrLiveLoadReactionData(strName,Rmax,W));
+         }
+      }
    }
 
    return m_LiveLoadReactions[ratingType][pierID];
