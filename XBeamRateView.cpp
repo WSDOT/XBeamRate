@@ -1202,10 +1202,6 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          segDirection->get_Value(&dirSegment);
 
          Float64 skew = dirPier - PI_OVER_2 - dirSegment;
-         if ( skew < 0 )
-         {
-            skew += TWO_PI;
-         }
          ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
 
          // compute shear factor
