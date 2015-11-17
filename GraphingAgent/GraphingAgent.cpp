@@ -52,6 +52,7 @@
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 #include <IFace\XBeamRateAgent.h>
+#include <IFace\Pier.h>
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>

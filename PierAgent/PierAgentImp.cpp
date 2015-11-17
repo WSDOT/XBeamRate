@@ -1993,14 +1993,14 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
 
    // Merge the attributes of POI thare are at the same location so when we remove
    // duplicates the attributes don't get lost
-   std::vector<xbrPointOfInterest>::iterator result = std::adjacent_find(vPoi.begin(),vPoi.end());
+   std::vector<xbrPointOfInterest>::iterator result = std::adjacent_find(vPoi.begin(),vPoi.end(),ComparePoiLocation);
    while ( result != vPoi.end() )
    {
       xbrPointOfInterest& poi1 = *result;
       xbrPointOfInterest& poi2 = *(result+1);
       poi1.SetAttributes(poi1.GetAttributes() | poi2.GetAttributes());
       vPoi.erase(result+1);
-      result = std::adjacent_find(vPoi.begin(),vPoi.end());
+      result = std::adjacent_find(vPoi.begin(),vPoi.end(),ComparePoiLocation);
    }
 }
 

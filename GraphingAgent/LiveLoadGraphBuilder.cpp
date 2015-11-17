@@ -40,6 +40,7 @@
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
 #include <IFace\RatingSpecification.h>
+#include <IFace\Pier.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
@@ -285,11 +286,21 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
    VehicleIndexType vehicleIdx = m_GraphController.GetVehicleIndex();
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
 
+   GET_IFACE2(pBroker,IXBRPier,pPier);
+   Float64 Lxb = pPier->GetXBeamLength(pierID);
+
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);
    std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
-   vPoi.insert(vPoi.begin(),vWLPoi.front());
-   vPoi.insert(vPoi.end(),vWLPoi.back());
+   if ( 0 <= vWLPoi.front().GetDistFromStart() )
+   {
+      vPoi.insert(vPoi.begin(),vWLPoi.front());
+   }
+
+   if ( vWLPoi.back().GetDistFromStart() <= Lxb )
+   {
+      vPoi.insert(vPoi.end(),vWLPoi.back());
+   }
    std::sort(vPoi.begin(),vPoi.end());
 
    IndexType llConfigIdx = m_GraphController.GetSelectedLiveLoadConfiguration();
