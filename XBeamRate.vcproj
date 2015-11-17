@@ -1108,6 +1108,10 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<File
+				RelativePath=".\XBRateCalculationSheet.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -1243,6 +1247,10 @@
 			</File>
 			<File
 				RelativePath=".\XBeamRateView.h"
+				>
+			</File>
+			<File
+				RelativePath=".\XBRateCalculationSheet.h"
 				>
 			</File>
 		</Filter>

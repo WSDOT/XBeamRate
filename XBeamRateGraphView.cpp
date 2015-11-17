@@ -28,9 +28,7 @@
 #include "XBeamRateGraphView.h"
 #include <EAF\EAFGraphBuilderBase.h>
 
-//#include "PGSuperCalculationSheet.h"
-//#include <IFace\VersionInfo.h>
-//#include <IFace\DocumentType.h>
+#include "XBRateCalculationSheet.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -85,32 +83,20 @@ bool CXBeamRateGraphView::DoResultsExist()
 
 void CXBeamRateGraphView::OnPrint(CDC* pDC, CPrintInfo* pInfo) 
 {
-   //CComPtr<IBroker> pBroker;
-   //EAFGetBroker(&pBroker);
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   
+   XBRateCalculationSheet border(pBroker);
 
-   //GET_IFACE2(pBroker,IVersionInfo,pVerInfo);
-   //GET_IFACE2(pBroker,IDocumentType,pDocType);
+   CRect rcPrint = border.Print(pDC, 1);
 
-   //// get paper size
-   //PGSuperCalculationSheet border(pBroker);
-   //CString strBottomTitle;
-   //if ( pDocType->IsPGSuperDocument() )
-   //   strBottomTitle.Format(_T("PGSuper™ Version %s, Copyright © %4d, WSDOT, All rights reserved"),pVerInfo->GetVersion(true),sysDate().Year());
-   //else
-   //   strBottomTitle.Format(_T("PGSplice™ Version %s, Copyright © %4d, WSDOT, All rights reserved"),pVerInfo->GetVersion(true),sysDate().Year());
+   if (rcPrint.IsRectEmpty())
+   {
+      CHECKX(0,_T("Can't print border - page too small?"));
+      rcPrint = pInfo->m_rectDraw;
+   }
 
-   //border.SetTitle(strBottomTitle);
-   //CDocument* pdoc = GetDocument();
-   //CString path = pdoc->GetPathName();
-   //border.SetFileName(path);
-   //CRect rcPrint = border.Print(pDC, 1);
+   m_PrintRect = rcPrint;
 
-   //if (rcPrint.IsRectEmpty())
-   //{
-   //   CHECKX(0,_T("Can't print border - page too small?"));
-   //   rcPrint = pInfo->m_rectDraw;
-   //}
-
-   //m_PrintRect = rcPrint;
 	CEAFAutoCalcGraphView::OnPrint(pDC, pInfo);
 }
