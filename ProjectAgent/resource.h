@@ -150,6 +150,8 @@
 #define IDC_LRFR                        324
 #define IDC_LL_STEP                     324
 #define IDC_LL_STEP_UNIT                325
+#define IDC_EDIT1                       326
+#define IDC_MAX_LANES                   326
 #define IDD_AASHTO_CONCRETE             500
 #define IDB_EDIT_PIER                   500
 #define IDC_EC_K1_LABEL                 501
@@ -212,15 +214,13 @@
 #define IDC_X5_LABEL                    1847
 #define IDC_X6_UNIT                     1848
 #define IDC_X6_LABEL                    1849
-
-#define IDC_BRIDGE                     1850
-#define IDC_BRIDGEID                   1851
-#define IDC_JOBNUMBER                  1852
-#define IDC_ENGINEER                   1853
-#define IDC_COMPANY                    1854
-#define IDC_COMMENTS                   1855
-#define IDC_SHOW_DIALOG                1856
-
+#define IDC_BRIDGE                      1850
+#define IDC_BRIDGEID                    1851
+#define IDC_JOBNUMBER                   1852
+#define IDC_ENGINEER                    1853
+#define IDC_COMPANY                     1854
+#define IDC_COMMENTS                    1855
+#define IDC_SHOW_DIALOG                 1856
 #define ID_EDIT_PROJECT_NAME            50000
 #define ID_EDIT_PIER                    50001
 #define ID_EDIT_OPTIONS                 50002
@@ -234,7 +234,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        209
 #define _APS_NEXT_COMMAND_VALUE         50009
-#define _APS_NEXT_CONTROL_VALUE         326
+#define _APS_NEXT_CONTROL_VALUE         327
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

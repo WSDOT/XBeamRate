@@ -45,6 +45,7 @@ struct txnEditOptionsData
    Float64 m_SystemFactorShear;
 
    Float64 m_MaxLLStepSize;
+   IndexType m_MaxLoadedLanes;
 
    Float64 m_PhiC;
    Float64 m_PhiT;

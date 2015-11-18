@@ -9,7 +9,6 @@
 //
 #include "afxres.h"
 #include <EAF\EAFResources.h>
-
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
@@ -36,7 +35,7 @@ END
 2 TEXTINCLUDE 
 BEGIN
     "#include ""afxres.h""\r\n"
-    "EAF\\EAFResources.h\0"
+    "#include <EAF\\EAFResources.h>\0"
     "\0"
 END
 
@@ -301,6 +300,9 @@ BEGIN
     LTEXT           "Maximum Live Load Step Size",IDC_STATIC,14,60,94,8
     EDITTEXT        IDC_LL_STEP,113,58,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_LL_STEP_UNIT,154,60,19,8
+    LTEXT           "Maximum Number of Lanes",IDC_STATIC,14,79,86,8
+    EDITTEXT        IDC_MAX_LANES,113,76,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,159,75,186,20
 END
 
 

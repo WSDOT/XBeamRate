@@ -58,6 +58,8 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,m_MaxLLStepSize, pDisplayUnits->GetSpanLengthUnit());
    DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
+
+   DDX_Keyword(pDX,IDC_MAX_LANES,_T("ALL"),m_MaxLoadedLanes);
 }
 
 

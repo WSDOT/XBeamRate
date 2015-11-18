@@ -470,6 +470,9 @@ BEGIN
     LTEXT           "Maximum Live Load Step Size",IDC_STATIC,7,9,94,8
     EDITTEXT        IDC_LL_STEP,106,7,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Static",IDC_LL_STEP_UNIT,147,9,19,8
+    LTEXT           "Maximum Number of Lanes",IDC_STATIC,7,31,86,8
+    EDITTEXT        IDC_MAX_LANES,106,28,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,7,46,186,20
 END
 
 

@@ -175,6 +175,7 @@ CProjectAgentImp::CProjectAgentImp()
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
 
    m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
 
    m_bExportingModel = false;
 }
@@ -451,6 +452,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("PhiV"),CComVariant(GetShearResistanceFactor()));
 
          pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(GetMaxLiveLoadStepSize()));
+         pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(GetMaxLoadedLanes()));
 
          pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Inventory)));
          pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Operating)));
@@ -652,6 +654,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
          pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
+         pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(m_MaxLLStepSize));
+         pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
       pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
@@ -762,6 +766,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             var.vt = VT_R8;
             hr = pStrLoad->get_Property(_T("MaxLiveLoadStepSize"),&var);
             m_MaxLLStepSize = var.dblVal;
+
+            var.vt = VT_INDEX;
+            hr = pStrLoad->get_Property(_T("MaxLoadedLanes"),&var);
+            m_MaxLoadedLanes = VARIANT2INDEX(var);
 
             var.vt = VT_BOOL;
             hr = pStrLoad->get_Property(_T("RatingEnabled_Design_Inventory"),&var);
@@ -1140,6 +1148,14 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
          m_PermitRatingMethod = (xbrTypes::PermitRatingMethod)var.lVal;
+
+         var.vt = VT_R8;
+         hr = pStrLoad->get_Property(_T("MaxLiveLoadStepSize"),&var);
+         m_MaxLLStepSize = var.dblVal;
+
+         var.vt = VT_INDEX;
+         hr = pStrLoad->get_Property(_T("MaxLoadedLanes"),&var);
+         m_MaxLoadedLanes = VARIANT2INDEX(var);
 
          hr = pStrLoad->EndUnit(); // RatingSpecification
 
@@ -2534,6 +2550,20 @@ void CProjectAgentImp::SetMaxLiveLoadStepSize(Float64 stepSize)
 Float64 CProjectAgentImp::GetMaxLiveLoadStepSize()
 {
    return m_MaxLLStepSize;
+}
+
+void CProjectAgentImp::SetMaxLoadedLanes(IndexType nLanesMax)
+{
+   if ( m_MaxLoadedLanes != nLanesMax )
+   {
+      m_MaxLoadedLanes = nLanesMax;
+      Fire_OnProjectChanged();
+   }
+}
+
+IndexType CProjectAgentImp::GetMaxLoadedLanes()
+{
+   return m_MaxLoadedLanes;
 }
 
 //////////////////////////////////////////////////////////

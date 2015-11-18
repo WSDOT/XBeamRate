@@ -58,6 +58,8 @@ void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,pParent->m_Options.m_MaxLLStepSize,pDisplayUnits->GetSpanLengthUnit());
    DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,pParent->m_Options.m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
+
+   DDX_Keyword(pDX,IDC_MAX_LANES,_T("ALL"),pParent->m_Options.m_MaxLoadedLanes);
 }
 
 

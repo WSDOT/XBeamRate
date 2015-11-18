@@ -150,6 +150,7 @@ void CAgentCmdTarget::OnEditOptions()
 
    GET_IFACE(IXBRProject,pProject);
    oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
+   oldOptions.m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
    oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
    oldOptions.m_SystemFactorShear   = pProject->GetSystemFactorShear();
 

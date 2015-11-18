@@ -57,9 +57,10 @@ UserGuide\Chapter_2\Saving_Projects.htm
 TechincalGuide\Computing_the_Reinforcement_Yield_Stress_Ratio.htm
 UserGuide\Chapter_1\TOC.htm
 UserGuide\Chapter_1\Introduction.htm
+UserGuide\Chapter_3\Understanding_the_Pier_View.htm
+UserGuide\Chapter_4\Introduction.htm
 UserGuide\Chapter_5\TOC.htm
 UserGuide\Chapter_4\TOC.htm
-UserGuide\Chapter_3\Understanding_the_Pier_View.htm
 UserGuide\Chapter_3\Live_Loads.htm
 UserGuide\Chapter_3\Permanent_Loads.htm
 UserGuide\Chapter_3\Materials_and_Reinforcement.htm
@@ -67,13 +68,12 @@ UserGuide\Chapter_3\Substructure.htm
 UserGuide\Chapter_3\Superstructure.htm
 UserGuide\Chapter_3\Exporting_Pier_Models.htm
 UserGuide\Chapter_4\Load_Rating_Options.htm
-UserGuide\Chapter_4\Introduction.htm
-Dialogs\Favorite_Reports.htm
 Dialogs\Custom_Reports.htm
-UserGuide\Chapter_5\Load_Rating_Report.htm
-UserGuide\Chapter_5\Live_Load_Results_Graph.htm
-UserGuide\Chapter_5\Introduction.htm
 UserGuide\Chapter_5\Analysis_Results_Graph.htm
+UserGuide\Chapter_5\Introduction.htm
+UserGuide\Chapter_5\Load_Rating_Report.htm
+Dialogs\Favorite_Reports.htm
+UserGuide\Chapter_5\Live_Load_Results_Graph.htm
 eHelp.xml
 RoboHHRE.lng
 

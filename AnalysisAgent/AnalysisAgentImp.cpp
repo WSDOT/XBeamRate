@@ -2285,6 +2285,7 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    IndexType nLanes;
    GetLaneInfo(Wcc,&wLane,&nLanes,&wLoadedLane);
 
+
    // Adjust Wcc and wLoadedLane so that they are measured in the plane of the pier
    Float64 skew = pPier->GetSkewAngle(pierID);
    Wcc /= cos(skew);
@@ -2292,6 +2293,8 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
 
    GET_IFACE(IXBRProject,pProject);
    Float64 maxStepSize = pProject->GetMaxLiveLoadStepSize();
+
+   nLanes = Min(nLanes,pProject->GetMaxLoadedLanes());
 
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID,&LCO,&RCO);

@@ -249,6 +249,9 @@ interface IXBRProject : IUnknown
 
    virtual void SetMaxLiveLoadStepSize(Float64 stepSize) = 0;
    virtual Float64 GetMaxLiveLoadStepSize() = 0;
+
+   virtual void SetMaxLoadedLanes(IndexType nLanesMax) = 0;
+   virtual IndexType GetMaxLoadedLanes() = 0;
 };
 
 /*****************************************************************************

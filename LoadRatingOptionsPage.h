@@ -40,6 +40,7 @@ public:
    pgsTypes::AnalysisType m_AnalysisType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
    Float64 m_MaxLLStepSize;
+   IndexType m_MaxLoadedLanes;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support

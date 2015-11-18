@@ -588,6 +588,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
 
    GET_IFACE(IXBRProject,pProject);
    pPage->m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
+   pPage->m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
 
    return pPage;
 }
@@ -604,11 +605,13 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
 
    GET_IFACE(IXBRProject,pProject);
    oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
+   oldOptions.m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
 
    txnLoadRatingOptions newOptions;
    newOptions.m_AnalysisType = pLROPage->m_AnalysisType;
    newOptions.m_PermitRatingMethod = pLROPage->m_PermitRatingMethod;
    newOptions.m_MaxLLStepSize = pLROPage->m_MaxLLStepSize;
+   newOptions.m_MaxLoadedLanes = pLROPage->m_MaxLoadedLanes;
 
    txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldOptions,newOptions);
    return pTxn;

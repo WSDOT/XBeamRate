@@ -38,6 +38,7 @@
 #define IDC_PERMIT_FACTORS              304
 #define IDC_LL_STEP                     324
 #define IDC_LL_STEP_UNIT                325
+#define IDC_MAX_LANES                   326
 #define IDC_LOCATION                    1260
 #define IDC_SLIDER                      1807
 #define ID_EDIT_PROJECTNAME             32771

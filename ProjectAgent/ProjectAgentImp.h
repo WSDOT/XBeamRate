@@ -276,6 +276,9 @@ public:
    virtual void SetMaxLiveLoadStepSize(Float64 stepSize);
    virtual Float64 GetMaxLiveLoadStepSize();
 
+   virtual void SetMaxLoadedLanes(IndexType nLanesMax);
+   virtual IndexType GetMaxLoadedLanes();
+
 // IXBRRatingSpecification
 public:
    virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType);
@@ -388,6 +391,7 @@ private:
    Float64 m_YieldStressCoefficient;
 
    Float64 m_MaxLLStepSize; // maximum step size for moving live load
+   IndexType m_MaxLoadedLanes; // maximum number of loaded lanes to consider (INVALID_INDEX means to consider all lanes)
 
    // Load Factors
    Float64 m_gDC_StrengthI;
