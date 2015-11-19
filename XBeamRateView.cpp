@@ -757,6 +757,22 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doXBeamSection->SetGravityWellStrategy(xbeam_section_gravity_well);
 
    displayList->AddDisplayObject(doXBeamSection);
+
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
+   CString strSectionCutLabel;
+   strSectionCutLabel.Format(_T("Section @ %s"),::FormatDimension(XxbCut,pDisplayUnits->GetSpanLengthUnit()));
+
+   CComPtr<IPoint2d> pntBC;
+   position->get_LocatorPoint(lpBottomCenter,&pntBC);
+   pntBC->Offset(0,-::ConvertToSysUnits(3.0,unitMeasure::Feet));
+
+   CComPtr<iTextBlock> doLabel;
+   doLabel.CoCreateInstance(CLSID_TextBlock);
+   doLabel->SetText(strSectionCutLabel);
+   doLabel->SetBkMode(TRANSPARENT);
+   doLabel->SetTextAlign(TA_TOP | TA_CENTER);
+   doLabel->SetPosition(pntBC);
+   displayList->AddDisplayObject(doLabel);
 }
 
 void CXBeamRateView::UpdateColumnDisplayObjects()
