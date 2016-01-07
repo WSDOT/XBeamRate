@@ -116,6 +116,7 @@ interface IXBRMaterial : public IUnknown
    virtual Float64 GetXBeamFc(PierIDType pierID) = 0;
    virtual Float64 GetXBeamEc(PierIDType pierID) = 0;
    virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID) = 0;
+   virtual Float64 GetXBeamLambda(PierIDType pierID) = 0;
    virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx) = 0;
 
    virtual void GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu) = 0;

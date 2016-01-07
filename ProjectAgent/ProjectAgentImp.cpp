@@ -1630,6 +1630,14 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
    // Throwns an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
 
+   // Initialize results
+   *pDC = 0;
+   *pDW = 0;
+   *pCR = 0;
+   *pSH = 0;
+   *pRE = 0;
+   *pPS = 0;
+
    if ( pierID == INVALID_ID )
    {
 #if defined _DEBUG
@@ -1673,10 +1681,15 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          Float64 ps[2];
          pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDC,girderKey,bat,resultsType,&dc[0],&dc[1]);
          pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDWRating,girderKey,bat,resultsType,&dw[0],&dw[1]);
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+
+         GET_IFACE(ILossParameters,pLossParams);
+         if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+         {
+            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
+            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
+            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
+            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+         }
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
@@ -1713,10 +1726,15 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
 
          *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDC,bat,resultsType);
          *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType);
-         *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType);
-         *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType);
-         *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType);
-         *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType);
+
+         GET_IFACE(ILossParameters,pLossParams);
+         if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+         {
+            *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType);
+            *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType);
+            *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType);
+            *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType);
+         }
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice

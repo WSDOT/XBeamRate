@@ -304,8 +304,20 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    *pChapter << pPara;
 
    bool bK1 = (lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion());
+   bool bLambda = (lrfdVersionMgr::SeventhEditionWith2016Interims <= lrfdVersionMgr::GetVersion());
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(bK1 ? 13 : 7,_T("Concrete Properties"));
+
+   ColumnIndexType nColumns = 7;
+   if ( bK1 )
+   {
+      nColumns += 6;
+   }
+   if ( bLambda )
+   {
+      nColumns++;
+   }
+
+   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,_T("Concrete Properties"));
    pTable->SetColumnStyle(0, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
    pTable->SetStripeRowColumnStyle(0, pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
    pTable->SetColumnStyle(1, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
@@ -325,29 +337,43 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    if ( bK1 )
    {
       pTable->SetNumberOfHeaderRows(2);
-      for ( int i = 0; i < 7; i++ )
+      for ( int i = 0; i < col; i++ )
       {
          pTable->SetRowSpan(0,i,2); 
          pTable->SetRowSpan(1,i,SKIP_CELL);
       }
 
-      pTable->SetColumnSpan(0,7,2);
-      pTable->SetColumnSpan(0,8,SKIP_CELL);
-      (*pTable)(0,7) << Sub2(_T("E"),_T("c"));
-      (*pTable)(1,7) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,8) << Sub2(_T("K"),_T("2"));
+      pTable->SetColumnSpan(0,col,2);
+      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
+      (*pTable)(0,col) << Sub2(_T("E"),_T("c"));
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
 
-      pTable->SetColumnSpan(0,9,2);
-      pTable->SetColumnSpan(0,10,SKIP_CELL);
-      (*pTable)(0,9) << _T("Creep");
-      (*pTable)(1,9) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,10) << Sub2(_T("K"),_T("2"));
+      pTable->SetColumnSpan(0,col,2);
+      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
+      (*pTable)(0,col) << _T("Creep");
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
 
-      pTable->SetColumnSpan(0,11,2);
-      pTable->SetColumnSpan(0,12,SKIP_CELL);
-      (*pTable)(0,11) << _T("Shrinkage");
-      (*pTable)(1,11) << Sub2(_T("K"),_T("1"));
-      (*pTable)(1,12) << Sub2(_T("K"),_T("2"));
+      pTable->SetColumnSpan(0,col,2);
+      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
+      (*pTable)(0,col) << _T("Shrinkage");
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
+      (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
+   }
+
+   if ( bLambda )
+   {
+      if ( bK1 )
+      {
+         pTable->SetRowSpan(0,col,2);
+         pTable->SetRowSpan(1,col,SKIP_CELL);
+         (*pTable)(0,col++) << symbol(lambda);
+      }
+      else
+      {
+         (*pTable)(row,col++) << symbol(lambda);
+      }
    }
 
 
@@ -363,10 +389,11 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 
    col = 0;
 
-   (*pTable)(row,col++) << matConcrete::GetTypeName( (matConcrete::Type)concrete.Type, true );
+   (*pTable)(row,col++) << lrfdConcreteUtil::GetTypeName( (matConcrete::Type)concrete.Type, true );
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 Ec = pMaterial->GetXBeamEc(pierID);
+   Float64 lambda = pMaterial->GetXBeamLambda(pierID);
 
    (*pTable)(row,col++) << stress.SetValue( concrete.Fc );
    (*pTable)(row,col++) << modE.SetValue( Ec );
@@ -401,6 +428,11 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
       (*pTable)(row,col++) << concrete.CreepK2;
       (*pTable)(row,col++) << concrete.ShrinkageK1;
       (*pTable)(row,col++) << concrete.ShrinkageK2;
+   }
+
+   if ( bLambda )
+   {
+      (*pTable)(row,col++) << lambda;
    }
 }
 

@@ -164,7 +164,16 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVc.png"),rptRcImage::Middle) << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
+   std::_tstring strImage;
+   if ( lrfdVersionMgr::GetVersion() < lrfdVersionMgr::SeventhEditionWith2016Interims )
+   {
+      strImage = _T("XBeamVc.png");
+   }
+   else
+   {
+      strImage = _T("XBeamVc_2016.png");
+   }
+   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + strImage,rptRcImage::Middle) << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
 
    rptRcTable* pVcTable = pgsReportStyleHolder::CreateDefaultTable(6);
    *pPara << pVcTable << rptNewLine;

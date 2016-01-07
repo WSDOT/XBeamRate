@@ -282,25 +282,7 @@ BOOL CReinforcementPage::OnSetActive()
 void CReinforcementPage::UpdateConcreteTypeLabel()
 {
    CString strLabel;
-   switch( m_pParent->GetConcrete().Type )
-   {
-   case pgsTypes::Normal:
-      strLabel = _T("Normal Weight Concrete");
-      break;
-
-   case pgsTypes::AllLightweight:
-      strLabel = _T("All Lightweight Concrete");
-      break;
-
-   case pgsTypes::SandLightweight:
-      strLabel = _T("Sand Lightweight Concrete");
-      break;
-
-   default:
-      ATLASSERT(false); // should never get here
-      strLabel = _T("Concrete Type Label Error");
-   }
-
+   strLabel.Format(_T("%s"),lrfdConcreteUtil::GetTypeName((matConcrete::Type)m_pParent->GetConcrete().Type,true).c_str());
    GetDlgItem(IDC_CONCRETE_TYPE_LABEL)->SetWindowText(strLabel);
 }
 

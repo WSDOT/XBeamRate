@@ -846,7 +846,18 @@ Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID)
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
-   return lrfdConcreteUtil::ModRupture(concrete.Fc,(lrfdConcreteUtil::DensityType)concrete.Type);
+   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(lrfdConcreteUtil::DensityType)concrete.Type);
+   Float64 lambda = GetXBeamLambda(pierID);
+   return lambda*fr;
+}
+
+Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID)
+{
+   GET_IFACE(IXBRProject,pProject);
+   const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
+
+   Float64 lambda = lrfdConcreteUtil::ComputeConcreteDensityModificationFactor((matConcrete::Type)concrete.Type,concrete.StrengthDensity,concrete.bHasFct,concrete.Fct,concrete.Fc);
+   return lambda;
 }
 
 Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx)
@@ -1002,7 +1013,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    bool hasFct = false;
    Float64 Fct = 0.0;
 
-   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (matConcrete::Type)type, fc, hasFct, Fct);
+   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (matConcrete::Type)type, fc, hasFct, Fct, concrete.StrengthDensity );
 
 
    // Get distances from section cut to ends of bar

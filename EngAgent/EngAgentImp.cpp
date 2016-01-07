@@ -758,6 +758,7 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    Float64 theta = M_PI/4; // 45 deg
 
    GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IXBRMaterial,pMaterial);
 
    matRebar::Type type;
    matRebar::Grade grade;
@@ -780,7 +781,8 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    Float64 fc = pProject->GetConcrete(pierID).Fc;
    Float64 bv = pProject->GetXBeamWidth(pierID);
    Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
-   Float64 Vc_us = 0.0316*beta*sqrt(fc_us)*bv*dv;
+   Float64 lambda = pMaterial->GetXBeamLambda(pierID);
+   Float64 Vc_us = 0.0316*lambda*beta*sqrt(fc_us)*bv*dv;
    Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
    Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
    Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity

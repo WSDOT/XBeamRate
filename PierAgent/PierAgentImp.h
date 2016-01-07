@@ -145,6 +145,7 @@ public:
    virtual Float64 GetXBeamFc(PierIDType pierID);
    virtual Float64 GetXBeamEc(PierIDType pierID);
    virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID);
+   virtual Float64 GetXBeamLambda(PierIDType pierID);
    virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx);
    virtual void GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu);
 
