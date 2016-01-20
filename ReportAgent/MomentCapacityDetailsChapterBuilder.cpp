@@ -72,7 +72,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   ColumnIndexType nColumns = 9;
+   ColumnIndexType nColumns = 10;
    if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
    {
       *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
@@ -102,6 +102,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
       }
       (*pTable)(0,col++) << Sub2(symbol(beta),_T("1"));
       (*pTable)(0,col++) << COLHDR(_T("c"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pTable)(0,col++) << COLHDR(_T("a"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << COLHDR(_T("b"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << _T("Reinforcement");
       (*pTable)(0,col++) << symbol(phi);
@@ -143,6 +144,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
          }
          (*pTable)(row,col++) << beta1;
          (*pTable)(row,col++) << dim.SetValue(c);
+         (*pTable)(row,col++) << dim.SetValue(beta1*c);
          (*pTable)(row,col++) << dim.SetValue(bw);
 
          rptRcTable* pReinfTable = pgsReportStyleHolder::CreateDefaultTable(4);
