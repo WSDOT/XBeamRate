@@ -1679,16 +1679,29 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          Float64 sh[2];
          Float64 re[2];
          Float64 ps[2];
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDC,girderKey,bat,resultsType,&dc[0],&dc[1]);
-         pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcDWRating,girderKey,bat,resultsType,&dw[0],&dw[1]);
+
+         ReactionLocation location[2];
+         location[0].PierIdx   = pierIdx;
+         location[0].GirderKey = girderKey;
+         location[0].Face      = rftAhead;
+
+         location[1].PierIdx   = pierIdx;
+         location[1].GirderKey = girderKey;
+         location[1].Face      = rftBack;
 
          GET_IFACE(ILossParameters,pLossParams);
-         if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+         for ( int i = 0; i < 2; i++ )
          {
-            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcCR,girderKey,bat,resultsType,&cr[0],&cr[1]);
-            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcSH,girderKey,bat,resultsType,&sh[0],&sh[1]);
-            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcRE,girderKey,bat,resultsType,&re[0],&re[1]);
-            pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,lcPS,girderKey,bat,resultsType,&ps[0],&ps[1]);
+            dc[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDC,bat,resultsType);
+            dw[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDWRating,bat,resultsType);
+
+            if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+            {
+               cr[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcCR,bat,resultsType);
+               sh[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcSH,bat,resultsType);
+               re[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcRE,bat,resultsType);
+               ps[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcPS,bat,resultsType);
+            }
          }
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
