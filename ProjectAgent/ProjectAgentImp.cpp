@@ -1164,7 +1164,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          {
             PierIDType pierID = pierData.GetID();
             ATLASSERT(pierID != INVALID_ID);
-            m_PierData.insert(std::make_pair(pierID,pierData));
+            xbrPierData& myPierData = GetPrivatePierData(pierID);
+            myPierData = pierData;
          }
       }
    }
