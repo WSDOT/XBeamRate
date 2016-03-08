@@ -47,4 +47,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
    virtual BOOL OnInitDialog();
+   afx_msg void OnBnClickedDesignRating();
+   afx_msg void OnBnClickedLegalRating();
+   afx_msg void OnBnClickedPermitRating();
 };

@@ -76,6 +76,9 @@ void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CRatingOptionsPage, CPropertyPage)
 	ON_COMMAND(ID_HELP, OnHelp)
+   ON_BN_CLICKED(IDC_DESIGN_RATING, &CRatingOptionsPage::OnBnClickedDesignRating)
+   ON_BN_CLICKED(IDC_LEGAL_RATING, &CRatingOptionsPage::OnBnClickedLegalRating)
+   ON_BN_CLICKED(IDC_PERMIT_RATING, &CRatingOptionsPage::OnBnClickedPermitRating)
 END_MESSAGE_MAP()
 
 
@@ -137,4 +140,30 @@ void CRatingOptionsPage::FillLRFRList()
 void CRatingOptionsPage::OnHelp() 
 {
    ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_GENERAL );
+}
+
+void CRatingOptionsPage::OnBnClickedDesignRating()
+{
+   // TODO: Add your control notification handler code here
+   BOOL bEnable = (IsDlgButtonChecked(IDC_DESIGN_RATING) == BST_CHECKED) ? TRUE : FALSE;
+   GetDlgItem(IDC_DESIGN_SHEAR)->EnableWindow(bEnable);
+}
+
+void CRatingOptionsPage::OnBnClickedLegalRating()
+{
+   // TODO: Add your control notification handler code here
+   BOOL bEnable = (IsDlgButtonChecked(IDC_LEGAL_RATING) == BST_CHECKED) ? TRUE : FALSE;
+   GetDlgItem(IDC_LEGAL_SHEAR)->EnableWindow(bEnable);
+}
+
+void CRatingOptionsPage::OnBnClickedPermitRating()
+{
+   // TODO: Add your control notification handler code here
+   BOOL bEnable = (IsDlgButtonChecked(IDC_PERMIT_RATING) == BST_CHECKED) ? TRUE : FALSE;
+   GetDlgItem(IDC_PERMIT_SHEAR)->EnableWindow(bEnable);
+   GetDlgItem(IDC_PERMIT_YIELD_STRESS)->EnableWindow(bEnable);
+   GetDlgItem(IDC_ALLOWABLE_STRESS_LABEL)->EnableWindow(bEnable);
+   GetDlgItem(IDC_ALLOWABLE_STRESS)->EnableWindow(bEnable);
+   GetDlgItem(IDC_ALLOWABLE_STRESS_TAG)->EnableWindow(bEnable);
+   GetDlgItem(IDC_PERMIT_FACTORS)->EnableWindow(bEnable);
 }
