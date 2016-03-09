@@ -391,7 +391,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
 
    ATLASSERT(::IsPermitRatingType(ratingType));
 
-   pgsTypes::LimitState ls = ::GetServiceLimitStateType(ratingType);
+   pgsTypes::LimitState ls = (ratingType == pgsTypes::lrPermit_Routine ? pgsTypes::ServiceI_PermitRoutine : pgsTypes::ServiceI_PermitSpecial);
    ATLASSERT(::IsServiceLimitState(ls));
 
    xbrTypes::Stage stage = xbrTypes::Stage2;
