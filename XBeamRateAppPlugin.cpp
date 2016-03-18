@@ -41,6 +41,8 @@
 #include "XBeamRateCommandLineInfo.h"
 #include "XBeamRateCommandLineProcessor.h"
 
+#include <XBeamRateVersionInfoImpl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
 HRESULT CXBeamRateAppPlugin::FinalConstruct()
@@ -64,7 +66,7 @@ void CXBeamRateAppPlugin::GetAppUnitSystem(IAppUnitSystem** ppAppUnitSystem)
 
 BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
 {
-   //AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
    //CXBeamRatePluginApp* pApp = (CXBeamRatePluginApp*)AfxGetApp();
 
    //CAutoRegistry autoReg(GetAppName());
@@ -72,6 +74,8 @@ BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
    //int i = pApp->GetProfileInt(_T("Settings"),_T("Placeholder"),0);
 
    LoadRegistryValues();
+
+   m_DocumentationImpl.Init(GetName());
 
    return TRUE;
 }
@@ -125,6 +129,35 @@ UINT CXBeamRateAppPlugin::GetDocumentResourceID()
 CString CXBeamRateAppPlugin::GetName()
 {
    return CString("XBRate");
+}
+
+CString CXBeamRateAppPlugin::GetDocumentationSetName()
+{
+   return GetName();
+}
+
+CString CXBeamRateAppPlugin::GetDocumentationURL()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   return m_DocumentationImpl.GetDocumentationURL();
+}
+
+CString CXBeamRateAppPlugin::GetDocumentationMapFile()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   return m_DocumentationImpl.GetDocumentationMapFile();
+}
+
+void CXBeamRateAppPlugin::LoadDocumentationMap()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   return m_DocumentationImpl.LoadDocumentationMap();
+}
+
+eafTypes::HelpResult CXBeamRateAppPlugin::GetDocumentLocation(LPCTSTR lpszDocSetName,UINT nID,CString& strURL)
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   return m_DocumentationImpl.GetDocumentLocation(lpszDocSetName,nID,strURL);
 }
 
 

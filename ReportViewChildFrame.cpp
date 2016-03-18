@@ -26,6 +26,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "ReportViewChildFrame.h"
+#include <EAF\EAFDocument.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -66,11 +67,17 @@ BOOL CReportViewChildFrame::Create(LPCTSTR lpszClassName,
 
 BEGIN_MESSAGE_MAP(CReportViewChildFrame, CEAFOutputChildFrame)
 	//{{AFX_MSG_MAP(CReportViewChildFrame)
+	ON_MESSAGE(WM_HELP, OnCommandHelp)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CReportViewChildFrame message handlers
+LRESULT CReportViewChildFrame::OnCommandHelp(WPARAM, LPARAM lParam)
+{
+   EAFHelp( EAFGetDocument()->GetDocumentationSetName(), IDH_REPORT_VIEW );
+   return TRUE;
+}
 
 #ifdef _DEBUG
 void CReportViewChildFrame::AssertValid() const

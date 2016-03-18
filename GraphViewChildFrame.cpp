@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CGraphViewChildFrame, CEAFGraphChildFrame)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
+
 /////////////////////////////////////////////////////////////////////////////
 // CGraphViewChildFrame message handlers
 

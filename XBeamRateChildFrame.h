@@ -83,6 +83,7 @@ protected:
    // Generated message map functions
 	//{{AFX_MSG(CXBeamRateChildFrame)
    afx_msg void OnPierChanged();
+   afx_msg LRESULT OnCommandHelp(WPARAM, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 

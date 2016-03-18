@@ -25,8 +25,7 @@
 
 #include "stdafx.h"
 #include "ProjectPropertiesDlg.h"
-
-//#include "HtmlHelp\HelpTopics.hh"
+#include <EAF\EAFDocument.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,8 +63,8 @@ void CProjectPropertiesDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CProjectPropertiesDlg, CDialog)
 	//{{AFX_MSG_MAP(CProjectPropertiesDlg)
-	ON_COMMAND(ID_HELP, OnHelp)
 	//}}AFX_MSG_MAP
+   ON_BN_CLICKED(ID_HELP, &CProjectPropertiesDlg::OnHelp)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -73,6 +72,5 @@ END_MESSAGE_MAP()
 
 void CProjectPropertiesDlg::OnHelp() 
 {
-#pragma Reminder("UPDATE: Add help topic")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_DIALOG_PROPERTIES );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_PROJECT_PROPERTIES );
 }

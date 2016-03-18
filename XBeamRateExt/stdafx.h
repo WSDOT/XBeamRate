@@ -31,8 +31,10 @@
 
 #include <Units\Units.h>
 #include <EAF\EAFUtilities.h>
+#include <EAF\EAFHelp.h>
 #include <grid\gxall.h>
 
+#include <XBRate.hh>
 
 //#define COMPARE_WITH_FULL_ANALYSIS
 

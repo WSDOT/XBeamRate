@@ -46,7 +46,7 @@
 
 #include "XBeamRateHints.h"
 
-#include "HtmlHelp\HelpTopics.hh"
+#include "XBRate.hh"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
    ON_UPDATE_COMMAND_UI(EAFID_TOGGLE_AUTOCALC,OnUpdateAutoCalc)
    ON_COMMAND(EAFID_AUTOCALC_UPDATENOW, OnUpdateNow)
 	ON_UPDATE_COMMAND_UI(EAFID_AUTOCALC_UPDATENOW, OnUpdateUpdateNow)
+   ON_COMMAND(ID_HELP_FINDER,OnHelpFinder)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -94,6 +95,11 @@ CXBeamRateDoc::CXBeamRateDoc()
 
 CXBeamRateDoc::~CXBeamRateDoc()
 {
+}
+
+void CXBeamRateDoc::OnHelpFinder()
+{
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(),IDH_XBRATE);
 }
 
 // CEAFAutoCalcDocMixin overrides
@@ -287,6 +293,17 @@ void CXBeamRateDoc::SaveDocumentSettings()
    CWinApp* pApp = AfxGetApp();
 
    VERIFY(pApp->WriteProfileString( _T("Settings"),_T("AutoCalc"),m_bAutoCalcEnabled ? _T("On") : _T("Off") ));
+}
+
+CString CXBeamRateDoc::GetDocumentationSetName()
+{
+   return CString(_T("XBRate"));
+}
+
+CString CXBeamRateDoc::GetDocumentationRootLocation()
+{
+   CEAFApp* pApp = EAFGetApp();
+   return pApp->GetDocumentationRootLocation();
 }
 
 void CXBeamRateDoc::ResetUIHints()

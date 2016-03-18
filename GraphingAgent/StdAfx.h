@@ -32,3 +32,5 @@
 #include <GraphManager\GraphManager.h>
 #include <GraphicsLib\GraphicsLib.h>
 #include <PgsExt\GirderLabel.h>
+
+#include <XBRate.hh>

@@ -99,6 +99,9 @@ protected:
    virtual void LoadDocumentSettings();
    virtual void SaveDocumentSettings();
 
+   virtual CString GetDocumentationSetName();
+   virtual CString GetDocumentationRootLocation();
+
 // Generated message map functions
 protected:
 	//{{AFX_MSG(CXBeamRateDoc)
@@ -113,6 +116,7 @@ protected:
    afx_msg void OnUpdateAutoCalc(CCmdUI* pCmdUI);
    afx_msg void OnUpdateNow();
 	afx_msg void OnUpdateUpdateNow(CCmdUI* pCmdUI);
+   afx_msg void OnHelpFinder();
 	DECLARE_MESSAGE_MAP()
 
    // callback IDs for any status callbacks we register

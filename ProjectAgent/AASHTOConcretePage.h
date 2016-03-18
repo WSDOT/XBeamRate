@@ -56,7 +56,6 @@ protected:
 	//{{AFX_MSG(CAASHTOConcretePage)
 	virtual BOOL OnInitDialog();
    virtual BOOL OnSetActive();
-   afx_msg LRESULT OnCommandHelp(WPARAM, LPARAM lParam);
 	afx_msg void OnHelp();
    afx_msg void OnAggSplittingStrengthClicked();
 	//}}AFX_MSG

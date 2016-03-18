@@ -84,6 +84,7 @@ class ATL_NO_VTABLE CXBeamRateAgent :
    //public IAgentPersist,
    public IXBeamRateAgent,
    public IAgentUIIntegration,
+   public IAgentDocumentationIntegration,
    public IEditPierCallback, // not a COM interface
    public IEditLoadRatingOptionsCallback, // not a COM interface
    public IProjectPropertiesEventSink,
@@ -110,6 +111,7 @@ BEGIN_COM_MAP(CXBeamRateAgent)
 	//COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY(IXBeamRateAgent)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
+   COM_INTERFACE_ENTRY(IAgentDocumentationIntegration)
    //COM_INTERFACE_ENTRY(IExtendUIEventSink)
    COM_INTERFACE_ENTRY(IProjectPropertiesEventSink)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
@@ -163,6 +165,12 @@ public:
 public:
    STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
 
+// IAgentDocumentationIntegration
+public:
+   STDMETHOD(GetDocumentationSetName)(BSTR* pbstrName);
+   STDMETHOD(LoadDocumentationMap)();
+   STDMETHOD(GetDocumentLocation)(UINT nHID,BSTR* pbstrURL);
+
 // IEditPierCallback
 public:
    virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData);
@@ -202,6 +210,9 @@ private:
    CMyCommandTarget m_CommandTarget;
    friend CMyCommandTarget;
    IDType m_BridgePlanViewCallbackID;
+
+   CString GetDocumentationURL();
+   std::map<UINT,CString> m_HelpTopics;
 
    void CreateMenus();
    void RemoveMenus();

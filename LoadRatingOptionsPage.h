@@ -48,5 +48,7 @@ protected:
    void FillAnalysisModeComboBox();
    void FillPermitRatingMethodComboBox();
 
+   afx_msg void OnHelp();
+
 	DECLARE_MESSAGE_MAP()
 };

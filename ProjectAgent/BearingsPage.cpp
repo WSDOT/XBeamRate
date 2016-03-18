@@ -29,9 +29,10 @@
 #include "PierDlg.h"
 
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 #include <MFCTools\CustomDDX.h>
 
-#include "..\HtmlHelp\HelpTopics.hh"
+#include "..\Documentation\XBRate.hh"
 
 #pragma warning(disable:4244)
 
@@ -171,11 +172,6 @@ BOOL CBearingsPage::OnInitDialog()
 
    return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
-}
-
-void CBearingsPage::OnHelp()
-{
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_PERMANENT_LOAD );
 }
 
 void CBearingsPage::OnAddBack()
@@ -391,4 +387,9 @@ void CBearingsPage::FillReactionTypeComboBox(IndexType brgLineIdx)
    {
       pcbReactionType->SetCurSel(0);
    }
+}
+
+void CBearingsPage::OnHelp()
+{
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_PERMANENT_LOAD);
 }

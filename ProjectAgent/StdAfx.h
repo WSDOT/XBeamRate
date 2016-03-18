@@ -32,9 +32,12 @@
 
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFResources.h>
+#include <EAF\EAFHelp.h>
 
 #include <MFCTools\MFCTools.h>
 
 #include <grid\gxall.h>
 #include <afxwin.h>
 #include <afxdlgs.h>
+
+#include <XBRate.hh>

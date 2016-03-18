@@ -30,10 +30,11 @@
 #include "PierDlg.h"
 
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 #include <MFCTools\CustomDDX.h>
 
 #include <PgsExt\GirderLabel.h>
-#include "..\HtmlHelp\HelpTopics.hh"
+#include "..\Documentation\XBRate.hh"
 
 // CPierLayoutPage dialog
 
@@ -269,7 +270,7 @@ void CPierLayoutPage::OnHeightMeasureChanged()
 
 void CPierLayoutPage::OnHelp() 
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_SUBSTRUCTURE );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_SUBSTRUCTURE);
 }
 
 void CPierLayoutPage::OnAddColumn()

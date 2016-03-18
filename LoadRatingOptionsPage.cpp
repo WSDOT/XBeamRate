@@ -29,6 +29,7 @@
 
 #include <MFCTools\CustomDDX.h>
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 
 // CLoadRatingOptionsPage dialog
 
@@ -37,7 +38,7 @@ IMPLEMENT_DYNAMIC(CLoadRatingOptionsPage, CPropertyPage)
 CLoadRatingOptionsPage::CLoadRatingOptionsPage()
 	: CPropertyPage(CLoadRatingOptionsPage::IDD)
 {
-
+   m_psp.dwFlags |= PSP_HASHELP;
 }
 
 CLoadRatingOptionsPage::~CLoadRatingOptionsPage()
@@ -64,6 +65,7 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CLoadRatingOptionsPage, CPropertyPage)
+   ON_BN_CLICKED(ID_HELP,OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -78,6 +80,11 @@ BOOL CLoadRatingOptionsPage::OnInitDialog()
 
    return TRUE;  // return TRUE unless you set the focus to a control
    // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CLoadRatingOptionsPage::OnHelp()
+{
+   EAFHelp(_T("XBRate"), IDH_PGS_RATING_OPTIONS);
 }
 
 void CLoadRatingOptionsPage::FillAnalysisModeComboBox()

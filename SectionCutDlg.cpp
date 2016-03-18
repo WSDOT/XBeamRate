@@ -28,8 +28,9 @@
 #include "SectionCutDlg.h"
 #include <ostream>
 
-//#include "HtmlHelp\HelpTopics.hh"
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
+
 #include <IFace\PointOfInterest.h>
 #include <IFace\Pier.h>
 
@@ -103,8 +104,7 @@ BOOL CSectionCutDlg::OnInitDialog()
 
 void CSectionCutDlg::OnHelp() 
 {
-#pragma Reminder("IMPLEMENT - OnHelp")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_DIALOG_SECTIONCUT );
+   EAFHelp( EAFGetDocument()->GetDocumentationSetName(), IDH_SECTION_CUT );
 }
 
 xbrPointOfInterest CSectionCutDlg::GetPOI()

@@ -94,7 +94,7 @@ BOOL CXBeamRateReportView::PreTranslateMessage(MSG* pMsg)
    //{
    //   if (pMsg->wParam == VK_F1)
    //   {
-   //      ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_REPORT_VIEW );
+   //      EAFHelp( EAFGetDocument()->GetDocumentationSetName(), IDH_REPORT_VIEW );
    //      return TRUE;
    //   }
    //}

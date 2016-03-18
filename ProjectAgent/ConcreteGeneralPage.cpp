@@ -36,6 +36,8 @@
 
 #include <PGSuperColors.h>
 
+#include <EAF\EAFDocument.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -176,8 +178,7 @@ BOOL CConcreteGeneralPage::OnInitDialog()
 
 void CConcreteGeneralPage::OnHelp() 
 {
-#pragma Reminder("UPDATE: need help topic")
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_CONCRETE_DETAILS );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_CONCRETE_GENERAL );
 }
 
 void CConcreteGeneralPage::OnUserEc()

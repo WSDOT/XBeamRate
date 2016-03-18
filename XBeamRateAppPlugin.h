@@ -30,6 +30,7 @@
 #include <EAF\EAFAppPlugIn.h>
 #include <WBFLUnitServer.h>
 #include <EAF\EAFCustomReport.h>
+#include <EAF\EAFAppPluginDocumentationImpl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateAppPlugin
@@ -71,6 +72,11 @@ public:
    virtual HMENU GetSharedMenuHandle();
    virtual UINT GetDocumentResourceID();
    virtual CString GetName();
+   virtual CString GetDocumentationSetName();
+   virtual CString GetDocumentationURL();
+   virtual CString GetDocumentationMapFile();
+   virtual void LoadDocumentationMap();
+   virtual eafTypes::HelpResult GetDocumentLocation(LPCTSTR lpszDocSetName,UINT nID,CString& strURL);
 
    virtual void LoadCustomReportInformation();
    virtual void SaveCustomReportInformation();
@@ -85,6 +91,8 @@ private:
 
    void LoadRegistryValues();
    void SaveRegistryValues();
+
+   CEAFAppPluginDocumentationImpl m_DocumentationImpl;
 };
 
 #endif //__PLUGIN_H_

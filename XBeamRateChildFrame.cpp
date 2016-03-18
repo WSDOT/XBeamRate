@@ -38,6 +38,9 @@
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
+#include <EAF\EAFDocument.h>
+
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -79,7 +82,15 @@ BEGIN_MESSAGE_MAP(CXBeamRateChildFrame, CEAFChildFrame)
 	//}}AFX_MSG_MAP
    ON_WM_CREATE()
    ON_CBN_SELCHANGE(IDC_PIERS,OnPierChanged)
+	ON_MESSAGE(WM_HELP, OnCommandHelp)
 END_MESSAGE_MAP()
+
+
+LRESULT CXBeamRateChildFrame::OnCommandHelp(WPARAM, LPARAM lParam)
+{
+   EAFHelp( EAFGetDocument()->GetDocumentationSetName(), IDH_PIER_VIEW );
+   return TRUE;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateChildFrame message handlers

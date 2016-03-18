@@ -36,5 +36,8 @@ extern CComModule _Module;
 
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFResources.h>
+#include <EAF\EAFHelp.h>
 
 #include <Math\Math.h>
+
+#include <XBRate.hh>

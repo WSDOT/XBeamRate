@@ -29,9 +29,10 @@
 #include "PierDlg.h"
 
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 #include <MFCTools\CustomDDX.h>
 
-#include "..\HtmlHelp\HelpTopics.hh"
+#include "..\Documentation\XBRate.hh"
 
 
 // CSuperstructureLayoutPage dialog
@@ -197,5 +198,5 @@ void CSuperstructureLayoutPage::OnPierTypeChanged()
 
 void CSuperstructureLayoutPage::OnHelp()
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_SUPERSTRUCTURE );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_SUPERSTRUCTURE);
 }

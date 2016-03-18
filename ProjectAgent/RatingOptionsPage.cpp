@@ -30,7 +30,9 @@
 
 #include <txnEditOptions.h>
 
-#include "..\HtmlHelp\HelpTopics.hh"
+#include <EAF\EAFDocument.h>
+
+#include "..\Documentation\XBRate.hh"
 
 
 // CRatingOptionsPage dialog
@@ -139,7 +141,7 @@ void CRatingOptionsPage::FillLRFRList()
 
 void CRatingOptionsPage::OnHelp() 
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_GENERAL );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_OPTIONS_GENERAL);
 }
 
 void CRatingOptionsPage::OnBnClickedDesignRating()

@@ -32,6 +32,7 @@
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>
+#include <EAF\EAFDocument.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
@@ -155,6 +156,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
    GET_IFACE(IGraphManager,pGraphMgr);
 
    CXBRAnalysisResultsGraphBuilder* pAnalysisResultsGraphBuilder = new CXBRAnalysisResultsGraphBuilder;
+   pAnalysisResultsGraphBuilder->InitDocumentation(_T("XBRate"),IDH_ANALYSIS_RESULTS);
    
    if ( IsPGSExtension() )
    {
@@ -167,6 +169,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 
 
    CXBRLiveLoadGraphBuilder* pLiveLoadGraphBuilder = new CXBRLiveLoadGraphBuilder;
+   pLiveLoadGraphBuilder->InitDocumentation(_T("XBRate"),IDH_LIVE_LOAD_RESULTS);
    
    if ( IsPGSExtension() )
    {

@@ -38,9 +38,9 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\BridgeDescription2.h>
 
-#include "XBeamRateReportSpecification.h"
+#include <EAF\EAFDocument.h>
 
-//#include "HtmlHelp\HelpTopics.hh"
+#include "XBeamRateReportSpecification.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -210,9 +210,7 @@ BOOL CPierReportDlg::OnInitDialog()
 
 void CPierReportDlg::OnHelp() 
 {
-   //AFX_MANAGE_STATE(AfxGetAppModuleState());
-   //::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_DIALOG_REPORT );
-#pragma Reminder("UPDATE: Add Help Topic")
+   EAFHelp( EAFGetDocument()->GetDocumentationSetName(), IDH_DIALOG_REPORT );
 }
 
 void CPierReportDlg::ClearChapterCheckMarks()

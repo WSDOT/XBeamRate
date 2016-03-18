@@ -62,6 +62,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CReportViewChildFrame)
+   afx_msg LRESULT OnCommandHelp(WPARAM, LPARAM lParam);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

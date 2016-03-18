@@ -28,7 +28,8 @@
 #include "LiveLoadReactionsPage.h"
 #include "PierDlg.h"
 #include <XBeamRateExt\XBeamRateUtilities.h>
-#include "..\HtmlHelp\HelpTopics.hh"
+#include <EAF\EAFDocument.h>
+#include "..\Documentation\XBRate.hh"
 
 void DDX_LiveLoadReactionsGrid(CDataExchange* pDX,CLiveLoadReactionGrid& grid,txnLiveLoadReactions& llData)
 {
@@ -187,5 +188,5 @@ void CLiveLoadReactionsPage::OnPermitSpecialRemove()
 
 void CLiveLoadReactionsPage::OnHelp()
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_LIVE_LOAD );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_LIVE_LOAD);
 }

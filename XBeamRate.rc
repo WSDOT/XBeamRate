@@ -162,6 +162,7 @@ BEGIN
     POPUP "&Help"
     BEGIN
         MENUITEM "&Help Topics",                ID_HELP_FINDER
+        MENUITEM "Help Source",                 EAFID_HELP_SOURCE
         MENUITEM SEPARATOR
         MENUITEM "&About BridgeLink...",        ID_APP_ABOUT
         MENUITEM "About &XBRate...",            ID_HELP_ABOUT

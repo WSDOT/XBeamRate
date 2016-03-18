@@ -40,9 +40,8 @@
 #include <PgsExt\ConcreteDetailsDlg.h>
 
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 #include <MFCTools\CustomDDX.h>
-
-#include "..\HtmlHelp\HelpTopics.hh"
 
 
 void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,xbrLongitudinalRebarData& rebars)
@@ -489,7 +488,12 @@ void CReinforcementPage::OnConditionFactorTypeChanged()
 
 void CReinforcementPage::OnHelp()
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   CString strHelpFile(AfxGetApp()->m_pszHelpFilePath);
-   ::HtmlHelp( *this, strHelpFile, HH_HELP_CONTEXT, IDH_MATERIAL);
+   if ( IsStandAlone() )
+   {
+      EAFHelp( _T("XBRate"), IDH_MATERIAL);
+   }
+   else
+   {
+      EAFHelp( _T("XBRate"), IDH_PGS_MATERIAL);
+   }
 }

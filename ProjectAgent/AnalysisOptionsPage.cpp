@@ -29,8 +29,9 @@
 #include "OptionsDlg.h"
 
 #include <EAF\EAFDisplayUnits.h>
+#include <EAF\EAFDocument.h>
 
-#include "..\HtmlHelp\HelpTopics.hh"
+#include "..\Documentation\XBRate.hh"
 
 // CAnalysisOptionsPage dialog
 
@@ -72,5 +73,5 @@ END_MESSAGE_MAP()
 
 void CAnalysisOptionsPage::OnHelp() 
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_ANALYSIS );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_OPTIONS_ANALYSIS);
 }

@@ -25,9 +25,11 @@
 #include "CapacityOptionsPage.h"
 #include "OptionsDlg.h"
 
+#include <EAF\EAFDocument.h>
+
 #include <txnEditOptions.h>
 
-#include "..\HtmlHelp\HelpTopics.hh"
+#include "..\Documentation\XBRate.hh"
 
 // CCapacityOptionsPage dialog
 
@@ -63,5 +65,5 @@ END_MESSAGE_MAP()
 
 void CCapacityOptionsPage::OnHelp() 
 {
-   ::HtmlHelp( *this, AfxGetApp()->m_pszHelpFilePath, HH_HELP_CONTEXT, IDH_OPTIONS_CAPACITY );
+   EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_OPTIONS_CAPACITY);
 }
