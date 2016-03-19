@@ -25,7 +25,7 @@ To export several models at once
 1. Select *File > Export > Piers to XBRate*
 2. Select one or more piers to be exported ![](ExportPiers.png)
 3. Press [OK]
-4. For each pier in the list, you will be prompted for an XBRate project file name. Enter a file name, or use the default, and press the [Save] button
-5. You will be notified when the export process is complete. Press the [OK] button
+4. For each pier in the list, you will be prompted for an XBRate project file name. Enter a file name, or use the default, and press [Save]
+5. You will be notified when the export process is complete. Press [OK]
 
 

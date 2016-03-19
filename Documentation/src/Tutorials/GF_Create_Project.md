@@ -12,7 +12,8 @@ The first thing we have to do is start the BridgeLink application.
 ## Create a new project
 To create an XBRate project:
 1. Select *File > New*. This brings up the New Project window. ![](NewProject.png)
-2. Select the XBRate project type and the XBRate project template. Press the [OK] button.
+2. Select the XBRate project type and the XBRate project template. 
+3. Press [OK].
 
 
 After the project is created, you are presented with the Pier View. You can see the default pier geometry isn't what we need.

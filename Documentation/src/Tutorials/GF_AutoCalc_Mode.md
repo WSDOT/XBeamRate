@@ -27,7 +27,7 @@ Now that the AutoCalc mode has been turned off, the graphs and reports will not 
 1. Before we can see the warning label, we need to edit the pier model. Select *Edit > Pier*
 2. Select the Permanent Loads page
 3. Change the DC loads to 400 kips
-4. Press the [OK] button.
+4. Press [OK].
 
 
 Notice the warning labels that frame the graphs and reports.

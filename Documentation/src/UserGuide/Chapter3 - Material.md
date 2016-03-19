@@ -2,8 +2,7 @@ Materials and Reinforcement {#chapter3_material}
 ==============================================
 
 ## PGSuper/PGSplice Materials and Reinforcement
-When integrated with PGSuper/PGSplice, the superstructure material is take to be that of the deck and diaphragms. The substructure concrete material defined on the
-Layout tab of the Pier Details window as previously described.
+When integrated with PGSuper/PGSplice, the superstructure material is taken to be that of the deck and diaphragms. The substructure concrete material defined on the Layout tab of the Pier Details window as previously described.
 
 The reinforcement is defined on the XBeam tab of the Pier Details windows. The XBeam tab is only shown in PGSuper/PGSplice if the XBRate extension is being used.
 ![](XBeam.png)

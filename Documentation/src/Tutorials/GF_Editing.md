@@ -80,7 +80,7 @@ The pier cap dimensions describe the cap beam (also called the cross beam).
 The column layout dimensions describe the type, size, and location of the columns. The base of a column can be defined by either its height (measured from the bottom of the cap beam) or by its bottom elevation.
 
 
-> NOTE: When the base of a column is described by its bottom elevation its height is computed using the Deck Elevation at Alignment, crown slopes, and superstructure and substructure dimensions. Refer to the [Technical Guide[(@ref technical_guide) for details.
+> NOTE: When the base of a column is described by its bottom elevation its height is computed using the Deck Elevation at Alignment, crown slopes, and superstructure and substructure dimensions. Refer to the [Technical Guide](@ref technical_guide) for details.
 
 
 The individual columns are defined in the column grid. Use the [+] and [-] buttons to add and remove columns from the grid.

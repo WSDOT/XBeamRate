@@ -21,7 +21,7 @@ XBRate extends the user interface of PGSuper/PGSplice by adding the XBeam tab to
 
 1. Select the XBeam tab
 2. Enter the reinforcement type, condition factor, and enter the longitudinal reinforcement and stirrups.
-3. Press the [OK] button.
+3. Press [OK].
 
 
 You probably noticed that the pier definition and XBeam input are very similar to XBRate in stand alone mode.

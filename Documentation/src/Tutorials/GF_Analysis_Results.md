@@ -3,7 +3,7 @@ Review Analysis Results {#analysis_results}
 All of the load rating analysis results are available in the Load Rating report. In addition to the governing rating factors, the Load Rating report provides the details of how the rating factors where computed, what loadings where used, how moment and shear capacities where computed and more. There is sufficient detail in the Load Rating report to verify any result.
 
 
-Graphical representations of the analysis results are also available in the Analysis Results graph. Select View > Graphs > Analysis Results.
+Graphical representations of the analysis results are also available in the Analysis Results graph. Select *View > Graphs > Analysis Results*.
 
 ![](AnalysisResults.png)
  
