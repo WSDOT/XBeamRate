@@ -896,7 +896,7 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
       // to capacity. but the rebar are measured from the top down of the entire
       // section. deduct the height of the upper cross beam to get the depth of
       // the rebar relative to the top of the lower cross beam
-      if ( connectionType != xbrTypes::pctIntegral )
+      if ( connectionType != xbrTypes::pctIntegral && stage == xbrTypes::Stage2 )
       {
          Ybar -= d;
       }
