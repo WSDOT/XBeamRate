@@ -75,7 +75,7 @@ BOOL CXBeamRateAppPlugin::Init(CEAFApp* pParent)
 
    LoadRegistryValues();
 
-   m_DocumentationImpl.Init(GetName());
+   m_DocumentationImpl.Init(this);
 
    return TRUE;
 }
