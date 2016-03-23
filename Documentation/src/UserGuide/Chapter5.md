@@ -19,16 +19,16 @@ Select *View > Reports > Load Rating Report*
 ## Graphs
 XBRate has two graphs; Analysis Results and Live Load Results. The Analysis Results graph displays shear and moment diagrams for the various loads and limit states as well as nominal capacities. The Live Load Results graph displays shear and moment diagrams for the controlling live load cases as well as diagrams for specific live load cases including a graphical representation of the live load arrangement.
 
+### Creating Graphical Results from XBRate
+To create the graphical results from PGSuper/PGSplice:
+Select *View > Graphs > Analysis Results* to create the Analysis Results graph
+Select *View > Graphs > Live Load Results* to create the Live Load Results graph
+
 ### Creating Graphical Results from PGSuper/PGSplice
 To create the graphical results from PGSuper/PGSplice:
 Select *View > Graphs > Cross Beam Analysis Results* to create the Analysis Results graph
 Select *View > Graphs > Cross Beam Live Load Results* to create the Live Load Results graph
 
-
-### Creating Graphical Results from XBRate
-To create the graphical results from PGSuper/PGSplice:
-Select *View > Graphs > Analysis Results* to create the Analysis Results graph
-Select *View > Graphs > Live Load Results* to create the Live Load Results graph
 
 
 ## Other Topics

@@ -1,4 +1,4 @@
-User Guide
+User Guide {#user_guide}
 ============
 
 This User Guide will give you an in-depth look at the XBRate software. If you are a first time user, we suggest a tour of XBRate by going through the [tutorials](@ref tutorials).

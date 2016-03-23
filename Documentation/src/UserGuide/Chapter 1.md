@@ -20,18 +20,3 @@ grid.
 
 
 Grid rows may be selected by clicking on the row header in the left-most column.
-
-## Choosing Commands
-There are several ways of choosing commands in XBRate. All commands are available from the Main Menu at the top of the main window. Frequently-used commands are accessible
-from the toolbars. All commands have keyboard alternatives, some of them also have keyboard shortcuts. Most items found in the various views are context-sensitive whereby
-a right mouse button click will access a context menu with item specific commands.
-
-## Menus
-
-## Toolbars
-
-## Context Menus
-Context menus provide a subset of XBRate commands. The subset of commands is defined by the context in which you are working.
-
-
-Right click the mouse to activate context menus.

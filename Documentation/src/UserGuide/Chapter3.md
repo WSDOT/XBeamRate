@@ -16,6 +16,16 @@ Expansion | Used when the superstructure does not have a moment connection acros
 The cross beam is at the interface between the substructure and superstructure of the bridge.  For our purposes, we will consider everything above the top of the cross
 beam as superstructure, including continuous hinge and integral pier diaphragms.
 
+
+## Pier modeled in XBRate
+XBRate models a single pier, independent of the bridge.
+To model a pier:
+1. Select *Edit > Pier* to open the pier editing window
+2. Enter the pier defintion on the various tabs
+3. Press [OK]
+![](EditPier.png)
+
+
 ## Pier modeled in PGSuper/PGSplice
 Piers are modeled in PGSuper/PGSplice as either idealized supports or physical pier models. Idealized supports are customary fixed, pinned, and roller supports and define
 the longitudinal boundary conditions for the bridge superstructure. Idealized supports lack sufficient detail to be used for cross beam load rating.
@@ -27,17 +37,9 @@ load rating a cross beam. XBRate extends PGSuper/PGSplice by adding user interfa
 
 To model a physical pier in PGSuper/PGSplice:
 1. Select *Edit > Abutment/Pier* ![](SelectPier.png)
-2. Select a pier to edit from the dropdown list and press the [OK] button
+2. Select a pier to edit from the dropdown list and press [OK]
 3. Select the Layout Tab ![](PierLayout.png)
 4. Set the Pier Model Type to Physical
-
-## Pier modeled in XBRate
-XBRate models a single pier, independent of the bridge.
-To model a pier:
-1. Select *Edit > Pier* to open the pier editing window
-2. Enter the pier defintion on the various tabs
-3. Press [OK]
-![](EditPier.png)
 
 ## Other Topics
 @subpage chapter3_superstructure

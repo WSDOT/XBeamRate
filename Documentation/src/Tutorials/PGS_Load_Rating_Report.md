@@ -4,7 +4,7 @@ The load rating reports are created are just like any other report in PGSuper/PG
 
 
 1. Select *View > Reports > Cross Beam Load Rating Report*
-2. Select the subject pier in the Report Options window ![](PGSRatingOptions.png)
+2. Select the subject pier in the Report Options window ![](PGSReportOptions.png)
 3. Press [OK]
 
 

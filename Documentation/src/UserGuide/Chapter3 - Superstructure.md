@@ -6,45 +6,6 @@ locations the pier with respect to the alignment, defines roadway surface geomet
 
 > NOTE: Even though the girder arrangement and bearing locations are part of the superstructure, the location of bearings and associated reactions are defined with the [Permanent Loads](@ref chapter3_permanent_loads).
 
-## PGSuper/PGSplice Superstructure Definition
-The superstructure definition is extracted from the bridge model with XBRate is integrated into PGSuper/PGSplice. The superstructure definition is derived from the information on the Connections tab of the Pier Details Window.
-![Pier Details Window](PierDetails.png)
-
-### Pier Type
-The pier type is derived from the Boundary Condition as indicated below.
-
-Boundary Condition | Pier Type
--------------------|----------
-Hinge<br>Roller | Expansion
-Continuous Before Deck Placement<br>Continuous After Deck Placement<br>Continuous Closure Joint<br>Continuous Segment | Continuous
-Integral Before Deck Placement<br> Integral After Deck Placement<br>Integral Before Deck Placement - Hinged Back/Ahead<br>Integral After Deck Placement - Hinged Back/Ahead<br> Integral Closure Joint<br> Integral Segment | Integral
-
-### Roadway Layout
-The roadway layout is derived from the bridge and roadway geometry
-
-### Superstructure Diaphragm
-The dimensions of the superstructure diaphragm is taken from the Diaphragm properties.  The width of the diaphragm is take to be the sum of the back and ahead width. The
-height of the diaphragm is taken to be the greater of the back and ahead heights.
-
-
-If the keyword "Compute" is used for the diaphragm dimensions, the diaphragm dimensions are computed based on the Girder Connection Properties and the bridge geometry at
-the pier.
-
-
-The height of the diaphragm is the distance from the bottom of the deck to the bottom of the tallest girder at the pier. It is computed as the height of the tallest girder
-at the pier + slab offset ("A" dimension) - gross slab thickness. 
-
-
-The width of the diaphragm one each side of the pier is computed as:
-
-Pier Type | Diaphragm Width
---------- |-----------------
-Expansion | Support Width
-Continuous | Bearing Offset - 0.5(Support Width)
-Integral | Bearing Offset + 0.5(Support Width)
-
-> NOTE: If the assumed pier dimensions don't accurately reflect your pier model, you can export the pier from PGSuper/PGSplice and edit the parameters directly in XBRate. See [Explorting Pier Models](@ref chapter3_exporting_models) for details.
-
 ## XBRate Superstructure Definition
 When XBrate is being used as a stand alone application, the superstructure definition must be entered explicitly.
 ![](EditPierFull.png)
@@ -92,3 +53,42 @@ The transverse dimensions are measured normal to the plane of the pier. They des
 of the deck slab (TS).
 
 
+
+## PGSuper/PGSplice Superstructure Definition
+The superstructure definition is extracted from the bridge model with XBRate is integrated into PGSuper/PGSplice. The superstructure definition is derived from the information on the Connections tab of the Pier Details Window.
+![Pier Details Window](PierDetails.png)
+
+### Pier Type
+The pier type is derived from the Boundary Condition as indicated below.
+
+Boundary Condition | Pier Type
+-------------------|----------
+Hinge<br>Roller | Expansion
+Continuous Before Deck Placement<br>Continuous After Deck Placement<br>Continuous Closure Joint<br>Continuous Segment | Continuous
+Integral Before Deck Placement<br> Integral After Deck Placement<br>Integral Before Deck Placement - Hinged Back/Ahead<br>Integral After Deck Placement - Hinged Back/Ahead<br> Integral Closure Joint<br> Integral Segment | Integral
+
+### Roadway Layout
+The roadway layout is derived from the bridge and roadway geometry
+
+### Superstructure Diaphragm
+The dimensions of the superstructure diaphragm is taken from the Diaphragm properties.  The width of the diaphragm is take to be the sum of the back and ahead width. The
+height of the diaphragm is taken to be the greater of the back and ahead heights.
+
+
+If the keyword "Compute" is used for the diaphragm dimensions, the diaphragm dimensions are computed based on the Girder Connection Properties and the bridge geometry at
+the pier.
+
+
+The height of the diaphragm is the distance from the bottom of the deck to the bottom of the tallest girder at the pier. It is computed as the height of the tallest girder
+at the pier + slab offset ("A" dimension) - gross slab thickness. 
+
+
+The width of the diaphragm one each side of the pier is computed as:
+
+Pier Type | Diaphragm Width
+--------- |-----------------
+Expansion | Support Width
+Continuous | Bearing Offset - 0.5(Support Width)
+Integral | Bearing Offset + 0.5(Support Width)
+
+> NOTE: If the assumed pier dimensions don't accurately reflect your pier model, you can export the pier from PGSuper/PGSplice and edit the parameters directly in XBRate. See [Explorting Pier Models](@ref chapter3_exporting_models) for details.

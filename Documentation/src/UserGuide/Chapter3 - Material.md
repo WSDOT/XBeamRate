@@ -1,22 +1,17 @@
 Materials and Reinforcement {#chapter3_material}
 ==============================================
-
-## PGSuper/PGSplice Materials and Reinforcement
-When integrated with PGSuper/PGSplice, the superstructure material is taken to be that of the deck and diaphragms. The substructure concrete material defined on the Layout tab of the Pier Details window as previously described.
-
-The reinforcement is defined on the XBeam tab of the Pier Details windows. The XBeam tab is only shown in PGSuper/PGSplice if the XBRate extension is being used.
-![](XBeam.png)
  
+## XBRate Materials and Reinforcement
 
-## Material Properties
+### Material Properties
 The material properties for the reinforcing steel is defined by selecting an option from the drop down list.
 
 
-## Condition Factor
+### Condition Factor
 Enter the condition of the cross beam by selecting an option from the drop down list.
 
 
-## Longitudinal Reinforcement
+### Longitudinal Reinforcement
 Multiple layers of longitudinal reinforcement can be defined for the cross beam. For each row enter the following parameters:
 
 
@@ -34,7 +29,7 @@ Left Hook | Indicates if the left end of the reinforcement is hooked. If hooked,
 Right Hook | Indicates if the right end of the reinforcement is hooked. If hooked, it is considered to be fully developed at its right end
 
 
-## Cross Beam\\Lower Cross Beam Stirrups
+### Cross Beam\\Lower Cross Beam Stirrups
 Defines the stirrups in the substructure portion of the cross beam as a sequence of zones. 
 
 
@@ -52,9 +47,16 @@ Spacing | Spacing of the bars within the zone
 The exact arrangement of reinforcement isn't that important. XBRate computes Av/S for each zone as (Abar)*(# Legs)/S and uses this value over the entire zone length.
 
 
-## Full Depth Stirrups
+### Full Depth Stirrups
 Defines the stirrups that are anchored in the substructure portion of the cross beam and are extended into the superstructure diaphragm. This input is only applicable
 to Integral piers.
 
 
 The input is the same as described above.
+
+## PGSuper/PGSplice Materials and Reinforcement
+When integrated with PGSuper/PGSplice, the superstructure material is taken to be that of the deck and diaphragms. The substructure concrete material defined on the Layout tab of the Pier Details window as previously described.
+
+
+The reinforcement is defined on the XBeam tab of the Pier Details windows. The XBeam tab is only shown in PGSuper/PGSplice if the XBRate extension is being used.
+![](XBeam.png)
