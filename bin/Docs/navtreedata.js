@@ -5,7 +5,7 @@ var NAVTREE =
     [ "License Agreement", "license.html", null ],
     [ "Technical Guide", "technical_guide.html", "technical_guide" ],
     [ "Tutorials", "tutorials.html", "tutorials" ],
-    [ "User Guide", "md_src_UserGuide_UserGuide.html", "md_src_UserGuide_UserGuide" ]
+    [ "User Guide", "user_guide.html", "user_guide" ]
   ] ]
 ];
 

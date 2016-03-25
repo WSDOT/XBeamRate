@@ -57,7 +57,33 @@ $(document).ready(function(){initNavTree('appendix_a_pgs_rating_options.html',''
 <div class="title">PGSuper/PGSplice Rating Options </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>XBRate adds a tab titled XBeam to the Load Rating Options window in PGSuper and PGSplice. Load rating options specific to cross beams are defined on this tab.</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>When PGSuper is in Envelope Mode, use </td><td>Select the analysis model to use for pier reactions when the Structural Analysis Method in PGSuper is set to "Envelope of Simple Span and Simple made Continuous Analysis". <table class="doxtable">
+<tr>
+<th>Item</th><th>Description</th></tr>
+<tr>
+<td>Simple</td><td>Reactions are based on simple span analysis</td></tr>
+<tr>
+<td>Continuous</td><td>Reactions are based on simple spans made continuous analysis</td></tr>
+<tr>
+<td>Envelope</td><td>Reactions are the greater of thos from simple span and a simple spans made continuous analysis</td></tr>
+</table>
+</td></tr>
+<tr>
+<td>Compute permit rating factors using </td><td>Select the method for computing permit rating factors </td></tr>
+<tr>
+<td>Maximum Live Load Step Size </td><td>Enter the maximum live load step size </td></tr>
+<tr>
+<td>Maximum Number of Lanes </td><td>Enter the maximum number of lanes to be considered in the analysis. Enter the keyword ALL to analyze for all lanes. </td></tr>
+</table>
+<blockquote class="doxtable">
+<p>NOTE: See Load Rating Options, <a class="el" href="appendix_a_load_rating_options_analysis.html">Analysis</a> tab, for additional information on live load step size and number of lanes.</p>
+</blockquote>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

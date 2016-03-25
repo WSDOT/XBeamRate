@@ -57,7 +57,24 @@ $(document).ready(function(){initNavTree('appendix_a_concrete_general.html','');
 <div class="title">General </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>General information about the concrete model is defined on this tab.</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Type </td><td>Use the drop down list to select the concrte type. </td></tr>
+<tr>
+<td>Strength - f'c </td><td>Enter the concrete strength </td></tr>
+<tr>
+<td>Unit Weight (used to compute Ec) </td><td>Enter the unit weight of the plain concrete. This value is used when computing the modulus of elasticity. </td></tr>
+<tr>
+<td>Unit Weight with Reinforcement </td><td>Enter the unit weight of the concrete including reinforcement. This value is used when computing dead load. </td></tr>
+<tr>
+<td>Mod. Elasticity, Ec </td><td>When checked, enter the modulus of elasticity, otherwise the modulus of elasticity is computed using the AASHTO LRFD equations. </td></tr>
+<tr>
+<td>Max. Aggregate Size </td><td>Enter the maximum aggregate size used in the concrete mix. This parameter is not used by XBRate but is included to be consistent with the other applications in the BridgeLink suite. </td></tr>
+</table>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

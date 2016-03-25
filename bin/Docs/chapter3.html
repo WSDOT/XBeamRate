@@ -70,21 +70,6 @@ $(document).ready(function(){initNavTree('chapter3.html','');});
 <td>Expansion </td><td>Used when the superstructure does not have a moment connection across the pier or with the substructure. </td></tr>
 </table>
 <p>The cross beam is at the interface between the substructure and superstructure of the bridge. For our purposes, we will consider everything above the top of the cross beam as superstructure, including continuous hinge and integral pier diaphragms.</p>
-<h2>Pier modeled in PGSuper/PGSplice</h2>
-<p>Piers are modeled in PGSuper/PGSplice as either idealized supports or physical pier models. Idealized supports are customary fixed, pinned, and roller supports and define the longitudinal boundary conditions for the bridge superstructure. Idealized supports lack sufficient detail to be used for cross beam load rating.</p>
-<p>Physical pier models in PGSuper/PGSplice describe piers including the cross beam and columns. The physical pier model provides almost all the information needed to load rating a cross beam. XBRate extends PGSuper/PGSplice by adding user interface elements to capture the addition information needed for cross beam load rating.</p>
-<p>To model a physical pier in PGSuper/PGSplice:</p><ol type="1">
-<li>Select <em>Edit &gt; Abutment/Pier</em> <div class="image">
-<img src="SelectPier.png" alt="SelectPier.png"/>
-</div>
-</li>
-<li>Select a pier to edit from the dropdown list and press the [OK] button</li>
-<li>Select the Layout Tab <div class="image">
-<img src="PierLayout.png" alt="PierLayout.png"/>
-</div>
-</li>
-<li>Set the Pier Model Type to Physical</li>
-</ol>
 <h2>Pier modeled in XBRate</h2>
 <p>XBRate models a single pier, independent of the bridge. To model a pier:</p><ol type="1">
 <li>Select <em>Edit &gt; Pier</em> to open the pier editing window</li>
@@ -93,6 +78,21 @@ $(document).ready(function(){initNavTree('chapter3.html','');});
 <img src="EditPier.png" alt="EditPier.png"/>
 </div>
 </li>
+</ol>
+<h2>Pier modeled in PGSuper/PGSplice</h2>
+<p>Piers are modeled in PGSuper/PGSplice as either idealized supports or physical pier models. Idealized supports are customary fixed, pinned, and roller supports and define the longitudinal boundary conditions for the bridge superstructure. Idealized supports lack sufficient detail to be used for cross beam load rating.</p>
+<p>Physical pier models in PGSuper/PGSplice describe piers including the cross beam and columns. The physical pier model provides almost all the information needed to load rating a cross beam. XBRate extends PGSuper/PGSplice by adding user interface elements to capture the addition information needed for cross beam load rating.</p>
+<p>To model a physical pier in PGSuper/PGSplice:</p><ol type="1">
+<li>Select <em>Edit &gt; Abutment/Pier</em> <div class="image">
+<img src="SelectPier.png" alt="SelectPier.png"/>
+</div>
+</li>
+<li>Select a pier to edit from the dropdown list and press [OK]</li>
+<li>Select the Layout Tab <div class="image">
+<img src="PierLayout.png" alt="PierLayout.png"/>
+</div>
+</li>
+<li>Set the Pier Model Type to Physical</li>
 </ol>
 <h2>Other Topics</h2>
 <p><a class="el" href="chapter3_superstructure.html">Superstructure</a></p>

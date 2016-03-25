@@ -57,10 +57,7 @@ $(document).ready(function(){initNavTree('chapter3_live_loads.html','');});
 <div class="title">Live Loads </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><h2>PGSuper/PGSplice Live Loads</h2>
-<p>The live loads are extracted from the girder line analysis performed by PGSuper/PGSplice. These loads are automatically applied to the XBRate pier model during the load rating analysis.</p>
-<p>The live load factors are taken from the PGSuper/PGSplice Load Rating Options.</p>
-<h2>XBRate Live Loads</h2>
+<div class="textblock"><h2>XBRate Live Loads</h2>
 <p>Live load reactions must be explicitly input into XBRate. This is done on the Live Loads tab of the Edit Pier window. </p><div class="image">
 <img src="LiveLoads.png" alt="LiveLoads.png"/>
 </div>
@@ -70,12 +67,15 @@ $(document).ready(function(){initNavTree('chapter3_live_loads.html','');});
 <blockquote class="doxtable">
 <p>NOTE: When integrated with PGSuper/PGSplice, the live load reactions are those associated with the longest girder line. </p>
 </blockquote>
-<h2>Live Load Application</h2>
+<h3>Live Load Application</h3>
 <p>Live load reactions can be applied directly to the cross beam or applied through the bearing locations.</p>
 <p>When applied directly to the cross beam, the live loads are applied to the cross beam member of the analysis model as described in WSDOT BDM 3.9.4E.</p>
 <p>In general, live load reactions are applied directly to the cross beam for Continuous and Integral piers and through the bearings for Expansion piers.</p>
-<h2>Live Load Reactions</h2>
-<p>For each rating type, define the live load factor for the indicated limit states. In the live load grids, enter a name for the live load and a reaction. For the legal load ratings, also enter a vehicle weight that will be used in the load posting analysis. </p>
+<h3>Live Load Reactions</h3>
+<p>For each rating type, define the live load factor for the indicated limit states. In the live load grids, enter a name for the live load and a reaction. For the legal load ratings, also enter a vehicle weight that will be used in the load posting analysis.</p>
+<h2>PGSuper/PGSplice Live Loads</h2>
+<p>The live loads are extracted from the girder line analysis performed by PGSuper/PGSplice. These loads are automatically applied to the XBRate pier model during the load rating analysis.</p>
+<p>The live load factors are taken from the PGSuper/PGSplice Load Rating Options. </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

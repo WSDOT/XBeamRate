@@ -57,7 +57,21 @@ $(document).ready(function(){initNavTree('appendix_a_pier_permanent_loads.html',
 <div class="title">Permanent Loads </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>Permant loads and load factors are defined on this tab.</p>
+<h2>Load Factors </h2>
+<p>Enter the Strength I, Strength II, and Service I load factors for dead load of components (DC), dead load of wearing surface and appurtanances (DW), creep (CR), shrinkage (SH), and secondary prestressing effects (PS).</p>
+<h2>Bearing Lines </h2>
+<p>Use the drop down list to select the number of bearing lines on the pier. Bearing lines run longitudinally along the pier and each bearing line can have one or more bearings.</p>
+<p>When two bearing lines are defined, permanent load reactions must be defined for bother bearing lines.</p>
+<p>Bearing lines are defined as the back and ahead bearing line, refering to the relative position with respect to the centerline of the pier and back and ahead on station.</p>
+<h2>Reaction Type </h2>
+<p>Use the drop down list to select the reaction type. The reaction type can be Concentrated or Uniform. An example of a concentrated reaction would be from a precast I-beam on a bearing pad. An example of a uniform reaction would be from a precast slab beam where the reaction is spread out over the width of the slab which could be several feet.</p>
+<h2>Bearings and Reactions </h2>
+<p>Bearings and reactions for each bearing line are defined in a grid. Use [+] and [-] to add and delete bearings and their associated reactions.</p>
+<p>In the grid, enter the reactions for the permanent load cases (DC, DW, etc). For uniform reactions, enter the width (W) over which the reaction is distributed. Also enter the spacing (S) of the centers of the bearing locations.</p>
+<p>The bearings must be located transversely on the cross beam. Select the center of a bearing and define its offset from either the alignment or bridge line.</p>
+<p>The bearing layout and reactions can be copied between bearing lines with [Copy to Ahead Bearing Line] and [Copy to Back Bearing Line] </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

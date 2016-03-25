@@ -54,12 +54,12 @@ var NAVTREEINDEX0 =
 "load_rating_from_pgs.html":[3,1],
 "load_rating_report.html":[3,0,5],
 "materials.html":[3,0,2],
-"md_src_UserGuide_UserGuide.html":[4],
 "pages.html":[],
 "permanent_loads.html":[3,0,3],
 "pgs_analysis_results.html":[3,1,2],
 "pgs_export_pier_models.html":[3,1,3],
 "pgs_load_rating_report.html":[3,1,1],
 "technical_guide.html":[2],
-"tutorials.html":[3]
+"tutorials.html":[3],
+"user_guide.html":[4]
 };

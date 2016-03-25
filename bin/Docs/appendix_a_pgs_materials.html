@@ -57,7 +57,94 @@ $(document).ready(function(){initNavTree('appendix_a_pgs_materials.html','');});
 <div class="title">PGSuper/PGSplice Materials </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>XBRate adds a tab titled XBeam to the Pier Details window in PGSuper and PGSplice. The materials of the cross beam not defined on the Pier Details window Layout tab are defined on this tab.</p>
+<h2>Material Properties</h2>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Reinforcement </td><td>Use the drop down list to select the reinforcement material used in the cross beam </td></tr>
+</table>
+<blockquote class="doxtable">
+<p>NOTE: Concrete properties are defined on the Layout tab </p>
+</blockquote>
+<h2>Condition Factor</h2>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Condition State List </td><td>Use the drop down list to select a condition state of the cross beam. </td></tr>
+<tr>
+<td>Condition Factor </td><td>The conditation factor associated with the selected condition state is show here. If the condition state is Other, enter the condition factor </td></tr>
+</table>
+<h2>Longitudinal Reinforcement</h2>
+<p>Define the longitudinal reinforcement in the cross beam. Reinforcement is defined as horizontal rows of reinforcement.</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Row </td><td>Identifies a row of reinforcing. </td></tr>
+<tr>
+<td>XBeam Face </td><td>Using the drop down list, select the face of the cross beam from which the reniforcement is located. </td></tr>
+<tr>
+<td>Datum </td><td>Use the drop down list to select the datum for locating the reinforcement along the length of the cross beam. Use Full Length if the reinforcement runs the full length of the cross beam. The reinforcement can also be defined as starting some distance from the left or right end of the cross beam. </td></tr>
+<tr>
+<td>Start </td><td>Location of the start of the reinforcement measured from the specified datum </td></tr>
+<tr>
+<td>Length </td><td>Length of the reinforcing bars </td></tr>
+<tr>
+<td>Cover </td><td>Clear cover from the specifed XBeam face to the edge of the reinforcement </td></tr>
+<tr>
+<td>Bar Size </td><td>Select a bar size from the drop down list </td></tr>
+<tr>
+<td># of Bars </td><td>Enter the number of bars in the horizontal row </td></tr>
+<tr>
+<td>Spacing </td><td>Enter the horizontal spacing of the bars </td></tr>
+<tr>
+<td>Left Hook </td><td>When checked, the left end of the bar is hooked and is assumed to be fully developed </td></tr>
+<tr>
+<td>Right Hook </td><td>When checked, the right end of the bar is hooked and is assumed to be fully developed </td></tr>
+</table>
+<blockquote class="doxtable">
+<p>NOTE: The top of the cross beam is considered to be at the bottom of the main slab </p>
+</blockquote>
+<h2>Lower Cross Beam Stirrups</h2>
+<p>Deine the stirrups in the lower cross beam. Stirrups are defined left to right along the length of the cross beam</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Symmetric about centerline </td><td>When checked, the stirrups are defined along the left half of the cross beam and reflected onto the right half. Otherwise the stirrups are defined over the full length of the cross beam. The length of the last zone of stirrups is adjusted to fit the lenght of the cross beam. </td></tr>
+<tr>
+<td>Zone # </td><td>Indicates a zone of stirrups </td></tr>
+<tr>
+<td>Zone Length </td><td>Length of the stirrup zone. This item has a value of "to center" for symmetric stirrups or "to end" for the last zone. </td></tr>
+<tr>
+<td>Bar Size </td><td>Select a bar size from the drop down list </td></tr>
+<tr>
+<td>Spacing </td><td>Enter the spacing of the stirrups </td></tr>
+<tr>
+<td># of Legs </td><td>Enter the number of stirrup legs </td></tr>
+</table>
+<h2>Full Depth Stirrups</h2>
+<p>Deine the stirrups in the full depth cross beam. Stirrups are defined left to right along the length of the cross beam</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Symmetric about centerline </td><td>When checked, the stirrups are defined along the left half of the cross beam and reflected onto the right half. Otherwise the stirrups are defined over the full length of the cross beam. The length of the last zone of stirrups is adjusted to fit the lenght of the cross beam. </td></tr>
+<tr>
+<td>Zone # </td><td>Indicates a zone of stirrups </td></tr>
+<tr>
+<td>Zone Length </td><td>Length of the stirrup zone. This item has a value of "to center" for symmetric stirrups or "to end" for the last zone. </td></tr>
+<tr>
+<td>Bar Size </td><td>Select a bar size from the drop down list </td></tr>
+<tr>
+<td>Spacing </td><td>Enter the spacing of the stirrups </td></tr>
+<tr>
+<td># of Legs </td><td>Enter the number of stirrup legs </td></tr>
+</table>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

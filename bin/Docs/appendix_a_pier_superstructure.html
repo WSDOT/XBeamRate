@@ -57,7 +57,58 @@ $(document).ready(function(){initNavTree('appendix_a_pier_superstructure.html','
 <div class="title">Superstructure </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>Geometric information about the superstructure is defined on this tab.</p>
+<blockquote class="doxtable">
+<p>NOTE: In XBRate, the superstructure is considered to be everything above the lower cross beam. </p>
+</blockquote>
+<h2>General </h2>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Pier Type </td><td>Select the pier type. Choices are Continous, Integral, and Expansion. </td></tr>
+</table>
+<p>Continous piers have a superstructure moment connection across the pier, but superstructure moments are not transmitted to the pier Integral piers have a full moment connection between the superstructure and the pier. Expansion piers do not transmit superstructure moments across or into the pier.</p>
+<blockquote class="doxtable">
+<p>NOTE: The schematic image updates to reflect the selected pier type </p>
+</blockquote>
+<h2>Roadway Layout </h2>
+<p>Items in this group define the roadway cross section geometry at the pier.</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Skew </td><td>Enter the skew angle of the pier </td></tr>
+<tr>
+<td>Deck elevation at alignment </td><td>Enter the elevation of the roadway surface at the intersection of the centerline of the pier and the alignment </td></tr>
+<tr>
+<td>Left Crown Slope (SL) </td><td>Enter the slope on the left of the crown point </td></tr>
+<tr>
+<td>Right Crown Slope (SR) </td><td>Enter the slope on the right of the crown point </td></tr>
+<tr>
+<td>Crown Point Offset (CPO) </td><td>Enter the offset from the alignemnt to the crown point </td></tr>
+<tr>
+<td>Bridge Line Offset (BLO) </td><td>Enter the offset from the alignment to the bridge line </td></tr>
+<tr>
+<td>Curb Line Measured From </td><td>Enter the datum from which the curb lines are located </td></tr>
+<tr>
+<td>Left Curb Offset (LCO) </td><td>Enter the offset from the curb line datum to the left curb line </td></tr>
+<tr>
+<td>Right Curb Offset (RCO) </td><td>Enter the offset from the curb line datum to the right curb line </td></tr>
+</table>
+<h2>Transvesrse Dimensions </h2>
+<p>Enter the transverse (cross section) dimensions of the superstructure</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Diaphragm Width (W) </td><td>Enter the width of the diaphragm as defined in the schematic </td></tr>
+<tr>
+<td>Diaphragm Height (H) </td><td>Enter the height of the diaphragm as defined in the schematic </td></tr>
+<tr>
+<td>Gross Slab Depth (TS) </td><td>Enter the gross depth of the slab as defined in the schematic </td></tr>
+</table>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

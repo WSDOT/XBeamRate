@@ -57,7 +57,34 @@ $(document).ready(function(){initNavTree('appendix_a_live_load_results.html','')
 <div class="title">Live Load Results </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"></div></div><!-- contents -->
+<div class="textblock"><p>The Live Load Results view provides a graphical representation of the live load analysis performed by XBRate.</p>
+<table class="doxtable">
+<tr>
+<th>Item </th><th>Description  </th></tr>
+<tr>
+<td>Response Selector </td><td>Select desired structural response; Moment or Shear </td></tr>
+<tr>
+<td>Live Load Type </td><td>Use the drop down list to select the general live load type such as Design, Legal, or Permit </td></tr>
+<tr>
+<td>Vehicle Type </td><td>Use the drop down list to select a specific vehicle for the selected general live load type </td></tr>
+<tr>
+<td>Live Load Configuration </td><td>Select a live load configuration </td></tr>
+<tr>
+<td>[&lt;] and [&gt;] </td><td>Press these buttons to move the live load left and right </td></tr>
+<tr>
+<td>Permit vehicle in lane </td><td>Select the lane in which the permit vehicle is located </td></tr>
+</table>
+<p>For Design and Legal live loads, as well as the Permit live load when the AASHTO MBE rating equation is used, three results graphs will be displayed:</p><ol type="1">
+<li>Envelope for all of the vehicles associated with a Live Load Type</li>
+<li>The response for a particular vehicle type</li>
+<li>The response for a specific live load configuration</li>
+</ol>
+<p>When the WSDOT BDM rating equation is used for Permit live loads, two results graphs will be displayed:</p><ol type="1">
+<li>The response for the permit vehicle in a single lane</li>
+<li>The response for the legal vehicle in all other lanes</li>
+</ol>
+<p>The live load configuration is schematically shown on the graph including the wheel line reactions and positions. </p>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->

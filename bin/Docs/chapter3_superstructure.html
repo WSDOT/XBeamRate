@@ -61,6 +61,36 @@ $(document).ready(function(){initNavTree('chapter3_superstructure.html','');});
 <blockquote class="doxtable">
 <p>NOTE: Even though the girder arrangement and bearing locations are part of the superstructure, the location of bearings and associated reactions are defined with the <a class="el" href="chapter3_permanent_loads.html">Permanent Loads</a>. </p>
 </blockquote>
+<h2>XBRate Superstructure Definition</h2>
+<p>When XBrate is being used as a stand alone application, the superstructure definition must be entered explicitly. </p><div class="image">
+<img src="EditPierFull.png" alt="EditPierFull.png"/>
+</div>
+<h3>Pier Type</h3>
+<p>XBRate supports three general pier types; Expansion, Continuous, and Integral.</p>
+<table class="doxtable">
+<tr>
+<th>Pier Type </th><th>Description  </th></tr>
+<tr>
+<td>Expansion </td><td>The superstructure has an expansion joint at the pier. There is only a transfer of vertical reactions to the substructure. </td></tr>
+<tr>
+<td>Continuous </td><td>The superstructure has a moment connection across the pier, but there is no moment transfer to the pier. </td></tr>
+<tr>
+<td>Integral </td><td>The superstructure has a moment connection across the pier and with the pier itself. The superstructure diaphragm is assumed to be composite with the cross beam and contributes to the flexural and shear capacity of the cross beam. </td></tr>
+</table>
+<h3>Roadway Layout</h3>
+<p>The roadway layout information describes geometric information about the roadway geometry at the pier and it locates the pier transversely.</p>
+<blockquote class="doxtable">
+<p>NOTE: Pay attention to how dimensions are measured. Crown slopes are measured in the plane of the pier and the offset dimensions are measured normal to the alignment. </p>
+</blockquote>
+<p>The skew angle defines the angle the centerline pier makes with the normal to the alignment at the centerline of pier. The skew angle is used for adjusting dimensions that are normal to the alignment to dimensions that are in the plane of the pier.</p>
+<p>The deck elevation at alignment locates the pier vertically. This elevation is the basis for computing the top and bottom of column elevations.</p>
+<p>The left (SL) and right (SR) crown slopes define the slope of the roadway surface, in the plane of the pier. Slopes down and away from the crown point are negative.</p>
+<p>The Crown Point Offset (CPO) locates the crown point with respect to the alignment.</p>
+<p>The Bridge Line Offset (BLO) locates the Bridge Line with respect to the alignment. The Bridge Line is an arbitrary line that is parallel to, and offset from, the alignment and can be used to describe the geometry of the pier.</p>
+<p>The curb line measure defines how the curb line offsets are defined. The curb lines can be located from the Alignment or the Bridge Line.</p>
+<p>The Left (LCO) and Right (RCO) Curb Offsets located the curb lines. The curb-to-curb width defines the number of lanes for load rating.</p>
+<h3>Transverse Dimensions</h3>
+<p>The transverse dimensions are measured normal to the plane of the pier. They describe the width (W) and height (H) of the superstructure diaphragm and the gross thickness of the deck slab (TS).</p>
 <h2>PGSuper/PGSplice Superstructure Definition</h2>
 <p>The superstructure definition is extracted from the bridge model with XBRate is integrated into PGSuper/PGSplice. The superstructure definition is derived from the information on the Connections tab of the Pier Details Window. </p><div class="image">
 <img src="PierDetails.png" alt="PierDetails.png"/>
@@ -105,38 +135,8 @@ Integral After Deck Placement - Hinged Back/Ahead<br />
 <td>Integral </td><td>Bearing Offset + 0.5(Support Width) </td></tr>
 </table>
 <blockquote class="doxtable">
-<p>NOTE: If the assumed pier dimensions don't accurately reflect your pier model, you can export the pier from PGSuper/PGSplice and edit the parameters directly in XBRate. See <a class="el" href="chapter3_exporting_models.html">Explorting Pier Models</a> for details. </p>
+<p>NOTE: If the assumed pier dimensions don't accurately reflect your pier model, you can export the pier from PGSuper/PGSplice and edit the parameters directly in XBRate. See <a class="el" href="chapter3_exporting_models.html">Explorting Pier Models</a> for details.</p>
 </blockquote>
-<h2>XBRate Superstructure Definition</h2>
-<p>When XBrate is being used as a stand alone application, the superstructure definition must be entered explicitly. </p><div class="image">
-<img src="EditPierFull.png" alt="EditPierFull.png"/>
-</div>
-<h3>Pier Type</h3>
-<p>XBRate supports three general pier types; Expansion, Continuous, and Integral.</p>
-<table class="doxtable">
-<tr>
-<th>Pier Type </th><th>Description  </th></tr>
-<tr>
-<td>Expansion </td><td>The superstructure has an expansion joint at the pier. There is only a transfer of vertical reactions to the substructure. </td></tr>
-<tr>
-<td>Continuous </td><td>The superstructure has a moment connection across the pier, but there is no moment transfer to the pier. </td></tr>
-<tr>
-<td>Integral </td><td>The superstructure has a moment connection across the pier and with the pier itself. The superstructure diaphragm is assumed to be composite with the cross beam and contributes to the flexural and shear capacity of the cross beam. </td></tr>
-</table>
-<h3>Roadway Layout</h3>
-<p>The roadway layout information describes geometric information about the roadway geometry at the pier and it locates the pier transversely.</p>
-<blockquote class="doxtable">
-<p>NOTE: Pay attention to how dimensions are measured. Crown slopes are measured in the plane of the pier and the offset dimensions are measured normal to the alignment. </p>
-</blockquote>
-<p>The skew angle defines the angle the centerline pier makes with the normal to the alignment at the centerline of pier. The skew angle is used for adjusting dimensions that are normal to the alignment to dimensions that are in the plane of the pier.</p>
-<p>The deck elevation at alignment locates the pier vertically. This elevation is the basis for computing the top and bottom of column elevations.</p>
-<p>The left (SL) and right (SR) crown slopes define the slope of the roadway surface, in the plane of the pier. Slopes down and away from the crown point are negative.</p>
-<p>The Crown Point Offset (CPO) locates the crown point with respect to the alignment.</p>
-<p>The Bridge Line Offset (BLO) locates the Bridge Line with respect to the alignment. The Bridge Line is an arbitrary line that is parallel to, and offset from, the alignment and can be used to describe the geometry of the pier.</p>
-<p>The curb line measure defines how the curb line offsets are defined. The curb lines can be located from the Alignment or the Bridge Line.</p>
-<p>The Left (LCO) and Right (RCO) Curb Offsets located the curb lines. The curb-to-curb width defines the number of lanes for load rating.</p>
-<h3>Transverse Dimensions</h3>
-<p>The transverse dimensions are measured normal to the plane of the pier. They describe the width (W) and height (H) of the superstructure diaphragm and the gross thickness of the deck slab (TS). </p>
 </div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->
