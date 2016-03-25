@@ -254,14 +254,14 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
       n.Type = 0;
       vXBeamNodes.push_back(n);
 
-      // curb line
-      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
-      n.Type = CURB;
-      vXBeamNodes.push_back(n);
+      //// curb line
+      //n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
+      //n.Type = CURB;
+      //vXBeamNodes.push_back(n);
 
-      n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
-      n.Type = CURB;
-      vXBeamNodes.push_back(n);
+      //n.X = pPier->ConvertPierToCrossBeamCoordinate(pierID,RCO);
+      //n.Type = CURB;
+      //vXBeamNodes.push_back(n);
 
       // top of columns
       for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
@@ -391,7 +391,14 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
          // live load is applied to a load transfer model.
 
          // dummy properties of the transfer model
-         Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
+         //Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
+
+         // Live load is on the deck, so the height of the transfer model is the height of the superstructure diaphram plus the deck thickness
+         Float64 H,W;
+         pProject->GetDiaphragmDimensions(pierID,&H,&W);
+         Float64 tSlab = pProject->GetDeckThickness(pierID);
+         Float64 Y = H + tSlab;
+
          Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
          Float64 EA = EAb*10000;
 
@@ -700,23 +707,41 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
             Float64 mbrLocation;
             GetXBeamFemModelLocation(pModelData,Xbrg,&mbrID,&mbrLocation);
 
-            CComPtr<IFem2dPointLoad> dcLoad;
-            dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
+            if ( !IsZero(DC) )
+            {
+               CComPtr<IFem2dPointLoad> dcLoad;
+               dcPointLoads->Create(dcLoadID++,mbrID,mbrLocation,0.0,-DC,0.0,lotGlobal,&dcLoad);
+            }
 
-            CComPtr<IFem2dPointLoad> dwLoad;
-            dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+            if ( !IsZero(DW) )
+            {
+               CComPtr<IFem2dPointLoad> dwLoad;
+               dwPointLoads->Create(dwLoadID++,mbrID,mbrLocation,0.0,-DW,0.0,lotGlobal,&dwLoad);
+            }
 
-            CComPtr<IFem2dPointLoad> shLoad;
-            shPointLoads->Create(shLoadID++,mbrID,mbrLocation,0.0,-SH,0.0,lotGlobal,&shLoad);
+            if ( !IsZero(SH) )
+            {
+               CComPtr<IFem2dPointLoad> shLoad;
+               shPointLoads->Create(shLoadID++,mbrID,mbrLocation,0.0,-SH,0.0,lotGlobal,&shLoad);
+            }
 
-            CComPtr<IFem2dPointLoad> crLoad;
-            crPointLoads->Create(crLoadID++,mbrID,mbrLocation,0.0,-CR,0.0,lotGlobal,&crLoad);
+            if ( !IsZero(CR) )
+            {
+               CComPtr<IFem2dPointLoad> crLoad;
+               crPointLoads->Create(crLoadID++,mbrID,mbrLocation,0.0,-CR,0.0,lotGlobal,&crLoad);
+            }
 
-            CComPtr<IFem2dPointLoad> psLoad;
-            psPointLoads->Create(psLoadID++,mbrID,mbrLocation,0.0,-PS,0.0,lotGlobal,&psLoad);
+            if ( !IsZero(PS) )
+            {
+               CComPtr<IFem2dPointLoad> psLoad;
+               psPointLoads->Create(psLoadID++,mbrID,mbrLocation,0.0,-PS,0.0,lotGlobal,&psLoad);
+            }
 
-            CComPtr<IFem2dPointLoad> reLoad;
-            rePointLoads->Create(reLoadID++,mbrID,mbrLocation,0.0,-RE,0.0,lotGlobal,&reLoad);
+            if ( !IsZero(RE) )
+            {
+               CComPtr<IFem2dPointLoad> reLoad;
+               rePointLoads->Create(reLoadID++,mbrID,mbrLocation,0.0,-RE,0.0,lotGlobal,&reLoad);
+            }
          }
          else
          {
@@ -729,23 +754,41 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
             if ( startMbrID == endMbrID )
             {
                // distributed load is contained within a single FEM member
-               CComPtr<IFem2dDistributedLoad> dcLoad;
-               dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
+               if ( !IsZero(DC) )
+               {
+                  CComPtr<IFem2dDistributedLoad> dcLoad;
+                  dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
+               }
 
-               CComPtr<IFem2dDistributedLoad> dwLoad;
-               dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+               if ( !IsZero(DW) )
+               {
+                  CComPtr<IFem2dDistributedLoad> dwLoad;
+                  dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+               }
 
-               CComPtr<IFem2dDistributedLoad> shLoad;
-               shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
+               if ( !IsZero(SH) )
+               {
+                  CComPtr<IFem2dDistributedLoad> shLoad;
+                  shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
+               }
 
-               CComPtr<IFem2dDistributedLoad> crLoad;
-               crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
+               if ( !IsZero(CR) )
+               {
+                  CComPtr<IFem2dDistributedLoad> crLoad;
+                  crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
+               }
 
-               CComPtr<IFem2dDistributedLoad> psLoad;
-               psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
+               if ( !IsZero(PS) )
+               {
+                  CComPtr<IFem2dDistributedLoad> psLoad;
+                  psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
+               }
 
-               CComPtr<IFem2dDistributedLoad> reLoad;
-               reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
+               if ( !IsZero(RE) )
+               {
+                  CComPtr<IFem2dDistributedLoad> reLoad;
+                  reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
+               }
             }
             else
             {
@@ -753,22 +796,40 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
 
                // apply loads to first member
                CComPtr<IFem2dDistributedLoad> dcLoad;
-               dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
+               if ( !IsZero(DC) )
+               {
+                  dcDistLoads->Create(dcLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
+               }
 
                CComPtr<IFem2dDistributedLoad> dwLoad;
-               dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+               if ( !IsZero(DW) )
+               {
+                  dwDistLoads->Create(dwLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+               }
 
                CComPtr<IFem2dDistributedLoad> shLoad;
-               shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
+               if ( !IsZero(SH) )
+               {
+                  shDistLoads->Create(shLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
+               }
 
                CComPtr<IFem2dDistributedLoad> crLoad;
-               crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
+               if ( !IsZero(CR) )
+               {
+                  crDistLoads->Create(crLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
+               }
 
                CComPtr<IFem2dDistributedLoad> psLoad;
-               psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
+               if ( !IsZero(PS) )
+               {
+                  psDistLoads->Create(psLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
+               }
 
                CComPtr<IFem2dDistributedLoad> reLoad;
-               reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
+               if ( !IsZero(RE) )
+               {
+                  reDistLoads->Create(reLoadID++,startMbrID,loadDirFy,startLocation,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
+               }
 
                // apply loads to intermediate members
                for ( MemberIDType mbrID = startMbrID+1; mbrID < endMbrID-1; mbrID++ )
@@ -780,12 +841,35 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
                   psLoad.Release();
                   reLoad.Release();
 
-                  dcDistLoads->Create(dcLoadID++,mbrID,loadDirFy,0.0,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
-                  dwDistLoads->Create(dwLoadID++,mbrID,loadDirFy,0.0,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
-                  shDistLoads->Create(shLoadID++,mbrID,loadDirFy,0.0,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
-                  crDistLoads->Create(crLoadID++,mbrID,loadDirFy,0.0,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
-                  psDistLoads->Create(psLoadID++,mbrID,loadDirFy,0.0,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
-                  reDistLoads->Create(reLoadID++,mbrID,loadDirFy,0.0,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
+                  if ( !IsZero(DC) )
+                  {
+                     dcDistLoads->Create(dcLoadID++,mbrID,loadDirFy,0.0,-1.0,-DC,-DC,lotGlobalProjected,&dcLoad);
+                  }
+
+                  if ( !IsZero(DW) )
+                  {
+                     dwDistLoads->Create(dwLoadID++,mbrID,loadDirFy,0.0,-1.0,-DW,-DW,lotGlobalProjected,&dwLoad);
+                  }
+
+                  if ( !IsZero(SH) )
+                  {
+                     shDistLoads->Create(shLoadID++,mbrID,loadDirFy,0.0,-1.0,-SH,-SH,lotGlobalProjected,&shLoad);
+                  }
+
+                  if ( !IsZero(CR) )
+                  {
+                     crDistLoads->Create(crLoadID++,mbrID,loadDirFy,0.0,-1.0,-CR,-CR,lotGlobalProjected,&crLoad);
+                  }
+
+                  if ( !IsZero(PS) )
+                  {
+                     psDistLoads->Create(psLoadID++,mbrID,loadDirFy,0.0,-1.0,-PS,-PS,lotGlobalProjected,&psLoad);
+                  }
+
+                  if ( !IsZero(RE) )
+                  {
+                     reDistLoads->Create(reLoadID++,mbrID,loadDirFy,0.0,-1.0,-RE,-RE,lotGlobalProjected,&reLoad);
+                  }
                }
 
                // apply loads to last member
@@ -796,12 +880,35 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
                psLoad.Release();
                reLoad.Release();
 
-               dcDistLoads->Create(dcLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
-               dwDistLoads->Create(dwLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
-               shDistLoads->Create(shLoadID++,endMbrID,loadDirFy,0.0,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
-               crDistLoads->Create(crLoadID++,endMbrID,loadDirFy,0.0,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
-               psDistLoads->Create(psLoadID++,endMbrID,loadDirFy,0.0,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
-               reDistLoads->Create(reLoadID++,endMbrID,loadDirFy,0.0,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
+               if ( !IsZero(DC) )
+               {
+                  dcDistLoads->Create(dcLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DC,-DC,lotGlobalProjected,&dcLoad);
+               }
+
+               if ( !IsZero(DW) )
+               {
+                  dwDistLoads->Create(dwLoadID++,endMbrID,loadDirFy,0.0,endLocation,-DW,-DW,lotGlobalProjected,&dwLoad);
+               }
+
+               if ( !IsZero(SH) )
+               {
+                  shDistLoads->Create(shLoadID++,endMbrID,loadDirFy,0.0,endLocation,-SH,-SH,lotGlobalProjected,&shLoad);
+               }
+
+               if ( !IsZero(CR) )
+               {
+                  crDistLoads->Create(crLoadID++,endMbrID,loadDirFy,0.0,endLocation,-CR,-CR,lotGlobalProjected,&crLoad);
+               }
+
+               if ( !IsZero(PS) )
+               {
+                  psDistLoads->Create(psLoadID++,endMbrID,loadDirFy,0.0,endLocation,-PS,-PS,lotGlobalProjected,&psLoad);
+               }
+
+               if ( !IsZero(RE) )
+               {
+                  reDistLoads->Create(reLoadID++,endMbrID,loadDirFy,0.0,endLocation,-RE,-RE,lotGlobalProjected,&reLoad);
+               }
             }
          }
       }

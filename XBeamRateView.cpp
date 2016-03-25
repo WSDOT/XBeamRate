@@ -928,7 +928,6 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
       displayList->AddDisplayObject(doRebar);
    }
 
-
    // Section View
    Float64 Lxb = pPier->GetXBeamLength(pierID);
    Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
@@ -958,7 +957,6 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
       sectionItem.Release();
    }
-
 }
 
 void CXBeamRateView::UpdateStirrupDisplayObjects()

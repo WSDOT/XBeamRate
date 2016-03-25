@@ -35,6 +35,7 @@ public:
 
 // IReinforcementPageParent
    virtual CPierData2* GetPierData();
+   virtual xbrPierData* GetXBRPierData();
    virtual CConcreteMaterial& GetConcrete();
    virtual xbrTypes::PierType GetPierType();
    virtual matRebar::Type& GetRebarType();

@@ -34,25 +34,74 @@
 #include <IFace\XBeamRateAgent.h>
 
 #include <PgsExt\PierData2.h>
+#include <XBeamRateExt\PierData.h>
+
 #include <PGSuperUnits.h> // for FormatDimension
 
 
 #include <PgsExt\ConcreteDetailsDlg.h>
+#include <PgsExt\GirderLabel.h>
 
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFDocument.h>
 #include <MFCTools\CustomDDX.h>
 
 
-void DDX_RebarGrid(CDataExchange* pDX,CLongitudinalRebarGrid& grid,xbrLongitudinalRebarData& rebars)
+void DDX_RebarGrid(CDataExchange* pDX,UINT nID,CLongitudinalRebarGrid& grid,IReinforcementPageParent* pParentPage)
 {
    if ( pDX->m_bSaveAndValidate )
    {
-      grid.GetRebarData(rebars);
+      grid.GetRebarData(pParentPage->GetLongitudinalRebar());
+      Float64 Lxb;
+      CPierData2* pPierData = pParentPage->GetPierData();
+      xbrPierData* pXBRPierData = pParentPage->GetXBRPierData();
+
+      if ( pPierData )
+      {
+         Lxb = pPierData->GetXBeamLength();
+      }
+      else
+      {
+         ATLASSERT(pXBRPierData);
+         Lxb = pXBRPierData->GetXBeamLength();
+      }
+
+      xbrLongitudinalRebarData& rebarData = pParentPage->GetLongitudinalRebar();
+      RowIndexType rowIdx = 0;
+      BOOST_FOREACH(xbrLongitudinalRebarData::RebarRow& rebarRow,rebarData.RebarRows)
+      {
+         rowIdx++;
+         if ( rebarRow.LayoutType == xbrTypes::blFullLength )
+         {
+            // full length bars always fit
+            continue;
+         }
+
+         Float64 start;
+         if ( rebarRow.LayoutType == xbrTypes::blLeftEnd )
+         {
+            start = rebarRow.Start;
+         }
+         else if ( rebarRow.LayoutType == xbrTypes::blRightEnd )
+         {
+            start = Lxb - rebarRow.Start;
+         }
+
+         Float64 end = start + rebarRow.Length;
+
+         if ( !InRange(0.0,start,Lxb) || !InRange(0.0,end,Lxb) )
+         {
+            CString strMsg;
+            strMsg.Format(_T("The longitudinal reinforcement in Row %d begins or ends outside of the cross beam"),rowIdx);
+            AfxMessageBox(strMsg,MB_OK | MB_ICONEXCLAMATION);
+            pDX->PrepareCtrl(nID);
+            pDX->Fail();
+         }
+      }
    }
    else
    {
-      grid.SetRebarData(rebars);
+      grid.SetRebarData(pParentPage->GetLongitudinalRebar());
    }
 }
 
@@ -139,7 +188,7 @@ void CReinforcementPage::DoDataExchange(CDataExchange* pDX)
    DDX_Check_Bool(pDX,IDC_EC_LABEL,m_pParent->GetConcrete().bUserEc);
    
    DDX_RebarMaterial(pDX,IDC_REBAR_MATERIAL,m_pParent->GetRebarType(),m_pParent->GetRebarGrade());
-   DDX_RebarGrid(pDX,*m_pRebarGrid,m_pParent->GetLongitudinalRebar());
+   DDX_RebarGrid(pDX,IDC_REBAR_GRID,*m_pRebarGrid,m_pParent);
    DDX_StirrupGrid(pDX,*m_pLowerXBeamGrid,m_pParent->GetLowerXBeamStirrups());
    DDX_StirrupGrid(pDX,*m_pFullDepthGrid,m_pParent->GetFullDepthStirrups());
 

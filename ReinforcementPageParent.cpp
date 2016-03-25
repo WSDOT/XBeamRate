@@ -40,6 +40,11 @@ CPierData2* CReinforcementPageParent::GetPierData()
    return m_pEditPierData->GetPierData();
 }
 
+xbrPierData* CReinforcementPageParent::GetXBRPierData()
+{
+   return &m_PierData;
+}
+
 CConcreteMaterial& CReinforcementPageParent::GetConcrete()
 {
    return m_pEditPierData->GetPierData()->GetConcrete();

@@ -68,6 +68,11 @@ CPierData2* CPierDlg::GetPierData()
    return NULL; // we are not associated with pier data for an entire bridge
 }
 
+xbrPierData* CPierDlg::GetXBRPierData()
+{
+   return &m_PierData.m_PierData;
+}
+
 CConcreteMaterial& CPierDlg::GetConcrete()
 {
    return m_PierData.m_PierData.GetConcreteMaterial();

@@ -1703,6 +1703,13 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
                re[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcRE,bat,resultsType);
                ps[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcPS,bat,resultsType);
             }
+            else
+            {
+               cr[i] = 0;
+               sh[i] = 0;
+               re[i] = 0;
+               ps[i] = 0;
+            }
          }
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
@@ -1748,6 +1755,13 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
             *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType);
             *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType);
             *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType);
+         }
+         else
+         {
+            *pCR = 0;
+            *pSH = 0;
+            *pRE = 0;
+            *pPS = 0;
          }
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included

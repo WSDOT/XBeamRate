@@ -26,6 +26,7 @@
 #include <MFCTools\RebarMaterialComboBox.h>
 #include <PgsExt\ConcreteMaterial.h>
 #include <PgsExt\PierData2.h>
+#include <XBeamRateExt\PierData.h>
 
 interface IEditPierData;
 class CLongitudinalRebarGrid;
@@ -38,6 +39,11 @@ interface IReinforcementPageParent
    // Returns data for the pier that is being edited
    // Return NULL if a pier object (part of a bridge object) is not being edited
    virtual CPierData2* GetPierData() = 0;
+
+   // Returns data for the pier that is being edited
+   // Return NULL if the pier that is being edited is part of a bridge
+   virtual xbrPierData* GetXBRPierData() = 0;
+
    virtual CConcreteMaterial& GetConcrete() = 0;
    virtual xbrTypes::PierType GetPierType() = 0;
 
