@@ -23,3 +23,7 @@ IDH_CONCRETE_AASHTO=appendix_a_concrete_aashto.html
 
 IDH_PGS_RATING_OPTIONS=appendix_a_pgs_rating_options.html
 IDH_PGS_MATERIAL=appendix_a_pgs_materials.html
+
+IDH_FAVORITE_REPORT=appendix_a_favorite_reports.html
+IDH_CUSTOM_REPORT=appendix_a_custom_reports.html
+IDH_CUSTOM_REPORT_DEFINITION=appendix_a_custom_report_definition.html

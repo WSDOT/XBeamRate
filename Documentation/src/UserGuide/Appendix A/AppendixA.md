@@ -7,6 +7,7 @@ Dialogs in XBRate
 * @subpage appendix_a_section_cut
 * @subpage appendix_a_load_rating_options
 * @subpage appendix_a_report
+* @subpage appendix_a_configure_reports
 * @subpage appendix_a_pier
 * @subpage appendix_a_pier_view
 * @subpage appendix_a_report_view

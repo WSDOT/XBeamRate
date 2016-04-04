@@ -89,6 +89,7 @@ CXBeamRateDoc::CXBeamRateDoc()
 
    SetCustomReportHelpID(eafTypes::crhCustomReport,IDH_CUSTOM_REPORT);
    SetCustomReportHelpID(eafTypes::crhFavoriteReport,IDH_FAVORITE_REPORT);
+   SetCustomReportDefinitionHelpID(IDH_CUSTOM_REPORT_DEFINITION);
 
    CEAFAutoCalcDocMixin::SetDocument(this);
 }
@@ -193,6 +194,12 @@ void CXBeamRateDoc::ShowCustomReportHelp(eafTypes::CustomReportHelp helpType)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    __super::ShowCustomReportHelp(helpType);
+}
+
+void CXBeamRateDoc::ShowCustomReportDefinitionHelp()
+{
+   AFX_MANAGE_STATE(AfxGetStaticModuleState());
+   __super::ShowCustomReportDefinitionHelp();
 }
 
 CATID CXBeamRateDoc::GetAgentCategoryID()

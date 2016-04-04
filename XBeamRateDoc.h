@@ -55,6 +55,7 @@ public:
 
    virtual void OnChangedFavoriteReports(BOOL bIsFavorites, BOOL bFromMenu);
    virtual void ShowCustomReportHelp(eafTypes::CustomReportHelp helpType);
+   virtual void ShowCustomReportDefinitionHelp();
 
 // Attributes
 public:
