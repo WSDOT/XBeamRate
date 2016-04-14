@@ -1,5 +1,6 @@
 cd \ARP\XBeamRate\Documentation
 
+rmdir /S /Q doc
 doxygen Doxygen.dox
 
 \ARP\BridgeLink\RegFreeCOM\x64\Release\MakeDocMap XBRate
