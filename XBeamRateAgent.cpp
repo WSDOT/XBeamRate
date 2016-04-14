@@ -571,13 +571,11 @@ STDMETHODIMP CXBeamRateAgent::LoadDocumentationMap()
 
    CEAFApp* pApp = EAFGetApp();
 
-   CString strDocumentationRootLocation = pApp->GetDocumentationRootLocation();
-
    CString strDocumentationURL = GetDocumentationURL();
 
-   CString strDocMapFile = EAFGetDocumentationMapFile(strDocSetName,strDocumentationURL,strDocumentationRootLocation);
+   CString strDocMapFile = EAFGetDocumentationMapFile(strDocSetName,strDocumentationURL);
 
-   EAFLoadDocumentationMap(strDocMapFile,m_HelpTopics);
+   VERIFY(EAFLoadDocumentationMap(strDocMapFile,m_HelpTopics));
    return S_OK;
 }
 
