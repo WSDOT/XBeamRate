@@ -97,8 +97,7 @@ CXBeamRateExt theApp;
 
 BOOL CXBeamRateExt::InitInstance()
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   GXInit();
+   GXInitDll();
    return CWinApp::InitInstance();
 }
 
@@ -107,5 +106,6 @@ BOOL CXBeamRateExt::InitInstance()
 
 int CXBeamRateExt::ExitInstance() 
 {
+   GXForceTerminate();
    return CWinApp::ExitInstance();
 }

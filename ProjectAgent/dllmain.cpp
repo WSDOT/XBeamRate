@@ -47,12 +47,12 @@ CProjectAgentModuleApp theApp;
 
 BOOL CProjectAgentModuleApp::InitInstance()
 {
-   AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   GXInit();
+   GXInitDll();
    return CWinApp::InitInstance();
 }
 
 int CProjectAgentModuleApp::ExitInstance()
 {
+   GXForceTerminate();
 	return CWinApp::ExitInstance();
 }
