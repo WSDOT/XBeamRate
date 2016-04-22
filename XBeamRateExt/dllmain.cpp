@@ -97,7 +97,7 @@ CXBeamRateExt theApp;
 
 BOOL CXBeamRateExt::InitInstance()
 {
-   GXInitDll();
+   GXInit();
    return CWinApp::InitInstance();
 }
 

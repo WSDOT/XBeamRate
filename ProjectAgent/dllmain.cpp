@@ -47,7 +47,7 @@ CProjectAgentModuleApp theApp;
 
 BOOL CProjectAgentModuleApp::InitInstance()
 {
-   GXInitDll();
+   GXInit();
    return CWinApp::InitInstance();
 }
 
