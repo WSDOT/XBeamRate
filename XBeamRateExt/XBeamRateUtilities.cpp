@@ -121,14 +121,22 @@ Uint16 CanModel(PierIDType pierID)
          return REASON_BC;
       }
 
-      const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
-      const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
-      ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
-      GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
-      GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
-      if ( nGirdersBack != nGirdersAhead )
+      if ( pPier->IsAbutment() )
       {
-         return REASON_NG;
+         return REASON_OK;
+      }
+      else
+      {
+         const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
+         const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
+
+         ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
+         GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
+         GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
+         if ( nGirdersBack != nGirdersAhead )
+         {
+            return REASON_NG;
+         }
       }
    }
 

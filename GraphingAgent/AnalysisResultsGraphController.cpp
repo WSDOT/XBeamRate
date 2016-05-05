@@ -155,7 +155,7 @@ void CXBRAnalysisResultsGraphController::FillPierList()
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
       PierIndexType nPiers = pBridgeDesc->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ ) // skip abutments (pierIdx = 0 & nPiers-1)
+      for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
       {
          // Can only load rate piers with a physical description
          const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);

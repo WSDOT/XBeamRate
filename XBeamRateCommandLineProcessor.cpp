@@ -89,7 +89,7 @@ BOOL CXBRateCommandLineProcessor::ProcessCommandLineOptions(CEAFCommandLineInfo&
       {
          GET_IFACE2(pBroker,IBridgeDescription,pBridgeDesc);
          PierIndexType nPiers = pBridgeDesc->GetPierCount();
-         for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+         for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
          {
             const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
             if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )

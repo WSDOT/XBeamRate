@@ -1175,6 +1175,17 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
    GroupIndexType backGroupIdx,aheadGroupIdx;
    pBridge->GetGirderGroupIndex(pierIdx,&backGroupIdx,&aheadGroupIdx);
 
+   // deal with first and last pier
+   PierIndexType nPiers = pBridge->GetPierCount();
+   if ( pierIdx == 0 )
+   {
+      backGroupIdx = aheadGroupIdx;
+   }
+   else if ( pierIdx == nPiers-1 )
+   {
+      aheadGroupIdx = backGroupIdx;
+   }
+
    GET_IFACE2(pBroker,IRoadway,pAlignment);
    GET_IFACE2(pBroker,IGeometry,pGeometry);
    GET_IFACE2(pBroker,IShapes,pShapes);

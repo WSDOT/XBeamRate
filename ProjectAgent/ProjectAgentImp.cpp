@@ -3055,7 +3055,7 @@ void CProjectAgentImp::UpdatePiers()
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
    PierIndexType nPiers = pBridgeDesc->GetPierCount();
-   for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+   for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
    {
       const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
       if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
@@ -3110,8 +3110,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
 
    GroupIndexType backGrpIdx, aheadGrpIdx;
    pBridge->GetGirderGroupIndex(pierIdx,&backGrpIdx,&aheadGrpIdx);
+
    GET_IFACE(IPointOfInterest,pPoi);
-   pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(CGirderKey(backGrpIdx,0),pierIdx);
+   pgsPointOfInterest poi = pPoi->GetPierPointOfInterest(CGirderKey(backGrpIdx == INVALID_INDEX ? aheadGrpIdx : backGrpIdx,0),pierIdx);
    Float64 tSlab = pBridge->GetGrossSlabDepth(poi);
    pierData.SetDeckThickness(tSlab);
 
@@ -3180,44 +3181,55 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    if ( pierData.GetPierType() == xbrTypes::pctExpansion )
    {
       // two bearing lines
-      pierData.SetBearingLineCount(2);
+      if ( pPier->IsAbutment() )
+      {
+         pierData.SetBearingLineCount(1);
+      }
+      else
+      {
+         pierData.SetBearingLineCount(2);
+      }
 
       GirderIndexType gdrIdx = 0;
 
-      GroupIndexType backGroupIdx, aheadGroupIdx;
-      pBridge->GetGirderGroupIndex(pierIdx,&backGroupIdx,&aheadGroupIdx);
+      if ( backGrpIdx != INVALID_INDEX )
+      {
+         CSegmentKey backSegmentKey  = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(backGrpIdx, gdrIdx));
 
-      CSegmentKey backSegmentKey  = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(backGroupIdx, gdrIdx));
-      CSegmentKey aheadSegmentKey = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(aheadGroupIdx,gdrIdx));
+         Float64 backBrgOffset  = pBridge->GetSegmentEndBearingOffset(backSegmentKey);
+         backBrgOffset *= -1; // offset to back side of pier is < 0
 
-      Float64 backBrgOffset  = pBridge->GetSegmentEndBearingOffset(backSegmentKey);
-      backBrgOffset *= -1; // offset to back side of pier is < 0
-      Float64 aheadBrgOffset = pBridge->GetSegmentStartBearingOffset(aheadSegmentKey);
+         Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
 
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+         std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+         xbrBearingLineData backBrgLine;
+         backBrgLine.SetBearingLineOffset(backBrgOffset);
+         backBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
+         backBrgLine.SetBearingCount(vBackSpacing.size()+1);
+         backBrgLine.SetSpacing(vBackSpacing);
+         pierData.SetBearingLineData(0,backBrgLine);
 
-      std::vector<Float64> vBackSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
-      xbrBearingLineData backBrgLine;
-      backBrgLine.SetBearingLineOffset(backBrgOffset);
-      backBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
-      backBrgLine.SetBearingCount(vBackSpacing.size()+1);
-      backBrgLine.SetSpacing(vBackSpacing);
-      pierData.SetBearingLineData(0,backBrgLine);
+         std::vector<BearingReactions>& vBackBrgReactions = GetPrivateBearingReactions(pierID,0);
+         vBackBrgReactions.resize(backBrgLine.GetBearingCount());
+      }
 
-      std::vector<BearingReactions>& vBackBrgReactions = GetPrivateBearingReactions(pierID,0);
-      vBackBrgReactions.resize(backBrgLine.GetBearingCount());
+      if ( aheadGrpIdx != INVALID_INDEX )
+      {
+         CSegmentKey aheadSegmentKey = pBridge->GetSegmentAtPier(pierIdx,CGirderKey(aheadGrpIdx,gdrIdx));
+         Float64 aheadBrgOffset = pBridge->GetSegmentStartBearingOffset(aheadSegmentKey);
+         Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
+         std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+         xbrBearingLineData aheadBrgLine;
+         aheadBrgLine.SetBearingLineOffset(aheadBrgOffset);
+         aheadBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
+         aheadBrgLine.SetBearingCount(vAheadSpacing.size()+1);
+         aheadBrgLine.SetSpacing(vAheadSpacing);
+         IndexType brgLineIdx = (backGrpIdx == INVALID_INDEX ? 0 : 1);
+         pierData.SetBearingLineData(brgLineIdx,aheadBrgLine);
 
-      refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Ahead,pgsTypes::omtAlignment);
-      std::vector<Float64> vAheadSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Ahead,pgsTypes::AtPierLine,pgsTypes::AlongItem);
-      xbrBearingLineData aheadBrgLine;
-      aheadBrgLine.SetBearingLineOffset(aheadBrgOffset);
-      aheadBrgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
-      aheadBrgLine.SetBearingCount(vAheadSpacing.size()+1);
-      aheadBrgLine.SetSpacing(vAheadSpacing);
-      pierData.SetBearingLineData(1,aheadBrgLine);
-
-      std::vector<BearingReactions>& vAheadBrgReactions = GetPrivateBearingReactions(pierID,1);
-      vAheadBrgReactions.resize(aheadBrgLine.GetBearingCount());
+         std::vector<BearingReactions>& vAheadBrgReactions = GetPrivateBearingReactions(pierID,brgLineIdx);
+         vAheadBrgReactions.resize(aheadBrgLine.GetBearingCount());
+      }
    }
    else
    {
@@ -3264,6 +3276,11 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
    ATLASSERT(pPier != NULL);
+
+   if ( pPier->IsAbutment() && pPier->GetIndex() == 0 )
+   {
+      pierFace = pgsTypes::Ahead;
+   }
 
    // Get the girder group
    const CGirderGroupData* pGroup = pPier->GetGirderGroup(pierFace);

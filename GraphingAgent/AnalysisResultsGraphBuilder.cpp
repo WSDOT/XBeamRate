@@ -159,7 +159,7 @@ bool CXBRAnalysisResultsGraphBuilder::UpdateNow()
 
       bool bCanUpdate = false;
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
       {
          const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
          if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )

@@ -77,7 +77,7 @@ HRESULT CPierExporter::Export(PierIndexType pierIdx)
       GET_IFACE(IBridge,pBridge);
       PierIndexType nPiers = pBridge->GetPierCount();
       CString strPiers;
-      for ( PierIndexType pIdx = 1; pIdx < nPiers-1; pIdx++ )
+      for ( PierIndexType pIdx = 0; pIdx < nPiers; pIdx++ )
       {
          pgsTypes::PierModelType modelType = pBridge->GetPierModelType(pIdx);
          if ( modelType == pgsTypes::pmtPhysical )
@@ -150,7 +150,7 @@ HRESULT CPierExporter::BatchExport()
    CString strPiers;
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    PierIndexType nPiers = pIBridgeDesc->GetPierCount();
-   for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+   for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
    {
       const CPierData2* pPier = pIBridgeDesc->GetPier(pierIdx);
       if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )

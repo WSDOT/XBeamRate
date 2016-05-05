@@ -189,7 +189,7 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
          GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
          const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
          PierIndexType nPiers = pBridgeDesc->GetPierCount();
-         for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+         for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
          {
             CString strPierLabel;
             strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
@@ -204,7 +204,7 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
             }
          }
 
-         if ( selPierIdx == INVALID_INDEX || selPierIdx == 0 || selPierIdx == nPiers-1 )
+         if ( selPierIdx == INVALID_INDEX )
          {
             pcbPiers->SetCurSel(0);
          }
@@ -234,7 +234,7 @@ BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs)
    EAFGetBroker(&pBroker);
    if ( pBroker == NULL )
    {
-      // If the broker is NULL, it has been initialized yet. This only happens during
+      // If the broker is NULL, it has not been initialized yet. This only happens during
       // start up in stand alone mode. In PGS Extension model, this viewframe doesn't
       // get created until long after the broker is alive and well.
       // 

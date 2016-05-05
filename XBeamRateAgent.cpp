@@ -104,21 +104,14 @@ void CMyCommandTarget::OnPierCommandUpdate(CCmdUI* pCmdUI)
 
    GET_IFACE2(pBroker,ISelection,pSelection);
    PierIndexType selPierIdx = pSelection->GetSelectedPier();
-   if ( selPierIdx == 0 || selPierIdx == nPiers-1 || nPiers < 3 )
+   const CPierData2* pPier = pIBridgeDesc->GetPier(selPierIdx);
+   if ( pPier == NULL || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
    {
-      pCmdUI->Enable(FALSE);
+      pCmdUI->Enable(TRUE);
    }
    else
    {
-      const CPierData2* pPier = pIBridgeDesc->GetPier(selPierIdx);
-      if ( pPier == NULL || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
-      {
-         pCmdUI->Enable(TRUE);
-      }
-      else
-      {
-         pCmdUI->Enable(FALSE);
-      }
+      pCmdUI->Enable(FALSE);
    }
 }
 
@@ -130,15 +123,8 @@ void CMyCommandTarget::OnBackgroundContextMenu(CEAFMenu* pMenu)
 
 void CMyCommandTarget::OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu)
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IBridge,pBridge);
-   PierIndexType nPiers = pBridge->GetPierCount();
-   if ( 0 < pierIdx && pierIdx < nPiers-1 )
-   {
-      pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
-      pMenu->AppendMenu(IDM_EXPORT_PIER,_T("Export to XBRate"),m_pMyAgent);
-   }
+   pMenu->AppendMenu(ID_VIEW_PIER,_T("View Pier"),m_pMyAgent);
+   pMenu->AppendMenu(IDM_EXPORT_PIER,_T("Export to XBRate"),m_pMyAgent);
 }
 
 void CMyCommandTarget::OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu) {}

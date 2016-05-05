@@ -182,7 +182,7 @@ BOOL CPierReportDlg::OnInitDialog()
       GET_IFACE(IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
       PierIndexType nPiers = pBridgeDesc->GetPierCount();
-      for ( PierIndexType pierIdx = 1; pierIdx < nPiers-1; pierIdx++ )
+      for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
       {
          CString strPierLabel;
          strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
@@ -192,7 +192,7 @@ BOOL CPierReportDlg::OnInitDialog()
          pCB->SetItemData(idx,(DWORD_PTR)pierID);
       }
 
-      m_PierID = pBridgeDesc->GetPier(1)->GetID();
+      m_PierID = pBridgeDesc->GetPier(0)->GetID();
    }
 
    CDialog::OnInitDialog();

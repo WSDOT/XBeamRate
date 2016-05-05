@@ -81,7 +81,7 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
       GET_IFACE(IBridgeDescription,pIBridgeDesc);
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
 
-      if ( selPierIdx == INVALID_INDEX || selPierIdx == 0 || selPierIdx == nPiers-1 )
+      if ( selPierIdx == INVALID_INDEX )
       {
          boost::shared_ptr<CReportSpecification> nullSpec;
          return CreateReportSpec(rptDesc,nullSpec);
