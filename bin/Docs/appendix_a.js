@@ -4,6 +4,7 @@ var appendix_a =
     [ "Section Cut", "appendix_a_section_cut.html", null ],
     [ "Load Rating Options", "appendix_a_load_rating_options.html", "appendix_a_load_rating_options" ],
     [ "Report Options", "appendix_a_report.html", null ],
+    [ "Configure Reports", "appendix_a_configure_reports.html", "appendix_a_configure_reports" ],
     [ "Pier Description", "appendix_a_pier.html", "appendix_a_pier" ],
     [ "Pier View", "appendix_a_pier_view.html", null ],
     [ "Report View", "appendix_a_report_view.html", null ],

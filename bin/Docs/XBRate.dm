@@ -1,7 +1,10 @@
 103=appendix_a_analysis_results.html
 501=appendix_a_concrete_aashto.html
 500=appendix_a_concrete_general.html
+3923=appendix_a_custom_reports.html
+3925=appendix_a_custom_report_definition.html
 401=appendix_a_report.html
+3924=appendix_a_favorite_reports.html
 205=appendix_a_pier_live_loads.html
 104=appendix_a_live_load_results.html
 203=appendix_a_pier_materials.html
