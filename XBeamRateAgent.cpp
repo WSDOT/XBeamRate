@@ -584,16 +584,9 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
    // The PGSuper/PGSplice Edit Pier dialog is being displayed... here is our
    // chance to add a property page to the dialog
    const CPierData2* pPier = pEditPierData->GetPierData();
-   if ( pPier->IsAbutment() )
-   {
-      return NULL;
-   }
-   else
-   {
-      GET_IFACE(IXBRProject,pProject);
-      m_ReinforcementPageParent.SetEditPierData(pEditPierData,pProject->GetPierData(pPier->GetID()));
-      return new CReinforcementPage(&m_ReinforcementPageParent);
-   }
+   GET_IFACE(IXBRProject,pProject);
+   m_ReinforcementPageParent.SetEditPierData(pEditPierData,pProject->GetPierData(pPier->GetID()));
+   return new CReinforcementPage(&m_ReinforcementPageParent);
 }
 
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage)
