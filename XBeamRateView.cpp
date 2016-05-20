@@ -1235,17 +1235,17 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
 
          // Get location of the top left and right corners of the girder, projected onto the viewing plane
          CComPtr<IPoint2d> pntPier1,pntEnd1,pntBrg1,pntBrg2,pntEnd2,pntPier2;
-         pGirder->GetSegmentEndPoints(segmentKey,&pntPier1,&pntEnd1,&pntBrg1,&pntBrg2,&pntEnd2,&pntPier2);
+         pGirder->GetSegmentEndPoints(segmentKey,pgsTypes::pcLocal,&pntPier1,&pntEnd1,&pntBrg1,&pntBrg2,&pntEnd2,&pntPier2);
          CComPtr<IPoint2d> pntLeft, pntRight;
          pGeometry->ByDistDir(pntEnd1, wTop/2,CComVariant(pierDirection),0.0,&pntLeft);
          pGeometry->ByDistDir(pntEnd1,-wTop/2,CComVariant(pierDirection),0.0,&pntRight);
 
          // Get the elevation of the top left and right corners
          Float64 station, offset;
-         pAlignment->GetStationAndOffset(pntLeft,&station,&offset);
+         pAlignment->GetStationAndOffset(pgsTypes::pcLocal,pntLeft,&station,&offset);
          Float64 elev1 = pAlignment->GetElevation(station,offset);
 
-         pAlignment->GetStationAndOffset(pntRight,&station,&offset);
+         pAlignment->GetStationAndOffset(pgsTypes::pcLocal,pntRight,&station,&offset);
          Float64 elev2 = pAlignment->GetElevation(station,offset);
 
          // Compute the shear factor
