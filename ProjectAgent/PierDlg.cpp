@@ -56,8 +56,9 @@ void CPierDlg::SetEditPierData(const txnEditPierData& pierData)
    m_PierData = pierData;
 }
 
-const txnEditPierData& CPierDlg::GetEditPierData() const
+txnEditPierData CPierDlg::GetEditPierData()
 {
+   VerifyLongitudinalReinforcement();
    return m_PierData;
 }
 
@@ -145,5 +146,21 @@ void CPierDlg::Init()
 BEGIN_MESSAGE_MAP(CPierDlg, CPropertySheet)
 END_MESSAGE_MAP()
 
-
 // CPierDlg message handlers
+
+bool RemoveTopBars(xbrLongitudinalRebarData::RebarRow& row)
+{
+   return row.Datum == xbrTypes::Top ? true : false;
+}
+
+void CPierDlg::VerifyLongitudinalReinforcement()
+{
+   // make sure the reinforcement in the pier data is correct
+   // If the pier type was changed from Integral to Expansion or Continuous
+   // the Top cross beam bars are not valid and should be removed
+   if ( m_PierData.m_PierData.GetPierType() != xbrTypes::pctIntegral )
+   {
+      xbrLongitudinalRebarData& rebar( m_PierData.m_PierData.GetLongitudinalRebar() );
+      rebar.RebarRows.erase(std::remove_if(rebar.RebarRows.begin(),rebar.RebarRows.end(),RemoveTopBars),rebar.RebarRows.end());
+   }
+}

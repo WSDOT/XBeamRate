@@ -300,7 +300,16 @@ CString CLongitudinalRebarGrid::GetDatum(xbrTypes::LongitudinalRebarDatumType da
 
    if ( datum == xbrTypes::Top )
    {
-      return _T("Top");
+      if ( pParent->GetPierType() == xbrTypes::pctIntegral )
+      {
+         return _T("Top");
+      }
+      else
+      {
+         // xbrTypes::Top bars are not valid for non-integral cross beams... return the keyword "Invalid"
+         // so we can omit this one from the grid
+         return _T("Invalid");
+      }
    }
 
    return _T("Top Lower XBeam");
@@ -327,28 +336,40 @@ xbrTypes::LongitudinalRebarLayoutType CLongitudinalRebarGrid::GetRebarLayoutType
 {
    CString str(lpszLayoutType);
    if ( str == _T("Left End") )
+   {
       return xbrTypes::blLeftEnd;
+   }
    else if ( str == _T("Right End") )
+   {
       return xbrTypes::blRightEnd;
+   }
    else if ( str == _T("Full Length") )
+   {
       return xbrTypes::blFullLength;
+   }
 
    ATLASSERT(false);
    return xbrTypes::blFullLength;
 }
 
-void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData)
+bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarData::RebarRow& rebarData)
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-
    ROWCOL col = 1;
 
    IReinforcementPageParent* pParent = ((CReinforcementPage*)GetParent())->GetPageParent();
 
    CString strBeamFaceChoiceList = GetDatumOptions();
    CString strDatum = GetDatum(rebarData.Datum);
+
+   if ( strDatum == _T("Invalid") )
+   {
+      // bar datum is not valid for this type of cross beam... just skip it
+      return false;
+   }
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    // Datum
    SetStyleRange(CGXRange(row,col++), CGXStyle()
@@ -463,6 +484,8 @@ void CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       );
 
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
+
+   return true;
 }
 
 void CLongitudinalRebarGrid::AddRebarRow(const xbrLongitudinalRebarData::RebarRow& rebarData)
@@ -470,7 +493,10 @@ void CLongitudinalRebarGrid::AddRebarRow(const xbrLongitudinalRebarData::RebarRo
    InsertRows(GetRowCount()+1,1);
    ROWCOL row = GetRowCount();
 
-   SetRebarData(row,rebarData);
+   if ( !SetRebarData(row,rebarData) )
+   {
+      RemoveRows(row,row);
+   }
 }
 
 void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::RebarRow& rebarData)

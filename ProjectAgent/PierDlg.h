@@ -41,7 +41,7 @@ public:
 	virtual ~CPierDlg();
 
    void SetEditPierData(const txnEditPierData& pierData);
-   const txnEditPierData& GetEditPierData() const;
+   txnEditPierData GetEditPierData();
 
    // IReinforcementPageParent
    virtual CPierData2* GetPierData();
@@ -59,6 +59,8 @@ public:
 
 protected:
 	DECLARE_MESSAGE_MAP()
+
+   void VerifyLongitudinalReinforcement();
 
    void Init();
 
