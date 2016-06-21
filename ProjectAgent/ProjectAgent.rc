@@ -60,8 +60,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,8
- PRODUCTVERSION 1,0,0,8
+ FILEVERSION 1,0,0,9
+ PRODUCTVERSION 1,0,0,9
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -79,12 +79,12 @@ BEGIN
             VALUE "Comments", "A member of the Alternate Route Project"
             VALUE "CompanyName", "Washington State Department of Transportation"
             VALUE "FileDescription", "ProjectAgent Module"
-            VALUE "FileVersion", "1.0.0.8"
+            VALUE "FileVersion", "1.0.0.9"
             VALUE "InternalName", "ProjectAgent"
             VALUE "LegalCopyright", "Copyright © 1999-2016, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "ProjectAgent.dll"
             VALUE "ProductName", "XBRate"
-            VALUE "ProductVersion", "1.0.0.8"
+            VALUE "ProductVersion", "1.0.0.9"
         END
     END
     BLOCK "VarFileInfo"
