@@ -1186,8 +1186,6 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
       aheadGroupIdx = backGroupIdx;
    }
 
-   GET_IFACE2(pBroker,IRoadway,pAlignment);
-   GET_IFACE2(pBroker,IGeometry,pGeometry);
    GET_IFACE2(pBroker,IShapes,pShapes);
    GET_IFACE2(pBroker,IPointOfInterest,pPoi);
    GET_IFACE2(pBroker,IIntervals,pIntervals);
@@ -1233,23 +1231,8 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          Float64 wTop = pGirder->GetTopWidth(poi);
          wTop /= cos(skew); // top width of the girder, measured normal to the viewing direction
 
-         // Get location of the top left and right corners of the girder, projected onto the viewing plane
-         CComPtr<IPoint2d> pntPier1,pntEnd1,pntBrg1,pntBrg2,pntEnd2,pntPier2;
-         pGirder->GetSegmentEndPoints(segmentKey,pgsTypes::pcLocal,&pntPier1,&pntEnd1,&pntBrg1,&pntBrg2,&pntEnd2,&pntPier2);
-         CComPtr<IPoint2d> pntLeft, pntRight;
-         pGeometry->ByDistDir(pntEnd1, wTop/2,CComVariant(pierDirection),0.0,&pntLeft);
-         pGeometry->ByDistDir(pntEnd1,-wTop/2,CComVariant(pierDirection),0.0,&pntRight);
-
-         // Get the elevation of the top left and right corners
-         Float64 station, offset;
-         pAlignment->GetStationAndOffset(pgsTypes::pcLocal,pntLeft,&station,&offset);
-         Float64 elev1 = pAlignment->GetElevation(station,offset);
-
-         pAlignment->GetStationAndOffset(pgsTypes::pcLocal,pntRight,&station,&offset);
-         Float64 elev2 = pAlignment->GetElevation(station,offset);
-
          // Compute the shear factor
-         Float64 shear = (elev2 - elev1)/wTop;
+         Float64 shear = 0;
 
          // Adjust the shape of the girder for skew and shear
          CComPtr<IShape> skewedShape;
