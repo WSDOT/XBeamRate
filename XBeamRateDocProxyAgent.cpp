@@ -249,6 +249,11 @@ HRESULT CXBeamRateDocProxyAgent::OnRatingSpecificationChanged()
 
 ////////////////////////////////////////////////////////////////////
 // IEAFDisplayUnitsEventSink
+HRESULT CXBeamRateDocProxyAgent::OnUnitsChanging()
+{
+   return S_OK;
+}
+
 HRESULT CXBeamRateDocProxyAgent::OnUnitsChanged(eafTypes::UnitMode newUnitMode)
 {
    AFX_MANAGE_STATE(AfxGetAppModuleState());

@@ -118,6 +118,7 @@ public:
 
 // IEAFDisplayUnitsEventSink
 public:
+   virtual HRESULT OnUnitsChanging();
    virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
 
 // IXBRUIEvents
