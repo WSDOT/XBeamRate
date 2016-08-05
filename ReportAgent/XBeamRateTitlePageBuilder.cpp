@@ -78,7 +78,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    rptChapter* pTitlePage = new rptChapter;
 
    rptParagraph* pPara = new rptParagraph;
-   pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
+   pPara->SetStyleName(rptStyleManager::GetReportTitleStyle());
    *pTitlePage << pPara;
 
    std::_tstring title = GetReportTitle();
@@ -98,7 +98,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
 
 
    pPara = new rptParagraph;
-   pPara->SetStyleName(pgsReportStyleHolder::GetReportTitleStyle());
+   pPara->SetStyleName(rptStyleManager::GetReportTitleStyle());
    *pTitlePage << pPara;
 #if defined _WIN64
    *pPara << _T("XBRate") << Super(symbol(TRADEMARK)) << _T(" (x64)") << rptNewLine;
@@ -106,18 +106,18 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    *pPara << _T("XBRate") << Super(symbol(TRADEMARK)) << _T(" (x86)") << rptNewLine;
 #endif
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetCopyrightStyle());
+   pPara = new rptParagraph(rptStyleManager::GetCopyrightStyle());
    *pTitlePage << pPara;
    *pPara << _T("Copyright ") << symbol(COPYRIGHT) << _T(" ") << sysDate().Year() << _T(", WSDOT, All Rights Reserved") << rptNewLine;
 
    pPara = new rptParagraph;
-   pPara->SetStyleName(pgsReportStyleHolder::GetReportSubtitleStyle());
+   pPara->SetStyleName(rptStyleManager::GetReportSubtitleStyle());
    *pTitlePage << pPara;
    GET_IFACE(IXBRVersionInfo,pVerInfo);
    *pPara << pVerInfo->GetVersionString() << rptNewLine;
 
    // Title page art image.
-   // Can't use pgsReportStyleHolder method because it is for PGSuper/PGSplice.
+   // Can't use rptStyleManager method because it is for PGSuper/PGSplice.
    // We will just do it here locally.
    CAutoRegistry ar(_T("XBeamRate"));
    CWinApp* pApp = (CWinApp*)AfxGetApp();
@@ -125,7 +125,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
    std::_tstring strImage;
    if ( strImageName == _T("xbr_title_page_art.gif") )
    {
-      strImage = pgsReportStyleHolder::GetImagePath() + strImageName;
+      strImage = std::_tstring(rptStyleManager::GetImagePath()) + strImageName;
    }
    else
    {
@@ -148,15 +148,15 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecifica
 
    GET_IFACE(IEAFDocument,pDocument);
    GET_IFACE(IXBRProjectProperties,pProps);
-   rptParagraph* pPara3 = new rptParagraph( pgsReportStyleHolder::GetHeadingStyle() );
+   rptParagraph* pPara3 = new rptParagraph( rptStyleManager::GetHeadingStyle() );
    *pTitlePage << pPara3;
 
-   rptRcTable* pTbl = pgsReportStyleHolder::CreateTableNoHeading(2,_T("Project Properties"));
+   rptRcTable* pTbl = rptStyleManager::CreateTableNoHeading(2,_T("Project Properties"));
 
-   pTbl->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetColumnStyle(1,pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetStripeRowColumnStyle(1,pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetColumnStyle(0,rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetColumnStyle(1,rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetStripeRowColumnStyle(1,rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
 
    *pPara3 << rptNewLine << rptNewLine << rptNewLine;
 

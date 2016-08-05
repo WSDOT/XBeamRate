@@ -83,7 +83,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
       }
 
       CString strLiveLoadType = ::GetLiveLoadTypeName(ratingType);
-      rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+      rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
       pPara->SetName(strLiveLoadType);
       *pPara << pPara->GetName() << rptNewLine;
@@ -105,7 +105,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
          if ( !::IsDesignRatingType(ratingType) )
          {
             std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-            pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+            pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
             *pChapter << pPara;
             *pPara << strLiveLoadName << rptNewLine;
          }
@@ -151,7 +151,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
 
    if ( bPositiveMoment )
@@ -170,22 +170,22 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
 
    if ( bIsWSDOTPermitRating )
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentRatingEquation_WSDOT.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentRatingEquation_WSDOT.png") ) << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentRatingEquation_LRFD.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 23 : 22);
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
-   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    *pPara << pTable << rptNewLine;
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetFootnoteStyle());
+   pPara = new rptParagraph(rptStyleManager::GetFootnoteStyle());
    *pChapter << pPara;
    if ( bIsWSDOTPermitRating )
    {
@@ -339,7 +339,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Rating for Shear") << rptNewLine;
 
@@ -350,22 +350,22 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
 
    if ( bIsWSDOTPermitRating )
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamShearRatingEquation_WSDOT.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamShearRatingEquation_WSDOT.png") ) << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamShearRatingEquation_LRFD.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamShearRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
-   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    *pPara << pTable << rptNewLine;
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetFootnoteStyle());
+   pPara = new rptParagraph(rptStyleManager::GetFootnoteStyle());
    *pChapter << pPara;
    if ( bIsWSDOTPermitRating )
    {
@@ -512,7 +512,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
       return;
    }
 
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    if ( bPositiveMoment )
    {
@@ -528,18 +528,18 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
    if ( bIsWSDOTPermitRating )
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamReinforcementYieldingEquation_WSDOT.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamReinforcementYieldingEquation_WSDOT.png") ) << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamReinforcementYieldingEquation_LRFD.png") ) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamReinforcementYieldingEquation_LRFD.png") ) << rptNewLine;
    }
 
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 15 : 14);
-   rptRcTable* table = pgsReportStyleHolder::CreateDefaultTable(nColumns);
+   rptRcTable* table = rptStyleManager::CreateDefaultTable(nColumns);
    
-   table->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    //*pPara << table << rptNewLine; // don't add table here... see below
 
@@ -675,19 +675,19 @@ void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,I
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Load Posting Analysis Details [MBE 6A.8]") << rptNewLine;
 
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("SafePostingLoad.png") ) << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("SafePostingLoad.png") ) << rptNewLine;
 
    INIT_UV_PROTOTYPE( rptForceUnitValue, tonnage, pDisplayUnits->GetTonnageUnit(), false );
    rptCapacityToDemand rating_factor;
 
-   rptRcTable* table = pgsReportStyleHolder::CreateDefaultTable(5,_T(""));
+   rptRcTable* table = rptStyleManager::CreateDefaultTable(5,_T(""));
    
-   table->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    *pPara << table << rptNewLine;
 

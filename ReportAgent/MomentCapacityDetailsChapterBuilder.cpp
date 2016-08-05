@@ -75,11 +75,11 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    ColumnIndexType nColumns = 10;
    if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamMomentCapacity.png")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentCapacity.png")) << rptNewLine;
       nColumns--; // no alpha column
    }
 
@@ -90,7 +90,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
       CString strTitle;
       strTitle.Format(_T("%s Moment"),(bPositiveMoment ? _T("Positive") : _T("Negative")));
 
-      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
+      rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns,strTitle);
       *pPara << pTable << rptNewLine;
 
 
@@ -147,7 +147,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
          (*pTable)(row,col++) << dim.SetValue(beta1*c);
          (*pTable)(row,col++) << dim.SetValue(bw);
 
-         rptRcTable* pReinfTable = pgsReportStyleHolder::CreateDefaultTable(4);
+         rptRcTable* pReinfTable = rptStyleManager::CreateDefaultTable(4);
          (*pTable)(row,col++) << pReinfTable;
 
          (*pTable)(row,col++) << mcd.phi;

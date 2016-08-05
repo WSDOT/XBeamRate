@@ -81,7 +81,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    *pPara << _T("Shear resistance computed by LRFD 5.8.3.4.1 - Simplified Procedure for Nonprestressed Sections") << rptNewLine;
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    if ( pierType == xbrTypes::pctIntegral )
    {
@@ -94,15 +94,15 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("EffectiveShearDepth.png")) << rptNewLine;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_dv.png")) << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("EffectiveShearDepth.png")) << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_dv.png")) << rptNewLine;
 
-   rptRcTable* pDvTable1 = pgsReportStyleHolder::CreateDefaultTable(10);
+   rptRcTable* pDvTable1 = rptStyleManager::CreateDefaultTable(10);
    *pPara << pDvTable1 << rptNewLine;
 
    if ( pierType == xbrTypes::pctIntegral )
    {
-      pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+      pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
       *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD 5.8.2.9") << rptNewLine;
    }
@@ -112,10 +112,10 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    {
       pPara = new rptParagraph;
       *pChapter << pPara;
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("EffectiveShearDepth.png")) << rptNewLine;
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_dv.png")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("EffectiveShearDepth.png")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_dv.png")) << rptNewLine;
 
-      pDvTable2 = pgsReportStyleHolder::CreateDefaultTable(10);
+      pDvTable2 = rptStyleManager::CreateDefaultTable(10);
       *pPara << pDvTable2 << rptNewLine;
    }
 
@@ -123,7 +123,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    rptRcTable* pAvSTable2 = NULL;
    if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
    {
-      pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+      pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
       if ( pierType == xbrTypes::pctIntegral )
       {
@@ -136,29 +136,29 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       pPara = new rptParagraph;
       *pChapter << pPara;
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
 
-      pAvSTable1 = pgsReportStyleHolder::CreateDefaultTable(4);
+      pAvSTable1 = rptStyleManager::CreateDefaultTable(4);
       *pPara << pAvSTable1 << rptNewLine;
 
       if ( pierType == xbrTypes::pctIntegral )
       {
-         pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+         pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
          *pChapter << pPara;
 
          *pPara << _T("Average shear reinforcement - Upper Cross Beam - MBE 6A.5.8") << rptNewLine;
          pPara = new rptParagraph;
          *pChapter << pPara;
-         *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
-         *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
+         *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_AvOverS.png"),rptRcImage::Middle) << _T(" based on MBE Eqn 6A.5.8-1") << rptNewLine;
+         *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Lshear_failure_plane.png"),rptRcImage::Middle) << rptNewLine;
 
-         pAvSTable2 = pgsReportStyleHolder::CreateDefaultTable(4);
+         pAvSTable2 = rptStyleManager::CreateDefaultTable(4);
          *pPara << pAvSTable2 << rptNewLine;
       }
    }
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Shear Resistance Provided By Tensile Stress in the Concrete") << rptNewLine;
 
@@ -173,13 +173,13 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    {
       strImage = _T("XBeamVc_2016.png");
    }
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + strImage,rptRcImage::Middle) << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + strImage,rptRcImage::Middle) << _T(" LRFD Eqn 5.8.3.3-3") << rptNewLine;
 
-   rptRcTable* pVcTable = pgsReportStyleHolder::CreateDefaultTable(6);
+   rptRcTable* pVcTable = rptStyleManager::CreateDefaultTable(6);
    *pPara << pVcTable << rptNewLine;
 
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Shear Resistance Provided By Shear Reinforcement") << rptNewLine;
 
@@ -187,26 +187,26 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    *pChapter << pPara;
    if ( pierType == xbrTypes::pctIntegral )
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn C5.8.3.3-1") << rptNewLine;
    }
 
-   rptRcTable* pVsTable = pgsReportStyleHolder::CreateDefaultTable((pierType == xbrTypes::pctIntegral ? 8 : 6));
+   rptRcTable* pVsTable = rptStyleManager::CreateDefaultTable((pierType == xbrTypes::pctIntegral ? 8 : 6));
    *pPara << pVsTable << rptNewLine;
 
 
-   pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Nominal Shear Resistance") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("XBeamVn.png"),rptRcImage::Middle) << _T(" LRFD Eqns 5.8.3.3-1 and 5.8.3.3-2") << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVn.png"),rptRcImage::Middle) << _T(" LRFD Eqns 5.8.3.3-1 and 5.8.3.3-2") << rptNewLine;
 
-   rptRcTable* pVnTable = pgsReportStyleHolder::CreateDefaultTable(11);
+   rptRcTable* pVnTable = rptStyleManager::CreateDefaultTable(11);
    *pPara << pVnTable << rptNewLine;
 
    ColumnIndexType DvTableCol = 0;
@@ -396,7 +396,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
          (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi);
 
-         rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
+         rptRcTable* pAvTable = rptStyleManager::CreateDefaultTable(4);
          (*pAvSTable1)(row,AvSTableCol++) << pAvTable;
 
          (*pAvSTable1)(row,AvSTableCol++) << dist.SetValue(avsDetails.ShearFailurePlaneLength);
@@ -424,7 +424,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
             const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
             (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(poi);
 
-            rptRcTable* pAvTable = pgsReportStyleHolder::CreateDefaultTable(4);
+            rptRcTable* pAvTable = rptStyleManager::CreateDefaultTable(4);
             (*pAvSTable2)(row,AvSTableCol++) << pAvTable;
 
             (*pAvSTable2)(row,AvSTableCol++) << dist.SetValue(avsDetails.ShearFailurePlaneLength);

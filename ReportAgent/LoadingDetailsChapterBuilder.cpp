@@ -93,16 +93,16 @@ CChapterBuilder* CLoadingDetailsChapterBuilder::Clone() const
 void write_limit_state_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Limit States") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(8);
-   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(8);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
    *pPara << pTable << rptNewLine;
 
    ColumnIndexType col = 0;
@@ -157,7 +157,7 @@ void write_limit_state_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 
 void write_dead_load_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Cross Beam Dead Load") << rptNewLine;
 
@@ -167,7 +167,7 @@ void write_dead_load_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptForcePerLengthUnitValue, fpl, pDisplayUnits->GetForcePerLengthUnit(), false );
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(4,_T("Lower Cross Beam"));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(4,_T("Lower Cross Beam"));
    *pPara << pTable << rptNewLine;
 
    ColumnIndexType col = 0;
@@ -199,7 +199,7 @@ void write_dead_load_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
 
 void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Bearing Layout and Reactions") << rptNewLine;
 
@@ -224,13 +224,13 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
       rptRcTable* pTable;
       if ( nBearingLines == 1 )
       {
-         pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns);
+         pTable = rptStyleManager::CreateDefaultTable(nColumns);
       }
       else
       {
          CString strTitle;
          strTitle.Format(_T("%s Bearing Line"),(brgLineIdx == 0 ? _T("Back") : _T("Ahead")));
-         pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,strTitle);
+         pTable = rptStyleManager::CreateDefaultTable(nColumns,strTitle);
       }
       *pPara << pTable << rptNewLine;
 
@@ -323,7 +323,7 @@ void write_bearing_layout_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 
 void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Live Load Reactions") << rptNewLine;
 
@@ -365,9 +365,9 @@ void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCh
       rptParagraph* pPara = new rptParagraph;
       *pChapter << pPara;
 
-      rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,pProject->GetLiveLoadName(pierID,ratingType,INVALID_INDEX).c_str());
-      pTable->SetColumnStyle(1, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
-      pTable->SetStripeRowColumnStyle(1, pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
+      rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns,pProject->GetLiveLoadName(pierID,ratingType,INVALID_INDEX).c_str());
+      pTable->SetColumnStyle(1, rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT) );
+      pTable->SetStripeRowColumnStyle(1, rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
       *pPara << pTable << rptNewLine;
 
       ColumnIndexType col = 0;

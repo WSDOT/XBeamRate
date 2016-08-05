@@ -51,7 +51,7 @@ rptChapter* CXBeamRateChapterBuilder::Build(CReportSpecification* pRptSpec,Uint1
 
    rptChapter* pChapter = new rptChapter(GetName());
    rptParagraph* p_para = new rptParagraph;
-   p_para->SetStyleName(pgsReportStyleHolder::GetChapterTitleStyle());
+   p_para->SetStyleName(rptStyleManager::GetChapterTitleStyle());
    *pChapter << p_para;
    *p_para << GetName() << rptNewLine;
    return pChapter;

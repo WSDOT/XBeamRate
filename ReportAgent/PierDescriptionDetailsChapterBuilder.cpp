@@ -102,7 +102,7 @@ void write_superstructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), true );
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Superstructure Properties") << rptNewLine;
 
@@ -114,13 +114,13 @@ void write_superstructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 
    CString strImageName;
    strImageName.Format(_T("XBR_Superstructure_%s_%s.png"),strPierTypes[pProject->GetPierType(pierID)],strDatumType[pProject->GetCurbLineDatum(pierID)]);
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + std::_tstring(strImageName)) << rptNewLine << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + std::_tstring(strImageName)) << rptNewLine << rptNewLine;
 
    *pPara << _T("Horizonal dimensions are normal to the alignment, except for W which is normal to the plane of the pier.") << rptNewLine;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateTableNoHeading(2);
-   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   rptRcTable* pTable = rptStyleManager::CreateTableNoHeading(2);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
    *pPara << pTable << rptNewLine;
 
 
@@ -191,22 +191,22 @@ void write_substructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Substructure Properties") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   *pPara << rptRcImage(pgsReportStyleHolder::GetImagePath() + _T("Lower_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Lower_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
 
    *pPara << _T("Horizonal dimensions are in the plane of the pier.") << rptNewLine;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateTableNoHeading(4);
-   pTable->SetColumnStyle(0,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetColumnStyle(2,pgsReportStyleHolder::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(2,pgsReportStyleHolder::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   rptRcTable* pTable = rptStyleManager::CreateTableNoHeading(4);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetColumnStyle(2,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(2,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
    *pPara << pTable << rptNewLine;
 
    Float64 H1,H2,H3,H4,X1,X2,X3,X4,X5,X6,W;
@@ -229,7 +229,7 @@ void write_substructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
    (*pTable)(2,2) << _T("");
    (*pTable)(2,3) << _T("W = ") << length.SetValue(W);
 
-   pTable = pgsReportStyleHolder::CreateDefaultTable(9,_T("Column Properties"));
+   pTable = rptStyleManager::CreateDefaultTable(9,_T("Column Properties"));
    *pPara << pTable << rptNewLine;
    ColumnIndexType col = 0;
    (*pTable)(0,col++) << _T("Col");
@@ -317,11 +317,11 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
       nColumns++;
    }
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(nColumns,_T("Concrete Properties"));
-   pTable->SetColumnStyle(0, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
-   pTable->SetStripeRowColumnStyle(0, pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
-   pTable->SetColumnStyle(1, pgsReportStyleHolder::GetTableCellStyle( CB_NONE | CJ_LEFT) );
-   pTable->SetStripeRowColumnStyle(1, pgsReportStyleHolder::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns,_T("Concrete Properties"));
+   pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT) );
+   pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
+   pTable->SetColumnStyle(1, rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT) );
+   pTable->SetStripeRowColumnStyle(1, rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT) );
 
    *pPara << pTable << rptNewLine;
 
@@ -455,7 +455,7 @@ void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,r
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(3,_T("Reinforcement Properties"));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(3,_T("Reinforcement Properties"));
    *pPara << pTable << rptNewLine;
 
    (*pTable)(0,0) << _T("Name");
@@ -470,14 +470,14 @@ void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,r
 
 void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Longitudinal Reinforcement") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(11);
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(11);
    *pPara << pTable << rptNewLine;
 
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -552,7 +552,7 @@ void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pD
 
 void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID,xbrTypes::Stage stage)
 {
-   rptParagraph* pPara = new rptParagraph(pgsReportStyleHolder::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Stirrups");
    if ( stage == xbrTypes::Stage1 )
@@ -586,7 +586,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = pgsReportStyleHolder::CreateDefaultTable(5);
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(5);
    *pPara << pTable << rptNewLine;
 
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
