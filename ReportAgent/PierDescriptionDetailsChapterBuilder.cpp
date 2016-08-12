@@ -337,7 +337,7 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    if ( bK1 )
    {
       pTable->SetNumberOfHeaderRows(2);
-      for ( int i = 0; i < col; i++ )
+      for ( ColumnIndexType i = 0; i < col; i++ )
       {
          pTable->SetRowSpan(0,i,2); 
          pTable->SetRowSpan(1,i,SKIP_CELL);
