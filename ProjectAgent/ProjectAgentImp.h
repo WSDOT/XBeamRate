@@ -461,6 +461,8 @@ private:
    bool UseUniformLoads(PierIDType pierID,IndexType brgLineIdx);
 
    GirderIndexType GetLongestGirderLine();
+
+   void Invalidate();
 };
 
 OBJECT_ENTRY_AUTO(CLSID_ProjectAgent, CProjectAgentImp)

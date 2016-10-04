@@ -191,6 +191,29 @@ HRESULT CProjectAgentImp::FinalConstruct()
 
 void CProjectAgentImp::FinalRelease()
 {
+   Invalidate();
+}
+
+void CProjectAgentImp::Invalidate()
+{
+   for ( int i = 0; i < 8; i++ )
+   {
+      m_gLL[i].clear();
+   }
+
+   for ( int i = 0; i < 2; i++ )
+   {
+      m_BearingReactions[i].clear();
+      m_BearingReactionType[i].clear();
+   }
+   
+   for ( int i = 0; i < 6; i++ )
+   {
+      std::map<PierIDType,std::vector<xbrLiveLoadReactionData>>& reactions = m_LiveLoadReactions[i];
+      reactions.clear();
+   }
+
+   m_ReactionApplication.clear();
 }
 
 HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
@@ -3247,7 +3270,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       brgLine.SetSpacing(vSpacing);
       pierData.SetBearingLineData(0,brgLine);
 
-      m_BearingReactions[pierID][0].resize(brgLine.GetBearingCount());
+      m_BearingReactions[0][pierID].resize(brgLine.GetBearingCount());
    }
 
    Fire_OnProjectChanged();
