@@ -37,3 +37,8 @@ PierIDType CXBeamRateReportSpecification::GetPierID()
 {
    return m_PierID;
 }
+
+void CXBeamRateReportSpecification::SetPierID(PierIDType pier)
+{
+   m_PierID = pier;
+}

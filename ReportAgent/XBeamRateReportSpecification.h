@@ -32,6 +32,7 @@ public:
    ~CXBeamRateReportSpecification(void);
 
    PierIDType GetPierID();
+   void SetPierID(PierIDType pier);
 
 protected:
    PierIDType m_PierID;

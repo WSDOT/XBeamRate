@@ -38,7 +38,7 @@ CXBeamRateReportSpecificationBuilder::~CXBeamRateReportSpecificationBuilder(void
 {
 }
 
-boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pRptSpec)
+boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pOldRptSpec)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -54,16 +54,30 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
       }
    }
 
-   CPierReportDlg dlg(m_pBroker,rptDesc,pRptSpec);
+   CPierReportDlg dlg(m_pBroker,rptDesc,pOldRptSpec);
 
    if ( dlg.DoModal() == IDOK )
    {
-      boost::shared_ptr<CReportSpecification> pRptSpec( new CXBeamRateReportSpecification(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID) );
+      // If possible, copy information from old spec. Otherwise header/footer and other info will be lost
+      boost::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = boost::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
+
+      boost::shared_ptr<CReportSpecification> pNewRptSpec;
+      if(pOldGRptSpec)
+      {
+         boost::shared_ptr<CXBeamRateReportSpecification> pNewGRptSpec = boost::shared_ptr<CXBeamRateReportSpecification>( new CXBeamRateReportSpecification(*pOldGRptSpec) );
+         pNewGRptSpec->SetPierID(dlg.m_PierID);
+
+         pNewRptSpec = boost::static_pointer_cast<CReportSpecification>(pNewGRptSpec);
+      }
+      else
+      {
+         pNewRptSpec = boost::shared_ptr<CXBeamRateReportSpecification>( new CXBeamRateReportSpecification(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID) );
+      }
 
       std::vector<std::_tstring> chList = dlg.m_ChapterList;
-      rptDesc.ConfigureReportSpecification(chList,pRptSpec);
+      rptDesc.ConfigureReportSpecification(chList,pNewRptSpec);
 
-      return pRptSpec;
+      return pNewRptSpec;
    }
 
    return boost::shared_ptr<CReportSpecification>();
