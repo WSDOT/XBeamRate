@@ -140,7 +140,7 @@ void write_limit_state_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
 
       pgsTypes::LoadRatingType ratingType = ::RatingTypeFromLimitState(limitState);
 
-      CString strLimitState = ::GetLimitStateName(limitState);
+      CString strLimitState = ::GetLimitStateString(limitState);
 
       Float64 LL = pProject->GetLiveLoadFactor(pierID,limitState,INVALID_INDEX);
 
