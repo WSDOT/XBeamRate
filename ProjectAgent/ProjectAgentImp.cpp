@@ -1768,16 +1768,16 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          // we want the total pier reaction
          GET_IFACE(IReactions,pReactions);
 
-         *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDC,bat,resultsType);
-         *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType);
+         *pDC = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDC,bat,resultsType).Fy;
+         *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType).Fy;
 
          GET_IFACE(ILossParameters,pLossParams);
          if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
          {
-            *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType);
-            *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType);
-            *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType);
-            *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType);
+            *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType).Fy;
+            *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType).Fy;
+            *pRE = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcRE,bat,resultsType).Fy;
+            *pPS = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcPS,bat,resultsType).Fy;
          }
          else
          {
@@ -3033,12 +3033,12 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
             std::_tstring strName = pProductLoads->GetLiveLoadName(llType,vehicleIdx);
 
 
-            Float64 Rmin,Rmax;
+            REACTION Rmin,Rmax;
             pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
 
             Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
             
-            m_LiveLoadReactions[ratingType][pierID].push_back(xbrLiveLoadReactionData(strName,Rmax,W));
+            m_LiveLoadReactions[ratingType][pierID].push_back(xbrLiveLoadReactionData(strName,Rmax.Fy,W));
          }
       }
    }
