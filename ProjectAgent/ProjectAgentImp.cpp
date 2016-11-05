@@ -104,24 +104,24 @@ CProjectAgentImp::CProjectAgentImp()
 
    m_gDC_StrengthI = 1.25;
    m_gDW_StrengthI = 1.50;
-   m_gCR_StrengthI = 1.00;
-   m_gSH_StrengthI = 1.00;
+   m_gCR_StrengthI = 1.25;
+   m_gSH_StrengthI = 1.25;
+   m_gRE_StrengthI = 1.25;
    m_gPS_StrengthI = 1.00;
-   m_gRE_StrengthI = 1.00;
 
    m_gDC_StrengthII = 1.25;
    m_gDW_StrengthII = 1.50;
-   m_gCR_StrengthII = 1.00;
-   m_gSH_StrengthII = 1.00;
+   m_gCR_StrengthII = 1.25;
+   m_gSH_StrengthII = 1.25;
+   m_gRE_StrengthII = 1.25;
    m_gPS_StrengthII = 1.00;
-   m_gRE_StrengthII = 1.00;
 
    m_gDC_ServiceI = 1.00;
    m_gDW_ServiceI = 1.00;
    m_gCR_ServiceI = 1.00;
    m_gSH_ServiceI = 1.00;
-   m_gPS_ServiceI = 1.00;
    m_gRE_ServiceI = 1.00;
+   m_gPS_ServiceI = 1.00;
 
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]       = 1.75;
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]       = 1.35;
