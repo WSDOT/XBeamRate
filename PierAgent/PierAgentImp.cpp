@@ -1713,6 +1713,11 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
    // Map the input stirrup zones into actual stirrup zones
    pvStirrupZones->clear();
 
+   if ( stirrupData.Zones.size() == 0 )
+   {
+      return;
+   }
+
    Float64 L = GetXBeamLength(pierID);
 
    GET_IFACE(IXBRProject,pProject);

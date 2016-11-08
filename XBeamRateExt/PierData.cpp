@@ -26,8 +26,8 @@
 xbrPierData::xbrPierData()
 {
    m_ID = INVALID_ID;
-   m_ConnectionType = xbrTypes::pctIntegral;
-   m_strSkew = _T("00 00 0.0 L");
+   m_ConnectionType = xbrTypes::pctContinuous;
+   m_strSkew = _T("00 00 00.0 L");
    m_BridgeLineOffset = 0;
    m_CurbLineDatum = pgsTypes::omtAlignment;
    m_LeftCurbOffset  = -::ConvertToSysUnits(10.0,unitMeasure::Feet);
@@ -41,7 +41,7 @@ xbrPierData::xbrPierData()
    m_LeftCrownSlope = -0.02;
    m_RightCrownSlope = -0.02;
 
-   m_H = ::ConvertToSysUnits(8,unitMeasure::Feet);
+   m_H = ::ConvertToSysUnits(3,unitMeasure::Feet);
    m_W = ::ConvertToSysUnits(5,unitMeasure::Feet);
 
    m_H1 = ::ConvertToSysUnits(5,unitMeasure::Feet);
@@ -61,8 +61,8 @@ xbrPierData::xbrPierData()
    m_RefColumnOffset = 0;
    m_RefColumnDatum = pgsTypes::omtAlignment;
 
-   m_X5 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_X6 = ::ConvertToSysUnits(5,unitMeasure::Feet);
+   m_X5 = ::ConvertToSysUnits(10,unitMeasure::Feet);
+   m_X6 = ::ConvertToSysUnits(10,unitMeasure::Feet);
 
    // Load Rating Condition
    m_ConditionFactorType = pgsTypes::cfGood;
@@ -72,15 +72,15 @@ xbrPierData::xbrPierData()
    m_RebarType = matRebar::A615;
    m_RebarGrade = matRebar::Grade60;
 
-   // Rebar
-   xbrLongitudinalRebarData::RebarRow row;
-   row.Datum = xbrTypes::Bottom;
-   row.LayoutType = xbrTypes::blFullLength;
-   row.BarSize = matRebar::bs11;
-   row.BarSpacing = ::ConvertToSysUnits(6,unitMeasure::Inch);
-   row.Cover = ::ConvertToSysUnits(2,unitMeasure::Inch);
-   row.NumberOfBars = 5;
-   m_LongitudinalRebar.RebarRows.push_back(row);
+   //// Rebar
+   //xbrLongitudinalRebarData::RebarRow row;
+   //row.Datum = xbrTypes::Bottom;
+   //row.LayoutType = xbrTypes::blFullLength;
+   //row.BarSize = matRebar::bs11;
+   //row.BarSpacing = ::ConvertToSysUnits(6,unitMeasure::Inch);
+   //row.Cover = ::ConvertToSysUnits(2,unitMeasure::Inch);
+   //row.NumberOfBars = 5;
+   //m_LongitudinalRebar.RebarRows.push_back(row);
 
    // Bearings
    xbrBearingLineData bearingLine;

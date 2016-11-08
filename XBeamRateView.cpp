@@ -972,8 +972,8 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   GET_IFACE2(pBroker,IXBRPier,pPier);
-   GET_IFACE2(pBroker,IXBRSectionProperties,pSectProps);
+   GET_IFACE2_NOCHECK(pBroker,IXBRPier,pPier);
+   GET_IFACE2_NOCHECK(pBroker,IXBRSectionProperties,pSectProps);
 
    PierIDType pierID = GetPierID();
 

@@ -33,7 +33,7 @@ static char THIS_FILE[] = __FILE__;
 xbrStirrupData::xbrStirrupData()
 {
    Symmetric = true;
-   Zones.push_back(StirrupZone());
+   //Zones.push_back(StirrupZone());
 }
 
 xbrStirrupData::xbrStirrupData(const xbrStirrupData& rOther)

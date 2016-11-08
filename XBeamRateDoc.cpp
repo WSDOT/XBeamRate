@@ -34,6 +34,8 @@
 
 #include "AboutDlg.h"
 
+#include <BridgeLink.h>
+
 #include <XBeamRateCatCom.h>
 
 #include <EAF\EAFMainFrame.h>
@@ -334,7 +336,16 @@ BOOL CXBeamRateDoc::OnNewDocument()
 	if (!CEAFBrokerDocument::OnNewDocument())
 		return FALSE;
 
-   GET_IFACE(IXBRProjectProperties,pProjectProperties);
+   CBridgeLinkApp* pApp = (CBridgeLinkApp*)EAFGetApp();
+   IBridgeLink* pBL = (IBridgeLink*)pApp;
+   CString engineer_name, company;
+   pBL->GetUserInfo(&engineer_name,&company);
+
+   GET_IFACE( IXBRProjectProperties, pProjectProperties );
+
+   pProjectProperties->SetEngineer(engineer_name);
+   pProjectProperties->SetCompany(company);
+
    if ( pProjectProperties->ShowProjectPropertiesOnNewProject() )
    {
       pProjectProperties->PromptForProjectProperties();
