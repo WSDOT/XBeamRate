@@ -26,7 +26,7 @@
 xbrPierData::xbrPierData()
 {
    m_ID = INVALID_ID;
-   m_ConnectionType = xbrTypes::pctContinuous;
+   m_ConnectionType = xbrTypes::pctIntegral;
    m_strSkew = _T("00 00 00.0 L");
    m_BridgeLineOffset = 0;
    m_CurbLineDatum = pgsTypes::omtAlignment;

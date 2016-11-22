@@ -176,10 +176,14 @@ BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDrag
       ROWCOL nSelRows = GetSelectedRows(selRows);
       ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
 
-      if (nDragRow != 0 && lastSelectedRow != nRows)
+      if (nDragRow != 0 && nRows != 0)
+      {
          pParent->OnEnableDelete(GetDlgCtrlID(),true);
+      }
       else
+      {
          pParent->OnEnableDelete(GetDlgCtrlID(),false);
+      }
    }
 
    return CGXGridWnd::OnLButtonHitRowCol(nHitRow,nHitCol,nDragRow,nDragCol,point,flags,nHitState);
@@ -195,10 +199,14 @@ BOOL CStirrupGrid::OnLButtonClickedRowCol(ROWCOL nRow, ROWCOL nCol, UINT nFlags,
    ROWCOL nSelRows = GetSelectedRows(selRows);
    ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
 
-   if (nCol == 0 && (nRow != 0 && lastSelectedRow != nRows))
+   if (nCol == 0 && nRow != 0)
+   {
       pParent->OnEnableDelete(GetDlgCtrlID(),true);
+   }
    else
+   {
       pParent->OnEnableDelete(GetDlgCtrlID(),false);
+   }
 
    return TRUE;
 }
@@ -215,6 +223,8 @@ void CStirrupGrid::RemoveSelectedZones()
       ROWCOL selRow = selRows[r];
       RemoveRows(selRow,selRow);
    }
+
+   UpdateLastZoneLength();
 
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
@@ -312,14 +322,15 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
          .SetValue(zoneData.nBars)
          );
 
+   UpdateLastZoneLength();
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
 void CStirrupGrid::AddZoneData(const xbrStirrupData::StirrupZone& zoneData)
 {
-   ROWCOL nRows = GetRowCount();
-   InsertRows(nRows,1);
-   SetZoneData(nRows,zoneData);
+   InsertRows(GetRowCount()+1,1);
+   ROWCOL row = GetRowCount();
+   SetZoneData(row,zoneData);
 }
 
 void CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
@@ -387,21 +398,39 @@ matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
 void CStirrupGrid::SetSymmetry(bool isSymmetrical)
 {
    m_IsSymmetrical = isSymmetrical;
+   ROWCOL nRows = GetRowCount();
+   if ( 0 < nRows )
+   {
+      UpdateLastZoneLength();
+   }
+}
 
-	GetParam()->EnableUndo(FALSE);
+void CStirrupGrid::UpdateLastZoneLength()
+{
+   ROWCOL lastRow = GetRowCount();
+   GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
+
+   if ( 1 < lastRow )
+   {
+      SetStyleRange(CGXRange(lastRow-1,1), CGXStyle()
+         .SetEnabled(TRUE)
+         .SetReadOnly(FALSE)
+         .SetInterior(::GetSysColor(COLOR_WINDOW))
+         .SetValue(0.0)
+         );
+   }
 
    // Set text in last row
    CString lastzlen = (m_IsSymmetrical) ? _T("to center") : _T("to end");
 
-   ROWCOL nrows = GetRowCount();
-   SetStyleRange(CGXRange(nrows,1), CGXStyle()
+   SetStyleRange(CGXRange(lastRow,1), CGXStyle()
       .SetEnabled(FALSE)
       .SetReadOnly(TRUE)
       .SetInterior(::GetSysColor(COLOR_BTNFACE))
       .SetValue(lastzlen)
       );
 
-	GetParam( )->EnableUndo(TRUE);
+   GetParam( )->EnableUndo(TRUE);
    GetParam()->SetLockReadOnly(TRUE);
 }

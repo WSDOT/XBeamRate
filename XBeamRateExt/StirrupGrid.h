@@ -75,6 +75,7 @@ private:
    void AddZoneData(const xbrStirrupData::StirrupZone& zoneData);
    void SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zoneData);
    void GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData);
+   void UpdateLastZoneLength();
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 
    // set up styles for interior rows
