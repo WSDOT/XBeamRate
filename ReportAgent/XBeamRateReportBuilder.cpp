@@ -49,7 +49,7 @@ boost::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(boost::shared
    pXBRRptSpec->GetBroker(&pBroker);
 
    GET_IFACE2(pBroker,IProgress, pProgress);
-   CEAFAutoProgress ap(pProgress);
+   CEAFAutoProgress ap(pProgress,0);
    CString strMsg;
    strMsg.Format(_T("Building %s"),pRptSpec->GetReportName().c_str());
    pProgress->UpdateMessage(strMsg);

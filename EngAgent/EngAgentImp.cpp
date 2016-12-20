@@ -1095,7 +1095,7 @@ CEngAgentImp::RatingArtifacts& CEngAgentImp::GetPrivateRatingArtifacts(PierIDTyp
 void CEngAgentImp::CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
    GET_IFACE(IProgress, pProgress);
-   CEAFAutoProgress ap(pProgress);
+   CEAFAutoProgress ap(pProgress,0);
    pProgress->UpdateMessage(_T("Load rating cross beam"));
 
    RatingArtifacts& ratingArtifacts = GetPrivateRatingArtifacts(pierID,ratingType,vehicleIdx);
