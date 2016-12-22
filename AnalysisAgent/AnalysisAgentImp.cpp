@@ -2384,6 +2384,9 @@ std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::Co
 
 void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData)
 {
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
    GET_IFACE(IXBRPier,pPier);
    Float64 Wcc = pPier->GetCurbToCurbWidth(pierID); // normal to alignment
 
@@ -2407,8 +2410,12 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
    Float64 XcurbLine = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
 
+   CString strProgressMsg;
    for ( IndexType nLoadedLanes = 1; nLoadedLanes <= nLanes; nLoadedLanes++ )
    {
+      strProgressMsg.Format(_T("Generating live load placement for %d of %d loaded lanes"),nLoadedLanes,nLanes);
+      pProgress->UpdateMessage(strProgressMsg);
+
       IndexType nLaneGaps = nLoadedLanes-1; // number of "gaps" between loaded lanes
       Float64 Wll = nLoadedLanes*wLoadedLane; // width of live load, measured in the plane of the pier
       IndexType nTotalSteps = (IndexType)ceil((Wcc - Wll)/maxStepSize); // total number of steps to move live load from left to right curb lines
@@ -2607,13 +2614,23 @@ std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelDat
 
 void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData)
 {
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+   CString strProgressMsg;
+
+   IndexType nLaneConfigurations = pModelData->m_LaneConfigurations.size();
+
    CComPtr<IFem2dLoadingCollection> loadings;
    pModelData->m_Model->get_Loadings(&loadings);
 
-   std::map<LoadCaseIDType,LaneConfiguration>::iterator iter(pModelData->m_LaneConfigurations.begin());
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator begin(pModelData->m_LaneConfigurations.begin());
+   std::map<LoadCaseIDType,LaneConfiguration>::iterator iter(begin);
    std::map<LoadCaseIDType,LaneConfiguration>::iterator end(pModelData->m_LaneConfigurations.end());
    for ( ; iter != end; iter++ )
    {
+      IndexType laneConfigIdx = std::distance(begin,iter);
+      strProgressMsg.Format(_T("Applying wheel line reactions to lane configuration %d of %d"),laneConfigIdx,nLaneConfigurations);
+
       LoadCaseIDType lcid = iter->first;
       LaneConfiguration& laneConfig = iter->second;
 

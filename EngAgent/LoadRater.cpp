@@ -60,14 +60,12 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
    // Rate for flexure
-   MomentRating(pierID,vMomentPoi,true /*positive moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
-   MomentRating(pierID,vMomentPoi,false/*negative moment*/,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vMomentPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
 
    // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
    {
-      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,true /*positive moment*/,ratingArtifact);
-      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,false/*negative moment*/,ratingArtifact);
+      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
    }
 
    // Rate for shear, if applicable
@@ -80,7 +78,7 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    return ratingArtifact;
 }
 
-void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
 
@@ -91,7 +89,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
    std::vector<Float64> vLLIMmin,vLLIMmax;
    std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
-   GetMoments(pierID, bPositiveMoment, ratingType, permitRatingMethod, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
+   GetMoments(pierID, ratingType, permitRatingMethod, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
 
    GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
 
@@ -127,92 +125,97 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
       Float64 RE   = vRE[i];
       Float64 PS   = vPS[i];
 
-      Float64 LLIM          = (bPositiveMoment ? vLLIMmax[i] : vLLIMmin[i]); // Live load (includes mpf)
-      IndexType llConfigIdx = (bPositiveMoment ? vMaxLLConfigIdx[i] : vMinLLConfigIdx[i]);
-
-      CString strProgress;
-      strProgress.Format(_T("Load rating %s for %s moment at %s"),
-                         strVehicleName.c_str(),bPositiveMoment ? _T("positive") : _T("negative"),
-                         ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
-      pProgress->UpdateMessage(strProgress);
-
-      const MomentCapacityDetails& momentCapacityDetails = pMomentCapacity->GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
-      Float64 phi_moment = momentCapacityDetails.phi;
-      Float64 Mn = momentCapacityDetails.Mn;
-
-      Float64 K = 1.0;
-      bool bPermitRating = ::IsPermitRatingType(ratingType);
-      if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
+      for ( int j = 0; j < 2; j++ )
       {
-         // NOTE: For WSDOT Method - Permit cases, K has to be computed for each combination
-         // of legal and permit loading... K will be computed in the moment rating artifact for the WSDOT/permit case.
+         bool bPositiveMoment = (j == 0 ? true : false);
 
-         // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
-         // is positive. This happens near the simple ends of spans. For example Mr < 0 because we are rating for
-         // negative moment and Mmin = min (1.2Mcr and 1.33Mu)... Mcr < 0 because we are looking at negative moment
-         // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
-         // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
-         // No adjustment needs to be made for underreinforcement so take K = 1.0
-         const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,stage,poi,bPositiveMoment);
-         Float64 Mr = minCapacityDetails.Mr;
-         Float64 MrMin = minCapacityDetails.MrMin;
-         Float64 K = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
-         if ( K < 0.0 || 1.0 < K )
+         Float64 LLIM          = (bPositiveMoment ? vLLIMmax[i] : vLLIMmin[i]); // Live load (includes mpf)
+         IndexType llConfigIdx = (bPositiveMoment ? vMaxLLConfigIdx[i] : vMinLLConfigIdx[i]);
+
+         CString strProgress;
+         strProgress.Format(_T("Load rating %s for %s moment at %s"),
+                            strVehicleName.c_str(),bPositiveMoment ? _T("positive") : _T("negative"),
+                            ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+         pProgress->UpdateMessage(strProgress);
+
+         const MomentCapacityDetails& momentCapacityDetails = pMomentCapacity->GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
+         Float64 phi_moment = momentCapacityDetails.phi;
+         Float64 Mn = momentCapacityDetails.Mn;
+
+         Float64 K = 1.0;
+         bool bPermitRating = ::IsPermitRatingType(ratingType);
+         if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
          {
-            K = 1.0;
+            // NOTE: For WSDOT Method - Permit cases, K has to be computed for each combination
+            // of legal and permit loading... K will be computed in the moment rating artifact for the WSDOT/permit case.
+
+            // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
+            // is positive. This happens near the simple ends of spans. For example Mr < 0 because we are rating for
+            // negative moment and Mmin = min (1.2Mcr and 1.33Mu)... Mcr < 0 because we are looking at negative moment
+            // and Mu > 0.... Since we are looking at the negative end of things, Mmin = 1.33Mu. +/- = -... it doesn't
+            // make since for K to be negative... K < 0 indicates that the section is most definate NOT under reinforced.
+            // No adjustment needs to be made for underreinforcement so take K = 1.0
+            const MinMomentCapacityDetails& minCapacityDetails = pMomentCapacity->GetMinMomentCapacityDetails(pierID,ls,stage,poi,bPositiveMoment);
+            Float64 Mr = minCapacityDetails.Mr;
+            Float64 MrMin = minCapacityDetails.MrMin;
+            Float64 K = (IsZero(MrMin) ? 1.0 : Mr/MrMin); // MBE 6A.5.6
+            if ( K < 0.0 || 1.0 < K )
+            {
+               K = 1.0;
+            }
          }
+
+         xbrMomentRatingArtifact momentArtifact;
+         momentArtifact.SetRatingType(ratingType);
+         momentArtifact.SetPermitRatingMethod(permitRatingMethod);
+         momentArtifact.SetPierID(pierID);
+         momentArtifact.SetPointOfInterest(poi);
+         momentArtifact.SetVehicleIndex(vehicleIdx == INVALID_INDEX ? llConfigIdx : vehicleIdx);
+         momentArtifact.SetVehicleWeight(W);
+         momentArtifact.SetVehicleName(strVehicleName.c_str());
+         momentArtifact.SetSystemFactor(system_factor);
+         momentArtifact.SetConditionFactor(condition_factor);
+         momentArtifact.SetCapacityReductionFactor(phi_moment);
+         momentArtifact.SetMinimumReinforcementFactor(K);
+         momentArtifact.SetNominalMomentCapacity(Mn);
+         momentArtifact.SetDeadLoadFactor(gDC);
+         momentArtifact.SetDeadLoadMoment(DC);
+         momentArtifact.SetWearingSurfaceFactor(gDW);
+         momentArtifact.SetWearingSurfaceMoment(DW);
+         momentArtifact.SetCreepFactor(gCR);
+         momentArtifact.SetCreepMoment(CR);
+         momentArtifact.SetShrinkageFactor(gSH);
+         momentArtifact.SetShrinkageMoment(SH);
+         momentArtifact.SetRelaxationFactor(gRE);
+         momentArtifact.SetRelaxationMoment(RE);
+         momentArtifact.SetSecondaryEffectsFactor(gPS);
+         momentArtifact.SetSecondaryEffectsMoment(PS);
+         momentArtifact.SetLiveLoadFactor(gLL);
+         momentArtifact.SetLiveLoadMoment(LLIM);
+
+         if ( vehicleIdx == INVALID_INDEX && llConfigIdx != INVALID_INDEX )
+         {
+            // llConfigIdx is actually the index of the vehicle that governs the load case... we now need to get the live load configuration
+            GET_IFACE(IXBRAnalysisResults,pResults);
+            Float64 Mmin, Mmax;
+            IndexType minLLConfigIdx, maxLLConfigIdx;
+            pResults->GetMoment(pierID,ratingType,llConfigIdx/*this is actually a vehicle index*/,poi,&Mmin,&Mmax,&minLLConfigIdx,&maxLLConfigIdx);
+            if ( bPositiveMoment )
+            {
+               llConfigIdx = maxLLConfigIdx;
+               ATLASSERT(IsEqual(LLIM,Mmax));
+            }
+            else
+            {
+               llConfigIdx = minLLConfigIdx;
+               ATLASSERT(IsEqual(LLIM,Mmin));
+            }
+         }
+
+         momentArtifact.SetLiveLoadConfigurationIndex(llConfigIdx);
+
+         ratingArtifact.AddArtifact(poi,momentArtifact,bPositiveMoment);
       }
-
-      xbrMomentRatingArtifact momentArtifact;
-      momentArtifact.SetRatingType(ratingType);
-      momentArtifact.SetPermitRatingMethod(permitRatingMethod);
-      momentArtifact.SetPierID(pierID);
-      momentArtifact.SetPointOfInterest(poi);
-      momentArtifact.SetVehicleIndex(vehicleIdx == INVALID_INDEX ? llConfigIdx : vehicleIdx);
-      momentArtifact.SetVehicleWeight(W);
-      momentArtifact.SetVehicleName(strVehicleName.c_str());
-      momentArtifact.SetSystemFactor(system_factor);
-      momentArtifact.SetConditionFactor(condition_factor);
-      momentArtifact.SetCapacityReductionFactor(phi_moment);
-      momentArtifact.SetMinimumReinforcementFactor(K);
-      momentArtifact.SetNominalMomentCapacity(Mn);
-      momentArtifact.SetDeadLoadFactor(gDC);
-      momentArtifact.SetDeadLoadMoment(DC);
-      momentArtifact.SetWearingSurfaceFactor(gDW);
-      momentArtifact.SetWearingSurfaceMoment(DW);
-      momentArtifact.SetCreepFactor(gCR);
-      momentArtifact.SetCreepMoment(CR);
-      momentArtifact.SetShrinkageFactor(gSH);
-      momentArtifact.SetShrinkageMoment(SH);
-      momentArtifact.SetRelaxationFactor(gRE);
-      momentArtifact.SetRelaxationMoment(RE);
-      momentArtifact.SetSecondaryEffectsFactor(gPS);
-      momentArtifact.SetSecondaryEffectsMoment(PS);
-      momentArtifact.SetLiveLoadFactor(gLL);
-      momentArtifact.SetLiveLoadMoment(LLIM);
-
-      if ( vehicleIdx == INVALID_INDEX && llConfigIdx != INVALID_INDEX )
-      {
-         // llConfigIdx is actually the index of the vehicle that governs the load case... we now need to get the live load configuration
-         GET_IFACE(IXBRAnalysisResults,pResults);
-         Float64 Mmin, Mmax;
-         IndexType minLLConfigIdx, maxLLConfigIdx;
-         pResults->GetMoment(pierID,ratingType,llConfigIdx/*this is actually a vehicle index*/,poi,&Mmin,&Mmax,&minLLConfigIdx,&maxLLConfigIdx);
-         if ( bPositiveMoment )
-         {
-            llConfigIdx = maxLLConfigIdx;
-            ATLASSERT(IsEqual(LLIM,Mmax));
-         }
-         else
-         {
-            llConfigIdx = minLLConfigIdx;
-            ATLASSERT(IsEqual(LLIM,Mmin));
-         }
-      }
-
-      momentArtifact.SetLiveLoadConfigurationIndex(llConfigIdx);
-
-      ratingArtifact.AddArtifact(poi,momentArtifact,bPositiveMoment);
    }
 }
 
@@ -383,7 +386,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    }
 }
 
-void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,bool bPositiveMoment,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
@@ -421,102 +424,106 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    // Create artifacts
    BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
    {
-      // assume yield stress ratio is minimized for the controlling flexure rating at this location
-      // this also gives us accees to Mlegal and Mpermit for the controlling case (WSDOT method)
-      const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);
-
-      CString strProgress;
-      strProgress.Format(_T("Checking for reinforcement yielding %s for %s moment at %s"),
-                         pMomentRatingArtifact->GetVehicleName().c_str(),bPositiveMoment ? _T("positive") : _T("negative"),
-                         ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
-      pProgress->UpdateMessage(strProgress);
-
-
-      const CrackedSectionDetails& crackedSectionDetails_PermanentLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltPermanent);
-      const CrackedSectionDetails& crackedSectionDetails_TransientLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltTransient);
-
-
-      // use this to get all the loading information
-      Float64 DC = pMomentRatingArtifact->GetDeadLoadMoment();
-      Float64 DW = pMomentRatingArtifact->GetWearingSurfaceMoment();
-      Float64 CR = pMomentRatingArtifact->GetCreepMoment();
-      Float64 SH = pMomentRatingArtifact->GetShrinkageMoment();
-      Float64 RE = pMomentRatingArtifact->GetRelaxationMoment();
-      Float64 PS = pMomentRatingArtifact->GetSecondaryEffectsMoment();
-
-      // NOTE: live load moments include multiple presence factor
-      Float64 LLIMpermit = 0;
-      Float64 LLIMlegal = 0;
-      if ( pMomentRatingArtifact->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
-      {
-         LLIMpermit = pMomentRatingArtifact->GetLiveLoadMoment(); // this is for AASHTO method
-      }
-      else
-      {
-         IndexType llConfigIdx;
-         IndexType permitLaneIdx;
-         IndexType vehIdx;
-         Float64 K;
-         pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&LLIMpermit,&LLIMlegal,&K);
-      }
-
       Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
-      // Get distance to reinforcement from extreme compression face
-      CComPtr<IRebarSection> rebarSection;
-      pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
-      Float64 Yb = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
-      CComPtr<IEnumRebarSectionItem> enumRebarSectionItem;
-      rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
-
-      CComPtr<IRebarSectionItem> rebarSectionItem;
-      while ( enumRebarSectionItem->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+      for ( int i = 0; i < 2; i++ )
       {
-        CComPtr<IPoint2d> location;
-        rebarSectionItem->get_Location(&location);
-        Float64 y = pRebar->GetRebarDepth(pierID,poi,stage,location);
-        ATLASSERT(0 <= y);
-        Yb = (bPositiveMoment ? Max(Yb,y) : Min(Yb,y));
-        rebarSectionItem.Release();
-     }
+         bool bPositiveMoment = (i == 0 ? true : false);
 
-      // Get allowable
-      xbrYieldStressRatioArtifact stressRatioArtifact;
-      stressRatioArtifact.SetRatingType(ratingType);
-      stressRatioArtifact.SetPermitRatingMethod(pMomentRatingArtifact->GetPermitRatingMethod());
-      stressRatioArtifact.SetPointOfInterest(poi);
-      stressRatioArtifact.SetVehicleIndex(pMomentRatingArtifact->GetVehicleIndex());
-      stressRatioArtifact.SetVehicleWeight(pMomentRatingArtifact->GetVehicleWeight());
-      stressRatioArtifact.SetVehicleName(pMomentRatingArtifact->GetVehicleName().c_str());
-      stressRatioArtifact.SetAllowableStressRatio(K);
-      stressRatioArtifact.SetDeadLoadFactor(gDC);
-      stressRatioArtifact.SetDeadLoadMoment(DC);
-      stressRatioArtifact.SetWearingSurfaceFactor(gDW);
-      stressRatioArtifact.SetWearingSurfaceMoment(DW);
-      stressRatioArtifact.SetCreepFactor(gCR);
-      stressRatioArtifact.SetCreepMoment(CR);
-      stressRatioArtifact.SetShrinkageFactor(gSH);
-      stressRatioArtifact.SetShrinkageMoment(SH);
-      stressRatioArtifact.SetRelaxationFactor(gRE);
-      stressRatioArtifact.SetRelaxationMoment(RE);
-      stressRatioArtifact.SetSecondaryEffectsFactor(gPS);
-      stressRatioArtifact.SetSecondaryEffectsMoment(PS);
-      stressRatioArtifact.SetLiveLoadFactor(gLL);
-      stressRatioArtifact.SetLiveLoadMoment(LLIMpermit);
-      stressRatioArtifact.SetAdjLiveLoadMoment(LLIMlegal);
-      stressRatioArtifact.SetIcr(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Icr);
-      stressRatioArtifact.SetIcr(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Icr);
-      stressRatioArtifact.SetCrackDepth(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Ycr);
-      stressRatioArtifact.SetCrackDepth(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Ycr);
-      stressRatioArtifact.SetModularRatio(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.n);
-      stressRatioArtifact.SetModularRatio(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.n);
-      stressRatioArtifact.SetYbar(Yb);
-      stressRatioArtifact.SetYieldStrength(fy);
-      ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
+         // this also gives us accees to Mlegal and Mpermit for the controlling case (WSDOT method)
+         const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);
+
+         CString strProgress;
+         strProgress.Format(_T("Checking for reinforcement yielding %s for %s moment at %s"),
+                            pMomentRatingArtifact->GetVehicleName().c_str(),bPositiveMoment ? _T("positive") : _T("negative"),
+                            ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+         pProgress->UpdateMessage(strProgress);
+
+         // use this to get all the loading information
+         Float64 DC = pMomentRatingArtifact->GetDeadLoadMoment();
+         Float64 DW = pMomentRatingArtifact->GetWearingSurfaceMoment();
+         Float64 CR = pMomentRatingArtifact->GetCreepMoment();
+         Float64 SH = pMomentRatingArtifact->GetShrinkageMoment();
+         Float64 RE = pMomentRatingArtifact->GetRelaxationMoment();
+         Float64 PS = pMomentRatingArtifact->GetSecondaryEffectsMoment();
+
+         // NOTE: live load moments include multiple presence factor
+         Float64 LLIMpermit = 0;
+         Float64 LLIMlegal = 0;
+         if ( pMomentRatingArtifact->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
+         {
+            LLIMpermit = pMomentRatingArtifact->GetLiveLoadMoment(); // this is for AASHTO method
+         }
+         else
+         {
+            IndexType llConfigIdx;
+            IndexType permitLaneIdx;
+            IndexType vehIdx;
+            Float64 K;
+            pMomentRatingArtifact->GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&vehIdx,&LLIMpermit,&LLIMlegal,&K);
+         }
+
+         // Get distance to reinforcement from extreme compression face
+         CComPtr<IRebarSection> rebarSection;
+         pRebar->GetRebarSection(pierID,stage,poi,&rebarSection);
+         Float64 Yb = (bPositiveMoment ? -DBL_MAX : DBL_MAX);
+         CComPtr<IEnumRebarSectionItem> enumRebarSectionItem;
+         rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
+
+         CComPtr<IRebarSectionItem> rebarSectionItem;
+         while ( enumRebarSectionItem->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+         {
+           CComPtr<IPoint2d> location;
+           rebarSectionItem->get_Location(&location);
+           Float64 y = pRebar->GetRebarDepth(pierID,poi,stage,location);
+           ATLASSERT(0 <= y);
+           Yb = (bPositiveMoment ? Max(Yb,y) : Min(Yb,y));
+           rebarSectionItem.Release();
+        }
+
+
+         const CrackedSectionDetails& crackedSectionDetails_PermanentLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltPermanent);
+         const CrackedSectionDetails& crackedSectionDetails_TransientLoads = pCrackedSection->GetCrackedSectionDetails(pierID,stage,poi,bPositiveMoment,xbrTypes::ltTransient);
+
+
+         // Get allowable
+         xbrYieldStressRatioArtifact stressRatioArtifact;
+         stressRatioArtifact.SetRatingType(ratingType);
+         stressRatioArtifact.SetPermitRatingMethod(pMomentRatingArtifact->GetPermitRatingMethod());
+         stressRatioArtifact.SetPointOfInterest(poi);
+         stressRatioArtifact.SetVehicleIndex(pMomentRatingArtifact->GetVehicleIndex());
+         stressRatioArtifact.SetVehicleWeight(pMomentRatingArtifact->GetVehicleWeight());
+         stressRatioArtifact.SetVehicleName(pMomentRatingArtifact->GetVehicleName().c_str());
+         stressRatioArtifact.SetAllowableStressRatio(K);
+         stressRatioArtifact.SetDeadLoadFactor(gDC);
+         stressRatioArtifact.SetDeadLoadMoment(DC);
+         stressRatioArtifact.SetWearingSurfaceFactor(gDW);
+         stressRatioArtifact.SetWearingSurfaceMoment(DW);
+         stressRatioArtifact.SetCreepFactor(gCR);
+         stressRatioArtifact.SetCreepMoment(CR);
+         stressRatioArtifact.SetShrinkageFactor(gSH);
+         stressRatioArtifact.SetShrinkageMoment(SH);
+         stressRatioArtifact.SetRelaxationFactor(gRE);
+         stressRatioArtifact.SetRelaxationMoment(RE);
+         stressRatioArtifact.SetSecondaryEffectsFactor(gPS);
+         stressRatioArtifact.SetSecondaryEffectsMoment(PS);
+         stressRatioArtifact.SetLiveLoadFactor(gLL);
+         stressRatioArtifact.SetLiveLoadMoment(LLIMpermit);
+         stressRatioArtifact.SetAdjLiveLoadMoment(LLIMlegal);
+         stressRatioArtifact.SetIcr(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Icr);
+         stressRatioArtifact.SetIcr(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Icr);
+         stressRatioArtifact.SetCrackDepth(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.Ycr);
+         stressRatioArtifact.SetCrackDepth(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.Ycr);
+         stressRatioArtifact.SetModularRatio(xbrTypes::ltPermanent,crackedSectionDetails_PermanentLoads.n);
+         stressRatioArtifact.SetModularRatio(xbrTypes::ltTransient,crackedSectionDetails_TransientLoads.n);
+         stressRatioArtifact.SetYbar(Yb);
+         stressRatioArtifact.SetYieldStrength(fy);
+         ratingArtifact.AddArtifact(poi,stressRatioArtifact,bPositiveMoment);
+      }
    } // next poi
 }
 
-void xbrLoadRater::GetMoments(PierIDType pierID,bool bPositiveMoment,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax,std::vector<IndexType>& vMinLLConfigIdx,std::vector<IndexType>& vMaxLLConfigIdx)
+void xbrLoadRater::GetMoments(PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax,std::vector<IndexType>& vMinLLConfigIdx,std::vector<IndexType>& vMaxLLConfigIdx)
 {
    pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
 
