@@ -28,8 +28,10 @@
 #include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
 #include <IFace\RatingSpecification.h>
+#include <EAF\EAFDisplayUnits.h>
 
 #include <Units\SysUnitsMgr.h>
+#include <MFCTools\Format.h>
 
 #include <EAF\EAFAutoProgress.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
@@ -1791,6 +1793,18 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
 
 void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration*/)
 {
+   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
+   CString strProgressMsg;
+   strProgressMsg.Format(_T("Getting live load moment for %s, %s, at %s"),
+      RatingLibraryEntry::GetLoadRatingType(ratingType),
+      pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx).c_str(),
+      ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+   pProgress->UpdateMessage(strProgressMsg);
+
    UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
    // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
@@ -1808,7 +1822,6 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       *pMax = liveLoadResult.m_MzMax;
    }
 
-   GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
    *pMin *= R;
@@ -1830,6 +1843,18 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
 
 void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration*/)
 {
+   GET_IFACE(IXBRProject,pProject);
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+
+   CString strProgressMsg;
+   strProgressMsg.Format(_T("Getting live load shear for %s, %s, at %s"),
+      RatingLibraryEntry::GetLoadRatingType(ratingType),
+      pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx).c_str(),
+      ::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()));
+   pProgress->UpdateMessage(strProgressMsg);
+
    UnitLiveLoadResult& liveLoadResult = GetUnitLiveLoadResult(pierID,poi);
 
    // permit rating results is always based on single loaded lane. the load factors make adjustments and account for
@@ -1847,7 +1872,6 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       *pMax = liveLoadResult.m_FyMax;
    }
 
-   GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
    pMin->Left()  *= R;
@@ -2404,7 +2428,8 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    GET_IFACE(IXBRProject,pProject);
    Float64 maxStepSize = pProject->GetMaxLiveLoadStepSize();
 
-   nLanes = Min(nLanes,pProject->GetMaxLoadedLanes());
+   IndexType nMaxLoadedLanes = pProject->GetMaxLoadedLanes();
+   nLanes = Min(nLanes,nMaxLoadedLanes);
 
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
@@ -2423,7 +2448,7 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
 
       // The lane configuration (position of the loaded lanes) is defined as a sequence of "gap indicies".
       // The size of the gap between lanes is the gap position index times the step size.
-      // The step size of the gaps is equal to the step size for movig the lane configuration 
+      // The step size of the gaps is equal to the step size for moving the lane configuration transversely
       // along the cross beam
       //
       //  wLoadedLane      wLoadedLane         wLoadedLane
@@ -2432,7 +2457,8 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
       //            |<--->|          |<------>|
       //              gap               gap
       std::vector<std::vector<IndexType>> vGapPositions;
-      GetLaneGapConfiguration(nTotalSteps,nLaneGaps,vGapPositions);
+      IndexType nMaxGapSteps = Min(nMaxLoadedLanes,nTotalSteps); // don't let the gap be any wider than nMaxLoaded lanes. Once the loaded lanes get to far apart, the results don't combine
+      GetLaneGapConfiguration(nMaxGapSteps,nLaneGaps,vGapPositions);
 
       // for each lane configuration, get the wheel line reaction configuration
       // and analyze the structure for the configuration. The configuration, in general,
@@ -2687,6 +2713,11 @@ struct Result
 
 void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
 {
+   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IProgress,pProgress);
+   CEAFAutoProgress ap(pProgress);
+   CString strProgressMsg;
+
    Float64 MzMin = DBL_MAX;
    Float64 MzMax = -DBL_MAX;
    IndexType minMz_llConfigIdx = INVALID_INDEX;
@@ -2722,11 +2753,21 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
    CComQIPtr<IFem2dModelResults> results(pModelData->m_Model);
    IndexType nLiveLoadConfigs = pModelData->m_LiveLoadConfigurations.size();
+
+   IndexType progressMsgIdx = Min((IndexType)100,nLiveLoadConfigs/10); // we don't want to update the progress message on every loop... the progress window flickers
+   // when the configuration index is a multiple of the above value, update the message, but not more than every 100 times through the loop
+
    for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigs; llConfigIdx++ )
    {
       LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
 
       IndexType nLoadedLanes = llConfig.m_LoadCases.size();
+
+      if ( llConfigIdx % progressMsgIdx == 0 )
+      {
+         strProgressMsg.Format(_T("Computing unit live load response at %s for configuration %d of %d - %d loaded lanes"),::FormatDimension(poi.GetDistFromStart(),pDisplayUnits->GetSpanLengthUnit()),llConfigIdx,nLiveLoadConfigs,nLoadedLanes);
+         pProgress->UpdateMessage(strProgressMsg);
+      }
 
       Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
 

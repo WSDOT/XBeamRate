@@ -216,9 +216,9 @@ private:
       LoadCaseIDType m_NextLiveLoadCaseID; // ID of the next live load case
 
       // this vector contains all of the live load configurations
-      // each configuration represents the some number of loaded lanes,
-      // the position of the loaded lanes, and the position of the
-      // group of loaded lanes transversely on the cross beam
+      // each configuration represents the same number of loaded lanes,
+      // the position of the loaded lanes with respect to one another, 
+      // and the position of the loaded lanes transversely on the cross beam
       std::vector<LiveLoadConfiguration> m_LiveLoadConfigurations;
 
       IndexType m_LastSingleLaneLLConfigIdx; // Index of the last live load configuration where a single lane is loaded
