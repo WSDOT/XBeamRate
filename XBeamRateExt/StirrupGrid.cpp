@@ -170,15 +170,31 @@ void CStirrupGrid::AddZone()
 {
    xbrStirrupData::StirrupZone zoneData;
 
-	GetParam( )->EnableUndo(FALSE);
+	GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
 
    AddZoneData(zoneData);
+
+   ROWCOL nRows = GetRowCount();
+   if ( 1 < nRows )
+   {
+      // there are 2 rows... 
+      // before adding the length of the one and only row was "to center" or "to end"
+      // now the second (last) row is "to center" or "to end" and the zone length of
+      // the previous last row needs to be updated
+	   SetStyleRange(CGXRange(nRows-1,1),CGXStyle()
+         .SetEnabled(TRUE)
+         .SetReadOnly(FALSE)
+         .SetInterior(::GetSysColor(COLOR_WINDOW))
+         .SetValue(0.0)
+         );
+   }
+
    UpdateLastZoneLength();
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 
    GetParam()->SetLockReadOnly(TRUE);
-	GetParam( )->EnableUndo(TRUE);
+	GetParam()->EnableUndo(TRUE);
 }
 
 BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState)
@@ -209,12 +225,6 @@ BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDrag
 BOOL CStirrupGrid::OnLButtonClickedRowCol(ROWCOL nRow, ROWCOL nCol, UINT nFlags, CPoint pt)
 {
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-
-   ROWCOL nRows = GetRowCount();
-
-   CDWordArray selRows;
-   ROWCOL nSelRows = GetSelectedRows(selRows);
-   ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
 
    if (nCol == 0 && nRow != 0)
    {
