@@ -46,7 +46,7 @@ public:
    void AddZone();
    void RemoveSelectedZones();
 
-   void GetStirrupData(xbrStirrupData& stirrups);
+   bool GetStirrupData(xbrStirrupData& stirrups);
    void SetStirrupData(const xbrStirrupData& stirrups);
 
 // Overrides
@@ -66,7 +66,7 @@ protected:
 
 public:
    // custom stuff for grid
-   void CustomInit();
+   void CustomInit(LPCTSTR lpszGridName);
 
    BOOL OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState);
    BOOL OnLButtonClickedRowCol(ROWCOL nRow, ROWCOL nCol, UINT nFlags, CPoint pt);
@@ -74,13 +74,15 @@ public:
 private:
    void AddZoneData(const xbrStirrupData::StirrupZone& zoneData);
    void SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zoneData);
-   void GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData);
+   bool GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData);
    void UpdateLastZoneLength();
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 
    // set up styles for interior rows
    matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
    bool m_IsSymmetrical;
+   CString m_strGridName;
+   CString m_strBarSizeChoiceList;
 };
 
 /////////////////////////////////////////////////////////////////////////////

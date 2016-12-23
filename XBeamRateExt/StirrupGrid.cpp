@@ -61,8 +61,10 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CStirrupGrid message handlers
 
-void CStirrupGrid::CustomInit()
+void CStirrupGrid::CustomInit(LPCTSTR lpszGridName)
 {
+   m_strGridName = lpszGridName;
+
 // Initialize the grid. For CWnd based grids this call is 
 // essential. For view based grids this initialization is done 
 // in OnInitialUpdate.
@@ -149,6 +151,19 @@ void CStirrupGrid::CustomInit()
 
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
+
+
+   CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
+   matRebar::Type type;
+   matRebar::Grade grade;
+   pParent->GetRebarMaterial(&type,&grade);
+   lrfdRebarIter rebarIter(type,grade,true/*stirrup only*/);
+   for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
+   {
+      const matRebar* pRebar = rebarIter.GetCurrentRebar();
+      m_strBarSizeChoiceList += pRebar->GetName().c_str();
+      m_strBarSizeChoiceList += _T("\n");
+   }
 }
 
 void CStirrupGrid::AddZone()
@@ -159,6 +174,8 @@ void CStirrupGrid::AddZone()
    GetParam()->SetLockReadOnly(FALSE);
 
    AddZoneData(zoneData);
+   UpdateLastZoneLength();
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
@@ -216,30 +233,45 @@ void CStirrupGrid::RemoveSelectedZones()
 	GetParam( )->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
 
+   ROWCOL lastRow = GetRowCount();
+   bool bLastRowRemoved = false;
+
    CDWordArray selRows;
    ROWCOL nSelRows = GetSelectedRows(selRows);
    for ( int r = nSelRows-1; r >= 0; r-- )
    {
       ROWCOL selRow = selRows[r];
       RemoveRows(selRow,selRow);
+      if ( selRow == lastRow )
+      {
+         bLastRowRemoved = true;
+      }
    }
 
-   UpdateLastZoneLength();
+   if ( bLastRowRemoved )
+   {
+      UpdateLastZoneLength();
+   }
 
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
 }
 
-void CStirrupGrid::GetStirrupData(xbrStirrupData& stirrups)
+bool CStirrupGrid::GetStirrupData(xbrStirrupData& stirrups)
 {
    stirrups.Zones.clear();
    ROWCOL nRows = GetRowCount();
    for ( ROWCOL row = 1; row <= nRows; row++ )
    {
       xbrStirrupData::StirrupZone zoneData;
-      GetZoneData(row,zoneData);
+      if ( !GetZoneData(row,zoneData) )
+      {
+         return false;
+      }
       stirrups.Zones.push_back(zoneData);
    }
+
+   return true;
 }
 
 void CStirrupGrid::SetStirrupData(const xbrStirrupData& stirrups)
@@ -261,7 +293,6 @@ void CStirrupGrid::SetStirrupData(const xbrStirrupData& stirrups)
    }
 
    SetSymmetry(stirrups.Symmetric);
-   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 
    GetParam()->SetLockReadOnly(TRUE);
    GetParam()->EnableUndo(TRUE);
@@ -283,24 +314,11 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
 		);
 
    // Bar Size
-   CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
-   pParent->GetRebarMaterial(&type,&grade);
-   CString strBarSizeChoiceList;
-   lrfdRebarIter rebarIter(type,grade,true/*stirrup only*/);
-   for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
-   {
-      const matRebar* pRebar = rebarIter.GetCurrentRebar();
-      strBarSizeChoiceList += pRebar->GetName().c_str();
-      strBarSizeChoiceList += _T("\n");
-   }
-
 	SetStyleRange(CGXRange(row,2), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
 		.SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
-		.SetChoiceList(strBarSizeChoiceList)
+		.SetChoiceList(m_strBarSizeChoiceList)
       .SetHorizontalAlignment(DT_RIGHT)
       .SetValue(lrfdRebarPool::GetBarSize(zoneData.BarSize).c_str())
       );
@@ -321,9 +339,6 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
          .SetHorizontalAlignment(DT_RIGHT)
          .SetValue(zoneData.nBars)
          );
-
-   UpdateLastZoneLength();
-   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
 void CStirrupGrid::AddZoneData(const xbrStirrupData::StirrupZone& zoneData)
@@ -333,7 +348,7 @@ void CStirrupGrid::AddZoneData(const xbrStirrupData::StirrupZone& zoneData)
    SetZoneData(row,zoneData);
 }
 
-void CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
+bool CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -349,6 +364,14 @@ void CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
    {
       Float64 length = _tstof(GetCellValue(row,1));
       zoneData.Length = ::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+
+      if ( zoneData.Length <= 0 )
+      {
+         CString strMsg;
+         strMsg.Format(_T("%s, Row %d: Stirrup zone length must be greater than zero."),m_strGridName,row);
+         AfxMessageBox(strMsg,MB_OK | MB_ICONEXCLAMATION);
+         return false;
+      }
    }
 
    zoneData.BarSize = GetBarSize(row,2);
@@ -358,6 +381,8 @@ void CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
 
    Float64 nBars = _tstof(GetCellValue(row,4));
    zoneData.nBars = nBars;
+
+   return true;
 }
 
 CString CStirrupGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
@@ -403,6 +428,7 @@ void CStirrupGrid::SetSymmetry(bool isSymmetrical)
    {
       UpdateLastZoneLength();
    }
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
 
 void CStirrupGrid::UpdateLastZoneLength()
@@ -410,16 +436,6 @@ void CStirrupGrid::UpdateLastZoneLength()
    ROWCOL lastRow = GetRowCount();
    GetParam()->EnableUndo(FALSE);
    GetParam()->SetLockReadOnly(FALSE);
-
-   if ( 1 < lastRow )
-   {
-      SetStyleRange(CGXRange(lastRow-1,1), CGXStyle()
-         .SetEnabled(TRUE)
-         .SetReadOnly(FALSE)
-         .SetInterior(::GetSysColor(COLOR_WINDOW))
-         .SetValue(0.0)
-         );
-   }
 
    // Set text in last row
    CString lastzlen = (m_IsSymmetrical) ? _T("to center") : _T("to end");

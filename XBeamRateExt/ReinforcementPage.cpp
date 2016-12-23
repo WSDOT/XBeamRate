@@ -109,7 +109,10 @@ void DDX_StirrupGrid(CDataExchange* pDX,CStirrupGrid& grid,xbrStirrupData& stirr
 {
    if ( pDX->m_bSaveAndValidate )
    {
-      grid.GetStirrupData(stirrups);
+      if ( !grid.GetStirrupData(stirrups) )
+      {
+         pDX->Fail();
+      }
    }
    else
    {
@@ -225,10 +228,10 @@ BOOL CReinforcementPage::OnInitDialog()
    m_pRebarGrid->CustomInit();
 
    m_pLowerXBeamGrid->SubclassDlgItem(IDC_LOWER_XBEAM_STIRRUP_GRID,this);
-   m_pLowerXBeamGrid->CustomInit();
+   m_pLowerXBeamGrid->CustomInit(_T("Lower Cross Beam Stirrups"));
 
    m_pFullDepthGrid->SubclassDlgItem(IDC_FULL_DEPTH_STIRRUP_GRID,this);
-   m_pFullDepthGrid->CustomInit();
+   m_pFullDepthGrid->CustomInit(_T("Full Depth Stirrups"));
 
    CComboBox* pcbConditionFactor = (CComboBox*)GetDlgItem(IDC_CONDITION_FACTOR_TYPE);
    pcbConditionFactor->AddString(_T("Good or Satisfactory (Structure condition rating 6 or higher)"));

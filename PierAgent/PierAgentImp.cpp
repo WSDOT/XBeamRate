@@ -1809,8 +1809,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          Float64 av = pRebar->GetNominalArea();
          Float64 Av = av*zone.nBars;
          
-         ATLASSERT(!IsZero(zone.BarSpacing));// UI should have prevented this
-         Float64 Av_over_S = Av/zone.BarSpacing;
+         Float64 Av_over_S = IsZero(zone.BarSpacing) ? 0 : Av/zone.BarSpacing;
 
          StirrupZone myZone;
          myZone.Av_over_S = Av_over_S;

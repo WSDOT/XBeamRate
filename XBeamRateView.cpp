@@ -1194,14 +1194,11 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
    CComPtr<IDirection> pierDirection;
    pBridge->GetPierDirection(pierIdx,&pierDirection);
 
-   Float64 dirPier;
-   pierDirection->get_Value(&dirPier);
+   CComPtr<IDirection> pierNormal;
+   pierDirection->Increment(CComVariant(-PI_OVER_2),&pierNormal);
 
-   CComPtr<IAngle> objSkew;
-   pBridge->GetPierSkew(pierIdx,&objSkew);
-
-   Float64 pierSkew;
-   objSkew->get_Value(&pierSkew);
+   Float64 dirPierNormal;
+   pierNormal->get_Value(&dirPierNormal);
 
    for ( GroupIndexType grpIdx = aheadGroupIdx; backGroupIdx <= grpIdx && grpIdx != INVALID_INDEX; grpIdx-- ) // draw in reverse order so back side girders cover ahead side girders
    {
@@ -1224,7 +1221,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          Float64 dirSegment;
          segDirection->get_Value(&dirSegment);
 
-         Float64 skew = dirPier - PI_OVER_2 - dirSegment;
+         Float64 skew = dirPierNormal - dirSegment;
          ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
 
          // compute shear factor

@@ -3124,7 +3124,6 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    CComPtr<IDirection> pierDirection;
    pBridge->GetPierDirection(pierIdx,&pierDirection);
 
-
    GET_IFACE(IRoadway,pRoadway);
    CComPtr<IPoint2dCollection> deckProfile;
    pRoadway->GetRoadwaySurface(pierStation,pierDirection,&deckProfile);
@@ -3139,8 +3138,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 tSlab = pBridge->GetGrossSlabDepth(poi);
    pierData.SetDeckThickness(tSlab);
 
-   Float64 leftCLO  = pBridge->GetLeftCurbOffset(pierIdx);
-   Float64 rightCLO = pBridge->GetRightCurbOffset(pierIdx);
+   Float64 leftCLO  = pBridge->GetLeftInteriorCurbOffset(pierIdx);
+   Float64 rightCLO = pBridge->GetRightInteriorCurbOffset(pierIdx);
    pierData.SetCurbLineDatum(pgsTypes::omtAlignment);
    pierData.SetCurbLineOffset(leftCLO,rightCLO);
 
