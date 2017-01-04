@@ -73,7 +73,7 @@ BEGIN
             VALUE "FileDescription", "XBRate Module"
             VALUE "FileVersion", "1.0.0.14"
             VALUE "InternalName", "XBRate"
-            VALUE "LegalCopyright", "Copyright © 1999-2016, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2017, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "XBeamRate.DLL"
             VALUE "ProductName", "XBRate Module"
             VALUE "ProductVersion", "1.0.0.14"

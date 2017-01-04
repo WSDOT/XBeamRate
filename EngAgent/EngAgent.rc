@@ -80,7 +80,7 @@ BEGIN
             VALUE "FileDescription", "EngAgent Module"
             VALUE "FileVersion", "1.0.0.14"
             VALUE "InternalName", "EngAgent"
-            VALUE "LegalCopyright", "Copyright © 1999-2016, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2017, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "EngAgent.DLL"
             VALUE "ProductName", "XBRate"
             VALUE "ProductVersion", "1.0.0.14"
