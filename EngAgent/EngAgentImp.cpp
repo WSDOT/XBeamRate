@@ -1109,6 +1109,14 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
 {
    DataStructures* pDataStructures = new DataStructures;
 
+   CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
+   solver->putref_RebarModel(NULL);
+   solver->putref_StrandModel(NULL);
+
+   CComQIPtr<INLSolver> nlsolver(m_CrackedSectionSolver);
+   nlsolver->putref_RebarModel(NULL);
+   nlsolver->putref_StrandModel(NULL);
+
    for ( int i = 0; i < 2; i++ )
    {
       pDataStructures->m_pPositiveMomentCapacity[i] = m_pPositiveMomentCapacity[i].release();
