@@ -3258,10 +3258,12 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
       // one bearing line
       pierData.SetBearingLineCount(1);
 
-      GirderIndexType gdrIdx = 0;
-      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pgsTypes::Back,pgsTypes::omtAlignment);
+      pgsTypes::PierFaceType pierFace(pierIdx == 0 ? pgsTypes::Ahead : pgsTypes::Back);
 
-      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(pierIdx,pgsTypes::Back,pgsTypes::AtPierLine,pgsTypes::AlongItem);
+      GirderIndexType gdrIdx = 0;
+      Float64 refBrgOffset = pBridge->GetGirderOffset(gdrIdx,pierIdx,pierFace,pgsTypes::omtAlignment);
+
+      std::vector<Float64> vSpacing = pBridge->GetGirderSpacing(pierIdx,pierFace,pgsTypes::AtPierLine,pgsTypes::AlongItem);
       xbrBearingLineData brgLine;
       brgLine.SetBearingLineOffset(0);
       brgLine.SetReferenceBearing(pgsTypes::omtAlignment,gdrIdx,refBrgOffset);
