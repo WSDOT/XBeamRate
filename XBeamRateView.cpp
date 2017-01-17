@@ -559,7 +559,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
          dispObj.CoCreateInstance(CLSID_PointDisplayObject);
 
          CComPtr<IShape> shape;
-         pShapes->GetSlabShape(pierStation,pierDirection,&shape);
+         pShapes->GetSlabShape(pierStation,pierDirection,true/*include haunch*/,&shape);
 
          CComPtr<iShapeDrawStrategy> strategy;
          strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
