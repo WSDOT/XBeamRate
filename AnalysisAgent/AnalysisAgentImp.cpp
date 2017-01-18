@@ -2755,6 +2755,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    IndexType nLiveLoadConfigs = pModelData->m_LiveLoadConfigurations.size();
 
    IndexType progressMsgIdx = Min((IndexType)100,nLiveLoadConfigs/10); // we don't want to update the progress message on every loop... the progress window flickers
+   progressMsgIdx = Max((IndexType)1,progressMsgIdx); // this is a devisor so it can never be zero
    // when the configuration index is a multiple of the above value, update the message, but not more than every 100 times through the loop
 
    for ( IndexType llConfigIdx = 0; llConfigIdx < nLiveLoadConfigs; llConfigIdx++ )
