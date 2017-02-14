@@ -110,6 +110,7 @@ STDMETHODIMP CTestAgentImp::ShutDown()
 HRESULT CTestAgentImp::RunTest(PierIDType pierID,LPCTSTR lpszResultsFile)
 {
    std::_tofstream ofResults;
+
    ofResults.open(lpszResultsFile);
    if ( !ofResults )
    {

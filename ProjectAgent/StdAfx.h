@@ -41,3 +41,5 @@
 #include <afxdlgs.h>
 
 #include <XBRate.hh>
+
+#include <OpenBridgeML.hxx>

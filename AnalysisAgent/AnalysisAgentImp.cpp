@@ -2947,7 +2947,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    std::set<Result>::iterator fmEnd(moments.end());
    for ( int i = 0; i < N && fmIter != fmEnd; i++, fmIter++)
    {
-      Result& mr(*fmIter);
+      Result& mr(const_cast<Result&>(*fmIter));
       liveLoadResult.m_MzMinLiveLoadConfigs.push_back(mr.llConfigIdx);
    }
 
@@ -2958,10 +2958,10 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    std::set<Result>::reverse_iterator rvEnd(shears.rend());
    for ( int i = 0; i < N && rmIter != rmEnd && rvIter != rvEnd; i++, rmIter++, rvIter++ )
    {
-      Result& mr(*rmIter);
+      Result& mr(const_cast<Result&>(*rmIter));
       liveLoadResult.m_MzMaxLiveLoadConfigs.push_back(mr.llConfigIdx);
 
-      Result& vr(*rvIter);
+      Result& vr(const_cast<Result&>(*rvIter));
       liveLoadResult.m_FyLiveLoadConfigs.push_back(vr.llConfigIdx);
    }
 
@@ -2982,7 +2982,7 @@ CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(
       ATLASSERT(found != liveLoadResults.end());
    }
 
-   return *found;
+   return const_cast<UnitLiveLoadResult&>(*found);
 }
 
 Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)

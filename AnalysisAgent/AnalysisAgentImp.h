@@ -258,7 +258,7 @@ private:
    void ApplyWheelLineLoadsToFemModel(ModelData* pModelData);
 
 
-   struct UnitLiveLoadResult
+   typedef struct UnitLiveLoadResult
    {
       // unit load results are moment/shear for a unit lane reaction in each loaded lane
       // multplied by the multiple presence factor.
@@ -312,7 +312,7 @@ private:
       // will be computed based the N load cases that cause the max
       // shears at this section.
       std::vector<IndexType> m_FyLiveLoadConfigs;
-   };
+   } UnitLiveLoadResult;
    std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>> m_pUnitLiveLoadResults;
    std::set<UnitLiveLoadResult>& GetUnitLiveLoadResults(PierIDType pierID);
    void ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi);
