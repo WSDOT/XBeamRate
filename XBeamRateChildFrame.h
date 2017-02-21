@@ -44,21 +44,21 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateChildFrame)
 	public:
-	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_OVERLAPPEDWINDOW, const RECT& rect = rectDefault, CMDIFrameWnd* pParentWnd = NULL, CCreateContext* pContext = NULL);
-   virtual BOOL LoadFrame(UINT nIDResource, DWORD dwDefaultStyle = WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, CWnd* pParentWnd = NULL, CCreateContext* pContext = NULL);
+	virtual BOOL Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle = WS_CHILD | WS_VISIBLE | WS_OVERLAPPEDWINDOW, const RECT& rect = rectDefault, CMDIFrameWnd* pParentWnd = nullptr, CCreateContext* pContext = nullptr) override;
+   virtual BOOL LoadFrame(UINT nIDResource, DWORD dwDefaultStyle = WS_OVERLAPPEDWINDOW | FWS_ADDTOTITLE, CWnd* pParentWnd = nullptr, CCreateContext* pContext = nullptr) override;
 	protected:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 	//}}AFX_VIRTUAL
 
 public:
    // iCutLocation
-   virtual Float64 GetCurrentCutLocation();
-   virtual void CutAt(Float64 Xp);
-   virtual void CutAtNext();
-   virtual void CutAtPrev();
-   virtual void ShowCutDlg();
-   virtual Float64 GetMinCutLocation();
-   virtual Float64 GetMaxCutLocation();
+   virtual Float64 GetCurrentCutLocation() override;
+   virtual void CutAt(Float64 Xp) override;
+   virtual void CutAtNext() override;
+   virtual void CutAtPrev() override;
+   virtual void ShowCutDlg() override;
+   virtual Float64 GetMinCutLocation() override;
+   virtual Float64 GetMaxCutLocation() override;
 
    void UpdateSectionCutExtents();
    xbrPointOfInterest GetCutLocation();
@@ -68,8 +68,8 @@ public:
 protected:
 	virtual ~CXBeamRateChildFrame();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
 #endif
 
    CDialogBar m_ControlBar;
@@ -87,5 +87,5 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   virtual void OnUpdateFrameTitle(BOOL bAddToTitle);
+   virtual void OnUpdateFrameTitle(BOOL bAddToTitle) override;
 };

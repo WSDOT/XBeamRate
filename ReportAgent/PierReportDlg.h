@@ -29,7 +29,7 @@ class CPierReportDlg : public CDialog
 	DECLARE_DYNAMIC(CPierReportDlg)
 
 public:
-	CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pRptSpec,CWnd* pParent = NULL);
+	CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pRptSpec,CWnd* pParent = nullptr);
 	virtual ~CPierReportDlg();
 
 // Dialog Data
@@ -39,25 +39,24 @@ public:
    std::vector<std::_tstring> m_ChapterList;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
-   virtual void UpdateChapterList();
-
-   virtual void ClearChapterCheckMarks();
-   virtual void InitChapterListFromSpec();
-   virtual void InitFromRptSpec();
+   void UpdateChapterList();
+   void ClearChapterCheckMarks();
+   void InitChapterListFromSpec();
+   void InitFromRptSpec();
 
    CCheckListBox	m_ChList;
 
    const CReportDescription& m_RptDesc;
    IBroker* m_pBroker;
 
-   boost::shared_ptr<CReportSpecification> m_pInitRptSpec; // report spec for initializing the dialog
+   std::shared_ptr<CReportSpecification> m_pInitRptSpec; // report spec for initializing the dialog
 
 public:
 	// Generated message map functions
 	//{{AFX_MSG(CPierReportDlg)
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog() override;
 	afx_msg void OnHelp();
 	//}}AFX_MSG
 

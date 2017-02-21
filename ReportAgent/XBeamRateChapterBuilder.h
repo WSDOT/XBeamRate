@@ -31,10 +31,10 @@ public:
    CXBeamRateChapterBuilder();
 
    // returns 1
-   virtual Uint16 GetMaxLevel() const;
+   virtual Uint16 GetMaxLevel() const override;
 
-   virtual bool Select() const;
+   virtual bool Select() const override;
 
    // creates a new chapter object and configures it with the correct style for our reports
-   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
+   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const override;
 };

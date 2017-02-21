@@ -384,7 +384,7 @@ const xbrRatingArtifact* CEngAgentImp::GetXBeamRatingArtifact(PierIDType pierID,
 
    if ( found == ratingArtifacts.end() )
    {
-      return NULL;
+      return nullptr;
    }
    else
    {
@@ -878,7 +878,7 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    // This loop accumulates As for each unique Ybar... it doesn't
    // put the bar in the capacity model
    CComPtr<IRebarSectionItem> rebarSectionItem;
-   while ( enumRebar->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+   while ( enumRebar->Next(1,&rebarSectionItem,nullptr) != S_FALSE )
    {
       CComPtr<IPoint2d> pntRebar;
       rebarSectionItem->get_Location(&pntRebar);
@@ -1110,12 +1110,12 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
    DataStructures* pDataStructures = new DataStructures;
 
    CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
-   solver->putref_RebarModel(NULL);
-   solver->putref_StrandModel(NULL);
+   solver->putref_RebarModel(nullptr);
+   solver->putref_StrandModel(nullptr);
 
    CComQIPtr<INLSolver> nlsolver(m_CrackedSectionSolver);
-   nlsolver->putref_RebarModel(NULL);
-   nlsolver->putref_StrandModel(NULL);
+   nlsolver->putref_RebarModel(nullptr);
+   nlsolver->putref_StrandModel(nullptr);
 
    for ( int i = 0; i < 2; i++ )
    {
@@ -1178,46 +1178,46 @@ void CEngAgentImp::CreateDataStructures()
 {
    for ( int i = 0; i < 2; i++ )
    {
-      m_pPositiveMomentCapacity[i] = std::auto_ptr<std::map<IDType,MomentCapacityDetails>>(new std::map<IDType,MomentCapacityDetails>());
-      m_pNegativeMomentCapacity[i] = std::auto_ptr<std::map<IDType,MomentCapacityDetails>>(new std::map<IDType,MomentCapacityDetails>());
+      m_pPositiveMomentCapacity[i] = std::make_unique<std::map<IDType,MomentCapacityDetails>>();
+      m_pNegativeMomentCapacity[i] = std::make_unique<std::map<IDType,MomentCapacityDetails>>();
 
-      m_pPositiveCrackingMoment[i] = std::auto_ptr<std::map<IDType,CrackingMomentDetails>>(new std::map<IDType,CrackingMomentDetails>());
-      m_pNegativeCrackingMoment[i] = std::auto_ptr<std::map<IDType,CrackingMomentDetails>>(new std::map<IDType,CrackingMomentDetails>());
+      m_pPositiveCrackingMoment[i] = std::make_unique<std::map<IDType,CrackingMomentDetails>>();
+      m_pNegativeCrackingMoment[i] = std::make_unique<std::map<IDType,CrackingMomentDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Inventory)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_Operating)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>>(new std::map<IDType,MinMomentCapacityDetails>());
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
-      m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pPositiveMomentCrackedSection[i][xbrTypes::ltPermanent] = std::make_unique<std::map<IDType,CrackedSectionDetails>>();
+      m_pNegativeMomentCrackedSection[i][xbrTypes::ltPermanent] = std::make_unique<std::map<IDType,CrackedSectionDetails>>();
 
-      m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
-      m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = std::auto_ptr<std::map<IDType,CrackedSectionDetails>>(new std::map<IDType,CrackedSectionDetails>());
+      m_pPositiveMomentCrackedSection[i][xbrTypes::ltTransient] = std::make_unique<std::map<IDType,CrackedSectionDetails>>();
+      m_pNegativeMomentCrackedSection[i][xbrTypes::ltTransient] = std::make_unique<std::map<IDType,CrackedSectionDetails>>();
 
-      m_pShearCapacity[i] = std::auto_ptr<std::map<IDType,ShearCapacityDetails>>(new std::map<IDType,ShearCapacityDetails>());
+      m_pShearCapacity[i] = std::make_unique<std::map<IDType,ShearCapacityDetails>>();
 
-      m_pShearFailurePlane[i] = std::auto_ptr<std::map<IDType,AvOverSDetails>>(new std::map<IDType,AvOverSDetails>());
+      m_pShearFailurePlane[i] = std::make_unique<std::map<IDType,AvOverSDetails>>();
 
-      m_pDvDetails[i] = std::auto_ptr<std::map<IDType,DvDetails>>(new std::map<IDType,DvDetails>());
+      m_pDvDetails[i] = std::make_unique<std::map<IDType,DvDetails>>();
    }
 
    for ( int i = 0; i < 6; i++ )
    {
-      m_pRatingArtifacts[i] = std::auto_ptr<std::map<PierIDType,RatingArtifacts>>(new std::map<PierIDType,RatingArtifacts>());
+      m_pRatingArtifacts[i] = std::make_unique<std::map<PierIDType,RatingArtifacts>>();
    }
 }
 

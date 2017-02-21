@@ -251,47 +251,47 @@ int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
    // Setup display lists
    CComPtr<iDisplayList> displayList;
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(SECTION_CUT_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(DIMENSIONS_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(ROADWAY_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(REBAR_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(STIRRUP_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(BEARING_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(GIRDER_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(XBEAM_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
    displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,NULL,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
+   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
    displayList->SetID(COLUMN_DISPLAY_LIST_ID);
    dispMgr->AddDisplayList(displayList);
 
@@ -333,7 +333,7 @@ xbrPointOfInterest CXBeamRateView::GetCutLocation()
    CComPtr<iDisplayObject> dispObj;
    pDL->FindDisplayObject(SECTION_CUT_ID,&dispObj);
 
-   if ( dispObj == NULL )
+   if ( dispObj == nullptr )
    {
       return xbrPointOfInterest();
    }
@@ -802,7 +802,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    CComPtr<IEnumPoint2d> enumPoints;
    points->get__Enum(&enumPoints);
    CComPtr<IPoint2d> pnt;
-   while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+   while ( enumPoints->Next(1,&pnt,nullptr) != S_FALSE )
    {
       Float64 x,y;
       pnt->Location(&x,&y);
@@ -940,7 +940,7 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    CComPtr<IEnumRebarSectionItem> enumSectionItems;
    rebarSection->get__EnumRebarSectionItem(&enumSectionItems);
    CComPtr<IRebarSectionItem> sectionItem;
-   while ( enumSectionItems->Next(1,&sectionItem,NULL) != S_FALSE )
+   while ( enumSectionItems->Next(1,&sectionItem,nullptr) != S_FALSE )
    {
       CComPtr<IPoint2d> pntBar;
       sectionItem->get_Location(&pntBar);
@@ -1290,7 +1290,7 @@ void CXBeamRateView::UpdateSectionCutDisplayObjects()
    dispMgr->GetDisplayObjectFactory(0, &factory);
 
    CComPtr<iDisplayObject> disp_obj;
-   factory->Create(CSectionCutDisplayImpl::ms_Format,NULL,&disp_obj);
+   factory->Create(CSectionCutDisplayImpl::ms_Format,nullptr,&disp_obj);
 
    CComPtr<iDisplayObjectEvents> sink;
    disp_obj->GetEventSink(&sink);
@@ -1592,7 +1592,7 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
 {
    // put points at locations and make them sockets
    CComPtr<iPointDisplayObject> from_rep;
-   ::CoCreateInstance(CLSID_PointDisplayObject,NULL,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&from_rep);
+   ::CoCreateInstance(CLSID_PointDisplayObject,nullptr,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&from_rep);
    from_rep->SetPosition(fromPoint,FALSE,FALSE);
    from_rep->SetID(m_DisplayObjectID++);
    CComQIPtr<iConnectable,&IID_iConnectable> from_connectable(from_rep);
@@ -1602,7 +1602,7 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
    pDL->AddDisplayObject(from_rep);
 
    CComPtr<iPointDisplayObject> to_rep;
-   ::CoCreateInstance(CLSID_PointDisplayObject,NULL,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&to_rep);
+   ::CoCreateInstance(CLSID_PointDisplayObject,nullptr,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&to_rep);
    to_rep->SetPosition(toPoint,FALSE,FALSE);
    to_rep->SetID(m_DisplayObjectID++);
    CComQIPtr<iConnectable,&IID_iConnectable> to_connectable(to_rep);
@@ -1613,7 +1613,7 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
 
    // Create the dimension line object
    CComPtr<iDimensionLine> dimLine;
-   ::CoCreateInstance(CLSID_DimensionLineDisplayObject,NULL,CLSCTX_ALL,IID_iDimensionLine,(void**)&dimLine);
+   ::CoCreateInstance(CLSID_DimensionLineDisplayObject,nullptr,CLSCTX_ALL,IID_iDimensionLine,(void**)&dimLine);
 
    dimLine->SetArrowHeadStyle(DManip::ahsFilled);
 
@@ -1631,7 +1631,7 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
 
    // Create the text block and attach it to the dimension line
    CComPtr<iTextBlock> textBlock;
-   ::CoCreateInstance(CLSID_TextBlock,NULL,CLSCTX_ALL,IID_iTextBlock,(void**)&textBlock);
+   ::CoCreateInstance(CLSID_TextBlock,nullptr,CLSCTX_ALL,IID_iTextBlock,(void**)&textBlock);
 
    // Format the dimension text
    CComPtr<IBroker> pBroker;
@@ -1722,7 +1722,7 @@ DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,
       // need to peek at our object first and make sure it's coming from the local process
       // this is ugly because it breaks encapsulation of CBridgeSectionCutDisplayImpl
       CComPtr<iDragDataSource> source;               
-      ::CoCreateInstance(CLSID_DragDataSource,NULL,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
+      ::CoCreateInstance(CLSID_DragDataSource,nullptr,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
       source->SetDataObject(pDataObject);
       source->PrepareFormat(CSectionCutDisplayImpl::ms_Format);
 
@@ -1769,7 +1769,7 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,I
    CComPtr<IPoint2d> pnt;
    CComPtr<IEnumPoint2d> enumPoints;
    points->get__Enum(&enumPoints);
-   while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+   while ( enumPoints->Next(1,&pnt,nullptr) != S_FALSE )
    {
       Float64 x,y;
       pnt->Location(&x,&y);
@@ -1797,7 +1797,7 @@ void CXBeamRateView::HandleContextMenu(CWnd* pWnd,CPoint logPoint)
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
    CEAFBrokerDocument* pDoc = (CEAFBrokerDocument*)GetDocument();
-   CEAFMenu* pContextMenu = NULL;
+   CEAFMenu* pContextMenu = nullptr;
 
    PierIndexType pierIdx = GetPierIndex();
    if ( IsPGSExtension() )
@@ -1813,13 +1813,13 @@ void CXBeamRateView::HandleContextMenu(CWnd* pWnd,CPoint logPoint)
       else
       {
          pContextMenu = CEAFMenu::CreateContextMenu(pDoc->GetPluginCommandManager());
-         pContextMenu->LoadMenu(IDR_PGS_PIER_VIEW_CTX,NULL);
+         pContextMenu->LoadMenu(IDR_PGS_PIER_VIEW_CTX,nullptr);
       }
    }
    else
    {
       pContextMenu = CEAFMenu::CreateContextMenu(pDoc->GetPluginCommandManager());
-      pContextMenu->LoadMenu(IDR_XBR_PIER_VIEW_CTX,NULL);
+      pContextMenu->LoadMenu(IDR_XBR_PIER_VIEW_CTX,nullptr);
       pDoc->BuildReportMenu(pContextMenu,true);
    }
 

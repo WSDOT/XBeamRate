@@ -164,11 +164,11 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   if ( pBroker != NULL )
+   if ( pBroker != nullptr )
    {
       // NOTE: We can't do 
-      // if ( pBroker != NULL || IsPGSExtension() ) {...}
-      // because IsPGSExtension must have a valid broker. if pBroker is NULL the evaluation goes
+      // if ( pBroker != nullptr || IsPGSExtension() ) {...}
+      // because IsPGSExtension must have a valid broker. if pBroker is nullptr the evaluation goes
       // to IsPGSExtension and we crash....
       //
       // If there is a broker, we must make sure we are a PGS extension to create the control bar, 
@@ -232,9 +232,9 @@ BOOL CXBeamRateChildFrame::PreCreateWindow(CREATESTRUCT& cs)
 {
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
-   if ( pBroker == NULL )
+   if ( pBroker == nullptr )
    {
-      // If the broker is NULL, it has not been initialized yet. This only happens during
+      // If the broker is nullptr, it has not been initialized yet. This only happens during
       // start up in stand alone mode. In PGS Extension model, this viewframe doesn't
       // get created until long after the broker is alive and well.
       // 

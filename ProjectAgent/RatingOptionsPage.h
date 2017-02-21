@@ -36,7 +36,7 @@ public:
 	enum { IDD = IDD_RATING_OPTIONS };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    void FillPermitFactorList();
    void FillLRFDList();
@@ -46,7 +46,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
    afx_msg void OnBnClickedDesignRating();
    afx_msg void OnBnClickedLegalRating();
    afx_msg void OnBnClickedPermitRating();

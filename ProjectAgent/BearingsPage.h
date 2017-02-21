@@ -38,12 +38,12 @@ public:
 	enum { IDD = IDD_BEARINGS_PAGE };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    CBearingLayoutGrid m_Grid[2];
 
 	//{{AFX_MSG(CPierLayoutPage)
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog() override;
    afx_msg void OnHelp();
    afx_msg void OnAddBack();
    afx_msg void OnRemoveBack();

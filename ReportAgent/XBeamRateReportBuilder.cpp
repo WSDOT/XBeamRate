@@ -41,7 +41,7 @@ CReportBuilder(strName,bHidden,bIncludeTimingChapter)
 {
 }
 
-boost::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(boost::shared_ptr<CReportSpecification>& pRptSpec)
+std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(std::shared_ptr<CReportSpecification>& pRptSpec)
 {
    CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec.get());
 
@@ -62,7 +62,7 @@ boost::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(boost::shared
       const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
       if ( pPier->GetPierModelType() == pgsTypes::pmtIdealized )
       {
-         boost::shared_ptr<rptReport> pReport( new rptReport(pRptSpec->GetReportName()) );
+         std::shared_ptr<rptReport> pReport(std::make_shared<rptReport>(pRptSpec->GetReportName()) );
          rptChapter* pChapter = new rptChapter;
          (*pReport) << pChapter;
 

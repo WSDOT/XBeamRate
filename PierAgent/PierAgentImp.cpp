@@ -1142,7 +1142,7 @@ ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage s
    std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
    ZoneIndexType zoneIdx = INVALID_INDEX;
    ZoneIndexType zIdx = 0;
-   BOOST_FOREACH(StirrupZone& zone,vStirrupZones)
+   for( const auto& zone : vStirrupZones)
    {
       if (::InRange(zone.Xstart,poi.GetDistFromStart(),zone.Xend) )
       {
@@ -1208,7 +1208,7 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PierIDTy
    }
 
    std::vector<xbrPointOfInterest> vFilteredPoi;
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       if ( poi.HasAttribute(attrib) )
       {
@@ -1593,7 +1593,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    MaterialSpec matSpec = GetRebarSpecification(rebarType);
 
    const xbrLongitudinalRebarData& rebarData = pProject->GetLongitudinalRebar(pierID);
-   BOOST_FOREACH(const xbrLongitudinalRebarData::RebarRow& row,rebarData.RebarRows)
+   for (const auto& row : rebarData.RebarRows)
    {
       CComPtr<IFixedLengthRebarLayoutItem> rebarLayoutItem;
       rebarLayoutItem.CoCreateInstance(CLSID_FixedLengthRebarLayoutItem);
@@ -1784,7 +1784,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       std::vector<StirrupZone> myZones;
       myZones.insert(myZones.begin(),pvStirrupZones->rbegin()+1,pvStirrupZones->rend());
       // Adjust the Start/End of the zone
-      BOOST_FOREACH(StirrupZone& myZone,myZones)
+      for (auto& myZone : myZones)
       {
          Float64 Xstart = myZone.Xstart;
          Float64 Xend   = myZone.Xend;
@@ -1844,7 +1844,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
 
    // Compute the number of stirrups in each zone
    // This is a little inefficient because we are looping through all the zones again, but it is easier and more clear
-   BOOST_FOREACH(StirrupZone& zone,*pvStirrupZones)
+   for (auto& zone : *pvStirrupZones)
    {
       ATLASSERT(0 <= zone.Xstart && zone.Xstart <= L);
       ATLASSERT(0 <= zone.Xend   && zone.Xend   <= L);
@@ -1990,7 +1990,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    std::vector<Float64> vWheelLineLocations = pProductForces->GetWheelLineLocations(pierID);
 
    // Put POI at every place a wheel line load is applied
-   BOOST_FOREACH(Float64 X,vWheelLineLocations)
+   for (const auto& X : vWheelLineLocations)
    {
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_WHEELLINE));
    }
@@ -2022,7 +2022,7 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
 bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)
 {
    std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       if ( IsEqual(poi.GetDistFromStart(),Xxb) )
       {
@@ -2051,7 +2051,7 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
    CComPtr<IEnumPoint2d> enumPoints;
    deckProfile->get__Enum(&enumPoints);
    CComPtr<IPoint2d> pnt;
-   while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+   while ( enumPoints->Next(1,&pnt,nullptr) != S_FALSE )
    {
       Float64 y;
       pnt->get_Y(&y);
@@ -2085,7 +2085,7 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
    {
       // the profile is flat... use the alignment point as the crown point
       enumPoints->Reset();
-      while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+      while ( enumPoints->Next(1,&pnt,nullptr) != S_FALSE )
       {
          Float64 x;
          pnt->get_X(&x);
@@ -2126,7 +2126,7 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
 
    bool bOverColumn = false;
    std::vector<xbrPointOfInterest> vFilteredPoi;
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
       {

@@ -136,7 +136,7 @@ public:
 
 protected:
    void MakeCopy(const xbrMomentRatingArtifact& rOther);
-   virtual void MakeAssignment(const xbrMomentRatingArtifact& rOther);
+   void MakeAssignment(const xbrMomentRatingArtifact& rOther);
    Float64 GetRatingFactor(Float64 K,Float64 Mllim,Float64 MllimAdj) const;
 
    mutable bool m_bRFComputed;

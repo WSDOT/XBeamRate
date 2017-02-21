@@ -36,12 +36,12 @@ class CLoadingDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CLoadingDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
    rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CLoadingDetailsChapterBuilder(const CLoadingDetailsChapterBuilder&);
-   CLoadingDetailsChapterBuilder& operator=(const CLoadingDetailsChapterBuilder&);
+   CLoadingDetailsChapterBuilder(const CLoadingDetailsChapterBuilder&) = delete;
+   CLoadingDetailsChapterBuilder& operator=(const CLoadingDetailsChapterBuilder&) = delete;
 };

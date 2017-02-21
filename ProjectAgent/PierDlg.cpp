@@ -66,7 +66,7 @@ txnEditPierData CPierDlg::GetEditPierData()
 // IReinforcementPageParent
 CPierData2* CPierDlg::GetPierData()
 {
-   return NULL; // we are not associated with pier data for an entire bridge
+   return nullptr; // we are not associated with pier data for an entire bridge
 }
 
 xbrPierData* CPierDlg::GetXBRPierData()

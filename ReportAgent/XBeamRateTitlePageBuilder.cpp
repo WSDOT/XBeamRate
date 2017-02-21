@@ -64,15 +64,15 @@ CTitlePageBuilder* CXBeamRateTitlePageBuilder::Clone() const
    return new CXBeamRateTitlePageBuilder(*this);
 }
 
-bool CXBeamRateTitlePageBuilder::NeedsUpdate(CReportHint* pHint,boost::shared_ptr<CReportSpecification>& pRptSpec)
+bool CXBeamRateTitlePageBuilder::NeedsUpdate(CReportHint* pHint,std::shared_ptr<CReportSpecification>& pRptSpec)
 {
    // don't let the title page control whether or not a report needs updating
    return false;
 }
 
-rptChapter* CXBeamRateTitlePageBuilder::Build(boost::shared_ptr<CReportSpecification>& pRptSpec)
+rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecification>& pRptSpec)
 {
-   boost::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = boost::dynamic_pointer_cast<CXBeamRateReportSpecification,CReportSpecification>(pRptSpec);
+   std::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification,CReportSpecification>(pRptSpec);
 
    // Create a title page for the report
    rptChapter* pTitlePage = new rptChapter;

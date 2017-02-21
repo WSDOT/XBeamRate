@@ -33,12 +33,12 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRatePluginApp)
 	public:
-    virtual BOOL InitInstance();
-    virtual int ExitInstance();
+    virtual BOOL InitInstance() override;
+    virtual int ExitInstance() override;
 
     CString GetVersion(bool bIncludeBuildNumber) const;
 
-    virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+    virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override;
 
 	//}}AFX_VIRTUAL
 

@@ -45,16 +45,16 @@ public:
    CLoadRatingChapterBuilder();
 
    //------------------------------------------------------------------------
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
 
    //------------------------------------------------------------------------
-   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
+   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const override;
 
    //------------------------------------------------------------------------
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CLoadRatingChapterBuilder(const CLoadRatingChapterBuilder&);
-   CLoadRatingChapterBuilder& operator=(const CLoadRatingChapterBuilder&);
+   CLoadRatingChapterBuilder(const CLoadRatingChapterBuilder&) = delete;
+   CLoadRatingChapterBuilder& operator=(const CLoadRatingChapterBuilder&) = delete;
 };

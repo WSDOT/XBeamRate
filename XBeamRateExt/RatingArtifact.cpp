@@ -98,7 +98,7 @@ const xbrRatingArtifact::ShearRatings& xbrRatingArtifact::GetShearRatings() cons
 Float64 xbrRatingArtifact::GetMomentRatingFactorEx(bool bPositiveMoment,const xbrMomentRatingArtifact** ppArtifact) const
 {
    Float64 RF = DBL_MAX;
-   (*ppArtifact) = NULL;
+   (*ppArtifact) = nullptr;
 
    MomentRatings::const_iterator iter;
    const MomentRatings* pRatings = (bPositiveMoment ? &m_PositiveMomentRatings : &m_NegativeMomentRatings);
@@ -114,7 +114,7 @@ Float64 xbrRatingArtifact::GetMomentRatingFactorEx(bool bPositiveMoment,const xb
       }
    }
 
-   if ( *ppArtifact == NULL && 0 < pRatings->size() )
+   if ( *ppArtifact == nullptr && 0 < pRatings->size() )
    {
       ATLASSERT(RF == DBL_MAX);
       const xbrMomentRatingArtifact& artifact = pRatings->begin()->second;
@@ -136,7 +136,7 @@ const xbrMomentRatingArtifact* xbrRatingArtifact::GetMomentRatingArtifact(const 
    MomentRatings::const_iterator found = pRatings->find(poi);
    if ( found == pRatings->end() )
    {
-      return NULL;
+      return nullptr;
    }
    else
    {
@@ -148,7 +148,7 @@ const xbrMomentRatingArtifact* xbrRatingArtifact::GetMomentRatingArtifact(const 
 Float64 xbrRatingArtifact::GetShearRatingFactorEx(const xbrShearRatingArtifact** ppArtifact) const
 {
    Float64 RF = DBL_MAX;
-   (*ppArtifact) = NULL;
+   (*ppArtifact) = nullptr;
 
    ShearRatings::const_iterator iter;
    for ( iter = m_ShearRatings.begin(); iter != m_ShearRatings.end(); iter++ )
@@ -162,7 +162,7 @@ Float64 xbrRatingArtifact::GetShearRatingFactorEx(const xbrShearRatingArtifact**
       }
    }
 
-   if ( *ppArtifact == NULL && 0 < m_ShearRatings.size() )
+   if ( *ppArtifact == nullptr && 0 < m_ShearRatings.size() )
    {
       ATLASSERT(RF == DBL_MAX);
       const xbrShearRatingArtifact& artifact = m_ShearRatings.begin()->second;
@@ -197,7 +197,7 @@ const xbrRatingArtifact::YieldStressRatios& xbrRatingArtifact::GetYieldStressRat
 Float64 xbrRatingArtifact::GetYieldStressRatioEx(bool bPositiveMoment,const xbrYieldStressRatioArtifact** ppArtifact) const
 {
    Float64 RF = DBL_MAX;
-   (*ppArtifact) = NULL;
+   (*ppArtifact) = nullptr;
 
    const YieldStressRatios* pRatios = (bPositiveMoment ? &m_PositiveMomentYieldStressRatios : &m_NegativeMomentYieldStressRatios);
    YieldStressRatios::const_iterator iter;
@@ -212,7 +212,7 @@ Float64 xbrRatingArtifact::GetYieldStressRatioEx(bool bPositiveMoment,const xbrY
       }
    }
 
-   if ( *ppArtifact == NULL && 0 < pRatios->size() )
+   if ( *ppArtifact == nullptr && 0 < pRatios->size() )
    {
       ATLASSERT(RF == DBL_MAX);
       const xbrYieldStressRatioArtifact& artifact = pRatios->begin()->second;
@@ -270,46 +270,46 @@ Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppP
       i = 4;
    }
 
-   // NULL out all but the controlling rating
+   // nullptr out all but the controlling rating
    if ( i == 0 )
    {
-      //(*ppPositiveMoment)            = NULL;
-      (*ppNegativeMoment)            = NULL;
-      (*ppShear)                     = NULL;
-      (*ppYieldStressPositiveMoment) = NULL;
-      (*ppYieldStressNegativeMoment) = NULL;
+      //(*ppPositiveMoment)            = nullptr;
+      (*ppNegativeMoment)            = nullptr;
+      (*ppShear)                     = nullptr;
+      (*ppYieldStressPositiveMoment) = nullptr;
+      (*ppYieldStressNegativeMoment) = nullptr;
    }
    else if ( i == 1 )
    {
-      (*ppPositiveMoment)            = NULL;
-      //(*ppNegativeMoment)            = NULL;
-      (*ppShear)                     = NULL;
-      (*ppYieldStressPositiveMoment) = NULL;
-      (*ppYieldStressNegativeMoment) = NULL;
+      (*ppPositiveMoment)            = nullptr;
+      //(*ppNegativeMoment)            = nullptr;
+      (*ppShear)                     = nullptr;
+      (*ppYieldStressPositiveMoment) = nullptr;
+      (*ppYieldStressNegativeMoment) = nullptr;
    }
    else if ( i == 2 )
    {
-      (*ppPositiveMoment)            = NULL;
-      (*ppNegativeMoment)            = NULL;
-      //(*ppShear)                     = NULL;
-      (*ppYieldStressPositiveMoment) = NULL;
-      (*ppYieldStressNegativeMoment) = NULL;
+      (*ppPositiveMoment)            = nullptr;
+      (*ppNegativeMoment)            = nullptr;
+      //(*ppShear)                     = nullptr;
+      (*ppYieldStressPositiveMoment) = nullptr;
+      (*ppYieldStressNegativeMoment) = nullptr;
    }
    else if ( i == 3 )
    {
-      (*ppPositiveMoment)            = NULL;
-      (*ppNegativeMoment)            = NULL;
-      (*ppShear)                     = NULL;
-      //(*ppYieldStressPositiveMoment) = NULL;
-      (*ppYieldStressNegativeMoment) = NULL;
+      (*ppPositiveMoment)            = nullptr;
+      (*ppNegativeMoment)            = nullptr;
+      (*ppShear)                     = nullptr;
+      //(*ppYieldStressPositiveMoment) = nullptr;
+      (*ppYieldStressNegativeMoment) = nullptr;
    }
    else if ( i == 4 )
    {
-      (*ppPositiveMoment)            = NULL;
-      (*ppNegativeMoment)            = NULL;
-      (*ppShear)                     = NULL;
-      (*ppYieldStressPositiveMoment) = NULL;
-      //(*ppYieldStressNegativeMoment) = NULL;
+      (*ppPositiveMoment)            = nullptr;
+      (*ppNegativeMoment)            = nullptr;
+      (*ppShear)                     = nullptr;
+      (*ppYieldStressPositiveMoment) = nullptr;
+      //(*ppYieldStressNegativeMoment) = nullptr;
    }
    else
    {
@@ -319,11 +319,11 @@ Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppP
       // reactions, but the reating factors are DBL_MAX...
       // since all types of ratings control equally, use positive moment as controlling factor
       ATLASSERT(i == -1);
-      //(*ppPositiveMoment)            = NULL;
-      (*ppNegativeMoment)            = NULL;
-      (*ppShear)                     = NULL;
-      (*ppYieldStressPositiveMoment) = NULL;
-      (*ppYieldStressNegativeMoment) = NULL;
+      //(*ppPositiveMoment)            = nullptr;
+      (*ppNegativeMoment)            = nullptr;
+      (*ppShear)                     = nullptr;
+      (*ppYieldStressPositiveMoment) = nullptr;
+      (*ppYieldStressNegativeMoment) = nullptr;
    }
    return RF;
 }
@@ -331,6 +331,11 @@ Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppP
 void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeight,Float64* pRF,std::_tstring* pVehicle) const
 {
    Float64 posting_load = DBL_MAX;
+
+   *pWeight = 0;
+   *pRF = 1;
+   *pVehicle = _T("Unknown");
+
    MomentRatings::const_iterator moment_iter;
    for ( moment_iter = m_PositiveMomentRatings.begin(); moment_iter != m_PositiveMomentRatings.end(); moment_iter++ )
    {

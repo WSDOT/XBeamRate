@@ -504,7 +504,7 @@ void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pD
 
 
    RowIndexType row = pTable->GetNumberOfHeaderRows();
-   BOOST_FOREACH(const xbrLongitudinalRebarData::RebarRow& rebarRow, rebarData.RebarRows)
+   for (const auto& rebarRow : rebarData.RebarRows)
    {
       col = 0;
 
@@ -602,7 +602,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
 
    RowIndexType row = pTable->GetNumberOfHeaderRows();
    IndexType zoneIdx = 0;
-   BOOST_FOREACH(const xbrStirrupData::StirrupZone& stirrupZone, pStirrups->Zones)
+   for (const auto& stirrupZone : pStirrups->Zones)
    {
       col = 0;
 

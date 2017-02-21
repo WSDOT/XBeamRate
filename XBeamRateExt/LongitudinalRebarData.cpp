@@ -103,7 +103,7 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pPro
 
    pStrSave->BeginUnit(_T("LongitudinalRebar"),1.0);
 
-   BOOST_FOREACH(RebarRow& rebar_row,RebarRows)
+   for (const auto& rebar_row : RebarRows)
    {
       pStrSave->BeginUnit(_T("RebarRow"),1.0);
       pStrSave->put_Property(_T("Datum"),        CComVariant(rebar_row.Datum));

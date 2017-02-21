@@ -35,7 +35,7 @@ class COptionsDlg : public CPropertySheet
 	DECLARE_DYNAMIC(COptionsDlg)
 
 public:
-	COptionsDlg(CWnd* pParentWnd = NULL, UINT iSelectPage = 0);   // standard constructor
+	COptionsDlg(CWnd* pParentWnd = nullptr, UINT iSelectPage = 0);   // standard constructor
 	virtual ~COptionsDlg();
 
    void SetOptions(const txnEditOptionsData& options);

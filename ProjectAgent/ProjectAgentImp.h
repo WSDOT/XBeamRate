@@ -103,186 +103,186 @@ END_CONNECTION_POINT_MAP()
 
 // IAgentEx
 public:
-	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker);
-   STDMETHOD(RegInterfaces)();
-	STDMETHOD(Init)();
-	STDMETHOD(Reset)();
-	STDMETHOD(ShutDown)();
-   STDMETHOD(Init2)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
+   STDMETHOD(RegInterfaces)() override;
+	STDMETHOD(Init)() override;
+	STDMETHOD(Reset)() override;
+	STDMETHOD(ShutDown)() override;
+   STDMETHOD(Init2)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 // IAgentUIIntegration
 public:
-   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
+   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate) override;
 
 // IAgentPersist
 public:
-	STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
-	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
+	STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad) override;
+	STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave) override;
 
 // IEAFCommandCallback
    // NOTE: this interface should be on CAgentCmdTarget, but it can't until
    // CAgentCmdTarget supports IUnknown. This is a COM interface
 public:
-   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
-   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
-   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
+   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo) override;
+   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const override;
+   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const override;
 
 // IXBRProjectProperties
 public:
-   virtual LPCTSTR GetBridgeName() const;
-   virtual void SetBridgeName(LPCTSTR name);
-   virtual LPCTSTR GetBridgeID() const;
-   virtual void SetBridgeID(LPCTSTR bid);
-   virtual LPCTSTR GetJobNumber() const;
-   virtual void SetJobNumber(LPCTSTR jid);
-   virtual LPCTSTR GetEngineer() const;
-   virtual void SetEngineer(LPCTSTR eng);
-   virtual LPCTSTR GetCompany() const;
-   virtual void SetCompany(LPCTSTR company);
-   virtual LPCTSTR GetComments() const;
-   virtual void SetComments(LPCTSTR comments);
-   virtual void ShowProjectPropertiesOnNewProject(bool bShow);
-   virtual bool ShowProjectPropertiesOnNewProject();
-   virtual void PromptForProjectProperties();
+   virtual LPCTSTR GetBridgeName() const override;
+   virtual void SetBridgeName(LPCTSTR name) override;
+   virtual LPCTSTR GetBridgeID() const override;
+   virtual void SetBridgeID(LPCTSTR bid) override;
+   virtual LPCTSTR GetJobNumber() const override;
+   virtual void SetJobNumber(LPCTSTR jid) override;
+   virtual LPCTSTR GetEngineer() const override;
+   virtual void SetEngineer(LPCTSTR eng) override;
+   virtual LPCTSTR GetCompany() const override;
+   virtual void SetCompany(LPCTSTR company) override;
+   virtual LPCTSTR GetComments() const override;
+   virtual void SetComments(LPCTSTR comments) override;
+   virtual void ShowProjectPropertiesOnNewProject(bool bShow) override;
+   virtual bool ShowProjectPropertiesOnNewProject() override;
+   virtual void PromptForProjectProperties() override;
 
 // IXBRProject
 public:
-   virtual void SetPierData(const xbrPierData& pierData);
-   virtual const xbrPierData& GetPierData(PierIDType pierID);
+   virtual void SetPierData(const xbrPierData& pierData) override;
+   virtual const xbrPierData& GetPierData(PierIDType pierID) override;
 
-   virtual xbrTypes::PierType GetPierType(PierIDType pierID);
-   virtual void SetPierType(PierIDType pierID,xbrTypes::PierType pierType);
+   virtual xbrTypes::PierType GetPierType(PierIDType pierID) override;
+   virtual void SetPierType(PierIDType pierID,xbrTypes::PierType pierType) override;
 
-   virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation);
-   virtual Float64 GetDeckElevation(PierIDType pierID);
-   virtual void SetDeckThickness(PierIDType pierID,Float64 tDeck);
-   virtual Float64 GetDeckThickness(PierIDType pierID);
-   virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo);
-   virtual Float64 GetCrownPointOffset(PierIDType pierID);
-   virtual void SetBridgeLineOffset(PierIDType pierID,Float64 blo);
-   virtual Float64 GetBridgeLineOffset(PierIDType pierID);
+   virtual void SetDeckElevation(PierIDType pierID,Float64 deckElevation) override;
+   virtual Float64 GetDeckElevation(PierIDType pierID) override;
+   virtual void SetDeckThickness(PierIDType pierID,Float64 tDeck) override;
+   virtual Float64 GetDeckThickness(PierIDType pierID) override;
+   virtual void SetCrownPointOffset(PierIDType pierID,Float64 cpo) override;
+   virtual Float64 GetCrownPointOffset(PierIDType pierID) override;
+   virtual void SetBridgeLineOffset(PierIDType pierID,Float64 blo) override;
+   virtual Float64 GetBridgeLineOffset(PierIDType pierID) override;
 
-   virtual void SetOrientation(PierIDType pierID,LPCTSTR strOrientation);
-   virtual LPCTSTR GetOrientation(PierIDType pierID);
+   virtual void SetOrientation(PierIDType pierID,LPCTSTR strOrientation) override;
+   virtual LPCTSTR GetOrientation(PierIDType pierID) override;
 
-   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum(PierIDType pierID);
-   virtual void SetCurbLineDatum(PierIDType pierID,pgsTypes::OffsetMeasurementType datumType);
+   virtual pgsTypes::OffsetMeasurementType GetCurbLineDatum(PierIDType pierID) override;
+   virtual void SetCurbLineDatum(PierIDType pierID,pgsTypes::OffsetMeasurementType datumType) override;
 
-   virtual void SetCurbLineOffset(PierIDType pierID,Float64 leftCLO,Float64 rightCLO);
-   virtual void GetCurbLineOffset(PierIDType pierID,Float64* pLeftCLO,Float64* pRightCLO);
+   virtual void SetCurbLineOffset(PierIDType pierID,Float64 leftCLO,Float64 rightCLO) override;
+   virtual void GetCurbLineOffset(PierIDType pierID,Float64* pLeftCLO,Float64* pRightCLO) override;
 
-   virtual void SetCrownSlopes(PierIDType pierID,Float64 sl,Float64 sr);
-   virtual void GetCrownSlopes(PierIDType pierID,Float64* psl,Float64* psr);
+   virtual void SetCrownSlopes(PierIDType pierID,Float64 sl,Float64 sr) override;
+   virtual void GetCrownSlopes(PierIDType pierID,Float64* psl,Float64* psr) override;
 
-   virtual void GetDiaphragmDimensions(PierIDType pierID,Float64* pH,Float64* pW);
-   virtual void SetDiaphragmDimensions(PierIDType pierID,Float64 H,Float64 W);
+   virtual void GetDiaphragmDimensions(PierIDType pierID,Float64* pH,Float64* pW) override;
+   virtual void SetDiaphragmDimensions(PierIDType pierID,Float64 H,Float64 W) override;
 
-   virtual IndexType GetBearingLineCount(PierIDType pierID);
-   virtual void SetBearingLineCount(PierIDType pierID,IndexType nBearingLines);
+   virtual IndexType GetBearingLineCount(PierIDType pierID) override;
+   virtual void SetBearingLineCount(PierIDType pierID,IndexType nBearingLines) override;
 
-   virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx);
-   virtual void SetBearingCount(PierIDType pierID,IndexType brgLineIdx,IndexType nBearings);
+   virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) override;
+   virtual void SetBearingCount(PierIDType pierID,IndexType brgLineIdx,IndexType nBearings) override;
 
-   virtual Float64 GetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
-   virtual void SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing);
+   virtual Float64 GetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) override;
+   virtual void SetBearingSpacing(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 spacing) override;
 
-   virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType);
-   virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
+   virtual void SetBearingReactionType(PierIDType pierID,IndexType brgLineIdx,xbrTypes::ReactionLoadType brgReactionType) override;
+   virtual xbrTypes::ReactionLoadType GetBearingReactionType(PierIDType pierID,IndexType brgLineIdx) override;
 
-   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W);
-   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW);
-   virtual Float64 GetBearingWidth(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
+   virtual void SetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W) override;
+   virtual void GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) override;
+   virtual Float64 GetBearingWidth(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) override;
 
-   virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum);
-   virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum);
+   virtual void GetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType* pRefIdx,Float64* pRefBearingOffset,pgsTypes::OffsetMeasurementType* pRefBearingDatum) override;
+   virtual void SetReferenceBearing(PierIDType pierID,IndexType brgLineIdx,IndexType refIdx,Float64 refBearingOffset,pgsTypes::OffsetMeasurementType refBearingDatum) override;
 
-   virtual void SetReactionLoadApplicationType(PierIDType pierID,xbrTypes::ReactionLoadApplicationType applicationType);
-   virtual xbrTypes::ReactionLoadApplicationType GetReactionLoadApplicationType(PierIDType pierID);
+   virtual void SetReactionLoadApplicationType(PierIDType pierID,xbrTypes::ReactionLoadApplicationType applicationType) override;
+   virtual xbrTypes::ReactionLoadApplicationType GetReactionLoadApplicationType(PierIDType pierID) override;
 
-   virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
-   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM);
-   virtual std::vector<xbrLiveLoadReactionData> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
-   virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
-   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
-   virtual Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+   virtual IndexType GetLiveLoadReactionCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) override;
+   virtual void SetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrLiveLoadReactionData>& vLLIM) override;
+   virtual std::vector<xbrLiveLoadReactionData> GetLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType) override;
+   virtual std::_tstring GetLiveLoadName(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) override;
+   virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) override;
+   virtual Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) override;
 
-   virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade);
-   virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade);
+   virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade) override;
+   virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade) override;
 
-   virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete);
-   virtual const CConcreteMaterial& GetConcrete(PierIDType pierID);
+   virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete) override;
+   virtual const CConcreteMaterial& GetConcrete(PierIDType pierID) override;
 
-   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w);
-   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw);
-   virtual Float64 GetXBeamLeftOverhang(PierIDType pierID);
-   virtual Float64 GetXBeamRightOverhang(PierIDType pierID);
-   virtual Float64 GetXBeamWidth(PierIDType pierID);
+   virtual void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w) override;
+   virtual void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) override;
+   virtual Float64 GetXBeamLeftOverhang(PierIDType pierID) override;
+   virtual Float64 GetXBeamRightOverhang(PierIDType pierID) override;
+   virtual Float64 GetXBeamWidth(PierIDType pierID) override;
 
-   virtual void SetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset);
-   virtual void GetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset);
-   virtual IndexType GetColumnCount(PierIDType pierID);
-   virtual Float64 GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx);
-   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx);
-   virtual Float64 GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx);
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx);
+   virtual void SetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset) override;
+   virtual void GetRefColumnLocation(PierIDType pierID,pgsTypes::OffsetMeasurementType* prefColumnDatum,IndexType* prefColumnIdx,Float64* prefColumnOffset) override;
+   virtual IndexType GetColumnCount(PierIDType pierID) override;
+   virtual Float64 GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx) override;
+   virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx) override;
+   virtual Float64 GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx) override;
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) override;
 
-   virtual void SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H);
-   virtual void GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH);
+   virtual void SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) override;
+   virtual void GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) override;
 
-   virtual const xbrLongitudinalRebarData& GetLongitudinalRebar(PierIDType pierID);
-   virtual void SetLongitudinalRebar(PierIDType pierID,const xbrLongitudinalRebarData& rebar);
-   virtual void SetLowerXBeamStirrups(PierIDType pierID,const xbrStirrupData& stirrups);
-   virtual const xbrStirrupData& GetLowerXBeamStirrups(PierIDType pierID);
-   virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups);
-   virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID);
+   virtual const xbrLongitudinalRebarData& GetLongitudinalRebar(PierIDType pierID) override;
+   virtual void SetLongitudinalRebar(PierIDType pierID,const xbrLongitudinalRebarData& rebar) override;
+   virtual void SetLowerXBeamStirrups(PierIDType pierID,const xbrStirrupData& stirrups) override;
+   virtual const xbrStirrupData& GetLowerXBeamStirrups(PierIDType pierID) override;
+   virtual void SetFullDepthStirrups(PierIDType pierID,const xbrStirrupData& stirrups) override;
+   virtual const xbrStirrupData& GetFullDepthStirrups(PierIDType pierID) override;
    
-   virtual void SetFlexureResistanceFactors(Float64 phiC,Float64 phiT);
-   virtual void GetFlexureResistanceFactors(Float64* phiC,Float64* phiT);
-   virtual void SetShearResistanceFactor(Float64 phi);
-   virtual Float64 GetShearResistanceFactor();
+   virtual void SetFlexureResistanceFactors(Float64 phiC,Float64 phiT) override;
+   virtual void GetFlexureResistanceFactors(Float64* phiC,Float64* phiT) override;
+   virtual void SetShearResistanceFactor(Float64 phi) override;
+   virtual Float64 GetShearResistanceFactor() override;
 
-   virtual void SetSystemFactorFlexure(Float64 sysFactor);
-   virtual Float64 GetSystemFactorFlexure();
+   virtual void SetSystemFactorFlexure(Float64 sysFactor) override;
+   virtual Float64 GetSystemFactorFlexure() override;
    
-   virtual void SetSystemFactorShear(Float64 sysFactor);
-   virtual Float64 GetSystemFactorShear();
+   virtual void SetSystemFactorShear(Float64 sysFactor) override;
+   virtual Float64 GetSystemFactorShear() override;
 
-   virtual void SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor);
-   virtual void GetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor);
-   virtual Float64 GetConditionFactor(PierIDType pierID);
+   virtual void SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor) override;
+   virtual void GetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType* pConditionFactorType,Float64 *pConditionFactor) override;
+   virtual Float64 GetConditionFactor(PierIDType pierID) override;
 
-   virtual void SetDCLoadFactor(pgsTypes::LimitState limitState,Float64 dc);
-   virtual Float64 GetDCLoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetDCLoadFactor(pgsTypes::LimitState limitState,Float64 dc) override;
+   virtual Float64 GetDCLoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetDWLoadFactor(pgsTypes::LimitState limitState,Float64 dw);
-   virtual Float64 GetDWLoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetDWLoadFactor(pgsTypes::LimitState limitState,Float64 dw) override;
+   virtual Float64 GetDWLoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetCRLoadFactor(pgsTypes::LimitState limitState,Float64 cr);
-   virtual Float64 GetCRLoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetCRLoadFactor(pgsTypes::LimitState limitState,Float64 cr) override;
+   virtual Float64 GetCRLoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetSHLoadFactor(pgsTypes::LimitState limitState,Float64 sh);
-   virtual Float64 GetSHLoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetSHLoadFactor(pgsTypes::LimitState limitState,Float64 sh) override;
+   virtual Float64 GetSHLoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetRELoadFactor(pgsTypes::LimitState limitState,Float64 re);
-   virtual Float64 GetRELoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetRELoadFactor(pgsTypes::LimitState limitState,Float64 re) override;
+   virtual Float64 GetRELoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetPSLoadFactor(pgsTypes::LimitState limitState,Float64 ps);
-   virtual Float64 GetPSLoadFactor(pgsTypes::LimitState limitState);
+   virtual void SetPSLoadFactor(pgsTypes::LimitState limitState,Float64 ps) override;
+   virtual Float64 GetPSLoadFactor(pgsTypes::LimitState limitState) override;
 
-   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll);
-   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx);
+   virtual void SetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,Float64 ll) override;
+   virtual Float64 GetLiveLoadFactor(PierIDType pierID,pgsTypes::LimitState limitState,VehicleIndexType vehicleIdx) override;
 
-   virtual void SetMaxLiveLoadStepSize(Float64 stepSize);
-   virtual Float64 GetMaxLiveLoadStepSize();
+   virtual void SetMaxLiveLoadStepSize(Float64 stepSize) override;
+   virtual Float64 GetMaxLiveLoadStepSize() override;
 
-   virtual void SetMaxLoadedLanes(IndexType nLanesMax);
-   virtual IndexType GetMaxLoadedLanes();
+   virtual void SetMaxLoadedLanes(IndexType nLanesMax) override;
+   virtual IndexType GetMaxLoadedLanes() override;
 
 // IXBRRatingSpecification
 public:
-   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType);
-   virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable);
+   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) override;
+   virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) override;
 
    //virtual std::_tstring GetRatingSpecification() = 0;
    //virtual void SetRatingSpecification(const std::_tstring& spec) = 0;
@@ -290,8 +290,8 @@ public:
    //virtual void SetADTT(Int16 adtt) = 0;
    //virtual Int16 GetADTT() = 0; // < 0 = Unknown
 
-   virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear);
-   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType);
+   virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) override;
+   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) override;
 
    //// Per last paragraph in MBE 6A.4.4.2.1a, the lane load may be excluded and the 0.75 truck factor taken as 1.0
    //// for ADTT < 500 and in the Engineer's judgement it is warranted
@@ -299,55 +299,55 @@ public:
    //virtual bool ExcludeLegalLoadLaneLoading() = 0;
 
    // Evalute yield stress in reinforcement MBE 6A.5.4.2.2b
-   virtual void CheckYieldStressLimit(bool bCheckYieldStress);
-   virtual bool CheckYieldStressLimit();
+   virtual void CheckYieldStressLimit(bool bCheckYieldStress) override;
+   virtual bool CheckYieldStressLimit() override;
 
    // returns fraction of yield stress that reinforcement can be stressed to during
    // a permit load rating evaluation MBE 6A.5.4.2.2b
-   virtual void SetYieldStressLimitCoefficient(Float64 x);
-   virtual Float64 GetYieldStressLimitCoefficient();
+   virtual void SetYieldStressLimitCoefficient(Float64 x) override;
+   virtual Float64 GetYieldStressLimitCoefficient() override;
 
    //// Permit type for rating for special/limited crossing permit vehicle
    //virtual void SetSpecialPermitType(pgsTypes::SpecialPermitType type) = 0;
    //virtual pgsTypes::SpecialPermitType GetSpecialPermitType() = 0;
 
-   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions();
-   virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType);
+   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() override;
+   virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) override;
 
-   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod();
-   virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod);
+   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() override;
+   virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) override;
 
 // IXBRProjectEdit
 public:
-   virtual void EditPier(int nPage);
-   virtual void EditOptions();
+   virtual void EditPier(int nPage) override;
+   virtual void EditOptions() override;
 
 // IXBREvents
 public:
-   virtual void HoldEvents();
-   virtual void FirePendingEvents();
-   virtual void CancelPendingEvents();
+   virtual void HoldEvents() override;
+   virtual void FirePendingEvents() override;
+   virtual void CancelPendingEvents() override;
 
 // IBridgeDescriptionEventSink
 public:
-   virtual HRESULT OnBridgeChanged(CBridgeChangedHint* pHint);
-   virtual HRESULT OnGirderFamilyChanged();
-   virtual HRESULT OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint);
-   virtual HRESULT OnLiveLoadChanged();
-   virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName);
-   virtual HRESULT OnConstructionLoadChanged();
+   virtual HRESULT OnBridgeChanged(CBridgeChangedHint* pHint) override;
+   virtual HRESULT OnGirderFamilyChanged() override;
+   virtual HRESULT OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint) override;
+   virtual HRESULT OnLiveLoadChanged() override;
+   virtual HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName) override;
+   virtual HRESULT OnConstructionLoadChanged() override;
 
 // IEventsSink
 public:
-   virtual HRESULT OnHoldEvents();
-   virtual HRESULT OnFirePendingEvents();
-   virtual HRESULT OnCancelPendingEvents();
+   virtual HRESULT OnHoldEvents() override;
+   virtual HRESULT OnFirePendingEvents() override;
+   virtual HRESULT OnCancelPendingEvents() override;
 
 
 // IXBRExport
 public:
-   virtual HRESULT Export(PierIndexType pierIdx);
-   virtual HRESULT BatchExport();
+   virtual HRESULT Export(PierIndexType pierIdx) override;
+   virtual HRESULT BatchExport() override;
 
 #ifdef _DEBUG
    bool AssertValid() const;

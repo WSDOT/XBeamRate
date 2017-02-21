@@ -50,7 +50,7 @@ protected:
 
    // iDisplayObjectFactory Implementation
    BEGIN_INTERFACE_PART(Factory,iDisplayObjectFactory)
-      STDMETHOD_(void,Create)(CLIPFORMAT cfFormat,COleDataObject* pDataObject,iDisplayObject** dispObj);
+      STDMETHOD_(void,Create)(CLIPFORMAT cfFormat,COleDataObject* pDataObject,iDisplayObject** dispObj) override;
    END_INTERFACE_PART(Factory)
 
 private:

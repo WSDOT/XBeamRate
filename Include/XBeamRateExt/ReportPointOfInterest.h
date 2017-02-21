@@ -47,7 +47,7 @@ public:
    rptXBRPointOfInterest& operator = (const rptXBRPointOfInterest& rOther);
 
    //------------------------------------------------------------------------
-   virtual rptReportContent* CreateClone() const;
+   virtual rptReportContent* CreateClone() const override;
 
    //------------------------------------------------------------------------
    virtual rptReportContent& SetValue(const xbrPointOfInterest& poi);
@@ -66,7 +66,7 @@ public:
 
 protected:
    void MakeCopy(const rptXBRPointOfInterest& rOther);
-   virtual void MakeAssignment(const rptXBRPointOfInterest& rOther);
+   void MakeAssignment(const rptXBRPointOfInterest& rOther);
 
 private:
    xbrPointOfInterest m_POI;

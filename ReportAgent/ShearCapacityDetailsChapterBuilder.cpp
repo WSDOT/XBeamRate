@@ -107,7 +107,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD 5.8.2.9") << rptNewLine;
    }
 
-   rptRcTable* pDvTable2 = NULL;
+   rptRcTable* pDvTable2 = nullptr;
    if ( pierType == xbrTypes::pctIntegral )
    {
       pPara = new rptParagraph;
@@ -119,8 +119,8 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       *pPara << pDvTable2 << rptNewLine;
    }
 
-   rptRcTable* pAvSTable1 = NULL;
-   rptRcTable* pAvSTable2 = NULL;
+   rptRcTable* pAvSTable1 = nullptr;
+   rptRcTable* pAvSTable2 = nullptr;
    if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
@@ -354,7 +354,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    RowIndexType row = pVcTable->GetNumberOfHeaderRows();
    RowIndexType DvTableRow = pDvTable1->GetNumberOfHeaderRows();
-   BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       DvTableCol = 0;
       AvSTableCol = 0;
@@ -408,7 +408,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          (*pAvTable)(0,3) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/s"),rptLengthUnitTag,pDisplayUnits->GetAvOverSUnit());
          RowIndexType avRow = pAvTable->GetNumberOfHeaderRows();
          IndexType ZoneIdx = 1;
-         BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
+         for (const auto& zone : avsDetails.Zones)
          {
             (*pAvTable)(avRow,0) << ZoneIdx;
             (*pAvTable)(avRow,1) << dist.SetValue(zone.Start);
@@ -436,7 +436,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
             (*pAvTable)(0,3) << COLHDR(Sub2(_T("A"),_T("v")) << _T("/s"),rptLengthUnitTag,pDisplayUnits->GetAvOverSUnit());
             RowIndexType avRow = pAvTable->GetNumberOfHeaderRows();
             IndexType ZoneIdx = 1;
-            BOOST_FOREACH(const AvOverSZone& zone,avsDetails.Zones)
+            for (const auto& zone : avsDetails.Zones)
             {
                (*pAvTable)(avRow,0) << ZoneIdx;
                (*pAvTable)(avRow,1) << dist.SetValue(zone.Start);

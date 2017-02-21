@@ -36,12 +36,12 @@ public:
    CXBRLiveLoadGraphBuilder(const CXBRLiveLoadGraphBuilder& other);
    virtual ~CXBRLiveLoadGraphBuilder();
 
-   virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
-   virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
-   virtual CGraphBuilder* Clone();
+   virtual BOOL CreateGraphController(CWnd* pParent,UINT nID) override;
+   virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
+   virtual CGraphBuilder* Clone() const override;
 
 protected:
-   virtual CEAFGraphControlWindow* GetGraphControlWindow();
+   virtual CEAFGraphControlWindow* GetGraphControlWindow() override;
 
    afx_msg void OnGraphTypeChanged();
    afx_msg void OnLbnSelChanged();
@@ -51,7 +51,7 @@ protected:
    afx_msg void OnRatingTypeChanged();
    afx_msg void OnVehicleTypeChanged();
 
-   virtual bool UpdateNow();
+   virtual bool UpdateNow() override;
    void InitGraph();
    void UpdateYAxisUnits();
    void UpdateGraphTitle();

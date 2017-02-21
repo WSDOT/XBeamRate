@@ -179,7 +179,7 @@ void write_dead_load_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
    GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
    const std::vector<LowerXBeamLoad>& vLoads = pProductForces->GetLowerCrossBeamLoading(pierID);
    RowIndexType row = pTable->GetNumberOfHeaderRows();
-   BOOST_FOREACH(const LowerXBeamLoad& load,vLoads)
+   for (const auto& load : vLoads)
    {
       col = 0;
 

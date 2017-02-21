@@ -58,17 +58,16 @@ public:
 
 
    // IBridgePlanViewEventCallback
-   virtual void OnBackgroundContextMenu(CEAFMenu* pMenu);
-   virtual void OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu);
-   virtual void OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu);
-   virtual void OnDeckContextMenu(CEAFMenu* pMenu);
-   virtual void OnAlignmentContextMenu(CEAFMenu* pMenu);
-   virtual void OnSectionCutContextMenu(CEAFMenu* pMenu);
-   virtual void OnGirderContextMenu(const CSpanKey& spanKey,CEAFMenu* pMenu);
-   virtual void OnGirderContextMenu(const CGirderKey& girderKey,CEAFMenu* pMenu);
-   virtual void OnTemporarySupportContextMenu(SupportIDType tsID,CEAFMenu* pMenu);
-   virtual void OnGirderSegmentContextMenu(const CSegmentKey& segmentKey,CEAFMenu* pMenu);
-   virtual void OnClosureJointContextMenu(const CSegmentKey& closureKey,CEAFMenu* pMenu);
+   virtual void OnBackgroundContextMenu(CEAFMenu* pMenu) override;
+   virtual void OnPierContextMenu(PierIndexType pierIdx,CEAFMenu* pMenu) override;
+   virtual void OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu) override;
+   virtual void OnDeckContextMenu(CEAFMenu* pMenu) override;
+   virtual void OnAlignmentContextMenu(CEAFMenu* pMenu) override;
+   virtual void OnSectionCutContextMenu(CEAFMenu* pMenu) override;
+   virtual void OnGirderContextMenu(const CGirderKey& girderKey,CEAFMenu* pMenu) override;
+   virtual void OnTemporarySupportContextMenu(SupportIDType tsID,CEAFMenu* pMenu) override;
+   virtual void OnGirderSegmentContextMenu(const CSegmentKey& segmentKey,CEAFMenu* pMenu) override;
+   virtual void OnClosureJointContextMenu(const CSegmentKey& closureKey,CEAFMenu* pMenu) override;
 
    CXBeamRateAgent* m_pMyAgent;
 
@@ -134,72 +133,71 @@ END_COM_MAP()
 
 // IAgentEx
 public:
-   STDMETHOD(SetBroker)(IBroker* pBroker);
-   STDMETHOD(RegInterfaces)();
-   STDMETHOD(Init)();
-   STDMETHOD(Init2)();
-   STDMETHOD(Reset)();
-   STDMETHOD(ShutDown)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+   STDMETHOD(SetBroker)(IBroker* pBroker) override;
+   STDMETHOD(RegInterfaces)() override;
+   STDMETHOD(Init)() override;
+   STDMETHOD(Init2)() override;
+   STDMETHOD(Reset)() override;
+   STDMETHOD(ShutDown)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 //// IAgentPersist
 //public:
-//   STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad);
-//   STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave);
+//   STDMETHOD(Load)(/*[in]*/ IStructuredLoad* pStrLoad) override;
+//   STDMETHOD(Save)(/*[in]*/ IStructuredSave* pStrSave) override;
 
 // IXBeamRateAgent
 public:
-   virtual bool IsExtendingPGSuper();
+   virtual bool IsExtendingPGSuper() override;
 
 // IXBeamRate
 public:
-   virtual void GetUnitServer(IUnitServer** ppUnitServer);
-   virtual void GetUnitConverter(IUnitConvert2** ppUnitConvert);
+   virtual void GetUnitServer(IUnitServer** ppUnitServer) override;
 
 // IXBRVersionInfo
 public:
-   virtual CString GetVersionString(bool bIncludeBuildNumber=false);
-   virtual CString GetVersion(bool bIncludeBuildNumber=false);
+   virtual CString GetVersionString(bool bIncludeBuildNumber=false) override;
+   virtual CString GetVersion(bool bIncludeBuildNumber=false) override;
 
 // IAgentUIIntegration
 public:
-   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
+   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate) override;
 
 // IAgentDocumentationIntegration
 public:
-   STDMETHOD(GetDocumentationSetName)(BSTR* pbstrName);
-   STDMETHOD(LoadDocumentationMap)();
-   STDMETHOD(GetDocumentLocation)(UINT nHID,BSTR* pbstrURL);
+   STDMETHOD(GetDocumentationSetName)(BSTR* pbstrName) override;
+   STDMETHOD(LoadDocumentationMap)() override;
+   STDMETHOD(GetDocumentLocation)(UINT nHID,BSTR* pbstrURL) override;
 
 // IEditPierCallback
 public:
-   virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData);
-   virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage);
-   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData);
-   virtual IDType GetEditBridgeCallbackID();
+   virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData) override;
+   virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage) override;
+   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData) override;
+   virtual IDType GetEditBridgeCallbackID() override;
 
 // IEditLoadRatingOptionsCallback
 public:
-   virtual CPropertyPage* CreatePropertyPage(IEditLoadRatingOptions* pLoadRatingOptions);
-   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions);
+   virtual CPropertyPage* CreatePropertyPage(IEditLoadRatingOptions* pLoadRatingOptions) override;
+   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions) override;
 
 // IProjectPropertiesEventSink
 public:
-   virtual HRESULT OnProjectPropertiesChanged();
+   virtual HRESULT OnProjectPropertiesChanged() override;
 
 // IXBRProjectEventSink
 public:
-   virtual HRESULT OnProjectChanged();
+   virtual HRESULT OnProjectChanged() override;
 
 // IEAFCommandCallback
 public:
-   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo);
-   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const;
-   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
+   virtual BOOL OnCommandMessage(UINT nID,int nCode,void* pExtra,AFX_CMDHANDLERINFO* pHandlerInfo) override;
+   virtual BOOL GetStatusBarMessageString(UINT nID, CString& rMessage) const override;
+   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const override;
 
 // IEAFProcessCommandLine
 public:
-   virtual BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo);
+   virtual BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo) override;
 
 private:
    DWORD m_dwProjectPropertiesCookie;

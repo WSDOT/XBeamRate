@@ -38,7 +38,7 @@ CXBeamRateReportSpecificationBuilder::~CXBeamRateReportSpecificationBuilder(void
 {
 }
 
-boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pOldRptSpec)
+std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pOldRptSpec)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -50,7 +50,7 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
       {
          CString strMsg(_T("The bridge must have at least two spans for cross beam analysis"));
          AfxMessageBox(strMsg,MB_OK | MB_ICONINFORMATION);
-         return boost::shared_ptr<CReportSpecification>();
+         return nullptr;
       }
    }
 
@@ -59,19 +59,19 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
    if ( dlg.DoModal() == IDOK )
    {
       // If possible, copy information from old spec. Otherwise header/footer and other info will be lost
-      boost::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = boost::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
+      std::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
 
-      boost::shared_ptr<CReportSpecification> pNewRptSpec;
+      std::shared_ptr<CReportSpecification> pNewRptSpec;
       if(pOldGRptSpec)
       {
-         boost::shared_ptr<CXBeamRateReportSpecification> pNewGRptSpec = boost::shared_ptr<CXBeamRateReportSpecification>( new CXBeamRateReportSpecification(*pOldGRptSpec) );
+         std::shared_ptr<CXBeamRateReportSpecification> pNewGRptSpec(std::make_shared<CXBeamRateReportSpecification>(*pOldGRptSpec) );
          pNewGRptSpec->SetPierID(dlg.m_PierID);
 
-         pNewRptSpec = boost::static_pointer_cast<CReportSpecification>(pNewGRptSpec);
+         pNewRptSpec = std::static_pointer_cast<CReportSpecification>(pNewGRptSpec);
       }
       else
       {
-         pNewRptSpec = boost::shared_ptr<CXBeamRateReportSpecification>( new CXBeamRateReportSpecification(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID) );
+         pNewRptSpec = std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID);
       }
 
       std::vector<std::_tstring> chList = dlg.m_ChapterList;
@@ -80,10 +80,10 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
       return pNewRptSpec;
    }
 
-   return boost::shared_ptr<CReportSpecification>();
+   return nullptr;
 }
 
-boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateDefaultReportSpec(const CReportDescription& rptDesc)
+std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateDefaultReportSpec(const CReportDescription& rptDesc)
 {
    PierIDType pierID = INVALID_ID;
 
@@ -97,8 +97,7 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
 
       if ( selPierIdx == INVALID_INDEX )
       {
-         boost::shared_ptr<CReportSpecification> nullSpec;
-         return CreateReportSpec(rptDesc,nullSpec);
+         return CreateReportSpec(rptDesc,std::shared_ptr<CReportSpecification>());
       }
 
       if ( selPierIdx != INVALID_INDEX )
@@ -109,7 +108,7 @@ boost::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Cr
    }
 
    // Use all chapters at the maximum level
-   boost::shared_ptr<CReportSpecification> pRptSpec( new CXBeamRateReportSpecification(rptDesc.GetReportName(),m_pBroker,pierID) );
+   std::shared_ptr<CReportSpecification> pRptSpec(std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,pierID) );
    rptDesc.ConfigureReportSpecification(pRptSpec);
    return pRptSpec;
 }

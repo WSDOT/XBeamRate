@@ -101,7 +101,7 @@ protected:
    void MakeCopy(const xbrStirrupData& rOther);
 
    //------------------------------------------------------------------------
-   virtual void MakeAssignment(const xbrStirrupData& rOther);
+   void MakeAssignment(const xbrStirrupData& rOther);
 
    // GROUP: ACCESS
    // GROUP: INQUIRY

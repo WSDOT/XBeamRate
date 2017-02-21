@@ -124,7 +124,7 @@ BOOL CXBeamRatePluginApp::InitInstance()
 
    // Using a shared menu
    // See MSKB Article ID: Q118435, "Sharing Menus Between MDI Child Windows"
-   m_hSharedMenu = NULL; /*::LoadMenu( m_hInstance, MAKEINTRESOURCE(IDR_???) );*/
+   m_hSharedMenu = nullptr; /*::LoadMenu( m_hInstance, MAKEINTRESOURCE(IDR_???) );*/
 
    _Module.Init(ObjectMap, m_hInstance, &LIBID_XBeamRateLibrary);
    return CWinApp::InitInstance();

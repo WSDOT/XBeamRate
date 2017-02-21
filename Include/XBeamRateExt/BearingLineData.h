@@ -53,11 +53,11 @@ public:
    IndexType GetBearingCount() const;
 
    HRESULT Load(IStructuredLoad* pStrLoad);
-	HRESULT Save(IStructuredSave* pStrSave);
+	HRESULT Save(IStructuredSave* pStrSave) const;
 
 protected:
    void MakeCopy(const xbrBearingLineData& rOther);
-   virtual void MakeAssignment(const xbrBearingLineData& rOther);
+   void MakeAssignment(const xbrBearingLineData& rOther);
 
 protected:
    // Offset from CL Pier to the bearing line, measure normal to the pier

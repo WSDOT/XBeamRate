@@ -177,7 +177,7 @@ HRESULT CPierExporter::BatchExport()
    CPierChoiceValidator validator;
    std::vector<int> vChoices = AfxMultiChoice(_T("Export Piers to XBRate"),_T("Select Piers to Export"),strPiers,&validator,vDefChoices,TRUE,TRUE);
 
-   BOOST_FOREACH(int i,vChoices)
+   for (const auto& i : vChoices)
    {
       PierIndexType pierIdx = vPiers[i];
       CString strDefaultFileName = GetDefaultPierExportFile(pierIdx);

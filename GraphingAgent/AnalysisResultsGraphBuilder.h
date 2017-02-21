@@ -36,21 +36,21 @@ public:
    CXBRAnalysisResultsGraphBuilder(const CXBRAnalysisResultsGraphBuilder& other);
    virtual ~CXBRAnalysisResultsGraphBuilder();
 
-   virtual BOOL CreateGraphController(CWnd* pParent,UINT nID);
-   virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC);
-   virtual CGraphBuilder* Clone();
+   virtual BOOL CreateGraphController(CWnd* pParent,UINT nID) override;
+   virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
+   virtual CGraphBuilder* Clone() const;
    const CXBRAnalysisResultsGraphDefinitions& GetGraphDefinitions();
 
    void UpdateGraphDefinitions();
 
 protected:
-   virtual CEAFGraphControlWindow* GetGraphControlWindow();
+   virtual CEAFGraphControlWindow* GetGraphControlWindow() override;
 
    afx_msg void OnGraphTypeChanged();
    afx_msg void OnLbnSelChanged();
    afx_msg void OnPierChanged();
 
-   virtual bool UpdateNow();
+   virtual bool UpdateNow() override;
    void InitGraph();
    void UpdateYAxisUnits();
    void UpdateGraphTitle();

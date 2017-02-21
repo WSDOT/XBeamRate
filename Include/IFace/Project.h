@@ -25,7 +25,7 @@
 #include <PgsExt\ColumnData.h>
 #include <XBeamRateExt\PierData.h>
 #include <XBeamRateExt\LiveLoadReactionData.h>
-#include <boost\shared_ptr.hpp>
+#include <memory>
 
 /*****************************************************************************
 INTERFACE
@@ -340,7 +340,7 @@ interface IXBRUIEvents : IUnknown
    virtual void HoldEvents(bool bHold=true) = 0;
    virtual void FirePendingEvents() = 0;
    virtual void CancelPendingEvents() = 0;
-   virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>()) = 0;
+   virtual void FireEvent(CView* pSender = nullptr,LPARAM lHint = 0,std::shared_ptr<CObject> pHint = nullptr) = 0;
 };
 
 /*****************************************************************************

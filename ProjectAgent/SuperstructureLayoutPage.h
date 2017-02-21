@@ -38,7 +38,7 @@ public:
 
 protected:
    CMetaFileStatic m_Dimensions;
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    afx_msg void OnCurbLineDatumChanged();
    afx_msg void OnPierTypeChanged();
@@ -48,7 +48,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 public:
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
 
 private:
    void UpdateImage();

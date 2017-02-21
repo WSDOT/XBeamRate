@@ -74,7 +74,7 @@ public:
    void CustomInit(xbrTypes::ReactionLoadType reactionLoadType);
 
 protected:
-   virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol);
+   virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol) override;
 
 private:
    xbrTypes::ReactionLoadType m_ReactionLoadType;

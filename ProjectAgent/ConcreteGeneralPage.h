@@ -46,7 +46,7 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CConcreteGeneralPage)
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	CEdit	m_ctrlEc;
 	CButton m_ctrlEcCheck;
@@ -69,7 +69,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CConcreteGeneralPage)
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog() override;
 	afx_msg void OnHelp();
    afx_msg void OnUserEc();
 	afx_msg void OnChangeFc();
@@ -81,7 +81,7 @@ public:
    afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 protected:
-   virtual void OnOK();
+   virtual void OnOK() override;
    pgsTypes::ConcreteType GetConreteType();
    bool IsDensityInRange(Float64 density,pgsTypes::ConcreteType type);
 };

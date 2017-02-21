@@ -36,12 +36,12 @@ class CShearCapacityDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CShearCapacityDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
    rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CShearCapacityDetailsChapterBuilder(const CShearCapacityDetailsChapterBuilder&);
-   CShearCapacityDetailsChapterBuilder& operator=(const CShearCapacityDetailsChapterBuilder&);
+   CShearCapacityDetailsChapterBuilder(const CShearCapacityDetailsChapterBuilder&) = delete;
+   CShearCapacityDetailsChapterBuilder& operator=(const CShearCapacityDetailsChapterBuilder&) = delete;
 };

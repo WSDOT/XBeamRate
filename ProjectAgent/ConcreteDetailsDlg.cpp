@@ -52,7 +52,7 @@ static char THIS_FILE[] = __FILE__;
 // CConcreteDetailsDlg dialog
 
 
-CConcreteDetailsDlg::CConcreteDetailsDlg(CWnd* pParent /*=NULL*/,UINT iSelectPage/*=0*/)
+CConcreteDetailsDlg::CConcreteDetailsDlg(CWnd* pParent /*=nullptr*/,UINT iSelectPage/*=0*/)
 	: CPropertySheet(_T("Concrete Details"),pParent, iSelectPage)
 {
 	//{{AFX_DATA_INIT(CConcreteDetailsDlg)

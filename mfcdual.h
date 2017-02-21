@@ -42,10 +42,10 @@
 // declaration.
 #define BEGIN_DUAL_INTERFACE_PART(localClass, baseClass) \
 	BEGIN_INTERFACE_PART(localClass, baseClass) \
-       STDMETHOD(GetTypeInfoCount)(UINT FAR* pctinfo); \
-       STDMETHOD(GetTypeInfo)(UINT itinfo, LCID lcid, ITypeInfo FAR* FAR* pptinfo); \
-       STDMETHOD(GetIDsOfNames)(REFIID riid, OLECHAR FAR* FAR* rgszNames, UINT cNames, LCID lcid, DISPID FAR* rgdispid); \
-       STDMETHOD(Invoke)(DISPID dispidMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS FAR* pdispparams, VARIANT FAR* pvarResult, EXCEPINFO FAR* pexcepinfo, UINT FAR* puArgErr); \
+       STDMETHOD(GetTypeInfoCount)(UINT FAR* pctinfo) override; \
+       STDMETHOD(GetTypeInfo)(UINT itinfo, LCID lcid, ITypeInfo FAR* FAR* pptinfo) override; \
+       STDMETHOD(GetIDsOfNames)(REFIID riid, OLECHAR FAR* FAR* rgszNames, UINT cNames, LCID lcid, DISPID FAR* rgdispid) override; \
+       STDMETHOD(Invoke)(DISPID dispidMember, REFIID riid, LCID lcid, WORD wFlags, DISPPARAMS FAR* pdispparams, VARIANT FAR* pvarResult, EXCEPINFO FAR* pexcepinfo, UINT FAR* puArgErr) override; \
 
 /////////////////////////////////////////////////////////////////////
 // END_DUAL_INTERFACE_PART is just like END_INTERFACE_PART. It
@@ -81,7 +81,7 @@
 	{ \
 		METHOD_PROLOGUE(objectClass, dualClass) \
 		LPDISPATCH lpDispatch = pThis->GetIDispatch(FALSE); \
-		ASSERT(lpDispatch != NULL); \
+		ASSERT(lpDispatch != nullptr); \
 		return lpDispatch->GetTypeInfoCount(pctinfo); \
 	} \
 	STDMETHODIMP objectClass::X##dualClass::GetTypeInfo( \
@@ -89,7 +89,7 @@
 	{ \
 		METHOD_PROLOGUE(objectClass, dualClass) \
 		LPDISPATCH lpDispatch = pThis->GetIDispatch(FALSE); \
-		ASSERT(lpDispatch != NULL); \
+		ASSERT(lpDispatch != nullptr); \
 		return lpDispatch->GetTypeInfo(itinfo, lcid, pptinfo); \
 	} \
 	STDMETHODIMP objectClass::X##dualClass::GetIDsOfNames( \
@@ -98,7 +98,7 @@
 	{ \
 		METHOD_PROLOGUE(objectClass, dualClass) \
 		LPDISPATCH lpDispatch = pThis->GetIDispatch(FALSE); \
-		ASSERT(lpDispatch != NULL); \
+		ASSERT(lpDispatch != nullptr); \
 		return lpDispatch->GetIDsOfNames(riid, rgszNames, cNames, \
 								         lcid, rgdispid); \
 	} \
@@ -109,7 +109,7 @@
 	{ \
 		METHOD_PROLOGUE(objectClass, dualClass) \
 		LPDISPATCH lpDispatch = pThis->GetIDispatch(FALSE); \
-		ASSERT(lpDispatch != NULL); \
+		ASSERT(lpDispatch != nullptr); \
 		return lpDispatch->Invoke(dispidMember, riid, lcid, \
 								  wFlags, pdispparams, pvarResult, \
 								  pexcepinfo, puArgErr); \

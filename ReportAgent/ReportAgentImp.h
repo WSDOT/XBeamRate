@@ -81,7 +81,7 @@ public:
 
 // IXBRProjectEventSink
 public:
-   virtual HRESULT OnProjectChanged();
+   virtual HRESULT OnProjectChanged() override;
 
 #ifdef _DEBUG
    bool AssertValid() const;

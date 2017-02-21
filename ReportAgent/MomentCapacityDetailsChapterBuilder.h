@@ -36,12 +36,12 @@ class CMomentCapacityDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CMomentCapacityDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
    rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CMomentCapacityDetailsChapterBuilder(const CMomentCapacityDetailsChapterBuilder&);
-   CMomentCapacityDetailsChapterBuilder& operator=(const CMomentCapacityDetailsChapterBuilder&);
+   CMomentCapacityDetailsChapterBuilder(const CMomentCapacityDetailsChapterBuilder&) = delete;
+   CMomentCapacityDetailsChapterBuilder& operator=(const CMomentCapacityDetailsChapterBuilder&) = delete;
 };

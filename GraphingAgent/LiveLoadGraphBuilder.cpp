@@ -49,6 +49,8 @@
 
 #include <MFCTools\Format.h>
 
+#include <algorithm>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -92,16 +94,16 @@ m_pYFormat(0)
 
 CXBRLiveLoadGraphBuilder::~CXBRLiveLoadGraphBuilder()
 {
-   if ( m_pXFormat != NULL )
+   if ( m_pXFormat != nullptr )
    {
       delete m_pXFormat;
-      m_pXFormat = NULL;
+      m_pXFormat = nullptr;
    }
 
-   if ( m_pYFormat != NULL )
+   if ( m_pYFormat != nullptr )
    {
       delete m_pYFormat;
-      m_pYFormat = NULL;
+      m_pYFormat = nullptr;
    }
 }
 
@@ -110,7 +112,7 @@ CEAFGraphControlWindow* CXBRLiveLoadGraphBuilder::GetGraphControlWindow()
    return &m_GraphController;
 }
 
-CGraphBuilder* CXBRLiveLoadGraphBuilder::Clone()
+CGraphBuilder* CXBRLiveLoadGraphBuilder::Clone() const
 {
    // set the module state or the commands wont route to the
    // the graph control window
@@ -313,7 +315,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
       // Controlling envelope for all trucks for this rating type
       CString strLiveLoadName = GetLiveLoadTypeName(ratingType);
       IndexType minGraphIdx = m_Graph.CreateDataSeries(strLiveLoadName,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
-      IndexType maxGraphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+      IndexType maxGraphIdx = m_Graph.CreateDataSeries(nullptr,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
       BuildControllingLiveLoadGraph(pierID,vPoi,ratingType,actionType,minGraphIdx,maxGraphIdx);
 
       GET_IFACE2(pBroker,IXBRProject,pProject);
@@ -321,7 +323,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
       if ( strLiveLoad != NO_LIVE_LOAD_DEFINED )
       {
          IndexType minVehGraphIdx = m_Graph.CreateDataSeries(strLiveLoad.c_str(),PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
-         IndexType maxVehGraphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
+         IndexType maxVehGraphIdx = m_Graph.CreateDataSeries(nullptr,PS_SOLID,GRAPH_PEN_WEIGHT,BLUE);
          BuildControllingVehicularLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,actionType,minVehGraphIdx,maxVehGraphIdx);
       }
    }
@@ -332,7 +334,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
       strName.Format(_T("Live Load Configuration %d"),LABEL_INDEX(llConfigIdx));
       m_Graph.SetSubtitle(strName);
 
-      IndexType graphIdx = m_Graph.CreateDataSeries(NULL,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
+      IndexType graphIdx = m_Graph.CreateDataSeries(nullptr,PS_SOLID,GRAPH_PEN_WEIGHT,RED);
 
       GET_IFACE2(pBroker,IXBRProductForces,pProductForces);
 
@@ -411,7 +413,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -419,7 +421,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,NULL,NULL);
+         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
          m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
@@ -428,7 +430,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
       else
       {
          sysSectionValue FyMin, FyMax;
-         pResults->GetShear(pierID,ratingType,poi,&FyMin,&FyMax,NULL,NULL,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,poi,&FyMin,&FyMax,nullptr,nullptr,nullptr,nullptr);
          Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
@@ -448,7 +450,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -456,7 +458,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,vehicleIdx,poi,&Mmin,&Mmax,NULL,NULL);
+         pResults->GetMoment(pierID,ratingType,vehicleIdx,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
          m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
@@ -465,7 +467,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
       else
       {
          sysSectionValue FyMin, FyMax;
-         pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,nullptr,nullptr);
          Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
@@ -484,7 +486,7 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -519,7 +521,7 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
    permitLaneIdx = (nLoadedLanes <= permitLaneIdx ? nLoadedLanes-1 : permitLaneIdx);
 
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);

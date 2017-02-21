@@ -81,46 +81,46 @@ END_COM_MAP()
 
 // IAgentEx
 public:
-	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker);
-   STDMETHOD(RegInterfaces)();
-	STDMETHOD(Init)();
-	STDMETHOD(Reset)();
-	STDMETHOD(ShutDown)();
-   STDMETHOD(Init2)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
+   STDMETHOD(RegInterfaces)() override;
+	STDMETHOD(Init)() override;
+	STDMETHOD(Reset)() override;
+	STDMETHOD(ShutDown)() override;
+   STDMETHOD(Init2)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 // IXBRMomentCapacity
 public:
-   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
-   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
+   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
 
-   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
-   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
+   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
+   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
 
-   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
-   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
-   virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx);
+   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
+   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) override;
+   virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx) override;
 
 // IXBRCrackedSection
 public:
-   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType);
-   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType);
+   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) override;
+   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) override;
 
 // IXBRShearCapacity
 public:
-   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
+   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
 
 // IXBRArtifact
 public:
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
+   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) override;
 
 // IXBRProjectEventSink
 public:
-   virtual HRESULT OnProjectChanged();
+   virtual HRESULT OnProjectChanged() override;
 
 private:
    DECLARE_EAF_AGENT_DATA;
@@ -130,22 +130,22 @@ private:
 
    // PierID is not used to store results because the POI ID is sufficent
    // POI IDs are not duplicated between piers
-   std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pPositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
-   std::auto_ptr<std::map<IDType,MomentCapacityDetails>> m_pNegativeMomentCapacity[2];
+   std::unique_ptr<std::map<IDType,MomentCapacityDetails>> m_pPositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::unique_ptr<std::map<IDType,MomentCapacityDetails>> m_pNegativeMomentCapacity[2];
 
-   std::auto_ptr<std::map<IDType,CrackingMomentDetails>> m_pPositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
-   std::auto_ptr<std::map<IDType,CrackingMomentDetails>> m_pNegativeCrackingMoment[2];
+   std::unique_ptr<std::map<IDType,CrackingMomentDetails>> m_pPositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
+   std::unique_ptr<std::map<IDType,CrackingMomentDetails>> m_pNegativeCrackingMoment[2];
 
-   std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
-   std::auto_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][6]; 
+   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
+   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][6];
 
-   std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pPositiveMomentCrackedSection[2][2]; // key = POI ID, array index = [xbrTypes::Stage][xbrTypes::LoadType]
-   std::auto_ptr<std::map<IDType,CrackedSectionDetails>> m_pNegativeMomentCrackedSection[2][2];
+   std::unique_ptr<std::map<IDType,CrackedSectionDetails>> m_pPositiveMomentCrackedSection[2][2]; // key = POI ID, array index = [xbrTypes::Stage][xbrTypes::LoadType]
+   std::unique_ptr<std::map<IDType,CrackedSectionDetails>> m_pNegativeMomentCrackedSection[2][2];
 
-   std::auto_ptr<std::map<IDType,ShearCapacityDetails>> m_pShearCapacity[2];
-   std::auto_ptr<std::map<IDType,AvOverSDetails>> m_pShearFailurePlane[2];
+   std::unique_ptr<std::map<IDType,ShearCapacityDetails>> m_pShearCapacity[2];
+   std::unique_ptr<std::map<IDType,AvOverSDetails>> m_pShearFailurePlane[2];
 
-   std::auto_ptr<std::map<IDType,DvDetails>> m_pDvDetails[2];
+   std::unique_ptr<std::map<IDType,DvDetails>> m_pDvDetails[2];
 
    MomentCapacityDetails ComputeMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
    CrackingMomentDetails ComputeCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment);
@@ -162,7 +162,7 @@ private:
 
    // rating artifacts for vehicleIdx == INVALID_INDEX are the governing artifacts for a load rating type
    typedef std::map<VehicleIndexType,xbrRatingArtifact> RatingArtifacts;
-   std::auto_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
+   std::unique_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
    RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 

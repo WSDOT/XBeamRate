@@ -204,7 +204,7 @@ HRESULT CGraphingAgentImp::OnProjectChanged()
 
    AFX_MANAGE_STATE(AfxGetAppModuleState());
    GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-   pViewRegistrar->UpdateRegisteredView(graphingViewKey,NULL,0,NULL);
+   pViewRegistrar->UpdateRegisteredView(graphingViewKey,nullptr,0,nullptr);
 
    return S_OK;
 }

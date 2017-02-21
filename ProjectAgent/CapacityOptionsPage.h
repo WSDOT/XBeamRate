@@ -37,7 +37,7 @@ public:
 	enum { IDD = IDD_CAPACITY_OPTIONS };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    afx_msg void OnHelp();
 

@@ -44,7 +44,7 @@ public:
 
    void EnableControls(BOOL bEnable);
 
-   virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+   virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 
    void FillLoadingList();
    void Next();
@@ -55,7 +55,7 @@ public:
 
 protected:
 
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
 
 	//{{AFX_MSG(CXBRLiveLoadGraphController)
    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);

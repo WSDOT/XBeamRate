@@ -45,22 +45,22 @@ protected: // create from serialization only
 
 // CEAFAutoCalcDocMixin over-rides
 public:
-   virtual bool IsAutoCalcEnabled() const;
-   virtual void EnableAutoCalc(bool bEnable);
+   virtual bool IsAutoCalcEnabled() const override;
+   virtual void EnableAutoCalc(bool bEnable) override;
 
 // CEBrokerDocument over-rides
 public:
-   virtual BOOL Init();
-   virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit);
+   virtual BOOL Init() override;
+   virtual BOOL LoadSpecialAgents(IBrokerInitEx2* pBrokerInit) override;
 
-   virtual void OnChangedFavoriteReports(BOOL bIsFavorites, BOOL bFromMenu);
-   virtual void ShowCustomReportHelp(eafTypes::CustomReportHelp helpType);
-   virtual void ShowCustomReportDefinitionHelp();
+   virtual void OnChangedFavoriteReports(BOOL bIsFavorites, BOOL bFromMenu) override;
+   virtual void ShowCustomReportHelp(eafTypes::CustomReportHelp helpType) override;
+   virtual void ShowCustomReportDefinitionHelp() override;
 
 // Attributes
 public:
-   virtual CString GetRootNodeName();
-   virtual Float64 GetRootNodeVersion();
+   virtual CString GetRootNodeName() override;
+   virtual Float64 GetRootNodeVersion() override;
 
 // Operations
 public:
@@ -70,38 +70,38 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateDoc)
 	public:
-	virtual BOOL OnNewDocument();
-   virtual void OnCloseDocument();
-	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo);
+	virtual BOOL OnNewDocument() override;
+   virtual void OnCloseDocument() override;
+	virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override;
 	//}}AFX_VIRTUAL	//}}AFX_VIRTUAL
 
-   virtual void LoadToolbarState();
-   virtual void SaveToolbarState();
-   virtual CString GetToolbarSectionName();
-   virtual BOOL GetStatusBarMessageString(UINT nID,CString& rMessage) const;
-   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const;
+   virtual void LoadToolbarState() override;
+   virtual void SaveToolbarState() override;
+   virtual CString GetToolbarSectionName() override;
+   virtual BOOL GetStatusBarMessageString(UINT nID,CString& rMessage) const override;
+   virtual BOOL GetToolTipMessageString(UINT nID, CString& rMessage) const override;
 
 // Implementation
 public:
 	virtual ~CXBeamRateDoc();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
 #endif
 
 protected:
-   virtual CATID GetAgentCategoryID();
-   virtual HINSTANCE GetResourceInstance();
-   virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad);
-   virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave);
-   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt);
-   virtual void CreateGraphView(CollectionIndexType graphIdx);
+   virtual CATID GetAgentCategoryID() override;
+   virtual HINSTANCE GetResourceInstance() override;
+   virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad) override;
+   virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave) override;
+   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt) override;
+   virtual void CreateGraphView(CollectionIndexType graphIdx) override;
 
-   virtual void LoadDocumentSettings();
-   virtual void SaveDocumentSettings();
+   virtual void LoadDocumentSettings() override;
+   virtual void SaveDocumentSettings() override;
 
-   virtual CString GetDocumentationSetName();
-   virtual CString GetDocumentationRootLocation();
+   virtual CString GetDocumentationSetName() override;
+   virtual CString GetDocumentationRootLocation() override;
 
 // Generated message map functions
 protected:
@@ -131,12 +131,12 @@ protected:
 
    bool m_bAutoCalcEnabled;
 
-   virtual BOOL OpenTheDocument(LPCTSTR lpszPathName);
-   virtual void OnCreateFinalize();
-   virtual void BrokerShutDown();
+   virtual BOOL OpenTheDocument(LPCTSTR lpszPathName) override;
+   virtual void OnCreateFinalize() override;
+   virtual void BrokerShutDown() override;
 
    // called when the UI Hints have been reset
-   virtual void ResetUIHints();
+   virtual void ResetUIHints() override;
 
    void PopulateReportMenu();
    void PopulateGraphMenu();

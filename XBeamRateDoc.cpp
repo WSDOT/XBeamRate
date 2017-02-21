@@ -86,7 +86,7 @@ CXBeamRateDoc::CXBeamRateDoc()
    UINT nCommands = GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
    ATLASSERT(nCommands == XBR_PLUGIN_COMMAND_COUNT);
 
-   m_pMyDocProxyAgent = NULL;
+   m_pMyDocProxyAgent = nullptr;
    m_bAutoCalcEnabled = true;
 
    SetCustomReportHelpID(eafTypes::crhCustomReport,IDH_CUSTOM_REPORT);
@@ -509,7 +509,7 @@ void CXBeamRateDoc::BrokerShutDown()
 {
    CEAFBrokerDocument::BrokerShutDown();
 
-   m_pMyDocProxyAgent = NULL;
+   m_pMyDocProxyAgent = nullptr;
 }
 
 void CXBeamRateDoc::PopulateReportMenu()
@@ -520,14 +520,14 @@ void CXBeamRateDoc::PopulateReportMenu()
    ASSERT( 0 <= viewPos );
 
    CEAFMenu* pViewMenu = pMainMenu->GetSubMenu(viewPos);
-   ASSERT( pViewMenu != NULL );
+   ASSERT( pViewMenu != nullptr );
 
    UINT reportsPos = pViewMenu->FindMenuItem(_T("&Reports"));
    ASSERT( 0 <= reportsPos );
 
    // Get the reports menu
    CEAFMenu* pReportsMenu = pViewMenu->GetSubMenu(reportsPos);
-   ASSERT(pReportsMenu != NULL);
+   ASSERT(pReportsMenu != nullptr);
 
    CEAFBrokerDocument::PopulateReportMenu(pReportsMenu);
 }
@@ -540,14 +540,14 @@ void CXBeamRateDoc::PopulateGraphMenu()
    ASSERT( 0 <= viewPos );
 
    CEAFMenu* pViewMenu = pMainMenu->GetSubMenu(viewPos);
-   ASSERT( pViewMenu != NULL );
+   ASSERT( pViewMenu != nullptr );
 
    UINT graphsPos = pViewMenu->FindMenuItem(_T("&Graphs"));
    ASSERT( 0 <= graphsPos );
 
    // Get the graphs menu
    CEAFMenu* pGraphMenu = pViewMenu->GetSubMenu(graphsPos);
-   ASSERT(pGraphMenu != NULL);
+   ASSERT(pGraphMenu != nullptr);
 
    CEAFBrokerDocument::PopulateGraphMenu(pGraphMenu);
 }
@@ -593,7 +593,7 @@ BOOL CXBeamRateDoc::OnViewGraphs(NMHDR* pnmhdr,LRESULT* plr)
 
    GET_IFACE(IEAFToolbars,pToolBars);
    CEAFToolBar* pToolBar = pToolBars->GetToolBar( m_pMyDocProxyAgent->GetStdToolBarID() );
-   int idx = pToolBar->CommandToIndex(ID_VIEW_GRAPHS,NULL);
+   int idx = pToolBar->CommandToIndex(ID_VIEW_GRAPHS,nullptr);
    CRect rect;
    pToolBar->GetItemRect(idx,&rect);
 
@@ -633,7 +633,7 @@ BOOL CXBeamRateDoc::OnViewReports(NMHDR* pnmhdr,LRESULT* plr)
 
    GET_IFACE(IEAFToolbars,pToolBars);
    CEAFToolBar* pToolBar = pToolBars->GetToolBar( m_pMyDocProxyAgent->GetStdToolBarID() );
-   int idx = pToolBar->CommandToIndex(ID_VIEW_REPORTS,NULL);
+   int idx = pToolBar->CommandToIndex(ID_VIEW_REPORTS,nullptr);
    CRect rect;
    pToolBar->GetItemRect(idx,&rect);
 

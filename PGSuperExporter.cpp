@@ -48,7 +48,7 @@ STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText)
 
 STDMETHODIMP CPGSuperDataExporter::GetBitmapHandle(HBITMAP* phBmp)
 {
-   *phBmp = NULL;
+   *phBmp = nullptr;
    return S_OK;
 }
 

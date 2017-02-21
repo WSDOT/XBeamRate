@@ -45,10 +45,10 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateReportView)
 	public:
-   virtual void OnInitialUpdate();
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
+   virtual void OnInitialUpdate() override;
+	virtual BOOL PreTranslateMessage(MSG* pMsg) override;
 	protected:
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -58,13 +58,13 @@ public:
 protected:
 	virtual ~CXBeamRateReportView();
 
-   virtual HRESULT UpdateReportBrowser(CReportHint* pHint);
-   virtual void RefreshReport();
-   virtual CReportHint* TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint);
+   virtual HRESULT UpdateReportBrowser(CReportHint* pHint) override;
+   virtual void RefreshReport() override;
+   virtual CReportHint* TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint) override;
 
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
 #endif
 
    // Generated message map functions

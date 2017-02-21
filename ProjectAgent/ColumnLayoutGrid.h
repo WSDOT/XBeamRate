@@ -68,8 +68,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
    
-   virtual void OnClickedButtonRowCol(ROWCOL nRow,ROWCOL nCol);
-   virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol);
+   virtual void OnClickedButtonRowCol(ROWCOL nRow,ROWCOL nCol) override;
+   virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol) override;
 
 private:
    void AddColumn(const CColumnData& column,Float64 S);

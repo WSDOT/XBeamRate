@@ -442,7 +442,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
       pProductForces->GetGoverningMomentLiveLoadConfigurations(m_PierID,m_POI,&vMinLLConfigIdx,&vMaxLLConfigIdx);
       std::vector<IndexType>* pvLLConfigIdx = (bPositiveMoment ? &vMaxLLConfigIdx : &vMinLLConfigIdx);
-      BOOST_FOREACH(IndexType llConfigIdx,*pvLLConfigIdx)
+      for (const auto& llConfigIdx : *pvLLConfigIdx)
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
@@ -682,11 +682,11 @@ void xbrMomentRatingArtifact::MakeAssignment(const xbrMomentRatingArtifact& rOth
 
 Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64 MllimAdj) const
 {
-   Float64 RF = -DBL_MAX;
+   Float64 RF = -Float64_Max;
 
    if ( IsZero(Mllim) || IsZero(m_gLL) )
    {
-      RF = DBL_MAX;
+      RF = Float64_Max;
    }
    else
    {
@@ -716,11 +716,11 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64
          // (C - DL) and LL have opposite signs
          // this case probably shouldn't happen, but if does,
          // the rating is great
-         RF = DBL_MAX;
+         RF = Float64_Max;
       }
       else
       {
-         RF = RFtop/RFbot;
+         RF = IsZero(RFbot) ? Float64_Max : RFtop/RFbot;
       }
    }
 

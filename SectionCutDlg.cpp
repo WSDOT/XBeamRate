@@ -120,7 +120,7 @@ void CSectionCutDlg::UpdatePOI()
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPOI);
    m_vPOI = pPOI->GetXBeamPointsOfInterest(m_PierID);
-   if (m_Slider.GetSafeHwnd() != NULL )
+   if (m_Slider.GetSafeHwnd() != nullptr )
    {
       m_Slider.SetRange(0,(int)(m_vPOI.size()-1)); // the range is number of spaces along slider... 
                                                    // subtract one so we don't go past the end of the array

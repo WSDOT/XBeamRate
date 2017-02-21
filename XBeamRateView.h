@@ -58,18 +58,18 @@ public:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateView)
 	public:
-	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
+	virtual BOOL PreCreateWindow(CREATESTRUCT& cs) override;
 	protected:
-	virtual void OnDraw(CDC* pDC);      // overridden to draw this view
-	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
-	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
+	virtual void OnDraw(CDC* pDC) override;      // overridden to draw this view
+	virtual BOOL OnPreparePrinting(CPrintInfo* pInfo) override;
+	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo) override;
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_VIRTUAL
 
-   virtual void OnInitialUpdate();
+   virtual void OnInitialUpdate() override;
 
-   virtual DROPEFFECT CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point);
-   virtual void OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point);
+   virtual DROPEFFECT CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point) override;
+   virtual void OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point) override;
 
    PierIDType GetPierID();
    PierIndexType GetPierIndex();
@@ -80,12 +80,12 @@ public:
 public:
 	virtual ~CXBeamRateView();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
 #endif
 
 protected:
-   virtual void OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint);
+   virtual void OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint) override;
    void UpdateDisplayObjects();
    void UpdateRoadwayDisplayObjects();
    void UpdateXBeamDisplayObjects();
@@ -99,10 +99,10 @@ protected:
 
    void CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO);
    void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
-   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = NULL);
+   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = nullptr);
    void SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,IShape** ppSkewedShape);
 
-	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint);
+	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint) override;
 
    IDType m_DisplayObjectID; // used to generate display object IDs
 
@@ -121,7 +121,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   virtual void HandleContextMenu(CWnd* pWnd,CPoint logPoint);
+   virtual void HandleContextMenu(CWnd* pWnd,CPoint logPoint) override;
 };
 
 

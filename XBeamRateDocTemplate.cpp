@@ -46,7 +46,7 @@ CXBeamRateDocTemplate::CXBeamRateDocTemplate(UINT nIDResource,
    GetDocString(strDocName,CDocTemplate::docName);
 
    HICON hIcon = AfxGetApp()->LoadIcon(IDR_XBEAMRATE);
-   m_TemplateGroup.AddItem( new CEAFTemplateItem(this,strDocName,NULL,hIcon) );
+   m_TemplateGroup.AddItem( new CEAFTemplateItem(this,strDocName,nullptr,hIcon) );
    m_TemplateGroup.SetIcon(hIcon);
 }
 

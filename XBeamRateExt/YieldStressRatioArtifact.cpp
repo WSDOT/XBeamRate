@@ -402,11 +402,11 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
       return m_StressRatio;
    }
 
-   Float64 SR = -DBL_MAX;
+   Float64 SR = -Float64_Max;
 
    if ( IsZero(m_Mllim) || IsZero(m_gLL) )
    {
-      SR = DBL_MAX;
+      SR = Float64_Max;
    }
    else
    {
@@ -445,11 +445,11 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
          // (C - DL) and LL have opposite signs
          // this case probably shouldn't happen, but if does,
          // the rating is great
-         SR = DBL_MAX;
+         SR = Float64_Max;
       }
       else
       {
-         SR = SRtop/SRbot;
+         SR = IsZero(SRbot) ? Float64_Max : SRtop / SRbot;
       }
    }
 

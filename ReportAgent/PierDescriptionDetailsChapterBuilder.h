@@ -36,12 +36,12 @@ class CPierDescriptionDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CPierDescriptionDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
    rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CPierDescriptionDetailsChapterBuilder(const CPierDescriptionDetailsChapterBuilder&);
-   CPierDescriptionDetailsChapterBuilder& operator=(const CPierDescriptionDetailsChapterBuilder&);
+   CPierDescriptionDetailsChapterBuilder(const CPierDescriptionDetailsChapterBuilder&) = delete;
+   CPierDescriptionDetailsChapterBuilder& operator=(const CPierDescriptionDetailsChapterBuilder&) = delete;
 };

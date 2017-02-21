@@ -37,5 +37,5 @@ class CXBeamRateReportBuilder : public CReportBuilder
 {
 public:
 	CXBeamRateReportBuilder(LPCTSTR strName,bool bHidden = false,bool bIncludeTimingChapter=false);
-   virtual boost::shared_ptr<rptReport> CreateReport(boost::shared_ptr<CReportSpecification>& pRptSpec);
+   virtual std::shared_ptr<rptReport> CreateReport(std::shared_ptr<CReportSpecification>& pRptSpec) override;
 };

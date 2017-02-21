@@ -47,6 +47,8 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
 
+#include <algorithm>
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -87,16 +89,16 @@ m_pYFormat(0)
 
 CXBRAnalysisResultsGraphBuilder::~CXBRAnalysisResultsGraphBuilder()
 {
-   if ( m_pXFormat != NULL )
+   if ( m_pXFormat != nullptr )
    {
       delete m_pXFormat;
-      m_pXFormat = NULL;
+      m_pXFormat = nullptr;
    }
 
-   if ( m_pYFormat != NULL )
+   if ( m_pYFormat != nullptr )
    {
       delete m_pYFormat;
-      m_pYFormat = NULL;
+      m_pYFormat = nullptr;
    }
 }
 
@@ -105,7 +107,7 @@ CEAFGraphControlWindow* CXBRAnalysisResultsGraphBuilder::GetGraphControlWindow()
    return &m_GraphController;
 }
 
-CGraphBuilder* CXBRAnalysisResultsGraphBuilder::Clone()
+CGraphBuilder* CXBRAnalysisResultsGraphBuilder::Clone() const
 {
    // set the module state or the commands wont route to the
    // the graph control window
@@ -465,7 +467,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,c
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -496,7 +498,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -527,7 +529,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -535,7 +537,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax,NULL,NULL);
+         pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
          m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
@@ -544,7 +546,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
       else
       {
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
          Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
@@ -565,7 +567,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -573,7 +575,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
       if ( actionType == actionMoment )
       {
          Float64 Mmin, Mmax;
-         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,NULL,NULL);
+         pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
          m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
@@ -582,7 +584,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
       else
       {
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,NULL,NULL,NULL,NULL);
+         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,nullptr,nullptr,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
          Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
@@ -603,7 +605,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,con
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRAnalysisResults,pResults);
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);
@@ -642,7 +644,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
 
    xbrTypes::Stage stage = xbrTypes::Stage2;
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 X = poi.GetDistFromStart();
       X  = m_pXFormat->Convert(X);

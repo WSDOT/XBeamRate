@@ -296,7 +296,7 @@ void CStirrupGrid::SetStirrupData(const xbrStirrupData& stirrups)
    }
 
    ROWCOL row = 1;
-   BOOST_FOREACH(const xbrStirrupData::StirrupZone& zoneData, stirrups.Zones)
+   for (const auto& zoneData : stirrups.Zones)
    {
       InsertRows(GetRowCount()+1,1);
       SetZoneData(row++,zoneData);

@@ -34,18 +34,18 @@ public:
    void SetEditPierData(IEditPierData* pEditPierData,const xbrPierData& pierData);
 
 // IReinforcementPageParent
-   virtual CPierData2* GetPierData();
-   virtual xbrPierData* GetXBRPierData();
-   virtual CConcreteMaterial& GetConcrete();
-   virtual xbrTypes::PierType GetPierType();
-   virtual matRebar::Type& GetRebarType();
-   virtual matRebar::Grade& GetRebarGrade();
-   virtual CConcreteMaterial& GetConcreteMaterial();
-   virtual xbrLongitudinalRebarData& GetLongitudinalRebar();
-   virtual xbrStirrupData& GetLowerXBeamStirrups();
-   virtual xbrStirrupData& GetFullDepthStirrups();
-   virtual pgsTypes::ConditionFactorType& GetConditionFactorType();
-   virtual Float64& GetConditionFactor();
+   virtual CPierData2* GetPierData() override;
+   virtual xbrPierData* GetXBRPierData() override;
+   virtual CConcreteMaterial& GetConcrete() override;
+   virtual xbrTypes::PierType GetPierType() override;
+   virtual matRebar::Type& GetRebarType() override;
+   virtual matRebar::Grade& GetRebarGrade() override;
+   virtual CConcreteMaterial& GetConcreteMaterial() override;
+   virtual xbrLongitudinalRebarData& GetLongitudinalRebar() override;
+   virtual xbrStirrupData& GetLowerXBeamStirrups() override;
+   virtual xbrStirrupData& GetFullDepthStirrups() override;
+   virtual pgsTypes::ConditionFactorType& GetConditionFactorType() override;
+   virtual Float64& GetConditionFactor() override;
 
 private:
    IEditPierData* m_pEditPierData;

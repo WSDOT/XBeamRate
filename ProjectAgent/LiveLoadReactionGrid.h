@@ -76,7 +76,7 @@ public:
 private:
    pgsTypes::LoadRatingType m_LoadRatingType;
 
-   virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol);
+   virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol) override;
 
    void SetRowStyle(ROWCOL row);
 

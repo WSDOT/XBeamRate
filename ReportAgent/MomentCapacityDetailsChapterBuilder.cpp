@@ -114,7 +114,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
 
       GET_IFACE2(pBroker,IXBRMomentCapacity,pMomentCapacity);
       RowIndexType row = pTable->GetNumberOfHeaderRows();
-      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          col = 0;
 

@@ -38,7 +38,7 @@ public:
 	enum { IDD = IDD_LIVE_LOAD_REACTIONS };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    afx_msg void OnDesignAdd();
    afx_msg void OnDesignRemove();
@@ -66,5 +66,5 @@ protected:
    CLiveLoadReactionGrid m_PermitSpecialGrid;
 
 public:
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
 };

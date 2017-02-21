@@ -52,14 +52,14 @@ public:
 	//{{AFX_VIRTUAL(CPierLayoutPage)
 	public:
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPierLayoutPage)
-	virtual BOOL OnInitDialog();
+	virtual BOOL OnInitDialog() override;
    afx_msg void OnHelp();
    afx_msg void OnConditionFactorTypeChanged();
    afx_msg void OnHeightMeasureChanged();

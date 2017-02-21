@@ -41,7 +41,7 @@ static char THIS_FILE[] = __FILE__;
 
 CDisplayObjectFactory::CDisplayObjectFactory()
 {
-   ::CoCreateInstance(CLSID_DisplayObjectFactory,NULL,CLSCTX_ALL,IID_iDisplayObjectFactory,(void**)&m_Factory);
+   ::CoCreateInstance(CLSID_DisplayObjectFactory,nullptr,CLSCTX_ALL,IID_iDisplayObjectFactory,(void**)&m_Factory);
 }
 
 
@@ -65,7 +65,7 @@ STDMETHODIMP_(void) CDisplayObjectFactory::XFactory::Create(CLIPFORMAT cfFormat,
    if ( cfFormat == CSectionCutDisplayImpl::ms_Format )
    {
       CComPtr<iPointDisplayObject> doSectionCut;
-      ::CoCreateInstance(CLSID_PointDisplayObject,NULL,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&doSectionCut);
+      ::CoCreateInstance(CLSID_PointDisplayObject,nullptr,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&doSectionCut);
 
       doSectionCut->SetSelectionType(stAll);
 
@@ -87,7 +87,7 @@ STDMETHODIMP_(void) CDisplayObjectFactory::XFactory::Create(CLIPFORMAT cfFormat,
       {
          // Initialize from data object
          CComPtr<iDragDataSource> source;
-         ::CoCreateInstance(CLSID_DragDataSource,NULL,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
+         ::CoCreateInstance(CLSID_DragDataSource,nullptr,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
          source->SetDataObject(pDataObject);
 
          // rebuild the display object from the data source

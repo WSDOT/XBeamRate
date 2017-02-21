@@ -407,7 +407,7 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
 
    if ( strName == NO_LIVE_LOAD_DEFINED )
    {
-      return NULL;
+      return nullptr;
    }
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
@@ -605,7 +605,7 @@ rptRcTable* CRatingSummaryTable::BuildLoadPosting(IBroker* pBroker,PierIDType pi
    if ( !bLoadPostingRequired )
    {
       delete table;
-      table = NULL;
+      table = nullptr;
    }
 
    return table;

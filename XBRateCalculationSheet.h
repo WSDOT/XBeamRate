@@ -44,7 +44,7 @@ public:
 
 protected:
    void MakeCopy(const XBRateCalculationSheet& rOther);
-   virtual void MakeAssignment(const XBRateCalculationSheet& rOther);
+   void MakeAssignment(const XBRateCalculationSheet& rOther);
 
 private:
    IBroker* m_pBroker;

@@ -39,14 +39,14 @@ class CLoadRatingDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CLoadRatingDetailsChapterBuilder();
-   virtual LPCTSTR GetName() const;
+   virtual LPCTSTR GetName() const override;
    rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const;
-   virtual CChapterBuilder* Clone() const;
+   virtual CChapterBuilder* Clone() const override;
 
 private:
    // Prevent accidental copying and assignment
-   CLoadRatingDetailsChapterBuilder(const CLoadRatingDetailsChapterBuilder&);
-   CLoadRatingDetailsChapterBuilder& operator=(const CLoadRatingDetailsChapterBuilder&);
+   CLoadRatingDetailsChapterBuilder(const CLoadRatingDetailsChapterBuilder&) = delete;
+   CLoadRatingDetailsChapterBuilder& operator=(const CLoadRatingDetailsChapterBuilder&) = delete;
 
    void MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const;
    void ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,const xbrRatingArtifact* pRatingArtifact) const;

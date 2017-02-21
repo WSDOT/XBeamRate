@@ -84,103 +84,103 @@ END_CONNECTION_POINT_MAP()
 
 // IAgentEx
 public:
-	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker);
-   STDMETHOD(RegInterfaces)();
-	STDMETHOD(Init)();
-	STDMETHOD(Reset)();
-	STDMETHOD(ShutDown)();
-   STDMETHOD(Init2)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
+   STDMETHOD(RegInterfaces)() override;
+	STDMETHOD(Init)() override;
+	STDMETHOD(Reset)() override;
+	STDMETHOD(ShutDown)() override;
+   STDMETHOD(Init2)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 // IXBRPier
 public:
-   virtual Float64 GetSkewAngle(PierIDType pierID);
-   virtual IndexType GetBearingLineCount(PierIDType pierID);
-   virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx);
-   virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
-   virtual Float64 GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx);
-   virtual IndexType GetColumnCount(PierIDType pierID);
-   virtual Float64 GetColumnLocation(PierIDType pierID,IndexType colIdx);
-   virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx);
-   virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx);
-   virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx);
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx);
-   virtual Float64 GetMaxColumnHeight(PierIDType pierID);
-   virtual Float64 GetXBeamLength(PierIDType pierID);
-   virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape);
-   virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape);
-   virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints);
-   virtual void GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints);
+   virtual Float64 GetSkewAngle(PierIDType pierID) override;
+   virtual IndexType GetBearingLineCount(PierIDType pierID) override;
+   virtual IndexType GetBearingCount(PierIDType pierID,IndexType brgLineIdx) override;
+   virtual Float64 GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) override;
+   virtual Float64 GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) override;
+   virtual IndexType GetColumnCount(PierIDType pierID) override;
+   virtual Float64 GetColumnLocation(PierIDType pierID,IndexType colIdx) override;
+   virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx) override;
+   virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx) override;
+   virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) override;
+   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) override;
+   virtual Float64 GetMaxColumnHeight(PierIDType pierID) override;
+   virtual Float64 GetXBeamLength(PierIDType pierID) override;
+   virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) override;
+   virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape) override;
+   virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) override;
+   virtual void GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) override;
 
-   virtual Float64 GetCrownPointOffset(PierIDType pierID);
-   virtual Float64 GetCrownPointLocation(PierIDType pierID);
+   virtual Float64 GetCrownPointOffset(PierIDType pierID) override;
+   virtual Float64 GetCrownPointLocation(PierIDType pierID) override;
 
-   virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl);
+   virtual Float64 GetElevation(PierIDType pierID,Float64 Xcl) override;
 
-   virtual Float64 GetCurbToCurbWidth(PierIDType pierID);
+   virtual Float64 GetCurbToCurbWidth(PierIDType pierID) override;
 
-   virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb);
-   virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl);
-   virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier);
-   virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb);
-   virtual Float64 ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier);
-   virtual Float64 ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl);
+   virtual Float64 ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb) override;
+   virtual Float64 ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl) override;
+   virtual Float64 ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier) override;
+   virtual Float64 ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb) override;
+   virtual Float64 ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier) override;
+   virtual Float64 ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl) override;
 
 // IXBRSectionProperties
 public:
-   virtual Float64 GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual Float64 GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape);
-   virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape);
+   virtual Float64 GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual Float64 GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual void GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape) override;
+   virtual void GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape) override;
 
 // IXBRMaterial
 public:
-   virtual Float64 GetXBeamDensity(PierIDType pierID);
-   virtual Float64 GetXBeamFc(PierIDType pierID);
-   virtual Float64 GetXBeamEc(PierIDType pierID);
-   virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID);
-   virtual Float64 GetXBeamLambda(PierIDType pierID);
-   virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx);
-   virtual void GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu);
+   virtual Float64 GetXBeamDensity(PierIDType pierID) override;
+   virtual Float64 GetXBeamFc(PierIDType pierID) override;
+   virtual Float64 GetXBeamEc(PierIDType pierID) override;
+   virtual Float64 GetXBeamModulusOfRupture(PierIDType pierID) override;
+   virtual Float64 GetXBeamLambda(PierIDType pierID) override;
+   virtual Float64 GetColumnEc(PierIDType pierID,IndexType colIdx) override;
+   virtual void GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu) override;
 
 // IXBRRebar
 public:
-   virtual void GetRebarSection(PierIDType pierIdx,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection);
-   virtual IndexType GetRebarRowCount(PierIDType pierID);
-   virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx);
-   virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints);
-   virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem);
-   virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx);
-   virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint);
-   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation);
+   virtual void GetRebarSection(PierIDType pierIdx,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection) override;
+   virtual IndexType GetRebarRowCount(PierIDType pierID) override;
+   virtual IndexType GetRebarCount(PierIDType pierID,IndexType rowIdx) override;
+   virtual void GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints) override;
+   virtual Float64 GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem) override;
+   virtual Float64 GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx) override;
+   virtual void GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) override;
+   virtual Float64 GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation) override;
 
 // IXBRStirrups
 public:
-   virtual ZoneIndexType FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi);
-   virtual ZoneIndexType GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage);
-   virtual void GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend);
-   virtual Float64 GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx);
-   virtual Float64 GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx);
-   virtual Float64 GetStirrupLegCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx);
-   virtual IndexType GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx);
+   virtual ZoneIndexType FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) override;
+   virtual ZoneIndexType GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage) override;
+   virtual void GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend) override;
+   virtual Float64 GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) override;
+   virtual Float64 GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) override;
+   virtual Float64 GetStirrupLegCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) override;
+   virtual IndexType GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) override;
 
 // IXBRPointOfInterest
 public:
-   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib);
-   virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx);
-   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID);
-   virtual std::vector<xbrPointOfInterest> GetShearRatingPointsOfInterest(PierIDType pierID);
-   virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi);
-   virtual xbrPointOfInterest ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp);
-   virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi);
-   virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID);
-   virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID);
+   virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib) override;
+   virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx) override;
+   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID) override;
+   virtual std::vector<xbrPointOfInterest> GetShearRatingPointsOfInterest(PierIDType pierID) override;
+   virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) override;
+   virtual xbrPointOfInterest ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp) override;
+   virtual xbrPointOfInterest GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi) override;
+   virtual xbrPointOfInterest GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID) override;
+   virtual xbrPointOfInterest GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID) override;
 
 // IXBRProjectEventSink
 public:

@@ -70,7 +70,7 @@ public:
    void CustomInit();
 
 private:
-   virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol);
+   virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol) override;
 
    CString GetDatumOptions();
    CString GetDatum(xbrTypes::LongitudinalRebarDatumType datum);

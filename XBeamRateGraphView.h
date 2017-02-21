@@ -38,13 +38,13 @@ public:
 
 // Operations
 public:
-   virtual bool DoResultsExist();
+   virtual bool DoResultsExist() override;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CXBeamRateGraphView)
 	protected:
-	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo);
+	virtual void OnPrint(CDC* pDC, CPrintInfo* pInfo) override;
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -52,8 +52,8 @@ protected:
 
 	virtual ~CXBeamRateGraphView();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+	virtual void AssertValid() const override;
+	virtual void Dump(CDumpContext& dc) const override;
 #endif
 
 	// Generated message map functions

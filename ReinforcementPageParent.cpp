@@ -26,7 +26,7 @@
 
 CReinforcementPageParent::CReinforcementPageParent()
 {
-   m_pEditPierData = NULL;
+   m_pEditPierData = nullptr;
 }
 
 void CReinforcementPageParent::SetEditPierData(IEditPierData* pEditPierData,const xbrPierData& pierData)

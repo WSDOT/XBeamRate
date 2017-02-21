@@ -48,7 +48,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBRProjectPropertiesEventSink* pEventSink = reinterpret_cast<IXBRProjectPropertiesEventSink*>(*pp);
 				ret = pEventSink->OnProjectPropertiesChanged();
@@ -84,7 +84,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBRProjectEventSink* pEventSink = reinterpret_cast<IXBRProjectEventSink*>(*pp);
 				ret = pEventSink->OnProjectChanged();
@@ -114,7 +114,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBREventsSink* pEventSink = reinterpret_cast<IXBREventsSink*>(*pp);
 				ret = pEventSink->OnHoldEvents();
@@ -134,7 +134,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBREventsSink* pEventSink = reinterpret_cast<IXBREventsSink*>(*pp);
 				ret = pEventSink->OnFirePendingEvents();
@@ -154,7 +154,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBREventsSink* pEventSink = reinterpret_cast<IXBREventsSink*>(*pp);
 				ret = pEventSink->OnCancelPendingEvents();
@@ -191,7 +191,7 @@ public:
 		IUnknown** pp = m_vec.begin();
 		while (pp < m_vec.end())
 		{
-			if (*pp != NULL)
+			if (*pp != nullptr)
 			{
 				IXBRRatingSpecificationEventSink* pEventSink = reinterpret_cast<IXBRRatingSpecificationEventSink*>(*pp);
 				ret = pEventSink->OnRatingSpecificationChanged();

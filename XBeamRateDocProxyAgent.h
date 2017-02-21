@@ -92,56 +92,56 @@ public:
 
 // IAgentEx
 public:
-   STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker);
-	STDMETHOD(RegInterfaces)();
-	STDMETHOD(Init)();
-	STDMETHOD(Init2)();
-	STDMETHOD(Reset)();
-	STDMETHOD(ShutDown)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+   STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
+	STDMETHOD(RegInterfaces)() override;
+	STDMETHOD(Init)() override;
+	STDMETHOD(Init2)() override;
+	STDMETHOD(Reset)() override;
+	STDMETHOD(ShutDown)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 // IAgentUIIntegration
 public:
-   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate);
+   STDMETHOD(IntegrateWithUI)(BOOL bIntegrate) override;
 
 // IXBeamRate
 public:
-   virtual void GetUnitServer(IUnitServer** ppUnitServer);
+   virtual void GetUnitServer(IUnitServer** ppUnitServer) override;
 
 // IXBRProjectEventSink
 public:
-   virtual HRESULT OnProjectChanged();
+   virtual HRESULT OnProjectChanged() override;
 
 // IXBRRatingSpecificationEventSink
 public:
-   virtual HRESULT OnRatingSpecificationChanged();
+   virtual HRESULT OnRatingSpecificationChanged() override;
 
 // IEAFDisplayUnitsEventSink
 public:
-   virtual HRESULT OnUnitsChanging();
-   virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode);
+   virtual HRESULT OnUnitsChanging() override;
+   virtual HRESULT OnUnitsChanged(eafTypes::UnitMode newUnitsMode) override;
 
 // IXBRUIEvents
 public:
-   virtual void HoldEvents(bool bHold=true);
-   virtual void FirePendingEvents();
-   virtual void CancelPendingEvents();
-   virtual void FireEvent(CView* pSender = NULL,LPARAM lHint = 0,boost::shared_ptr<CObject> pHint = boost::shared_ptr<CObject>());
+   virtual void HoldEvents(bool bHold=true) override;
+   virtual void FirePendingEvents() override;
+   virtual void CancelPendingEvents() override;
+   virtual void FireEvent(CView* pSender = nullptr,LPARAM lHint = 0,std::shared_ptr<CObject> pHint = nullptr) override;
 
 // IXBRVersionInfo
 public:
-   virtual CString GetVersionString(bool bIncludeBuildNumber=false);
-   virtual CString GetVersion(bool bIncludeBuildNumber=false);
+   virtual CString GetVersionString(bool bIncludeBuildNumber=false) override;
+   virtual CString GetVersion(bool bIncludeBuildNumber=false) override;
 
 // IXBRViews
 public:
-   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec=TRUE);
-   virtual void CreateGraphView(CollectionIndexType graphIdx);
-   virtual void CreatePierView();
+   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec=TRUE) override;
+   virtual void CreateGraphView(CollectionIndexType graphIdx) override;
+   virtual void CreatePierView() override;
 
 // IXBREditByUI
 public:
-   virtual UINT GetStdToolBarID();
+   virtual UINT GetStdToolBarID() override;
 
 private:
    DECLARE_EAF_AGENT_DATA;
@@ -176,7 +176,7 @@ private:
    {
       CView* pSender;
       LPARAM lHint;
-      boost::shared_ptr<CObject> pHint;
+      std::shared_ptr<CObject> pHint;
    };
    std::vector<UIEvent> m_UIEvents;
 };

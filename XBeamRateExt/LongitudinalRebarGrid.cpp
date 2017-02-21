@@ -259,7 +259,7 @@ void CLongitudinalRebarGrid::SetRebarData(const xbrLongitudinalRebarData& rebars
       RemoveRows(1,nRows);
    }
 
-   BOOST_FOREACH(const xbrLongitudinalRebarData::RebarRow& rebarData, rebars.RebarRows)
+   for (const auto& rebarData : rebars.RebarRows)
    {
       AddRebarRow(rebarData);
    }

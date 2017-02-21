@@ -75,5 +75,5 @@ public:
 
 protected:
    void MakeCopy(const xbrLongitudinalRebarData& rOther);
-   virtual void MakeAssignment(const xbrLongitudinalRebarData& rOther);
+   void MakeAssignment(const xbrLongitudinalRebarData& rOther);
 };

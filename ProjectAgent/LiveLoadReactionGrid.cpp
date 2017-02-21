@@ -206,7 +206,7 @@ void CLiveLoadReactionGrid::SetLiveLoadData(const txnLiveLoadReactions& llimData
       RemoveRows(1,nRows);
    }
 
-   BOOST_FOREACH(const xbrLiveLoadReactionData& reactionData,llimData.m_LLIM)
+   for (const auto& reactionData : llimData.m_LLIM)
    {
       AddLiveLoadData(reactionData);
    }

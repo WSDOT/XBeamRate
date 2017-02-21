@@ -105,7 +105,7 @@ void CMyCommandTarget::OnPierCommandUpdate(CCmdUI* pCmdUI)
    GET_IFACE2(pBroker,ISelection,pSelection);
    PierIndexType selPierIdx = pSelection->GetSelectedPier();
    const CPierData2* pPier = pIBridgeDesc->GetPier(selPierIdx);
-   if ( pPier == NULL || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
+   if ( pPier == nullptr || pPier->GetPierModelType() == pgsTypes::pmtPhysical )
    {
       pCmdUI->Enable(TRUE);
    }
@@ -131,7 +131,6 @@ void CMyCommandTarget::OnSpanContextMenu(SpanIndexType spanIdx,CEAFMenu* pMenu) 
 void CMyCommandTarget::OnDeckContextMenu(CEAFMenu* pMenu) {}
 void CMyCommandTarget::OnAlignmentContextMenu(CEAFMenu* pMenu) {}
 void CMyCommandTarget::OnSectionCutContextMenu(CEAFMenu* pMenu) {}
-void CMyCommandTarget::OnGirderContextMenu(const CSpanKey& spanKey,CEAFMenu* pMenu) {}
 void CMyCommandTarget::OnGirderContextMenu(const CGirderKey& girderKey,CEAFMenu* pMenu) {}
 void CMyCommandTarget::OnTemporarySupportContextMenu(SupportIDType tsID,CEAFMenu* pMenu) {}
 void CMyCommandTarget::OnGirderSegmentContextMenu(const CSegmentKey& segmentKey,CEAFMenu* pMenu) {}
@@ -149,7 +148,7 @@ HRESULT CXBeamRateAgent::FinalConstruct()
    CComPtr<ICatRegister> pICatReg;
    HRESULT hr;
    hr = ::CoCreateInstance( CLSID_StdComponentCategoriesMgr,
-                            NULL,
+                            nullptr,
                             CLSCTX_INPROC_SERVER,
                             IID_ICatRegister,
                             (void**)&pICatReg );
@@ -171,7 +170,7 @@ HRESULT CXBeamRateAgent::FinalConstruct()
    ID[0] = CATID_XBeamRateAgent;
 
    // enum agents
-   pICatInfo->EnumClassesOfCategories(nID,ID,0,NULL,&pIEnumCLSID);
+   pICatInfo->EnumClassesOfCategories(nID,ID,0,nullptr,&pIEnumCLSID);
 
    // load up to 10 agents at a time
    const int nMaxAgents = 10;
@@ -209,7 +208,7 @@ void CXBeamRateAgent::UnregisterViews()
 void CXBeamRateAgent::CreatePierView()
 {
    GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
-   pViewRegistrar->CreateView(m_PierViewKey,NULL);
+   pViewRegistrar->CreateView(m_PierViewKey,nullptr);
 }
 
 void CXBeamRateAgent::CreateMenus()
@@ -246,8 +245,8 @@ void CXBeamRateAgent::CreateToolbar()
    // Put the button to the right of PGSuper/PGSplice view girder button
    // The IDs from PGSuper/PGSplice aren't available to plugins so we'll just
    // hard code the command ID.
-   int idx = pStdToolBar->CommandToIndex(36896/*ID_VIEW_GIRDEREDITOR*/,NULL); 
-   pStdToolBar->InsertButton(idx+1,ID_VIEW_PIER,IDB_VIEW_PIER,NULL,this);
+   int idx = pStdToolBar->CommandToIndex(36896/*ID_VIEW_GIRDEREDITOR*/,nullptr); 
+   pStdToolBar->InsertButton(idx+1,ID_VIEW_PIER,IDB_VIEW_PIER,nullptr,this);
 }
 
 void CXBeamRateAgent::RemoveToolbar()
@@ -269,15 +268,15 @@ void CXBeamRateAgent::RemoveToolbar()
 //   // Create report spec builders
 //   //
 //
-//   boost::shared_ptr<CReportSpecificationBuilder> pMyRptSpecBuilder( new CMyReportSpecificationBuilder(m_pBroker) );
+//   std::shared_ptr<CReportSpecificationBuilder> pMyRptSpecBuilder( std::make_shared<CMyReportSpecificationBuilder>(m_pBroker) );
 //
 //   // My report
-//   CReportBuilder* pRptBuilder = new CReportBuilder(_T("Extension Agent Report"));
+//   std::unique_ptr<CReportBuilder> pRptBuilder(std::make_unique<CReportBuilder>(_T("Extension Agent Report"));
 //   pRptBuilder->SetMenuBitmap(&m_bmpMenu);
-//   pRptBuilder->AddTitlePageBuilder( boost::shared_ptr<CTitlePageBuilder>(new CPGSuperTitlePageBuilder(m_pBroker,pRptBuilder->GetName(),false)) );
+//   pRptBuilder->AddTitlePageBuilder( std::make_shared<CPGSuperTitlePageBuilder>(m_pBroker,pRptBuilder->GetName(),false)) );
 //   pRptBuilder->SetReportSpecificationBuilder( pMyRptSpecBuilder );
-//   pRptBuilder->AddChapterBuilder( boost::shared_ptr<CChapterBuilder>(new CMyChapterBuilder) );
-//   pRptMgr->AddReportBuilder( pRptBuilder );
+//   pRptBuilder->AddChapterBuilder( std::make_shared<CMyChapterBuilder>) );
+//   pRptMgr->AddReportBuilder( pRptBuilder.release() );
 //}
 
 void CXBeamRateAgent::RegisterUIExtensions()
@@ -469,14 +468,6 @@ void CXBeamRateAgent::GetUnitServer(IUnitServer** ppUnitServer)
    pDocUnits->GetUnitServer(ppUnitServer);
 }
 
-void CXBeamRateAgent::GetUnitConverter(IUnitConvert2** ppUnitConvert)
-{
-   GET_IFACE(IDocumentUnitSystem,pDocUnits);
-   CComPtr<IUnitServer> unitServer;
-   pDocUnits->GetUnitServer(&unitServer);
-   unitServer.QueryInterface(ppUnitConvert);
-}
-
 ////////////////////////////////////////////////////////////////////
 // IAgentUIIntegration
 STDMETHODIMP CXBeamRateAgent::IntegrateWithUI(BOOL bIntegrate)
@@ -592,15 +583,15 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData)
 CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage)
 {
    ATLASSERT(false); // should never get here
-   return NULL;
+   return nullptr;
 }
 
 txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
-   if ( pPage == NULL )
+   if ( pPage == nullptr )
    {
       // we aren't extending the dialog for this pier
-      return NULL;
+      return nullptr;
    }
 
    xbrEditReinforcementData oldReinforcement;

@@ -38,6 +38,7 @@
 #include <XBeamRateExt\StatusItem.h>
 
 #include <numeric>
+#include <algorithm>
 
 #include <System\Flags.h>
 #include <LRFD\Utility.h>
@@ -68,8 +69,8 @@ CAnalysisAgentImp::~CAnalysisAgentImp()
 
 HRESULT CAnalysisAgentImp::FinalConstruct()
 {
-   m_pModelData = std::auto_ptr<std::map<PierIDType,ModelData>>(new std::map<PierIDType,ModelData>());
-   m_pUnitLiveLoadResults = std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>>(new std::map<PierIDType,std::set<UnitLiveLoadResult>>());
+   m_pModelData = std::make_unique<std::map<PierIDType,ModelData>>();
+   m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType,std::set<UnitLiveLoadResult> > >();
    return S_OK;
 }
 
@@ -459,7 +460,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
 
       GET_IFACE(IXBRPointOfInterest,pPoi);
       std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID);
-      BOOST_FOREACH(xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          MemberIDType mbrID;
          Float64 mbrLocation;
@@ -603,7 +604,7 @@ void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pMo
    LoadIDType loadID = 0;
 
    Float64 w = GetUpperCrossBeamLoading(pierID);
-   BOOST_FOREACH(BeamMember& capMbr,pModelData->m_XBeamMembers)
+   for (const auto& capMbr : pModelData->m_XBeamMembers)
    {
       CComPtr<IFem2dDistributedLoad> distLoad;
       distLoads->Create(loadID++,capMbr.mbrID,loadDirFy,0,-1,-w,-w,lotMember,&distLoad);
@@ -1193,7 +1194,7 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
 
    WheelLineConfiguration wheelConfig;
    IndexType laneIdx = 0;
-   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   for (const auto& lcid : llConfig.m_LoadCases)
    {
       std::map<LoadCaseIDType,LaneConfiguration>::iterator found = pModelData->m_LaneConfigurations.find(lcid);
       ATLASSERT(found != pModelData->m_LaneConfigurations.end());
@@ -1323,7 +1324,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::Pr
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 m = GetMoment(pierID,pfType,poi);
       vM.push_back(m);
@@ -1336,7 +1337,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue v = GetShear(pierID,pfType,poi);
       vV.push_back(v);
@@ -1349,7 +1350,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceTy
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    Float64 M = 0;
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPFTypes)
+   for (const auto& pfType : vPFTypes)
    {
       Float64 m = GetMoment(pierID,pfType,poi);
       M += m;
@@ -1362,7 +1363,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::Combined
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    sysSectionValue V(0,0);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPFTypes)
+   for (const auto& pfType : vPFTypes)
    {
       sysSectionValue v = GetShear(pierID,pfType,poi);
       V += v;
@@ -1375,7 +1376,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::Co
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 m = GetMoment(pierID,lcType,poi);
       vM.push_back(m);
@@ -1387,7 +1388,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue v = GetShear(pierID,lcType,poi);
       vV.push_back(v);
@@ -1411,7 +1412,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
    Float64 FyLeft(0), FyRight(0);
    Float64 MzLeft(0), MzRight(0);
 
-   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   for (const auto& lcid : llConfig.m_LoadCases)
    {
       Float64 fxLeft, fyLeft, mzLeft;
       HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
@@ -1473,7 +1474,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    Float64 FyLeft(0), FyRight(0);
    Float64 MzLeft(0), MzRight(0);
 
-   BOOST_FOREACH(LoadCaseIDType lcid,llConfig.m_LoadCases)
+   for (const auto& lcid : llConfig.m_LoadCases)
    {
       Float64 fxLeft, fyLeft, mzLeft;
       HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
@@ -1517,7 +1518,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::Lo
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 m = GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
       vM.push_back(m);
@@ -1529,7 +1530,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTy
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue v = GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
       vV.push_back(v);
@@ -1658,7 +1659,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    pvMpermit->resize(vPoi.size());
    pvMlegal->clear();
    pvMlegal->resize(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 Mpermit,Mlegal;
       GetMoment(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
@@ -1780,7 +1781,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    pvVpermit->resize(vPoi.size());
    pvVlegal->clear();
    pvVlegal->resize(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue Vpermit,Vlegal;
       GetShear(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
@@ -1929,12 +1930,12 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       pvMaxLLConfigIdx->reserve(vPoi.size());
    }
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 min,max;
       //WheelLineConfiguration minConfig, maxConfig;
       IndexType minLLConfigIdx, maxLLConfigIdx;
-      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL);
+      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : nullptr,pvMaxLLConfigIdx ? &maxLLConfigIdx : nullptr);
       pvMin->push_back(min);
       pvMax->push_back(max);
       if ( pvMinLLConfigIdx )
@@ -1965,12 +1966,12 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       pvMaxLLConfigIdx->reserve(vPoi.size());
    }
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue min,max;
       //WheelLineConfiguration minLeftConfig, minRightConfig, maxLeftConfig, maxRightConfig;
       IndexType minLLConfigIdx, maxLLConfigIdx;
-      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : NULL,pvMaxLLConfigIdx ? &maxLLConfigIdx : NULL);
+      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,pvMinLLConfigIdx ? &minLLConfigIdx : nullptr,pvMaxLLConfigIdx ? &maxLLConfigIdx : nullptr);
       pvMin->push_back(min);
       pvMax->push_back(max);
 
@@ -2013,7 +2014,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoadReactions; vehicleIdx++ )
    {
       Float64 min,max;
-      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,NULL,NULL);
+      GetMoment(pierID,ratingType,vehicleIdx,poi,&min,&max,nullptr,nullptr);
 
       if ( min < *pMin )
       {
@@ -2070,7 +2071,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    for ( VehicleIndexType vehicleIdx = 0; vehicleIdx < nLiveLoadReactions; vehicleIdx++ )
    {
       sysSectionValue min,max;
-      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,NULL,NULL);
+      GetShear(pierID,ratingType,vehicleIdx,poi,&min,&max,nullptr,nullptr);
       if ( min.Left() < (*pMin).Left() )
       {
          pMin->Left() = min.Left();
@@ -2125,7 +2126,8 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       pvMaxVehicleIdx->clear();
       pvMaxVehicleIdx->reserve(vPoi.size());
    }
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+
+   for (const auto& poi : vPoi)
    {
       Float64 min,max;
       VehicleIndexType minIdx, maxIdx;
@@ -2172,7 +2174,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       pvMaxRightVehicleIdx->reserve(vPoi.size());
    }
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue min,max;
       VehicleIndexType minLeftIdx, minRightIdx, maxLeftIdx, maxRightIdx;
@@ -2217,7 +2219,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDC)
+   for (const auto& pfType : vDC)
    {
       Float64 dc = GetMoment(pierID,pfType,poi);
       DC += dc;
@@ -2225,7 +2227,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 DW = 0;
    std::vector<xbrTypes::ProductForceType> vDW = GetLoads(xbrTypes::lcDW);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDW)
+   for (const auto& pfType : vDW)
    {
       Float64 dw = GetMoment(pierID,pfType,poi);
       DW += dw;
@@ -2233,7 +2235,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 CR = 0;
    std::vector<xbrTypes::ProductForceType> vCR = GetLoads(xbrTypes::lcCR);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
+   for (const auto& pfType : vCR)
    {
       Float64 cr = GetMoment(pierID,pfType,poi);
       CR += cr;
@@ -2241,7 +2243,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 SH = 0;
    std::vector<xbrTypes::ProductForceType> vSH = GetLoads(xbrTypes::lcSH);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
+   for (const auto& pfType : vSH)
    {
       Float64 sh = GetMoment(pierID,pfType,poi);
       SH += sh;
@@ -2249,7 +2251,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 PS = 0;
    std::vector<xbrTypes::ProductForceType> vPS = GetLoads(xbrTypes::lcPS);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
+   for (const auto& pfType : vPS)
    {
       Float64 ps = GetMoment(pierID,pfType,poi);
       PS += ps;
@@ -2257,14 +2259,14 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
 
    Float64 RE = 0;
    std::vector<xbrTypes::ProductForceType> vRE = GetLoads(xbrTypes::lcRE);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
+   for (const auto& pfType : vRE)
    {
       Float64 re = GetMoment(pierID,pfType,poi);
       RE += re;
    }
 
    Float64 LLIMmin, LLIMmax;
-   GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL);
+   GetMoment(pierID,ratingType,poi,&LLIMmin,&LLIMmax,nullptr,nullptr);
 
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
@@ -2285,7 +2287,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue DC = 0;
    std::vector<xbrTypes::ProductForceType> vDC = GetLoads(xbrTypes::lcDC);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDC)
+   for (const auto& pfType : vDC)
    {
       sysSectionValue dc = GetShear(pierID,pfType,poi);
       DC += dc;
@@ -2293,7 +2295,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue DW = 0;
    std::vector<xbrTypes::ProductForceType> vDW = GetLoads(xbrTypes::lcDW);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vDW)
+   for (const auto& pfType : vDW)
    {
       sysSectionValue dw = GetShear(pierID,pfType,poi);
       DW += dw;
@@ -2301,7 +2303,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue CR = 0;
    std::vector<xbrTypes::ProductForceType> vCR = GetLoads(xbrTypes::lcCR);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vCR)
+   for (const auto& pfType : vCR)
    {
       sysSectionValue cr = GetShear(pierID,pfType,poi);
       CR += cr;
@@ -2309,7 +2311,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue SH = 0;
    std::vector<xbrTypes::ProductForceType> vSH = GetLoads(xbrTypes::lcSH);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vSH)
+   for (const auto& pfType : vSH)
    {
       sysSectionValue sh = GetShear(pierID,pfType,poi);
       SH += sh;
@@ -2317,7 +2319,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue PS = 0;
    std::vector<xbrTypes::ProductForceType> vPS = GetLoads(xbrTypes::lcPS);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vPS)
+   for (const auto& pfType : vPS)
    {
       sysSectionValue ps = GetShear(pierID,pfType,poi);
       PS += ps;
@@ -2325,14 +2327,14 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
 
    sysSectionValue RE = 0;
    std::vector<xbrTypes::ProductForceType> vRE = GetLoads(xbrTypes::lcRE);
-   BOOST_FOREACH(xbrTypes::ProductForceType pfType,vRE)
+   for (const auto& pfType : vRE)
    {
       sysSectionValue re = GetShear(pierID,pfType,poi);
       RE += re;
    }
 
    sysSectionValue LLIMmin, LLIMmax;
-   GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax,NULL,NULL,NULL,NULL);
+   GetShear(pierID,ratingType,poi,&LLIMmin,&LLIMmax,nullptr,nullptr,nullptr,nullptr);
 
    *pMin = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmin;
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
@@ -2344,7 +2346,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    pvMin->reserve(vPoi.size());
    pvMax->clear();
    pvMax->reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 min,max;
       GetMoment(pierID,limitState,poi,&min,&max);
@@ -2359,7 +2361,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    pvMin->reserve(vPoi.size());
    pvMax->clear();
    pvMax->reserve(vPoi.size());
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       sysSectionValue min,max;
       GetShear(pierID,limitState,poi,&min,&max);
@@ -2474,7 +2476,7 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
       //
       // Increment the gap position and repeat...
 
-      BOOST_FOREACH(std::vector<IndexType>& vGapPosition,vGapPositions)
+      for (const auto& vGapPosition : vGapPositions)
       {
          // location of wheel lines measured from the left curb line... with the first wheel line being 
          // at its left-most position. The position of the second wheel line is governed by
@@ -2550,7 +2552,7 @@ void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType 
    }
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,std::vector<IndexType>& vGapPosition)
+std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,const std::vector<IndexType>& vGapPosition)
 {
    Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
    w3 /= cos(skew); // we are working in the plane of the pier, so make skew adjustment
@@ -2560,13 +2562,10 @@ std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float
    vLoadPositions.push_back(wLoadedLane/2-w3);
    vLoadPositions.push_back(wLoadedLane/2+w3);
 
-   std::vector<IndexType>::iterator gapPositionIter(vGapPosition.begin());
-   std::vector<IndexType>::iterator gapPositionIterEnd(vGapPosition.end());
    IndexType laneIdx = 1;
    Float64 totalGapWidth = 0;
-   for ( ; gapPositionIter != gapPositionIterEnd; gapPositionIter++, laneIdx++ )
+   for(const auto& gapPosition : vGapPosition)
    {
-      IndexType gapPosition(*gapPositionIter);
       Float64 gapWidth = stepSize*gapPosition;
       totalGapWidth += gapWidth;
       
@@ -2577,12 +2576,14 @@ std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float
 
       vLoadPositions.push_back(XleftWheelLine);
       vLoadPositions.push_back(XrightWheelLine);
+
+      laneIdx++;
    }
 
    return vLoadPositions;
 }
 
-std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,std::vector<Float64>& vWheelLinePositions)
+std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,const std::vector<Float64>& vWheelLinePositions)
 {
    // keep track of the last load case ID used for one loaded lane
    // vLoadPositions has two point loads per lane, so the number of loaded lanes
@@ -2597,8 +2598,8 @@ std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelDat
    // for each loaded lane, create a FEM2D load case that has the two
    // wheel line loads
    std::vector<LoadCaseIDType> vLoadCases;
-   std::vector<Float64>::iterator iter(vWheelLinePositions.begin());
-   std::vector<Float64>::iterator end(vWheelLinePositions.end());
+   auto iter(vWheelLinePositions.begin());
+   auto end(vWheelLinePositions.end());
    for ( ; iter != end; iter += 2 )
    {
       // these are the left curb line justified position of the wheel lines
@@ -3023,7 +3024,7 @@ void CAnalysisAgentImp::InvalidateModels(bool bCreateNewDataStructures)
    std::map<PierIDType,ModelData>* pOldModelData = m_pModelData.release();
    if ( bCreateNewDataStructures )
    {
-      m_pModelData = std::auto_ptr<std::map<PierIDType,ModelData>>(new std::map<PierIDType,ModelData>());
+      m_pModelData = std::make_unique<std::map<PierIDType,ModelData>>();
    }
 
 #if defined _USE_MULTITHREADING

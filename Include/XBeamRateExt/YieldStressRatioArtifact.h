@@ -135,7 +135,7 @@ public:
 
 protected:
    void MakeCopy(const xbrYieldStressRatioArtifact& rOther);
-   virtual void MakeAssignment(const xbrYieldStressRatioArtifact& rOther);
+   void MakeAssignment(const xbrYieldStressRatioArtifact& rOther);
 
    mutable bool m_bRFComputed;
    mutable Float64 m_StressRatio;

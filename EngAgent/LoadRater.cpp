@@ -378,8 +378,8 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    //   pgsDesigner2 designer;
    //   designer.SetBroker(m_pBroker);
    //   pShearCapacity->GetShearCapacityDetails(ls,loadRatingIntervalIdx,poi,&scd);
-   //   designer.InitShearCheck(poi.GetSegmentKey(),loadRatingIntervalIdx,ls,NULL);
-   //   designer.CheckLongReinfShear(poi,loadRatingIntervalIdx,ls,scd,NULL,&l_artifact);
+   //   designer.InitShearCheck(poi.GetSegmentKey(),loadRatingIntervalIdx,ls,nullptr);
+   //   designer.CheckLongReinfShear(poi,loadRatingIntervalIdx,ls,scd,nullptr,&l_artifact);
    //   shearArtifact.SetLongReinfShearArtifact(l_artifact);
 
       ratingArtifact.AddArtifact(poi,shearArtifact);
@@ -422,7 +422,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
 
    // Create artifacts
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
@@ -471,7 +471,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
          rebarSection->get__EnumRebarSectionItem(&enumRebarSectionItem);
 
          CComPtr<IRebarSectionItem> rebarSectionItem;
-         while ( enumRebarSectionItem->Next(1,&rebarSectionItem,NULL) != S_FALSE )
+         while ( enumRebarSectionItem->Next(1,&rebarSectionItem,nullptr) != S_FALSE )
          {
            CComPtr<IPoint2d> location;
            rebarSectionItem->get_Location(&location);

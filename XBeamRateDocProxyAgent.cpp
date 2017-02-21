@@ -56,7 +56,7 @@ CLASS
 
 CXBeamRateDocProxyAgent::CXBeamRateDocProxyAgent()
 {
-   m_pMyDocument = NULL;
+   m_pMyDocument = nullptr;
    m_StdToolBarID = -1;
    
    m_EventHoldCount = 0;
@@ -228,8 +228,7 @@ HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
 
    //m_pMyDocument->UpdateAllViews(0,0,0);
 
-   boost::shared_ptr<CObject> pnull;
-   FireEvent( 0, HINT_PROJECTCHANGED, pnull );
+   FireEvent( 0, HINT_PROJECTCHANGED, nullptr );
    return S_OK;
 }
 
@@ -242,8 +241,7 @@ HRESULT CXBeamRateDocProxyAgent::OnRatingSpecificationChanged()
 
    //m_pMyDocument->UpdateAllViews(0,0,0);
 
-   boost::shared_ptr<CObject> pnull;
-   FireEvent( 0, HINT_RATINGSPECCHANGED, pnull );
+   FireEvent( 0, HINT_RATINGSPECCHANGED, nullptr );
    return S_OK;
 }
 
@@ -265,8 +263,7 @@ HRESULT CXBeamRateDocProxyAgent::OnUnitsChanged(eafTypes::UnitMode newUnitMode)
    m_pMyDocument->GetDocUnitSystem(&pDocUnitSystem);
    pDocUnitSystem->put_UnitMode(UnitModeType(pDisplayUnits->GetUnitMode()));
 
-   boost::shared_ptr<CObject> pnull;
-   FireEvent( 0, HINT_UNITSCHANGED, pnull );
+   FireEvent( 0, HINT_UNITSCHANGED, nullptr );
 
    return S_OK;
 }
@@ -333,7 +330,7 @@ void CXBeamRateDocProxyAgent::CancelPendingEvents()
    }
 }
 
-void CXBeamRateDocProxyAgent::FireEvent(CView* pSender,LPARAM lHint,boost::shared_ptr<CObject> pHint)
+void CXBeamRateDocProxyAgent::FireEvent(CView* pSender,LPARAM lHint,std::shared_ptr<CObject> pHint)
 {
    AFX_MANAGE_STATE(AfxGetAppModuleState());
    if ( 0 < m_EventHoldCount )
@@ -439,9 +436,9 @@ void CXBeamRateDocProxyAgent::RegisterViews()
    // for the views below will register them. For example, the analysis results view is the
    // responsiblity of the analysis results agent, so that view's implementation will move
    GET_IFACE(IEAFViewRegistrar,pViewReg);
-   m_ReportViewKey    = pViewReg->RegisterView(IDR_REPORT,    NULL, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
-   m_GraphingViewKey  = pViewReg->RegisterView(IDR_GRAPHING,  NULL, RUNTIME_CLASS(CGraphViewChildFrame),  RUNTIME_CLASS(CXBeamRateGraphView),  hMenu, -1); // unlimited number of reports
-   m_PierViewKey      = pViewReg->RegisterView(IDR_XBEAMRATE, NULL, RUNTIME_CLASS(CXBeamRateChildFrame),  RUNTIME_CLASS(CXBeamRateView),        hMenu, 1);
+   m_ReportViewKey    = pViewReg->RegisterView(IDR_REPORT,    nullptr, RUNTIME_CLASS(CReportViewChildFrame), RUNTIME_CLASS(CXBeamRateReportView), hMenu, -1); // unlimited number of reports
+   m_GraphingViewKey  = pViewReg->RegisterView(IDR_GRAPHING,  nullptr, RUNTIME_CLASS(CGraphViewChildFrame),  RUNTIME_CLASS(CXBeamRateGraphView),  hMenu, -1); // unlimited number of reports
+   m_PierViewKey      = pViewReg->RegisterView(IDR_XBEAMRATE, nullptr, RUNTIME_CLASS(CXBeamRateChildFrame),  RUNTIME_CLASS(CXBeamRateView),        hMenu, 1);
 }
 
 void CXBeamRateDocProxyAgent::UnregisterViews()
@@ -460,13 +457,13 @@ void CXBeamRateDocProxyAgent::CreateToolBars()
 
    m_StdToolBarID = pToolBars->CreateToolBar(_T("Standard"));
    CEAFToolBar* pToolBar = pToolBars->GetToolBar(m_StdToolBarID);
-   pToolBar->LoadToolBar(IDR_XBEAMRATE,NULL); // don't use a command callback because these commands are handled by 
+   pToolBar->LoadToolBar(IDR_XBEAMRATE,nullptr); // don't use a command callback because these commands are handled by 
                                                // the standard MFC message routing
 
    // Add a drop-down arrow to the Open and Report buttons
-   pToolBar->CreateDropDownButton(ID_FILE_OPEN,   NULL,BTNS_DROPDOWN);
-   pToolBar->CreateDropDownButton(ID_VIEW_GRAPHS, NULL,BTNS_WHOLEDROPDOWN);
-   pToolBar->CreateDropDownButton(ID_VIEW_REPORTS,NULL,BTNS_WHOLEDROPDOWN);
+   pToolBar->CreateDropDownButton(ID_FILE_OPEN,   nullptr,BTNS_DROPDOWN);
+   pToolBar->CreateDropDownButton(ID_VIEW_GRAPHS, nullptr,BTNS_WHOLEDROPDOWN);
+   pToolBar->CreateDropDownButton(ID_VIEW_REPORTS,nullptr,BTNS_WHOLEDROPDOWN);
 
    //OnStatusChanged(); // set the status items
 }
@@ -501,7 +498,7 @@ void CXBeamRateDocProxyAgent::CreateStatusBar()
 void CXBeamRateDocProxyAgent::ResetStatusBar()
 {
    CEAFMainFrame* pFrame = EAFGetMainFrame();
-   pFrame->SetStatusBar(NULL);
+   pFrame->SetStatusBar(nullptr);
 }
 
 void CXBeamRateDocProxyAgent::OnResetHints()

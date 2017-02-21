@@ -238,7 +238,7 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    // This is a little brittle, but that prologue information is very stable so it isn't likely to change.
 
    CComPtr<IStructuredSave> pStrSave;
-   HRESULT hr = ::CoCreateInstance(CLSID_StructuredSave, NULL, CLSCTX_INPROC_SERVER, IID_IStructuredSave, (void**)&pStrSave);
+   HRESULT hr = ::CoCreateInstance(CLSID_StructuredSave, nullptr, CLSCTX_INPROC_SERVER, IID_IStructuredSave, (void**)&pStrSave);
    ATLASSERT(SUCCEEDED(hr));
 
    hr = pStrSave->Open(lpszPathName);
@@ -566,7 +566,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
 
             std::vector<xbrLiveLoadReactionData> vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrDesign_Inventory);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -581,7 +581,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
             pStrSave->BeginUnit(_T("Design_Operating"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrDesign_Operating);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -596,7 +596,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
             pStrSave->BeginUnit(_T("Legal_Routine"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrLegal_Routine);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -611,7 +611,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
             pStrSave->BeginUnit(_T("Legal_Special"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrLegal_Special);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -626,7 +626,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
             pStrSave->BeginUnit(_T("Permit_Routine"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrPermit_Routine);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -641,7 +641,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
             pStrSave->BeginUnit(_T("Permit_Special"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrPermit_Special);
-            BOOST_FOREACH(xbrLiveLoadReactionData& llReaction,vReactions)
+            for (const auto& llReaction : vReactions)
             {
                if ( llReaction.Name != NO_LIVE_LOAD_DEFINED )
                {
@@ -662,12 +662,12 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       {
          PierIDType pierID = m_PierData[m_SavePierID].GetID();
          m_PierData[m_SavePierID].SetID(INVALID_ID); // set the pier ID to that of a stand alone pier
-         m_PierData[m_SavePierID].Save(pStrSave,NULL);
+         m_PierData[m_SavePierID].Save(pStrSave,nullptr);
          m_PierData[m_SavePierID].SetID(pierID);
       }
       else
       {
-         m_PierData[m_SavePierID].Save(pStrSave,NULL);
+         m_PierData[m_SavePierID].Save(pStrSave,nullptr);
       }
 
       pStrSave->EndUnit(); // ProjectData
@@ -692,7 +692,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          xbrPierData& pierData(iter->second);
          ATLASSERT(pierData.GetID() != INVALID_ID);
-         pierData.Save(pStrSave,NULL);
+         pierData.Save(pStrSave,nullptr);
       }
    }
 
@@ -1155,7 +1155,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          }
 
          // Load the basic pier information
-         hr = m_PierData[INVALID_ID].Load(pStrLoad,NULL);
+         hr = m_PierData[INVALID_ID].Load(pStrLoad,nullptr);
          ATLASSERT(m_PierData[INVALID_ID].GetID() == INVALID_ID);
 
          hr = pStrLoad->EndUnit(); // ProjectData
@@ -1183,7 +1183,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          hr = pStrLoad->EndUnit(); // RatingSpecification
 
          xbrPierData pierData;
-         while ( SUCCEEDED(pierData.Load(pStrLoad,NULL)) )
+         while ( SUCCEEDED(pierData.Load(pStrLoad,nullptr)) )
          {
             PierIDType pierID = pierData.GetID();
             ATLASSERT(pierID != INVALID_ID);
@@ -2914,7 +2914,7 @@ void CProjectAgentImp::CreateMenus()
    // Add our commands to the Project menu
    UINT projPos = pMenu->FindMenuItem(_T("&Project"));
    CEAFMenu* pProjectMenu = pMenu->GetSubMenu(projPos);
-   pProjectMenu->AppendMenu(EAFID_EDIT_UNITS,_T("&Units..."),NULL);
+   pProjectMenu->AppendMenu(EAFID_EDIT_UNITS,_T("&Units..."),nullptr);
    pProjectMenu->AppendMenu(ID_EDIT_OPTIONS,_T("Load Rating Options..."),this);
    pProjectMenu->AppendSeparator();
    pProjectMenu->AppendMenu(ID_EDIT_PROPERTIES,_T("&Properties..."),this);
@@ -2933,10 +2933,10 @@ void CProjectAgentImp::RemoveMenus()
 
    UINT projPos = pMenu->FindMenuItem(_T("&Project"));
    CEAFMenu* pProjectMenu = pMenu->GetSubMenu(projPos);
-   pProjectMenu->RemoveMenu(EAFID_EDIT_UNITS,MF_BYCOMMAND,NULL);
+   pProjectMenu->RemoveMenu(EAFID_EDIT_UNITS,MF_BYCOMMAND,nullptr);
    pProjectMenu->RemoveMenu(ID_EDIT_OPTIONS,MF_BYCOMMAND,this);
    pProjectMenu->RemoveMenu(ID_EDIT_PROPERTIES,MF_BYCOMMAND,this);
-   pProjectMenu->RemoveMenu(pProjectMenu->GetMenuItemCount()-1,MF_BYPOSITION,NULL); // remove the separator
+   pProjectMenu->RemoveMenu(pProjectMenu->GetMenuItemCount()-1,MF_BYPOSITION,nullptr); // remove the separator
 }
 
 void CProjectAgentImp::CreateToolbars()
@@ -2948,9 +2948,9 @@ void CProjectAgentImp::CreateToolbars()
    UINT stdID = pEditUI->GetStdToolBarID();
    CEAFToolBar* pStdToolBar = pToolBars->GetToolBar(stdID);
 
-   int idx = pStdToolBar->CommandToIndex(ID_VIEW_PIER,NULL); 
-   pStdToolBar->InsertButton(idx-1,ID_EDIT_OPTIONS,IDB_EDIT_OPTIONS,NULL,this);
-   pStdToolBar->InsertButton(idx-1,ID_EDIT_PIER,IDB_EDIT_PIER,NULL,this);
+   int idx = pStdToolBar->CommandToIndex(ID_VIEW_PIER,nullptr); 
+   pStdToolBar->InsertButton(idx-1,ID_EDIT_OPTIONS,IDB_EDIT_OPTIONS,nullptr,this);
+   pStdToolBar->InsertButton(idx-1,ID_EDIT_PIER,IDB_EDIT_PIER,nullptr,this);
 }
 
 void CProjectAgentImp::RemoveToolbars()
@@ -3034,7 +3034,7 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
 
 
             REACTION Rmin,Rmax;
-            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,NULL,NULL);
+            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,nullptr,nullptr);
 
             Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
             
@@ -3286,7 +3286,7 @@ PierIndexType CProjectAgentImp::GetPierIndex(PierIDType pierID)
 
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
-   ATLASSERT(pPier != NULL);
+   ATLASSERT(pPier != nullptr);
    return pPier->GetIndex();
 }
 
@@ -3299,7 +3299,7 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
 
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
    const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
-   ATLASSERT(pPier != NULL);
+   ATLASSERT(pPier != nullptr);
 
    if ( pPier->IsAbutment() && pPier->GetIndex() == 0 )
    {
@@ -3308,7 +3308,7 @@ CGirderKey CProjectAgentImp::GetGirderKey(PierIDType pierID,IndexType brgLineIdx
 
    // Get the girder group
    const CGirderGroupData* pGroup = pPier->GetGirderGroup(pierFace);
-   ATLASSERT(pGroup != NULL);
+   ATLASSERT(pGroup != nullptr);
    GroupIndexType grpIdx = pGroup->GetIndex();
 
    // Assuming there is a one-to-one relationship between bearings and girders

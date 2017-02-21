@@ -42,7 +42,7 @@ static const Uint32 SSIZE = 1440 * 3/8; // (twips)
 UINT CSectionCutDisplayImpl::ms_Format = ::RegisterClipboardFormat(_T("XBRSectionCutData"));
 
 CSectionCutDisplayImpl::CSectionCutDisplayImpl():
-m_pCutLocation(NULL),
+m_pCutLocation(nullptr),
 m_Color(CUT_COLOR)
 {
    EnableAutomation ();

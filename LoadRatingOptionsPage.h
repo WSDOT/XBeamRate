@@ -35,7 +35,7 @@ public:
 
 // Dialog Data
 	enum { IDD = IDD_RATING_OPTIONS };
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
 
    pgsTypes::AnalysisType m_AnalysisType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
@@ -43,7 +43,7 @@ public:
    IndexType m_MaxLoadedLanes;
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    void FillAnalysisModeComboBox();
    void FillPermitRatingMethodComboBox();

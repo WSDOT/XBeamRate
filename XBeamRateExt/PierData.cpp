@@ -682,7 +682,7 @@ IndexType xbrPierData::GetBearingCount(IndexType brgLineIdx) const
 Float64 xbrPierData::GetXBeamLength() const
 {
    Float64 L = 0;
-   BOOST_FOREACH(Float64 s,m_vColumnSpacing)
+   for (const auto& s : m_vColumnSpacing)
    {
       L += s;
    }
@@ -718,7 +718,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
          CComPtr<IEnumPoint2d> enumPoints;
          m_DeckProfile->get__Enum(&enumPoints);
          CComPtr<IPoint2d> pnt;
-         while ( enumPoints->Next(1,&pnt,NULL) != S_FALSE )
+         while ( enumPoints->Next(1,&pnt,nullptr) != S_FALSE )
          {
             Float64 x,y;
             pnt->Location(&x,&y);
@@ -774,18 +774,18 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
       }
    pStrSave->EndUnit(); // Columns
 
-   m_Concrete.Save(pStrSave,NULL);
+   m_Concrete.Save(pStrSave,nullptr);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
       pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
       pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
-      m_LongitudinalRebar.Save(pStrSave,NULL);
+      m_LongitudinalRebar.Save(pStrSave,nullptr);
       m_LowerXBeamStirrups.Save(pStrSave);
       m_FullDepthStirrups.Save(pStrSave);
    pStrSave->EndUnit(); // Reinforcement
 
    pStrSave->BeginUnit(_T("Bearings"),1.0);
-      BOOST_FOREACH(xbrBearingLineData& bearingLine,m_vBearingLines)
+   for (const auto& bearingLine : m_vBearingLines)
       {
          bearingLine.Save(pStrSave);
       }
@@ -1016,7 +1016,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
       }
 
       {
-         hr = m_Concrete.Load(pStrLoad,NULL);
+         hr = m_Concrete.Load(pStrLoad,nullptr);
       }
 
       {
@@ -1029,7 +1029,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
          hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
          m_RebarGrade = (matRebar::Grade)(var.lVal);
 
-         hr = m_LongitudinalRebar.Load(pStrLoad,NULL);
+         hr = m_LongitudinalRebar.Load(pStrLoad,nullptr);
          hr = m_LowerXBeamStirrups.Load(pStrLoad);
          hr = m_FullDepthStirrups.Load(pStrLoad);
          hr = pStrLoad->EndUnit(); // Reinforcement

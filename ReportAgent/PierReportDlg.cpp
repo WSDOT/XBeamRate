@@ -52,7 +52,7 @@ static char THIS_FILE[] = __FILE__;
 
 IMPLEMENT_DYNAMIC(CPierReportDlg, CDialog)
 
-CPierReportDlg::CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDesc,boost::shared_ptr<CReportSpecification>& pRptSpec,CWnd* pParent)
+CPierReportDlg::CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pRptSpec,CWnd* pParent)
 : CDialog(CPierReportDlg::IDD, pParent), m_RptDesc(rptDesc), m_pInitRptSpec(pRptSpec)
 {
    m_PierID = INVALID_ID;
@@ -162,7 +162,7 @@ BOOL CPierReportDlg::OnInitDialog()
       CWnd* pChListLabel = GetDlgItem(IDC_LABEL);
       CRect rLabel;
       pChListLabel->GetWindowRect(&rLabel);
-      pChListLabel->SetWindowPos(NULL,rGroupBox.left,rGroupBox.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
+      pChListLabel->SetWindowPos(nullptr,rGroupBox.left,rGroupBox.top,0,0,SWP_NOSIZE | SWP_NOZORDER);
 
       // Make the chapter list taller
       CWnd* pChList = GetDlgItem(IDC_LIST);
@@ -172,7 +172,7 @@ BOOL CPierReportDlg::OnInitDialog()
       rList.top = grpTop + rLabel.Height() + clearance;
 
       ScreenToClient(rList);
-      pChList->SetWindowPos(NULL,rList.left,rList.top,rList.Width(),rList.Height(),SWP_NOZORDER);
+      pChList->SetWindowPos(nullptr,rList.left,rList.top,rList.Width(),rList.Height(),SWP_NOZORDER);
 
    }
    else
@@ -224,7 +224,7 @@ void CPierReportDlg::ClearChapterCheckMarks()
 
 void CPierReportDlg::InitFromRptSpec()
 {
-   boost::shared_ptr<CXBeamRateReportSpecification> pRptSpec = boost::dynamic_pointer_cast<CXBeamRateReportSpecification>(m_pInitRptSpec);
+   std::shared_ptr<CXBeamRateReportSpecification> pRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification>(m_pInitRptSpec);
    m_PierID = pRptSpec->GetPierID();
    InitChapterListFromSpec();
 

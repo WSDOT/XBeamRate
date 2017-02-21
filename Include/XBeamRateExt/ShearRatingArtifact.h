@@ -133,7 +133,7 @@ public:
 
 protected:
    void MakeCopy(const xbrShearRatingArtifact& rOther);
-   virtual void MakeAssignment(const xbrShearRatingArtifact& rOther);
+   void MakeAssignment(const xbrShearRatingArtifact& rOther);
 
    Float64 GetRatingFactor(Float64 Vllim,Float64 VllimAdj) const;
 

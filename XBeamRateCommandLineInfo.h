@@ -38,17 +38,17 @@ public:
    virtual ~CXBRateCommandLineInfo();
 
    // derive new version to parse new commands
-   virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast);
+   virtual void ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL bLast) override;
 
-   virtual CString GetUsageMessage();
-   virtual CString GetErrorMessage();
+   virtual CString GetUsageMessage() override;
+   virtual CString GetErrorMessage() override;
 
    bool m_bRegTests;
    Uint32 m_Count;
 
 private:
    // Prevent accidental copying and assignment
-   CXBRateCommandLineInfo(const CXBRateCommandLineInfo&);
-   CXBRateCommandLineInfo& operator=(const CXBRateCommandLineInfo&);
+   CXBRateCommandLineInfo(const CXBRateCommandLineInfo&) = delete;
+   CXBRateCommandLineInfo& operator=(const CXBRateCommandLineInfo&) = delete;
 };
 

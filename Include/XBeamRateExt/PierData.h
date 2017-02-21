@@ -200,7 +200,7 @@ public:
 
 protected:
    void MakeCopy(const xbrPierData& rOther);
-   virtual void MakeAssignment(const xbrPierData& rOther);
+   void MakeAssignment(const xbrPierData& rOther);
 
 protected:
    PierIDType m_ID;

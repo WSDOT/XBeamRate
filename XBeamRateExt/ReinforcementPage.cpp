@@ -68,7 +68,7 @@ void DDX_RebarGrid(CDataExchange* pDX,UINT nID,CLongitudinalRebarGrid& grid,IRei
 
       xbrLongitudinalRebarData& rebarData = pParentPage->GetLongitudinalRebar();
       RowIndexType rowIdx = 0;
-      BOOST_FOREACH(xbrLongitudinalRebarData::RebarRow& rebarRow,rebarData.RebarRows)
+      for (const auto& rebarRow : rebarData.RebarRows)
       {
          rowIdx++;
          if ( rebarRow.LayoutType == xbrTypes::blFullLength )

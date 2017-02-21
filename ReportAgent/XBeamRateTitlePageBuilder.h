@@ -32,10 +32,10 @@ public:
    CXBeamRateTitlePageBuilder(const CXBeamRateTitlePageBuilder& other);
    ~CXBeamRateTitlePageBuilder(void);
 
-   virtual rptChapter* Build(boost::shared_ptr<CReportSpecification>& pRptSpec);
-   virtual bool NeedsUpdate(CReportHint* pHint,boost::shared_ptr<CReportSpecification>& pRptSpec);
+   virtual rptChapter* Build(std::shared_ptr<CReportSpecification>& pRptSpec) override;
+   virtual bool NeedsUpdate(CReportHint* pHint,std::shared_ptr<CReportSpecification>& pRptSpec) override;
 
-   virtual CTitlePageBuilder* Clone() const;
+   virtual CTitlePageBuilder* Clone() const override;
 
 protected:
    CComPtr<IBroker> m_pBroker;

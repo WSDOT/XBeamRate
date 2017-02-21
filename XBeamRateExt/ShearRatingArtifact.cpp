@@ -420,7 +420,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
 
       std::vector<IndexType> vLLConfigIdx;
       pProductForces->GetGoverningShearLiveLoadConfigurations(m_PierID,m_POI,&vLLConfigIdx);
-      BOOST_FOREACH(IndexType llConfigIdx,vLLConfigIdx)
+      for (const auto& llConfigIdx : vLLConfigIdx)
       {
          IndexType nLoadedLanes = pProductForces->GetLoadedLaneCount(m_PierID,llConfigIdx);
          for ( IndexType permitLaneIdx = 0; permitLaneIdx < nLoadedLanes; permitLaneIdx++ )
@@ -593,11 +593,11 @@ void xbrShearRatingArtifact::MakeAssignment(const xbrShearRatingArtifact& rOther
 
 Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) const
 {
-   Float64 RF = -DBL_MAX;
+   Float64 RF = -Float64_Max;
 
    if ( IsZero(Vllim) || IsZero(m_gLL) )
    {
-      RF = DBL_MAX;
+      RF = Float64_Max;
    }
    else
    {
@@ -627,11 +627,11 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
          // (C - DL) and LL have opposite signs
          // this case probably shouldn't happen, but if does,
          // the rating is great
-         RF = DBL_MAX;
+         RF = Float64_Max;
       }
       else
       {
-         RF = RFtop/RFbot;
+         RF = IsZero(RFbot) ? Float64_Max : RFtop / RFbot;
       }
    }
 

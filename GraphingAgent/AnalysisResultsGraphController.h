@@ -40,13 +40,13 @@ public:
 
    void EnableControls(BOOL bEnable);
 
-   virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+   virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) override;
 
    void FillLoadingList();
 
 protected:
 
-   virtual BOOL OnInitDialog();
+   virtual BOOL OnInitDialog() override;
 
 	//{{AFX_MSG(CXBRAnalysisResultsGraphController)
    //}}AFX_MSG

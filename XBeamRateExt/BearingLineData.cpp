@@ -148,14 +148,14 @@ IndexType xbrBearingLineData::GetBearingCount() const
    return m_vSpacing.size() + 1;
 }
 
-HRESULT xbrBearingLineData::Save(IStructuredSave* pStrSave)
+HRESULT xbrBearingLineData::Save(IStructuredSave* pStrSave) const
 {
    pStrSave->BeginUnit(_T("BearingLine"),1.0);
       pStrSave->put_Property(_T("BearingLineOffset"),CComVariant(m_BrgLineOffset));
       pStrSave->put_Property(_T("RefBrgDatum"),CComVariant(m_RefBearingDatum));
       pStrSave->put_Property(_T("RefBrgIndex"),CComVariant(m_RefBearingIndex));
       pStrSave->put_Property(_T("RefBrgOffset"),CComVariant(m_RefBearingOffset));
-      BOOST_FOREACH(Float64 s,m_vSpacing)
+      for (const auto& s : m_vSpacing)
       {
          pStrSave->put_Property(_T("S"),CComVariant(s));
       }

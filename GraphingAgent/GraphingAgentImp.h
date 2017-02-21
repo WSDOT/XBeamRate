@@ -69,17 +69,17 @@ END_CONNECTION_POINT_MAP()
 
 // IAgentEx
 public:
-	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker);
-   STDMETHOD(RegInterfaces)();
-	STDMETHOD(Init)();
-	STDMETHOD(Reset)();
-	STDMETHOD(ShutDown)();
-   STDMETHOD(Init2)();
-   STDMETHOD(GetClassID)(CLSID* pCLSID);
+	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
+   STDMETHOD(RegInterfaces)() override;
+	STDMETHOD(Init)() override;
+	STDMETHOD(Reset)() override;
+	STDMETHOD(ShutDown)() override;
+   STDMETHOD(Init2)() override;
+   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
 
 // IXBRProjectEventSink
 public:
-   HRESULT OnProjectChanged();
+   HRESULT OnProjectChanged() override;
 
 #ifdef _DEBUG
    bool AssertValid() const;

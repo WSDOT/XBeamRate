@@ -83,7 +83,7 @@ public:
 
 protected:
    void MakeCopy(const xbrRatingArtifact& rOther);
-   virtual void MakeAssignment(const xbrRatingArtifact& rOther);
+   void MakeAssignment(const xbrRatingArtifact& rOther);
 
    MomentRatings m_PositiveMomentRatings;
    MomentRatings m_NegativeMomentRatings;

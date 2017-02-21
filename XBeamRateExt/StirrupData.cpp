@@ -77,7 +77,7 @@ HRESULT xbrStirrupData::Save(IStructuredSave* pStrSave)
 
    pStrSave->BeginUnit(_T("StirrupData"),1.0);
    pStrSave->put_Property(_T("Symmetric"),CComVariant(Symmetric));
-   BOOST_FOREACH(StirrupZone& zone,Zones)
+   for (const auto& zone : Zones)
    {
       pStrSave->BeginUnit(_T("Zone"),1.0);
       pStrSave->put_Property(_T("Length"), CComVariant(zone.Length) );

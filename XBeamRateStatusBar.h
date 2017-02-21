@@ -30,8 +30,8 @@ public:
 	CXBeamRateStatusBar();
 	virtual ~CXBeamRateStatusBar();
 
-   virtual void GetStatusIndicators(const UINT** lppIDArray,int* pnIDCount);
-   virtual BOOL SetStatusIndicators(const UINT* lpIDArray, int nIDCount);
+   virtual void GetStatusIndicators(const UINT** lppIDArray,int* pnIDCount) override;
+   virtual BOOL SetStatusIndicators(const UINT* lpIDArray, int nIDCount) override;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -146,7 +146,7 @@ CReportHint* CXBeamRateReportView::TranslateHint(CView* pSender, LPARAM lHint, C
    //   CGirderReportHint* pSGHint = new CGirderReportHint(pGirderHint->girderKey,pGirderHint->lHint);
    //   return pSGHint;
    //}
-   return NULL;
+   return nullptr;
 }
 
 int CXBeamRateReportView::OnCreate(LPCREATESTRUCT lpCreateStruct) 

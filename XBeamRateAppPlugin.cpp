@@ -104,11 +104,11 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
    CXBeamRateDocTemplate* pDocTemplate;
 	pDocTemplate = new CXBeamRateDocTemplate(
       IDR_XBEAMRATE,
-      NULL,
+      nullptr,
 		RUNTIME_CLASS(CXBeamRateDoc),
 		RUNTIME_CLASS(CXBeamRateChildFrame),
 		RUNTIME_CLASS(CXBeamRateView),
-      NULL,1);
+      nullptr,1);
 
    pDocTemplate->SetPlugin(this);
 
@@ -118,12 +118,7 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
 
 HMENU CXBeamRateAppPlugin::GetSharedMenuHandle()
 {
-   return NULL;
-}
-
-UINT CXBeamRateAppPlugin::GetDocumentResourceID()
-{
-   return IDR_XBEAMRATE;
+   return nullptr;
 }
 
 CString CXBeamRateAppPlugin::GetName()

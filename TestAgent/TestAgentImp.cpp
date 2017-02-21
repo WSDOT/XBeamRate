@@ -159,7 +159,7 @@ void CTestAgentImp::RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszPro
       CString strShearTestID;
       strShearTestID.Format(_T("7770%d02"),i);
 
-      BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          Float64 M = pResults->GetMoment(pierID,pfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << M << std::endl;
@@ -184,7 +184,7 @@ void CTestAgentImp::RunCombinedLoadActionsTest(std::_tostream& os,LPCTSTR lpszPr
       CString strShearTestID;
       strShearTestID.Format(_T("7771%d02"),i);
 
-      BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          Float64 M = pResults->GetMoment(pierID,cfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << M << std::endl;
@@ -209,7 +209,7 @@ void CTestAgentImp::RunLiveLoadActionsTest(std::_tostream& os,LPCTSTR lpszProces
       CString strShearTestID;
       strShearTestID.Format(_T("7772%d02"),i);
 
-      BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          Float64 Mmin,Mmax;
          VehicleIndexType minVehicleIdx, maxVehicleIdx;
@@ -218,7 +218,7 @@ void CTestAgentImp::RunLiveLoadActionsTest(std::_tostream& os,LPCTSTR lpszProces
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Mmax << _T(", ") << maxVehicleIdx << std::endl;
 
          sysSectionValue Vmin, Vmax;
-         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,NULL,&minVehicleIdx,NULL,&maxVehicleIdx);
+         pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,nullptr,&minVehicleIdx,nullptr,&maxVehicleIdx);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("a, ") << poi.GetDistFromStart() << _T(", ") << Vmin.Right() << _T(", ") << minVehicleIdx << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Vmax.Right() << _T(", ") << maxVehicleIdx << std::endl;
       }
@@ -240,7 +240,7 @@ void CTestAgentImp::RunLimitStateLoadActionsTest(std::_tostream& os,LPCTSTR lpsz
    vLimitStates.push_back(pgsTypes::ServiceI_PermitSpecial);
 
    int i = 0;
-   BOOST_FOREACH(pgsTypes::LimitState limitState,vLimitStates)
+   for (const auto& limitState : vLimitStates)
    {
       CString strMomentTestID;
       strMomentTestID.Format(_T("7773%d01"),i);
@@ -248,7 +248,7 @@ void CTestAgentImp::RunLimitStateLoadActionsTest(std::_tostream& os,LPCTSTR lpsz
       CString strShearTestID;
       strShearTestID.Format(_T("7773%d02"),i);
 
-      BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          Float64 Mmin,Mmax;
          pResults->GetMoment(pierID,limitState,poi,&Mmin,&Mmax);
@@ -284,7 +284,7 @@ void CTestAgentImp::RunMomentCapacityTest(std::_tostream& os,LPCTSTR lpszProcess
       CString strMomentCapacityBaseTestID;
       strMomentCapacityBaseTestID.Format(_T("7774%d"),i);
 
-      BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+      for (const auto& poi : vPoi)
       {
          const MomentCapacityDetails& mcd = pMomentCapacity->GetMomentCapacityDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment);
          const CrackingMomentDetails& cmd = pMomentCapacity->GetCrackingMomentDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment);
@@ -305,7 +305,7 @@ void CTestAgentImp::RunMomentCapacityTest(std::_tostream& os,LPCTSTR lpszProcess
          os << lpszProcessID << _T(", ") << (LPCTSTR)(strMomentCapacityBaseTestID+_T("12, ")) << poi.GetDistFromStart() << _T(", ") << cmd.g2 << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)(strMomentCapacityBaseTestID+_T("13, ")) << poi.GetDistFromStart() << _T(", ") << cmd.g3 << std::endl;
 
-         BOOST_FOREACH(pgsTypes::LimitState limitState,vLimitStates)
+         for (const auto& limitState : vLimitStates)
          {
             CString strBaseTestID;
             strBaseTestID.Format(_T("%s%d"),strMomentCapacityBaseTestID,(int)limitState);
@@ -327,7 +327,7 @@ void CTestAgentImp::RunShearCapacityTest(std::_tostream& os,LPCTSTR lpszProcessI
 
    CString strShearCapacityBaseTestID(_T("77750"));
 
-   BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+   for (const auto& poi : vPoi)
    {
       const ShearCapacityDetails& scd = pShearCapacity->GetShearCapacityDetails(pierID,xbrTypes::Stage2,poi);
       const AvOverSDetails& AvSDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
@@ -375,7 +375,7 @@ void CTestAgentImp::RunCrackedSectionTest(std::_tostream& os,LPCTSTR lpszProcess
          CString strBaseTestID;
          strBaseTestID.Format(_T("7776%d%d"),i,j);
 
-         BOOST_FOREACH(const xbrPointOfInterest& poi,vPoi)
+         for (const auto& poi : vPoi)
          {
             const CrackedSectionDetails& csd = pCrackedSection->GetCrackedSectionDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment,loadType);
 

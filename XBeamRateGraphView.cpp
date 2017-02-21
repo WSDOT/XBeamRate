@@ -76,8 +76,8 @@ void CXBeamRateGraphView::Dump(CDumpContext& dc) const
 // CXBeamRateGraphView message handlers
 bool CXBeamRateGraphView::DoResultsExist()
 {
-   boost::shared_ptr<CGraphBuilder> pGraphBuilder(GetGraphBuilder());
-   boost::shared_ptr<CEAFGraphBuilderBase> pMyGraphBuilder = boost::dynamic_pointer_cast<CEAFGraphBuilderBase>(pGraphBuilder);
+   std::shared_ptr<CGraphBuilder> pGraphBuilder(GetGraphBuilder());
+   std::shared_ptr<CEAFGraphBuilderBase> pMyGraphBuilder = std::dynamic_pointer_cast<CEAFGraphBuilderBase>(pGraphBuilder);
    return pMyGraphBuilder->IsValidGraph();
 }
 

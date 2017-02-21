@@ -37,11 +37,11 @@ class xbrStirrupData;
 interface IReinforcementPageParent
 {
    // Returns data for the pier that is being edited
-   // Return NULL if a pier object (part of a bridge object) is not being edited
+   // Return nullptr if a pier object (part of a bridge object) is not being edited
    virtual CPierData2* GetPierData() = 0;
 
    // Returns data for the pier that is being edited
-   // Return NULL if the pier that is being edited is part of a bridge
+   // Return nullptr if the pier that is being edited is part of a bridge
    virtual xbrPierData* GetXBRPierData() = 0;
 
    virtual CConcreteMaterial& GetConcrete() = 0;
@@ -85,14 +85,14 @@ public:
 protected:
    IReinforcementPageParent* m_pParent;
 
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 	CEdit	m_ctrlEc;
 	CButton m_ctrlEcCheck;
 	CEdit	m_ctrlFc;
 
 	//{{AFX_MSG(CPierLayoutPage)
-	virtual BOOL OnInitDialog();
-   virtual BOOL OnSetActive();
+	virtual BOOL OnInitDialog() override;
+   virtual BOOL OnSetActive() override;
    afx_msg void OnMoreProperties();
    afx_msg void OnBnClickedEc();
    afx_msg void OnAddRebar();
