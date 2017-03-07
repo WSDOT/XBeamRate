@@ -306,7 +306,9 @@ STDMETHODIMP CProjectAgentImp::Init()
    m_XBeamRateStatusGroupID = pStatusCenter->CreateStatusGroupID();
 
    // Register status callbacks that we want to use
-   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
+   m_scidBridgeInfo = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusInformation));
+   m_scidBridgeWarn = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusWarning));
+   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError));
 
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    CWinApp* pApp = AfxGetApp();
@@ -1196,6 +1198,29 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
    {
       THROW_LOAD(InvalidFileFormat,pStrLoad);
    }
+
+   // The first release of the software permitted single column piers to have a pinned fixity at the base of the column.
+   // This resulted in unstable models. Detected single column pier models here and ensure the fixity is a proper value
+   for (auto& value : m_PierData)
+   {
+      auto& pierData = value.second;
+      if (pierData.GetColumnCount() == 1)
+      {
+         auto& column = pierData.GetColumnData(0);
+         pgsTypes::ColumnFixityType fixity = column.GetTransverseFixity();
+         if (fixity == pgsTypes::cftPinned)
+         {
+            column.SetTransverseFixity(pgsTypes::cftFixed);
+
+            CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixed has been changed to Fixed"));
+            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID, m_scidBridgeInfo, strMsg);
+
+            GET_IFACE(IEAFStatusCenter, pStatusCenter);
+            pStatusCenter->Add(pStatusItem);
+         }
+      }
+   }
+
 
    if ( !bIsStandAlone )
    {

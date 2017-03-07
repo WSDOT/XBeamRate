@@ -365,6 +365,8 @@ private:
    DWORD m_dwEventsCookie;
 
    StatusGroupIDType m_XBeamRateStatusGroupID; // ID used to identify status items created by this agent
+   StatusCallbackIDType m_scidBridgeInfo;
+   StatusCallbackIDType m_scidBridgeWarn;
    StatusCallbackIDType m_scidBridgeError;
 
    // Project Properties

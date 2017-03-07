@@ -66,6 +66,21 @@ void DDV_ColumnGrid(CDataExchange* pDX,CColumnLayoutGrid& grid)
          AfxMessageBox(_T("The pier must have at least one column"),MB_OK | MB_ICONEXCLAMATION);
          pDX->Fail();
       }
+
+      if (grid.GetRowCount() == 1)
+      {
+         // single column piers must have a fixed connection
+         xbrPierData pier;
+         grid.GetColumnData(pier);
+         ATLASSERT(pier.GetColumnCount() == 1);
+         auto column = pier.GetColumnData(0);
+         pgsTypes::ColumnFixityType fixity = column.GetTransverseFixity();
+         if (fixity != pgsTypes::cftFixed)
+         {
+            AfxMessageBox(_T("Single column piers must be fixed. Change the column fixity."), MB_OK | MB_ICONEXCLAMATION);
+            pDX->Fail();
+         }
+      }
    }
 }
 

@@ -402,8 +402,18 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
          Float64 tSlab = pProject->GetDeckThickness(pierID);
          Float64 Y = H + tSlab;
 
-         Float64 EI = EIb*10000; // use members that are considerably stiffer than the XBeam members
-         Float64 EA = EAb*10000;
+         if (IsZero(Y))
+         {
+            // monolithic piers are sometimes modeled with just the lower cross beam. The upper cross beam
+            // height is set to 0.0. In this case, use the lower cross beam dimensions to get some sort of reasonable
+            // offset for the live load transfer model
+            Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
+            pProject->GetLowerXBeamDimensions(pierID, &H1, &H2, &H3, &H4, &X1, &X2, &X3, &X4, &W);
+            Y = Max(H1 + H2, H3 + H4);
+         }
+
+         Float64 EI = EIb/10000; // use members that are considerably less stiff than the XBeam members (we don't want to attract the dead load into this transfer model)
+         Float64 EA = EAb/10000;
 
          std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
          std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
@@ -2434,7 +2444,8 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    nLanes = Min(nLanes,nMaxLoadedLanes);
 
    Float64 LCO, RCO;
-   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+   pProject->GetCurbLineOffset(pierID,&LCO,&RCO); // this are measured normal to the alignment
+   LCO /= cos(skew); // divide by cos(skew) to get measured in plane of pier
    Float64 XcurbLine = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
 
    CString strProgressMsg;
