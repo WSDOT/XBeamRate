@@ -129,9 +129,6 @@
     <ClInclude Include="PierLayoutPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Include\IFace\Project.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ProjectAgent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -167,6 +164,9 @@
     </ClInclude>
     <ClInclude Include="ProjectAgentCLSID.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\IFace\Project.h">
+      <Filter>IFace</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -227,6 +227,9 @@
     <Filter Include="Resource Files">
       <UniqueIdentifier>{bc8c9536-c8d1-419b-92e5-589a58edc087}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="IFace">
+      <UniqueIdentifier>{e3e29631-3888-4087-bb78-d83074442ea2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
