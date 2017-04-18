@@ -552,7 +552,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       CComPtr<IDirection> pierDirection;
       pBridge->GetPierDirection(pierIdx,&pierDirection);
 
-      pgsTypes::SupportedDeckType deckType = pDeck->DeckType;
+      pgsTypes::SupportedDeckType deckType = pDeck->GetDeckType();
       if ( deckType != pgsTypes::sdtNone )
       {
          CComPtr<iPointDisplayObject> dispObj;
