@@ -36,6 +36,8 @@ public:
 // Dialog Data
 	enum { IDD = IDD_ANALYSIS_OPTIONS };
 
+   virtual BOOL OnInitDialog() override;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 

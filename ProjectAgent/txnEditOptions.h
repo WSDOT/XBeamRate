@@ -34,6 +34,7 @@ struct txnEditOptionsData
 
    bool m_bLegalRating;
    bool m_bLegalRateForShear;
+   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
 
    bool m_bPermitRating;
    bool m_bPermitRateForShear;
@@ -46,6 +47,7 @@ struct txnEditOptionsData
 
    Float64 m_MaxLLStepSize;
    IndexType m_MaxLoadedLanes;
+   xbrTypes::ReactionLoadApplicationType m_LiveLoadReactionApplication;
 
    Float64 m_PhiC;
    Float64 m_PhiT;

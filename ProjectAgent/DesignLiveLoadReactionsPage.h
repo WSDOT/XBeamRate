@@ -20,26 +20,35 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// stdafx.h : include file for standard system include files,
-//      or project specific include files that are used frequently,
-//      but are changed infrequently
-
 #pragma once
 
-#include <XBeamRateAll.h>
+#include "LiveLoadReactionGrid.h"
 
-#include <atlbase.h>
-//You may derive a class from CComModule and use it if you want to override
-//something, but do not change the name of _Module
-extern CComModule _Module;
-#include <atlcom.h>
+// CDesignLiveLoadReactionsPage dialog
 
-#include <EAF\EAFUtilities.h>
-#include <EAF\EAFResources.h>
-#include <EAF\EAFHelp.h>
+class CDesignLiveLoadReactionsPage : public CPropertyPage
+{
+	DECLARE_DYNAMIC(CDesignLiveLoadReactionsPage)
 
-#include <Math\Math.h>
+public:
+   CDesignLiveLoadReactionsPage();
+	virtual ~CDesignLiveLoadReactionsPage();
 
-#include <XBRate.hh>
+// Dialog Data
+	enum { IDD = IDD_DESIGN_LIVE_LOAD_REACTIONS };
 
-#include <grid\gxall.h>
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
+
+   afx_msg void OnDesignAdd();
+   afx_msg void OnDesignRemove();
+
+   afx_msg void OnHelp();
+
+	DECLARE_MESSAGE_MAP()
+
+   CLiveLoadReactionGrid m_DesignGrid;
+
+public:
+   virtual BOOL OnInitDialog() override;
+};

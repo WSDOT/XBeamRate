@@ -34,6 +34,20 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
+void DDX_LiveLoadReactionsGrid(CDataExchange* pDX, CLiveLoadReactionGrid& grid, txnLiveLoadReactions& llData)
+{
+   if (pDX->m_bSaveAndValidate)
+   {
+      grid.GetLiveLoadData(llData);
+   }
+   else
+   {
+      grid.SetLiveLoadData(llData);
+   }
+}
+
+
 GRID_IMPLEMENT_REGISTER(CLiveLoadReactionGrid, CS_DBLCLKS, 0, 0, 0);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,8 +55,14 @@ GRID_IMPLEMENT_REGISTER(CLiveLoadReactionGrid, CS_DBLCLKS, 0, 0, 0);
 
 CLiveLoadReactionGrid::CLiveLoadReactionGrid()
 {
-//   RegisterClass();
+   //   RegisterClass();
    m_LoadRatingType = pgsTypes::lrDesign_Inventory;
+}
+
+CLiveLoadReactionGrid::CLiveLoadReactionGrid(pgsTypes::LoadRatingType ratingType)
+{
+   //   RegisterClass();
+   m_LoadRatingType = ratingType;
 }
 
 CLiveLoadReactionGrid::~CLiveLoadReactionGrid()
@@ -57,11 +77,6 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CLiveLoadReactionGrid message handlers
-
-void CLiveLoadReactionGrid::SetLoadRatingType(pgsTypes::LoadRatingType ratingType)
-{
-   m_LoadRatingType = ratingType;
-}
 
 pgsTypes::LoadRatingType CLiveLoadReactionGrid::GetLoadRatingType()
 {
@@ -260,6 +275,28 @@ void CLiveLoadReactionGrid::SetLiveLoadData(ROWCOL row,const xbrLiveLoadReaction
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetValue(value)
       );
+
+   if (::IsEmergencyRatingType(m_LoadRatingType))
+   {
+      col = 1;
+      // Disable Name column... can't change name of emergency rating vehicles
+      SetStyleRange(CGXRange(row, col++), CGXStyle()
+         .SetEnabled(FALSE)
+         .SetReadOnly(TRUE)
+         .SetInterior(::GetSysColor(COLOR_BTNFACE))
+         .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
+      );
+
+      col++; // skipe the reaction column
+
+      // Disable Weight column... can't change emergency rating vehicles
+      SetStyleRange(CGXRange(row, col++), CGXStyle()
+         .SetEnabled(FALSE)
+         .SetReadOnly(TRUE)
+         .SetInterior(::GetSysColor(COLOR_BTNFACE))
+         .SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
+      );
+   }
 }
 
 void CLiveLoadReactionGrid::AddLiveLoadData(const xbrLiveLoadReactionData& reactionData)

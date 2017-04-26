@@ -61,12 +61,30 @@ void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
    DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,pParent->m_Options.m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
 
    DDX_Keyword(pDX,IDC_MAX_LANES,_T("ALL"),pParent->m_Options.m_MaxLoadedLanes);
+
+   DDX_CBEnum(pDX, IDC_REACTION_APPLICATION, pParent->m_Options.m_LiveLoadReactionApplication);
 }
 
 
 BEGIN_MESSAGE_MAP(CAnalysisOptionsPage, CPropertyPage)
 	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
+
+BOOL CAnalysisOptionsPage::OnInitDialog()
+{
+   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_REACTION_APPLICATION);
+   int idx = pCB->AddString(_T("Apply reactions directly to cross beam"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::rlaCrossBeam);
+   idx = pCB->AddString(_T("Apply reactions through bearings"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::rlaBearings);
+
+   CPropertyPage::OnInitDialog();
+
+   // TODO:  Add extra initialization here
+
+   return TRUE;  // return TRUE unless you set the focus to a control
+                 // EXCEPTION: OCX Property Pages should return FALSE
+}
 
 
 // CAnalysisOptionsPage message handlers

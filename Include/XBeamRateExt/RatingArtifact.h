@@ -51,11 +51,13 @@ public:
    typedef std::map<xbrPointOfInterest,xbrShearRatingArtifact>  ShearRatings;
    typedef std::map<xbrPointOfInterest,xbrYieldStressRatioArtifact> YieldStressRatios;
 
-   xbrRatingArtifact();
+   xbrRatingArtifact(pgsTypes::LoadRatingType ratingType);
    xbrRatingArtifact(const xbrRatingArtifact& rOther);
    virtual ~xbrRatingArtifact();
 
    xbrRatingArtifact& operator = (const xbrRatingArtifact& rOther);
+
+   pgsTypes::LoadRatingType GetLoadRatingType() const;
 
    void AddArtifact(const xbrPointOfInterest& poi,const xbrMomentRatingArtifact& artifact,bool bPositiveMoment);
    void AddArtifact(const xbrPointOfInterest& poi,const xbrShearRatingArtifact& artifact);
@@ -79,11 +81,15 @@ public:
    Float64 GetRatingFactorEx(const xbrMomentRatingArtifact** ppPositiveMoment,const xbrMomentRatingArtifact** ppNegativeMoment,
                              const xbrShearRatingArtifact** ppShear,
                              const xbrYieldStressRatioArtifact** ppYieldStressPositiveMoment,const xbrYieldStressRatioArtifact** ppYieldStressNegativeMoment) const;
+
+   bool IsLoadPostingRequired() const;
    void GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeight,Float64* pRF,std::_tstring* pVehicle) const;
 
 protected:
    void MakeCopy(const xbrRatingArtifact& rOther);
    void MakeAssignment(const xbrRatingArtifact& rOther);
+
+   pgsTypes::LoadRatingType m_RatingType;
 
    MomentRatings m_PositiveMomentRatings;
    MomentRatings m_NegativeMomentRatings;

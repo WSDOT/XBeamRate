@@ -88,14 +88,16 @@ CProjectAgentImp::CProjectAgentImp()
    m_bRatingEnabled[pgsTypes::lrDesign_Inventory] = true;
    m_bRatingEnabled[pgsTypes::lrDesign_Operating] = true;
    m_bRatingEnabled[pgsTypes::lrLegal_Routine]    = true;
-   m_bRatingEnabled[pgsTypes::lrLegal_Special]    = true;
+   m_bRatingEnabled[pgsTypes::lrLegal_Special] = true;
+   m_bRatingEnabled[pgsTypes::lrLegal_Emergency] = true;
    m_bRatingEnabled[pgsTypes::lrPermit_Routine]   = true;
    m_bRatingEnabled[pgsTypes::lrPermit_Special]   = true;
 
    m_bRateForShear[pgsTypes::lrDesign_Inventory] = true;
    m_bRateForShear[pgsTypes::lrDesign_Operating] = true;
    m_bRateForShear[pgsTypes::lrLegal_Routine]    = true;
-   m_bRateForShear[pgsTypes::lrLegal_Special]    = true;
+   m_bRateForShear[pgsTypes::lrLegal_Special] = true;
+   m_bRateForShear[pgsTypes::lrLegal_Emergency] = true;
    m_bRateForShear[pgsTypes::lrPermit_Routine]   = true;
    m_bRateForShear[pgsTypes::lrPermit_Special]   = true;
 
@@ -126,19 +128,20 @@ CProjectAgentImp::CProjectAgentImp()
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Inventory)][INVALID_ID]       = 1.75;
    m_gLL[GET_INDEX(pgsTypes::StrengthI_Operating)][INVALID_ID]       = 1.35;
    m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalRoutine)][INVALID_ID]    = 1.80;
-   m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID]    = 1.60;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID] = 1.60;
+   m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalEmergency)][INVALID_ID] = 1.30;
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID]  = 1.15;
    m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitSpecial)][INVALID_ID]  = 1.20;
    m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitRoutine)][INVALID_ID]    = 1.00;
    m_gLL[GET_INDEX(pgsTypes::ServiceI_PermitSpecial)][INVALID_ID]    = 1.00;
 
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Truck + Lane"),0,0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Tandem + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Legal Truck + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Legal Tandem + Lane"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Inventory][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Truck + Lane"),0,0));
-   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Design Tandem + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Legal Truck + Lane"),0,0));
+   m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Legal Tandem + Lane"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
@@ -152,6 +155,9 @@ CProjectAgentImp::CProjectAgentImp()
    //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
    //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
    //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
+
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV2"), 0, ::ConvertToSysUnits(57.5, unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV3"), 0, ::ConvertToSysUnits(86.0, unitMeasure::Kip)));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
@@ -173,6 +179,7 @@ CProjectAgentImp::CProjectAgentImp()
    m_AnalysisType = pgsTypes::Envelope;
 
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
+   m_EmergencyRatingMethod = xbrTypes::ermWSDOT;
 
    m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
@@ -196,7 +203,7 @@ void CProjectAgentImp::FinalRelease()
 
 void CProjectAgentImp::Invalidate()
 {
-   for ( int i = 0; i < 8; i++ )
+   for ( int i = 0; i < RATING_LIMIT_STATE_COUNT; i++ )
    {
       m_gLL[i].clear();
    }
@@ -207,7 +214,8 @@ void CProjectAgentImp::Invalidate()
       m_BearingReactionType[i].clear();
    }
    
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       std::map<PierIDType,std::vector<xbrLiveLoadReactionData>>& reactions = m_LiveLoadReactions[i];
       reactions.clear();
@@ -463,13 +471,15 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // Also, need to save/load this data per pier
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
-      pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
          pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
          pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
 
-         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(GetPermitRatingMethod()));
+         pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(GetEmergencyRatingMethod())); // added in version 3
+         pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(GetPermitRatingMethod()));
          pStrSave->put_Property(_T("SystemFactorFlexure"),CComVariant(GetSystemFactorFlexure()));
          pStrSave->put_Property(_T("SystemFactorShear"),CComVariant(GetSystemFactorShear()));
+
          Float64 phiC,phiT;
          GetFlexureResistanceFactors(&phiC,&phiT);
          pStrSave->put_Property(_T("PhiC"),CComVariant(phiC));
@@ -482,14 +492,16 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("RatingEnabled_Design_Inventory"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Inventory)));
          pStrSave->put_Property(_T("RatingEnabled_Design_Operating"),CComVariant(IsRatingEnabled(pgsTypes::lrDesign_Operating)));
          pStrSave->put_Property(_T("RatingEnabled_Legal_Routine"),   CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Routine)));
-         pStrSave->put_Property(_T("RatingEnabled_Legal_Special"),   CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Special"), CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RatingEnabled_Legal_Emergency"), CComVariant(IsRatingEnabled(pgsTypes::lrLegal_Emergency))); // added in version 2
          pStrSave->put_Property(_T("RatingEnabled_Permit_Routine"),  CComVariant(IsRatingEnabled(pgsTypes::lrPermit_Routine)));
          pStrSave->put_Property(_T("RatingEnabled_Permit_Special"),  CComVariant(IsRatingEnabled(pgsTypes::lrPermit_Special)));
 
          pStrSave->put_Property(_T("RateForShear_Design_Inventory"),CComVariant(RateForShear(pgsTypes::lrDesign_Inventory)));
          pStrSave->put_Property(_T("RateForShear_Design_Operating"),CComVariant(RateForShear(pgsTypes::lrDesign_Operating)));
          pStrSave->put_Property(_T("RateForShear_Legal_Routine"),   CComVariant(RateForShear(pgsTypes::lrLegal_Routine)));
-         pStrSave->put_Property(_T("RateForShear_Legal_Special"),   CComVariant(RateForShear(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RateForShear_Legal_Special"), CComVariant(RateForShear(pgsTypes::lrLegal_Special)));
+         pStrSave->put_Property(_T("RateForShear_Legal_Emergency"), CComVariant(RateForShear(pgsTypes::lrLegal_Emergency))); // added in version 2
          pStrSave->put_Property(_T("RateForShear_Permit_Routine"),  CComVariant(RateForShear(pgsTypes::lrPermit_Routine)));
          pStrSave->put_Property(_T("RateForShear_Permit_Special"),  CComVariant(RateForShear(pgsTypes::lrPermit_Special)));
 
@@ -497,7 +509,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(GetYieldStressLimitCoefficient()));
       pStrSave->EndUnit(); // RatingSpecification
 
-      pStrSave->BeginUnit(_T("LoadFactors"),1.0);
+      pStrSave->BeginUnit(_T("LoadFactors"),2.0);
          // NOTE: This note applies to exporting a pier model from PGSuper
          // PGSuper has DC, DW, etc load factors for every load rating limit state,
          // however, XBeamRate only has these load factors for StrengthI, StrengthII, and ServiceIII
@@ -529,7 +541,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("LL_StrengthI_Inventory"),      CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_Inventory,      INVALID_INDEX)));
          pStrSave->put_Property(_T("LL_StrengthI_Operating"),      CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_Operating,      INVALID_INDEX)));
          pStrSave->put_Property(_T("LL_StrengthI_LegalRoutine"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_LegalRoutine,   INVALID_INDEX)));
-         pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthI_LegalSpecial,   INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalSpecial"), CComVariant(GetLiveLoadFactor(m_SavePierID, pgsTypes::StrengthI_LegalSpecial, INVALID_INDEX)));
+         pStrSave->put_Property(_T("LL_StrengthI_LegalEmergency"), CComVariant(GetLiveLoadFactor(m_SavePierID, pgsTypes::StrengthI_LegalEmergency, INVALID_INDEX))); // added in version 2
          pStrSave->put_Property(_T("LL_StrengthII_PermitRoutine"), CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthII_PermitRoutine, INVALID_INDEX)));
          pStrSave->put_Property(_T("LL_StrengthII_PermitSpecial"), CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::StrengthII_PermitSpecial, INVALID_INDEX)));
          pStrSave->put_Property(_T("LL_ServiceI_PermitRoutine"),   CComVariant(GetLiveLoadFactor(m_SavePierID,pgsTypes::ServiceI_PermitRoutine,   INVALID_INDEX)));
@@ -563,7 +576,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          }
          pStrSave->EndUnit(); // DeadLoad
 
-         pStrSave->BeginUnit(_T("LiveLoad"),1.0);
+         pStrSave->BeginUnit(_T("LiveLoad"),2.0);
             pStrSave->put_Property(_T("ReactionLoadApplication"),CComVariant(GetReactionLoadApplicationType(m_SavePierID)));
             pStrSave->BeginUnit(_T("Design_Inventory"),1.0);
 
@@ -626,6 +639,22 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
             }
             pStrSave->EndUnit(); // Legal_Special
 
+            // added in version 2
+            pStrSave->BeginUnit(_T("Legal_Emergency"), 1.0);
+            vReactions = GetLiveLoadReactions(m_SavePierID, pgsTypes::lrLegal_Emergency);
+            for (const auto& llReaction : vReactions)
+            {
+               if (llReaction.Name != NO_LIVE_LOAD_DEFINED)
+               {
+                  pStrSave->BeginUnit(_T("Reaction"), 1.0);
+                  pStrSave->put_Property(_T("Name"), CComVariant(llReaction.Name.c_str()));
+                  pStrSave->put_Property(_T("LLIM"), CComVariant(llReaction.LLIM));
+                  pStrSave->put_Property(_T("W"), CComVariant(llReaction.W));
+                  pStrSave->EndUnit(); // Reaction
+               }
+            }
+            pStrSave->EndUnit(); // Legal_Emergency
+
             pStrSave->BeginUnit(_T("Permit_Routine"),1.0);
             vReactions = GetLiveLoadReactions(m_SavePierID,pgsTypes::lrPermit_Routine);
             for (const auto& llReaction : vReactions)
@@ -676,9 +705,10 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    } // end if bIsStandAlone or bExportingModel
    else
    {
-      pStrSave->BeginUnit(_T("RatingSpecification"),1.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),2.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
-         pStrSave->put_Property(_T("PermitRatingMethod"),CComVariant(m_PermitRatingMethod));
+         pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
+         pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(m_MaxLLStepSize));
          pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
       pStrSave->EndUnit(); // RatingSpecification
@@ -757,6 +787,8 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
          {
             hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+            Float64 version;
+            pStrLoad->get_Version(&version);
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFD"),&var);
@@ -767,6 +799,14 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             pStrLoad->get_Property(_T("LRFR"),&var);
             lrfrVersionMgr::Version lrfrVersion = lrfrVersionMgr::GetVersion(OLE2T(var.bstrVal));
             lrfrVersionMgr::SetVersion(lrfrVersion);
+
+            if (2 < version)
+            {
+               // added in vesrion 3
+               var.vt = VT_I4;
+               hr = pStrLoad->get_Property(_T("EmergencyRatingMethod"), &var);
+               m_EmergencyRatingMethod = (xbrTypes::EmergencyRatingMethod)var.lVal;
+            }
 
             var.vt = VT_I4;
             hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
@@ -809,6 +849,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("RatingEnabled_Legal_Special"),&var);
             m_bRatingEnabled[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
 
+            if (1 < version)
+            {
+               // added in version 2
+               hr = pStrLoad->get_Property(_T("RatingEnabled_Legal_Emergency"), &var);
+               m_bRatingEnabled[pgsTypes::lrLegal_Emergency] = (var.boolVal == VARIANT_TRUE ? true : false);
+            }
+
             hr = pStrLoad->get_Property(_T("RatingEnabled_Permit_Routine"),&var);
             m_bRatingEnabled[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
 
@@ -849,6 +896,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             hr = pStrLoad->get_Property(_T("RateForShear_Legal_Special"),&var);
             m_bRateForShear[pgsTypes::lrLegal_Special] = (var.boolVal == VARIANT_TRUE ? true : false);
 
+            if (1 < version)
+            {
+               // added in version 2
+               hr = pStrLoad->get_Property(_T("RateForShear_Legal_Emergency"), &var);
+               m_bRateForShear[pgsTypes::lrLegal_Emergency] = (var.boolVal == VARIANT_TRUE ? true : false);
+            }
+
             hr = pStrLoad->get_Property(_T("RateForShear_Permit_Routine"),&var);
             m_bRateForShear[pgsTypes::lrPermit_Routine] = (var.boolVal == VARIANT_TRUE ? true : false);
 
@@ -868,6 +922,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
          {
             hr = pStrLoad->BeginUnit(_T("LoadFactors"));
+
+            Float64 version;
+            pStrLoad->get_Version(&version);
             
             var.vt = VT_R8;
             hr = pStrLoad->get_Property(_T("DC_StrengthI"),&var);
@@ -939,6 +996,12 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("LL_StrengthI_LegalSpecial"),&var);
             m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalSpecial)][INVALID_ID] = var.dblVal;
+
+            if (1 < version)
+            {
+               hr = pStrLoad->get_Property(_T("LL_StrengthI_LegalEmergency"), &var);
+               m_gLL[GET_INDEX(pgsTypes::StrengthI_LegalEmergency)][INVALID_ID] = var.dblVal;
+            }
 
             hr = pStrLoad->get_Property(_T("LL_StrengthII_PermitRoutine"),&var);
             m_gLL[GET_INDEX(pgsTypes::StrengthII_PermitRoutine)][INVALID_ID] = var.dblVal;
@@ -1014,6 +1077,9 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                {
                   hr = pStrLoad->BeginUnit(_T("LiveLoad"));
                   {
+                     Float64 version;
+                     pStrLoad->get_Version(&version);
+
                      var.vt = VT_I4;
                      hr = pStrLoad->get_Property(_T("ReactionLoadApplication"),&var);
                      GetPrivateReactionLoadApplication(INVALID_ID) = (xbrTypes::ReactionLoadApplicationType)var.iVal;
@@ -1106,6 +1172,32 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
                      }
                      hr = pStrLoad->EndUnit(); // Legal_Special
 
+                     if (1 < version)
+                     {
+                        // added in vesion 2
+                        hr = pStrLoad->BeginUnit(_T("Legal_Emergency"));
+                        m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].clear();
+                        while (SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))))
+                        {
+                           xbrLiveLoadReactionData llReaction;
+                           var.vt = VT_BSTR;
+                           hr = pStrLoad->get_Property(_T("Name"), &var);
+                           llReaction.Name = OLE2T(var.bstrVal);
+
+                           var.vt = VT_R8;
+                           hr = pStrLoad->get_Property(_T("LLIM"), &var);
+                           llReaction.LLIM = var.dblVal;
+
+                           var.vt = VT_R8;
+                           hr = pStrLoad->get_Property(_T("W"), &var);
+                           llReaction.W = var.dblVal;
+
+                           m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(llReaction);
+                           hr = pStrLoad->EndUnit(); // Reaction
+                        }
+                        hr = pStrLoad->EndUnit(); // Legal_Emergency
+                     }
+
                      hr = pStrLoad->BeginUnit(_T("Permit_Routine"));
                      m_LiveLoadReactions[pgsTypes::lrPermit_Routine][INVALID_ID].clear();
                      while ( SUCCEEDED(pStrLoad->BeginUnit(_T("Reaction"))) )
@@ -1165,10 +1257,21 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       else
       {
          hr = pStrLoad->BeginUnit(_T("RatingSpecification"));
+
+         Float64 version;
+         pStrLoad->get_Version(&version);
          
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("AnalysisType"),&var);
          m_AnalysisType = (pgsTypes::AnalysisType)var.lVal;
+
+         if (1 < version)
+         {
+            // added in vesion 2
+            var.vt = VT_I4;
+            hr = pStrLoad->get_Property(_T("EmergencyRatingMethod"), &var);
+            m_EmergencyRatingMethod = (xbrTypes::EmergencyRatingMethod)var.lVal;
+         }
 
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("PermitRatingMethod"),&var);
@@ -2751,6 +2854,25 @@ void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType anal
    }
 }
 
+xbrTypes::EmergencyRatingMethod CProjectAgentImp::GetEmergencyRatingMethod()
+{
+   return m_EmergencyRatingMethod;
+}
+
+void CProjectAgentImp::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod permitRatingMethod)
+{
+   if (m_EmergencyRatingMethod != permitRatingMethod)
+   {
+      m_EmergencyRatingMethod = permitRatingMethod;
+      Fire_OnRatingSpecificationChanged();
+   }
+}
+
+bool CProjectAgentImp::IsWSDOTEmergencyRating(pgsTypes::LoadRatingType ratingType)
+{
+   return (::IsEmergencyRatingType(ratingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT ? true : false);
+}
+
 xbrTypes::PermitRatingMethod CProjectAgentImp::GetPermitRatingMethod()
 {
    return m_PermitRatingMethod;
@@ -2763,6 +2885,11 @@ void CProjectAgentImp::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permit
       m_PermitRatingMethod = permitRatingMethod;
       Fire_OnRatingSpecificationChanged();
    }
+}
+
+bool CProjectAgentImp::IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType)
+{
+   return (::IsPermitRatingType(ratingType) && m_PermitRatingMethod == xbrTypes::ermWSDOT ? true : false);
 }
 
 //////////////////////////////////////////////////////////

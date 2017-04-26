@@ -245,10 +245,11 @@ int GetIndexFromLimitState(pgsTypes::LimitState ls)
    case pgsTypes::StrengthI_Operating:      idx = 1; break;
    case pgsTypes::StrengthI_LegalRoutine:   idx = 2; break;
    case pgsTypes::StrengthI_LegalSpecial:   idx = 3; break;
-   case pgsTypes::StrengthII_PermitRoutine: idx = 4; break;
-   case pgsTypes::StrengthII_PermitSpecial: idx = 5; break;
-   case pgsTypes::ServiceI_PermitRoutine:   idx = 6; break;
-   case pgsTypes::ServiceI_PermitSpecial:   idx = 7; break;
+   case pgsTypes::StrengthI_LegalEmergency: idx = 4; break;
+   case pgsTypes::StrengthII_PermitRoutine: idx = 5; break;
+   case pgsTypes::StrengthII_PermitSpecial: idx = 6; break;
+   case pgsTypes::ServiceI_PermitRoutine:   idx = 7; break;
+   case pgsTypes::ServiceI_PermitSpecial:   idx = 8; break;
    default: ATLASSERT(false);
    }
    return idx;

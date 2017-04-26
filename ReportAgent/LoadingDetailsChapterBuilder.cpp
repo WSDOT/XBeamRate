@@ -95,7 +95,7 @@ void write_limit_state_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
    GET_IFACE2(pBroker,IXBRProject,pProject);
    rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
-   *pPara << _T("Limit States") << rptNewLine;
+   *pPara << _T("Limit State Load Factors") << rptNewLine;
 
    pPara = new rptParagraph;
    *pChapter << pPara;
@@ -115,10 +115,13 @@ void write_limit_state_details(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("PS"));
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("LL"));
 
+   // NOTE: On multiple occasions I've wanted to add Service III limit states to this list.
+   // This is a cross beam, reinforced concrete load rating. Service III isn't applicable.
    pgsTypes::LimitState limitStates[] = { pgsTypes::StrengthI_Inventory,
                                           pgsTypes::StrengthI_Operating,
                                           pgsTypes::StrengthI_LegalRoutine,
                                           pgsTypes::StrengthI_LegalSpecial,
+                                          pgsTypes::StrengthI_LegalEmergency,
                                           pgsTypes::StrengthII_PermitRoutine,
                                           pgsTypes::ServiceI_PermitRoutine,
                                           pgsTypes::StrengthII_PermitSpecial,
@@ -347,7 +350,8 @@ void write_live_load_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCh
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptForceUnitValue, force, pDisplayUnits->GetGeneralForceUnit(), false );
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
       IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);

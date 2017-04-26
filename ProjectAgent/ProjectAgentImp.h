@@ -38,6 +38,7 @@
 #include <EAF\EAFInterfaceCache.h>
 #include <EAF\EAFUIIntegration.h>
 #include <XBeamRateExt\PierData.h>
+#include <XBeamRateExt\XBeamRateUtilities.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 
@@ -314,8 +315,13 @@ public:
    virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() override;
    virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) override;
 
+   virtual xbrTypes::EmergencyRatingMethod GetEmergencyRatingMethod() override;
+   virtual void SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod) override;
+   virtual bool IsWSDOTEmergencyRating(pgsTypes::LoadRatingType ratingType) override;
+
    virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() override;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) override;
+   virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) override;
 
 // IXBRProjectEdit
 public:
@@ -387,8 +393,8 @@ private:
    Float64 m_SysFactorShear;
    Float64 m_PhiC, m_PhiT; // resistance factors for flexure (compress,tension controlled section)
    Float64 m_PhiV; // resistance factor for shear
-   bool m_bRatingEnabled[6]; // array index is pgsTypes::LoadRatingType
-   bool m_bRateForShear[6]; // array index is pgsTypes::LoadRatingType
+   bool m_bRatingEnabled[pgsTypes::lrLoadRatingTypeCount]; // array index is pgsTypes::LoadRatingType
+   bool m_bRateForShear[pgsTypes::lrLoadRatingTypeCount]; // array index is pgsTypes::LoadRatingType
    bool m_bCheckYieldStress;
    Float64 m_YieldStressCoefficient;
 
@@ -417,7 +423,7 @@ private:
    Float64 m_gPS_ServiceI;
    Float64 m_gRE_ServiceI;
 
-   std::map<PierIDType,Float64> m_gLL[8]; // use GET_INDEX macro to access the array
+   std::map<PierIDType,Float64> m_gLL[RATING_LIMIT_STATE_COUNT]; // use GET_INDEX macro to access the array
    // Bearing Reactions
    typedef struct BearingReactions
    {
@@ -431,7 +437,7 @@ private:
    std::map<PierIDType,xbrTypes::ReactionLoadType> m_BearingReactionType[2];
    xbrTypes::ReactionLoadType& GetPrivateBearingReactionType(PierIDType pierID,IndexType brgLineIdx);
 
-   std::map<PierIDType,std::vector<xbrLiveLoadReactionData>> m_LiveLoadReactions[6]; // access with pgsTypes::LoadRatingType
+   std::map<PierIDType,std::vector<xbrLiveLoadReactionData>> m_LiveLoadReactions[pgsTypes::lrLoadRatingTypeCount]; // access with pgsTypes::LoadRatingType
    std::vector<xbrLiveLoadReactionData>& GetPrivateLiveLoadReactions(PierIDType pierID,pgsTypes::LoadRatingType ratingType);
 
    std::map<PierIDType,xbrTypes::ReactionLoadApplicationType> m_ReactionApplication;
@@ -440,6 +446,7 @@ private:
    pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
 
    // Options
+   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
 
    // Events

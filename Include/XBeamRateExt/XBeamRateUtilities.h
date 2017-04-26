@@ -33,5 +33,6 @@ bool XBREXTFUNC CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,S
 
 void XBREXTFUNC GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloadedLane);
 
+#define RATING_LIMIT_STATE_COUNT 9
 #define GET_INDEX(ls) GetIndexFromLimitState(ls)
 int XBREXTFUNC GetIndexFromLimitState(pgsTypes::LimitState ls);

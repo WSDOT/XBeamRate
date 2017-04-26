@@ -133,13 +133,17 @@ void CPierDlg::Init()
    m_SubstructurePage.m_psp.dwFlags    |= PSP_HASHELP;
    m_ReinforcementPage.m_psp.dwFlags   |= PSP_HASHELP;
    m_BearingsPage.m_psp.dwFlags        |= PSP_HASHELP;
-   m_LiveLoadPage.m_psp.dwFlags        |= PSP_HASHELP;
+   m_DesignLiveLoadPage.m_psp.dwFlags |= PSP_HASHELP;
+   m_LegalLiveLoadPage.m_psp.dwFlags |= PSP_HASHELP;
+   m_PermitLiveLoadPage.m_psp.dwFlags |= PSP_HASHELP;
 
    AddPage(&m_SuperstructurePage);
    AddPage(&m_SubstructurePage);
    AddPage(&m_ReinforcementPage);
    AddPage(&m_BearingsPage);
-   AddPage(&m_LiveLoadPage);
+   AddPage(&m_DesignLiveLoadPage);
+   AddPage(&m_LegalLiveLoadPage);
+   AddPage(&m_PermitLiveLoadPage);
 }
 
 

@@ -34,9 +34,6 @@
     <ClCompile Include="LiveLoadReactionGrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="LiveLoadReactionsPage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="OptionsDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,6 +73,15 @@
     <ClCompile Include="txnEditProject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DesignLiveLoadReactionsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LegalLiveLoadReactionsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PermitLiveLoadReactionsPage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AASHTOConcretePage.h">
@@ -112,9 +118,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LiveLoadReactionGrid.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LiveLoadReactionsPage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OptionsDlg.h">
@@ -167,6 +170,15 @@
     </ClInclude>
     <ClInclude Include="..\Include\IFace\Project.h">
       <Filter>IFace</Filter>
+    </ClInclude>
+    <ClInclude Include="DesignLiveLoadReactionsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LegalLiveLoadReactionsPage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PermitLiveLoadReactionsPage.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

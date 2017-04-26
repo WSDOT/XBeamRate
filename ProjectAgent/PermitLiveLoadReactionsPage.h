@@ -24,30 +24,21 @@
 
 #include "LiveLoadReactionGrid.h"
 
-// CLiveLoadReactionsPage dialog
+// CPermitLiveLoadReactionsPage dialog
 
-class CLiveLoadReactionsPage : public CPropertyPage
+class CPermitLiveLoadReactionsPage : public CPropertyPage
 {
-	DECLARE_DYNAMIC(CLiveLoadReactionsPage)
+	DECLARE_DYNAMIC(CPermitLiveLoadReactionsPage)
 
 public:
-	CLiveLoadReactionsPage();
-	virtual ~CLiveLoadReactionsPage();
+   CPermitLiveLoadReactionsPage();
+	virtual ~CPermitLiveLoadReactionsPage();
 
 // Dialog Data
-	enum { IDD = IDD_LIVE_LOAD_REACTIONS };
+	enum { IDD = IDD_PERMIT_LIVE_LOAD_REACTIONS };
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
-
-   afx_msg void OnDesignAdd();
-   afx_msg void OnDesignRemove();
-
-   afx_msg void OnLegalRoutineAdd();
-   afx_msg void OnLegalRoutineRemove();
-
-   afx_msg void OnLegalSpecialAdd();
-   afx_msg void OnLegalSpecialRemove();
 
    afx_msg void OnPermitRoutineAdd();
    afx_msg void OnPermitRoutineRemove();
@@ -59,9 +50,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-   CLiveLoadReactionGrid m_DesignGrid;
-   CLiveLoadReactionGrid m_LegalRoutineGrid;
-   CLiveLoadReactionGrid m_LegalSpecialGrid;
    CLiveLoadReactionGrid m_PermitRoutineGrid;
    CLiveLoadReactionGrid m_PermitSpecialGrid;
 

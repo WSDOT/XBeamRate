@@ -1148,7 +1148,9 @@ IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgs
 {
    ModelData* pModelData = GetModelData(pierID);
    GET_IFACE_NOCHECK(IXBRRatingSpecification,pRatingSpec);
-   if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO )
+   if ( (::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmAASHTO) 
+      ||
+      (ratingType == pgsTypes::lrLegal_Emergency && pRatingSpec->GetEmergencyRatingMethod() == xbrTypes::ermAASHTO))
    {
       return pModelData->m_LastSingleLaneLLConfigIdx + 1;
    }
@@ -1186,12 +1188,12 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
    bool bIsPermit = ::IsPermitRatingType(ratingType);
+   bool bIsEmergency = (ratingType == pgsTypes::lrLegal_Emergency ? true : false);
 
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   bool bIsWSDOTMethod = (pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT ? true : false);
+   GET_IFACE(IXBRRatingSpecification,pSpec);
 
    Float64 Rlgl = 0;
-   if ( bIsPermit && bIsWSDOTMethod )
+   if ( pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType) )
    {
       Rlgl = GetMaxLegalReaction(pierID);
    }
@@ -1211,7 +1213,7 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
 
       LaneConfiguration& laneConfig = found->second;
 
-      if ( bIsPermit && bIsWSDOTMethod )
+      if (pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType))
       {
          if ( laneIdx == permitLaneIdx )
          {
@@ -1550,20 +1552,23 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTy
 
 //////////////////////////////////
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
 {
-   ATLASSERT(::IsPermitRatingType(permitRatingType));
+   ATLASSERT(::IsPermitRatingType(ratingType) || ratingType == pgsTypes::lrLegal_Emergency);
 #if defined _DEBUG
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
-   // This method is only used for WSDOT permit ratings
+   if ( ::IsPermitRatingType(ratingType))
+      ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
+   else
+      ATLASSERT(pRatingSpec->GetEmergencyRatingMethod() == xbrTypes::ermWSDOT);
+   // This method is only used for WSDOT emergency and permit ratings
 #endif
 
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
    if ( nLoadedLanes == 1 )
    {
-      // if there is only one loaded lane, it is the permit vehicle... just use the regular implementation
-      *pMpermit = GetMoment(pierID,permitRatingType,vehicleIdx,llConfigIdx,poi);
+      // if there is only one loaded lane, it is the permit/emergency vehicle... just use the regular implementation
+      *pMpermit = GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
       *pMlegal = 0;
       return;
    }
@@ -1636,7 +1641,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    }
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
+   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
    Float64 Rlegal  = GetMaxLegalReaction(pierID);
 
    *pMpermit *= Rpermit;
@@ -1663,7 +1668,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    *pMpermit *= mpf;
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
 {
    pvMpermit->clear();
    pvMpermit->resize(vPoi.size());
@@ -1672,26 +1677,30 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType per
    for (const auto& poi : vPoi)
    {
       Float64 Mpermit,Mlegal;
-      GetMoment(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
+      GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
       pvMpermit->push_back(Mpermit);
       pvMlegal->push_back(Mlegal);
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,sysSectionValue* pVpermit,sysSectionValue* pVlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,sysSectionValue* pVpermit,sysSectionValue* pVlegal)
 {
-   ATLASSERT(::IsPermitRatingType(permitRatingType));
+   ATLASSERT(::IsPermitRatingType(ratingType) || ratingType == pgsTypes::lrLegal_Emergency);
 #if defined _DEBUG
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
-   // This method is only used for WSDOT permit ratings
+   GET_IFACE(IXBRRatingSpecification, pRatingSpec);
+   if (::IsPermitRatingType(ratingType))
+      ATLASSERT(pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT);
+   else
+      ATLASSERT(pRatingSpec->GetEmergencyRatingMethod() == xbrTypes::ermWSDOT);
+   // This method is only used for WSDOT emergency and permit ratings
 #endif
+
 
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
    if ( nLoadedLanes == 1 )
    {
       // if there is only one loaded lane, it is the permit vehicle... just use the regular implementation
-      *pVpermit = GetShear(pierID,permitRatingType,vehicleIdx,llConfigIdx,poi);
+      *pVpermit = GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
       *pVlegal = 0;
       return;
    }
@@ -1756,7 +1765,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    *pVlegal  = sysSectionValue(-FyLeftLegal, FyRightLegal );
 
    GET_IFACE(IXBRProject,pProject);
-   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,permitRatingType,vehicleIdx); // single lane reaction
+   Float64 Rpermit = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
    Float64 Rlegal  = GetMaxLegalReaction(pierID);
 
    *pVpermit *= Rpermit;
@@ -1785,7 +1794,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    *pVpermit *= mpf;
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType permitRatingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvVpermit,std::vector<sysSectionValue>* pvVlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvVpermit,std::vector<sysSectionValue>* pvVlegal)
 {
    pvVpermit->clear();
    pvVpermit->resize(vPoi.size());
@@ -1794,7 +1803,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType perm
    for (const auto& poi : vPoi)
    {
       sysSectionValue Vpermit,Vlegal;
-      GetShear(pierID,permitRatingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
+      GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
       pvVpermit->push_back(Vpermit);
       pvVlegal->push_back(Vlegal);
    }

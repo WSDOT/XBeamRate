@@ -61,9 +61,15 @@ interface IXBRRatingSpecification : IUnknown
    virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() = 0;
    virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) = 0;
 
+   // Controls the method used to rating factors for emergency vehicle loading cases
+   virtual xbrTypes::EmergencyRatingMethod GetEmergencyRatingMethod() = 0;
+   virtual void SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod) = 0;
+   virtual bool IsWSDOTEmergencyRating(pgsTypes::LoadRatingType ratingType) = 0;
+
    // Controls the method used to rating factors for permit loading cases
    virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() = 0;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) = 0;
+   virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) = 0;
 };
 
 /*****************************************************************************

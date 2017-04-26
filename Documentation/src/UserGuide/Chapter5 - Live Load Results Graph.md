@@ -21,11 +21,11 @@ Select a Live Load Configuration to see the results for a specific live load cas
 Use the < and > buttons to step through the various live load configurations.
 
 
-## Permit Live Load Configurations
+## Emergency Vehicle and Permit Live Load Configurations
 
 
-When the permit rating factors are computed by the WSDOT BDM method the live load results shows only the results for the selected live load configuration. Each configuration consists of a permit vehicle response and the legal load response. The permit is shown in green and legal in red.
+When the emergency vehicle and permit rating factors are computed by the WSDOT BDM method the live load results shows only the results for the selected live load configuration. Each configuration consists of an emergency or permit vehicle response and the legal load response. The emergency/permit vehicle is shown in green and legal vehicle in red.
 
 ![](Permit.jpg)
 
-As you can see, the permit vehicle is in one lane and the permit vehicles occupy remaining lanes. The results for the permit vehicle in the various lane positions can be viewed by selecting the permit vehicle lane position with the control at the bottom of the Live Load Configuration list.
+For the image above, you can see the permit vehicle is in one lane and the permit vehicles occupy remaining lanes. The results for the permit vehicle in the various lane positions can be viewed by selecting the permit vehicle lane position with the control at the bottom of the Live Load Configuration list.

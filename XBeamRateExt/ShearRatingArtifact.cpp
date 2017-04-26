@@ -50,6 +50,7 @@ m_strVehicleName(_T("Unknown"))
 
    m_RatingType = pgsTypes::lrDesign_Inventory;
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
+   m_EmergencyRatingMethod = xbrTypes::ermAASHTO;
 
    m_VehicleIdx = INVALID_INDEX;
    m_VehicleWeight = -999999;
@@ -123,6 +124,17 @@ void xbrShearRatingArtifact::SetRatingType(pgsTypes::LoadRatingType ratingType)
 pgsTypes::LoadRatingType xbrShearRatingArtifact::GetLoadRatingType() const
 {
    return m_RatingType;
+}
+
+void xbrShearRatingArtifact::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod)
+{
+   m_EmergencyRatingMethod = emergencyRatingMethod;
+   m_bRFComputed = false;
+}
+
+xbrTypes::EmergencyRatingMethod xbrShearRatingArtifact::GetEmergencyRatingMethod() const
+{
+   return m_EmergencyRatingMethod;
 }
 
 void xbrShearRatingArtifact::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
@@ -383,7 +395,11 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
    }
 
 
-   if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+   if ( 
+      (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT) 
+      ||
+      (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+      )
    {
       // we don't know which combination of permit and legal loads cause the minimum rating factor
       // so we have to check them all.... the min rating factor could happen when the legal load
@@ -556,6 +572,7 @@ void xbrShearRatingArtifact::MakeCopy(const xbrShearRatingArtifact& rOther)
    m_POI                        = rOther.m_POI;
    m_RatingType                 = rOther.m_RatingType;
    m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
+   m_EmergencyRatingMethod      = rOther.m_EmergencyRatingMethod;
    m_VehicleIdx                 = rOther.m_VehicleIdx;
    m_VehicleWeight              = rOther.m_VehicleWeight;
    m_strVehicleName             = rOther.m_strVehicleName;
@@ -610,7 +627,11 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
       Float64 C = p * m_CapacityRedutionFactor * m_Vn;
       Float64 RFtop = C - fabs(m_gDC*m_Vdc - m_gDW*m_Vdw - m_gCR*m_Vcr - m_gSH*m_Vsh - m_gRE*m_Vre - m_gPS*m_Vps);
 
-      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+      if (
+         (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+         ||
+         (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+         )
       {
          RFtop -= fabs(m_gLL*VllimAdj); // WSDOT BDM Eqn. 13.1.1A-2
       }

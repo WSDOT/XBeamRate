@@ -26,6 +26,9 @@
 
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
+#include <\ARP\PGSuper\Include\IFace\Project.h>
+
+#include <PgsExt\BridgeDescription2.h>
 
 txnEditLoadRatingOptions::txnEditLoadRatingOptions(const txnLoadRatingOptions& oldOptions,const txnLoadRatingOptions& newOptions)
 {
@@ -59,6 +62,7 @@ void txnEditLoadRatingOptions::Execute(int i)
    GET_IFACE2(pBroker,IXBRRatingSpecification,pSpec);
    pSpec->SetAnalysisMethodForReactions(m_Options[i].m_AnalysisType);
    pSpec->SetPermitRatingMethod(m_Options[i].m_PermitRatingMethod);
+   pSpec->SetEmergencyRatingMethod(m_Options[i].m_EmergencyRatingMethod);
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
    pProject->SetMaxLiveLoadStepSize(m_Options[i].m_MaxLLStepSize);

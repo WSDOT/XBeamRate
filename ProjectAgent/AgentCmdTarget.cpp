@@ -103,16 +103,17 @@ void CAgentCmdTarget::OnEditPier()
    oldPierData.m_gLL[0] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_Inventory,INVALID_INDEX);
    oldPierData.m_gLL[1] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_Operating,INVALID_INDEX);
    oldPierData.m_gLL[2] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalRoutine,INVALID_INDEX);
-   oldPierData.m_gLL[3] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalSpecial,INVALID_INDEX);
-   oldPierData.m_gLL[4] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine,INVALID_INDEX);
-   oldPierData.m_gLL[5] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial,INVALID_INDEX);
-   oldPierData.m_gLL[6] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,INVALID_INDEX);
-   oldPierData.m_gLL[7] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,INVALID_INDEX);
+   oldPierData.m_gLL[3] = pProject->GetLiveLoadFactor(pierID, pgsTypes::StrengthI_LegalSpecial, INVALID_INDEX);
+   oldPierData.m_gLL[4] = pProject->GetLiveLoadFactor(pierID, pgsTypes::StrengthI_LegalEmergency, INVALID_INDEX);
+   oldPierData.m_gLL[5] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine,INVALID_INDEX);
+   oldPierData.m_gLL[6] = pProject->GetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial,INVALID_INDEX);
+   oldPierData.m_gLL[7] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,INVALID_INDEX);
+   oldPierData.m_gLL[8] = pProject->GetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,INVALID_INDEX);
 
-   oldPierData.m_LiveLoadReactionApplication  = pProject->GetReactionLoadApplicationType(pierID);
    oldPierData.m_DesignLiveLoad.m_LLIM        = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory);
    oldPierData.m_LegalRoutineLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine);
-   oldPierData.m_LegalSpecialLiveLoad.m_LLIM  = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special);
+   oldPierData.m_LegalSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID, pgsTypes::lrLegal_Special);
+   oldPierData.m_LegalEmergencyLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID, pgsTypes::lrLegal_Emergency);
    oldPierData.m_PermitRoutineLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Routine);
    oldPierData.m_PermitSpecialLiveLoad.m_LLIM = pProject->GetLiveLoadReactions(pierID,pgsTypes::lrPermit_Special);
 
@@ -136,11 +137,12 @@ void CAgentCmdTarget::OnEditOptions()
    oldOptions.m_LRFDVersion = lrfdVersionMgr::GetVersion();
    oldOptions.m_LRFRVersion = lrfrVersionMgr::GetVersion();
 
-   oldOptions.m_bDesignRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
-   oldOptions.m_bDesignRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);
+   oldOptions.m_bLegalRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
+   oldOptions.m_bLegalRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);
 
    oldOptions.m_bLegalRating  = pRatingSpec->IsRatingEnabled(pgsTypes::lrLegal_Routine);
    oldOptions.m_bLegalRateForShear  = pRatingSpec->RateForShear(pgsTypes::lrLegal_Routine);
+   oldOptions.m_EmergencyRatingMethod = pRatingSpec->GetEmergencyRatingMethod();
 
    oldOptions.m_bPermitRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrPermit_Routine);
    oldOptions.m_bPermitRateForShear = pRatingSpec->RateForShear(pgsTypes::lrPermit_Routine);
@@ -151,6 +153,7 @@ void CAgentCmdTarget::OnEditOptions()
    GET_IFACE(IXBRProject,pProject);
    oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
    oldOptions.m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
+   oldOptions.m_LiveLoadReactionApplication = pProject->GetReactionLoadApplicationType(INVALID_ID);
    oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
    oldOptions.m_SystemFactorShear   = pProject->GetSystemFactorShear();
 

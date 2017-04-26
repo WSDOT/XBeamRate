@@ -307,7 +307,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
 
    IndexType llConfigIdx = m_GraphController.GetSelectedLiveLoadConfiguration();
 
-   if ( !::IsPermitRatingType(ratingType) || ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT ) )
+   if ( !pRatingSpec->IsWSDOTEmergencyRating(ratingType) && !pRatingSpec->IsWSDOTPermitRating(ratingType) )
    {
       // only draw envelopes if this is not a permit rating, or if it is a permit rating, we aren't using the WSDOT method.
       // envelope doesn't make sense with WSDOT method.
@@ -351,11 +351,14 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
       }
       std::sort(vPoi.begin(),vPoi.end());
 
-      if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
+      if (pRatingSpec->IsWSDOTEmergencyRating(ratingType) || pRatingSpec->IsWSDOTPermitRating(ratingType))
       {
          m_Graph.SetDataLabel(graphIdx,_T("Legal"));
 
-         IndexType permitGraphIdx = m_Graph.CreateDataSeries(_T("Permit"),PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
+         CString strSeries;
+         strSeries.Format(_T("%s"), pRatingSpec->IsWSDOTEmergencyRating(ratingType) ? _T("Emergency") : _T("Permit"));
+
+         IndexType permitGraphIdx = m_Graph.CreateDataSeries(strSeries,PS_SOLID,GRAPH_PEN_WEIGHT,GREEN);
          BuildWSDOTPermitLiveLoadGraph(pierID,vPoi,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,actionType,permitGraphIdx,graphIdx);
       }
       else

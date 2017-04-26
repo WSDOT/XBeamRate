@@ -33,7 +33,8 @@ static char THIS_FILE[] = __FILE__;
 CLASS
    xbrRatingArtifact
 ****************************************************************************/
-xbrRatingArtifact::xbrRatingArtifact()
+xbrRatingArtifact::xbrRatingArtifact(pgsTypes::LoadRatingType ratingType) :
+   m_RatingType(ratingType)
 {
 }
 
@@ -178,17 +179,6 @@ Float64 xbrRatingArtifact::GetShearRatingFactor() const
    return GetShearRatingFactorEx(&pArtifact);
 }
 
-Float64 xbrRatingArtifact::GetRatingFactor() const
-{
-   const xbrMomentRatingArtifact* pPositiveMoment;
-   const xbrMomentRatingArtifact* pNegativeMoment;
-   const xbrShearRatingArtifact* pShear;
-   const xbrYieldStressRatioArtifact* pYieldStressPositiveMoment;
-   const xbrYieldStressRatioArtifact* pYieldStressNegativeMoment;
-
-   return GetRatingFactorEx(&pPositiveMoment,&pNegativeMoment,&pShear,&pYieldStressPositiveMoment,&pYieldStressNegativeMoment);
-}
-
 const xbrRatingArtifact::YieldStressRatios& xbrRatingArtifact::GetYieldStressRatios(bool bPositiveMoment) const
 {
    return (bPositiveMoment ? m_PositiveMomentYieldStressRatios : m_NegativeMomentYieldStressRatios);
@@ -226,6 +216,17 @@ Float64 xbrRatingArtifact::GetYieldStressRatio(bool bPositiveMoment) const
 {
    const xbrYieldStressRatioArtifact* pArtifact;
    return GetYieldStressRatioEx(bPositiveMoment,&pArtifact);
+}
+
+Float64 xbrRatingArtifact::GetRatingFactor() const
+{
+   const xbrMomentRatingArtifact* pPositiveMoment;
+   const xbrMomentRatingArtifact* pNegativeMoment;
+   const xbrShearRatingArtifact* pShear;
+   const xbrYieldStressRatioArtifact* pYieldStressPositiveMoment;
+   const xbrYieldStressRatioArtifact* pYieldStressNegativeMoment;
+
+   return GetRatingFactorEx(&pPositiveMoment, &pNegativeMoment, &pShear, &pYieldStressPositiveMoment, &pYieldStressNegativeMoment);
 }
 
 Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppPositiveMoment,const xbrMomentRatingArtifact** ppNegativeMoment,
@@ -328,6 +329,11 @@ Float64 xbrRatingArtifact::GetRatingFactorEx(const xbrMomentRatingArtifact** ppP
    return RF;
 }
 
+bool xbrRatingArtifact::IsLoadPostingRequired() const
+{
+   return (::IsLegalRatingType(m_RatingType) && !::IsEmergencyRatingType(m_RatingType) && GetRatingFactor() < 1.0 ? true : false);
+}
+
 void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeight,Float64* pRF,std::_tstring* pVehicle) const
 {
    Float64 posting_load = DBL_MAX;
@@ -344,7 +350,7 @@ void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeigh
       std::_tstring strVehicle = artifact.GetVehicleName();
       Float64 W = artifact.GetVehicleWeight();
       Float64 RF = artifact.GetRatingFactor();
-      Float64 spl = W*(RF - 0.3)/0.7;
+      Float64 spl = W*(RF - 0.3)/0.7; // safe posting load, MBE Eqn 6A.8.3-1
       if ( spl < 0 )
       {
          spl = 0;
@@ -454,6 +460,7 @@ void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeigh
 
 void xbrRatingArtifact::MakeCopy(const xbrRatingArtifact& rOther)
 {
+   m_RatingType                      = rOther.m_RatingType;
    m_PositiveMomentRatings           = rOther.m_PositiveMomentRatings;
    m_NegativeMomentRatings           = rOther.m_NegativeMomentRatings;
    m_ShearRatings                    = rOther.m_ShearRatings;

@@ -58,6 +58,9 @@ public:
    void SetRatingType(pgsTypes::LoadRatingType ratingType);
    pgsTypes::LoadRatingType GetLoadRatingType() const;
 
+   void SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod);
+   xbrTypes::EmergencyRatingMethod GetEmergencyRatingMethod() const;
+
    void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod);
    xbrTypes::PermitRatingMethod GetPermitRatingMethod() const;
 
@@ -152,6 +155,7 @@ protected:
 
    pgsTypes::LoadRatingType m_RatingType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
 
    VehicleIndexType m_VehicleIdx;
    Float64 m_VehicleWeight;

@@ -530,10 +530,12 @@
     <ClCompile Include="ColumnLayoutGrid.cpp" />
     <ClCompile Include="ConcreteDetailsDlg.cpp" />
     <ClCompile Include="ConcreteGeneralPage.cpp" />
+    <ClCompile Include="DesignLiveLoadReactionsPage.cpp" />
     <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="LegalLiveLoadReactionsPage.cpp" />
     <ClCompile Include="LiveLoadReactionGrid.cpp" />
-    <ClCompile Include="LiveLoadReactionsPage.cpp" />
     <ClCompile Include="OptionsDlg.cpp" />
+    <ClCompile Include="PermitLiveLoadReactionsPage.cpp" />
     <ClCompile Include="PierDlg.cpp" />
     <ClCompile Include="PierExporter.cpp" />
     <ClCompile Include="PierLayoutPage.cpp" />
@@ -584,10 +586,12 @@
     <ClInclude Include="ConcreteDetailsDlg.h" />
     <ClInclude Include="ConcreteGeneralPage.h" />
     <ClInclude Include="CPProjectAgent.h" />
+    <ClInclude Include="DesignLiveLoadReactionsPage.h" />
     <ClInclude Include="dllmain.h" />
+    <ClInclude Include="LegalLiveLoadReactionsPage.h" />
     <ClInclude Include="LiveLoadReactionGrid.h" />
-    <ClInclude Include="LiveLoadReactionsPage.h" />
     <ClInclude Include="OptionsDlg.h" />
+    <ClInclude Include="PermitLiveLoadReactionsPage.h" />
     <ClInclude Include="PierDlg.h" />
     <ClInclude Include="PierExporter.h" />
     <ClInclude Include="PierLayoutPage.h" />

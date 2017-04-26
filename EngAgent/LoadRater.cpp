@@ -54,13 +54,12 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    GET_IFACE(IXBRPointOfInterest,pPOI);
    std::vector<xbrPointOfInterest> vMomentPoi( pPOI->GetMomentRatingPointsOfInterest(pierID) );
 
-   xbrRatingArtifact ratingArtifact;
+   xbrRatingArtifact ratingArtifact(ratingType);
 
-   GET_IFACE(IXBRRatingSpecification,pRatingSpec);
-   xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
+   GET_IFACE(IXBRRatingSpecification, pRatingSpec);
 
    // Rate for flexure
-   MomentRating(pierID,vMomentPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
 
    // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
@@ -72,13 +71,13 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    if ( pRatingSpec->RateForShear(ratingType) )
    {
       std::vector<xbrPointOfInterest> vShearPoi( pPOI->GetShearRatingPointsOfInterest(pierID) );
-      ShearRating(pierID,vShearPoi,ratingType,permitRatingMethod,vehicleIdx,ratingArtifact);
+      ShearRating(pierID,vShearPoi,ratingType,vehicleIdx,ratingArtifact);
    }
 
    return ratingArtifact;
 }
 
-void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
 
@@ -89,7 +88,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
    std::vector<Float64> vLLIMmin,vLLIMmax;
    std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
-   GetMoments(pierID, ratingType, permitRatingMethod, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
+   GetMoments(pierID, ratingType, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
 
    GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
 
@@ -143,8 +142,8 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
          Float64 Mn = momentCapacityDetails.Mn;
 
          Float64 K = 1.0;
-         bool bPermitRating = ::IsPermitRatingType(ratingType);
-         if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
+         GET_IFACE(IXBRRatingSpecification, pSpec);
+         if ( !pSpec->IsWSDOTEmergencyRating(ratingType) && !pSpec->IsWSDOTPermitRating(ratingType) )
          {
             // NOTE: For WSDOT Method - Permit cases, K has to be computed for each combination
             // of legal and permit loading... K will be computed in the moment rating artifact for the WSDOT/permit case.
@@ -167,7 +166,8 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
 
          xbrMomentRatingArtifact momentArtifact;
          momentArtifact.SetRatingType(ratingType);
-         momentArtifact.SetPermitRatingMethod(permitRatingMethod);
+         momentArtifact.SetPermitRatingMethod(pSpec->GetPermitRatingMethod());
+         momentArtifact.SetEmergencyRatingMethod(pSpec->GetEmergencyRatingMethod());
          momentArtifact.SetPierID(pierID);
          momentArtifact.SetPointOfInterest(poi);
          momentArtifact.SetVehicleIndex(vehicleIdx == INVALID_INDEX ? llConfigIdx : vehicleIdx);
@@ -219,7 +219,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    }
 }
 
-void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
@@ -271,8 +271,13 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
       Float64 LLIM = 0;
       IndexType llConfigIdx;
       VehicleIndexType vehIdx;
-      bool bPermitRating = ::IsPermitRatingType(ratingType);
-      if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
+      GET_IFACE(IXBRRatingSpecification, pSpec);
+      if (pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType))
+      {
+         // for WSDOT permit rating, the analysis is done in the rating artifact object
+         LLIM = 0;
+      }
+      else
       {
          // moments include multiple presence factor
          if ( vehicleIdx == INVALID_INDEX )
@@ -328,12 +333,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
             }
          }
       }
-      else
-      {
-         // for WSDOT permit rating, the analysis is done in the rating artifact object
-         ATLASSERT(bPermitRating && permitRatingMethod == xbrTypes::prmWSDOT);
-         LLIM = 0;
-      }
+
 
       CString strProgress;
       strProgress.Format(_T("Load rating %s for shear at %s"),
@@ -345,7 +345,8 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
 
       xbrShearRatingArtifact shearArtifact;
       shearArtifact.SetRatingType(ratingType);
-      shearArtifact.SetPermitRatingMethod(permitRatingMethod);
+      shearArtifact.SetPermitRatingMethod(pSpec->GetPermitRatingMethod());
+      shearArtifact.SetEmergencyRatingMethod(pSpec->GetEmergencyRatingMethod());
       shearArtifact.SetPierID(pierID);
       shearArtifact.SetPointOfInterest(poi);
       shearArtifact.SetVehicleIndex(vehicleIdx == INVALID_INDEX ? vehIdx : vehicleIdx);
@@ -523,7 +524,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
    } // next poi
 }
 
-void xbrLoadRater::GetMoments(PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax,std::vector<IndexType>& vMinLLConfigIdx,std::vector<IndexType>& vMaxLLConfigIdx)
+void xbrLoadRater::GetMoments(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx, const std::vector<xbrPointOfInterest>& vPoi, std::vector<Float64>& vDC,std::vector<Float64>& vDW,std::vector<Float64>& vCR,std::vector<Float64>& vSH,std::vector<Float64>& vRE,std::vector<Float64>& vPS, std::vector<Float64>& vLLIMmin, std::vector<Float64>& vLLIMmax,std::vector<IndexType>& vMinLLConfigIdx,std::vector<IndexType>& vMaxLLConfigIdx)
 {
    pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
 
@@ -535,26 +536,25 @@ void xbrLoadRater::GetMoments(PierIDType pierID,pgsTypes::LoadRatingType ratingT
    vRE = pResults->GetMoment(pierID,xbrTypes::lcRE,vPoi);
    vPS = pResults->GetMoment(pierID,xbrTypes::lcPS,vPoi);
 
-   bool bPermitRating = ::IsPermitRatingType(ratingType);
-   if ( (bPermitRating && permitRatingMethod != xbrTypes::prmWSDOT) || !bPermitRating )
+   GET_IFACE(IXBRRatingSpecification, pSpec);
+   if ( pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType))
    {
-      // moments include multiple presence factor
-      if ( vehicleIdx == INVALID_INDEX )
-      {
-         pResults->GetMoment(pierID,ratingType,vPoi,&vLLIMmin,&vLLIMmax,&vMinLLConfigIdx,&vMaxLLConfigIdx);
-      }
-      else
-      {
-         pResults->GetMoment(pierID,ratingType,vehicleIdx,vPoi,&vLLIMmin,&vLLIMmax,&vMinLLConfigIdx,&vMaxLLConfigIdx);
-      }
-   }
-   else
-   {
-      // for WSDOT permit rating, the analysis is done in the rating artifact object
-      ATLASSERT(bPermitRating && permitRatingMethod == xbrTypes::prmWSDOT);
+      // for WSDOT permit/emergency rating, the analysis is done in the rating artifact object
       vLLIMmin.resize(vPoi.size(),0);
       vLLIMmax.resize(vPoi.size(),0);
       vMinLLConfigIdx.resize(vPoi.size(),INVALID_INDEX);
       vMaxLLConfigIdx.resize(vPoi.size(),INVALID_INDEX);
+   }
+   else
+   {
+      // moments include multiple presence factor
+      if (vehicleIdx == INVALID_INDEX)
+      {
+         pResults->GetMoment(pierID, ratingType, vPoi, &vLLIMmin, &vLLIMmax, &vMinLLConfigIdx, &vMaxLLConfigIdx);
+      }
+      else
+      {
+         pResults->GetMoment(pierID, ratingType, vehicleIdx, vPoi, &vLLIMmin, &vLLIMmax, &vMinLLConfigIdx, &vMaxLLConfigIdx);
+      }
    }
 }

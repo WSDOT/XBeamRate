@@ -71,16 +71,15 @@ public:
    Float64 m_gSH_ServiceI;
    Float64 m_gPS_ServiceI;
 
-   Float64 m_gLL[8]; // use GET_INDEX with a limit state to access the array
+   Float64 m_gLL[9]; // use GET_INDEX with a limit state to access the array
 
    xbrTypes::ReactionLoadType m_DeadLoadReactionType[2];
    std::vector<txnDeadLoadReaction> m_DeadLoadReactions[2]; // use bearing line index to access array
 
-   xbrTypes::ReactionLoadApplicationType m_LiveLoadReactionApplication;
-
    txnLiveLoadReactions m_DesignLiveLoad;
    txnLiveLoadReactions m_LegalRoutineLiveLoad;
    txnLiveLoadReactions m_LegalSpecialLiveLoad;
+   txnLiveLoadReactions m_LegalEmergencyLiveLoad;
    txnLiveLoadReactions m_PermitRoutineLiveLoad;
    txnLiveLoadReactions m_PermitSpecialLiveLoad;
 };

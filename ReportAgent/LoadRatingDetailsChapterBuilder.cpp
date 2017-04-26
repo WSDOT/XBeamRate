@@ -73,7 +73,8 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
    xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 
@@ -99,7 +100,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
 
       IndexType nVehicles = pProject->GetLiveLoadReactionCount(pierID,ratingType);
       VehicleIndexType firstVehicleIdx = 0;
-      VehicleIndexType lastVehicleIdx  = (ratingType == pgsTypes::lrDesign_Inventory || ratingType == pgsTypes::lrDesign_Operating ? 0 : nVehicles-1);
+      VehicleIndexType lastVehicleIdx  = (::IsDesignRatingType(ratingType) ? 0 : nVehicles-1);
       for ( VehicleIndexType vehicleIdx = firstVehicleIdx; vehicleIdx <= lastVehicleIdx; vehicleIdx++ )
       {
          if ( !::IsDesignRatingType(ratingType) )
@@ -110,24 +111,23 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
             *pPara << strLiveLoadName << rptNewLine;
          }
 
-         const xbrRatingArtifact* pRatingArtifact = pArtifact->GetXBeamRatingArtifact(pierID,ratingType,(ratingType == pgsTypes::lrDesign_Inventory || ratingType == pgsTypes::lrDesign_Operating) ? INVALID_INDEX : vehicleIdx);
+         const xbrRatingArtifact* pRatingArtifact = pArtifact->GetXBeamRatingArtifact(pierID,ratingType,(::IsDesignRatingType(ratingType) ? INVALID_INDEX : vehicleIdx));
 
-         MomentRatingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,true, pRatingArtifact);
-         MomentRatingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,false,pRatingArtifact);
+         MomentRatingDetails(pChapter,pBroker,pierID,ratingType,true, pRatingArtifact);
+         MomentRatingDetails(pChapter,pBroker,pierID,ratingType,false,pRatingArtifact);
 
          if ( pRatingSpec->RateForShear(ratingType) )
          {
-            ShearRatingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,pRatingArtifact);
+            ShearRatingDetails(pChapter,pBroker,pierID,ratingType,pRatingArtifact);
          }
 
          if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
          {
-            ReinforcementYieldingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,true, pRatingArtifact);
-            ReinforcementYieldingDetails(pChapter,pBroker,pierID,ratingType,permitRatingMethod,false,pRatingArtifact);
+            ReinforcementYieldingDetails(pChapter,pBroker,pierID,ratingType,true, pRatingArtifact);
+            ReinforcementYieldingDetails(pChapter,pBroker,pierID,ratingType,false,pRatingArtifact);
          }
 
-         if ( ::IsLegalRatingType(ratingType) && pRatingArtifact->GetRatingFactor() < 1 
-            )
+         if ( pRatingArtifact->IsLoadPostingRequired() )
          {
             LoadPostingDetails(pChapter,pBroker,pRatingArtifact);
          }
@@ -142,7 +142,7 @@ CChapterBuilder* CLoadRatingDetailsChapterBuilder::Clone() const
    return new CLoadRatingDetailsChapterBuilder;
 }
 
-void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -150,6 +150,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    rptCapacityToDemand rating_factor;
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
+
 
    rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
@@ -163,12 +164,13 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       *pPara << _T("Rating for Negative Moment") << rptNewLine;
    }
 
-   bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+   GET_IFACE2(pBroker, IXBRRatingSpecification, pSpec);
+   bool bIsWSDOTRating = (pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType) ? true : false);
 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   if ( bIsWSDOTPermitRating )
+   if ( bIsWSDOTRating )
    {
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentRatingEquation_WSDOT.png") ) << rptNewLine;
    }
@@ -177,19 +179,29 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
-   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 23 : 22);
+   ColumnIndexType nColumns = (bIsWSDOTRating ? 23 : 22);
 
    rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns);
-   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_RIGHT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_RIGHT));
 
    *pPara << pTable << rptNewLine;
 
    pPara = new rptParagraph(rptStyleManager::GetFootnoteStyle());
    *pChapter << pPara;
-   if ( bIsWSDOTPermitRating )
+   std::_tstring strVehicle;
+   if (bIsWSDOTRating)
    {
-      *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+      if (::IsEmergencyRatingType(ratingType))
+      {
+         strVehicle = _T("E");
+         *pPara << _T("LCn, Em = Live Load Configuration n, with Emergency Vehicle in Lane m") << rptNewLine;
+      }
+      else
+      {
+         strVehicle = _T("P");
+         *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+      }
    }
    else
    {
@@ -228,9 +240,16 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("PS"));
    (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("PS")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("LL"));
-   if ( bIsWSDOTPermitRating )
+   if (bIsWSDOTRating)
    {
-      (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")) << rptNewLine << _T("Permit"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
+      if (::IsEmergencyRatingType(ratingType))
+      {
+         (*pTable)(0, col++) << COLHDR(Sub2(_T("M"), _T("LL+IM")) << rptNewLine << _T("Emergency"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+      }
+      else
+      {
+         (*pTable)(0, col++) << COLHDR(Sub2(_T("M"), _T("LL+IM")) << rptNewLine << _T("Permit"), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+      }
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("LL+IM")) << rptNewLine << _T("Legal"),  rptMomentUnitTag, pDisplayUnits->GetMomentUnit() );
    }
    else
@@ -269,7 +288,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       Float64 Mpermit;
       Float64 Mlegal;
       Float64 K;
-      if ( bIsWSDOTPermitRating )
+      if ( bIsWSDOTRating )
       {
          artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Mpermit,&Mlegal,&K);
       }
@@ -278,7 +297,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       (*pTable)(row,col++) << artifact.GetConditionFactor();
       (*pTable)(row,col++) << artifact.GetSystemFactor();
       (*pTable)(row,col++) << artifact.GetCapacityReductionFactor();
-       if ( bIsWSDOTPermitRating )
+       if ( bIsWSDOTRating )
        {
          (*pTable)(row,col++) << K;
        }
@@ -301,11 +320,11 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       (*pTable)(row,col++) << moment.SetValue(artifact.GetSecondaryEffectsMoment());
       (*pTable)(row,col++) << artifact.GetLiveLoadFactor();
 
-      if ( bIsWSDOTPermitRating )
+      if ( bIsWSDOTRating )
       {
          (*pTable)(row,col++) << moment.SetValue(Mpermit);
          (*pTable)(row,col++) << moment.SetValue(Mlegal);
-         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", ") << strVehicle  << LABEL_INDEX(permitLaneIdx);
       }
       else
       {
@@ -330,7 +349,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    } // next poi
 }
 
-void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -343,12 +362,13 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    *pChapter << pPara;
    *pPara << _T("Rating for Shear") << rptNewLine;
 
-   bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+   GET_IFACE2(pBroker, IXBRRatingSpecification, pSpec);
+   bool bIsWSDOTRating = (pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType) ? true : false);
 
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   if ( bIsWSDOTPermitRating )
+   if ( bIsWSDOTRating )
    {
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamShearRatingEquation_WSDOT.png") ) << rptNewLine;
    }
@@ -357,19 +377,29 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamShearRatingEquation_LRFD.png") ) << rptNewLine;
    }
 
-   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 22 : 21);
+   ColumnIndexType nColumns = (bIsWSDOTRating ? 22 : 21);
 
    rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns);
-   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_RIGHT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_RIGHT));
 
    *pPara << pTable << rptNewLine;
 
    pPara = new rptParagraph(rptStyleManager::GetFootnoteStyle());
    *pChapter << pPara;
-   if ( bIsWSDOTPermitRating )
+   std::_tstring strVehicle;
+   if ( bIsWSDOTRating )
    {
-      *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+      if (::IsEmergencyRatingType(ratingType))
+      {
+         strVehicle = _T("E");
+         *pPara << _T("LCn, Em = Live Load Configuration n, with Emergency Vehicle in Lane m") << rptNewLine;
+      }
+      else
+      {
+         strVehicle = _T("P");
+         *pPara << _T("LCn, Pm = Live Load Configuration n, with Permit Vehicle in Lane m") << rptNewLine;
+      }
    }
    else
    {
@@ -407,9 +437,16 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("PS"));
    (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("PS")), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
    (*pTable)(0,col++) << Sub2(symbol(gamma),_T("LL"));
-   if ( bIsWSDOTPermitRating )
+   if ( bIsWSDOTRating )
    {
-      (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")) << rptNewLine << _T("Permit"), rptForceUnitTag, pDisplayUnits->GetShearUnit() );
+      if (::IsEmergencyRatingType(ratingType))
+      {
+         (*pTable)(0, col++) << COLHDR(Sub2(_T("V"), _T("LL+IM")) << rptNewLine << _T("Emergency"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
+      }
+      else
+      {
+         (*pTable)(0, col++) << COLHDR(Sub2(_T("V"), _T("LL+IM")) << rptNewLine << _T("Permit"), rptForceUnitTag, pDisplayUnits->GetShearUnit());
+      }
       (*pTable)(0,col++) << COLHDR(Sub2(_T("V"),_T("LL+IM")) << rptNewLine << _T("Legal"),  rptForceUnitTag, pDisplayUnits->GetShearUnit() );
    }
    else
@@ -449,7 +486,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       VehicleIndexType permitVehicleIdx;
       Float64 Vpermit;
       Float64 Vlegal;
-      if ( bIsWSDOTPermitRating )
+      if ( bIsWSDOTRating )
       {
          artifact.GetWSDOTPermitConfiguration(&llConfigIdx,&permitLaneIdx,&permitVehicleIdx,&Vpermit,&Vlegal);
       }
@@ -473,11 +510,11 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
       (*pTable)(row,col++) << shear.SetValue(artifact.GetSecondaryEffectsShear());
       (*pTable)(row,col++) << artifact.GetLiveLoadFactor();
 
-      if ( bIsWSDOTPermitRating )
+      if ( bIsWSDOTRating )
       {
          (*pTable)(row,col++) << shear.SetValue(Vpermit);
          (*pTable)(row,col++) << shear.SetValue(Vlegal);
-         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", P") << LABEL_INDEX(permitLaneIdx);
+         (*pTable)(row,col++) << _T("LC") << LABEL_INDEX(llConfigIdx) << _T(", ") << strVehicle << LABEL_INDEX(permitLaneIdx);
       }
       else
       {
@@ -502,9 +539,11 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    } // next poi
 }
 
-void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,xbrTypes::PermitRatingMethod permitRatingMethod,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
 {
-   bool bIsWSDOTPermitRating = (::IsPermitRatingType(ratingType) && permitRatingMethod == xbrTypes::prmWSDOT ? true : false);
+   GET_IFACE2(pBroker, IXBRRatingSpecification, pSpec);
+
+   bool bIsWSDOTPermitRating = (pSpec->IsWSDOTPermitRating(ratingType) ? true : false);
 
    const xbrRatingArtifact::YieldStressRatios& artifacts = pRatingArtifact->GetYieldStressRatios(bPositiveMoment);
    if ( artifacts.size() == 0 )
@@ -538,8 +577,8 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 15 : 14);
    rptRcTable* table = rptStyleManager::CreateDefaultTable(nColumns);
    
-   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_RIGHT));
+   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_RIGHT));
 
    //*pPara << table << rptNewLine; // don't add table here... see below
 
@@ -686,8 +725,8 @@ void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,I
 
    rptRcTable* table = rptStyleManager::CreateDefaultTable(5,_T(""));
    
-   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_RIGHT));
+   table->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_RIGHT));
 
    *pPara << table << rptNewLine;
 

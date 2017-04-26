@@ -16,8 +16,8 @@ For Design and Legal live loads, as well as the Permit live load when the AASHTO
 2. The response for a particular vehicle type
 3. The response for a specific live load configuration
 
-When the WSDOT BDM rating equation is used for Permit live loads, two results graphs will be displayed:
-1. The response for the permit vehicle in a single lane
+When the WSDOT BDM rating equation is used for Emergency Vehicle or Permit live loads, two results graphs will be displayed:
+1. The response for the emergency/permit vehicle in a single lane
 2. The response for the legal vehicle in all other lanes
 
 

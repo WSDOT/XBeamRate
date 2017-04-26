@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -100,14 +98,16 @@ END
 //
 
 IDR_PROJECTAGENT        REGISTRY                "ProjectAgent.rgs"
+
 IDR_PROJECTAGENTMODULE  REGISTRY                "ProjectAgentModule.rgs"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Dialog
 //
 
-IDD_PROJECTPROPERTIES DIALOG  0, 0, 241, 231
+IDD_PROJECTPROPERTIES DIALOG 0, 0, 241, 231
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Project Properties"
 FONT 8, "MS Sans Serif"
@@ -310,57 +310,77 @@ BEGIN
     LTEXT           "Static",IDC_SLAB_DEPTH_UNIT,159,348,19,8
 END
 
-IDD_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 428
+IDD_DESIGN_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 116
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Live Loads"
+CAPTION "Design Live Loads"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    LTEXT           "Live Load Reactions Per Lane",IDC_STATIC,7,7,94,8
-    COMBOBOX        IDC_REACTION_APPLICATION,127,7,198,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Design Live Loads",IDC_STATIC,7,40,58,8
+    LTEXT           "Design Live Loads",IDC_STATIC,7,39,58,8
     LTEXT           "Strength I - Inventory",IDC_STATIC,88,39,72,8
     LTEXT           "Load Factor",IDC_STATIC,164,26,39,8
     EDITTEXT        IDC_LF_INVENTORY,163,36,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Load Factor",IDC_STATIC,294,26,39,8
     LTEXT           "Strength I - Operating",IDC_STATIC,220,39,72,8
+    LTEXT           "Load Factor",IDC_STATIC,294,26,39,8
     EDITTEXT        IDC_LF_OPERATING,294,36,40,14,ES_RIGHT | ES_AUTOHSCROLL
     CONTROL         "Custom1",IDC_DESIGN_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,52,329,57
-    PUSHBUTTON      "+",IDC_DESIGN_ADD,340,51,23,14
-    PUSHBUTTON      "-",IDC_DESIGN_REMOVE,340,69,23,14
-    LTEXT           "Legal Live Loads - Routine Commercial Traffic",IDC_STATIC,7,124,178,8
-    LTEXT           "Strength I",IDC_STATIC,253,123,39,8
-    LTEXT           "Load Factor",IDC_STATIC,294,112,39,8
-    EDITTEXT        IDC_LF_LEGAL_ROUTINE,294,121,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    CONTROL         "Custom1",IDC_LEGAL_ROUTINE_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,136,329,57
-    PUSHBUTTON      "+",IDC_LEGAL_ROUTINE_ADD,340,135,23,14
-    PUSHBUTTON      "-",IDC_LEGAL_ROUTINE_REMOVE,340,153,23,14
-    LTEXT           "Legal Live Loads - Specialized Hauling Vehicles",IDC_STATIC,7,208,158,8
-    LTEXT           "Strength I",IDC_STATIC,258,208,34,8
-    LTEXT           "Load Factor",IDC_STATIC,294,195,39,8
-    EDITTEXT        IDC_LF_LEGAL_SPECIAL,294,204,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    CONTROL         "Custom1",IDC_LEGAL_SPECIAL_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,220,329,57
-    PUSHBUTTON      "+",IDC_LEGAL_SPECIAL_ADD,340,219,23,14
-    PUSHBUTTON      "-",IDC_LEGAL_SPECIAL_REMOVE,340,237,23,14
-    LTEXT           "Permit Live Loads - Routine/Annual Permit Vehicles",IDC_STATIC,7,293,171,8
-    LTEXT           "Service I",IDC_STATIC,182,292,29,8
-    LTEXT           "Load Factor",IDC_STATIC,211,282,39,8
-    EDITTEXT        IDC_LF_PERMIT_ROUTINE_SERVICEI,211,291,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Strength II",IDC_STATIC,256,292,36,8
-    LTEXT           "Load Factor",IDC_STATIC,294,281,39,8
-    EDITTEXT        IDC_LF_PERMIT_ROUTINE,294,290,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    CONTROL         "Custom1",IDC_PERMIT_ROUTINE_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,305,329,43
-    PUSHBUTTON      "+",IDC_PERMIT_ROUTINE_ADD,340,303,23,14
-    PUSHBUTTON      "-",IDC_PERMIT_ROUTINE_REMOVE,340,321,23,14
-    LTEXT           "Permit Live Loads - Special/Limited Crossing Permits",IDC_STATIC,7,365,180,8
-    LTEXT           "Service I",IDC_STATIC,182,364,29,8
-    LTEXT           "Load Factor",IDC_STATIC,211,349,39,8
-    EDITTEXT        IDC_LF_PERMIT_SPECIAL_SERVICEI,211,362,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Strength II",IDC_STATIC,256,364,36,8
-    LTEXT           "Load Factor",IDC_STATIC,294,349,39,8
-    EDITTEXT        IDC_LF_PERMIT_SPECIAL,294,362,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    CONTROL         "Custom1",IDC_PERMIT_SPECIAL_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,378,329,43
-    PUSHBUTTON      "+",IDC_PERMIT_SPECIAL_ADD,340,377,23,14
-    PUSHBUTTON      "-",IDC_PERMIT_SPECIAL_REMOVE,340,395,23,14
+    PUSHBUTTON      "+",IDC_DESIGN_ADD,339,51,23,14
+    PUSHBUTTON      "-",IDC_DESIGN_REMOVE,339,69,23,14
+    LTEXT           "Live Load Reactions Per Lane",IDC_STATIC,7,7,94,8
+END
+
+IDD_LEGAL_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 373, 292
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Legal Live Loads"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Legal Live Loads - Routine Commercial Traffic",IDC_STATIC,7,37,178,8
+    LTEXT           "Strength I",IDC_STATIC,253,36,39,8
+    LTEXT           "Load Factor",IDC_STATIC,294,25,39,8
+    EDITTEXT        IDC_LF_LEGAL_ROUTINE,294,34,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_LEGAL_ROUTINE_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,49,329,57
+    PUSHBUTTON      "+",IDC_LEGAL_ROUTINE_ADD,339,48,23,14
+    PUSHBUTTON      "-",IDC_LEGAL_ROUTINE_REMOVE,339,66,23,14
+    LTEXT           "Legal Live Loads - Specialized Hauling Vehicles",IDC_STATIC,7,128,158,8
+    LTEXT           "Strength I",IDC_STATIC,258,128,34,8
+    LTEXT           "Load Factor",IDC_STATIC,294,115,39,8
+    EDITTEXT        IDC_LF_LEGAL_SPECIAL,294,124,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_LEGAL_SPECIAL_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,140,329,57
+    PUSHBUTTON      "+",IDC_LEGAL_SPECIAL_ADD,339,139,23,14
+    PUSHBUTTON      "-",IDC_LEGAL_SPECIAL_REMOVE,339,157,23,14
+    LTEXT           "Legal Live Loads - Emergency Vehicles",IDC_STATIC,7,216,158,8
+    LTEXT           "Strength I",IDC_STATIC,259,216,34,8
+    LTEXT           "Load Factor",IDC_STATIC,295,203,39,8
+    EDITTEXT        IDC_LF_LEGAL_EMERGENCY,295,212,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_LEGAL_EMERGENCY_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,228,329,57
+    PUSHBUTTON      "+",IDC_LEGAL_EMERGENCY_ADD,341,227,23,14
+    PUSHBUTTON      "-",IDC_LEGAL_EMERGENCY_REMOVE,341,246,23,14
+    LTEXT           "Live Load Reactions Per Lane",IDC_STATIC,7,7,94,8
+END
+
+IDD_PERMIT_LIVE_LOAD_REACTIONS DIALOGEX 0, 0, 371, 188
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Permit Live Loads"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Permit Live Loads - Routine/Annual Permit Vehicles",IDC_STATIC,7,26,171,8
+    LTEXT           "Service I",IDC_STATIC,182,25,29,8
+    LTEXT           "Load Factor",IDC_STATIC,211,15,39,8
+    EDITTEXT        IDC_LF_PERMIT_ROUTINE_SERVICEI,211,25,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Strength II",IDC_STATIC,256,25,36,8
+    LTEXT           "Load Factor",IDC_STATIC,294,15,39,8
+    EDITTEXT        IDC_LF_PERMIT_ROUTINE,294,23,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_PERMIT_ROUTINE_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,39,329,57
+    PUSHBUTTON      "+",IDC_PERMIT_ROUTINE_ADD,339,36,23,14
+    PUSHBUTTON      "-",IDC_PERMIT_ROUTINE_REMOVE,339,55,23,14
+    LTEXT           "Permit Live Loads - Special/Limited Crossing Permits",IDC_STATIC,7,111,180,8
+    LTEXT           "Service I",IDC_STATIC,182,111,29,8
+    EDITTEXT        IDC_LF_PERMIT_SPECIAL_SERVICEI,211,109,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Strength II",IDC_STATIC,256,111,36,8
+    EDITTEXT        IDC_LF_PERMIT_SPECIAL,294,109,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    CONTROL         "Custom1",IDC_PERMIT_SPECIAL_GRID,"GXWND",WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,7,124,329,57
+    PUSHBUTTON      "+",IDC_PERMIT_SPECIAL_ADD,339,124,23,14
+    PUSHBUTTON      "-",IDC_PERMIT_SPECIAL_REMOVE,339,142,23,14
+    LTEXT           "Live Load Reactions Per Lane",IDC_STATIC,7,7,94,8
 END
 
 IDD_CONCRETE_DETAILS DIALOGEX 0, 0, 230, 137
@@ -413,37 +433,39 @@ BEGIN
     LTEXT           "Modulus of Elasticity",IDC_STATIC,7,4,66,8
 END
 
-IDD_RATING_OPTIONS DIALOGEX 0, 0, 316, 291
+IDD_RATING_OPTIONS DIALOGEX 0, 0, 317, 302
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "General"
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
-    GROUPBOX        "Specifications",IDC_STATIC,7,7,302,69
+    GROUPBOX        "Specifications",IDC_STATIC,7,7,303,69
     LTEXT           "Static",IDC_LRFD_LABEL,14,20,280,8
     COMBOBOX        IDC_LRFD,14,31,280,94,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Static",IDC_LRFR_LABEL,14,48,280,8
     COMBOBOX        IDC_LRFR,14,58,280,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "Design Rating (Inventory/Operating)",IDC_STATIC,7,77,302,40
+    GROUPBOX        "Design Rating (Inventory/Operating)",IDC_STATIC,7,77,303,40
     CONTROL         "Perform load rating analysis",IDC_DESIGN_RATING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,93,105,10
     CONTROL         "Rate for Shear",IDC_DESIGN_SHEAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,144,93,63,10
-    GROUPBOX        "Legal Load Rating",IDC_STATIC,7,122,302,40
+    GROUPBOX        "Legal Load Rating",IDC_STATIC,7,122,303,52
     CONTROL         "Perform load rating analysis",IDC_LEGAL_RATING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,141,105,10
     CONTROL         "Rate for Shear",IDC_LEGAL_SHEAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,144,141,63,10
-    GROUPBOX        "Permit Load Rating",IDC_STATIC,7,165,302,68
-    CONTROL         "Perform load rating analysis",IDC_PERMIT_RATING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,184,105,10
-    CONTROL         "Rate for Shear",IDC_PERMIT_SHEAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,144,184,63,10
+    LTEXT           "Compute emergency vehicle rating factors using",IDC_STATIC,17,157,155,8
+    COMBOBOX        IDC_EMERGENCY_FACTORS,176,155,127,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "Permit Load Rating",IDC_STATIC,7,179,303,68
+    CONTROL         "Perform load rating analysis",IDC_PERMIT_RATING,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,198,105,10
+    CONTROL         "Rate for Shear",IDC_PERMIT_SHEAR,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,144,198,63,10
     CONTROL         "Check reinforcement yielding (6A.5.4.2.2b)",IDC_PERMIT_YIELD_STRESS,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,200,155,10
-    LTEXT           "Allowable Stress",IDC_ALLOWABLE_STRESS_LABEL,174,200,53,8
-    EDITTEXT        IDC_ALLOWABLE_STRESS,228,198,25,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "fy",IDC_ALLOWABLE_STRESS_TAG,258,200,8,8
-    LTEXT           "Compute permit rating factors using",IDC_STATIC,16,218,116,8
-    COMBOBOX        IDC_PERMIT_FACTORS,136,216,166,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,7,237,302,47
-    LTEXT           "Flexure",IDC_STATIC,21,259,25,8
-    EDITTEXT        IDC_SYSTEM_FACTOR_FLEXURE,50,257,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Shear",IDC_STATIC,108,259,20,8
-    EDITTEXT        IDC_SYSTEM_FACTOR_SHEAR,130,257,40,14,ES_RIGHT | ES_AUTOHSCROLL
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,214,155,10
+    LTEXT           "Allowable Stress",IDC_ALLOWABLE_STRESS_LABEL,174,214,53,8
+    EDITTEXT        IDC_ALLOWABLE_STRESS,228,212,25,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "fy",IDC_ALLOWABLE_STRESS_TAG,258,214,8,8
+    LTEXT           "Compute permit rating factors using",IDC_STATIC,16,232,116,8
+    COMBOBOX        IDC_PERMIT_FACTORS,136,230,166,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,7,251,303,43
+    LTEXT           "Flexure",IDC_STATIC,21,273,25,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_FLEXURE,50,271,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Shear",IDC_STATIC,108,273,20,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_SHEAR,130,271,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
 IDD_CAPACITY_OPTIONS DIALOGEX 0, 0, 262, 160
@@ -462,7 +484,7 @@ BEGIN
     EDITTEXT        IDC_PHI_SHEAR,136,89,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
-IDD_ANALYSIS_OPTIONS DIALOGEX 0, 0, 210, 154
+IDD_ANALYSIS_OPTIONS DIALOGEX 0, 0, 293, 154
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Analysis"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
@@ -473,6 +495,8 @@ BEGIN
     LTEXT           "Maximum Number of Lanes",IDC_STATIC,7,31,86,8
     EDITTEXT        IDC_MAX_LANES,106,28,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,7,46,186,20
+    COMBOBOX        IDC_REACTION_APPLICATION,7,89,198,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Live Load Reactions",IDC_STATIC,7,78,64,8
 END
 
 
@@ -482,7 +506,9 @@ END
 //
 
 IDB_EDIT_OPTIONS        BITMAP                  "res\\EditOptions.bmp"
+
 IDB_EDIT_PIER           BITMAP                  "res\\EditPier.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -490,7 +516,7 @@ IDB_EDIT_PIER           BITMAP                  "res\\EditPier.bmp"
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_PROJECTPROPERTIES, DIALOG
     BEGIN
@@ -525,12 +551,28 @@ BEGIN
         BOTTOMMARGIN, 365
     END
 
-    IDD_LIVE_LOAD_REACTIONS, DIALOG
+    IDD_DESIGN_LIVE_LOAD_REACTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 363
         TOPMARGIN, 7
-        BOTTOMMARGIN, 421
+        BOTTOMMARGIN, 109
+    END
+
+    IDD_LEGAL_LIVE_LOAD_REACTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 365
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 285
+    END
+
+    IDD_PERMIT_LIVE_LOAD_REACTIONS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 363
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 181
     END
 
     IDD_CONCRETE_DETAILS, DIALOG
@@ -552,9 +594,9 @@ BEGIN
     IDD_RATING_OPTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 309
+        RIGHTMARGIN, 310
         TOPMARGIN, 7
-        BOTTOMMARGIN, 284
+        BOTTOMMARGIN, 295
     END
 
     IDD_CAPACITY_OPTIONS, DIALOG
@@ -568,7 +610,7 @@ BEGIN
     IDD_ANALYSIS_OPTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 203
+        RIGHTMARGIN, 286
         TOPMARGIN, 7
         BOTTOMMARGIN, 147
     END
@@ -582,26 +624,64 @@ END
 //
 
 PIERLAYOUT              METAFILE                "res\\PierLayout.emf"
+
 DIMENSIONS_ALIGNMENT_INTEGRAL METAFILE                "res\\Dimensions_Alignment_Integral.emf"
+
 DIMENSIONS_ALIGNMENT_CONTINUOUS METAFILE                "res\\Dimensions_Alignment_Continuous.emf"
+
 DIMENSIONS_ALIGNMENT_EXPANSION METAFILE                "res\\Dimensions_Alignment_Expansion.emf"
+
 DIMENSIONS_BRIDGELINE_INTEGRAL METAFILE                "res\\Dimensions_BridgeLine_Integral.emf"
+
 DIMENSIONS_BRIDGELINE_CONTINUOUS METAFILE                "res\\Dimensions_BridgeLine_Continuous.emf"
+
 DIMENSIONS_BRIDGELINE_EXPANSION METAFILE                "res\\Dimensions_BridgeLine_Expansion.emf"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_DESIGN_LIVE_LOAD_REACTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_LEGAL_LIVE_LOAD_REACTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_PERMIT_LIVE_LOAD_REACTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_ANALYSIS_OPTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+IDD_RATING_OPTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PROJNAME            "ProjectAgent"
     IDS_NWC_MESSAGE         """The concrete density is less than the minimum value for Normal Weight Concrete (See LRFD 5.2).\nThe concrete will be treated as Normal Weight."""
     IDS_LWC_MESSAGE         """The concrete density is greater than the maximum value for Lightweight Concrete (See LRFD 5.2).\nThe concrete will be treated as Lightweight."""
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_PROJECT_NAME    "Edit Project Name\nproject name"
     ID_EDIT_PIER            "Edit Pier\nEdit Pier"
@@ -610,7 +690,7 @@ BEGIN
                             "Shows the properties for the current project\nProject Properties"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

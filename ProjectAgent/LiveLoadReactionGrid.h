@@ -28,7 +28,6 @@
 
 #include "txnEditPier.h"
 
-
 /////////////////////////////////////////////////////////////////////////////
 // CLiveLoadReactionGrid window
 
@@ -37,7 +36,7 @@ class CLiveLoadReactionGrid : public CGXGridWnd
 	GRID_DECLARE_REGISTER()
 // Construction
 public:
-	CLiveLoadReactionGrid();
+	CLiveLoadReactionGrid(pgsTypes::LoadRatingType ratingType);
 	virtual ~CLiveLoadReactionGrid();
 
 // Attributes
@@ -48,7 +47,6 @@ public:
    void AddVehicle();
    void RemoveSelectedVehicles();
 
-   void SetLoadRatingType(pgsTypes::LoadRatingType ratingType);
    pgsTypes::LoadRatingType GetLoadRatingType();
 
    void GetLiveLoadData(txnLiveLoadReactions& llimData);
@@ -74,6 +72,8 @@ public:
    void CustomInit();
 
 private:
+   CLiveLoadReactionGrid();
+
    pgsTypes::LoadRatingType m_LoadRatingType;
 
    virtual BOOL OnEndEditing(ROWCOL nRow,ROWCOL nCol) override;
@@ -85,6 +85,9 @@ private:
    void GetLiveLoadData(ROWCOL row,xbrLiveLoadReactionData& reactionData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 };
+
+
+void DDX_LiveLoadReactionsGrid(CDataExchange* pDX, CLiveLoadReactionGrid& grid, txnLiveLoadReactions& llData);
 
 /////////////////////////////////////////////////////////////////////////////
 

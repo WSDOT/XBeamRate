@@ -5,7 +5,16 @@ XBRate is a reinforced concrete cross beam load rating tool. Load ratings are pe
 Factor Ratings and the Washington State Department of Transportation (WSDOT) Bridge Design Manual.
 
 
-XBRate performs design, legal, and permit level ratings. If necessary, load posting analysis is also performed.
+Load rating calculations can be performed for:
+* Inventory
+* Operating
+* Legal Loads with Routine Commercial Traffic
+* Legal Loads with Specialized Hauling Vehicles
+* Legal Loads with Emergency Vehicles
+* Permit Loads for routine or annual permits
+* Permit Loads for special or limited crossing permits
+
+> NOTE: Legal Loads with Emergency Vehicles load rating is defined in FHWA Memorandum dated November 3, 2016 (https://www.fhwa.dot.gov/bridge/loadrating/161103.pdf). FHWA published the explainitory document [QUESTIONS AND ANSWERS Load Rating for the FAST Act's Emergency Vehicles](https://www.fhwa.dot.gov/bridge/loadrating/fast1410_qa.pdf), dated March 2017.
 
 
 XBRate is part of the BridgeLink suite of applications published by WSDOT. XBRate functions as a general purpose, stand alone rating program. It also extends the PGSuper

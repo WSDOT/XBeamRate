@@ -26,7 +26,9 @@
 #include "PierLayoutPage.h"
 #include <XBeamRateExt\ReinforcementPage.h>
 #include "BearingsPage.h"
-#include "LiveLoadReactionsPage.h"
+#include "DesignLiveLoadReactionsPage.h"
+#include "LegalLiveLoadReactionsPage.h"
+#include "PermitLiveLoadReactionsPage.h"
 #include "txnEditPier.h"
 
 // CPierDlg
@@ -71,13 +73,17 @@ public:
    friend CPierLayoutPage;
    friend CReinforcementPage;
    friend CBearingsPage;
-   friend CLiveLoadReactionsPage;
+   friend CDesignLiveLoadReactionsPage;
+   friend CLegalLiveLoadReactionsPage;
+   friend CPermitLiveLoadReactionsPage;
 
    CSuperstructureLayoutPage m_SuperstructurePage;
    CPierLayoutPage m_SubstructurePage;
    CReinforcementPage m_ReinforcementPage;
    CBearingsPage m_BearingsPage;
-   CLiveLoadReactionsPage m_LiveLoadPage;
+   CDesignLiveLoadReactionsPage m_DesignLiveLoadPage;
+   CLegalLiveLoadReactionsPage m_LegalLiveLoadPage;
+   CPermitLiveLoadReactionsPage m_PermitLiveLoadPage;
 };
 
 

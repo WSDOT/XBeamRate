@@ -120,6 +120,8 @@ BOOL CXBeamRatePluginApp::InitInstance()
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+   GXInit();
+
    SetRegistryKey( _T("Washington State Department of Transportation") );
 
    // Using a shared menu
@@ -136,6 +138,7 @@ int CXBeamRatePluginApp::ExitInstance()
    // release the shared menu
    //::DestroyMenu( m_hSharedMenu );
 
+   GXForceTerminate();
    _Module.Term();
    return CWinApp::ExitInstance();
 }

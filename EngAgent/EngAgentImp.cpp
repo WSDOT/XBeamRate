@@ -1137,6 +1137,9 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
       pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].release();
       pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)].release();
 
+      pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)].release();
+      pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)].release();
+
       pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].release();
       pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)].release();
 
@@ -1155,7 +1158,8 @@ void CEngAgentImp::Invalidate(bool bCreateNewDataStructures)
       pDataStructures->m_pDvDetails[i] = m_pDvDetails[i].release();
    }
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pDataStructures->m_pRatingArtifacts[i] = m_pRatingArtifacts[i].release();
    }
@@ -1193,8 +1197,11 @@ void CEngAgentImp::CreateDataStructures()
       m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
       m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
 
-      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
-      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType, MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)] = std::make_unique<std::map<IDType, MinMomentCapacityDetails>>();
+
+      m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)] = std::make_unique<std::map<IDType, MinMomentCapacityDetails>>();
+      m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)] = std::make_unique<std::map<IDType, MinMomentCapacityDetails>>();
 
       m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
       m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)] = std::make_unique<std::map<IDType,MinMomentCapacityDetails>>();
@@ -1215,7 +1222,8 @@ void CEngAgentImp::CreateDataStructures()
       m_pDvDetails[i] = std::make_unique<std::map<IDType,DvDetails>>();
    }
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       m_pRatingArtifacts[i] = std::make_unique<std::map<PierIDType,RatingArtifacts>>();
    }
@@ -1245,6 +1253,9 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
       delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)];
       delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalSpecial)];
 
+      delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)];
+      delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthI_LegalEmergency)];
+
       delete pDataStructures->m_pPositiveMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)];
       delete pDataStructures->m_pNegativeMinMomentCapacity[i][GET_INDEX(pgsTypes::StrengthII_PermitRoutine)];
 
@@ -1264,7 +1275,8 @@ UINT CEngAgentImp::DeleteDataStructures(LPVOID pParam)
       delete pDataStructures->m_pDvDetails[i];
    }
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       delete pDataStructures->m_pRatingArtifacts[i];
    }

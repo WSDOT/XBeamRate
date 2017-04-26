@@ -123,12 +123,19 @@ void txnEditPier::Execute(int i)
    pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
    pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalRoutine,m_PierData[i].m_gPS_StrengthI);
 
-   pProject->SetDCLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gDC_StrengthI);
-   pProject->SetDWLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gDW_StrengthI);
-   pProject->SetCRLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gCR_StrengthI);
-   pProject->SetSHLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gSH_StrengthI);
-   pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
-   pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalSpecial,m_PierData[i].m_gPS_StrengthI);
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gPS_StrengthI);
+
+   pProject->SetDCLoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gDC_StrengthI);
+   pProject->SetDWLoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gDW_StrengthI);
+   pProject->SetCRLoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gCR_StrengthI);
+   pProject->SetSHLoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gSH_StrengthI);
+   pProject->SetRELoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gCR_StrengthI); // using creep factor for relaxation
+   pProject->SetPSLoadFactor(pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gPS_StrengthI);
 
    pProject->SetDCLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gDC_StrengthI);
    pProject->SetDWLoadFactor(pgsTypes::StrengthII_PermitRoutine,m_PierData[i].m_gDW_StrengthI);
@@ -158,21 +165,21 @@ void txnEditPier::Execute(int i)
    pProject->SetRELoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gCR_ServiceI); // using creep factor for relaxation
    pProject->SetPSLoadFactor(pgsTypes::ServiceI_PermitSpecial,m_PierData[i].m_gPS_ServiceI);
 
-   pProject->SetReactionLoadApplicationType(pierID,m_PierData[i].m_LiveLoadReactionApplication);
-
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthI_Inventory,      m_PierData[i].m_gLL[0]);
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthI_Operating,      m_PierData[i].m_gLL[1]);
    pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalRoutine,   m_PierData[i].m_gLL[2]);
-   pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthI_LegalSpecial,   m_PierData[i].m_gLL[3]);
-   pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine, m_PierData[i].m_gLL[4]);
-   pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial, m_PierData[i].m_gLL[5]);
-   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,   m_PierData[i].m_gLL[6]);
-   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,   m_PierData[i].m_gLL[7]);
+   pProject->SetLiveLoadFactor(pierID, pgsTypes::StrengthI_LegalSpecial, m_PierData[i].m_gLL[3]);
+   pProject->SetLiveLoadFactor(pierID, pgsTypes::StrengthI_LegalEmergency, m_PierData[i].m_gLL[4]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitRoutine, m_PierData[i].m_gLL[5]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::StrengthII_PermitSpecial, m_PierData[i].m_gLL[6]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitRoutine,   m_PierData[i].m_gLL[7]);
+   pProject->SetLiveLoadFactor(pierID,pgsTypes::ServiceI_PermitSpecial,   m_PierData[i].m_gLL[8]);
 
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Inventory, m_PierData[i].m_DesignLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrDesign_Operating, m_PierData[i].m_DesignLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrLegal_Routine,    m_PierData[i].m_LegalRoutineLiveLoad.m_LLIM);
-   pProject->SetLiveLoadReactions(pierID,pgsTypes::lrLegal_Special,    m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID, pgsTypes::lrLegal_Special, m_PierData[i].m_LegalSpecialLiveLoad.m_LLIM);
+   pProject->SetLiveLoadReactions(pierID, pgsTypes::lrLegal_Emergency, m_PierData[i].m_LegalEmergencyLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrPermit_Routine,   m_PierData[i].m_PermitRoutineLiveLoad.m_LLIM);
    pProject->SetLiveLoadReactions(pierID,pgsTypes::lrPermit_Special,   m_PierData[i].m_PermitSpecialLiveLoad.m_LLIM);
 

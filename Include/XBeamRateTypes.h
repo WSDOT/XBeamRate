@@ -99,6 +99,12 @@ typedef struct xbrTypes
       prmWSDOT   // use WSDOT BDM Equation 13.1.1A-2
    } PermitRatingMethod;
 
+   typedef enum EmergencyRatingMethod
+   {
+      ermAASHTO, // use AASHTO MBE Equation 6A.4.2.1-1
+      ermWSDOT   // use WSDOT BDM Equation 13.1.1A-2
+   } EmergencyRatingMethod;
+
    typedef enum LoadType
    {
       ltPermanent, // permanent loads 

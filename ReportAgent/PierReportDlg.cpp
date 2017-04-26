@@ -179,6 +179,8 @@ BOOL CPierReportDlg::OnInitDialog()
    {
       CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_PIER);
 
+      m_PierID = INVALID_ID;
+
       GET_IFACE(IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
       PierIndexType nPiers = pBridgeDesc->GetPierCount();
@@ -188,11 +190,23 @@ BOOL CPierReportDlg::OnInitDialog()
          strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
          int idx = pCB->AddString(strPierLabel);
 
-         PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
+         const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);
+         PierIDType pierID = pPier->GetID();
          pCB->SetItemData(idx,(DWORD_PTR)pierID);
+
+         if (pPier->GetPierModelType() == pgsTypes::pmtPhysical && m_PierID == INVALID_ID)
+         {
+            // this is the first physical pier model.... capture its ID so we can
+            // use it to set the default
+            m_PierID = pierID;
+         }
       }
 
-      m_PierID = pBridgeDesc->GetPier(0)->GetID();
+      if (m_PierID == INVALID_ID)
+      {
+         // no physical pier models found, use pier 0 as the default
+         m_PierID = pBridgeDesc->GetPier(0)->GetID();
+      }
    }
 
    CDialog::OnInitDialog();

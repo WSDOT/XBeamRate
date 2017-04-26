@@ -82,9 +82,14 @@ void CXBRLiveLoadGraphController::Dump(CDumpContext& dc) const
 
 void CXBRLiveLoadGraphController::UpdatePermitLaneLabel()
 {
+   pgsTypes::LoadRatingType ratingType = GetLoadRatingType();
+   bool bIsEmergencyRatingType = ::IsEmergencyRatingType(ratingType);
+   bool bIsPermitRatingType = ::IsPermitRatingType(ratingType);
+   ATLASSERT(bIsEmergencyRatingType || bIsPermitRatingType);
+
    IndexType permitLaneIdx = GetPermitLaneIndex();
    CString strLabel;
-   strLabel.Format(_T("Permit vehicle in Lane %d"),(permitLaneIdx+1));
+   strLabel.Format(_T("%s vehicle in Lane %d"), bIsPermitRatingType ? _T("Permit") : _T("Emergency"), (permitLaneIdx+1));
    GetDlgItem(IDC_PERMIT_LANE_NOTE)->SetWindowText(strLabel);
 }
 
@@ -146,7 +151,7 @@ IndexType CXBRLiveLoadGraphController::GetPermitLaneIndex()
    EAFGetBroker(&pBroker);
    GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
    
-   if (::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
+   if (pRatingSpec->IsWSDOTEmergencyRating(ratingType) || pRatingSpec->IsWSDOTPermitRating(ratingType))
    {
       CSpinButtonCtrl* pSpin = (CSpinButtonCtrl*)GetDlgItem(IDC_PERMIT_LANE_SPINNER);
       int curPos = pSpin->GetPos32();
@@ -230,7 +235,8 @@ void CXBRLiveLoadGraphController::FillRatingType()
    CComboBox* pcbRatingType = (CComboBox*)GetDlgItem(IDC_RATING_TYPE);
    int curSel = pcbRatingType->GetCurSel();
    pcbRatingType->ResetContent();
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 
@@ -316,11 +322,13 @@ void CXBRLiveLoadGraphController::RatingTypeChanged()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2_NOCHECK(pBroker,IXBRRatingSpecification,pRatingSpec);
-   if ( ::IsPermitRatingType(ratingType) && pRatingSpec->GetPermitRatingMethod() == xbrTypes::prmWSDOT )
+   if (pRatingSpec->IsWSDOTEmergencyRating(ratingType) || pRatingSpec->IsWSDOTPermitRating(ratingType))
    {
       GetDlgItem(IDC_PERMIT_LANE_NOTE)->ShowWindow(SW_SHOW);
       GetDlgItem(IDC_PERMIT_LANE)->ShowWindow(SW_SHOW);
       GetDlgItem(IDC_PERMIT_LANE_SPINNER)->ShowWindow(SW_SHOW);
+
+      UpdatePermitLaneLabel();
    }
    else
    {

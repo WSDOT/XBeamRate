@@ -403,20 +403,27 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
 
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Inventory/Operating)"),pgsTypes::lrDesign_Inventory));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Legal Routine)"),      pgsTypes::lrLegal_Routine));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Legal Special)"),      pgsTypes::lrLegal_Special));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++, _T("LLIM (Legal Special)"), pgsTypes::lrLegal_Special));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++, _T("LLIM (Legal Emergency)"), pgsTypes::lrLegal_Emergency));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Routine)"),     pgsTypes::lrPermit_Routine));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("LLIM (Permit Special)"),     pgsTypes::lrPermit_Special));
 
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Inventory)"),      pgsTypes::StrengthI_Inventory));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Operating)"),      pgsTypes::StrengthI_Operating));
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Routine)"),  pgsTypes::StrengthI_LegalRoutine));
-   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength I (Legal Special)"),  pgsTypes::StrengthI_LegalSpecial));
+   m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++, _T("Strength I (Legal Special)"), pgsTypes::StrengthI_LegalSpecial));
+   GET_IFACE2(pBroker, IXBRRatingSpecification, pRatingSpec);
+   if (pRatingSpec->GetEmergencyRatingMethod() != xbrTypes::prmWSDOT)
+   {
+      // NOTE: Strength I limit state doesn't make sense for WSDOT Emergency vehicle method. The graphs show the limit state based on a controlling envelope. For the WSDOT method
+      // we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combination of Legal and Emergency loads
+      m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++, _T("Strength I (Legal Emergency)"), pgsTypes::StrengthI_LegalEmergency));
+   }
 
-   GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
    if ( pRatingSpec->GetPermitRatingMethod() != xbrTypes::prmWSDOT )
    {
       // NOTE: Strength II limit state doesn't make sense for WSDOT method. The graphs show the limit state based on a controlling envelope. For the WSDOT method
-      // we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combinatin of Legal and Permit loads
+      // we don't have a controlling envelope per se. WSDOT method minimizes RF based on a combination of Legal and Permit loads
       m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Routine)"),pgsTypes::StrengthII_PermitRoutine));
       m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Strength II (Permit Special)"),pgsTypes::StrengthII_PermitSpecial));
    }

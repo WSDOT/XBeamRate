@@ -21,6 +21,7 @@ Item | Description
 -----|------------
 Perform load rating analysis | When checked, legal load rating analysis is performed for flexure
 Rate for Shear | When checked, legal load rating analysis is performed for shear
+Compute emergency vehicle rating factors using | Select the option for computing the emergency vehicle rating factors.
 
 ## Permit Load Rating
 Item | Description

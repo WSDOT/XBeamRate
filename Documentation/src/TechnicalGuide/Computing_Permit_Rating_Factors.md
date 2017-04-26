@@ -1,20 +1,19 @@
-Computing Permit Rating Factors {#computing_permit_rating_factors}
+Computing Emergency Vehicle and Permit Rating Factors {#computing_permit_rating_factors}
 ======================================
 
-Section 13.1.1 of the WSDOT BDM provides a modified procedure for computing rating factors for Level 3 (Permit) ratings. Rating factors are computed as
+Section 13.1.1 of the WSDOT BDM provides a modified procedure for computing rating factors for Emergency and Permit Vehicle ratings. Rating factors are computed as
 ![WSDOT BDM Eq 13.1.1A-2](RF.png)
 
-The governing combination of legal and permit live load is the one that minimizes RF. The myriad of lane positions and locations of the permit vehicle within the arrangement
-of lanes makes it difficult to efficiently compute the minimum rating factor.
+The governing combination of legal and emergency/permit live load is the one that minimizes RF. The myriad of lane positions and locations of the emergency/permit vehicle within the arrangement of lanes makes it difficult to efficiently compute the minimum rating factor.
 
 
-XBRate uses a simplified approach to reduce the number of combinations of loaded lanes and permit vehicle locations that must be evaluated to determine the rating factor.
+XBRate uses a simplified approach to reduce the number of combinations of loaded lanes and emergency/permit vehicle locations that must be evaluated to determine the rating factor.
 
 
 The cross beam is evaluated for one or more loaded lanes, with vehicles of the same weight in each lane during the design and legal load rating analysis. During this analysis, the load cases that produce the 10 greatest positive moment, negative moment, and shear at each rating location is recorded.
 
 
-The permit case is evaluated with this subset of load cases, substituting the permit vehicle into each loaded lane and the maximum legal load vehicle into the remaining lanes. 
+The emergency/permit case is evaluated with this subset of load cases, substituting the emergency/permit vehicle into each loaded lane and the maximum legal load vehicle into the remaining lanes. 
 
 
 Example:

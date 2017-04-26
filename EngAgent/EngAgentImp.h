@@ -136,8 +136,8 @@ private:
    std::unique_ptr<std::map<IDType,CrackingMomentDetails>> m_pPositiveCrackingMoment[2]; // key = POI ID, array index = xbrTypes::Stage
    std::unique_ptr<std::map<IDType,CrackingMomentDetails>> m_pNegativeCrackingMoment[2];
 
-   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][6]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
-   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][6];
+   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pPositiveMinMomentCapacity[2][pgsTypes::lrLoadRatingTypeCount]; // key = POI ID, array index = xbrTypes::Stage, second array index is based on limit state type.use GET_INDEX(limitState) macro
+   std::unique_ptr<std::map<IDType,MinMomentCapacityDetails>> m_pNegativeMinMomentCapacity[2][pgsTypes::lrLoadRatingTypeCount];
 
    std::unique_ptr<std::map<IDType,CrackedSectionDetails>> m_pPositiveMomentCrackedSection[2][2]; // key = POI ID, array index = [xbrTypes::Stage][xbrTypes::LoadType]
    std::unique_ptr<std::map<IDType,CrackedSectionDetails>> m_pNegativeMomentCrackedSection[2][2];
@@ -162,7 +162,7 @@ private:
 
    // rating artifacts for vehicleIdx == INVALID_INDEX are the governing artifacts for a load rating type
    typedef std::map<VehicleIndexType,xbrRatingArtifact> RatingArtifacts;
-   std::unique_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[6]; // array index is pgsTypes::LoadRatingType
+   std::unique_ptr<std::map<PierIDType,RatingArtifacts>> m_pRatingArtifacts[pgsTypes::lrLoadRatingTypeCount]; // array index is pgsTypes::LoadRatingType
    RatingArtifacts& GetPrivateRatingArtifacts(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
    void CreateRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
@@ -183,13 +183,13 @@ private:
       std::map<IDType,CrackingMomentDetails>* m_pPositiveCrackingMoment[2];
       std::map<IDType,CrackingMomentDetails>* m_pNegativeCrackingMoment[2];
 
-      std::map<IDType,MinMomentCapacityDetails>* m_pPositiveMinMomentCapacity[2][6];
-      std::map<IDType,MinMomentCapacityDetails>* m_pNegativeMinMomentCapacity[2][6];
+      std::map<IDType,MinMomentCapacityDetails>* m_pPositiveMinMomentCapacity[2][pgsTypes::lrLoadRatingTypeCount];
+      std::map<IDType,MinMomentCapacityDetails>* m_pNegativeMinMomentCapacity[2][pgsTypes::lrLoadRatingTypeCount];
 
       std::map<IDType,CrackedSectionDetails>* m_pPositiveMomentCrackedSection[2][2];
       std::map<IDType,CrackedSectionDetails>* m_pNegativeMomentCrackedSection[2][2];
 
-      std::map<PierIDType,RatingArtifacts>* m_pRatingArtifacts[6];
+      std::map<PierIDType,RatingArtifacts>* m_pRatingArtifacts[pgsTypes::lrLoadRatingTypeCount];
 
       std::map<IDType,ShearCapacityDetails>* m_pShearCapacity[2];
       std::map<IDType,AvOverSDetails>* m_pShearFailurePlane[2];

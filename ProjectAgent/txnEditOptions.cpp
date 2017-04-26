@@ -61,15 +61,18 @@ void txnEditOptions::Execute(int i)
    lrfdVersionMgr::SetVersion(m_Options[i].m_LRFDVersion);
    lrfrVersionMgr::SetVersion(m_Options[i].m_LRFRVersion);
 
-   pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
-   pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);
-   pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRateForShear);
-   pRatingSpec->RateForShear(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRateForShear);
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bLegalRating);
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bLegalRating);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Operating,m_Options[i].m_bLegalRateForShear);
 
    pRatingSpec->EnableRating(pgsTypes::lrLegal_Routine,m_Options[i].m_bLegalRating);
-   pRatingSpec->EnableRating(pgsTypes::lrLegal_Special,m_Options[i].m_bLegalRating);
+   pRatingSpec->EnableRating(pgsTypes::lrLegal_Special, m_Options[i].m_bLegalRating);
+   pRatingSpec->EnableRating(pgsTypes::lrLegal_Emergency, m_Options[i].m_bLegalRating);
    pRatingSpec->RateForShear(pgsTypes::lrLegal_Routine,m_Options[i].m_bLegalRateForShear);
-   pRatingSpec->RateForShear(pgsTypes::lrLegal_Special,m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrLegal_Special, m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrLegal_Emergency, m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->SetEmergencyRatingMethod(m_Options[i].m_EmergencyRatingMethod);
 
    pRatingSpec->EnableRating(pgsTypes::lrPermit_Routine,m_Options[i].m_bPermitRating);
    pRatingSpec->EnableRating(pgsTypes::lrPermit_Special,m_Options[i].m_bPermitRating);
@@ -82,6 +85,9 @@ void txnEditOptions::Execute(int i)
    GET_IFACE2(pBroker,IXBRProject,pProject);
    pProject->SetMaxLiveLoadStepSize(m_Options[i].m_MaxLLStepSize);
    pProject->SetMaxLoadedLanes(m_Options[i].m_MaxLoadedLanes);
+
+   pProject->SetReactionLoadApplicationType(INVALID_ID, m_Options[i].m_LiveLoadReactionApplication);
+
    pProject->SetSystemFactorFlexure(m_Options[i].m_SystemFactorFlexure);
    pProject->SetSystemFactorShear(m_Options[i].m_SystemFactorShear);
    pProject->SetFlexureResistanceFactors(m_Options[i].m_PhiC,m_Options[i].m_PhiT);

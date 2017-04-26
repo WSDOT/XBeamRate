@@ -55,7 +55,8 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_CBEnum(pDX,IDC_ANALYSIS_MODE,m_AnalysisType);
 
-   DDX_CBEnum(pDX,IDC_PERMIT_FACTORS,m_PermitRatingMethod);
+   DDX_CBEnum(pDX, IDC_PERMIT_FACTORS, m_PermitRatingMethod);
+   DDX_CBEnum(pDX, IDC_EMERGENCY_FACTORS, m_EmergencyRatingMethod);
 
    DDX_UnitValueAndTag(pDX,IDC_LL_STEP,IDC_LL_STEP_UNIT,m_MaxLLStepSize, pDisplayUnits->GetSpanLengthUnit());
    DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
@@ -74,6 +75,7 @@ END_MESSAGE_MAP()
 BOOL CLoadRatingOptionsPage::OnInitDialog()
 {
    FillAnalysisModeComboBox();
+   FillEmergencyRatingMethodComboBox();
    FillPermitRatingMethodComboBox();
 
    CPropertyPage::OnInitDialog();
@@ -101,14 +103,26 @@ void CLoadRatingOptionsPage::FillAnalysisModeComboBox()
    pCB->SetItemData(idx,(DWORD_PTR)pgsTypes::Envelope);
 }
 
+void CLoadRatingOptionsPage::FillEmergencyRatingMethodComboBox()
+{
+   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_EMERGENCY_FACTORS);
+   pCB->ResetContent();
+
+   int idx = pCB->AddString(_T("AASHTO MBE Equation 6A.4.2.1-1"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::ermAASHTO);
+
+   idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::ermWSDOT);
+}
+
 void CLoadRatingOptionsPage::FillPermitRatingMethodComboBox()
 {
    CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_PERMIT_FACTORS);
    pCB->ResetContent();
 
    int idx = pCB->AddString(_T("AASHTO MBE Equation 6A.4.2.1-1"));
-   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmAASHTO);
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::prmAASHTO);
 
    idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
-   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmWSDOT);
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::prmWSDOT);
 }

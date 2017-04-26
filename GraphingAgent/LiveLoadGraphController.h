@@ -26,8 +26,6 @@
 #include <IFace\AnalysisResults.h>
 #include <GraphingTypes.h>
 
-class CXBRLiveLoadGraphDefinitions;
-
 class CXBRLiveLoadGraphController : public CEAFGraphControlWindow
 {
 public:

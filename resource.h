@@ -36,6 +36,8 @@
 #define IDR_PGSUPERCOMPONENTINFO        300
 #define IDR_PGSPLICECOMPONENTINFO       301
 #define IDC_PERMIT_FACTORS              304
+#define IDC_PERMIT_FACTORS2             305
+#define IDC_EMERGENCY_FACTORS           305
 #define IDC_LL_STEP                     324
 #define IDC_LL_STEP_UNIT                325
 #define IDC_MAX_LANES                   326
@@ -55,7 +57,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        213
+#define _APS_NEXT_RESOURCE_VALUE        214
 #define _APS_NEXT_COMMAND_VALUE         32786
 #define _APS_NEXT_CONTROL_VALUE         204
 #define _APS_NEXT_SYMED_VALUE           103

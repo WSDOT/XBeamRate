@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -92,18 +90,24 @@ END
 //
 
 IDR_XBEAMRATEAPP        REGISTRY                "XBeamRateAppPlugin.rgs"
+
 IDR_COMPONENTINFO       REGISTRY                "ComponentInfo.rgs"
+
 IDR_XBEAMRATEAGENT      REGISTRY                "XBeamRateAgent.rgs"
+
 IDR_PGSUPERCOMPONENTINFO REGISTRY                "PGSuperComponentInfo.rgs"
+
 IDR_PGSPLICECOMPONENTINFO REGISTRY                "PGSpliceComponentInfo.rgs"
+
 IDR_PGSUPEREXPORTER     REGISTRY                "PGSuperExporter.rgs"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_XBEAMRATE MENU 
+IDR_XBEAMRATE MENU
 BEGIN
     POPUP "&File"
     BEGIN
@@ -169,7 +173,7 @@ BEGIN
     END
 END
 
-IDR_REPORTS MENU 
+IDR_REPORTS MENU
 BEGIN
     POPUP "ReportContextMenu"
     BEGIN
@@ -177,7 +181,7 @@ BEGIN
     END
 END
 
-IDR_GRAPHS MENU 
+IDR_GRAPHS MENU
 BEGIN
     POPUP "GraphContextMenu"
     BEGIN
@@ -185,13 +189,13 @@ BEGIN
     END
 END
 
-IDR_PGS_PIER_VIEW_CTX MENU 
+IDR_PGS_PIER_VIEW_CTX MENU
 BEGIN
     MENUITEM "Edit Pier...",                IDM_EDIT_PIER
     MENUITEM "Export to XBRate",            IDM_EXPORT_PIER
 END
 
-IDR_XBR_PIER_VIEW_CTX MENU 
+IDR_XBR_PIER_VIEW_CTX MENU
 BEGIN
     MENUITEM "Edit Pier...",                IDM_EDIT_PIER
     MENUITEM SEPARATOR
@@ -206,17 +210,22 @@ END
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
 IDR_XBEAMRATE           ICON                    "res\\XBeamRate.ico"
+
 IDR_REPORT              ICON                    "res\\ReportView.ico"
+
 IDR_GRAPHING            ICON                    "res\\GraphingView.ico"
+
 IDI_WSDOT               ICON                    "res\\Wsdot.ico"
+
 IDI_PIERVIEW            ICON                    "res\\PierView.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Toolbar
 //
 
-IDR_XBEAMRATE TOOLBAR  16, 16
+IDR_XBEAMRATE TOOLBAR 16, 16
 BEGIN
     BUTTON      ID_FILE_NEW
     BUTTON      ID_FILE_OPEN
@@ -244,7 +253,9 @@ END
 //
 
 IDR_XBEAMRATE           BITMAP                  "res\\toolbar.bmp"
+
 IDB_VIEW_PIER           BITMAP                  "res\\ViewPier.bmp"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -297,14 +308,16 @@ BEGIN
     LTEXT           "When PGSuper is in Envelope Mode, use",IDC_ANALYSIS_MODE_LABEL,14,21,130,8
     COMBOBOX        IDC_ANALYSIS_MODE,148,18,103,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "for the Pier reactions",IDC_STATIC,257,20,68,8
-    LTEXT           "Compute permit rating factors using",IDC_STATIC,14,37,116,8
-    COMBOBOX        IDC_PERMIT_FACTORS,136,36,180,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Maximum Live Load Step Size",IDC_STATIC,14,60,94,8
-    EDITTEXT        IDC_LL_STEP,113,58,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Static",IDC_LL_STEP_UNIT,154,60,19,8
-    LTEXT           "Maximum Number of Lanes",IDC_STATIC,14,79,86,8
-    EDITTEXT        IDC_MAX_LANES,113,76,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,159,75,186,20
+    LTEXT           "Compute emergency vehicle rating factors using",IDC_STATIC,14,37,155,8
+    COMBOBOX        IDC_EMERGENCY_FACTORS,171,35,145,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Compute permit rating factors using",IDC_STATIC,14,52,116,8
+    COMBOBOX        IDC_PERMIT_FACTORS,171,51,145,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Maximum Live Load Step Size",IDC_STATIC,14,75,94,8
+    EDITTEXT        IDC_LL_STEP,113,73,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Static",IDC_LL_STEP_UNIT,154,75,19,8
+    LTEXT           "Maximum Number of Lanes",IDC_STATIC,14,94,86,8
+    EDITTEXT        IDC_MAX_LANES,113,91,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,159,90,186,20
 END
 
 
@@ -313,7 +326,7 @@ END
 // Accelerator
 //
 
-IDR_XBEAMRATE ACCELERATORS 
+IDR_XBEAMRATE ACCELERATORS
 BEGIN
     "Y",            ID_EDIT_REDO,           VIRTKEY, CONTROL, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
@@ -326,7 +339,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ABOUTBOX, DIALOG
     BEGIN
@@ -366,67 +379,78 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_RATING_OPTIONS AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PROJNAME            "XBRate"
     IDR_XBEAMRATE           "Pier View\nXBRate\nXBRate\nXBRate Files (*.xbr)\n.xbr\nXBRate.Document\nXBRate Document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDR_REPORT              "Report\n\n\n\n\n\n"
     IDR_GRAPHING            "Graphing\n\n\n\n\n\n"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_OPEN            "Open an existing document\nOpen"
     ID_FILE_PRINT_SETUP     "Change the printer and printing options\nPrint Setup"
     ID_FILE_PRINT           "Print the active view\nPrint"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
     ID_HELP_FINDER          "List Help topics\nHelp Topics"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_PROJECTNAME     "Edit the Project Name\nEdit the project name"
     ID_VIEW_GRAPHS          "View a graph\nGraphs"
     ID_VIEW_REPORTS         "View a report\nReports"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_VIEW_PIER            "View Pier\nView Pier"
     IDM_EXPORT_PIER         "Export pier model to XBRate\nExport"
     IDM_EDIT_PIER           "Edit Pier\nEdit Pier"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_EDIT_UNDO            "Undo\nUndo (Ctrl+Z)"
     ID_EDIT_REDO            "Redo\nRedo (Ctrl+Y)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     ID_WINDOW_NEW           "Open another window for the active document\nNew Window"
     ID_WINDOW_ARRANGE       "Arrange icons at the bottom of the window\nArrange Icons"
@@ -436,7 +460,7 @@ BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

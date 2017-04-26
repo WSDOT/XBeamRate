@@ -38,6 +38,7 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
+   void FillEmergencyFactorList();
    void FillPermitFactorList();
    void FillLRFDList();
    void FillLRFRList();

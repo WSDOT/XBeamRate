@@ -17,7 +17,7 @@ Select the AASHTO LRFD Bridge Design Specification and AASHTO Manual for Bridge 
 Use the check boxes to indicate if the Design Rating analysis is performed, and if so, if a load rating analysis for shear is to be performed.
 
 #### Legal Load Rating
-Use the check boxes to indicate if the Legal Load Rating analysis is performed, and if so, if a load rating analysis for shear is to be performed.
+Use the check boxes to indicate if the Legal Load Rating analysis is performed, and if so, if a load rating analysis for shear is to be performed. Indicate the method of analysis for determining the emergency vehicle rating factors.
 
 #### Permit Load Rating
 Use the check boxes to indicate if the Permit Load Rating analysis is performed, and if so, if a load rating analysis for shear is to be performed. Additionally, indicate if the reinforcement is to be checked for yielding by MBE 6A.5.4.2.2b and indicate the method of analysis for determining the permit rating factors.
@@ -36,6 +36,13 @@ XBRate determines live load moments and shears by placing many combinations of l
 
 ### Maximum Number of Lanes
 The number of lanes to be analyzed is determined by AASHTO MBE 6A.2.3.2. Governing cases typically occur when fewer than the maximum number of lanes are loaded. This parameter sets the maximum number of lanes to be considered in the live load analysis. Using fewer lanes will increase the speed of the analysis. Enter the maximum number of lanes to be considered or the keyword "ALL" if all lanes are to be loaded.
+
+### Live Load Reactions
+Live load reactions can be applied directly to the cross beam or applied through the bearing locations.
+
+When applied directly to the cross beam, the live loads are applied to the cross beam member of the analysis model as described in WSDOT BDM 3.9.4E.
+
+In general, live load reactions are applied directly to the cross beam for Continuous and Integral piers and through the bearings for Expansion piers.
 
 
 ### Capacity
@@ -62,6 +69,14 @@ Simple | Use the reactions from a simple span analysis for cross beam load ratin
 Continuous | Use the reactions from a simple span made continuous analysis for cross beam load rating
 Envelope | Use the greater of the simple span and simple span made continuous analyses for cross beam load rating
 
+### Emergency Vehicle Rating Factor
+WSDOT deviates from AASHTO when computing emergency vehicle rating factors for cross beams. Use the drop down list to select how emergency vehicle rating factors are computed.
+
+
+Option | Description
+-------|----------------
+AASHTO MBE Equation 6A.4.2.1-1 | Emergency vehicle load ratings are performed by the method described in the AASHTO MBE. A single lane containing the emergency vehicle is analyzed recognizing that the load factors have been calibrated to represent legal loads elsewhere on the bridge.
+WSDOT BDM Equation  13.1.1A-2 | Emergency vehicle load rates are performed by the method described in the WSDOT BDM. A single emergenc vehicle is located in one lane and the governing legal load case is placed in the adjacent lanes on the structure.
 
 ### Permit Rating Factor
 WSDOT deviates from AASHTO when computing permit rating factors for cross beams. Use the drop down list to select how permit rating factors are computed.
@@ -73,7 +88,8 @@ AASHTO MBE Equation 6A.4.2.1-1 | Permit load ratings are performed by the method
 WSDOT BDM Equation  13.1.1A-2 | Permit load rates are performed by the method described in the WSDOT BDM. A single permit vehicle is located in one lane and the governing legal load case is placed in the adjacent lanes on the structure.
 
 
-
+### Live Load Step Size
 Enter the maximum live load step size as described above.
 
+### Number of Lanes
 Enter the maximum number of lanes as described above.

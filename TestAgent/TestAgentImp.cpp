@@ -199,7 +199,8 @@ void CTestAgentImp::RunLiveLoadActionsTest(std::_tostream& os,LPCTSTR lpszProces
 {
    GET_IFACE(IXBRAnalysisResults,pResults);
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 
@@ -393,7 +394,8 @@ void CTestAgentImp::RunLoadRatingTest(std::_tostream& os,LPCTSTR lpszProcessID,P
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRArtifact,pArtifact);
 
-   for ( int i = 0; i < 6; i++ )
+   int n = (int)pgsTypes::lrLoadRatingTypeCount;
+   for ( int i = 0; i < n; i++ )
    {
       pgsTypes::LoadRatingType ratingType = (pgsTypes::LoadRatingType)i;
 

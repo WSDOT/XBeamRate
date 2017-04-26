@@ -27,7 +27,7 @@
 
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
-#include <PgsExt\PierData2.h>
+#include <PgsExt\BridgeDescription2.h>
 
 #include <IFace\DocumentType.h>
 #include <IFace\Bridge.h>
@@ -635,6 +635,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
    GET_IFACE(IXBRRatingSpecification,pSpec);
    pPage->m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
    pPage->m_PermitRatingMethod = pSpec->GetPermitRatingMethod();
+   pPage->m_EmergencyRatingMethod = pSpec->GetEmergencyRatingMethod();
 
    GET_IFACE(IXBRProject,pProject);
    pPage->m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
@@ -652,6 +653,7 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    txnLoadRatingOptions oldOptions;
    oldOptions.m_AnalysisType = pSpec->GetAnalysisMethodForReactions();
    oldOptions.m_PermitRatingMethod = pSpec->GetPermitRatingMethod();
+   oldOptions.m_EmergencyRatingMethod = pSpec->GetEmergencyRatingMethod();
 
    GET_IFACE(IXBRProject,pProject);
    oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
@@ -660,6 +662,7 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    txnLoadRatingOptions newOptions;
    newOptions.m_AnalysisType = pLROPage->m_AnalysisType;
    newOptions.m_PermitRatingMethod = pLROPage->m_PermitRatingMethod;
+   newOptions.m_EmergencyRatingMethod = pLROPage->m_EmergencyRatingMethod;
    newOptions.m_MaxLLStepSize = pLROPage->m_MaxLLStepSize;
    newOptions.m_MaxLoadedLanes = pLROPage->m_MaxLoadedLanes;
 

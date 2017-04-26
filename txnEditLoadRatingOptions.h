@@ -26,6 +26,7 @@ struct txnLoadRatingOptions
 {
    pgsTypes::AnalysisType m_AnalysisType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
    Float64 m_MaxLLStepSize;
    IndexType m_MaxLoadedLanes;
 };

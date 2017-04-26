@@ -53,6 +53,7 @@ m_strVehicleName(_T("Unknown"))
 
    m_RatingType = pgsTypes::lrDesign_Inventory;
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
+   m_EmergencyRatingMethod = xbrTypes::ermAASHTO;
 
    m_VehicleIdx = INVALID_INDEX;
    m_VehicleWeight = -999999;
@@ -130,6 +131,17 @@ void xbrMomentRatingArtifact::SetRatingType(pgsTypes::LoadRatingType ratingType)
 pgsTypes::LoadRatingType xbrMomentRatingArtifact::GetLoadRatingType() const
 {
    return m_RatingType;
+}
+
+void xbrMomentRatingArtifact::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod)
+{
+   m_EmergencyRatingMethod = emergencyRatingMethod;
+   m_bRFComputed = false;
+}
+
+xbrTypes::EmergencyRatingMethod xbrMomentRatingArtifact::GetEmergencyRatingMethod() const
+{
+   return m_EmergencyRatingMethod;
 }
 
 void xbrMomentRatingArtifact::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod)
@@ -401,7 +413,11 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
       return m_RF;
    }
 
-   if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+   if ( 
+      (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+      ||
+      (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+      )
    {
       // we don't know which combination of permit and legal loads cause the minimum rating factor
       // so we have to check them all.... the min rating factor could happen when the legal load
@@ -642,6 +658,7 @@ void xbrMomentRatingArtifact::MakeCopy(const xbrMomentRatingArtifact& rOther)
    m_POI                        = rOther.m_POI;
    m_RatingType                 = rOther.m_RatingType;
    m_PermitRatingMethod         = rOther.m_PermitRatingMethod;
+   m_EmergencyRatingMethod      = rOther.m_EmergencyRatingMethod;
    m_VehicleIdx                 = rOther.m_VehicleIdx;
    m_VehicleWeight              = rOther.m_VehicleWeight;
    m_strVehicleName             = rOther.m_strVehicleName;
@@ -699,7 +716,11 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64
       Float64 C = p * m_CapacityRedutionFactor * K * m_Mn;
       Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
 
-      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+      if (
+         (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+         ||
+         (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+         )
       {
          RFtop -= m_gLL*MllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
       }

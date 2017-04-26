@@ -64,6 +64,7 @@ void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_Check_Bool(pDX,IDC_LEGAL_RATING,pParent->m_Options.m_bLegalRating);
    DDX_Check_Bool(pDX,IDC_LEGAL_SHEAR,pParent->m_Options.m_bLegalRateForShear);
+   DDX_CBEnum(pDX, IDC_EMERGENCY_FACTORS, pParent->m_Options.m_EmergencyRatingMethod);
 
    DDX_Check_Bool(pDX,IDC_PERMIT_RATING,pParent->m_Options.m_bPermitRating);
    DDX_Check_Bool(pDX,IDC_PERMIT_SHEAR,pParent->m_Options.m_bPermitRateForShear);
@@ -89,6 +90,7 @@ END_MESSAGE_MAP()
 
 BOOL CRatingOptionsPage::OnInitDialog()
 {
+   FillEmergencyFactorList();
    FillPermitFactorList();
 
    GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(lrfdVersionMgr::GetCodeString());
@@ -105,16 +107,28 @@ BOOL CRatingOptionsPage::OnInitDialog()
    // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CRatingOptionsPage::FillEmergencyFactorList()
+{
+   CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_EMERGENCY_FACTORS);
+   pCB->ResetContent();
+
+   int idx = pCB->AddString(_T("AASHTO MBE Equation 6A.4.2.1-1"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::ermAASHTO);
+
+   idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::ermWSDOT);
+}
+
 void CRatingOptionsPage::FillPermitFactorList()
 {
    CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_PERMIT_FACTORS);
    pCB->ResetContent();
 
    int idx = pCB->AddString(_T("AASHTO MBE Equation 6A.4.2.1-1"));
-   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmAASHTO);
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::prmAASHTO);
 
    idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
-   pCB->SetItemData(idx,(DWORD_PTR)xbrTypes::prmWSDOT);
+   pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::prmWSDOT);
 }
 
 void CRatingOptionsPage::FillLRFDList()
@@ -156,6 +170,7 @@ void CRatingOptionsPage::OnBnClickedLegalRating()
    // TODO: Add your control notification handler code here
    BOOL bEnable = (IsDlgButtonChecked(IDC_LEGAL_RATING) == BST_CHECKED) ? TRUE : FALSE;
    GetDlgItem(IDC_LEGAL_SHEAR)->EnableWindow(bEnable);
+   GetDlgItem(IDC_EMERGENCY_FACTORS)->EnableWindow(bEnable);
 }
 
 void CRatingOptionsPage::OnBnClickedPermitRating()

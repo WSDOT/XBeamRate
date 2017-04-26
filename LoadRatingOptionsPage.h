@@ -22,7 +22,6 @@
 
 #pragma once
 
-
 // CLoadRatingOptionsPage dialog
 
 class CLoadRatingOptionsPage : public CPropertyPage
@@ -39,6 +38,7 @@ public:
 
    pgsTypes::AnalysisType m_AnalysisType;
    xbrTypes::PermitRatingMethod m_PermitRatingMethod;
+   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
    Float64 m_MaxLLStepSize;
    IndexType m_MaxLoadedLanes;
 
@@ -46,6 +46,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    void FillAnalysisModeComboBox();
+   void FillEmergencyRatingMethodComboBox();
    void FillPermitRatingMethodComboBox();
 
    afx_msg void OnHelp();
