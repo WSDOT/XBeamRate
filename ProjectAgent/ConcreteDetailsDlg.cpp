@@ -97,7 +97,7 @@ CString CConcreteDetailsDlg::UpdateEc(const CString& strFc,const CString& strDen
        sysTokenizer::ParseDouble(strDensity,&density) &&
        sysTokenizer::ParseDouble(strK1,&k1) &&
        sysTokenizer::ParseDouble(strK2,&k2) &&
-       0 < density && 0 < fc && 0 < k1 && 0 < k2
+       0 <= density && 0 <= fc && 0 <= k1 && 0 <= k2
        )
    {
          CComPtr<IBroker> pBroker;
