@@ -131,7 +131,7 @@ void write_superstructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,
    row++;
 
    (*pTable)(row,0) << _T("Curb line measured from");
-   (*pTable)(row,1) << (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtAlignment ? _T("Alignment") : _T("BridgeLink"));
+   (*pTable)(row,1) << (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtAlignment ? _T("Alignment") : _T("BridgeLine"));
    row++;
 
    (*pTable)(row,0) << _T("Skew");
