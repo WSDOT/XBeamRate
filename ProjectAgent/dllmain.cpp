@@ -48,6 +48,9 @@ CProjectAgentModuleApp theApp;
 BOOL CProjectAgentModuleApp::InitInstance()
 {
    GXInit();
+
+   SetRegistryKey(_T("Washington State Department of Transportation"));
+
    return CWinApp::InitInstance();
 }
 
