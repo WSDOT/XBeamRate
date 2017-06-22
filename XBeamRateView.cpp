@@ -47,7 +47,8 @@
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFDisplayUnits.h>
-#include <MFCTools\WsdotCalculationSheet.h>
+
+#include "XBRateCalculationSheet.h"
 
 #include <PgsExt\BridgeDescription2.h>
 
@@ -158,11 +159,10 @@ BOOL CXBeamRateView::OnPreparePrinting(CPrintInfo* pInfo)
 void CXBeamRateView::OnPrint(CDC* pDC, CPrintInfo* pInfo) 
 {
    // get paper size
-   WsdotCalculationSheet border;
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   XBRateCalculationSheet border(pBroker);
 
-   CDocument* pdoc = GetDocument();
-   CString path = pdoc->GetPathName();
-   border.SetFileName(path);
    CRect rcPrint = border.Print(pDC, 1);
 
    // want to offset picture away from borders - get device units for 10mm
