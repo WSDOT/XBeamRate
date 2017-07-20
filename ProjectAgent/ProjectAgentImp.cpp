@@ -3305,8 +3305,8 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    // Lower Cross Beam
    Float64 H1, H2, H3, H4;
    Float64 X1, X2, X3, X4, W;
-   pPier->GetXBeamDimensions(pgsTypes::pstLeft, &H1,&H2,&X1,&X2);
-   pPier->GetXBeamDimensions(pgsTypes::pstRight,&H3,&H4,&X3,&X4);
+   pPier->GetXBeamDimensions(pgsTypes::stLeft, &H1,&H2,&X1,&X2);
+   pPier->GetXBeamDimensions(pgsTypes::stRight,&H3,&H4,&X3,&X4);
    W = pPier->GetXBeamWidth();
    pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,X3,X4,W);
 
