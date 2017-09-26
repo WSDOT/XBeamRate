@@ -303,6 +303,10 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
             {
                vehIdx = maxLLRightConfigIdx;
             }
+            else
+            {
+               ATLASSERT(false); // should never get here
+            }
 
             sysSectionValue Vmin, Vmax;
             IndexType minLLConfigIdx, maxLLConfigIdx;

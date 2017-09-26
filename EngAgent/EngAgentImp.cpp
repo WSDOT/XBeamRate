@@ -449,10 +449,51 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       solution->get_Yflange(&Yflange);
       dc = (Cweb*Yweb + Cflange*Yflange)/(Cweb + Cflange);
 
-      Float64 T;
-      solution->get_T(&T);
-      Float64 MomentArm = fabs(Mn/T);
-      de = dc + MomentArm;
+      // compute de... distance from extreme compression fiber to
+      // centroid of tensile force in tension reinforcement
+      //
+      // The solution has the location of the resultant tension force, but this
+      // includes compression reinforcement. Find the resultant location for
+      // only the reinforcement in tension
+      Float64 sumT = 0;
+      Float64 sumTd = 0;
+      CComPtr<IDblArray> vfs;
+      solution->get_fs(&vfs);
+      CollectionIndexType nRebarLayers;
+      rcBeam->get_RebarLayerCount(&nRebarLayers);
+      for (IndexType idx = 0; idx < nRebarLayers; idx++)
+      {
+         Float64 ds, As, devFactor;
+         rcBeam->GetRebarLayer(idx, &ds, &As, &devFactor);
+         Float64 f;
+         vfs->get_Item(idx, &f);
+         if (0 < f)
+         {
+            Float64 T = devFactor*As*f;
+            sumT += T;
+            sumTd += T*ds;
+         }
+      }
+
+      CComPtr<IDblArray> vfps;
+      solution->get_fps(&vfps);
+      CollectionIndexType nStrandLayers;
+      rcBeam->get_StrandLayerCount(&nStrandLayers);
+      for (IndexType idx = 0; idx < nStrandLayers; idx++)
+      {
+         Float64 ds, As, devFactor;
+         rcBeam->GetStrandLayer(idx, &ds, &As, &devFactor);
+         Float64 f;
+         vfps->get_Item(idx, &f);
+         if (0 < f)
+         {
+            Float64 T = devFactor*As*f;
+            sumT += T;
+            sumTd += T*ds;
+         }
+      }
+
+      de = IsZero(sumT) ? 0 : sumTd / sumT;
    }
 
    MomentCapacityDetails capacityDetails;
@@ -841,27 +882,12 @@ void CEngAgentImp::BuildMomentCapacityModel(PierIDType pierID,xbrTypes::Stage st
    GET_IFACE(IXBRMaterial,pMaterial);
    Float64 fc = pMaterial->GetXBeamFc(pierID);
    rcBeam->put_FcBeam(fc);
-
-   //if ( IsStandAlone() )
-   //{
-      rcBeam->put_FcSlab(fc);
-   //}
-   //else
-   //{
-   //   GET_IFACE(IIntervals,pIntervals);
-   //   IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
-
-   //   GET_IFACE(IMaterials,pMaterials);
-   //   Float64 fcSlab = pMaterials->GetDeckDesignFc(loadRatingIntervalIdx);
-   //   rcBeam->put_FcSlab(fcSlab);
-   //}
+   rcBeam->put_FcSlab(fc);
 
    Float64 Es, fy, fu;
    pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
    rcBeam->put_fy(fy);
    rcBeam->put_Es(Es);
-
-   Float64 tDeck = pProject->GetDeckThickness(pierID);
 
    GET_IFACE(IXBRRebar,pRebar);
    CComPtr<IRebarSection> rebarSection;
