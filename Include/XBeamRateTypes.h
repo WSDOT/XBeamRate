@@ -112,4 +112,11 @@ typedef struct xbrTypes
       // used for cracked section properties (See LRFD 5.7.1 and MBE example in appendix A2)
    } LoadType;
 
+   typedef enum XBeamLocation
+   {
+      xblTopUpperXBeam,
+      xblTopLowerXBeam,
+      xblBottomXBeam
+   } XBeamLocation;
+
 } xbrTypes;

@@ -131,6 +131,8 @@ public:
 
    Float64 GetAllowableStress() const;
    Float64 GetRebarStress() const;
+   Float64 GetFdl() const;
+   Float64 GetFll() const;
    Float64 GetStressRatio() const;
 
 protected:
@@ -139,6 +141,8 @@ protected:
 
    mutable bool m_bRFComputed;
    mutable Float64 m_StressRatio;
+   mutable Float64 m_fdl;
+   mutable Float64 m_fll;
 
    xbrPointOfInterest m_POI;
 

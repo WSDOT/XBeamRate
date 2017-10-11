@@ -86,8 +86,8 @@
 // view by this amount.
 const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
 
-const SelectionType selectionType = stNone; // nothing is selectable, except for the section cut object
-//const SelectionType selectionType = stAll;
+const SelectionType g_selectionType = stNone; // nothing is selectable, except for the section cut object
+//const SelectionType g_selectionType = stAll;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -579,7 +579,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
 
          dispObj->SetGravityWellStrategy(gravity_well);
 
-         dispObj->SetSelectionType(selectionType);
+         dispObj->SetSelectionType(g_selectionType);
 
          dispObj->SetID(m_DisplayObjectID++);
 
@@ -677,7 +677,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
       doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
       doUpperXBeam->SetID(m_DisplayObjectID++);
       doUpperXBeam->SetPosition(point,FALSE,FALSE);
-      doUpperXBeam->SetSelectionType(selectionType);
+      doUpperXBeam->SetSelectionType(g_selectionType);
 
       CComPtr<IShape> upperXBeamShape;
       pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
@@ -704,7 +704,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doLowerXBeam.CoCreateInstance(CLSID_PointDisplayObject);
    doLowerXBeam->SetID(m_DisplayObjectID++);
    doLowerXBeam->SetPosition(point,FALSE,FALSE);
-   doLowerXBeam->SetSelectionType(selectionType);
+   doLowerXBeam->SetSelectionType(g_selectionType);
 
    CComPtr<IShape> lowerXBeamShape;
    pPier->GetLowerXBeamProfile(pierID,&lowerXBeamShape);
@@ -726,7 +726,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    displayList->AddDisplayObject(doLowerXBeam);
 
    // Section Cut
-   Float64 Lxb = pPier->GetXBeamLength(pierID);
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
    Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
 
    Float64 XxbCut = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
@@ -735,7 +735,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    doXBeamSection.CoCreateInstance(CLSID_PointDisplayObject);
    doXBeamSection->SetID(m_DisplayObjectID++);
    doXBeamSection->SetPosition(point,FALSE,FALSE);
-   doXBeamSection->SetSelectionType(selectionType);
+   doXBeamSection->SetSelectionType(g_selectionType);
 
    CComPtr<IShape> xbeamShape;
    pSectProp->GetXBeamShape(pierID,xbrPointOfInterest(INVALID_ID,XxbCut),&xbeamShape);
@@ -869,7 +869,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       doColumn.CoCreateInstance(CLSID_PointDisplayObject);
       doColumn->SetID(m_DisplayObjectID++);
       doColumn->SetPosition(pntTop,FALSE,FALSE);
-      doColumn->SetSelectionType(selectionType);
+      doColumn->SetSelectionType(g_selectionType);
 
       CComPtr<iShapeDrawStrategy> drawColumnStrategy;
       drawColumnStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
@@ -902,11 +902,6 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
    PierIDType pierID = GetPierID();
 
-   Float64 CPO = pPier->GetCrownPointOffset(pierID);
-   Float64 Xcrown = pPier->GetCrownPointLocation(pierID);
-   Xcrown = pPier->ConvertCurbLineToCrossBeamCoordinate(pierID,Xcrown);
-   Float64 Xoffset = CPO - Xcrown;
-
    GET_IFACE2(pBroker,IXBRRebar,pRebar);
 
    // Elevation View
@@ -915,7 +910,6 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    {
       CComPtr<IPoint2dCollection> points;
       pRebar->GetRebarProfile(pierID,rowIdx,&points); // in Cross Beam Coordinates
-      points->Offset(Xoffset,0);
 
       CComPtr<iPolyLineDisplayObject> doRebar;
       doRebar.CoCreateInstance(CLSID_PolyLineDisplayObject);
@@ -929,7 +923,7 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    }
 
    // Section View
-   Float64 Lxb = pPier->GetXBeamLength(pierID);
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
    Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
 
    Float64 XxbCut = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
@@ -1266,7 +1260,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
 
          dispObj->SetDrawingStrategy(strategy);
 
-         dispObj->SetSelectionType(selectionType);
+         dispObj->SetSelectionType(g_selectionType);
 
          dispObj->SetID(m_DisplayObjectID++);
 
@@ -1353,36 +1347,36 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
    CComPtr<IPoint2d> uxbTL;
    uxbTL.CoCreateInstance(CLSID_Point2d);
-   uxbTL->Move(Xp-X2,Y);
+   uxbTL->Move(Xp,Y);
 
    // Upper Cross Beam - Bottom Left (Lower Cross Beam - Top Left)
    CComPtr<IPoint2d> uxbBL;
    uxbBL.CoCreateInstance(CLSID_Point2d);
-   uxbBL->Move(Xp-X2,Y-Hu);
+   uxbBL->Move(Xp,Y-Hu);
 
    // Lower Cross Beam - Bottom Left
    CComPtr<IPoint2d> lxbBL;
    lxbBL.CoCreateInstance(CLSID_Point2d);
-   lxbBL->Move(Xp-X2,Y-Hu-H1);
+   lxbBL->Move(Xp,Y-Hu-H1);
 
    // Upper Cross Beam - Top Right
-   Xxb = pPier->GetXBeamLength(pierID);
+   Xxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
    Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
    Xp  = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
    Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
    CComPtr<IPoint2d> uxbTR;
    uxbTR.CoCreateInstance(CLSID_Point2d);
-   uxbTR->Move(Xp+X4,Y);
+   uxbTR->Move(Xp,Y);
    
    // Upper Cross Beam - Bottom Right (Lower Cross Beam - Top Right)
    CComPtr<IPoint2d> uxbBR;
    uxbBR.CoCreateInstance(CLSID_Point2d);
-   uxbBR->Move(Xp+X4,Y-Hu);
+   uxbBR->Move(Xp,Y-Hu);
 
    // Lower Cross Beam - Bottom Right
    CComPtr<IPoint2d> lxbBR;
    lxbBR.CoCreateInstance(CLSID_Point2d);
-   lxbBR->Move(Xp+X4,Y-Hu-H1);
+   lxbBR->Move(Xp,Y-Hu-H1);
 
    CComPtr<IPoint2d> lxbBLC, lxbBRC;
    CComPtr<IPoint2d> lxbBL2, lxbBR2;
@@ -1470,8 +1464,10 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       YbotColMin = Min(YbotColMin,YbotCol);
    }
 
-   // Column Spacing (starts with right cross beam cantilever and
+   // Column Spacing (starts with left cross beam cantilever and
    // than proceeds with the spacing between columns at their base)
+   // create the dimension line with rightpt,leftpt so the text comes
+   // out on the correct side
    CComPtr<IPoint2d> pntLeft;
    pntLeft.CoCreateInstance(CLSID_Point2d);
    pntLeft->Move(Xoffset,YbotColMin);
@@ -1489,8 +1485,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       pntLeft = pntRight;
    }
 
-   // Left cross beam cantilever
-   Float64 Lxb = pPier->GetXBeamLength(pierID);
+   // Right cross beam cantilever
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
    Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
    CComPtr<IPoint2d> pntRight;
    pntRight.CoCreateInstance(CLSID_Point2d);
@@ -1564,16 +1560,17 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 Ylc = pPier->GetElevation(pierID,0);
    Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
+   Y = Max(Ylc, Yrc);
 
    CComPtr<IPoint2d> pntLC;
    pntLC.CoCreateInstance(CLSID_Point2d);
    LCO /= cos(skew); // skew adjust
-   pntLC->Move(LCO,Ylc);
+   pntLC->Move(LCO,Y);
 
    CComPtr<IPoint2d> pntRC;
    pntRC.CoCreateInstance(CLSID_Point2d);
    RCO /= cos(skew); // skew adjust
-   pntRC->Move(RCO,Yrc);
+   pntRC->Move(RCO,Y);
 
    BuildDimensionLine(displayList,pntLC,pntRC);
 }

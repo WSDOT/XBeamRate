@@ -394,6 +394,24 @@ Float64 xbrYieldStressRatioArtifact::GetAllowableStress() const
    return m_AllowableStressRatio*m_fy;
 }
 
+Float64 xbrYieldStressRatioArtifact::GetFdl() const
+{
+   if (!m_bRFComputed)
+   {
+      GetStressRatio();
+   }
+   return m_fdl;
+}
+
+Float64 xbrYieldStressRatioArtifact::GetFll() const
+{
+   if (!m_bRFComputed)
+   {
+      GetStressRatio();
+   }
+   return m_fll;
+}
+
 Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
 {
    // NOTE: Calculation procedure based on MBE A2A.13.2.2
@@ -403,9 +421,12 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
    }
 
    Float64 SR = -Float64_Max;
+   Float64 fdl, fll;
 
    if ( IsZero(m_Mllim) || IsZero(m_gLL) )
    {
+      fdl = 0;
+      fll = 0;
       SR = Float64_Max;
    }
    else
@@ -424,35 +445,35 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
       Float64 fLLIM = m_gLL*m_Mllim*kt;
       Float64 fLLIM_Adj = m_gLL*m_MllimAdj*kt;
 
-      Float64 C = GetAllowableStress();
+      Float64 fr = GetAllowableStress();
 
-      Float64 SRtop = C - m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS);
+      fdl = m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS);
 
       if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
       {
-         SRtop -= m_n[xbrTypes::ltTransient]*fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
+         fdl += m_n[xbrTypes::ltTransient]*fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
       }
 
-      Float64 SRbot = m_n[xbrTypes::ltTransient]*fLLIM;
+      fll = m_n[xbrTypes::ltTransient]*fLLIM;
 
-      if ( IsZero(C) || (0 < C && SRtop < 0) || (C < 0 && 0 < SRtop) )
+      SR = IsZero(fll) ? Float64_Max : (fr - fdl) / fll;
+
+      if ( IsZero(fr) || (0 < fr && fr-fdl < 0) || (fr < 0 && 0 < fr-fdl) )
       {
          // There isn't any capacity remaining for live load
          SR = 0;
       }
-      else if ( ::BinarySign(SRtop) != ::BinarySign(SRbot) && !IsZero(SRtop) )
+      else if ( ::BinarySign(fr-fdl) != ::BinarySign(fll) && !IsZero(fr-fdl) )
       {
          // (C - DL) and LL have opposite signs
          // this case probably shouldn't happen, but if does,
          // the rating is great
          SR = Float64_Max;
       }
-      else
-      {
-         SR = IsZero(SRbot) ? Float64_Max : SRtop / SRbot;
-      }
    }
 
+   m_fdl = fdl;
+   m_fll = fll;
    m_StressRatio = SR;;
    m_bRFComputed = true;
    return m_StressRatio;

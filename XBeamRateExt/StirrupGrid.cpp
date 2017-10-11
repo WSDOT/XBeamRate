@@ -207,6 +207,11 @@ BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDrag
 
       CDWordArray selRows;
       ROWCOL nSelRows = GetSelectedRows(selRows);
+      if (nSelRows == 0)
+      {
+         return FALSE;
+      }
+
       ROWCOL lastSelectedRow = selRows.GetAt(nSelRows-1);
 
       if (nDragRow != 0 && nRows != 0)

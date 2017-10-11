@@ -235,6 +235,8 @@ private:
 
       int m_InitLevel;
 
+      Float64 m_Lmax;
+
       ModelData() { m_InitLevel = MODEL_INIT_NONE; 
                     m_NextLiveLoadCaseID = FIRST_LIVELOAD_ID; }
    } ModelData;
