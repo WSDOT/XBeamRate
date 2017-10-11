@@ -55,7 +55,7 @@ interface IXBRPier : public IUnknown
    virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) = 0;
 
    // Returns the length of the cross beam measured at the bottom face.
-   virtual Float64 GetXBeamLength(PierIDType pierID) = 0;
+   virtual Float64 GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID) = 0;
 
    // Returns the cross beam profile in Pier Coordinates
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) = 0;

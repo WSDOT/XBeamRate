@@ -691,10 +691,25 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // Save the pier description information
       if (m_bExportingModel )
       {
-         PierIDType pierID = m_PierData[m_SavePierID].GetID();
-         m_PierData[m_SavePierID].SetID(INVALID_ID); // set the pier ID to that of a stand alone pier
-         m_PierData[m_SavePierID].Save(pStrSave,nullptr);
-         m_PierData[m_SavePierID].SetID(pierID);
+         // the pier model we export can't have a profile defined deck... we have to use
+         // the simplified model (XBRate stand alone UI doesn't support complex deck profiles)
+         xbrPierData pierData = m_PierData[m_SavePierID]; // copy the pier data we want to save because we are going to tweak it
+         pierData.SetID(INVALID_ID);
+         pierData.SetDeckSurfaceType(xbrPierData::Simplified); // we must use a simplfied deck surface model
+
+         // update the deck surface model
+         GET_IFACE(IBridge, pBridge);
+         Float64 pierStation = pBridge->GetPierStation((PierIndexType)m_SavePierID);
+         GET_IFACE(IRoadway, pAlignment);
+         Float64 sl = pAlignment->GetSlope(pierStation, pierData.GetLeftCurbLineOffset());
+         Float64 sr = pAlignment->GetSlope(pierStation,  pierData.GetRightCurbLineOffset());
+         Float64 elev = pAlignment->GetElevation(pierStation,0.0);
+         pierData.SetDeckElevation(elev);
+         pierData.SetCrownSlope(-sl, sr);
+         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(pierStation));
+
+         // ok, save it
+         pierData.Save(pStrSave, nullptr);
       }
       else
       {

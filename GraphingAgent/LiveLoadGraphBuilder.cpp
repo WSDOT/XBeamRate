@@ -289,7 +289,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   Float64 Lxb = pPier->GetXBeamLength(pierID);
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);

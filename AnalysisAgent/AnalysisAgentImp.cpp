@@ -242,7 +242,9 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
 
       IndexType nColumns = pProject->GetColumnCount(pierID);
 
-      Float64 L = pPier->GetXBeamLength(pierID);
+      Float64 L = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
+
+      pModelData->m_Lmax = L;
 
       // Get the location of all the cross beam nodes
 
@@ -418,7 +420,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
          std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
          std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
 
-         XBeamNode* pPrevNode = &(*iter);;
+         XBeamNode* pPrevNode = &(*iter);
          JointIDType prevJointID = jntID++;
          CComPtr<IFem2dJoint> joint;
          joints->Create(prevJointID,pPrevNode->X,Y,&joint);
@@ -2649,10 +2651,10 @@ std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelDat
       // save the lane position and load case ID for future reference
       pModelData->m_LiveLoadCases.insert(std::make_pair(Xcenter,lcid));
 
-      // save the lane configuration for future reference
+      // save the lane configuration for future reference (force lane edges to be within the bounds of the model)
       LaneConfiguration laneConfig;
-      laneConfig.Xleft  = Xleft;
-      laneConfig.Xright = Xright;
+      laneConfig.Xleft  = Max(Xleft,0.0);
+      laneConfig.Xright = Min(Xright,pModelData->m_Lmax);
       pModelData->m_LaneConfigurations.insert(std::make_pair(lcid,laneConfig));
    }
 

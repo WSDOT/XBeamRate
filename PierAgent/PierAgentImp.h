@@ -106,7 +106,7 @@ public:
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) override;
    virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) override;
    virtual Float64 GetMaxColumnHeight(PierIDType pierID) override;
-   virtual Float64 GetXBeamLength(PierIDType pierID) override;
+   virtual Float64 GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID) override;
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) override;
    virtual void GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape) override;
    virtual void GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) override;

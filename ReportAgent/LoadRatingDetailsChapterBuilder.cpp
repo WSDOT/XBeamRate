@@ -106,8 +106,9 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
          if ( !::IsDesignRatingType(ratingType) )
          {
             std::_tstring strLiveLoadName = pProject->GetLiveLoadName(pierID,ratingType,vehicleIdx);
-            pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
+            pPara = new rptParagraph(rptStyleManager::GetSubheadingStyle());
             *pChapter << pPara;
+            pPara->SetName(strLiveLoadName.c_str());
             *pPara << strLiveLoadName << rptNewLine;
          }
 
@@ -152,7 +153,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
 
-   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetSubheadingStyle());
    *pChapter << pPara;
 
    if ( bPositiveMoment )
@@ -358,8 +359,9 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
 
    GET_IFACE2_NOCHECK(pBroker,IXBRProject,pProject);
 
-   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetSubheadingStyle());
    *pChapter << pPara;
+
    *pPara << _T("Rating for Shear") << rptNewLine;
 
    GET_IFACE2(pBroker, IXBRRatingSpecification, pSpec);
@@ -551,7 +553,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
       return;
    }
 
-   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
+   rptParagraph* pPara = new rptParagraph(rptStyleManager::GetSubheadingStyle());
    *pChapter << pPara;
    if ( bPositiveMoment )
    {
@@ -574,7 +576,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamReinforcementYieldingEquation_LRFD.png") ) << rptNewLine;
    }
 
-   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 15 : 14);
+   ColumnIndexType nColumns = (bIsWSDOTPermitRating ? 17 : 16);
    rptRcTable* table = rptStyleManager::CreateDefaultTable(nColumns);
    
    table->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_RIGHT));
@@ -618,6 +620,8 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    (*table)(0,col++) << COLHDR(Sub2(_T("c"),_T("t")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit() );
    (*table)(0,col++) << COLHDR(Sub2(_T("I"),_T("crt")), rptLength4UnitTag, pDisplayUnits->GetMomentOfInertiaUnit() );
    (*table)(0,col++) << COLHDR(RPT_STRESS(_T("r")), rptStressUnitTag, pDisplayUnits->GetStressUnit() );
+   (*table)(0, col++) << COLHDR(RPT_STRESS(_T("dl")), rptStressUnitTag, pDisplayUnits->GetStressUnit());
+   (*table)(0, col++) << COLHDR(RPT_STRESS(_T("ll")), rptStressUnitTag, pDisplayUnits->GetStressUnit());
    (*table)(0,col++) << _T("SR");
 
    const xbrYieldStressRatioArtifact* pControllingRating;
@@ -633,6 +637,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
 
    dim.ShowUnitTag(true);
+   modE.ShowUnitTag(true);
    
    *pPara << Sub2(_T("f"),_T("r")) << _T(" = ") << _T("k") << Sub2(_T("f"),_T("y")) << _T(" = ") << artifacts.begin()->second.GetAllowableStressRatio() << Sub2(_T("f"),_T("y")) << rptNewLine;
    *pPara << Sub2(symbol(gamma),_T("DC")) << _T(" = ") << scalar.SetValue(artifacts.begin()->second.GetDeadLoadFactor()) << rptNewLine;
@@ -654,6 +659,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
    
    dim.ShowUnitTag(false);
+   modE.ShowUnitTag(false);
 
    // Add table here
    *pPara << table << rptNewLine;
@@ -695,7 +701,9 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
       (*table)(row,col++) << dim.SetValue(artifact.GetCrackDepth(xbrTypes::ltTransient));
       (*table)(row,col++) << mom_i.SetValue(artifact.GetIcr(xbrTypes::ltTransient));
 
-      (*table)(row,col++) << stress.SetValue(artifact.GetAllowableStress());
+      (*table)(row, col++) << stress.SetValue(artifact.GetAllowableStress());
+      (*table)(row, col++) << stress.SetValue(artifact.GetFdl());
+      (*table)(row, col++) << stress.SetValue(artifact.GetFll());
 
       if ( SR < 1 )
       {

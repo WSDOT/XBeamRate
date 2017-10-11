@@ -397,7 +397,7 @@ Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID)
    return Hmax;
 }
 
-Float64 CPierAgentImp::GetXBeamLength(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID)
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -406,7 +406,7 @@ Float64 CPierAgentImp::GetXBeamLength(PierIDType pierID)
    pier->get_CrossBeam(&xbeam);
 
    Float64 length;
-   xbeam->get_Length(&length);
+   xbeam->get_Length((XBeamLocation)(location),&length);
 
    return length;
 }
@@ -987,7 +987,7 @@ void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dC
    Float64 XpStart;
    pier->ConvertCrossBeamToPierCoordinate(XxbStart,&XpStart);
 
-   (*ppPoints)->Offset(XxbStart,0);
+   (*ppPoints)->Offset(XpStart,0);
 }
 
 Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem)
@@ -1405,14 +1405,14 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
       }
       else
       {
-         if ( cpo < 0 )
+         if ( 0 < cpo )
          {
-            elevCP = -cpo*sr + elevDeck;
+            elevCP = cpo*sr + elevDeck;
          }
          else
          {
             ATLASSERT(0 < cpo);
-            elevCP = elevDeck + sl*cpo;
+            elevCP = elevDeck - sl*cpo;
          }
       }
 
@@ -1571,7 +1571,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    xbeam->get_RebarLayout(&rebarLayout);
 
    Float64 Lxb;
-   xbeam->get_Length(&Lxb);
+   xbeam->get_Length(xblTopLowerXBeam, &Lxb);
 
    CComPtr<IRebarFactory> rebar_factory;
    rebar_factory.CoCreateInstance(CLSID_RebarFactory);
@@ -1718,7 +1718,42 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       return;
    }
 
-   Float64 L = GetXBeamLength(pierID);
+   // layout stirrups with respect to the bottom of the cross beam
+   Float64 L = GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
+
+   // we want to work in pier coordinates, but the layout is measured along the bottom of the xbeam
+   // we need to offset all of the zone locations by difference is horizontal position of the left edge
+   // of the top of the lower cross beam and the bottom of the cross beam
+
+   CComPtr<IPoint2dCollection> topSurface, bottomSurface;
+   GetTopSurface(pierID, xbrTypes::Stage1, &topSurface);
+   GetBottomSurface(pierID, xbrTypes::Stage1, &bottomSurface);
+
+   CComPtr<IPoint2d> pntTL;
+   topSurface->get_Item(0, &pntTL);
+   CComPtr<IPoint2d> pntBL;
+   bottomSurface->get_Item(0, &pntBL);
+
+   Float64 xTL, xBL;
+   pntTL->get_X(&xTL);
+   pntBL->get_X(&xBL);
+
+   Float64 XoffsetStart = xBL - xTL; // add this to the starting position of the zone to put it in XBeam Coordinates
+
+   IndexType nPoints;
+   topSurface->get_Count(&nPoints);
+   CComPtr<IPoint2d> pntTR;
+   topSurface->get_Item(nPoints - 1, &pntTR);
+
+   bottomSurface->get_Count(&nPoints);
+   CComPtr<IPoint2d> pntBR;
+   bottomSurface->get_Item(nPoints - 1, &pntBR);
+
+   Float64 xTR, xBR;
+   pntTR->get_X(&xTR);
+   pntBR->get_X(&xBR);
+
+   Float64 XoffsetEnd = xTR - xBR; // subtract this from the ending position of the last zone
 
    GET_IFACE(IXBRProject,pProject);
    matRebar::Type type;
@@ -1728,9 +1763,10 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
 
    if ( stirrupData.Symmetric )
    {
-      Float64 Xstart = 0;
-      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.begin());
-      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.end());
+      Float64 Xstart = XoffsetStart;
+      Float64 Xoffset = XoffsetStart;
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.cbegin());
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.cend());
       for ( ; iter != end; iter++ )
       {
          const xbrStirrupData::StirrupZone& zone(*iter);
@@ -1747,7 +1783,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          myZone.S = zone.BarSpacing;
          myZone.nLegs = zone.nBars;
 
-         Float64 Xend = (iter+1 == end ? Xstart + L/2 : Xstart + zone.Length);
+         Float64 Xend = (iter+1 == end ? Xstart + L/2 : Xstart + zone.Length - XoffsetStart);
          bool bDone = false;
          if ( L/2 < Xend )
          {
@@ -1765,6 +1801,8 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          {
             break;
          }
+
+         Xoffset = 0;
       }
 
       // make sure last zone goes to centerline of xbeam
@@ -1799,9 +1837,10 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
    }
    else
    {
-      Float64 Xstart = 0;
-      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.begin());
-      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.end());
+      Float64 Xstart = XoffsetStart;
+      Float64 Xoffset = XoffsetStart;
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator iter(stirrupData.Zones.cbegin());
+      std::vector<xbrStirrupData::StirrupZone>::const_iterator end(stirrupData.Zones.cend());
       for ( ; iter != end; iter++ )
       {
          const xbrStirrupData::StirrupZone& zone(*iter);
@@ -1817,11 +1856,12 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          myZone.S = zone.BarSpacing;
          myZone.nLegs = zone.nBars;
 
-         Float64 Xend = (iter+1 == end ? Xstart + L : Xstart + zone.Length);
+         Float64 Xend = (iter+1 == end ? Xstart + L : Xstart + zone.Length - Xoffset);
          bool bDone = false;
          if ( L < Xend )
          {
-            Xend = L;
+            // the current zone goes beyond the end so we are done
+            Xend = L - XoffsetEnd;
             bDone = true;
          }
          myZone.Xstart = Xstart;
@@ -1835,11 +1875,17 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          {
             break;
          }
+
+         Xoffset = 0;
       }
 
       // make sure the last zone ends at L
-      pvStirrupZones->back().Xend = L;
-      pvStirrupZones->back().Length = pvStirrupZones->back().Xstart - pvStirrupZones->back().Xend;
+      if (iter != end)
+      {
+         // there weren't enough zones to fill across, so lengthen the last zone
+         pvStirrupZones->back().Xend = L - XoffsetEnd;
+         pvStirrupZones->back().Length = pvStirrupZones->back().Xend - pvStirrupZones->back().Xstart;
+      }
    }
 
    // Compute the number of stirrups in each zone
@@ -1851,6 +1897,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       ATLASSERT(zone.Xstart < zone.Xend);
 
       zone.nStirrups = IndexType(zone.Length/zone.S) + 1;
+      ATLASSERT(zone.nStirrups != INVALID_INDEX);
    }
 }
 
@@ -1878,7 +1925,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    Float64 W;
    pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W);
 
-   Float64 L = GetXBeamLength(pierID);
+   Float64 L = GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
 
    std::vector<xbrPointOfInterest> vPoi;
 

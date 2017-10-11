@@ -1045,7 +1045,7 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
    {
       // This procedure is based on MBE 6A.5.8 (2nd Edition, 2015 interims).
       GET_IFACE(IXBRPier,pPier);
-      Float64 L = pPier->GetXBeamLength(pierID);
+      Float64 L = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
       // Get start/end of the shear failure plane at the poi
       Float64 dv = GetDv(pierID,stage,poi);
