@@ -97,7 +97,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("EffectiveShearDepth.png")) << rptNewLine;
    *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_dv.png")) << rptNewLine;
 
-   rptRcTable* pDvTable1 = rptStyleManager::CreateDefaultTable(10);
+   rptRcTable* pDvTable1 = rptStyleManager::CreateDefaultTable(12);
    *pPara << pDvTable1 << rptNewLine;
 
    if ( pierType == xbrTypes::pctIntegral )
@@ -115,7 +115,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("EffectiveShearDepth.png")) << rptNewLine;
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_dv.png")) << rptNewLine;
 
-      pDvTable2 = rptStyleManager::CreateDefaultTable(10);
+      pDvTable2 = rptStyleManager::CreateDefaultTable(12);
       *pPara << pDvTable2 << rptNewLine;
    }
 
@@ -224,24 +224,28 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
-   pDvTable1->SetColumnSpan(0,DvTableCol,3);
+   pDvTable1->SetColumnSpan(0,DvTableCol,4);
    (*pDvTable1)(0,DvTableCol) << _T("Positive Moment");
    pDvTable1->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable1->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+   pDvTable1->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
+   pDvTable1->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
    (*pDvTable1)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   (*pDvTable1)(1, DvTableCol++) << COLHDR(Sub2(_T("d"), _T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
-   pDvTable1->SetColumnSpan(0,DvTableCol,3);
+   pDvTable1->SetColumnSpan(0,DvTableCol,4);
    (*pDvTable1)(0,DvTableCol) << _T("Negative Moment");
    pDvTable1->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable1->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+   pDvTable1->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
+   pDvTable1->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
    (*pDvTable1)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   (*pDvTable1)(1, DvTableCol++) << COLHDR(Sub2(_T("d"), _T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
    pDvTable1->SetRowSpan(0,DvTableCol,2);
-   (*pDvTable1)(0,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+   (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("Controlling") << rptNewLine << Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    //
@@ -262,24 +266,28 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
-      pDvTable2->SetColumnSpan(0,DvTableCol,3);
+      pDvTable2->SetColumnSpan(0,DvTableCol,4);
       (*pDvTable2)(0,DvTableCol) << _T("Positive Moment");
       pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-      pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+      pDvTable2->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
+      pDvTable2->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
       (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1, DvTableCol++) << COLHDR(Sub2(_T("d"), _T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
-      pDvTable2->SetColumnSpan(0,DvTableCol,3);
+      pDvTable2->SetColumnSpan(0,DvTableCol,4);
       (*pDvTable2)(0,DvTableCol) << _T("Negative Moment");
       pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-      pDvTable2->SetColumnSpan(0,DvTableCol+2,SKIP_CELL);
+      pDvTable2->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
+      pDvTable2->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
       (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(1, DvTableCol++) << COLHDR(Sub2(_T("d"), _T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
       pDvTable2->SetRowSpan(0,DvTableCol,2);
-      (*pDvTable2)(0,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
+      (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("Controlling") << rptNewLine << Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
    }
 
@@ -369,10 +377,12 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails1.h);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.de[0]);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails1.de[0]);
-      (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[0]);
+      (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[0]);
+      (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentDv[0]);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.de[1]);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails1.de[1]);
-      (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[1]);
+      (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[1]);
+      (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentDv[1]);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.dv);
 
       if ( pierType == xbrTypes::pctIntegral )
@@ -384,10 +394,12 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails2.h);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[0]);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[0]);
-         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[0]);
+         (*pDvTable2)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[0]);
+         (*pDvTable2)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails2.MomentDv[0]);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.de[1]);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails2.de[1]);
-         (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[1]);
+         (*pDvTable2)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails2.MomentArm[1]);
+         (*pDvTable2)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails2.MomentDv[1]);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.dv);
       }
 

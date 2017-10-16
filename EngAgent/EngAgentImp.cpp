@@ -1014,6 +1014,8 @@ DvDetails CEngAgentImp::ComputeDv(PierIDType pierID,xbrTypes::Stage stage,const 
    details.de[1] = negCapacityDetails.de;
    details.MomentArm[0] = posMomentArm;
    details.MomentArm[1] = negMomentArm;
+   details.MomentDv[0] = posDv;
+   details.MomentDv[1] = negDv;
    details.dv = dv;
    return details;
 }
