@@ -112,7 +112,8 @@ typedef struct DvDetails
    Float64 h; // height of the section
    Float64 de[2]; // depth to resultant tensile force
    Float64 MomentArm[2]; // moment arm
-   Float64 dv; // dv, per LRFD 5.8.2.9
+   Float64 MomentDv[2]; // dv based on type of moment ([0] = dv for positive moment, [1] = dv for negative moment)
+   Float64 dv; // dv, per LRFD 5.8.2.9 (minimum of MomentDv[0] and MomentDv[1])
 } DvDetails;
 
 /*****************************************************************************
