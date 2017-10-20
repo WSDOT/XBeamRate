@@ -1376,7 +1376,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Lower Cross Beam - Bottom Right
    CComPtr<IPoint2d> lxbBR;
    lxbBR.CoCreateInstance(CLSID_Point2d);
-   lxbBR->Move(Xp,Y-Hu-H1);
+   lxbBR->Move(Xp,Y-Hu-H3);
 
    CComPtr<IPoint2d> lxbBLC, lxbBRC;
    CComPtr<IPoint2d> lxbBL2, lxbBR2;
