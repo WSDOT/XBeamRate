@@ -158,12 +158,84 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
    DDX_CBEnum(pDX, IDC_CONDITION_FACTOR_TYPE, pParent->m_PierData.m_PierData.GetConditionFactorType());
    DDX_Text(pDX,   IDC_CONDITION_FACTOR,      pParent->m_PierData.m_PierData.GetConditionFactor());
 
-   if ( pDX->m_bSaveAndValidate )
+   if (pDX->m_bSaveAndValidate)
    {
-#pragma Reminder("WOKRING HERE - need to validate overall pier geometry")
-      // maybe do this on the parent property page...
-      // XBeam needs to be long enough to support all girders
-      // XBeam needs to be as wide as columns(? not necessarily)
+      // XBeam width, W, must be greater than zeo
+      DDV_UnitValueGreaterThanZero(pDX, IDC_W, pParent->m_PierData.m_PierData.GetW(), pDisplayUnits->GetSpanLengthUnit());
+
+      // H1 and H3 must be > 0
+      DDV_UnitValueGreaterThanZero(pDX, IDC_H1, pParent->m_PierData.m_PierData.GetH1(), pDisplayUnits->GetSpanLengthUnit());
+      DDV_UnitValueGreaterThanZero(pDX, IDC_H3, pParent->m_PierData.m_PierData.GetH3(), pDisplayUnits->GetSpanLengthUnit());
+
+      // X2 and X4 must be >= 0
+      DDV_UnitValueZeroOrMore(pDX, IDC_X2, pParent->m_PierData.m_PierData.GetX2(), pDisplayUnits->GetSpanLengthUnit());
+      DDV_UnitValueZeroOrMore(pDX, IDC_X4, pParent->m_PierData.m_PierData.GetX4(), pDisplayUnits->GetSpanLengthUnit());
+
+      if (0 < pParent->m_PierData.m_PierData.GetH2())
+      {
+         // if H2 > 0, then X1 must be > 0
+         DDV_UnitValueGreaterThanZero(pDX, IDC_X1, pParent->m_PierData.m_PierData.GetX1(), pDisplayUnits->GetSpanLengthUnit());
+      }
+      else if (IsZero(pParent->m_PierData.m_PierData.GetH2()) && !IsZero(pParent->m_PierData.m_PierData.GetX1()))
+      {
+         // if H2 is zero, then X1 must also be zero
+         pDX->PrepareCtrl(IDC_X1);
+         AfxMessageBox(_T("X1 must be 0 when H2 is 0."));
+         pDX->Fail();
+      }
+
+      if (0 < pParent->m_PierData.m_PierData.GetH4())
+      {
+         // if H4 > 0, then X3 must be > 0
+         DDV_UnitValueGreaterThanZero(pDX, IDC_X3, pParent->m_PierData.m_PierData.GetX3(), pDisplayUnits->GetSpanLengthUnit());
+      }
+      else if (IsZero(pParent->m_PierData.m_PierData.GetH4()) && !IsZero(pParent->m_PierData.m_PierData.GetX3()))
+      {
+         // if H4 is zero, then X3 must also be zero
+         pDX->PrepareCtrl(IDC_X3);
+         AfxMessageBox(_T("X3 must be 0 when H4 is 0."));
+         pDX->Fail();
+      }
+
+      if (pParent->m_PierData.m_PierData.GetX1() < pParent->m_PierData.m_PierData.GetX2())
+      {
+         pDX->PrepareCtrl(IDC_X2);
+         AfxMessageBox(_T("X2 must be less than X1"));
+         pDX->Fail();
+      }
+
+      if (pParent->m_PierData.m_PierData.GetX3() < pParent->m_PierData.m_PierData.GetX4())
+      {
+         pDX->PrepareCtrl(IDC_X4);
+         AfxMessageBox(_T("X4 must be less than X3"));
+         pDX->Fail();
+      }
+
+      Float64 D1, D2;
+      // X5 must be >= diameter of first column
+      pParent->m_PierData.m_PierData.GetColumnData(0).GetColumnDimensions(&D1, &D2);
+      DDV_UnitValueLimitOrMore(pDX, IDC_X5, pParent->m_PierData.m_PierData.GetX5(), D1/2,pDisplayUnits->GetSpanLengthUnit());
+
+      // X6 must be >= diameter of first column
+      ColumnIndexType nColumns = pParent->m_PierData.m_PierData.GetColumnCount();
+      pParent->m_PierData.m_PierData.GetColumnData(nColumns - 1).GetColumnDimensions(&D1, &D2);
+      DDV_UnitValueLimitOrMore(pDX, IDC_X6, pParent->m_PierData.m_PierData.GetX6(), D1/2, pDisplayUnits->GetSpanLengthUnit());
+
+      // X1 + X3 must be less than X5 + X6 + Sum(S)
+      ATLASSERT(1 <= nColumns);
+      Float64 S = 0;
+      for (SpacingIndexType spaIdx = 0; spaIdx < nColumns - 1; spaIdx++)
+      {
+         S += pParent->m_PierData.m_PierData.GetColumnSpacing(spaIdx);
+      }
+      Float64 pierWidth = pParent->m_PierData.m_PierData.GetX5() + pParent->m_PierData.m_PierData.GetX6() + S;
+      Float64 sumOverhangs = pParent->m_PierData.m_PierData.GetX1() + pParent->m_PierData.m_PierData.GetX3();
+      if (pierWidth < sumOverhangs)
+      {
+         pDX->PrepareCtrl(IDC_X5);
+         AfxMessageBox(_T("X1 + X3 cannot exceed the overall pier width (X5 + X6 + summation of S)"));
+         pDX->Fail();
+      }
    }
 }
 

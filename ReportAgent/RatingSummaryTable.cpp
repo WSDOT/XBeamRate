@@ -534,8 +534,8 @@ rptRcTable* CRatingSummaryTable::BuildByVehicle(IBroker* pBroker,PierIDType pier
 rptRcTable* CRatingSummaryTable::BuildLoadPosting(IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType, bool* pbMustCloseBridge) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
-   GET_IFACE2(pBroker,IXBRArtifact,pArtifact);
    GET_IFACE2(pBroker,IXBRProject,pProject);
+   GET_IFACE2_NOCHECK(pBroker, IXBRArtifact, pArtifact); // this interface not used of nVehicles = 0
 
    rptCapacityToDemand rating_factor;
    INIT_UV_PROTOTYPE( rptForceUnitValue, tonnage, pDisplayUnits->GetTonnageUnit(), false );
