@@ -1000,7 +1000,12 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
          }
 
          IndexType nStirrups = pStirrups->GetStirrupCount(pierID,stage,zoneIdx);
-         Float64 S = pStirrups->GetStirrupZoneSpacing(pierID,stage,zoneIdx);
+         Float64 Lzone = pStirrups->GetStirrupZoneLength(pierID, stage, zoneIdx);
+         Float64 S = pStirrups->GetStirrupZoneSpacing(pierID, stage, zoneIdx);
+         if (1 < nStirrups)
+         {
+            S = Lzone / (nStirrups - 1); // the zones and the spacing don't usually line up... compute a nominal spacing for display purposes
+         }
 
          for ( IndexType stirrupIdx = 0; stirrupIdx < nStirrups; stirrupIdx++ )
          {
@@ -1340,107 +1345,121 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 D, Hu;
    pProject->GetDiaphragmDimensions(pierID,&Hu,&D);
 
+   CComPtr<IPoint2dCollection> topUpperXBeamProfile, topLowerXBeamProfile, bottomXBeamProfile;
+   pPier->GetTopSurface(pierID, xbrTypes::Stage1, &topLowerXBeamProfile);
+   pPier->GetTopSurface(pierID, xbrTypes::Stage2, &topUpperXBeamProfile);
+   pPier->GetBottomSurface(pierID, xbrTypes::Stage1, &bottomXBeamProfile);
+
    // Upper Cross Beam - Top Left
-   Float64 Xxb = 0;
-   Float64 Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
-   Float64 Xp  = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
-   Float64 Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
+   CComPtr<IPoint2d> pnt;
+   topUpperXBeamProfile->get_Item(0, &pnt);
    CComPtr<IPoint2d> uxbTL;
    uxbTL.CoCreateInstance(CLSID_Point2d);
-   uxbTL->Move(Xp,Y);
+   uxbTL->MoveEx(pnt);
+
+   // we want all vertical dimensions on the left side to be at this x-location
+   Float64 Xl;
+   pnt->get_X(&Xl);
 
    // Upper Cross Beam - Bottom Left (Lower Cross Beam - Top Left)
+   pnt.Release();
+   topLowerXBeamProfile->get_Item(0, &pnt);
    CComPtr<IPoint2d> uxbBL;
    uxbBL.CoCreateInstance(CLSID_Point2d);
-   uxbBL->Move(Xp,Y-Hu);
+   uxbBL->MoveEx(pnt);
+   uxbBL->put_X(Xl);
 
    // Lower Cross Beam - Bottom Left
+   pnt.Release();
+   bottomXBeamProfile->get_Item(0, &pnt);
    CComPtr<IPoint2d> lxbBL;
    lxbBL.CoCreateInstance(CLSID_Point2d);
-   lxbBL->Move(Xp,Y-Hu-H1);
+   lxbBL->MoveEx(pnt);
+   lxbBL->put_X(Xl);
 
    // Upper Cross Beam - Top Right
-   Xxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
-   Xcl = pPier->ConvertCrossBeamToCurbLineCoordinate(pierID,Xxb);
-   Xp  = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
-   Y   = pPier->GetElevation(pierID,Xcl) - tDeck;
+   pnt.Release();
+   IndexType nPoints;
+   topUpperXBeamProfile->get_Count(&nPoints);
+   topUpperXBeamProfile->get_Item(nPoints - 1, &pnt);
    CComPtr<IPoint2d> uxbTR;
    uxbTR.CoCreateInstance(CLSID_Point2d);
-   uxbTR->Move(Xp,Y);
+   uxbTR->MoveEx(pnt);
+
+   // we want all vertical dimensions on the right side to be at this x-location
+   Float64 Xr;
+   pnt->get_X(&Xr);
    
    // Upper Cross Beam - Bottom Right (Lower Cross Beam - Top Right)
+   pnt.Release();
+   topLowerXBeamProfile->get_Count(&nPoints);
+   topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
    CComPtr<IPoint2d> uxbBR;
    uxbBR.CoCreateInstance(CLSID_Point2d);
-   uxbBR->Move(Xp,Y-Hu);
+   uxbBR->MoveEx(pnt);
+   uxbBR->put_X(Xr);
 
    // Lower Cross Beam - Bottom Right
+   pnt.Release();
+   bottomXBeamProfile->get_Count(&nPoints);
+   bottomXBeamProfile->get_Item(nPoints - 1, &pnt);
    CComPtr<IPoint2d> lxbBR;
    lxbBR.CoCreateInstance(CLSID_Point2d);
-   lxbBR->Move(Xp,Y-Hu-H3);
-
-   CComPtr<IPoint2d> lxbBLC, lxbBRC;
-   CComPtr<IPoint2d> lxbBL2, lxbBR2;
-   lxbBLC.CoCreateInstance(CLSID_Point2d);
-   lxbBRC.CoCreateInstance(CLSID_Point2d);
-   lxbBL2.CoCreateInstance(CLSID_Point2d);
-   lxbBR2.CoCreateInstance(CLSID_Point2d);
-   Float64 x,y;
-   lxbBL->Location(&x,&y);
-   lxbBLC->Move(x,y-H2);
-   lxbBL2->Move(x+X1,y-H2);
-
-   lxbBR->Location(&x,&y);
-   lxbBRC->Move(x,y-H4);
-   lxbBR2->Move(x-X3,y-H4);
-
-   // Horizontal Cross Beam Dimensions
-
-   // Length of top of lower cross beam
-   //if ( pierType == xbrTypes::pctExpansion )
-   //{
-   //   CComPtr<IPoint2d> lxbTLC, lxbTRC;
-   //   lxbTLC.CoCreateInstance(CLSID_Point2d);
-   //   lxbTRC.CoCreateInstance(CLSID_Point2d);
-   //   Float64 x1,y1;
-   //   uxbBL->Location(&x1,&y1);
-   //   Float64 x2,y2;
-   //   uxbBR->Location(&x2,&y2);
-   //   lxbTLC->Move(x1,Max(y1,y2));
-   //   lxbTRC->Move(x2,Max(y1,y2));
-   //   BuildDimensionLine(displayList,lxbTLC,lxbTRC);
-   //}
-   //else
-   //{
-   //   CComPtr<IPoint2d> uxbTLC, uxbTRC;
-   //   uxbTLC.CoCreateInstance(CLSID_Point2d);
-   //   uxbTRC.CoCreateInstance(CLSID_Point2d);
-   //   Float64 x1,y1;
-   //   uxbTL->Location(&x1,&y1);
-   //   Float64 x2,y2;
-   //   uxbTR->Location(&x2,&y2);
-   //   uxbTLC->Move(x1,Max(y1,y2));
-   //   uxbTRC->Move(x2,Max(y1,y2));
-   //   BuildDimensionLine(displayList,uxbTLC,uxbTRC);
-   //}
-
-   BuildDimensionLine(displayList,lxbBL2,lxbBLC);
-   BuildDimensionLine(displayList,lxbBRC,lxbBR2);
-
-   // Left Side of Cross Beam
+   lxbBR->MoveEx(pnt);
+   lxbBR->put_X(Xr);
 
    // Height of upper cross beam
-   if ( pierType != xbrTypes::pctExpansion )
+   if (pierType != xbrTypes::pctExpansion)
    {
-      BuildDimensionLine(displayList,uxbBL,uxbTL);
-      BuildDimensionLine(displayList,uxbTR,uxbBR);
+      BuildDimensionLine(displayList, uxbBL, uxbTL);
+      BuildDimensionLine(displayList, uxbTR, uxbBR);
    }
 
    // Height of lower cross beam
-   BuildDimensionLine(displayList,lxbBL,uxbBL);
-   BuildDimensionLine(displayList,uxbBR,lxbBR);
+   BuildDimensionLine(displayList, lxbBL, uxbBL); // H1 Dimension
+   BuildDimensionLine(displayList, uxbBR, lxbBR); // H3 Dimension
 
-   BuildDimensionLine(displayList,lxbBLC,lxbBL);
-   BuildDimensionLine(displayList,lxbBR,lxbBRC);
+   // Lower cross beam bottom taper, vertical dimensions
+   CComPtr<IPoint2d> lxbBLC, lxbBRC;
+   lxbBLC.CoCreateInstance(CLSID_Point2d);
+   lxbBRC.CoCreateInstance(CLSID_Point2d);
+   lxbBLC->MoveEx(lxbBL);
+   lxbBLC->Offset(0, -H2);
+   lxbBRC->MoveEx(lxbBR);
+   lxbBRC->Offset(0, -H4);
+
+   BuildDimensionLine(displayList, lxbBLC, lxbBL); // H2 Dimension
+   BuildDimensionLine(displayList, lxbBR, lxbBRC); // H4 Dimension
+
+   // Lower cross beam bottom taper, horizontal dimensions
+   pnt.Release();
+   topLowerXBeamProfile->get_Item(0, &pnt);
+   CComPtr<IPoint2d> lxbBL1, lxbBR1;
+   lxbBL1.CoCreateInstance(CLSID_Point2d);
+   lxbBR1.CoCreateInstance(CLSID_Point2d);
+   lxbBL1->MoveEx(pnt);
+   lxbBL1->Offset(0, -H1 - H2);
+
+   pnt.Release();
+   topLowerXBeamProfile->get_Count(&nPoints);
+   topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
+   lxbBR1->MoveEx(pnt);
+   lxbBR1->Offset(0, -H3 - H4);
+
+   CComPtr<IPoint2d> lxbBL2, lxbBR2;
+   lxbBL2.CoCreateInstance(CLSID_Point2d);
+   lxbBR2.CoCreateInstance(CLSID_Point2d);
+   Float64 y;
+   lxbBL1->Location(&Xl,&y); // TRICKY: changing Xl to now be the x-location of left dimensions for the columns
+   lxbBL2->Move(Xl+X1,y);
+
+   lxbBR1->Location(&Xr,&y);
+   lxbBR2->Move(Xr-X3,y); // TRICKY: changing Xr to now be the x-location of right dimensions for the columns
+
+   // Horizontal Cross Beam Dimensions
+   BuildDimensionLine(displayList,lxbBL2,lxbBL1); // X1 Dimension
+   BuildDimensionLine(displayList,lxbBR1,lxbBR2); // X3 Dimension
+
 
    // Column Dimensions
 
@@ -1459,7 +1478,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       pntBot.CoCreateInstance(CLSID_Point2d);
       pntTop->Move(XpCol,YtopCol);
       pntBot->Move(XpCol,YbotCol);
-      BuildDimensionLine(displayList,pntTop,pntBot);
+      BuildDimensionLine(displayList,pntTop,pntBot); // Column Height
 
       YbotColMin = Min(YbotColMin,YbotCol);
    }
@@ -1470,7 +1489,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // out on the correct side
    CComPtr<IPoint2d> pntLeft;
    pntLeft.CoCreateInstance(CLSID_Point2d);
-   pntLeft->Move(Xoffset,YbotColMin);
+   pntLeft->Move(Xl,YbotColMin);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 XxbCol = pPier->GetColumnLocation(pierID,colIdx);
@@ -1480,18 +1499,23 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       pntRight.CoCreateInstance(CLSID_Point2d);
       pntRight->Move(XpCol,YbotColMin);
      
-      BuildDimensionLine(displayList,pntRight,pntLeft);
+      BuildDimensionLine(displayList,pntRight,pntLeft); // first time this is X5, then S
 
       pntLeft = pntRight;
    }
 
    // Right cross beam cantilever
-   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
-   Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
    CComPtr<IPoint2d> pntRight;
    pntRight.CoCreateInstance(CLSID_Point2d);
-   pntRight->Move(Lxb,YbotColMin);
-   BuildDimensionLine(displayList,pntRight,pntLeft);
+   pntRight->Move(Xr,YbotColMin);
+   BuildDimensionLine(displayList,pntRight,pntLeft); // X6 Dimension
+
+   //
+   // Cross section dimensions
+   //
+
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam, pierID);
+   Lxb = pPier->ConvertCrossBeamToPierCoordinate(pierID, Lxb);
 
    Float64 Z = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
 
@@ -1560,7 +1584,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 Ylc = pPier->GetElevation(pierID,0);
    Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
-   Y = Max(Ylc, Yrc);
+   Float64 Y = Max(Ylc, Yrc);
 
    CComPtr<IPoint2d> pntLC;
    pntLC.CoCreateInstance(CLSID_Point2d);
