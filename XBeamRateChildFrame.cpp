@@ -349,7 +349,7 @@ void CXBeamRateChildFrame::UpdateSectionCutExtents()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IXBRPier,pPier);
-   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblTopLowerXBeam,pierID);
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam,pierID);
    m_Xmin = pPier->ConvertCrossBeamToPierCoordinate(pierID,0);
    m_Xmax = pPier->ConvertCrossBeamToPierCoordinate(pierID,Lxb);
 
