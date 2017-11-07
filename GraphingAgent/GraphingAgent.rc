@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -99,7 +97,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER, DIALOG
     BEGIN
@@ -146,9 +144,9 @@ BEGIN
     COMBOBOX        IDC_VEHICLE,7,39,150,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Live Load Configuration",IDC_STATIC,7,56,76,8
     LISTBOX         IDC_LOADING,7,67,150,286,WS_VSCROLL | WS_TABSTOP
-    PUSHBUTTON      "<",IDC_PREV,7,353,17,14
-    PUSHBUTTON      ">",IDC_NEXT,27,353,17,14
-    LTEXT           "Permit vehicle in lane",IDC_PERMIT_LANE_NOTE,56,356,72,8,NOT WS_VISIBLE
+    PUSHBUTTON      "<",IDC_PREV,6,353,17,14
+    PUSHBUTTON      ">",IDC_NEXT,24,353,17,14
+    LTEXT           "Emergency vehicle in Lane",IDC_PERMIT_LANE_NOTE,42,356,84,8,NOT WS_VISIBLE
     EDITTEXT        IDC_PERMIT_LANE,128,353,29,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
     CONTROL         "",IDC_PERMIT_LANE_SPINNER,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK | NOT WS_VISIBLE,146,353,11,14
 END
@@ -160,19 +158,32 @@ END
 //
 
 IDR_GRAPHINGAGENT       REGISTRY                "GraphingAgent.rgs"
+
 IDR_GRAPHINGAGENTMODULE REGISTRY                "GraphingAgentModule.rgs"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// AFX_DIALOG_LAYOUT
+//
+
+IDD_LIVE_LOAD_GRAPH_CONTROLLER AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PROJNAME            "GraphingAgent"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
