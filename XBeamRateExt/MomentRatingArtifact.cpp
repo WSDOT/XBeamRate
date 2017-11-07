@@ -701,48 +701,45 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64
 {
    Float64 RF = -Float64_Max;
 
-   if ( IsZero(Mllim) || IsZero(m_gLL) )
+   Float64 p = m_SystemFactor * m_ConditionFactor;
+   if ( p < 0.85 )
+   {
+      p = 0.85; // 6A.4.2.1-3)
+   }
+
+   Float64 C = p * m_CapacityRedutionFactor * K * m_Mn;
+   Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
+
+   if (
+      (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+      ||
+      (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+      )
+   {
+      RFtop -= m_gLL*MllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
+   }
+
+   Float64 RFbot = m_gLL*Mllim;
+
+   if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
+   {
+      // There isn't any capacity remaining for live load
+      RF = 0;
+   }
+   else if ( ::BinarySign(RFtop) != ::BinarySign(RFbot) && !IsZero(RFtop) )
+   {
+      // (C - DL) and LL have opposite signs
+      // this case probably shouldn't happen, but if does,
+      // the rating is great
+      RF = Float64_Max;
+   }
+   else if (IsZero(Mllim) || IsZero(m_gLL))
    {
       RF = Float64_Max;
    }
    else
    {
-      Float64 p = m_SystemFactor * m_ConditionFactor;
-      if ( p < 0.85 )
-      {
-         p = 0.85; // 6A.4.2.1-3)
-      }
-
-      Float64 C = p * m_CapacityRedutionFactor * K * m_Mn;
-      Float64 RFtop = C - m_gDC*m_Mdc - m_gDW*m_Mdw - m_gCR*m_Mcr - m_gSH*m_Msh - m_gRE*m_Mre - m_gPS*m_Mps;
-
-      if (
-         (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
-         ||
-         (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
-         )
-      {
-         RFtop -= m_gLL*MllimAdj; // WSDOT BDM Eqn. 13.1.1A-2
-      }
-
-      Float64 RFbot = m_gLL*Mllim;
-
-      if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
-      {
-         // There isn't any capacity remaining for live load
-         RF = 0;
-      }
-      else if ( ::BinarySign(RFtop) != ::BinarySign(RFbot) && !IsZero(RFtop) )
-      {
-         // (C - DL) and LL have opposite signs
-         // this case probably shouldn't happen, but if does,
-         // the rating is great
-         RF = Float64_Max;
-      }
-      else
-      {
-         RF = IsZero(RFbot) ? Float64_Max : RFtop/RFbot;
-      }
+      RF = IsZero(RFbot) ? Float64_Max : RFtop/RFbot;
    }
 
    return RF;

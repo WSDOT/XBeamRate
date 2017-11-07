@@ -421,20 +421,20 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 
    Float64 dc = 0;
    Float64 de = 0;
-   Float64 phi = 0;
+
+   GET_IFACE(IXBRProject, pProject);
+   Float64 PhiC, PhiT;
+   pProject->GetFlexureResistanceFactors(&PhiC, &PhiT);
+   Float64 phi = PhiT;
+
    if ( !IsZero(Mn) )
    {
       Float64 c;
       solution->get_NeutralAxisDepth(&c);
 
-      GET_IFACE(IXBRProject,pProject);
-
       matRebar::Type rebarType;
       matRebar::Grade rebarGrade;
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
-
-      Float64 PhiC, PhiT;
-      pProject->GetFlexureResistanceFactors(&PhiC,&PhiT);
 
       Float64 et  = (dt - c)*0.003/c;
       Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
