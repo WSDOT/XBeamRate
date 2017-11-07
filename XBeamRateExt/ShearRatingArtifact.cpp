@@ -632,7 +632,11 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
 
    Float64 RFbot = fabs(m_gLL*Vllim);
 
-   if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
+   if (IsZero(C) && IsZero(RFtop) && IsZero(RFbot))
+   {
+      RF = Float64_Max;
+   }
+   else if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
    {
       // There isn't any capacity remaining for live load
       RF = 0;
