@@ -721,7 +721,11 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor(Float64 K,Float64 Mllim,Float64
 
    Float64 RFbot = m_gLL*Mllim;
 
-   if ( IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop) )
+   if (IsZero(C) && IsZero(RFtop) && IsZero(RFbot))
+   {
+      RF = Float64_Max;
+   }
+   else if (IsZero(C) || (0 < C && RFtop < 0) || (C < 0 && 0 < RFtop))
    {
       // There isn't any capacity remaining for live load
       RF = 0;
