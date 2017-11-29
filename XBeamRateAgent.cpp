@@ -750,12 +750,6 @@ BOOL CXBeamRateAgent::GetToolTipMessageString(UINT nID, CString& rMessage) const
 // IEAFProcessCommandLine
 BOOL CXBeamRateAgent::ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo)
 {
-   GET_IFACE(IXBeamRateAgent, pAgent);
-   if (!pAgent || pAgent->IsExtendingPGSuper())
-   {
-      return FALSE; // our command line options are not for PGSuper... return not handled
-   }
-
    CXBRateCommandLineProcessor processor;
    return processor.ProcessCommandLineOptions(cmdInfo);
 }
