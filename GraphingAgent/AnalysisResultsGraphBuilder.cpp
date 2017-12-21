@@ -115,6 +115,11 @@ CGraphBuilder* CXBRAnalysisResultsGraphBuilder::Clone() const
    return new CXBRAnalysisResultsGraphBuilder(*this);
 }
 
+void CXBRAnalysisResultsGraphBuilder::CreateViewController(IEAFViewController** ppController)
+{
+   *ppController = nullptr;
+}
+
 const CXBRAnalysisResultsGraphDefinitions& CXBRAnalysisResultsGraphBuilder::GetGraphDefinitions()
 {
    return m_GraphDefinitions;

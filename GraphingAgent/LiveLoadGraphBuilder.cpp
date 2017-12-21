@@ -120,6 +120,11 @@ CGraphBuilder* CXBRLiveLoadGraphBuilder::Clone() const
    return new CXBRLiveLoadGraphBuilder(*this);
 }
 
+void CXBRLiveLoadGraphBuilder::CreateViewController(IEAFViewController** ppController)
+{
+   *ppController = nullptr;
+}
+
 BOOL CXBRLiveLoadGraphBuilder::CreateGraphController(CWnd* pParent,UINT nID)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());

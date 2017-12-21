@@ -43,6 +43,8 @@ public:
 
    void UpdateGraphDefinitions();
 
+   virtual void CreateViewController(IEAFViewController** ppController) override;
+
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow() override;
 

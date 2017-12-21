@@ -39,6 +39,7 @@ public:
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID) override;
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
    virtual CGraphBuilder* Clone() const override;
+   virtual void CreateViewController(IEAFViewController** ppController) override;
 
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow() override;
