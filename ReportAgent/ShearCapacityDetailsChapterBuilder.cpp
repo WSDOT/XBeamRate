@@ -347,7 +347,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    (*pVnTable)(0,VnTableCol++) << COLHDR(Sub2(_T("V"),_T("n2")), rptForceUnitTag, pDisplayUnits->GetShearUnit());
    (*pVnTable)(0,VnTableCol++) << COLHDR(Sub2(_T("V"),_T("n")), rptForceUnitTag, pDisplayUnits->GetShearUnit());
    (*pVnTable)(0,VnTableCol++) << symbol(phi);
-   (*pVnTable)(0,VnTableCol++) << COLHDR(Sub2(_T("V"),_T("r")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+   (*pVnTable)(0,VnTableCol++) << COLHDR(Sub2(_T("V"),_T("r")), rptForceUnitTag, pDisplayUnits->GetShearUnit());
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetShearRatingPointsOfInterest(pierID);
