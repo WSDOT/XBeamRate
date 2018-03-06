@@ -76,12 +76,12 @@ BEGIN
             VALUE "Comments", "A member of the Alternate Route Project"
             VALUE "CompanyName", "Washington State Department of Transportation"
             VALUE "FileDescription", "GraphingAgent Module"
-            VALUE "FileVersion", "1.1.4.3"
+            VALUE "FileVersion", "1.1.5.0"
             VALUE "InternalName", "GraphingAgent"
             VALUE "LegalCopyright", "Copyright © 1999-2018, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "GraphingAgent.DLL"
             VALUE "ProductName", "XBRate"
-            VALUE "ProductVersion", "1.1.4.3"
+            VALUE "ProductVersion", "1.1.5.0"
         END
     END
     BLOCK "VarFileInfo"
