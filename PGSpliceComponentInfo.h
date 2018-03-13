@@ -22,6 +22,8 @@
 
 #pragma once
 #include "PGSComponentInfo.h"
+#include "CLSID.h"
+#include "resource.h"
 
 class ATL_NO_VTABLE CPGSpliceComponentInfo : 
    public CComObjectRootEx<CComSingleThreadModel>,

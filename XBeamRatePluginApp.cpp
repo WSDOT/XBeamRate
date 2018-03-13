@@ -41,8 +41,7 @@
 
 #include <initguid.h>
 #include <EAF\EAFAppPlugin.h>
-#include "XBeamRatePlugin_i.h"
-#include "XBeamRatePlugin_i.c"
+#include "CLSID.h"
 #include "SectionCut.h"
 
 // EAF Common Interfaces
@@ -128,7 +127,7 @@ BOOL CXBeamRatePluginApp::InitInstance()
    // See MSKB Article ID: Q118435, "Sharing Menus Between MDI Child Windows"
    m_hSharedMenu = nullptr; /*::LoadMenu( m_hInstance, MAKEINTRESOURCE(IDR_???) );*/
 
-   _Module.Init(ObjectMap, m_hInstance, &LIBID_XBeamRateLibrary);
+   _Module.Init(ObjectMap, m_hInstance);
    return CWinApp::InitInstance();
 }
 

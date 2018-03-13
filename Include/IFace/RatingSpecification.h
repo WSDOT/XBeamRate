@@ -38,38 +38,35 @@ DEFINE_GUID(IID_IXBRRatingSpecification,
 0x34ba2439, 0xc0a2, 0x4171, 0x9f, 0xdc, 0xb4, 0x30, 0x70, 0x36, 0xc0, 0x7c);
 interface IXBRRatingSpecification : IUnknown
 {
-   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) const = 0;
    virtual void EnableRating(pgsTypes::LoadRatingType ratingType,bool bEnable) = 0;
 
-   //virtual std::_tstring GetRatingSpecification() = 0;
-   //virtual void SetRatingSpecification(const std::_tstring& spec) = 0;
-
    virtual void RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear) = 0;
-   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool RateForShear(pgsTypes::LoadRatingType ratingType) const = 0;
 
    // Evalute yield stress in reinforcement MBE 6A.5.4.2.2b
    virtual void CheckYieldStressLimit(bool bCheckYieldStress) = 0;
-   virtual bool CheckYieldStressLimit() = 0;
+   virtual bool CheckYieldStressLimit() const = 0;
 
    // returns fraction of yield stress that reinforcement can be stressed to during
    // a permit load rating evaluation MBE 6A.5.4.2.2b
    virtual void SetYieldStressLimitCoefficient(Float64 x) = 0;
-   virtual Float64 GetYieldStressLimitCoefficient() = 0;
+   virtual Float64 GetYieldStressLimitCoefficient() const = 0;
 
    // Controls the analysis type to be used for superstructure reactions obtained
    // from PGSuper when PGSuper is in Envelope mode
-   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() = 0;
+   virtual pgsTypes::AnalysisType GetAnalysisMethodForReactions() const = 0;
    virtual void SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType) = 0;
 
    // Controls the method used to rating factors for emergency vehicle loading cases
-   virtual xbrTypes::EmergencyRatingMethod GetEmergencyRatingMethod() = 0;
+   virtual xbrTypes::EmergencyRatingMethod GetEmergencyRatingMethod() const = 0;
    virtual void SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod) = 0;
-   virtual bool IsWSDOTEmergencyRating(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool IsWSDOTEmergencyRating(pgsTypes::LoadRatingType ratingType) const = 0;
 
    // Controls the method used to rating factors for permit loading cases
-   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() = 0;
+   virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() const = 0;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) = 0;
-   virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) = 0;
+   virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) const = 0;
 };
 
 /*****************************************************************************

@@ -243,7 +243,7 @@ STDMETHODIMP CPierAgentImp::ShutDown()
 
 //////////////////////////////////////////
 // IXBRPier
-Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
+Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -257,7 +257,7 @@ Float64 CPierAgentImp::GetSkewAngle(PierIDType pierID)
    return skew;
 }
 
-IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID)
+IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -270,7 +270,7 @@ IndexType CPierAgentImp::GetBearingLineCount(PierIDType pierID)
    return nBearingLines;
 }
 
-IndexType CPierAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx)
+IndexType CPierAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -283,7 +283,7 @@ IndexType CPierAgentImp::GetBearingCount(PierIDType pierID,IndexType brgLineIdx)
    return nBearings;
 }
 
-Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
+Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -296,7 +296,7 @@ Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx
    return Xxb;
 }
 
-Float64 CPierAgentImp::GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx)
+Float64 CPierAgentImp::GetBearingElevation(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -309,7 +309,7 @@ Float64 CPierAgentImp::GetBearingElevation(PierIDType pierID,IndexType brgLineId
    return Y;
 }
 
-IndexType CPierAgentImp::GetColumnCount(PierIDType pierID)
+IndexType CPierAgentImp::GetColumnCount(PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -323,7 +323,7 @@ IndexType CPierAgentImp::GetColumnCount(PierIDType pierID)
    return nColumns;
 }
 
-Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx)
+Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -343,7 +343,7 @@ Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx)
    return Xxb;
 }
 
-Float64 CPierAgentImp::GetColumnHeight(PierIDType pierID,IndexType colIdx)
+Float64 CPierAgentImp::GetColumnHeight(PierIDType pierID,IndexType colIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -359,7 +359,7 @@ Float64 CPierAgentImp::GetColumnHeight(PierIDType pierID,IndexType colIdx)
    return h;
 }
 
-Float64 CPierAgentImp::GetTopColumnElevation(PierIDType pierID,IndexType colIdx)
+Float64 CPierAgentImp::GetTopColumnElevation(PierIDType pierID,IndexType colIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -372,7 +372,7 @@ Float64 CPierAgentImp::GetTopColumnElevation(PierIDType pierID,IndexType colIdx)
    return topElev;
 }
 
-Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colIdx)
+Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -385,13 +385,13 @@ Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colI
    return botElev;
 }
 
-pgsTypes::ColumnFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx)
+pgsTypes::ColumnFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    return pProject->GetColumnFixity(pierID,colIdx);
 }
 
-Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID)
+Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID) const
 {
    IndexType nColumns = GetColumnCount(pierID);
    Float64 Hmax = 0;
@@ -404,7 +404,7 @@ Float64 CPierAgentImp::GetMaxColumnHeight(PierIDType pierID)
    return Hmax;
 }
 
-Float64 CPierAgentImp::GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -418,7 +418,7 @@ Float64 CPierAgentImp::GetXBeamLength(xbrTypes::XBeamLocation location,PierIDTyp
    return length;
 }
 
-void CPierAgentImp::GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape)
+void CPierAgentImp::GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -429,7 +429,7 @@ void CPierAgentImp::GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape)
    xbeam->get_Profile(1,ppShape); // stage 1 is upper x-beam
 }
 
-void CPierAgentImp::GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape)
+void CPierAgentImp::GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -440,7 +440,7 @@ void CPierAgentImp::GetLowerXBeamProfile(PierIDType pierID,IShape** ppShape)
    xbeam->get_Profile(0,ppShape); // stage 0 is lower x-beam
 }
 
-void CPierAgentImp::GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints)
+void CPierAgentImp::GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -452,7 +452,7 @@ void CPierAgentImp::GetTopSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint
    xbeam->get_TopSurface(stageIdx,ppPoints);
 }
 
-void CPierAgentImp::GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints)
+void CPierAgentImp::GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPoint2dCollection** ppPoints) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -464,7 +464,7 @@ void CPierAgentImp::GetBottomSurface(PierIDType pierID,xbrTypes::Stage stage,IPo
    xbeam->get_BottomSurface(stageIdx,ppPoints);
 }
 
-Float64 CPierAgentImp::GetCrownPointOffset(PierIDType pierID)
+Float64 CPierAgentImp::GetCrownPointOffset(PierIDType pierID) const
 {
    CComPtr<IPoint2d> pnt;
    GetCrownPoint(pierID,&pnt);
@@ -473,14 +473,14 @@ Float64 CPierAgentImp::GetCrownPointOffset(PierIDType pierID)
    return cpo;
 }
 
-Float64 CPierAgentImp::GetCrownPointLocation(PierIDType pierID)
+Float64 CPierAgentImp::GetCrownPointLocation(PierIDType pierID) const
 {
    Float64 cpo = GetCrownPointOffset(pierID);
    Float64 Xcrown = ConvertPierToCurbLineCoordinate(pierID,cpo);
    return Xcrown;
 }
 
-Float64 CPierAgentImp::GetElevation(PierIDType pierID,Float64 Xcl)
+Float64 CPierAgentImp::GetElevation(PierIDType pierID,Float64 Xcl) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -490,7 +490,7 @@ Float64 CPierAgentImp::GetElevation(PierIDType pierID,Float64 Xcl)
    return elev;
 }
 
-Float64 CPierAgentImp::GetCurbToCurbWidth(PierIDType pierID)
+Float64 CPierAgentImp::GetCurbToCurbWidth(PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -499,7 +499,7 @@ Float64 CPierAgentImp::GetCurbToCurbWidth(PierIDType pierID)
    return Wcc;
 }
 
-Float64 CPierAgentImp::ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb)
+Float64 CPierAgentImp::ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Float64 Xxb) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -509,7 +509,7 @@ Float64 CPierAgentImp::ConvertCrossBeamToCurbLineCoordinate(PierIDType pierID,Fl
    return Xcl;
 }
 
-Float64 CPierAgentImp::ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl)
+Float64 CPierAgentImp::ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Float64 Xcl) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -519,7 +519,7 @@ Float64 CPierAgentImp::ConvertCurbLineToCrossBeamCoordinate(PierIDType pierID,Fl
    return Xxb;
 }
 
-Float64 CPierAgentImp::ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier)
+Float64 CPierAgentImp::ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float64 Xpier) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -529,7 +529,7 @@ Float64 CPierAgentImp::ConvertPierToCrossBeamCoordinate(PierIDType pierID,Float6
    return Xxb;
 }
 
-Float64 CPierAgentImp::ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb)
+Float64 CPierAgentImp::ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float64 Xxb) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -539,7 +539,7 @@ Float64 CPierAgentImp::ConvertCrossBeamToPierCoordinate(PierIDType pierID,Float6
    return Xpier;
 }
 
-Float64 CPierAgentImp::ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier)
+Float64 CPierAgentImp::ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64 Xpier) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -549,7 +549,7 @@ Float64 CPierAgentImp::ConvertPierToCurbLineCoordinate(PierIDType pierID,Float64
    return Xcl;
 }
 
-Float64 CPierAgentImp::ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl)
+Float64 CPierAgentImp::ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64 Xcl) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -561,7 +561,7 @@ Float64 CPierAgentImp::ConvertCurbLineToPierCoordinate(PierIDType pierID,Float64
 
 //////////////////////////////////////////
 // IXBRSectionProperties
-Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -593,7 +593,7 @@ Float64 CPierAgentImp::GetDepth(PierIDType pierID,xbrTypes::Stage stage,const xb
    }
 }
 
-Float64 CPierAgentImp::GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -629,7 +629,7 @@ Float64 CPierAgentImp::GetArea(PierIDType pierID,xbrTypes::Stage stage,const xbr
    }
 }
 
-Float64 CPierAgentImp::GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -665,7 +665,7 @@ Float64 CPierAgentImp::GetIxx(PierIDType pierID,xbrTypes::Stage stage,const xbrP
    }
 }
 
-Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -701,7 +701,7 @@ Float64 CPierAgentImp::GetIyy(PierIDType pierID,xbrTypes::Stage stage,const xbrP
    }
 }
 
-Float64 CPierAgentImp::GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -737,7 +737,7 @@ Float64 CPierAgentImp::GetYtop(PierIDType pierID,xbrTypes::Stage stage,const xbr
    }
 }
 
-Float64 CPierAgentImp::GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    if ( poi.IsColumnPOI() )
    {
@@ -773,21 +773,21 @@ Float64 CPierAgentImp::GetYbot(PierIDType pierID,xbrTypes::Stage stage,const xbr
    }
 }
 
-Float64 CPierAgentImp::GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetStop(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    Float64 Ixx = GetIxx(pierID,stage,poi);
    Float64 Yt  = GetYtop(pierID,stage,poi);
    return Ixx/Yt;
 }
 
-Float64 CPierAgentImp::GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::GetSbot(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    Float64 Ixx = GetIxx(pierID,stage,poi);
    Float64 Yb  = GetYbot(pierID,stage,poi);
    return Ixx/Yb;
 }
 
-void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape)
+void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& poi,IShape** ppShape) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -799,7 +799,7 @@ void CPierAgentImp::GetXBeamShape(PierIDType pierID,const xbrPointOfInterest& po
    xbeam->get_BasicShape(Xxb,ppShape);
 }
 
-void CPierAgentImp::GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape)
+void CPierAgentImp::GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IShape** ppShape) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -815,21 +815,21 @@ void CPierAgentImp::GetXBeamShape(PierIDType pierID,xbrTypes::Stage stage,const 
 
 //////////////////////////////////////////
 // IXBRMaterial
-Float64 CPierAgentImp::GetXBeamDensity(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamDensity(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    return concrete.WeightDensity;
 }
 
-Float64 CPierAgentImp::GetXBeamFc(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamFc(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    return concrete.Fc;
 }
 
-Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
@@ -849,7 +849,7 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID)
    return Ec;
 }
 
-Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
@@ -858,7 +858,7 @@ Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID)
    return lambda*fr;
 }
 
-Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID)
+Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
@@ -867,13 +867,13 @@ Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID)
    return lambda;
 }
 
-Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx)
+Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx) const
 {
    // right now, everything uses the same material
    return GetXBeamEc(pierID);
 }
 
-void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu)
+void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu) const
 {
    matRebar::Type rebarType;
    matRebar::Grade rebarGrade;
@@ -888,7 +888,7 @@ void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pF
 
 //////////////////////////////////////////
 // IXBRRebar
-void CPierAgentImp::GetRebarSection(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection)
+void CPierAgentImp::GetRebarSection(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,IRebarSection** ppRebarSection) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -906,7 +906,7 @@ void CPierAgentImp::GetRebarSection(PierIDType pierID,xbrTypes::Stage stage,cons
    rebarLayout->CreateRebarSection(Xxb,stageIdx,ppRebarSection);
 }
 
-IndexType CPierAgentImp::GetRebarRowCount(PierIDType pierID)
+IndexType CPierAgentImp::GetRebarRowCount(PierIDType pierID) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -931,7 +931,7 @@ IndexType CPierAgentImp::GetRebarRowCount(PierIDType pierID)
    return nItems;
 }
 
-IndexType CPierAgentImp::GetRebarCount(PierIDType pierID,IndexType rowIdx)
+IndexType CPierAgentImp::GetRebarCount(PierIDType pierID,IndexType rowIdx) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -957,7 +957,7 @@ IndexType CPierAgentImp::GetRebarCount(PierIDType pierID,IndexType rowIdx)
    return nBars;
 }
 
-void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints)
+void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dCollection** ppPoints) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -997,7 +997,7 @@ void CPierAgentImp::GetRebarProfile(PierIDType pierID,IndexType rowIdx,IPoint2dC
    (*ppPoints)->Offset(XpStart,0);
 }
 
-Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem)
+Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInterest& poi,IRebarSectionItem* pRebarSectionItem) const
 {
    CComPtr<IRebar> rebar;
    pRebarSectionItem->get_Rebar(&rebar);
@@ -1067,7 +1067,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    }
 }
 
-Float64 CPierAgentImp::GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx)
+Float64 CPierAgentImp::GetRebarRowLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx) const
 {
    // rebar are modeled in horizontal rows so it doesn't matter which bar we get 
    // the location for. all bars in a horizontal row have the same elevation
@@ -1080,7 +1080,7 @@ Float64 CPierAgentImp::GetRebarRowLocation(PierIDType pierID,const xbrPointOfInt
    return y;
 }
 
-void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint)
+void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest& poi,IndexType rowIdx,IndexType barIdx,IPoint2d** ppPoint) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -1105,7 +1105,7 @@ void CPierAgentImp::GetRebarLocation(PierIDType pierID,const xbrPointOfInterest&
    rebarSectionItem->get_Location(ppPoint);
 }
 
-Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation)
+Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest& poi,xbrTypes::Stage stage,IPoint2d* pRebarLocation) const
 {
    Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID,poi.GetDistFromStart());
    Float64 Ydeck = GetElevation(pierID,Xcl);
@@ -1142,11 +1142,11 @@ Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest&
 
 //////////////////////////////////////////
 // IXBRStirrups
-ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi)
+ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
 {
    ATLASSERT(!poi.IsColumnPOI());
 
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
    ZoneIndexType zoneIdx = INVALID_INDEX;
    ZoneIndexType zIdx = 0;
    for( const auto& zone : vStirrupZones)
@@ -1162,60 +1162,60 @@ ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage s
    return zoneIdx;
 }
 
-ZoneIndexType CPierAgentImp::GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage)
+ZoneIndexType CPierAgentImp::GetStirrupZoneCount(PierIDType pierID,xbrTypes::Stage stage) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
    return vStirrupZones.size();
 }
 
-Float64 CPierAgentImp::GetStirrupZoneLength(PierIDType pierID, xbrTypes::Stage stage, ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupZoneLength(PierIDType pierID, xbrTypes::Stage stage, ZoneIndexType zoneIdx) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID, stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID, stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    return zone.Length;
 }
 
-void CPierAgentImp::GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend)
+void CPierAgentImp::GetStirrupZoneBoundary(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx,Float64* pXstart,Float64* pXend) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    *pXstart = zone.Xstart;
    *pXend   = zone.Xend;
 }
 
-Float64 CPierAgentImp::GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupZoneSpacing(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    return zone.S;
 }
 
-Float64 CPierAgentImp::GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupZoneReinforcement(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    return zone.Av_over_S;
 }
 
-Float64 CPierAgentImp::GetStirrupLegCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+Float64 CPierAgentImp::GetStirrupLegCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    return zone.nLegs;
 }
 
-IndexType CPierAgentImp::GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx)
+IndexType CPierAgentImp::GetStirrupCount(PierIDType pierID,xbrTypes::Stage stage,ZoneIndexType zoneIdx) const
 {
-   std::vector<StirrupZone>& vStirrupZones = GetStirrupZones(pierID,stage);
-   const StirrupZone& zone = vStirrupZones[zoneIdx];
+   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& zone = vStirrupZones[zoneIdx];
    return zone.nStirrups;
 }
 
 //////////////////////////////////////////
 // IXBRointOfInterest
-std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib) const
 {
-   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+   const auto& vPoi = GetPointsOfInterest(pierID);
    if ( attrib == 0 )
    {
       return vPoi;
@@ -1233,23 +1233,23 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetXBeamPointsOfInterest(PierIDTy
    return vFilteredPoi;
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx) const
 {
    ATLASSERT(false); // not really using column POI just yet
    return std::vector<xbrPointOfInterest>();
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID) const
 {
    return GetRatingPointsOfInterest(pierID,false);
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetShearRatingPointsOfInterest(PierIDType pierID)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetShearRatingPointsOfInterest(PierIDType pierID) const
 {
    return GetRatingPointsOfInterest(pierID,true);
 }
 
-Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi)
+Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -1260,7 +1260,7 @@ Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPoi
    return Xp;
 }
 
-xbrPointOfInterest CPierAgentImp::ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp)
+xbrPointOfInterest CPierAgentImp::ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -1277,7 +1277,7 @@ xbrPointOfInterest CPierAgentImp::ConvertPierCoordinateToPoi(PierIDType pierID,F
    return poi;
 }
 
-xbrPointOfInterest CPierAgentImp::GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi)
+xbrPointOfInterest CPierAgentImp::GetNearestPointOfInterest(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
    ATLASSERT(!poi.IsColumnPOI());
    Float64 Xxb = poi.GetDistFromStart();
@@ -1314,7 +1314,7 @@ xbrPointOfInterest CPierAgentImp::GetNearestPointOfInterest(PierIDType pierID,co
    return xbrPointOfInterest();
 }
 
-xbrPointOfInterest CPierAgentImp::GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID)
+xbrPointOfInterest CPierAgentImp::GetNextPointOfInterest(PierIDType pierID,PoiIDType poiID) const
 {
    const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
    std::vector<xbrPointOfInterest>::const_iterator begin(vPoi.begin());
@@ -1337,7 +1337,7 @@ xbrPointOfInterest CPierAgentImp::GetNextPointOfInterest(PierIDType pierID,PoiID
    return poi;
 }
 
-xbrPointOfInterest CPierAgentImp::GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID)
+xbrPointOfInterest CPierAgentImp::GetPrevPointOfInterest(PierIDType pierID,PoiIDType poiID) const
 {
    const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
    std::vector<xbrPointOfInterest>::const_iterator begin(vPoi.begin());
@@ -1369,9 +1369,9 @@ HRESULT CPierAgentImp::OnProjectChanged()
 }
 
 //////////////////////////////////////////
-void CPierAgentImp::ValidatePierModel(PierIDType pierID)
+void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
 {
-   std::map<PierIDType,CComPtr<IPier>>::iterator found(m_PierModels.find(pierID));
+   auto found(m_PierModels.find(pierID));
    if ( found != m_PierModels.end() )
    {
       return;
@@ -1692,7 +1692,7 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID)
    }
 }
 
-void CPierAgentImp::GetPierModel(PierIDType pierID,IPier** ppPierModel)
+void CPierAgentImp::GetPierModel(PierIDType pierID,IPier** ppPierModel) const
 {
    ValidatePierModel(pierID);
 
@@ -1710,9 +1710,9 @@ void CPierAgentImp::Invalidate()
    m_StirrupZones[xbrTypes::Stage2].clear();
 }
 
-std::vector<CPierAgentImp::StirrupZone>& CPierAgentImp::GetStirrupZones(PierIDType pierID,xbrTypes::Stage stage)
+const std::vector<CPierAgentImp::StirrupZone>& CPierAgentImp::GetStirrupZones(PierIDType pierID,xbrTypes::Stage stage) const
 {
-   std::map<PierIDType,std::vector<StirrupZone>>::iterator found(m_StirrupZones[stage].find(pierID));
+   auto found(m_StirrupZones[stage].find(pierID));
    if ( found == m_StirrupZones[stage].end() )
    {
       ValidateStirrupZones(pierID,stage);
@@ -1722,7 +1722,7 @@ std::vector<CPierAgentImp::StirrupZone>& CPierAgentImp::GetStirrupZones(PierIDTy
    return found->second;
 }
 
-void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage)
+void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage) const
 {
    GET_IFACE(IXBRProject,pProject);
    const xbrPierData& pierData = pProject->GetPierData(pierID);
@@ -1743,7 +1743,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage
    m_StirrupZones[stage].insert(std::make_pair(pierID,vStirrupZones));
 }
 
-void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones)
+void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones) const
 {
    // Map the input stirrup zones into actual stirrup zones
    pvStirrupZones->clear();
@@ -1895,9 +1895,9 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
    }
 }
 
-std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType pierID)
+const std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType pierID) const
 {
-   std::map<PierIDType,std::vector<xbrPointOfInterest>>::iterator found(m_XBeamPoi.find(pierID));
+   auto found(m_XBeamPoi.find(pierID));
    if ( found == m_XBeamPoi.end() )
    {
       ValidatePointsOfInterest(pierID);
@@ -1908,7 +1908,7 @@ std::vector<xbrPointOfInterest>& CPierAgentImp::GetPointsOfInterest(PierIDType p
    return found->second;
 }
 
-void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
+void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
 
@@ -2042,7 +2042,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID)
    m_XBeamPoi.insert(std::make_pair(pierID,vPoi));
 }
 
-void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
+void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi) const
 {
    // put POI in left-to-right sorted order
    std::sort(vPoi.begin(),vPoi.end());
@@ -2060,9 +2060,9 @@ void CPierAgentImp::SimplifyPOIList(std::vector<xbrPointOfInterest>& vPoi)
    }
 }
 
-bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi)
+bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInterest* pPoi) const
 {
-   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+   const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
    for (const auto& poi : vPoi)
    {
       if ( IsEqual(poi.GetDistFromStart(),Xxb) )
@@ -2075,7 +2075,7 @@ bool CPierAgentImp::FindXBeamPoi(PierIDType pierID,Float64 Xxb,xbrPointOfInteres
    return false;
 }
 
-void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
+void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint) const
 {
    CComPtr<IPier> pier;
    GetPierModel(pierID,&pier);
@@ -2159,11 +2159,11 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint)
    deckProfile->get_Item(maxIdx,ppPoint);
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear)
+std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear) const
 {
    // load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
    // for shear, don't include any poi that are between faces of column
-   std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
+   const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
 
    bool bOverColumn = false;
    std::vector<xbrPointOfInterest> vFilteredPoi;

@@ -181,7 +181,7 @@ STDMETHODIMP CAnalysisAgentImp::ShutDown()
    return S_OK;
 }
 
-CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,int level)
+CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,int level) const
 {
    BuildModel(pierID,level); // builds or updates the model if necessary
    std::map<PierIDType,ModelData>::iterator found = m_pModelData->find(pierID);
@@ -202,7 +202,7 @@ struct XBeamNode
    bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X,0.005); }
 };
 
-void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
+void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 {
    CanModelPier(pierID,m_StatusGroupID,m_scidBridgeError); // if this is not the kind of pier we can model, an Unwind exception will be thrown
 
@@ -499,14 +499,14 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level)
    }
 }
 
-void CAnalysisAgentImp::ApplyDeadLoad(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ApplyDeadLoad(PierIDType pierID,ModelData* pModelData) const
 {
    ApplyLowerXBeamDeadLoad(pierID,pModelData);
    ApplyUpperXBeamDeadLoad(pierID,pModelData);
    ApplySuperstructureDeadLoadReactions(pierID,pModelData);
 }
 
-void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData) const
 {
    ValidateLowerXBeamDeadLoad(pierID,pModelData);
 
@@ -601,7 +601,7 @@ void CAnalysisAgentImp::ApplyLowerXBeamDeadLoad(PierIDType pierID,ModelData* pMo
    }
 }
 
-void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pModelData) const
 {
    CComPtr<IFem2dLoadingCollection> loadings;
    pModelData->m_Model->get_Loadings(&loadings);
@@ -623,7 +623,7 @@ void CAnalysisAgentImp::ApplyUpperXBeamDeadLoad(PierIDType pierID,ModelData* pMo
    }
 }
 
-void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,ModelData* pModelData) const
 {
    GET_IFACE(IXBRPier,pPier);
    GET_IFACE(IXBRProject,pProject);
@@ -930,7 +930,7 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
    }
 }
 
-void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* pModelData) const
 {
    if ( 0 < pModelData->m_LowerXBeamLoads.size() )
    {
@@ -972,7 +972,7 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
    }
 }
 
-void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation)
+void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation) const
 {
    ATLASSERT(!poi.IsColumnPOI()); // not supporting POIs on the columns yet
 
@@ -980,7 +980,7 @@ void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPoint
    GetXBeamFemModelLocation(pModelData,Xpoi,pMbrID,pMbrLocation);
 }
 
-void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation)
+void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const
 {
    std::vector<BeamMember>::iterator iter(pModelData->m_XBeamMembers.begin());
    std::vector<BeamMember>::iterator end(pModelData->m_XBeamMembers.end());
@@ -997,7 +997,7 @@ void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X
    ATLASSERT(false); // should never get here
 }
 
-void CAnalysisAgentImp::GetSuperstructureFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation)
+void CAnalysisAgentImp::GetSuperstructureFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const
 {
    std::vector<BeamMember>::iterator iter(pModelData->m_SuperstructureMembers.begin());
    std::vector<BeamMember>::iterator end(pModelData->m_SuperstructureMembers.end());
@@ -1014,7 +1014,7 @@ void CAnalysisAgentImp::GetSuperstructureFemModelLocation(ModelData* pModelData,
    ATLASSERT(false); // should never get here
 }
 
-LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfType)
+LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfType) const
 {
    switch (pfType)
    {
@@ -1121,13 +1121,13 @@ HRESULT CAnalysisAgentImp::OnConstructionLoadChanged()
 
 //////////////////////////////////////////////////////////////////////
 // IXBRProductForces
-const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading(PierIDType pierID)
+const std::vector<LowerXBeamLoad>& CAnalysisAgentImp::GetLowerCrossBeamLoading(PierIDType pierID) const
 {
    ModelData* pModelData = GetModelData(pierID);
    return pModelData->m_LowerXBeamLoads;
 }
 
-Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
+Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    Float64 H, W;
@@ -1146,7 +1146,7 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID)
    return w;
 }
 
-IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType)
+IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgsTypes::LoadRatingType ratingType) const
 {
    ModelData* pModelData = GetModelData(pierID);
    GET_IFACE_NOCHECK(IXBRRatingSpecification,pRatingSpec);
@@ -1162,19 +1162,19 @@ IndexType CAnalysisAgentImp::GetLiveLoadConfigurationCount(PierIDType pierID,pgs
    }
 }
 
-IndexType CAnalysisAgentImp::GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx)
+IndexType CAnalysisAgentImp::GetLoadedLaneCount(PierIDType pierID,IndexType liveLoadConfigIdx) const
 {
    ModelData* pModelData = GetModelData(pierID);
    return pModelData->m_LiveLoadConfigurations[liveLoadConfigIdx].m_LoadCases.size();
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(PierIDType pierID)
+std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(PierIDType pierID) const
 {
    ModelData* pModelData = GetModelData(pierID,MODEL_INIT_TOPOLOGY);
    return GetWheelLineLocations(pModelData);
 }
 
-WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx)
+WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType liveLoadConfigIdx,IndexType permitLaneIdx) const
 {
    ModelData* pModelData = GetModelData(pierID);
    LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[liveLoadConfigIdx];
@@ -1261,7 +1261,7 @@ WheelLineConfiguration CAnalysisAgentImp::GetLiveLoadConfiguration(PierIDType pi
    return wheelConfig;
 }
 
-void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax)
+void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvMin,std::vector<IndexType>* pvMax) const
 {
    pvMin->clear();
    pvMax->clear();
@@ -1272,7 +1272,7 @@ void CAnalysisAgentImp::GetGoverningMomentLiveLoadConfigurations(PierIDType pier
    *pvMax = unitLiveLoadResult.m_MzMaxLiveLoadConfigs;
 }
 
-void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig)
+void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierID,const xbrPointOfInterest& poi,std::vector<IndexType>* pvLLConfig) const
 {
    pvLLConfig->clear();
 
@@ -1282,7 +1282,7 @@ void CAnalysisAgentImp::GetGoverningShearLiveLoadConfigurations(PierIDType pierI
 
 //////////////////////////////////////////////////////////////////////
 // IAnalysisResults
-Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi) const
 {
    ModelData* pModelData = GetModelData(pierID);
 
@@ -1311,7 +1311,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceTyp
    return Mz;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const xbrPointOfInterest& poi) const
 {
    ModelData* pModelData = GetModelData(pierID);
 
@@ -1334,7 +1334,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductF
    return V;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
@@ -1347,7 +1347,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::Pr
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductForceType pfType,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
@@ -1360,7 +1360,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
    return vV;
 }
 
-Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi) const
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    Float64 M = 0;
@@ -1373,7 +1373,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceTy
    return M;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const xbrPointOfInterest& poi) const
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes = GetLoads(lcType);
    sysSectionValue V(0,0);
@@ -1386,7 +1386,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::Combined
    return V;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
@@ -1398,7 +1398,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::Co
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::CombinedForceType lcType,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
@@ -1410,7 +1410,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTy
    return vV;
 }
 
-Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi)
+Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi) const
 {
    ModelData* pModelData = GetModelData(pierID);
 
@@ -1473,7 +1473,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
    return Mz;
 }
 
-sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi)
+sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const xbrPointOfInterest& poi) const
 {
    ModelData* pModelData = GetModelData(pierID);
 
@@ -1528,7 +1528,7 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    return Fy;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<Float64> vM;
    vM.reserve(vPoi.size());
@@ -1540,7 +1540,7 @@ std::vector<Float64> CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::Lo
    return vM;
 }
 
-std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi)
+std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,const std::vector<xbrPointOfInterest>& vPoi) const
 {
    std::vector<sysSectionValue> vV;
    vV.reserve(vPoi.size());
@@ -1554,7 +1554,7 @@ std::vector<sysSectionValue> CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTy
 
 //////////////////////////////////
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,Float64* pMpermit,Float64* pMlegal) const
 {
    ATLASSERT(::IsPermitRatingType(ratingType) || ratingType == pgsTypes::lrLegal_Emergency);
 #if defined _DEBUG
@@ -1670,7 +1670,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    *pMpermit *= mpf;
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMpermit,std::vector<Float64>* pvMlegal) const
 {
    pvMpermit->clear();
    pvMpermit->resize(vPoi.size());
@@ -1685,7 +1685,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,sysSectionValue* pVpermit,sysSectionValue* pVlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const xbrPointOfInterest& poi,sysSectionValue* pVpermit,sysSectionValue* pVlegal) const
 {
    ATLASSERT(::IsPermitRatingType(ratingType) || ratingType == pgsTypes::lrLegal_Emergency);
 #if defined _DEBUG
@@ -1796,7 +1796,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    *pVpermit *= mpf;
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvVpermit,std::vector<sysSectionValue>* pvVlegal)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvVpermit,std::vector<sysSectionValue>* pvVlegal) const
 {
    pvVpermit->clear();
    pvVpermit->resize(vPoi.size());
@@ -1813,7 +1813,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
 
 //////////////////////////////////
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinConfiguration,WheelLineConfiguration* pMaxConfiguration*/)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
@@ -1863,7 +1863,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx/*WheelLineConfiguration* pMinLeftConfiguration,WheelLineConfiguration* pMinRightConfiguration,WheelLineConfiguration* pMaxLeftConfiguration,WheelLineConfiguration* pMaxRightConfiguration*/)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,IndexType* pMinLLConfigIdx,IndexType* pMaxLLConfigIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
@@ -1932,7 +1932,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    }
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx/*std::vector<WheelLineConfiguration>* pvMinConfiguration,std::vector<WheelLineConfiguration>* pvMaxConfiguration*/)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -1970,7 +1970,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx/*std::vector<WheelLineConfiguration>* pvMinLeftConfiguration,std::vector<WheelLineConfiguration>* pvMinRightConfiguration,std::vector<WheelLineConfiguration>* pvMaxLeftConfiguration,std::vector<WheelLineConfiguration>* pvMaxRightConfiguration*/)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<IndexType>* pvMinLLConfigIdx,std::vector<IndexType>* pvMaxLLConfigIdx) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -2008,7 +2008,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    }
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,VehicleIndexType* pMinVehicleIdx,VehicleIndexType* pMaxVehicleIdx)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax,VehicleIndexType* pMinVehicleIdx,VehicleIndexType* pMaxVehicleIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    IndexType nLiveLoadReactions = pProject->GetLiveLoadReactionCount(pierID,ratingType);
@@ -2057,7 +2057,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,VehicleIndexType* pMinLeftVehicleIdx,VehicleIndexType* pMinRightVehicleIdx,VehicleIndexType* pMaxLeftVehicleIdx,VehicleIndexType* pMaxRightVehicleIdx)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax,VehicleIndexType* pMinLeftVehicleIdx,VehicleIndexType* pMinRightVehicleIdx,VehicleIndexType* pMaxLeftVehicleIdx,VehicleIndexType* pMaxRightVehicleIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    IndexType nLiveLoadReactions = pProject->GetLiveLoadReactionCount(pierID,ratingType);
@@ -2131,7 +2131,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    }
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<VehicleIndexType>* pvMinVehicleIdx,std::vector<VehicleIndexType>* pvMaxVehicleIdx)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax,std::vector<VehicleIndexType>* pvMinVehicleIdx,std::vector<VehicleIndexType>* pvMaxVehicleIdx) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -2168,7 +2168,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<VehicleIndexType>* pvMinLeftVehicleIdx,std::vector<VehicleIndexType>* pvMinRightVehicleIdx,std::vector<VehicleIndexType>* pvMaxLeftVehicleIdx,std::vector<VehicleIndexType>* pvMaxRightVehicleIdx)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType ratingType,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax,std::vector<VehicleIndexType>* pvMinLeftVehicleIdx,std::vector<VehicleIndexType>* pvMinRightVehicleIdx,std::vector<VehicleIndexType>* pvMaxLeftVehicleIdx,std::vector<VehicleIndexType>* pvMaxRightVehicleIdx) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -2225,7 +2225,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    }
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,Float64* pMin,Float64* pMax) const
 {
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
@@ -2293,7 +2293,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const xbrPointOfInterest& poi,sysSectionValue* pMin,sysSectionValue* pMax) const
 {
    pgsTypes::LoadRatingType ratingType = RatingTypeFromLimitState(limitState);
 
@@ -2361,7 +2361,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    *pMax = gDC*DC + gDW*DW + gCR*CR + gSH*SH + gPS*PS + gRE*RE + gLL*LLIMmax;
 }
 
-void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax)
+void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<Float64>* pvMin,std::vector<Float64>* pvMax) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -2376,7 +2376,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LimitState limitSt
    }
 }
 
-void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax)
+void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitState,const std::vector<xbrPointOfInterest>& vPoi,std::vector<sysSectionValue>* pvMin,std::vector<sysSectionValue>* pvMax) const
 {
    pvMin->clear();
    pvMin->reserve(vPoi.size());
@@ -2391,7 +2391,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LimitState limitSta
    }
 }
 
-std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::CombinedForceType lcType)
+std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::CombinedForceType lcType) const
 {
    std::vector<xbrTypes::ProductForceType> vPFTypes;
    switch(lcType)
@@ -2429,7 +2429,7 @@ std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::Co
    return vPFTypes;
 }
 
-void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData)
+void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData) const
 {
    GET_IFACE(IProgress,pProgress);
    CEAFAutoProgress ap(pProgress);
@@ -2544,7 +2544,7 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    } // next number of loaded lanes
 }
 
-void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions)
+void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType nLaneGaps,std::vector<std::vector<IndexType>>& vGapPositions) const
 {
    if ( nLaneGaps == 0 )
    {
@@ -2574,7 +2574,7 @@ void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType 
    }
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,const std::vector<IndexType>& vGapPosition)
+std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,const std::vector<IndexType>& vGapPosition) const
 {
    Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
    w3 /= cos(skew); // we are working in the plane of the pier, so make skew adjustment
@@ -2605,7 +2605,7 @@ std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float
    return vLoadPositions;
 }
 
-std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,const std::vector<Float64>& vWheelLinePositions)
+std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelData* pModelData,Float64 Xoffset,const std::vector<Float64>& vWheelLinePositions) const
 {
    // keep track of the last load case ID used for one loaded lane
    // vLoadPositions has two point loads per lane, so the number of loaded lanes
@@ -2661,7 +2661,7 @@ std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelDat
    return vLoadCases;
 }
 
-void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData)
+void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData) const
 {
    GET_IFACE(IProgress,pProgress);
    CEAFAutoProgress ap(pProgress);
@@ -2711,7 +2711,7 @@ void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData)
    }
 }
 
-std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveLoadResults(PierIDType pierID)
+std::set<CAnalysisAgentImp::UnitLiveLoadResult>& CAnalysisAgentImp::GetUnitLiveLoadResults(PierIDType pierID) const
 {
    std::map<PierIDType,std::set<UnitLiveLoadResult>>::iterator found = m_pUnitLiveLoadResults->find(pierID);
    if ( found == m_pUnitLiveLoadResults->end() )
@@ -2734,7 +2734,7 @@ struct Result
    bool operator<(const Result& result)const { return Value < result.Value; }
 };
 
-void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
+void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress,pProgress);
@@ -2992,7 +2992,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
    liveLoadResults.insert(liveLoadResult);
 }
 
-CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi)
+CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
    std::set<UnitLiveLoadResult>& liveLoadResults = GetUnitLiveLoadResults(pierID);
    UnitLiveLoadResult key;
@@ -3008,7 +3008,7 @@ CAnalysisAgentImp::UnitLiveLoadResult& CAnalysisAgentImp::GetUnitLiveLoadResult(
    return const_cast<UnitLiveLoadResult&>(*found);
 }
 
-Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
+Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
 
@@ -3026,7 +3026,7 @@ Float64 CAnalysisAgentImp::GetMaxLegalReaction(PierIDType pierID)
    return Rlgl;
 }
 
-std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(ModelData* pModelData)
+std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(ModelData* pModelData) const
 {
    std::vector<Float64> vWheelLineLocations;
 

@@ -21,8 +21,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "resource.h"
-#include "XBeamRatePlugin_i.h"
 #include "PGSpliceComponentInfo.h"
 #include <MFCTools\VersionInfo.h>
 

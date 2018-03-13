@@ -26,7 +26,7 @@
 #define __PLUGIN_H_
 
 #include "resource.h"       // main symbols
-#include "XBeamRatePlugin_i.h"
+#include "CLSID.h"
 #include <EAF\EAFAppPlugIn.h>
 #include <WBFLUnitServer.h>
 #include <EAF\EAFCustomReport.h>

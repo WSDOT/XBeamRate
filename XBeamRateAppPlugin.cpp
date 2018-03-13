@@ -24,7 +24,6 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#include "XBeamRatePlugin_i.h"
 #include "XBeamRateAppPlugin.h"
 
 #include "XBeamRatePluginApp.h"

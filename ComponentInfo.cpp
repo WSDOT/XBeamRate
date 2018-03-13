@@ -21,7 +21,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "XBeamRatePlugin_i.h"
 #include "ComponentInfo.h"
 #include "resource.h"
 #include <EAF\EAFApp.h>

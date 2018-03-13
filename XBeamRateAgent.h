@@ -26,7 +26,7 @@
 
 #pragma once
 #include "resource.h"       // main symbols
-#include "XBeamRatePlugin_i.h"
+#include "CLSID.h"
 #include "ReinforcementPageParent.h"
 
 #include <EAF\EAFInterfaceCache.h>

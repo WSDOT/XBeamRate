@@ -210,6 +210,9 @@
     <ClInclude Include="XBRateCalculationSheet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CLSID.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\GraphingView.ico">
@@ -233,9 +236,6 @@
     <Image Include="res\XBeamRate.ico">
       <Filter>Resource Files</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <Midl Include="XBeamRatePlugin.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="XBeamRate.def" />
