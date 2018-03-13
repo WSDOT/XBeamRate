@@ -40,19 +40,19 @@ STDMETHODIMP CPGSuperDataExporter::Init(UINT nCmdID)
    return S_OK;
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText)
+STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText) const
 {
    *bstrText = CComBSTR("Piers to XBRate");
    return S_OK;
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetBitmapHandle(HBITMAP* phBmp)
+STDMETHODIMP CPGSuperDataExporter::GetBitmapHandle(HBITMAP* phBmp) const
 {
    *phBmp = nullptr;
    return S_OK;
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText)
+STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText) const
 {
    *bstrText = CComBSTR("Export a pier to XBRate\nTool tip text");
    return S_OK;   

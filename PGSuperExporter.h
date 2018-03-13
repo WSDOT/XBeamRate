@@ -25,6 +25,7 @@
 #ifndef __PGSUPEREXPORTER_H_
 #define __PGSUPEREXPORTER_H_
 
+#include <PGSuperIEPlugin.h>
 #include "resource.h"       // main symbols
 
 /////////////////////////////////////////////////////////////////////////////
@@ -52,9 +53,9 @@ END_COM_MAP()
 // IPGSDataExporter
 public:
    STDMETHOD(Init)(UINT nCmdID) override;
-   STDMETHOD(GetMenuText)(/*[out,retval]*/BSTR*  bstrText) override;
-   STDMETHOD(GetBitmapHandle)(/*[out]*/HBITMAP* phBmp) override;
-   STDMETHOD(GetCommandHintText)(BSTR*  bstrText) override;
+   STDMETHOD(GetMenuText)(/*[out,retval]*/BSTR*  bstrText) const override;
+   STDMETHOD(GetBitmapHandle)(/*[out]*/HBITMAP* phBmp) const override;
+   STDMETHOD(GetCommandHintText)(BSTR*  bstrText) const override;
    STDMETHOD(Export)(/*[in]*/IBroker* pBroker) override;
 };
 

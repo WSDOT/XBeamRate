@@ -88,7 +88,7 @@
 #include <PGSuperCatCom.h>
 #include <PGSpliceCatCom.h>
 #include <System\ComCatMgr.h>
-#include <PGSuperIEPlugin_i.c>
+#include <PGSuperIEPlugin.h>
 
 #include "XBeamRatePluginApp.h"
 

@@ -44,29 +44,29 @@ void CPGSpliceComponentInfo::Terminate()
 {
 }
 
-CString CPGSpliceComponentInfo::GetName()
+CString CPGSpliceComponentInfo::GetName() const
 {
    return _T("XBRate Extensions");
 }
 
-CString CPGSpliceComponentInfo::GetDescription()
+CString CPGSpliceComponentInfo::GetDescription() const
 {
    CString strDesc;
    strDesc.Format(_T("Adds cross beam load rating capabilties to PGSplice"));
    return strDesc;
 }
 
-HICON CPGSpliceComponentInfo::GetIcon()
+HICON CPGSpliceComponentInfo::GetIcon() const
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
    return AfxGetApp()->LoadIcon(IDR_XBEAMRATE);
 }
 
-bool CPGSpliceComponentInfo::HasMoreInfo()
+bool CPGSpliceComponentInfo::HasMoreInfo() const
 {
    return false;
 }
 
-void CPGSpliceComponentInfo::OnMoreInfo()
+void CPGSpliceComponentInfo::OnMoreInfo() const
 {
 }
