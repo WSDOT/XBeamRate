@@ -1221,6 +1221,10 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          segDirection->get_Value(&dirSegment);
 
          Float64 skew = dirPierNormal - dirSegment;
+         if (M_PI <= skew)
+         {
+            skew = TWO_PI - skew;
+         }
          ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
 
          // compute shear factor
@@ -1778,6 +1782,8 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,I
       return;
    }
 
+   Float64 cos_skew = cos(skew);
+
    CComPtr<IRect2d> bbox;
    pShape->get_BoundingBox(&bbox);
    CComPtr<IPoint2d> pntTC;
@@ -1796,7 +1802,7 @@ void CXBeamRateView::SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,I
       pnt->Location(&x,&y);
 
       y += shear*(x-xcl);
-      x /= cos(skew);
+      x /= cos_skew;
 
       pnt->Move(x,y);
 
