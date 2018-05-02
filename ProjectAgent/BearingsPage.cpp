@@ -36,6 +36,13 @@
 
 #pragma warning(disable:4244)
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,xbrBearingLineData& brgLineData,std::vector<txnDeadLoadReaction>& deadLoadReactions)
 {
    if ( pDX->m_bSaveAndValidate )

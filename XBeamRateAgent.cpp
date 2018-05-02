@@ -71,6 +71,13 @@
 //
 //#include <MFCTools\Prompts.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 BEGIN_MESSAGE_MAP(CMyCommandTarget, CCmdTarget)
 	ON_COMMAND(ID_VIEW_PIER, OnViewPier)
    ON_UPDATE_COMMAND_UI(ID_VIEW_PIER,OnPierCommandUpdate)

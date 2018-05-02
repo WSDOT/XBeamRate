@@ -29,6 +29,13 @@
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 CXBeamRateReportSpecificationBuilder::CXBeamRateReportSpecificationBuilder(IBroker* pBroker) :
 CEAFBrokerReportSpecificationBuilder(pBroker)
 {

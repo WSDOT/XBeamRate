@@ -26,6 +26,13 @@
 #include "resource.h"
 #include "dllmain.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 CAnalysisAgentModule _AtlModule;
 
 class CAnalysisAgentModuleApp : public CWinApp

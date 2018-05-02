@@ -27,6 +27,13 @@
 #include "resource.h"
 #include "dllmain.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 CPierAgentModule _AtlModule;
 
 class CPierAgentModuleApp : public CWinApp

@@ -23,6 +23,13 @@
 #include "stdafx.h"
 #include <XBeamRateExt\PierData.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 xbrPierData::xbrPierData()
 {
    m_ID = INVALID_ID;

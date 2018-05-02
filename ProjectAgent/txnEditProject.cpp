@@ -26,6 +26,13 @@
 
 #include <IFace\Project.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 txnEditProjectProperties::txnEditProjectProperties(
       const std::_tstring& oldBridgeName, const std::_tstring& newBridgeName,
       const std::_tstring& oldBridgeID,   const std::_tstring& newBridgeID,

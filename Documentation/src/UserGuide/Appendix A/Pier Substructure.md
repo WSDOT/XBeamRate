@@ -24,6 +24,8 @@ Depth | Depth of the column. Depth is measured normal to the plane of the pier.
 S | Center to center column spacing
 Transverse Location of Columns | Select a column to locate transversely with respect to the alignment or bridge line. Enter the offset of the column from the alignment or bridge line.
 
+![](ColumnDimensions.png)
+
 Condition and Rating
 --------------------
 

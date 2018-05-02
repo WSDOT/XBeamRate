@@ -23,6 +23,13 @@
 #include "StdAfx.h"
 #include "XBeamRateReportSpecification.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 CXBeamRateReportSpecification::CXBeamRateReportSpecification(LPCTSTR strReportName,IBroker* pBroker,PierIDType pierID) :
 CEAFBrokerReportSpecification(strReportName,pBroker),
 m_PierID(pierID)

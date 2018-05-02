@@ -40,6 +40,13 @@
 #include <IFace\RatingSpecification.h>
 
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 BEGIN_MESSAGE_MAP(CAgentCmdTarget,CCmdTarget)
    ON_COMMAND(ID_EDIT_PIER, &CAgentCmdTarget::OnEditPier)
    ON_COMMAND(ID_EDIT_OPTIONS,&CAgentCmdTarget::OnEditOptions)

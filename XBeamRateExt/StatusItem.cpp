@@ -24,6 +24,13 @@
 #include <IFace\StatusCenter.h>
 #include <XBeamRateExt\StatusItem.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 xbrBridgeStatusItem::xbrBridgeStatusItem(StatusGroupIDType statusGroupID,StatusCallbackIDType callbackID,LPCTSTR strDescription) :
 CEAFStatusItem(statusGroupID,callbackID,strDescription)
 {

@@ -25,6 +25,13 @@
 
 #include <System\Flags.h>
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+
 #if defined _DEBUG
 #define UPDATE_ATTRIBUTES UpdateAttributeString()
 #else
