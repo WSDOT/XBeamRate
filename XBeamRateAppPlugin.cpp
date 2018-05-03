@@ -107,8 +107,7 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
 
    std::vector<CEAFDocTemplate*> templates;
 
-   CXBeamRateDocTemplate* pDocTemplate;
-	pDocTemplate = new CXBeamRateDocTemplate(
+   std::unique_ptr<CXBeamRateDocTemplate> pDocTemplate = std::make_unique<CXBeamRateDocTemplate>(
       IDR_XBEAMRATE,
       nullptr,
 		RUNTIME_CLASS(CXBeamRateDoc),
@@ -118,7 +117,7 @@ std::vector<CEAFDocTemplate*> CXBeamRateAppPlugin::CreateDocTemplates()
 
    pDocTemplate->SetPlugin(this);
 
-   templates.push_back(pDocTemplate);
+   templates.push_back(pDocTemplate.release());
    return templates;
 }
 
