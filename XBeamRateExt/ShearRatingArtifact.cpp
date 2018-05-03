@@ -173,7 +173,7 @@ void xbrShearRatingArtifact::SetVehicleName(LPCTSTR str)
    m_strVehicleName = str;
 }
 
-std::_tstring xbrShearRatingArtifact::GetVehicleName() const
+const std::_tstring& xbrShearRatingArtifact::GetVehicleName() const
 {
    return m_strVehicleName;
 }

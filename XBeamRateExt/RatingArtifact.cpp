@@ -23,11 +23,57 @@
 #include "stdafx.h"
 #include <XBeamRateExt\RatingArtifact.h>
 
+#if defined _USE_MULTITHREADING
+#include <future>
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
+
+struct PostingLoad
+{
+   Float64 Load;
+   Float64 RF;
+   Float64 VehicleWeight;
+   std::_tstring VehicleName;
+   PostingLoad() : Load(DBL_MAX), RF(1.0), VehicleWeight(0.0), VehicleName(_T("Unknown"))
+   {
+   }
+};
+
+template<class T>
+PostingLoad ComputeSafePostingLoad(const T& ratingArtifacts)
+{
+   PostingLoad postingLoad;
+
+   for (const auto& item : ratingArtifacts)
+   {
+      const auto& artifact = item.second;
+      const auto& strVehicle = artifact.GetVehicleName();
+      auto W = artifact.GetVehicleWeight();
+      auto RF = artifact.GetRatingFactor();
+      Float64 spl = W*(RF - 0.3) / 0.7; // safe posting load, MBE Equation 6A.8.3-1
+      if (spl < 0)
+      {
+         spl = 0;
+      }
+
+      if (spl < postingLoad.Load)
+      {
+         postingLoad.Load = spl;
+         postingLoad.RF = RF;
+         postingLoad.VehicleWeight = W;
+         postingLoad.VehicleName = strVehicle;
+      }
+   }
+
+   return postingLoad;
+}
 
 /****************************************************************************
 CLASS
@@ -336,126 +382,60 @@ bool xbrRatingArtifact::IsLoadPostingRequired() const
 
 void xbrRatingArtifact::GetSafePostingLoad(Float64* pPostingLoad,Float64* pWeight,Float64* pRF,std::_tstring* pVehicle) const
 {
-   Float64 posting_load = DBL_MAX;
+   PostingLoad postingLoad;
+#if defined _USE_MULTITHREADING
+   std::vector<std::future<PostingLoad>> vFutures;
+   vFutures.emplace_back(std::async([&, this] {return ComputeSafePostingLoad(m_PositiveMomentRatings);}));
+   vFutures.emplace_back(std::async([&, this] {return ComputeSafePostingLoad(m_NegativeMomentRatings);}));
+   vFutures.emplace_back(std::async([&, this] {return ComputeSafePostingLoad(m_ShearRatings);}));
+   vFutures.emplace_back(std::async([&, this] {return ComputeSafePostingLoad(m_PositiveMomentYieldStressRatios);}));
+   vFutures.emplace_back(std::async([&, this] {return ComputeSafePostingLoad(m_NegativeMomentYieldStressRatios);}));
 
-   *pWeight = 0;
-   *pRF = 1;
-   *pVehicle = _T("Unknown");
-
-   MomentRatings::const_iterator moment_iter;
-   for ( moment_iter = m_PositiveMomentRatings.begin(); moment_iter != m_PositiveMomentRatings.end(); moment_iter++ )
+   for (auto& f : vFutures)
    {
-      const xbrMomentRatingArtifact& artifact = moment_iter->second;
-
-      std::_tstring strVehicle = artifact.GetVehicleName();
-      Float64 W = artifact.GetVehicleWeight();
-      Float64 RF = artifact.GetRatingFactor();
-      Float64 spl = W*(RF - 0.3)/0.7; // safe posting load, MBE Eqn 6A.8.3-1
-      if ( spl < 0 )
+      auto pl = f.get();
+      if (pl.Load < postingLoad.Load)
       {
-         spl = 0;
-      }
-
-      if ( spl < posting_load )
-      {
-         posting_load = spl;
-         *pWeight = W;
-         *pRF = RF;
-         *pVehicle = strVehicle;
+         postingLoad = pl;
       }
    }
+#else
+   PostingLoad pl_pM = ComputeSafePostingLoad(m_PositiveMomentRatings);
+   PostingLoad pl_nM = ComputeSafePostingLoad(m_NegativeMomentRatings);
+   PostingLoad pl_V = ComputeSafePostingLoad(m_ShearRatings);
+   PostingLoad pl_YS_pM = ComputeSafePostingLoad(m_PositiveMomentYieldStressRatios);
+   PostingLoad pl_YS_nM = ComputeSafePostingLoad(m_NegativeMomentYieldStressRatios);
 
-   for ( moment_iter = m_NegativeMomentRatings.begin(); moment_iter != m_NegativeMomentRatings.end(); moment_iter++ )
+   if (pl_pM.Load < postingLoad.Load)
    {
-      const xbrMomentRatingArtifact& artifact = moment_iter->second;
-
-      std::_tstring strVehicle = artifact.GetVehicleName();
-      Float64 W = artifact.GetVehicleWeight();
-      Float64 RF = artifact.GetRatingFactor();
-      Float64 spl = W*(RF - 0.3)/0.7;
-      if ( spl < 0 )
-      {
-         spl = 0;
-      }
-
-      if ( spl < posting_load )
-      {
-         posting_load = spl;
-         *pWeight = W;
-         *pRF = RF;
-         *pVehicle = strVehicle;
-      }
+      postingLoad = pl_pM;
    }
 
-   ShearRatings::const_iterator shear_iter;
-   for ( shear_iter = m_ShearRatings.begin(); shear_iter != m_ShearRatings.end(); shear_iter++ )
+   if (pl_nM.Load < postingLoad.Load)
    {
-      const xbrShearRatingArtifact& artifact = shear_iter->second;
-
-      std::_tstring strVehicle = artifact.GetVehicleName();
-      Float64 W = artifact.GetVehicleWeight();
-      Float64 RF = artifact.GetRatingFactor();
-      Float64 spl = W*(RF - 0.3)/0.7;
-      if ( spl < 0 )
-      {
-         spl = 0;
-      }
-
-      if ( spl < posting_load )
-      {
-         posting_load = spl;
-         *pWeight = W;
-         *pRF = RF;
-         *pVehicle = strVehicle;
-      }
+      postingLoad = pl_nM;
    }
 
-   YieldStressRatios::const_iterator yield_stress_iter;
-   for ( yield_stress_iter = m_PositiveMomentYieldStressRatios.begin(); yield_stress_iter != m_PositiveMomentYieldStressRatios.end(); yield_stress_iter++ )
+   if (pl_V.Load < postingLoad.Load)
    {
-      const xbrYieldStressRatioArtifact& artifact = yield_stress_iter->second;
-
-      std::_tstring strVehicle = artifact.GetVehicleName();
-      Float64 W = artifact.GetVehicleWeight();
-      Float64 RF = artifact.GetStressRatio();
-      Float64 spl = W*(RF - 0.3)/0.7;
-      if ( spl < 0 )
-      {
-         spl = 0;
-      }
-
-      if ( spl < posting_load )
-      {
-         posting_load = spl;
-         *pWeight = W;
-         *pRF = RF;
-         *pVehicle = strVehicle;
-      }
+      postingLoad = pl_V;
    }
 
-   for ( yield_stress_iter = m_NegativeMomentYieldStressRatios.begin(); yield_stress_iter != m_NegativeMomentYieldStressRatios.end(); yield_stress_iter++ )
+   if (pl_pMpl_YS_pMLoad < postingLoad.Load)
    {
-      const xbrYieldStressRatioArtifact& artifact = yield_stress_iter->second;
-
-      std::_tstring strVehicle = artifact.GetVehicleName();
-      Float64 W = artifact.GetVehicleWeight();
-      Float64 RF = artifact.GetStressRatio();
-      Float64 spl = W*(RF - 0.3)/0.7;
-      if ( spl < 0 )
-      {
-         spl = 0;
-      }
-
-      if ( spl < posting_load )
-      {
-         posting_load = spl;
-         *pWeight = W;
-         *pRF = RF;
-         *pVehicle = strVehicle;
-      }
+      postingLoad = pl_YS_pM;
    }
 
-   *pPostingLoad = posting_load;
+   if (pl_pMpl_YS_nMLoad < postingLoad.Load)
+   {
+      postingLoad = pl_YS_nM;
+   }
+#endif
+
+   *pPostingLoad = postingLoad.Load;
+   *pRF = postingLoad.RF;
+   *pWeight = postingLoad.VehicleWeight;
+   *pVehicle = postingLoad.VehicleName;
 }
 
 void xbrRatingArtifact::MakeCopy(const xbrRatingArtifact& rOther)

@@ -153,7 +153,7 @@ void xbrYieldStressRatioArtifact::SetVehicleName(LPCTSTR str)
    m_bRFComputed = false;
 }
 
-std::_tstring xbrYieldStressRatioArtifact::GetVehicleName() const
+const std::_tstring& xbrYieldStressRatioArtifact::GetVehicleName() const
 {
    return m_strVehicleName;
 }

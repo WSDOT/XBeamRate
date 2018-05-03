@@ -64,7 +64,7 @@ public:
    Float64 GetVehicleWeight() const;
 
    void SetVehicleName(LPCTSTR str);
-   std::_tstring GetVehicleName() const;
+   const std::_tstring& GetVehicleName() const;
 
    void SetAllowableStressRatio(Float64 K);
    Float64 GetAllowableStressRatio() const;
@@ -134,6 +134,7 @@ public:
    Float64 GetFdl() const;
    Float64 GetFll() const;
    Float64 GetStressRatio() const;
+   Float64 GetRatingFactor() const { return GetStressRatio(); }
 
 protected:
    void MakeCopy(const xbrYieldStressRatioArtifact& rOther);
