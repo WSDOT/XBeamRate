@@ -476,11 +476,11 @@ BEGIN
     GROUPBOX        "Flexure",IDC_STATIC,7,7,248,64
     EDITTEXT        IDC_PHI_COMPRESSION,136,31,40,14,ES_RIGHT | ES_AUTOHSCROLL
     EDITTEXT        IDC_PHI_TENSION,136,50,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "Resistance Factors (LRFD 5.5.4.2.1)",IDC_STATIC,16,18,118,8
+    LTEXT           "Resistance Factors (LRFD 5.5.4.2)",IDC_STATIC,16,18,118,8
     LTEXT           "Compression Controlled Sections",IDC_STATIC,27,34,105,8
     LTEXT           "Tension Controlled Sections",IDC_STATIC,27,52,89,8
     GROUPBOX        "Shear",IDC_STATIC,7,76,248,77
-    LTEXT           "Resistance Factors (LRFD 5.5.4.2.1)",IDC_STATIC,16,92,118,8
+    LTEXT           "Resistance Factors (LRFD 5.5.4.2)",IDC_STATIC,16,92,118,8
     EDITTEXT        IDC_PHI_SHEAR,136,89,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
