@@ -2322,7 +2322,7 @@ Float64 CProjectAgentImp::GetShearResistanceFactor() const
    else
    {
       GET_IFACE(IResistanceFactors,pResistanceFactors);
-      return pResistanceFactors->GetShearResistanceFactor(pgsTypes::Normal);
+      return pResistanceFactors->GetShearResistanceFactor(false, pgsTypes::Normal); // assume no debonding ever in pier
    }
 }
 
