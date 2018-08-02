@@ -23,7 +23,7 @@
 #pragma once
 
 #ifndef _XBEAMRATE_VERSION
-#define _XBEAMRATE_VERSION 124 // version 1.2.4
+#define _XBEAMRATE_VERSION 125 // version 1.2.5
 #endif
 
 #include <\ARP\BridgeLink\Include\BridgeLinkVersion.h>
