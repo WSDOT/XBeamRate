@@ -383,7 +383,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
       shearArtifact.SetLiveLoadShear(LLIM);
       shearArtifact.SetLiveLoadConfigurationIndex(llConfigIdx);
 
-#pragma Reminder("WORKING HERE - add longitudinal reinforcement for shear check")
+#pragma Reminder("add longitudinal reinforcement for shear check")
    //   // longitudinal steel check
    //   pgsLongReinfShearArtifact l_artifact;
    //   SHEARCAPACITYDETAILS scd;
