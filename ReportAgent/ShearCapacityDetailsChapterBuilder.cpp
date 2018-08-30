@@ -214,21 +214,15 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pDvTable1->SetRowSpan(0,DvTableCol,2);
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    pDvTable1->SetRowSpan(0,DvTableCol,2);
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    pDvTable1->SetRowSpan(0,DvTableCol,2);
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    pDvTable1->SetColumnSpan(0,DvTableCol,4);
    (*pDvTable1)(0,DvTableCol) << _T("Positive Moment");
-   pDvTable1->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable1->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
-   pDvTable1->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
    (*pDvTable1)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -236,9 +230,6 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pDvTable1->SetColumnSpan(0,DvTableCol,4);
    (*pDvTable1)(0,DvTableCol) << _T("Negative Moment");
-   pDvTable1->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-   pDvTable1->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
-   pDvTable1->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
    (*pDvTable1)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -246,7 +237,6 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pDvTable1->SetRowSpan(0,DvTableCol,2);
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("Controlling") << rptNewLine << Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-   pDvTable1->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
    //
    if ( pierType == xbrTypes::pctIntegral )
@@ -256,21 +246,15 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       pDvTable2->SetRowSpan(0,DvTableCol,2);
       (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
       pDvTable2->SetRowSpan(0,DvTableCol,2);
       (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
       pDvTable2->SetRowSpan(0,DvTableCol,2);
       (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("0.72h"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
 
       pDvTable2->SetColumnSpan(0,DvTableCol,4);
       (*pDvTable2)(0,DvTableCol) << _T("Positive Moment");
-      pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-      pDvTable2->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
-      pDvTable2->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
       (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -278,9 +262,6 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       pDvTable2->SetColumnSpan(0,DvTableCol,4);
       (*pDvTable2)(0,DvTableCol) << _T("Negative Moment");
-      pDvTable2->SetColumnSpan(0,DvTableCol+1,SKIP_CELL);
-      pDvTable2->SetColumnSpan(0, DvTableCol + 2, SKIP_CELL);
-      pDvTable2->SetColumnSpan(0, DvTableCol + 3, SKIP_CELL);
       (*pDvTable2)(1,DvTableCol++) << COLHDR(Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("0.9") << Sub2(_T("d"),_T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pDvTable2)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -288,7 +269,6 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
       pDvTable2->SetRowSpan(0,DvTableCol,2);
       (*pDvTable2)(0,DvTableCol++) << COLHDR(_T("Controlling") << rptNewLine << Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
-      pDvTable2->SetRowSpan(1,DvTableCol-1,SKIP_CELL);
    }
 
    ColumnIndexType AvSTableCol = 0;

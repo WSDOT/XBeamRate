@@ -340,23 +340,19 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
       for ( ColumnIndexType i = 0; i < col; i++ )
       {
          pTable->SetRowSpan(0,i,2); 
-         pTable->SetRowSpan(1,i,SKIP_CELL);
       }
 
       pTable->SetColumnSpan(0,col,2);
-      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
       (*pTable)(0,col) << Sub2(_T("E"),_T("c"));
       (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
       (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
 
       pTable->SetColumnSpan(0,col,2);
-      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
       (*pTable)(0,col) << _T("Creep");
       (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
       (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
 
       pTable->SetColumnSpan(0,col,2);
-      pTable->SetColumnSpan(0,col+1,SKIP_CELL);
       (*pTable)(0,col) << _T("Shrinkage");
       (*pTable)(1,col++) << Sub2(_T("K"),_T("1"));
       (*pTable)(1,col++) << Sub2(_T("K"),_T("2"));
@@ -367,7 +363,6 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
       if ( bK1 )
       {
          pTable->SetRowSpan(0,col,2);
-         pTable->SetRowSpan(1,col,SKIP_CELL);
          (*pTable)(0,col++) << symbol(lambda);
       }
       else
