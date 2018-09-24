@@ -46,6 +46,7 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
+#include <PgsExt\Helpers.h>
 
 #include <MFCTools\Format.h>
 

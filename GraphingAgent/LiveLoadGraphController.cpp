@@ -33,6 +33,8 @@
 
 #include <PgsExt\GirderLabel.h>
 #include <PgsExt\BridgeDescription2.h>
+#include <PgsExt\Helpers.h>
+
 #include <EAF\EAFUtilities.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 

@@ -26,6 +26,7 @@
 
 #include <PgsExt\RatingArtifact.h>
 #include <PgsExt\CapacityToDemand.h>
+#include <PgsExt\Helpers.h>
 
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\Project.h>

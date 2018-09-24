@@ -40,6 +40,7 @@
 #include <WBFLUnitServer\OpenBridgeML.h>
 
 #include <PgsExt\BridgeDescription2.h>
+#include <PgsExt\Helpers.h>
 
 #include <\ARP\PGSuper\Include\IFace\Bridge.h>
 #include <\ARP\PGSuper\Include\IFace\Alignment.h>
