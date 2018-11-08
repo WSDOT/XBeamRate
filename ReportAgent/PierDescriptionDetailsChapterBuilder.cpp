@@ -575,7 +575,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
       pPara = new rptParagraph;
       *pChapter << pPara;
 
-      *pPara << _T("Stirrups are symmetric about cneterline of cross beam") << rptNewLine;
+      *pPara << _T("Stirrups are symmetric about centerline of cross beam") << rptNewLine;
    }
 
    pPara = new rptParagraph;

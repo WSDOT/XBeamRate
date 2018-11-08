@@ -61,30 +61,34 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    GET_IFACE(IXBRPointOfInterest,pPOI);
    std::vector<xbrPointOfInterest> vMomentPoi( pPOI->GetMomentRatingPointsOfInterest(pierID) );
 
+   GET_IFACE(IXBRProject, pProject);
+   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
+   xbrTypes::Stage stage = (pierType == xbrTypes::pctIntegral ? xbrTypes::Stage2 : xbrTypes::Stage1);
+
    xbrRatingArtifact ratingArtifact(ratingType);
 
    GET_IFACE(IXBRRatingSpecification, pRatingSpec);
 
    // Rate for flexure
-   MomentRating(pierID,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,stage,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
 
    // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
    {
-      CheckReinforcementYielding(pierID,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
+      CheckReinforcementYielding(pierID,stage,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
    }
 
    // Rate for shear, if applicable
    if ( pRatingSpec->RateForShear(ratingType) )
    {
       std::vector<xbrPointOfInterest> vShearPoi( pPOI->GetShearRatingPointsOfInterest(pierID) );
-      ShearRating(pierID,vShearPoi,ratingType,vehicleIdx,ratingArtifact);
+      ShearRating(pierID,stage,vShearPoi,ratingType,vehicleIdx,ratingArtifact);
    }
 
    return ratingArtifact;
 }
 
-void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::MomentRating(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
 
@@ -104,8 +108,6 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    Float64 condition_factor = pProject->GetConditionFactor(pierID);
 
    pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
-
-   xbrTypes::Stage stage = xbrTypes::Stage2;
 
    Float64 gDC = pProject->GetDCLoadFactor(ls);
    Float64 gDW = pProject->GetDWLoadFactor(ls);
@@ -226,7 +228,7 @@ void xbrLoadRater::MomentRating(PierIDType pierID,const std::vector<xbrPointOfIn
    }
 }
 
-void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
@@ -241,8 +243,6 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    Float64 condition_factor = pProject->GetConditionFactor(pierID);
 
    pgsTypes::LimitState ls = ::GetStrengthLimitStateType(ratingType);
-
-   xbrTypes::Stage stage = xbrTypes::Stage2;
 
    Float64 gDC = pProject->GetDCLoadFactor(ls);
    Float64 gDW = pProject->GetDWLoadFactor(ls);
@@ -398,7 +398,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID,const std::vector<xbrPointOfInt
    }
 }
 
-void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
@@ -408,8 +408,6 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID,const std::vecto
 
    pgsTypes::LimitState ls = (ratingType == pgsTypes::lrPermit_Routine ? pgsTypes::ServiceI_PermitRoutine : pgsTypes::ServiceI_PermitSpecial);
    ATLASSERT(::IsServiceLimitState(ls));
-
-   xbrTypes::Stage stage = xbrTypes::Stage2;
 
    GET_IFACE(IXBRCrackedSection,pCrackedSection);
    GET_IFACE(IXBRProject,pProject);
