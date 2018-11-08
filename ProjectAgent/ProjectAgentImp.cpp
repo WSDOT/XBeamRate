@@ -225,6 +225,17 @@ void CProjectAgentImp::Invalidate()
    m_ReactionApplication.clear();
 }
 
+template <class T> 
+class AutoRevert
+{
+public:
+   AutoRevert(T* pParam, const T& value, const T& revert) : m_pParam(pParam), m_Revert(revert) { *m_pParam = value; };
+   ~AutoRevert() { *m_pParam = m_Revert; };
+private:
+   T* m_pParam;
+   T m_Revert;
+};
+
 HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
 {
    GET_IFACE(IBridgeDescription,pIBridgeDesc);
@@ -238,8 +249,8 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
    pProgress->UpdateMessage(strMsg);
 
-   m_SavePierID = pierID; // this is the ID of the pier we are saving
-   m_bExportingModel = true; // set this to true so Save() knows not to change m_SavePierID
+   AutoRevert<PierIDType> revert_pier_id(&m_SavePierID, pierID, INVALID_ID); // this is the ID of the pier we are saving... revert to INVALID_ID on exit
+   AutoRevert<bool> revert_exporting_model(&m_bExportingModel, true, false); // set this to true so Save() knows to leave m_SavePierID alone... revert to false on exit
 
    // We can't tap directly into the IEAFDocument::SaveAs or into IBrokerPersist, because they will
    // save the current PGS document. We want to create a XBR document. To accomplish this, we have to
@@ -272,9 +283,6 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    pStrSave->EndUnit(); // Agent
    pStrSave->EndUnit(); // Broker
    pStrSave->EndUnit(); // XBeamRate
-
-   m_bExportingModel = false;
-   m_SavePierID = INVALID_ID;
 
    return S_OK;
 }

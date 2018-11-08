@@ -91,7 +91,8 @@ bool IsStandAlone()
 
    CComPtr<IXBeamRateAgent> pAgent;
    HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
-   return FAILED(hr) ? true : false;
+   // if we get the IXBeamRateAgent interface, XBRate is acting as an extension to PGSuper/PGSplice... we are not stand alone
+   return SUCCEEDED(hr) ? false : true;
 }
 
 bool IsPGSExtension()
