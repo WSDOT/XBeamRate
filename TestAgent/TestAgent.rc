@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -59,8 +57,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 4,0,9,0
- PRODUCTVERSION 4,0,9,0
+ FILEVERSION 4,0,10,0
+ PRODUCTVERSION 4,0,10,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -78,12 +76,12 @@ BEGIN
             VALUE "Comments", "A member of the Alternate Route Project"
             VALUE "CompanyName", "Washington State Department of Transportation"
             VALUE "FileDescription", "TestAgent Module"
-            VALUE "FileVersion", "4.0.9.0"
+            VALUE "FileVersion", "4.0.10.0"
             VALUE "InternalName", "TestAgent"
             VALUE "LegalCopyright", "Copyright © 1999-2018, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "TestAgent.DLL"
             VALUE "ProductName", "XBRate"
-            VALUE "ProductVersion", "4.0.9.0"
+            VALUE "ProductVersion", "4.0.10.0"
         END
     END
     BLOCK "VarFileInfo"
@@ -98,20 +96,22 @@ END
 // REGISTRY
 //
 
-IDR_TESTAGENT       REGISTRY                "TestAgent.rgs"
-IDR_TESTAGENTMODULE REGISTRY                "TestAgentModule.rgs"
+IDR_TESTAGENT           REGISTRY                "TestAgent.rgs"
+
+IDR_TESTAGENTMODULE     REGISTRY                "TestAgentModule.rgs"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PROJNAME            "TestAgent"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

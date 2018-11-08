@@ -22,8 +22,8 @@
 
 #pragma once
 
-#ifndef _XBEAMRATE_VERSION
-#define _XBEAMRATE_VERSION 409 // version 409
-#endif
-
 #include <\ARP\BridgeLink\Include\BridgeLinkVersion.h>
+
+#ifndef _XBEAMRATE_VERSION
+#define _XBEAMRATE_VERSION _BRIDGELINK_VERSION
+#endif
