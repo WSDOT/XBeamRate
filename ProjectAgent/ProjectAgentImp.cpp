@@ -37,8 +37,6 @@
 #include <PgsExt\GirderLabel.h>
 #include <EAF\EAFAutoProgress.h>
 
-#include <WBFLUnitServer\OpenBridgeML.h>
-
 #include <PgsExt\BridgeDescription2.h>
 #include <PgsExt\Helpers.h>
 
