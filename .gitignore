@@ -337,3 +337,9 @@ bin/
 *.hxx
 *.hh
 *.dm
+RegressionTest/Current/*.dbr
+RegressionTest/Current/*.dbp
+RegressionTest/Current/*.err
+RegressionTest/Current/*.Test
+*.bat
+!Run*.bat
