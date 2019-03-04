@@ -704,9 +704,13 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pierData.SetID(INVALID_ID);
          pierData.SetDeckSurfaceType(xbrPierData::Simplified); // we must use a simplfied deck surface model
 
+         GET_IFACE(IBridgeDescription, pIBridgeDesc);
+         const auto* pPier = pIBridgeDesc->FindPier(m_SavePierID);
+         PierIndexType pierIdx = pPier->GetIndex();
+
          // update the deck surface model
          GET_IFACE(IBridge, pBridge);
-         Float64 pierStation = pBridge->GetPierStation((PierIndexType)m_SavePierID);
+         Float64 pierStation = pBridge->GetPierStation(pierIdx);
          GET_IFACE(IRoadway, pAlignment);
          Float64 sl = pAlignment->GetSlope(pierStation, pierData.GetLeftCurbLineOffset());
          Float64 sr = pAlignment->GetSlope(pierStation,  pierData.GetRightCurbLineOffset());
