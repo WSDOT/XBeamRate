@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2018  Washington State Department of Transportation
+// Copyright © 1999-2019  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -36,8 +36,6 @@
 
 #include <PgsExt\GirderLabel.h>
 #include <EAF\EAFAutoProgress.h>
-
-#include <WBFLUnitServer\OpenBridgeML.h>
 
 #include <PgsExt\BridgeDescription2.h>
 #include <PgsExt\Helpers.h>
@@ -706,9 +704,13 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pierData.SetID(INVALID_ID);
          pierData.SetDeckSurfaceType(xbrPierData::Simplified); // we must use a simplfied deck surface model
 
+         GET_IFACE(IBridgeDescription, pIBridgeDesc);
+         const auto* pPier = pIBridgeDesc->FindPier(m_SavePierID);
+         PierIndexType pierIdx = pPier->GetIndex();
+
          // update the deck surface model
          GET_IFACE(IBridge, pBridge);
-         Float64 pierStation = pBridge->GetPierStation((PierIndexType)m_SavePierID);
+         Float64 pierStation = pBridge->GetPierStation(pierIdx);
          GET_IFACE(IRoadway, pAlignment);
          Float64 sl = pAlignment->GetSlope(pierStation, pierData.GetLeftCurbLineOffset());
          Float64 sr = pAlignment->GetSlope(pierStation,  pierData.GetRightCurbLineOffset());
@@ -1889,9 +1891,9 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
-         Float64 Pback, Mback, Pahead, Mahead;
+         Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
          GET_IFACE(IProductLoads,pProductLoads);
-         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&Pahead,&Mahead);
+         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
          dc[0] -= Pback;
          dc[1] -= Pahead;
 
@@ -1941,9 +1943,9 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
-         Float64 Pback, Mback, Pahead, Mahead;
+         Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
          GET_IFACE(IProductLoads,pProductLoads);
-         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&Pahead,&Mahead);
+         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
          *pDC -= (Pback + Pahead);
       }
 

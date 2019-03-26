@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2018  Washington State Department of Transportation
+// Copyright © 1999-2019  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -28,6 +28,8 @@
 #define XBREXT_AUTOLIBNAME "XBeamRateExt.lib"
 
 #pragma comment(lib,XBREXT_AUTOLIBNAME)
-//#pragma message("Linking with " XBREXT_AUTOLIBNAME )
+#if defined AUTOLIB
+#pragma message("Linking with " XBREXT_AUTOLIBNAME )
+#endif // AUTOLIB
 
 #endif // BUILDXBREXTLIB
