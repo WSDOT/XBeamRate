@@ -731,13 +731,15 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    } // end if bIsStandAlone or bExportingModel
    else
    {
-      pStrSave->BeginUnit(_T("RatingSpecification"),2.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(m_MaxLLStepSize));
          pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
-      pStrSave->EndUnit(); // RatingSpecification
+         pStrSave->put_Property(_T("SystemFactorFlexure"), CComVariant(m_SysFactorFlexure)); // added in version 3
+         pStrSave->put_Property(_T("SystemFactorShear"), CComVariant(m_SysFactorShear)); // added in version 3
+         pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
       std::map<PierIDType,xbrPierData>::iterator end(m_PierData.end());
@@ -1310,6 +1312,18 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          var.vt = VT_INDEX;
          hr = pStrLoad->get_Property(_T("MaxLoadedLanes"),&var);
          m_MaxLoadedLanes = VARIANT2INDEX(var);
+
+         if (2 < version)
+         {
+            // added in version 3
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("SystemFactorFlexure"), &var);
+            m_SysFactorFlexure = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("SystemFactorShear"), &var);
+            m_SysFactorShear = var.dblVal;
+
+         }
 
          hr = pStrLoad->EndUnit(); // RatingSpecification
 
@@ -2345,15 +2359,7 @@ void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure() const
 {
-   if ( IsStandAlone() )
-   {
-      return m_SysFactorFlexure;
-   }
-   else
-   {
-      GET_IFACE(IRatingSpecification,pRatingSpec);
-      return pRatingSpec->GetSystemFactorFlexure();
-   }
+   return m_SysFactorFlexure;
 }
 
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
@@ -2364,15 +2370,7 @@ void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorShear() const
 {
-   if ( IsStandAlone() )
-   {
-      return m_SysFactorShear;
-   }
-   else
-   {
-      GET_IFACE(IRatingSpecification,pRatingSpec);
-      return pRatingSpec->GetSystemFactorShear();
-   }
+   return m_SysFactorShear;
 }
 
 void CProjectAgentImp::SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
