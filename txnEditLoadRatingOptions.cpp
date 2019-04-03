@@ -74,6 +74,8 @@ void txnEditLoadRatingOptions::Execute(int i)
    GET_IFACE2(pBroker,IXBRProject,pProject);
    pProject->SetMaxLiveLoadStepSize(m_Options[i].m_MaxLLStepSize);
    pProject->SetMaxLoadedLanes(m_Options[i].m_MaxLoadedLanes);
+   pProject->SetSystemFactorFlexure(m_Options[i].m_SystemFactorFlexure);
+   pProject->SetSystemFactorShear(m_Options[i].m_SystemFactorShear);
 
    pEvents->FirePendingEvents();
 }
