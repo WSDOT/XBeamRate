@@ -717,7 +717,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          Float64 elev = pAlignment->GetElevation(pierStation,0.0);
          pierData.SetDeckElevation(elev);
          pierData.SetCrownSlope(-sl, sr);
-         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(pierStation));
+         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(1,pierStation));
 
          // ok, save it
          pierData.Save(pStrSave, nullptr);
