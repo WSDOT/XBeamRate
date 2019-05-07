@@ -526,16 +526,7 @@ CString CXBeamRateAgent::GetDocumentationURL()
    strAppName += _T(".dll");
    verInfo.Load(strAppName);
 
-   CString strVersion = verInfo.GetProductVersionAsString();
-
-   std::_tstring v(strVersion);
-   auto count = std::count(std::begin(v), std::end(v), _T('.'));
-
-   for (auto i = 0; i < count - 1; i++)
-   {
-      int pos = strVersion.ReverseFind(_T('.')); // find the last '.'
-      strVersion = strVersion.Left(pos);
-   }
+   CString strVersion = verInfo.GetProductVersionAsString(false);
 
    CString strURL;
    strURL.Format(_T("%s%s/"),strDocumentationURL,strVersion);
@@ -650,6 +641,8 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
    GET_IFACE(IXBRProject,pProject);
    pPage->m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
    pPage->m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
+   pPage->m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
+   pPage->m_SystemFactorShear = pProject->GetSystemFactorShear();
 
    return pPage;
 }
@@ -668,6 +661,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    GET_IFACE(IXBRProject,pProject);
    oldOptions.m_MaxLLStepSize = pProject->GetMaxLiveLoadStepSize();
    oldOptions.m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
+   oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
+   oldOptions.m_SystemFactorShear = pProject->GetSystemFactorShear();
 
    txnLoadRatingOptions newOptions;
    newOptions.m_AnalysisType = pLROPage->m_AnalysisType;
@@ -675,6 +670,9 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    newOptions.m_EmergencyRatingMethod = pLROPage->m_EmergencyRatingMethod;
    newOptions.m_MaxLLStepSize = pLROPage->m_MaxLLStepSize;
    newOptions.m_MaxLoadedLanes = pLROPage->m_MaxLoadedLanes;
+   newOptions.m_SystemFactorFlexure = pLROPage->m_SystemFactorFlexure;
+   newOptions.m_SystemFactorShear = pLROPage->m_SystemFactorShear;
+
 
    txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldOptions,newOptions);
    return pTxn;

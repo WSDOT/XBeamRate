@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
-// XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// Copyright © 1999-2018  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -22,33 +22,31 @@
 
 #pragma once
 
-struct txnLoadRatingOptions
-{
-   pgsTypes::AnalysisType m_AnalysisType;
-   xbrTypes::PermitRatingMethod m_PermitRatingMethod;
-   xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;
-   Float64 m_MaxLLStepSize;
-   IndexType m_MaxLoadedLanes;
-   Float64 m_SystemFactorFlexure;
-   Float64 m_SystemFactorShear;
-};
+#include <MFCTools\Exceptions.h>
 
-class txnEditLoadRatingOptions :
-   public txnTransaction
+class CXBeamAnalysisResult
 {
 public:
-   txnEditLoadRatingOptions(const txnLoadRatingOptions& oldOptions,const txnLoadRatingOptions& newOptions);
-   ~txnEditLoadRatingOptions(void);
+   CXBeamAnalysisResult(LPCTSTR lpszFile,long line) : m_File(lpszFile),m_Line(line),m_Result(S_OK){};
+   CXBeamAnalysisResult(LPCTSTR lpszFile,long line,HRESULT hr) : m_File(lpszFile),m_Line(line),m_Result(hr) {ProcessHResult();}
 
-   virtual bool Execute();
-   virtual void Undo();
-   virtual txnTransaction* CreateClone() const;
-   virtual std::_tstring Name() const;
-   virtual bool IsUndoable();
-   virtual bool IsRepeatable();
+   HRESULT operator=(HRESULT hr) { m_Result = hr; return ProcessHResult(); }
+
+   operator HRESULT() { return m_Result; }
 
 private:
-   void Execute(int i);
-
-   txnLoadRatingOptions m_Options[2];
+   HRESULT ProcessHResult()
+   {
+      if ( FAILED(m_Result) )
+      {
+         ATLASSERT(false); // attention grabber
+         CString strMsg;
+         strMsg.Format(_T("An error occured during the cross beam structural analysis (%d)\n%s, Line %d"),m_Result,m_File,m_Line);
+         THROW_UNWIND(strMsg,-1);
+      }
+      return m_Result;
+   }
+   HRESULT m_Result;
+   CString m_File;
+   long m_Line;
 };
