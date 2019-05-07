@@ -318,6 +318,11 @@ BEGIN
     LTEXT           "Maximum Number of Lanes",IDC_STATIC,14,94,86,8
     EDITTEXT        IDC_MAX_LANES,113,91,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,159,90,186,20
+    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,14,118,331,43
+    LTEXT           "Flexure",IDC_STATIC,28,140,25,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_FLEXURE,57,138,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "Shear",IDC_STATIC,115,140,20,8
+    EDITTEXT        IDC_SYSTEM_FACTOR_SHEAR,137,138,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
 
