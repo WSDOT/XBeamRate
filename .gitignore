@@ -343,5 +343,4 @@ RegressionTest/Current/*.err
 RegressionTest/Current/*.Test
 *.bat
 !Run*.bat
-!RegTestMerge.bat
 
