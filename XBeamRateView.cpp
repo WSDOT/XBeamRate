@@ -1210,7 +1210,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          CComPtr<IShape> shape;
-         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,pgsTypes::hspVariableParabolic,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
+         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
 
          // compute skew angle of segment with respect to the viewing direction
          // (viewing direction is normal to pier)
