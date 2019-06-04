@@ -1209,8 +1209,24 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          const CSegmentKey& segmentKey = poi.GetSegmentKey();
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
+         pgsPointOfInterest gdrPoi;
+         if (grpIdx == backGroupIdx)
+         {
+            PoiList vPoi;
+            pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
+            ATLASSERT(vPoi.size() == 1);
+            gdrPoi = vPoi.front();
+         }
+         else
+         {
+            PoiList vPoi;
+            pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
+            ATLASSERT(vPoi.size() == 1);
+            gdrPoi = vPoi.front();
+         }
+
          CComPtr<IShape> shape;
-         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
+         pShapes->GetSegmentShape(intervalIdx, gdrPoi,true,pgsTypes::scBridge,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
 
          // compute skew angle of segment with respect to the viewing direction
          // (viewing direction is normal to pier)
@@ -1224,7 +1240,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
 
          // compute shear factor
-         Float64 wTop = pGirder->GetTopWidth(poi);
+         Float64 wTop = pGirder->GetTopWidth(gdrPoi);
          wTop /= cos(skew); // top width of the girder, measured normal to the viewing direction
 
          // Compute the shear factor
