@@ -428,7 +428,7 @@ private:
    mutable std::map<PierIDType,xbrTypes::ReactionLoadApplicationType> m_ReactionApplication;
    xbrTypes::ReactionLoadApplicationType& GetPrivateReactionLoadApplication(PierIDType pierID) const;
 
-   pgsTypes::AnalysisType m_AnalysisType; // use this analysis type when PGSuper is in Envelope model
+   pgsTypes::AnalysisType m_EnvelopeModeAnalysisType; // use this analysis type when PGSuper is in Envelope model
 
    // Options
    xbrTypes::EmergencyRatingMethod m_EmergencyRatingMethod;

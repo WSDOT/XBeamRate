@@ -175,7 +175,7 @@ CProjectAgentImp::CProjectAgentImp()
    // pier data for the stand alone case
    m_PierData.insert(std::make_pair(INVALID_ID,pierData));
 
-   m_AnalysisType = pgsTypes::Envelope;
+   m_EnvelopeModeAnalysisType = pgsTypes::Envelope;
 
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
    m_EmergencyRatingMethod = xbrTypes::ermWSDOT;
@@ -732,7 +732,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    else
    {
       pStrSave->BeginUnit(_T("RatingSpecification"),2.0);
-         pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
+         pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_EnvelopeModeAnalysisType));
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(m_MaxLLStepSize));
@@ -1289,7 +1289,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("AnalysisType"),&var);
-         m_AnalysisType = (pgsTypes::AnalysisType)var.lVal;
+         m_EnvelopeModeAnalysisType = (pgsTypes::AnalysisType)var.lVal;
 
          if (1 < version)
          {
@@ -1842,8 +1842,20 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       GET_IFACE(IIntervals,pIntervals);
       IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
 
-      GET_IFACE(IProductForces,pProductForces);
-      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
+      GET_IFACE(ISpecification, pSpecification);
+      pgsTypes::AnalysisType analysisType = pSpecification->GetAnalysisType();
+
+      pgsTypes::BridgeAnalysisType bat;
+      GET_IFACE(IProductForces, pProductForces);
+      if (analysisType == pgsTypes::Envelope)
+      {
+         bat = pProductForces->GetBridgeAnalysisType(m_EnvelopeModeAnalysisType, pgsTypes::Maximize);
+      }
+      else
+      {
+         bat = pProductForces->GetBridgeAnalysisType(analysisType, pgsTypes::Maximize);
+      }
+
       ResultsType resultsType = rtCumulative;
 
       xbrPierData& pierData = GetPrivatePierData(pierID);
@@ -1861,11 +1873,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          ReactionLocation location[2];
          location[0].PierIdx   = pierIdx;
          location[0].GirderKey = girderKey;
-         location[0].Face      = rftAhead;
+         location[0].Face      = rftBack;
 
          location[1].PierIdx   = pierIdx;
          location[1].GirderKey = girderKey;
-         location[1].Face      = rftBack;
+         location[1].Face      = rftAhead;
 
          GET_IFACE(ILossParameters,pLossParams);
          for ( int i = 0; i < 2; i++ )
@@ -1946,7 +1958,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
-         *pDC -= (Pback + Pahead);
+         *pDC += (Pback + Pahead); // use + because loads are negative downwards
       }
 
       if ( UseUniformLoads(pierID,brgLineIdx) )
@@ -2868,14 +2880,14 @@ Float64 CProjectAgentImp::GetYieldStressLimitCoefficient() const
 
 pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions() const
 {
-   return m_AnalysisType;
+   return m_EnvelopeModeAnalysisType;
 }
 
 void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType)
 {
-   if ( analysisType != m_AnalysisType )
+   if ( analysisType != m_EnvelopeModeAnalysisType)
    {
-      m_AnalysisType = analysisType;
+      m_EnvelopeModeAnalysisType = analysisType;
       Fire_OnRatingSpecificationChanged();
    }
 }
@@ -3195,8 +3207,20 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
          // when getting the girder key we'll use for live load reactions
          CGirderKey girderKey = GetGirderKey(pierID,0,gdrIdx);
 
-         GET_IFACE(IProductForces,pProductForces);
-         pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
+         GET_IFACE(ISpecification, pSpecification);
+         pgsTypes::AnalysisType analysisType = pSpecification->GetAnalysisType();
+
+         pgsTypes::BridgeAnalysisType bat;
+         GET_IFACE(IProductForces, pProductForces);
+         if (analysisType == pgsTypes::Envelope)
+         {
+            bat = pProductForces->GetBridgeAnalysisType(m_EnvelopeModeAnalysisType, pgsTypes::Maximize);
+         }
+         else
+         {
+            bat = pProductForces->GetBridgeAnalysisType(analysisType, pgsTypes::Maximize);
+         }
+
 
          GET_IFACE(IProductLoads,pProductLoads);
          pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
