@@ -1862,10 +1862,13 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          }
          myZone.Xstart = Xstart;
          myZone.Xend = Xend;
-         ATLASSERT(myZone.Xstart < myZone.Xend);
          myZone.Length = Xend - Xstart;
 
-         pvStirrupZones->push_back(myZone);
+         if (0 < myZone.Length)
+         {
+            pvStirrupZones->push_back(myZone);
+         }
+
          Xstart = Xend;
          if ( bDone )
          {
