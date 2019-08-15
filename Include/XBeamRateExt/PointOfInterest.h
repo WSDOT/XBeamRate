@@ -25,7 +25,7 @@
 #include <XBeamRateExt\XBRExtExp.h>
 
 
-typedef Uint32 PoiAttributeType; // NOTE: if more bits are needed use a 64-bit type
+typedef Uint64 PoiAttributeType;
 
 #define POI_SECTIONCHANGE 0x00000001
 #define POI_COLUMN        0x00000002 // POI in XBeam at CL of Column
