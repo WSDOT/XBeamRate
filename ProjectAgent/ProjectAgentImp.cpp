@@ -3210,7 +3210,7 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
 
 
             REACTION Rmin,Rmax;
-            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,nullptr,nullptr);
+            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,&Rmin,&Rmax,nullptr,nullptr);
 
             Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
             
