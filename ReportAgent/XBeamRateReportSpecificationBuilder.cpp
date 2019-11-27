@@ -49,18 +49,6 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-   if ( IsPGSExtension() )
-   {
-      GET_IFACE(IBridgeDescription,pIBridgeDesc);
-      PierIndexType nPiers = pIBridgeDesc->GetPierCount();
-      if ( nPiers < 3 )
-      {
-         CString strMsg(_T("The bridge must have at least two spans for cross beam analysis"));
-         AfxMessageBox(strMsg,MB_OK | MB_ICONINFORMATION);
-         return nullptr;
-      }
-   }
-
    CPierReportDlg dlg(m_pBroker,rptDesc,pOldRptSpec);
 
    if ( dlg.DoModal() == IDOK )
