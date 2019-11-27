@@ -1210,7 +1210,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          pgsPointOfInterest gdrPoi;
-         if (grpIdx == backGroupIdx)
+         if (grpIdx == backGroupIdx && pierIdx != 0)
          {
             PoiList vPoi;
             pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
