@@ -43,6 +43,7 @@
 #include <\ARP\PGSuper\Include\IFace\Bridge.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\Hints.h>
 #include <IFace\Alignment.h>
 #include <MFCTools\Format.h>
 
@@ -349,6 +350,38 @@ xbrPointOfInterest CXBeamRateView::GetCutLocation()
 
 void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
 {
+   if (IsPGSExtension())
+   {
+      if (lHint == HINT_SELECTIONCHANGED)
+      {
+         // nothing in this view is related to the current selection
+         return;
+      }
+
+      if (lHint == HINT_BRIDGECHANGED)
+      {
+         AFX_MANAGE_STATE(AfxGetAppModuleState());
+         CXBeamRateChildFrame* pFrame = (CXBeamRateChildFrame*)GetParentFrame();
+         pFrame->UpdatePierList();
+      }
+   }
+
+   PierIDType pierID = GetPierID();
+   if (pierID != INVALID_ID)
+   {
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker, IBridgeDescription, pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
+      if (pPier == nullptr)
+      {
+         CDC* pDC = GetDC();
+         pDC->TextOut(0, 0, _T("Invalid Pier"));
+         return;
+      }
+   }
+
    m_pFrame->UpdateSectionCutExtents();
 
    CDisplayView::OnUpdate(pSender,lHint,pHint);
