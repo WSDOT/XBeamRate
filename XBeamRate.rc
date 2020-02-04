@@ -52,8 +52,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 5,0,0,6
- PRODUCTVERSION 5,0,0,6
+ FILEVERSION 5,0,0,7
+ PRODUCTVERSION 5,0,0,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,12 +69,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "XBRate Module"
-            VALUE "FileVersion", "5.0.0.6"
+            VALUE "FileVersion", "5.0.0.7"
             VALUE "InternalName", "XBRate"
             VALUE "LegalCopyright", "Copyright © 1999-2020, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "XBeamRate.DLL"
             VALUE "ProductName", "XBRate Module"
-            VALUE "ProductVersion", "5.0.0.6"
+            VALUE "ProductVersion", "5.0.0.7"
         END
     END
     BLOCK "VarFileInfo"
