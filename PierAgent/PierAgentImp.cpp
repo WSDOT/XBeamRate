@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -1862,10 +1862,13 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
          }
          myZone.Xstart = Xstart;
          myZone.Xend = Xend;
-         ATLASSERT(myZone.Xstart < myZone.Xend);
          myZone.Length = Xend - Xstart;
 
-         pvStirrupZones->push_back(myZone);
+         if (0 < myZone.Length)
+         {
+            pvStirrupZones->push_back(myZone);
+         }
+
          Xstart = Xend;
          if ( bDone )
          {

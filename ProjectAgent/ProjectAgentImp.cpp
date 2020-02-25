@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -717,7 +717,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          Float64 elev = pAlignment->GetElevation(pierStation,0.0);
          pierData.SetDeckElevation(elev);
          pierData.SetCrownSlope(-sl, sr);
-         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(pierStation));
+         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(1,pierStation));
 
          // ok, save it
          pierData.Save(pStrSave, nullptr);
@@ -3210,7 +3210,7 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
 
 
             REACTION Rmin,Rmax;
-            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,nullptr,nullptr);
+            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,&Rmin,&Rmax,nullptr,nullptr);
 
             Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
             

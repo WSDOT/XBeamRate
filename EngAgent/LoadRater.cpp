@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -256,11 +256,14 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
 
    Float64 W = (vehicleIdx == INVALID_INDEX ? 0 : pProject->GetVehicleWeight(pierID,ratingType,vehicleIdx));
 
-   CollectionIndexType nPOI = vPoi.size();
-   for ( CollectionIndexType i = 0; i < nPOI; i++ )
-   {
-      const xbrPointOfInterest& poi = vPoi[i];
+   GET_IFACE(IXBRRatingSpecification, pSpec);
+   xbrTypes::PermitRatingMethod ratingMethod = pSpec->GetPermitRatingMethod();
+   xbrTypes::EmergencyRatingMethod emergencyRatingMethod = pSpec->GetEmergencyRatingMethod();
+   bool bIsWSDOTMethodApplicable = pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType);
 
+
+   for( const auto& poi : vPoi)
+   {
       sysSectionValue vDC = pAnalysisResults->GetShear(pierID,xbrTypes::lcDC,poi);
       sysSectionValue vDW = pAnalysisResults->GetShear(pierID,xbrTypes::lcDW,poi);
       sysSectionValue vCR = pAnalysisResults->GetShear(pierID,xbrTypes::lcCR,poi);
@@ -278,10 +281,9 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
       Float64 LLIM = 0;
       IndexType llConfigIdx;
       VehicleIndexType vehIdx;
-      GET_IFACE(IXBRRatingSpecification, pSpec);
-      if (pSpec->IsWSDOTEmergencyRating(ratingType) || pSpec->IsWSDOTPermitRating(ratingType))
+      if (bIsWSDOTMethodApplicable)
       {
-         // for WSDOT permit rating, the analysis is done in the rating artifact object
+         // for WSDOT permit or emergency rating, the analysis is done in the rating artifact object
          LLIM = 0;
       }
       else
@@ -356,8 +358,8 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
 
       xbrShearRatingArtifact shearArtifact;
       shearArtifact.SetRatingType(ratingType);
-      shearArtifact.SetPermitRatingMethod(pSpec->GetPermitRatingMethod());
-      shearArtifact.SetEmergencyRatingMethod(pSpec->GetEmergencyRatingMethod());
+      shearArtifact.SetPermitRatingMethod(ratingMethod);
+      shearArtifact.SetEmergencyRatingMethod(emergencyRatingMethod);
       shearArtifact.SetPierID(pierID);
       shearArtifact.SetPointOfInterest(poi);
       shearArtifact.SetVehicleIndex(vehicleIdx == INVALID_INDEX ? vehIdx : vehicleIdx);

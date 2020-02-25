@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -48,18 +48,6 @@ CXBeamRateReportSpecificationBuilder::~CXBeamRateReportSpecificationBuilder(void
 std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pOldRptSpec)
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-
-   if ( IsPGSExtension() )
-   {
-      GET_IFACE(IBridgeDescription,pIBridgeDesc);
-      PierIndexType nPiers = pIBridgeDesc->GetPierCount();
-      if ( nPiers < 3 )
-      {
-         CString strMsg(_T("The bridge must have at least two spans for cross beam analysis"));
-         AfxMessageBox(strMsg,MB_OK | MB_ICONINFORMATION);
-         return nullptr;
-      }
-   }
 
    CPierReportDlg dlg(m_pBroker,rptDesc,pOldRptSpec);
 

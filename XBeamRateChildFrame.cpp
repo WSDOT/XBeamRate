@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -149,8 +149,15 @@ PierIndexType CXBeamRateChildFrame::GetPierIndex()
    GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
    const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
    const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
-   ATLASSERT(pPier);
-   return pPier->GetIndex();
+   if (pPier)
+   {
+      return pPier->GetIndex();
+   }
+   else
+   {
+      ATLASSERT(pPier);
+      return INVALID_INDEX;
+   }
 }
 
 BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, const RECT& rect, CMDIFrameWnd* pParentWnd, CCreateContext* pContext)
@@ -182,38 +189,49 @@ BOOL CXBeamRateChildFrame::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
             return FALSE;
          }
 
-         GET_IFACE2(pBroker,ISelection,pSelection);
-         PierIndexType selPierIdx = pSelection->GetSelectedPier();
-
-         CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
-         GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
-         const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
-         PierIndexType nPiers = pBridgeDesc->GetPierCount();
-         for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
-         {
-            CString strPierLabel;
-            strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
-            int idx = pcbPiers->AddString(strPierLabel);
-
-            PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
-            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
-
-            if ( pierIdx == selPierIdx )
-            {
-               pcbPiers->SetCurSel(idx);
-            }
-         }
-
-         if ( selPierIdx == INVALID_INDEX )
-         {
-            pcbPiers->SetCurSel(0);
-         }
-
+         UpdatePierList();
          OnPierChanged();
       }
    }
 
    return TRUE;
+}
+
+void CXBeamRateChildFrame::UpdatePierList()
+{
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+   GET_IFACE2(pBroker, ISelection, pSelection);
+   PierIndexType selPierIdx = pSelection->GetSelectedPier();
+
+   CComboBox* pcbPiers = (CComboBox*)m_ControlBar.GetDlgItem(IDC_PIERS);
+   int curSel = pcbPiers->GetCurSel();
+   PierIDType curPierID = (curSel == CB_ERR ? INVALID_ID : (PierIDType)pcbPiers->GetItemData(curSel));
+
+   pcbPiers->ResetContent();
+
+   GET_IFACE2(pBroker, IBridgeDescription, pIBridgeDesc);
+   const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+   PierIndexType nPiers = pBridgeDesc->GetPierCount();
+   for (PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++)
+   {
+      CString strPierLabel;
+      strPierLabel.Format(_T("Pier %d"), LABEL_PIER(pierIdx));
+      int idx = pcbPiers->AddString(strPierLabel);
+
+      PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();
+      pcbPiers->SetItemData(idx, (DWORD_PTR)pierID);
+
+      if (pierIdx == selPierIdx || pierID == curPierID)
+      {
+         pcbPiers->SetCurSel(idx);
+      }
+   }
+
+   if (pcbPiers->GetCurSel() == CB_ERR)
+   {
+      pcbPiers->SetCurSel(0);
+   }
 }
 
 BOOL CXBeamRateChildFrame::LoadFrame(UINT nIDResource, DWORD dwDefaultStyle, CWnd* pParentWnd, CCreateContext* pContext)

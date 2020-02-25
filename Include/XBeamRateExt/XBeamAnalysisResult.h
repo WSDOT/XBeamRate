@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
-// XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2020  Washington State Department of Transportation
+// PGSuper - Prestressed Girder SUPERstructure Design and Analysis
+// Copyright © 1999-2018  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,22 +20,33 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// stdafx.h : include file for standard system include files,
-// or project specific include files that are used frequently, but
-// are changed infrequently
-//
-
 #pragma once
 
-#include <XBeamRateAll.h>
+#include <MFCTools\Exceptions.h>
 
-#include <Units\Units.h>
-#include <EAF\EAFUtilities.h>
-#include <EAF\EAFHelp.h>
-#include <grid\gxall.h>
+class CXBeamAnalysisResult
+{
+public:
+   CXBeamAnalysisResult(LPCTSTR lpszFile,long line) : m_File(lpszFile),m_Line(line),m_Result(S_OK){};
+   CXBeamAnalysisResult(LPCTSTR lpszFile,long line,HRESULT hr) : m_File(lpszFile),m_Line(line),m_Result(hr) {ProcessHResult();}
 
-#include <XBRate.hh>
+   HRESULT operator=(HRESULT hr) { m_Result = hr; return ProcessHResult(); }
 
-//#define COMPARE_WITH_FULL_ANALYSIS
+   operator HRESULT() { return m_Result; }
 
-// TODO: reference additional headers your program requires here
+private:
+   HRESULT ProcessHResult()
+   {
+      if ( FAILED(m_Result) )
+      {
+         ATLASSERT(false); // attention grabber
+         CString strMsg;
+         strMsg.Format(_T("An error occured during the cross beam structural analysis (%d)\n%s, Line %d"),m_Result,m_File,m_Line);
+         THROW_UNWIND(strMsg,-1);
+      }
+      return m_Result;
+   }
+   HRESULT m_Result;
+   CString m_File;
+   long m_Line;
+};

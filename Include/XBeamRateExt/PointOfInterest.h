@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 #include <XBeamRateExt\XBRExtExp.h>
 
 
-typedef Uint32 PoiAttributeType; // NOTE: if more bits are needed use a 64-bit type
+typedef Uint64 PoiAttributeType;
 
 #define POI_SECTIONCHANGE 0x00000001
 #define POI_COLUMN        0x00000002 // POI in XBeam at CL of Column

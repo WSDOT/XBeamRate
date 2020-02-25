@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -619,7 +619,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
    }
 
    Float64 C = p * m_CapacityRedutionFactor * m_Vn;
-   Float64 RFtop = C - fabs(m_gDC*m_Vdc - m_gDW*m_Vdw - m_gCR*m_Vcr - m_gSH*m_Vsh - m_gRE*m_Vre - m_gPS*m_Vps);
+   Float64 RFtop = C - fabs(m_gDC*m_Vdc + m_gDW*m_Vdw + m_gCR*m_Vcr + m_gSH*m_Vsh + m_gRE*m_Vre + m_gPS*m_Vps);
 
    if (
       (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)

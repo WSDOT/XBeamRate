@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2019  Washington State Department of Transportation
+// Copyright © 1999-2020  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -314,13 +314,13 @@ void CConcreteGeneralPage::OnOK()
    CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
    if ( !m_bErrorInDDX && !IsDensityInRange(pParent->Concrete.StrengthDensity,pParent->Concrete.Type) )
    {
-      AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
+      AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal || pParent->Concrete.Type == pgsTypes::UHPC ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
    }
 }
 
 bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteType type)
 {
-   if ( type == pgsTypes::Normal )
+   if ( type == pgsTypes::Normal || type == pgsTypes::UHPC )
    {
       return ( IsLE(m_MinNWCDensity,density) );
    }

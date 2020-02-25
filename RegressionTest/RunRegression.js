@@ -29,7 +29,7 @@ else if (machine=="HQB0630025")
    XBRateDrive = "F:";
 else if (machine=="HQA4434036")
    XBRateDrive = "F:";
-else if (machine=="HQC1431001")
+else if (machine=="HQE3609046")
    XBRateDrive = "F:";
 else if (machine=="HQD1764064")
    XBRateDrive = "F:";
