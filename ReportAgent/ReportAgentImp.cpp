@@ -125,14 +125,6 @@ STDMETHODIMP CReportAgentImp::Init2()
       pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IXBRRatingSpecificationEventSink, &pCP);
-   if (SUCCEEDED(hr))
-   {
-      hr = pCP->Advise(GetUnknown(), &m_dwSpecCookie);
-      ATLASSERT(SUCCEEDED(hr));
-      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-   }
-
    return S_OK;
 }
 
@@ -161,15 +153,6 @@ STDMETHODIMP CReportAgentImp::ShutDown()
    {
       hr = pCP->Unadvise( m_dwProjectCookie );
       ATLASSERT( SUCCEEDED(hr) );
-      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-   }
-
-
-   hr = pBrokerInit->FindConnectionPoint(IID_IXBRRatingSpecificationEventSink, &pCP);
-   if (SUCCEEDED(hr))
-   {
-      hr = pCP->Unadvise(m_dwSpecCookie);
-      ATLASSERT(SUCCEEDED(hr));
       pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
    }
 
@@ -204,26 +187,14 @@ void CReportAgentImp::InitReportBuilders()
 // IXBRProjectEventSink
 HRESULT CReportAgentImp::OnProjectChanged()
 {
-   return UpdateReports();
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// IXBRRatingSpecificationEventSink
-HRESULT CReportAgentImp::OnRatingSpecificationChanged()
-{
-   return UpdateReports();
-}
-
-HRESULT CReportAgentImp::UpdateReports()
-{
-   if (!IsStandAlone())
+   if ( !IsStandAlone() )
    {
       // we are plugged into PGSuper/PGSplice
       // Something in our project changed
       // Look at the open report views, if any of them are displaying a cross beam load rating report
       // tell that view to update.
-      GET_IFACE(IViews, pViews);
-      GET_IFACE(IEAFViewRegistrar, pViewRegistrar);
+      GET_IFACE(IViews,pViews);
+      GET_IFACE(IEAFViewRegistrar,pViewRegistrar);
 
       // get all the report views
       long rptViewKey = pViews->GetReportViewKey();
@@ -231,7 +202,7 @@ HRESULT CReportAgentImp::UpdateReports()
       for (const auto& pView : vViews)
       {
          // make sure it is the right type so we can cast it
-         if (pView->IsKindOf(RUNTIME_CLASS(CEAFReportView)))
+         if ( pView->IsKindOf(RUNTIME_CLASS(CEAFReportView)) )
          {
             // Get the report spec so we can get the report name
             CEAFReportView* pReportView = (CEAFReportView*)pView;
@@ -239,7 +210,7 @@ HRESULT CReportAgentImp::UpdateReports()
 
             // is it one of our reports?
             std::set<std::_tstring>::iterator found = m_ReportNames.find(pReportSpec->GetReportName());
-            if (found != m_ReportNames.end())
+            if ( found != m_ReportNames.end() )
             {
                // yes, it is one of our reports... update it.
                pReportView->UpdateNow(0);

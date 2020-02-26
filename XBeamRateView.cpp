@@ -43,6 +43,7 @@
 #include <\ARP\PGSuper\Include\IFace\Bridge.h>
 #include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
 #include <\ARP\PGSuper\Include\IFace\Intervals.h>
+#include <\ARP\PGSuper\Include\Hints.h>
 #include <IFace\Alignment.h>
 #include <MFCTools\Format.h>
 
@@ -349,6 +350,38 @@ xbrPointOfInterest CXBeamRateView::GetCutLocation()
 
 void CXBeamRateView::OnUpdate(CView* pSender,LPARAM lHint,CObject* pHint)
 {
+   if (IsPGSExtension())
+   {
+      if (lHint == HINT_SELECTIONCHANGED)
+      {
+         // nothing in this view is related to the current selection
+         return;
+      }
+
+      if (lHint == HINT_BRIDGECHANGED)
+      {
+         AFX_MANAGE_STATE(AfxGetAppModuleState());
+         CXBeamRateChildFrame* pFrame = (CXBeamRateChildFrame*)GetParentFrame();
+         pFrame->UpdatePierList();
+      }
+   }
+
+   PierIDType pierID = GetPierID();
+   if (pierID != INVALID_ID)
+   {
+      CComPtr<IBroker> pBroker;
+      EAFGetBroker(&pBroker);
+      GET_IFACE2(pBroker, IBridgeDescription, pIBridgeDesc);
+      const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+      const CPierData2* pPier = pBridgeDesc->FindPier(pierID);
+      if (pPier == nullptr)
+      {
+         CDC* pDC = GetDC();
+         pDC->TextOut(0, 0, _T("Invalid Pier"));
+         return;
+      }
+   }
+
    m_pFrame->UpdateSectionCutExtents();
 
    CDisplayView::OnUpdate(pSender,lHint,pHint);
@@ -1209,8 +1242,24 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          const CSegmentKey& segmentKey = poi.GetSegmentKey();
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
+         pgsPointOfInterest gdrPoi;
+         if (grpIdx == backGroupIdx && pierIdx != 0)
+         {
+            PoiList vPoi;
+            pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
+            ATLASSERT(vPoi.size() == 1);
+            gdrPoi = vPoi.front();
+         }
+         else
+         {
+            PoiList vPoi;
+            pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
+            ATLASSERT(vPoi.size() == 1);
+            gdrPoi = vPoi.front();
+         }
+
          CComPtr<IShape> shape;
-         pShapes->GetSegmentShape(intervalIdx,poi,true,pgsTypes::scBridge,pgsTypes::hspVariableParabolic,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
+         pShapes->GetSegmentShape(intervalIdx, gdrPoi,true,pgsTypes::scBridge,&shape); // this is the shape normal to the girder... it needs to be projected onto the viewing plane
 
          // compute skew angle of segment with respect to the viewing direction
          // (viewing direction is normal to pier)
@@ -1224,7 +1273,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          ATLASSERT(-PI_OVER_2 <= skew && skew <= PI_OVER_2);
 
          // compute shear factor
-         Float64 wTop = pGirder->GetTopWidth(poi);
+         Float64 wTop = pGirder->GetTopWidth(gdrPoi);
          wTop /= cos(skew); // top width of the girder, measured normal to the viewing direction
 
          // Compute the shear factor

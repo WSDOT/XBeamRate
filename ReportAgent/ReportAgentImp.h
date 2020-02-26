@@ -35,7 +35,6 @@
 #include <EAF\EAFInterfaceCache.h>
 
 #include <IFace\Project.h>
-#include <IFace\RatingSpecification.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CReportAgentImp
@@ -46,8 +45,7 @@ class ATL_NO_VTABLE CReportAgentImp :
 	//public IConnectionPointContainerImpl<CReportAgentImp>,
    //public CProxyIProjectEventSink<CReportAgentImp>,
    public IAgentEx,
-   public IXBRProjectEventSink,
-   public IXBRRatingSpecificationEventSink
+   public IXBRProjectEventSink
 {
 public:
 	CReportAgentImp(); 
@@ -64,7 +62,6 @@ BEGIN_COM_MAP(CReportAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
-   COM_INTERFACE_ENTRY(IXBRRatingSpecificationEventSink)
    //COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
 END_COM_MAP()
 
@@ -86,10 +83,6 @@ public:
 public:
    virtual HRESULT OnProjectChanged() override;
 
-   // IXBRRatingSpecificationEventSink
-public:
-   virtual HRESULT OnRatingSpecificationChanged() override;
-
 #ifdef _DEBUG
    bool AssertValid() const;
 #endif//
@@ -98,11 +91,8 @@ private:
    DECLARE_EAF_AGENT_DATA;
 
    DWORD m_dwProjectCookie;
-   DWORD m_dwSpecCookie;
 
    void InitReportBuilders();
-
-   HRESULT UpdateReports();
 
    std::set<std::_tstring> m_ReportNames;
 };

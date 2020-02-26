@@ -60,6 +60,7 @@ public:
    virtual Float64 GetMinCutLocation() override;
    virtual Float64 GetMaxCutLocation() override;
 
+   void UpdatePierList();
    void UpdateSectionCutExtents();
    xbrPointOfInterest GetCutLocation();
 

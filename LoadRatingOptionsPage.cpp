@@ -69,6 +69,9 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
    DDV_UnitValueGreaterThanLimit(pDX,IDC_LL_STEP,m_MaxLLStepSize,0.0,pDisplayUnits->GetSpanLengthUnit());
 
    DDX_Keyword(pDX,IDC_MAX_LANES,_T("ALL"),m_MaxLoadedLanes);
+
+   DDX_Text(pDX, IDC_SYSTEM_FACTOR_FLEXURE, m_SystemFactorFlexure);
+   DDX_Text(pDX, IDC_SYSTEM_FACTOR_SHEAR, m_SystemFactorShear);
 }
 
 

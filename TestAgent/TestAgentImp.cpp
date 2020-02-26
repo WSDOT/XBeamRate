@@ -140,9 +140,18 @@ HRESULT CTestAgentImp::RunTest(PierIDType pierID,LPCTSTR lpszResultsFile)
 
 CString CTestAgentImp::GetProcessID()
 {
-   // the process ID is going to be the version number
-   GET_IFACE(IXBRVersionInfo,pVI);
-   return pVI->GetVersion(true);
+   //// the process ID is going to be the version number
+   //GET_IFACE(IXBRVersionInfo,pVI);
+   //return pVI->GetVersion(true);
+
+   // we stopped using the version number as the process ID
+   // because we never compared results from one process to another
+   // as described in the 12-50 process. Since the move to 
+   // GIT VCS, merging files is difficult and it is especially difficult
+   // with reg test results that have the version number incoded in it
+   //
+   // now using a "generic" number for the process id
+   return CString(_T("0.0.0.0"));
 }
 
 void CTestAgentImp::RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszProcessID,PierIDType pierID,const std::vector<xbrPointOfInterest>& vPoi)

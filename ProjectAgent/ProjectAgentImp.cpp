@@ -175,7 +175,7 @@ CProjectAgentImp::CProjectAgentImp()
    // pier data for the stand alone case
    m_PierData.insert(std::make_pair(INVALID_ID,pierData));
 
-   m_EnvelopeModeAnalysisType = pgsTypes::Envelope;
+   m_AnalysisType = pgsTypes::Envelope;
 
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
    m_EmergencyRatingMethod = xbrTypes::ermWSDOT;
@@ -717,7 +717,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          Float64 elev = pAlignment->GetElevation(pierStation,0.0);
          pierData.SetDeckElevation(elev);
          pierData.SetCrownSlope(-sl, sr);
-         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(pierStation));
+         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(1,pierStation));
 
          // ok, save it
          pierData.Save(pStrSave, nullptr);
@@ -731,13 +731,15 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    } // end if bIsStandAlone or bExportingModel
    else
    {
-      pStrSave->BeginUnit(_T("RatingSpecification"),2.0);
-         pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_EnvelopeModeAnalysisType));
+      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
+         pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
          pStrSave->put_Property(_T("MaxLiveLoadStepSize"),CComVariant(m_MaxLLStepSize));
          pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
-      pStrSave->EndUnit(); // RatingSpecification
+         pStrSave->put_Property(_T("SystemFactorFlexure"), CComVariant(m_SysFactorFlexure)); // added in version 3
+         pStrSave->put_Property(_T("SystemFactorShear"), CComVariant(m_SysFactorShear)); // added in version 3
+         pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
       std::map<PierIDType,xbrPierData>::iterator end(m_PierData.end());
@@ -1289,7 +1291,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("AnalysisType"),&var);
-         m_EnvelopeModeAnalysisType = (pgsTypes::AnalysisType)var.lVal;
+         m_AnalysisType = (pgsTypes::AnalysisType)var.lVal;
 
          if (1 < version)
          {
@@ -1310,6 +1312,18 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          var.vt = VT_INDEX;
          hr = pStrLoad->get_Property(_T("MaxLoadedLanes"),&var);
          m_MaxLoadedLanes = VARIANT2INDEX(var);
+
+         if (2 < version)
+         {
+            // added in version 3
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("SystemFactorFlexure"), &var);
+            m_SysFactorFlexure = var.dblVal;
+
+            hr = pStrLoad->get_Property(_T("SystemFactorShear"), &var);
+            m_SysFactorShear = var.dblVal;
+
+         }
 
          hr = pStrLoad->EndUnit(); // RatingSpecification
 
@@ -1842,20 +1856,8 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       GET_IFACE(IIntervals,pIntervals);
       IntervalIndexType loadRatingIntervalIdx = pIntervals->GetLoadRatingInterval();
 
-      GET_IFACE(ISpecification, pSpecification);
-      pgsTypes::AnalysisType analysisType = pSpecification->GetAnalysisType();
-
-      pgsTypes::BridgeAnalysisType bat;
-      GET_IFACE(IProductForces, pProductForces);
-      if (analysisType == pgsTypes::Envelope)
-      {
-         bat = pProductForces->GetBridgeAnalysisType(m_EnvelopeModeAnalysisType, pgsTypes::Maximize);
-      }
-      else
-      {
-         bat = pProductForces->GetBridgeAnalysisType(analysisType, pgsTypes::Maximize);
-      }
-
+      GET_IFACE(IProductForces,pProductForces);
+      pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
       ResultsType resultsType = rtCumulative;
 
       xbrPierData& pierData = GetPrivatePierData(pierID);
@@ -1873,11 +1875,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          ReactionLocation location[2];
          location[0].PierIdx   = pierIdx;
          location[0].GirderKey = girderKey;
-         location[0].Face      = rftBack;
+         location[0].Face      = rftAhead;
 
          location[1].PierIdx   = pierIdx;
          location[1].GirderKey = girderKey;
-         location[1].Face      = rftAhead;
+         location[1].Face      = rftBack;
 
          GET_IFACE(ILossParameters,pLossParams);
          for ( int i = 0; i < 2; i++ )
@@ -1958,7 +1960,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
-         *pDC += (Pback + Pahead); // use + because loads are negative downwards
+         *pDC -= (Pback + Pahead);
       }
 
       if ( UseUniformLoads(pierID,brgLineIdx) )
@@ -2357,15 +2359,7 @@ void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure() const
 {
-   if ( IsStandAlone() )
-   {
-      return m_SysFactorFlexure;
-   }
-   else
-   {
-      GET_IFACE(IRatingSpecification,pRatingSpec);
-      return pRatingSpec->GetSystemFactorFlexure();
-   }
+   return m_SysFactorFlexure;
 }
 
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
@@ -2376,15 +2370,7 @@ void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 
 Float64 CProjectAgentImp::GetSystemFactorShear() const
 {
-   if ( IsStandAlone() )
-   {
-      return m_SysFactorShear;
-   }
-   else
-   {
-      GET_IFACE(IRatingSpecification,pRatingSpec);
-      return pRatingSpec->GetSystemFactorShear();
-   }
+   return m_SysFactorShear;
 }
 
 void CProjectAgentImp::SetConditionFactor(PierIDType pierID,pgsTypes::ConditionFactorType conditionFactorType,Float64 conditionFactor)
@@ -2880,14 +2866,14 @@ Float64 CProjectAgentImp::GetYieldStressLimitCoefficient() const
 
 pgsTypes::AnalysisType CProjectAgentImp::GetAnalysisMethodForReactions() const
 {
-   return m_EnvelopeModeAnalysisType;
+   return m_AnalysisType;
 }
 
 void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType analysisType)
 {
-   if ( analysisType != m_EnvelopeModeAnalysisType)
+   if ( analysisType != m_AnalysisType )
    {
-      m_EnvelopeModeAnalysisType = analysisType;
+      m_AnalysisType = analysisType;
       Fire_OnRatingSpecificationChanged();
    }
 }
@@ -3207,20 +3193,8 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
          // when getting the girder key we'll use for live load reactions
          CGirderKey girderKey = GetGirderKey(pierID,0,gdrIdx);
 
-         GET_IFACE(ISpecification, pSpecification);
-         pgsTypes::AnalysisType analysisType = pSpecification->GetAnalysisType();
-
-         pgsTypes::BridgeAnalysisType bat;
-         GET_IFACE(IProductForces, pProductForces);
-         if (analysisType == pgsTypes::Envelope)
-         {
-            bat = pProductForces->GetBridgeAnalysisType(m_EnvelopeModeAnalysisType, pgsTypes::Maximize);
-         }
-         else
-         {
-            bat = pProductForces->GetBridgeAnalysisType(analysisType, pgsTypes::Maximize);
-         }
-
+         GET_IFACE(IProductForces,pProductForces);
+         pgsTypes::BridgeAnalysisType bat = pProductForces->GetBridgeAnalysisType(m_AnalysisType,pgsTypes::Maximize);
 
          GET_IFACE(IProductLoads,pProductLoads);
          pgsTypes::LiveLoadType llType = ::GetLiveLoadType(ratingType);
@@ -3236,7 +3210,7 @@ std::vector<xbrLiveLoadReactionData>& CProjectAgentImp::GetPrivateLiveLoadReacti
 
 
             REACTION Rmin,Rmax;
-            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,false,&Rmin,&Rmax,nullptr,nullptr);
+            pReactions->GetVehicularLiveLoadReaction(loadRatingIntervalIdx,llType,vehicleIdx,pierIdx,girderKey,bat,true,&Rmin,&Rmax,nullptr,nullptr);
 
             Float64 W = pProductLoads->GetVehicleWeight(llType,vehicleIdx);
             

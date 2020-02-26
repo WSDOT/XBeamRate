@@ -36,6 +36,7 @@
 #include <EAF\EAFAutoProgress.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <XBeamRateExt\StatusItem.h>
+#include <XBeamRateExt\XBeamAnalysisResult.h>
 
 #include <numeric>
 #include <algorithm>
@@ -1295,8 +1296,9 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceTyp
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
    Float64 FxL, FxR, FyL, FyR, MzL, MzR;
-   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
-   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
+   CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+   ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
+   ar = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
 
    Float64 Mz;
    if ( IsZero(poi.GetDistFromStart()) )
@@ -1324,8 +1326,9 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,xbrTypes::ProductF
    LoadCaseIDType lcid = GetLoadCaseID(pfType);
 
    Float64 FxL, FxR, FyL, FyR, MzL, MzR;
-   results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
-   results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
+   CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+   ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotGlobalProjected,&FxL,&FyL,&MzL);
+   ar = results->ComputePOIForces(lcid,femPoiID,mftRight,lotGlobalProjected,&FxR,&FyR,&MzR);
 
    FyL = IsZero(FyL) ? 0 : FyL;
    FyR = IsZero(FyR) ? 0 : FyR;
@@ -1429,12 +1432,12 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
    for (const auto& lcid : llConfig.m_LoadCases)
    {
       Float64 fxLeft, fyLeft, mzLeft;
-      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+      ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
 
       Float64 fxRight, fyRight, mzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar2(_T(__FILE__),__LINE__);
+      ar2 = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
 
       FxLeft += fxLeft;
       FyLeft += fyLeft;
@@ -1491,12 +1494,12 @@ sysSectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRati
    for (const auto& lcid : llConfig.m_LoadCases)
    {
       Float64 fxLeft, fyLeft, mzLeft;
-      HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+      ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
 
       Float64 fxRight, fyRight, mzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar2(_T(__FILE__),__LINE__);
+      ar2 = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
 
       FxLeft += fxLeft;
       FyLeft += fyLeft;
@@ -1602,11 +1605,12 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       // get unit lane load forces
       LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
       Float64 fxLeft, fyLeft, mzLeft;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+      ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
 
       Float64 fxRight, fyRight, mzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
+      CXBeamAnalysisResult ar2(_T(__FILE__),__LINE__);
+      ar2 = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
       ATLASSERT(SUCCEEDED(hr));
 
       if ( laneIdx == permitLaneIdx )
@@ -1734,12 +1738,12 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
       // get unit lane load forces
       LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
       Float64 fxLeft, fyLeft, mzLeft;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+      ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
 
       Float64 fxRight, fyRight, mzRight;
-      hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
-      ATLASSERT(SUCCEEDED(hr));
+      CXBeamAnalysisResult ar2(_T(__FILE__),__LINE__);
+      ar2 = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
 
       if ( laneIdx == permitLaneIdx )
       {
@@ -2803,12 +2807,12 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
          LoadCaseIDType lcid = llConfig.m_LoadCases[laneIdx];
 
          Float64 fxLeft, fyLeft, mzLeft;
-         HRESULT hr = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
-         ATLASSERT(SUCCEEDED(hr));
+         CXBeamAnalysisResult ar(_T(__FILE__),__LINE__);
+         ar = results->ComputePOIForces(lcid,femPoiID,mftLeft,lotMember,&fxLeft,&fyLeft,&mzLeft);
 
          Float64 fxRight, fyRight, mzRight;
-         hr = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
-         ATLASSERT(SUCCEEDED(hr));
+         CXBeamAnalysisResult ar2(_T(__FILE__),__LINE__);
+         ar2 = results->ComputePOIForces(lcid,femPoiID,mftRight,lotMember,&fxRight,&fyRight,&mzRight);
 
          FxLeft += fxLeft;
          FyLeft += fyLeft;
