@@ -840,7 +840,7 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
    }
    else
    {
-      Ec = lrfdConcreteUtil::ModE(concrete.Fc,concrete.StrengthDensity,false);
+      Ec = lrfdConcreteUtil::ModE((matConcrete::Type)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
       if ( lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion() )
       {
          Ec *= (concrete.EcK1*concrete.EcK2);

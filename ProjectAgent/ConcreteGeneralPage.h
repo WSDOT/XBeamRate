@@ -53,6 +53,8 @@ public:
 	CEdit	m_ctrlFc;
 	CEdit	m_ctrlStrengthDensity;
 
+   Float64 m_MinFcUHPC;
+   Float64 m_MaxFcUHPC;
    Float64 m_MinNWCDensity;
    Float64 m_MaxLWCDensity;
    bool m_bErrorInDDX;
@@ -84,4 +86,5 @@ protected:
    virtual void OnOK() override;
    pgsTypes::ConcreteType GetConreteType();
    bool IsDensityInRange(Float64 density,pgsTypes::ConcreteType type);
+   bool IsStrengthInRange(Float64 fc, pgsTypes::ConcreteType type);
 };
