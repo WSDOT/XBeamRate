@@ -140,7 +140,6 @@ BOOL CConcreteGeneralPage::OnInitDialog()
 {
    CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
    GetDlgItem(IDC_FC_LABEL)->SetWindowText(_T("Strength - f'c"));
-   GetDlgItem(IDC_DS_TITLE)->SetWindowText(_T("Unit Weight (used to compute Ec)"));
    GetDlgItem(IDC_MOD_E)->SetWindowText(_T("Mod. Elasticity, Ec"));
 
    CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
