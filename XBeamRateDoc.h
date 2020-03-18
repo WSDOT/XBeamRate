@@ -136,7 +136,7 @@ protected:
    virtual void BrokerShutDown() override;
 
    // called when the UI Hints have been reset
-   virtual void ResetUIHints() override;
+   virtual void OnUIHintsReset() override;
 
    void PopulateReportMenu();
    void PopulateGraphMenu();

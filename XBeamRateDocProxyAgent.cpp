@@ -501,9 +501,9 @@ void CXBeamRateDocProxyAgent::ResetStatusBar()
    pFrame->SetStatusBar(nullptr);
 }
 
-void CXBeamRateDocProxyAgent::OnResetHints()
+void CXBeamRateDocProxyAgent::OnUIHintsReset()
 {
    // Do nothing for now
 //   // we'll need this method if XBRate ever supports extensions
-//   Fire_OnHintsReset();
+//   Fire_OnUIHintsReset();
 }

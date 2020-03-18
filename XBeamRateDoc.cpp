@@ -315,10 +315,10 @@ CString CXBeamRateDoc::GetDocumentationRootLocation()
    return pApp->GetDocumentationRootLocation();
 }
 
-void CXBeamRateDoc::ResetUIHints()
+void CXBeamRateDoc::OnUIHintsReset()
 {
-   __super::ResetUIHints();
-   m_pMyDocProxyAgent->OnResetHints();
+   __super::OnUIHintsReset();
+   m_pMyDocProxyAgent->OnUIHintsReset();
 }
 
 CString CXBeamRateDoc::GetRootNodeName()
