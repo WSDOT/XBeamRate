@@ -1038,9 +1038,15 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
       // before 2015, shear capacity was based strictly on stirrups at a section
       GET_IFACE(IXBRStirrups,pStirrups);
       ZoneIndexType zoneIdx = pStirrups->FindStirrupZone(pierID,stage,poi);
-      ATLASSERT(zoneIdx != INVALID_INDEX);
-      Float64 Av_over_S = pStirrups->GetStirrupZoneReinforcement(pierID,stage,zoneIdx);
-      details.AvgAvOverS = Av_over_S;
+      if (zoneIdx == INVALID_INDEX)
+      {
+         // POI is not in a zone (this can happen if there aren't any stirrups defined)
+         details.AvgAvOverS = 0.0;
+      }
+      else
+      {
+         details.AvgAvOverS = pStirrups->GetStirrupZoneReinforcement(pierID, stage, zoneIdx);
+      }
       return details;
    }
    else
