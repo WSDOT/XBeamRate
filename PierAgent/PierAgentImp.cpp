@@ -1142,11 +1142,16 @@ Float64 CPierAgentImp::GetRebarDepth(PierIDType pierID,const xbrPointOfInterest&
 
 //////////////////////////////////////////
 // IXBRStirrups
-ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const
+ZoneIndexType CPierAgentImp::FindStirrupZone(PierIDType pierID, xbrTypes::Stage stage, const xbrPointOfInterest& poi) const
 {
    ATLASSERT(!poi.IsColumnPOI());
 
-   const auto& vStirrupZones = GetStirrupZones(pierID,stage);
+   const auto& vStirrupZones = GetStirrupZones(pierID, stage);
+   if (vStirrupZones.empty())
+   {
+      return INVALID_INDEX;
+   }
+
    ZoneIndexType zoneIdx = INVALID_INDEX;
    ZoneIndexType zIdx = 0;
    for( const auto& zone : vStirrupZones)
