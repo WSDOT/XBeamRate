@@ -187,7 +187,7 @@ BOOL CPierReportDlg::OnInitDialog()
       for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
       {
          CString strPierLabel;
-         strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+         strPierLabel.Format(_T("Pier %s"),LABEL_PIER(pierIdx));
          int idx = pCB->AddString(strPierLabel);
 
          const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);

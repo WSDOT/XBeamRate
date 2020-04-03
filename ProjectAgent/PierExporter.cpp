@@ -90,7 +90,7 @@ HRESULT CPierExporter::Export(PierIndexType pierIdx)
          if ( modelType == pgsTypes::pmtPhysical )
          {
             CString str;
-            str.Format(_T("Pier %d"),LABEL_PIER(pIdx));
+            str.Format(_T("Pier %s"),LABEL_PIER(pIdx));
             if ( strPiers.GetLength() == 0 )
             {
                strPiers = str;
@@ -163,7 +163,7 @@ HRESULT CPierExporter::BatchExport()
       if ( pPier->GetPierModelType() == pgsTypes::pmtPhysical )
       {
          CString strPier;
-         strPier.Format(_T("Pier %d\n"),LABEL_PIER(pierIdx));
+         strPier.Format(_T("Pier %s\n"),LABEL_PIER(pierIdx));
          strPiers += strPier;
          vPiers.push_back(pierIdx);
       }
@@ -195,7 +195,7 @@ HRESULT CPierExporter::BatchExport()
          if ( FAILED(hr) )
          {
             CString strMsg;
-            strMsg.Format(_T("An error occured while exporting Pier %d."),LABEL_PIER(pierIdx));
+            strMsg.Format(_T("An error occured while exporting Pier %s."),LABEL_PIER(pierIdx));
             AfxMessageBox(strMsg,MB_ICONEXCLAMATION | MB_OK);
          }
       }
@@ -225,7 +225,7 @@ CString CPierExporter::GetDefaultPierExportFile(PierIndexType pierIdx)
    CString strDefaultFileName;
    GET_IFACE(IEAFDocument,pDoc);
 
-   strDefaultFileName.Format(_T("%s%s_Pier_%d.xbr"),
+   strDefaultFileName.Format(_T("%s%s_Pier_%s.xbr"),
                              pDoc->GetFileRoot(), // path to the file
                              pDoc->GetFileTitle(), // the file name without path or extension
                              LABEL_PIER(pierIdx));

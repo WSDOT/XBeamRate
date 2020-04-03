@@ -223,7 +223,7 @@ void CXBRLiveLoadGraphController::FillPierList()
          {
             PierIDType pierID = pPierData->GetID();
             CString strPier;
-            strPier.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+            strPier.Format(_T("Pier %s"),LABEL_PIER(pierIdx));
             int idx = pcbPiers->AddString(strPier);
             pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
          }

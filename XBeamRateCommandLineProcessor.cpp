@@ -164,7 +164,7 @@ BOOL CXBRateCommandLineProcessor::GetResultsFileName(LPCTSTR lpszSourceFile,Pier
       }
       else
       {
-         strResultsFile.Format(_T("%s_Pier_%d.dbr"),CString(lpszSourceFile).Left(strSourceFile.GetLength()-4),LABEL_PIER(pierIdx));
+         strResultsFile.Format(_T("%s_Pier_%s.dbr"),CString(lpszSourceFile).Left(strSourceFile.GetLength()-4),LABEL_PIER(pierIdx));
       }
       return TRUE;
    }

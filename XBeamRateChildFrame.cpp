@@ -106,7 +106,7 @@ void CXBeamRateChildFrame::OnUpdateFrameTitle(BOOL bAddToTitle)
       }
       else
       {
-         strTitle.Format(_T("Pier View - Pier %d"),LABEL_PIER(pierIdx));
+         strTitle.Format(_T("Pier View - Pier %s"),LABEL_PIER(pierIdx));
       }
 
       // set our title
@@ -216,7 +216,7 @@ void CXBeamRateChildFrame::UpdatePierList()
    for (PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++)
    {
       CString strPierLabel;
-      strPierLabel.Format(_T("Pier %d"), LABEL_PIER(pierIdx));
+      strPierLabel.Format(_T("Pier %s"), LABEL_PIER(pierIdx));
       int idx = pcbPiers->AddString(strPierLabel);
 
       PierIDType pierID = pBridgeDesc->GetPier(pierIdx)->GetID();

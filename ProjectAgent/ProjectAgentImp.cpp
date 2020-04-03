@@ -244,7 +244,7 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    CEAFAutoProgress ap(pProgress);
 
    CString strMsg;
-   strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
+   strMsg.Format(_T("Exporting Pier %s to XBRate"),LABEL_PIER(pierIdx));
    pProgress->UpdateMessage(strMsg);
 
    AutoRevert<PierIDType> revert_pier_id(&m_SavePierID, pierID, INVALID_ID); // this is the ID of the pier we are saving... revert to INVALID_ID on exit
