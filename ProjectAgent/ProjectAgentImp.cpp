@@ -1970,7 +1970,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          GET_IFACE(IGirder,pIGirder);
          GET_IFACE(IBridge,pBridge);
          CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
-         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetBottomFlangeCount(segmentKey);
          ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
 
          GET_IFACE(IPointOfInterest,pPoi);
@@ -2031,7 +2031,7 @@ Float64 CProjectAgentImp::GetBearingWidth(PierIDType pierID,IndexType brgLineIdx
          GET_IFACE(IGirder,pIGirder);
          GET_IFACE(IBridge,pBridge);
          CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
-         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetBottomFlangeCount(segmentKey);
          ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
 
          GET_IFACE(IPointOfInterest,pPoi);
