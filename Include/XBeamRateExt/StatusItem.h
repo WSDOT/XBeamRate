@@ -36,7 +36,7 @@ class XBREXTCLASS xbrBridgeStatusCallback : public iStatusCallback
 {
 public:
    xbrBridgeStatusCallback(eafTypes::StatusSeverityType severity,UINT helpID=0);
-   virtual eafTypes::StatusSeverityType GetSeverity() override;
+   virtual eafTypes::StatusSeverityType GetSeverity() const override;
    virtual void Execute(CEAFStatusItem* pStatusItem) override;
 
 private:
