@@ -68,10 +68,10 @@ void txnEditOptions::Execute(int i)
    lrfdVersionMgr::SetVersion(m_Options[i].m_LRFDVersion);
    lrfrVersionMgr::SetVersion(m_Options[i].m_LRFRVersion);
 
-   pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bLegalRating);
-   pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bLegalRating);
-   pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bLegalRateForShear);
-   pRatingSpec->RateForShear(pgsTypes::lrDesign_Operating,m_Options[i].m_bLegalRateForShear);
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
+   pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRateForShear);
+   pRatingSpec->RateForShear(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRateForShear);
 
    pRatingSpec->EnableRating(pgsTypes::lrLegal_Routine,m_Options[i].m_bLegalRating);
    pRatingSpec->EnableRating(pgsTypes::lrLegal_Special, m_Options[i].m_bLegalRating);
