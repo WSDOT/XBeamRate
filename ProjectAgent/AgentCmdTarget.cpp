@@ -144,8 +144,8 @@ void CAgentCmdTarget::OnEditOptions()
    oldOptions.m_LRFDVersion = lrfdVersionMgr::GetVersion();
    oldOptions.m_LRFRVersion = lrfrVersionMgr::GetVersion();
 
-   oldOptions.m_bLegalRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
-   oldOptions.m_bLegalRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);
+   oldOptions.m_bDesignRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
+   oldOptions.m_bDesignRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);
 
    oldOptions.m_bLegalRating  = pRatingSpec->IsRatingEnabled(pgsTypes::lrLegal_Routine);
    oldOptions.m_bLegalRateForShear  = pRatingSpec->RateForShear(pgsTypes::lrLegal_Routine);

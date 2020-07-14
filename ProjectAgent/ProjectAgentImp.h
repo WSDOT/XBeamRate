@@ -378,8 +378,8 @@ private:
    Float64 m_SysFactorShear;
    Float64 m_PhiC, m_PhiT; // resistance factors for flexure (compress,tension controlled section)
    Float64 m_PhiV; // resistance factor for shear
-   bool m_bRatingEnabled[pgsTypes::lrLoadRatingTypeCount]; // array index is pgsTypes::LoadRatingType
-   bool m_bRateForShear[pgsTypes::lrLoadRatingTypeCount]; // array index is pgsTypes::LoadRatingType
+   std::array<bool, pgsTypes::lrLoadRatingTypeCount> m_bRatingEnabled; // array index is pgsTypes::LoadRatingType
+   std::array<bool, pgsTypes::lrLoadRatingTypeCount> m_bRateForShear; // array index is pgsTypes::LoadRatingType
    bool m_bCheckYieldStress;
    Float64 m_YieldStressCoefficient;
 
