@@ -245,6 +245,13 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
             }
             row++;
          }
+         else
+         {
+            (*table)(row, col + 0) << RPT_NA;
+            (*table)(row, col + 1) << _T("");
+            (*table)(row, col + 2) << _T("");
+            row++;
+         }
 
          // Strength II
          if ( ratingTableType == Permit )
@@ -324,6 +331,13 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
                }
                row++;
             }
+            else
+            {
+               (*table)(row, col + 0) << RPT_NA;
+               (*table)(row, col + 1) << _T("");
+               (*table)(row, col + 2) << _T("");
+               row++;
+            }
          }
 
          // Service I
@@ -382,7 +396,7 @@ rptRcTable* CRatingSummaryTable::BuildByLimitState(IBroker* pBroker,PierIDType p
             }
             else
             {
-               (*table)(row,col)   << _T("");
+               (*table)(row,col)   << RPT_NA;
                (*table)(row,col+1) << _T("");
                (*table)(row,col+2) << _T("");
                row++;
