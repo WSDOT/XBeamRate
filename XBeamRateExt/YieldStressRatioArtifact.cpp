@@ -449,12 +449,19 @@ Float64 xbrYieldStressRatioArtifact::GetStressRatio() const
 
       fdl = m_n[xbrTypes::ltPermanent]*(fDC + fDW + fCR + fSH + fRE + fPS);
 
-      if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
-      {
-         fdl += m_n[xbrTypes::ltTransient]*fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
-      }
+      // WSDOT rating equation changed in July 2019 BDM
+      //if ( ::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT )
+      //{
+      //   fdl += m_n[xbrTypes::ltTransient]*fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
+      //}
 
       fll = m_n[xbrTypes::ltTransient]*fLLIM;
+
+      // WSDOT rating equation changed in July 2019 BDM
+      if (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+      {
+         fll += m_n[xbrTypes::ltTransient] * fLLIM_Adj; // WSDOT BDM Eqn. 13.1.1A-2
+      }
 
       SR = IsZero(fll) ? Float64_Max : (fr - fdl) / fll;
 
