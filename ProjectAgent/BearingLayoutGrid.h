@@ -56,7 +56,7 @@ public:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CBridgeDescFramingGrid)
+	//{{AFX_VIRTUAL(CBearingLayoutGrid)
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -64,7 +64,7 @@ public:
 
 	// Generated message map functions
 public:
-	//{{AFX_MSG(CBridgeDescFramingGrid)
+	//{{AFX_MSG(CBearingLayoutGrid)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()

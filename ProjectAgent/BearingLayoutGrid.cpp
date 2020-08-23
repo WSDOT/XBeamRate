@@ -34,7 +34,7 @@ static char THIS_FILE[] = __FILE__;
 GRID_IMPLEMENT_REGISTER(CBearingLayoutGrid, CS_DBLCLKS, 0, 0, 0);
 
 /////////////////////////////////////////////////////////////////////////////
-// CBridgeDescFramingGrid
+// CBearingLayoutGrid
 
 CBearingLayoutGrid::CBearingLayoutGrid()
 {
