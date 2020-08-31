@@ -385,7 +385,7 @@ Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colI
    return botElev;
 }
 
-pgsTypes::ColumnFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx) const
+pgsTypes::ColumnTransverseFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    return pProject->GetColumnFixity(pierID,colIdx);

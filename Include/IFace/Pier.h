@@ -52,7 +52,7 @@ interface IXBRPier : public IUnknown
    virtual Float64 GetMaxColumnHeight(PierIDType pierID) const = 0;
    virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx) const = 0;
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) const = 0;
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) const = 0;
+   virtual pgsTypes::ColumnTransverseFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) const = 0;
 
    // Returns the length of the cross beam measured at the bottom face.
    virtual Float64 GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID) const = 0;

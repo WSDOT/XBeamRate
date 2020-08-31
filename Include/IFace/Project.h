@@ -192,7 +192,7 @@ interface IXBRProject : IUnknown
    virtual Float64 GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx) const = 0;
    virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx) const = 0;
    virtual Float64 GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx) const = 0;
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const = 0;
+   virtual pgsTypes::ColumnTransverseFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const = 0;
 
    virtual void SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) = 0;
    virtual void GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) const = 0;

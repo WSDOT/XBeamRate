@@ -104,7 +104,7 @@ public:
    virtual Float64 GetColumnHeight(PierIDType pierID,IndexType colIdx) const override;
    virtual Float64 GetTopColumnElevation(PierIDType pierID,IndexType colIdx) const override;
    virtual Float64 GetBottomColumnElevation(PierIDType pierID,IndexType colIdx) const override;
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) const override;
+   virtual pgsTypes::ColumnTransverseFixityType GetColumnFixity(PierIDType pierID,IndexType colIdx) const override;
    virtual Float64 GetMaxColumnHeight(PierIDType pierID) const override;
    virtual Float64 GetXBeamLength(xbrTypes::XBeamLocation location,PierIDType pierID) const override;
    virtual void GetUpperXBeamProfile(PierIDType pierID,IShape** ppShape) const override;

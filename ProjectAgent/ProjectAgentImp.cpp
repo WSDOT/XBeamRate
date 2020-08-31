@@ -1350,10 +1350,10 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       if (pierData.GetColumnCount() == 1)
       {
          auto& column = pierData.GetColumnData(0);
-         pgsTypes::ColumnFixityType fixity = column.GetTransverseFixity();
-         if (fixity == pgsTypes::cftPinned)
+         pgsTypes::ColumnTransverseFixityType fixity = column.GetTransverseFixity();
+         if (fixity == pgsTypes::ctftTopFixedBottomPinned)
          {
-            column.SetTransverseFixity(pgsTypes::cftFixed);
+            column.SetTransverseFixity(pgsTypes::ctftTopFixedBottomFixed);
 
             CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixed has been changed to Fixed"));
             xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID, m_scidBridgeInfo, strMsg);
@@ -2270,7 +2270,7 @@ void CProjectAgentImp::GetColumnProperties(PierIDType pierID,ColumnIndexType col
    *pheightType = columnData.GetColumnHeightMeasurementType();
 }
 
-pgsTypes::ColumnFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const
+pgsTypes::ColumnTransverseFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const
 {
    return GetPrivatePierData(pierID).GetColumnData(colIdx).GetTransverseFixity();
 }

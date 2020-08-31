@@ -364,9 +364,9 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             joint.Release();
             joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
 
-            pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
+            pgsTypes::ColumnTransverseFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
             joint->Support(); // fully fixed
-            if ( columnFixity == pgsTypes::cftPinned )
+            if ( columnFixity == pgsTypes::ctftTopFixedBottomPinned )
             {
                joint->ReleaseDof(jrtMz);
             }
@@ -377,6 +377,12 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
             mbr.Release();
             members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
+
+            // Release top end of member, if specified
+            if (columnFixity == pgsTypes::ctftTopPinnedBottomFixed)
+            {
+               mbr->ReleaseEnd(metStart, mbrReleaseMz);
+            }
 
             colIdx++;
          }

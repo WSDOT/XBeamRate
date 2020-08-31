@@ -33,6 +33,7 @@
 #include <XBeamRateExt\StirrupData.h>
 
 #include <PgsExt\GirderLabel.h>
+#include <PGSuperUIUtil.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -244,7 +245,6 @@ void write_substructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
-   CString strFixity[] = {_T("Fixed"), _T("Pinned") };
    CString strShape[] = {_T("Circle"), _T("Rectangle") };
 
 
@@ -258,7 +258,7 @@ void write_substructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rp
       (*pTable)(row,col++) << elevation.SetValue(pPier->GetTopColumnElevation(pierID,colIdx));
       (*pTable)(row,col++) << elevation.SetValue(pPier->GetBottomColumnElevation(pierID,colIdx));
       (*pTable)(row,col++) << length.SetValue(pProject->GetColumnHeight(pierID,colIdx));
-      (*pTable)(row,col++) << strFixity[pProject->GetColumnFixity(pierID,colIdx)];
+      (*pTable)(row,col++) << GetTransverseFixityString(pProject->GetColumnFixity(pierID,colIdx));
 
       CColumnData::ColumnShapeType shapeType;
       CColumnData::ColumnHeightMeasurementType measureType;
