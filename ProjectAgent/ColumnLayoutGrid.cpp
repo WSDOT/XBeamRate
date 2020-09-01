@@ -24,7 +24,7 @@
 #include "stdafx.h"
 #include "ColumnLayoutGrid.h"
 #include <EAF\EAFDisplayUnits.h>
-#include <PgsExt\ColumnFixityComboBox.h>
+#include <PGSuperUIUtil.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
