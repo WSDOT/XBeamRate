@@ -298,7 +298,7 @@ void CXBRLiveLoadGraphBuilder::UpdateGraphData()
    Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT | POI_FOC_DV2 | POI_FOC_DV);
    std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
    if ( 0 <= vWLPoi.front().GetDistFromStart() )
    {

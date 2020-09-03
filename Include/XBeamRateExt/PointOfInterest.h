@@ -35,6 +35,8 @@ typedef Uint64 PoiAttributeType;
 #define POI_WHEELLINE     0x00000020 // POI in XBeam at the location of a wheel line load
 #define POI_GRID          0x00000040 // POI in XBeam at a one foot grid location
 #define POI_MIDPOINT      0x00000080 // POI in XBeam mid-way between columns
+#define POI_FOC_DV        0x00000100 // POI in XBeam at distance Dv from face of column
+#define POI_FOC_DV2       0x00000200 // POI in XBeam at distance Dv/2 from face of column
 
 class XBREXTCLASS xbrPointOfInterest
 {

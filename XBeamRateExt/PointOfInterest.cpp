@@ -206,6 +206,28 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
       nAttributes++;
    }
 
+   if ( HasAttribute(POI_FOC_DV2) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("FoC_dv2");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_FOC_DV) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("FoC_dv");
+      nAttributes++;
+   }
+
    if ( HasAttribute(POI_MIDPOINT) )
    {
       if ( 0 < nAttributes )
@@ -264,6 +286,16 @@ void xbrPointOfInterest::UpdateAttributeString()
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )
    {
       os << _T("POI_MIDPOINT | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV2) )
+   {
+      os << _T("POI_FOC_dv2 | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV) )
+   {
+      os << _T("POI_FOC_dv | ");
    }
 
    os << std::endl;

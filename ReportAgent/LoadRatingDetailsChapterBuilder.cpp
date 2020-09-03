@@ -45,7 +45,8 @@ static char THIS_FILE[] = __FILE__;
 CLASS
    CLoadRatingDetailsChapterBuilder
 ****************************************************************************/
-CLoadRatingDetailsChapterBuilder::CLoadRatingDetailsChapterBuilder()
+CLoadRatingDetailsChapterBuilder::CLoadRatingDetailsChapterBuilder():
+m_bReportEvenIncrements(true)
 {
 }
 
@@ -59,6 +60,8 @@ LPCTSTR CLoadRatingDetailsChapterBuilder::GetName() const
 rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
 {
    CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+
+   m_bReportEvenIncrements = pXBRRptSpec->GetDoReportEvenIncrements();
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -779,14 +782,21 @@ void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,I
 
 bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest& poi,const xbrPointOfInterest& controllingPoi) const
 {
-   if ( poi == controllingPoi || 
-        poi.HasAttribute(POI_GRID)
-      )
+   if (!m_bReportEvenIncrements)
    {
-      return true;
+      return true; // report all
    }
    else
    {
-      return false;
+      if (poi == controllingPoi ||
+         poi.HasAttribute(POI_GRID)
+         )
+      {
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 }

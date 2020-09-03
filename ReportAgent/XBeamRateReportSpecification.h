@@ -28,13 +28,17 @@ class CXBeamRateReportSpecification :
    public CEAFBrokerReportSpecification
 {
 public:
-   CXBeamRateReportSpecification(LPCTSTR strReportName,IBroker* pBroker,PierIDType pierID);
+   CXBeamRateReportSpecification(LPCTSTR strReportName,IBroker* pBroker,PierIDType pierID, bool bReportEvenIncrements);
    ~CXBeamRateReportSpecification(void);
 
    PierIDType GetPierID();
    void SetPierID(PierIDType pier);
 
+   bool GetDoReportEvenIncrements() const;
+   void SetDoReportEvenIncrements(bool isEven);
+
 protected:
    PierIDType m_PierID;
+   bool m_bReportEvenIncrements;
 };
 

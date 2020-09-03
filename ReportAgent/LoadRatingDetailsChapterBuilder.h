@@ -54,4 +54,6 @@ private:
    void LoadPostingDetails(rptChapter* pChapter,IBroker* pBroker,const xbrRatingArtifact* pRatingArtifact) const;
 
    bool ReportAtThisPoi(const xbrPointOfInterest& poi,const xbrPointOfInterest& controllingPoi) const;
+
+   mutable bool m_bReportEvenIncrements;
 };

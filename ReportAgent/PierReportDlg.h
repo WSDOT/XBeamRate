@@ -53,7 +53,11 @@ protected:
 
    std::shared_ptr<CReportSpecification> m_pInitRptSpec; // report spec for initializing the dialog
 
+   int m_ReportEvenIncrementsIval;
+
 public:
+   bool m_bReportEvenIncrements;
+
 	// Generated message map functions
 	//{{AFX_MSG(CPierReportDlg)
 	virtual BOOL OnInitDialog() override;
