@@ -789,7 +789,9 @@ bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest&
    else
    {
       if (poi == controllingPoi ||
-         poi.HasAttribute(POI_GRID)
+         poi.HasAttribute(POI_GRID) ||
+         poi.HasAttribute(POI_COLUMN_LEFT) ||
+         poi.HasAttribute(POI_COLUMN_RIGHT)
          )
       {
          return true;

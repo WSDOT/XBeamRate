@@ -176,6 +176,45 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    (*pTbl)(6,0) << _T("File");
    (*pTbl)(6,1) << pDocument->GetFilePath();
 
+   // Notes table
+   rptRcTable* pTable;
+   int row = 0;
+
+   pPara = new rptParagraph;
+   pPara->SetStyleName(rptStyleManager::GetHeadingStyle());
+   *pTitlePage << pPara;
+
+   *pPara << _T("Notes") << rptNewLine;
+
+   pTable = rptStyleManager::CreateDefaultTable(2);
+   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetColumnStyle(1,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(1,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+
+   *pPara << pTable << rptNewLine;
+
+   row = 0;
+   (*pTable)(row,0) << _T("Symbol");
+   (*pTable)(row++,1) << _T("Definition");
+
+   (*pTable)(row,0) << _T("Brg");
+   (*pTable)(row++,1) << _T("Bearing location");
+
+   (*pTable)(row,0) << Sub2(_T("Col"),_T("left")) << Sub2(_T(", Col"),_T("right"));
+   (*pTable)(row++,1) << _T("Just left or right of CL column");
+
+   (*pTable)(row,0) << _T("FOC");
+   (*pTable)(row++,1) << _T("Face of column");
+
+   (*pTable)(row,0) << Sub2(_T("FOC"),_T("dv")) << Sub2(_T(", FOC"),_T("dv2"));
+   (*pTable)(row++, 1) << Sub2(_T("d"), _T("v")) << Sub2(_T(" or d"), _T("v")) << _T(" /2 from face of column");
+
+   (*pTable)(row,0) << _T("MP");
+   (*pTable)(row++,1) << _T("mid-point of cap between columns");
+
+   (*pTable)(row,0) << _T("ST");
+   (*pTable)(row++,1) << _T("section change");
 
    // Throw in a page break
    pPara = new rptParagraph;

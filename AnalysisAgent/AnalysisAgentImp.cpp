@@ -985,6 +985,14 @@ void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPoint
 
    Float64 Xpoi = poi.GetDistFromStart();
    GetXBeamFemModelLocation(pModelData,Xpoi,pMbrID,pMbrLocation);
+
+   // We know that GetXBeamFemModelLocation will always return the member to the left of a joint location if at a joint.
+   // For a POI_COLUMN_RIGHT, we want the member to the right
+   if (poi.HasAttribute(POI_COLUMN_RIGHT))
+   {
+      (*pMbrID)++;
+      *pMbrLocation = 0.0;
+   }
 }
 
 void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const

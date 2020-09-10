@@ -67,7 +67,17 @@ bool xbrPointOfInterest::operator<(const xbrPointOfInterest& other) const
 {
    if ( m_ColumnIndex == other.m_ColumnIndex )
    {
-      return m_Xpoi < other.m_Xpoi;
+      // We want to put right of column poi at end of =='s list
+      bool bpcr = HasAttribute(POI_COLUMN_RIGHT);
+      bool botherpcr = other.HasAttribute(POI_COLUMN_RIGHT);
+      if (m_Xpoi == other.m_Xpoi && botherpcr && !bpcr )
+      {
+         return true; 
+      }
+      else
+      {
+         return m_Xpoi < other.m_Xpoi;
+      }
    }
 
    return m_ColumnIndex < other.m_ColumnIndex;
@@ -151,14 +161,25 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
       nAttributes++;
    }
 
-   if ( HasAttribute(POI_COLUMN) )
+   if ( HasAttribute(POI_COLUMN_LEFT) )
    {
       if ( 0 < nAttributes )
       {
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("Col");
+      strAttrib += _T("Col_left");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_COLUMN_RIGHT) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("Col_right");
       nAttributes++;
    }
 
@@ -253,14 +274,14 @@ void xbrPointOfInterest::UpdateAttributeString()
       os << _T("POI_SECTIONCHANGE | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN) )
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_LEFT) )
    {
-      os << _T("POI_COLUMN | ");
+      os << _T("POI_COLUMN_LEFT | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMNDELTA) )
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_RIGHT) )
    {
-      os << _T("POI_COLUMNDELTA | ");
+      os << _T("POI_COLUMN_RIGHT | ");
    }
 
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )

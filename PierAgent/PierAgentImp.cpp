@@ -68,6 +68,12 @@ bool ComparePoiLocation(const xbrPointOfInterest& poi1,const xbrPointOfInterest&
       return false;
    }
 
+   if ((poi1.HasAttribute(POI_COLUMN_LEFT) && poi2.HasAttribute(POI_COLUMN_RIGHT)) || 
+       (poi2.HasAttribute(POI_COLUMN_LEFT) && poi1.HasAttribute(POI_COLUMN_RIGHT))) // do not merge these
+   {
+      return false;
+   }
+
    if ( !IsEqual(poi1.GetDistFromStart(),poi2.GetDistFromStart()) )
    {
       return false;
@@ -2007,9 +2013,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
    Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID)-X2; 
 
    // left column
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta,POI_COLUMNDELTA));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta,POI_COLUMNDELTA));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN_LEFT));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN_RIGHT));
 
    // put POI at faces of left column
    CColumnData::ColumnShapeType shapeType;
@@ -2066,9 +2071,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 
          X += space;
 
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta,POI_COLUMNDELTA));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta,POI_COLUMNDELTA));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN_LEFT));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN_RIGHT));
 
          // put POI at faces of column
          pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);
@@ -2251,7 +2255,8 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
            (poi.HasAttribute(POI_GRID) || 
             poi.HasAttribute(POI_BRG)  || 
             poi.HasAttribute(POI_MIDPOINT) || 
-            poi.HasAttribute(POI_COLUMN) || 
+            poi.HasAttribute(POI_COLUMN_LEFT) || 
+            poi.HasAttribute(POI_COLUMN_RIGHT) || 
             poi.HasAttribute(POI_FOC_DV) || 
             poi.HasAttribute(POI_FOC_DV2) || 
             poi.HasAttribute(POI_SECTIONCHANGE)) 

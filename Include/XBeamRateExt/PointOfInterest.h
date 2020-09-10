@@ -28,8 +28,8 @@
 typedef Uint64 PoiAttributeType;
 
 #define POI_SECTIONCHANGE 0x00000001
-#define POI_COLUMN        0x00000002 // POI in XBeam at CL of Column
-#define POI_COLUMNDELTA   0x00000004 // POI in XBeam just offset from CL Column
+#define POI_COLUMN_LEFT   0x00000002 // POI in XBeam just left of CL of Column
+#define POI_COLUMN_RIGHT  0x00000004 // POI in XBeam just right from CL Column
 #define POI_FACEOFCOLUMN  0x00000008 // POI in XBeam at face of column
 #define POI_BRG           0x00000010 // POI in XBeam at CL Girder Bearing Point
 #define POI_WHEELLINE     0x00000020 // POI in XBeam at the location of a wheel line load
