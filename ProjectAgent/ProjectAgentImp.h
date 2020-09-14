@@ -52,7 +52,6 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>,
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public CProxyIXBREventsEventSink<CProjectAgentImp>,
-   public CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
@@ -98,7 +97,6 @@ END_COM_MAP()
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
    CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBRProjectPropertiesEventSink )
-   CONNECTION_POINT_ENTRY( IID_IXBRRatingSpecificationEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBREventsSink )
 END_CONNECTION_POINT_MAP()
 
@@ -448,7 +446,6 @@ private:
 
    friend CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>;
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
-   friend CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>;
 
    void CreateMenus();
    void RemoveMenus();

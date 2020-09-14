@@ -2382,8 +2382,11 @@ Float64 CProjectAgentImp::GetShearResistanceFactor() const
 
 void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 {
-   m_SysFactorFlexure = sysFactor;
-   Fire_OnRatingSpecificationChanged();
+   if (sysFactor != m_SysFactorFlexure)
+   {
+      m_SysFactorFlexure = sysFactor;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure() const
@@ -2393,8 +2396,11 @@ Float64 CProjectAgentImp::GetSystemFactorFlexure() const
 
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 {
-   m_SysFactorShear = sysFactor;
-   Fire_OnRatingSpecificationChanged();
+   if (sysFactor != m_SysFactorShear)
+   {
+      m_SysFactorShear = sysFactor;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetSystemFactorShear() const
@@ -2854,8 +2860,11 @@ void CProjectAgentImp::EnableRating(pgsTypes::LoadRatingType ratingType,bool bEn
 
 void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
 {
-   m_bRateForShear[ratingType] = bRateForShear;
-   Fire_OnRatingSpecificationChanged();
+   if (m_bRateForShear[ratingType] != bRateForShear)
+   {
+      m_bRateForShear[ratingType] = bRateForShear;
+      Fire_OnProjectChanged();
+   }
 }
 
 bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType) const
@@ -2873,8 +2882,11 @@ bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType) const
 
 void CProjectAgentImp::CheckYieldStressLimit(bool bCheckYieldStress)
 {
-   m_bCheckYieldStress = bCheckYieldStress;
-   Fire_OnRatingSpecificationChanged();
+   if (m_bCheckYieldStress != bCheckYieldStress)
+   {
+      m_bCheckYieldStress = bCheckYieldStress;
+      Fire_OnProjectChanged();
+   }
 }
 
 bool CProjectAgentImp::CheckYieldStressLimit() const
@@ -2892,8 +2904,11 @@ bool CProjectAgentImp::CheckYieldStressLimit() const
 
 void CProjectAgentImp::SetYieldStressLimitCoefficient(Float64 x)
 {
-   m_YieldStressCoefficient = x;
-   Fire_OnRatingSpecificationChanged();
+   if (m_YieldStressCoefficient != x)
+   {
+      m_YieldStressCoefficient = x;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetYieldStressLimitCoefficient() const
@@ -2919,7 +2934,7 @@ void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType anal
    if ( analysisType != m_AnalysisType )
    {
       m_AnalysisType = analysisType;
-      Fire_OnRatingSpecificationChanged();
+      Fire_OnProjectChanged();
    }
 }
 
@@ -2928,12 +2943,12 @@ xbrTypes::EmergencyRatingMethod CProjectAgentImp::GetEmergencyRatingMethod() con
    return m_EmergencyRatingMethod;
 }
 
-void CProjectAgentImp::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod permitRatingMethod)
+void CProjectAgentImp::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod)
 {
-   if (m_EmergencyRatingMethod != permitRatingMethod)
+   if (m_EmergencyRatingMethod != emergencyRatingMethod)
    {
-      m_EmergencyRatingMethod = permitRatingMethod;
-      Fire_OnRatingSpecificationChanged();
+      m_EmergencyRatingMethod = emergencyRatingMethod;
+      Fire_OnProjectChanged();
    }
 }
 
@@ -2952,7 +2967,7 @@ void CProjectAgentImp::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permit
    if ( m_PermitRatingMethod != permitRatingMethod )
    {
       m_PermitRatingMethod = permitRatingMethod;
-      Fire_OnRatingSpecificationChanged();
+      Fire_OnProjectChanged();
    }
 }
 
@@ -3045,11 +3060,6 @@ void CProjectAgentImp::FirePendingEvents()
 	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
       {
 	      Fire_OnProjectChanged();
-      }
-
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_RATINGSPECIFICATION) )
-      {
-	      Fire_OnRatingSpecificationChanged();
       }
 
       // tell event listeners that it is time to fire their events
