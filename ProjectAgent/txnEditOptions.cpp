@@ -100,6 +100,8 @@ void txnEditOptions::Execute(int i)
    pProject->SetFlexureResistanceFactors(m_Options[i].m_PhiC,m_Options[i].m_PhiT);
    pProject->SetShearResistanceFactor(m_Options[i].m_PhiV);
 
+   pProject->SetDoAnalyzeNegativeMomentBetweenFocOptions(m_Options[i].m_bDoAnalyzeNegativeMomentBetweenFOC, m_Options[i].m_MinColumnWidthForNegMoment);
+
    pEvents->FirePendingEvents();
 }
 

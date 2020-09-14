@@ -28,6 +28,7 @@
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 #include <algorithm>
 #include <Math\Math.h>
 
@@ -1251,14 +1252,14 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDT
    return std::vector<xbrPointOfInterest>();
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID) const
+std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID, bool bNegativeMoment) const
 {
-   return GetRatingPointsOfInterest(pierID,false);
+   return GetRatingPointsOfInterest(pierID,false, bNegativeMoment);
 }
 
 std::vector<xbrPointOfInterest> CPierAgentImp::GetShearRatingPointsOfInterest(PierIDType pierID) const
 {
-   return GetRatingPointsOfInterest(pierID,true);
+   return GetRatingPointsOfInterest(pierID,true, false);
 }
 
 Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) const
@@ -2230,10 +2231,23 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint) const
    deckProfile->get_Item(maxIdx,ppPoint);
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear) const
+std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear,bool bNegativeMoment) const
 {
-   // load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
-   // for shear, don't include any poi that are between faces of column
+   // Load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
+
+   // For shear, and possibly negative moment, don't include any pois that are between faces of column
+   bool bSkipOverColumn = false;
+   if (bShear)
+   {
+      bSkipOverColumn = true;
+   }
+   else if (bNegativeMoment)
+   {
+      // user settings and column size determines this
+      GET_IFACE(IXBRRatingSpecification, pSpec);
+      bSkipOverColumn = !pSpec->DoCheckNegativeMomentBetweenFOCs(pierID);
+   }
+
    const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
 
    bool bOverColumn = false;
@@ -2242,7 +2256,7 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
    {
       if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
       {
-         if ( bShear )
+         if ( bSkipOverColumn )
          {
             // only keep track if we are between faces of column
             // if we are getting shear poi

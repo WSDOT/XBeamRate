@@ -299,7 +299,7 @@ BEGIN
     LTEXT           "Static",IDC_LOCATION,15,36,291,43
 END
 
-IDD_RATING_OPTIONS DIALOGEX 0, 0, 352, 207
+IDD_RATING_OPTIONS DIALOGEX 0, 0, 445, 243
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "XBeam"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
@@ -317,12 +317,18 @@ BEGIN
     LTEXT           "Static",IDC_LL_STEP_UNIT,154,75,19,8
     LTEXT           "Maximum Number of Lanes",IDC_STATIC,14,94,86,8
     EDITTEXT        IDC_MAX_LANES,113,91,40,14,ES_RIGHT | ES_AUTOHSCROLL
-    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,159,90,186,20
-    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,14,118,331,43
+    LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,161,90,186,20
+    GROUPBOX        "System Factors (MBE 6A.4.2.4)",IDC_STATIC,14,118,424,43
     LTEXT           "Flexure",IDC_STATIC,28,140,25,8
     EDITTEXT        IDC_SYSTEM_FACTOR_FLEXURE,57,138,40,14,ES_RIGHT | ES_AUTOHSCROLL
     LTEXT           "Shear",IDC_STATIC,115,140,20,8
     EDITTEXT        IDC_SYSTEM_FACTOR_SHEAR,137,138,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    GROUPBOX        "Analysis Locations for Negative Moment over Columns",IDC_STATIC,14,167,424,43
+    CONTROL         "If column width equals or exceeds",IDC_NEG_MOMENT_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,21,181,124,10
+    EDITTEXT        IDC_NEG_MOMENT_WIDTH,145,179,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "st",IDC_NEG_MOMENT_WIDTH_UNIT,186,181,8,8
+    LTEXT           ", then only analyze locations outside of the effective column faces",IDC_STATIC_MOM,195,180,213,8
 END
 
 
@@ -373,10 +379,10 @@ BEGIN
     IDD_RATING_OPTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 345
+        RIGHTMARGIN, 438
         VERTGUIDE, 14
         TOPMARGIN, 7
-        BOTTOMMARGIN, 200
+        BOTTOMMARGIN, 236
     END
 END
 #endif    // APSTUDIO_INVOKED

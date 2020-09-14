@@ -72,11 +72,16 @@ void CLoadRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    DDX_Text(pDX, IDC_SYSTEM_FACTOR_FLEXURE, m_SystemFactorFlexure);
    DDX_Text(pDX, IDC_SYSTEM_FACTOR_SHEAR, m_SystemFactorShear);
+
+   DDX_Check_Bool(pDX, IDC_NEG_MOMENT_CHECK, m_bDoAnalyzeNegativeMomentBetweenFOC);
+   DDX_UnitValueAndTag(pDX, IDC_NEG_MOMENT_WIDTH, IDC_NEG_MOMENT_WIDTH_UNIT, m_MinColumnWidthForNegMoment, pDisplayUnits->GetSpanLengthUnit());
+   DDV_UnitValueGreaterThanLimit(pDX,IDC_NEG_MOMENT_WIDTH,m_MinColumnWidthForNegMoment, 0.0, pDisplayUnits->GetSpanLengthUnit());
 }
 
 
 BEGIN_MESSAGE_MAP(CLoadRatingOptionsPage, CPropertyPage)
    ON_BN_CLICKED(ID_HELP,OnHelp)
+   ON_BN_CLICKED(IDC_NEG_MOMENT_CHECK, &CLoadRatingOptionsPage::OnBnClickedNegMomentCheck)
 END_MESSAGE_MAP()
 
 
@@ -89,6 +94,8 @@ BOOL CLoadRatingOptionsPage::OnInitDialog()
    FillPermitRatingMethodComboBox();
 
    CPropertyPage::OnInitDialog();
+
+   OnNegMomCheckChanged();
 
    return TRUE;  // return TRUE unless you set the focus to a control
    // EXCEPTION: OCX Property Pages should return FALSE
@@ -135,4 +142,21 @@ void CLoadRatingOptionsPage::FillPermitRatingMethodComboBox()
 
    idx = pCB->AddString(_T("WSDOT BDM Equation 13.1.1A-2"));
    pCB->SetItemData(idx, (DWORD_PTR)xbrTypes::prmWSDOT);
+}
+
+void CLoadRatingOptionsPage::OnBnClickedNegMomentCheck()
+{
+   OnNegMomCheckChanged();
+}
+
+void CLoadRatingOptionsPage::OnNegMomCheckChanged()
+{
+   BOOL bEnableUserInput= IsDlgButtonChecked(IDC_NEG_MOMENT_CHECK) == BST_CHECKED ? TRUE : FALSE;
+
+   CWnd* pCtrl = GetDlgItem(IDC_NEG_MOMENT_WIDTH);
+   pCtrl->EnableWindow(bEnableUserInput);
+   pCtrl = GetDlgItem(IDC_NEG_MOMENT_WIDTH_UNIT);
+   pCtrl->EnableWindow(bEnableUserInput);
+   pCtrl = GetDlgItem(IDC_STATIC_MOM);
+   pCtrl->EnableWindow(bEnableUserInput);
 }

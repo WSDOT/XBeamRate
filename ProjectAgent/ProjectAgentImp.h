@@ -280,6 +280,9 @@ public:
    virtual void SetMaxLoadedLanes(IndexType nLanesMax) override;
    virtual IndexType GetMaxLoadedLanes() const override;
 
+   virtual bool GetDoAnalyzeNegativeMomentBetweenFocOptions(Float64* minColumnWidth) override;
+   virtual void SetDoAnalyzeNegativeMomentBetweenFocOptions(bool bDoUseOption, Float64 minColumnWidth) override;
+
 // IXBRRatingSpecification
 public:
    virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) const override;
@@ -307,6 +310,8 @@ public:
    virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() const override;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) override;
    virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) const override;
+
+   virtual bool DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const override;
 
 // IXBRProjectEdit
 public:
@@ -385,6 +390,9 @@ private:
 
    Float64 m_MaxLLStepSize; // maximum step size for moving live load
    IndexType m_MaxLoadedLanes; // maximum number of loaded lanes to consider (INVALID_INDEX means to consider all lanes)
+
+   bool m_bDoAnalyzeNegativeMomentBetweenFOC;
+   Float64 m_MinColumnWidthForNegMoment; // min column width before we have to analyze between FOC's
 
    // Load Factors
    Float64 m_gDC_StrengthI;

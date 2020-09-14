@@ -70,11 +70,16 @@ void CAnalysisOptionsPage::DoDataExchange(CDataExchange* pDX)
    DDX_Keyword(pDX,IDC_MAX_LANES,_T("ALL"),pParent->m_Options.m_MaxLoadedLanes);
 
    DDX_CBEnum(pDX, IDC_REACTION_APPLICATION, pParent->m_Options.m_LiveLoadReactionApplication);
+
+   DDX_Check_Bool(pDX, IDC_NEG_MOMENT_CHECK, pParent->m_Options.m_bDoAnalyzeNegativeMomentBetweenFOC);
+   DDX_UnitValueAndTag(pDX, IDC_NEG_MOMENT_WIDTH, IDC_NEG_MOMENT_WIDTH_UNIT, pParent->m_Options.m_MinColumnWidthForNegMoment, pDisplayUnits->GetSpanLengthUnit());
+   DDV_UnitValueGreaterThanLimit(pDX,IDC_NEG_MOMENT_WIDTH,pParent->m_Options.m_MinColumnWidthForNegMoment, 0.0, pDisplayUnits->GetSpanLengthUnit());
 }
 
 
 BEGIN_MESSAGE_MAP(CAnalysisOptionsPage, CPropertyPage)
 	ON_COMMAND(ID_HELP, OnHelp)
+   ON_BN_CLICKED(IDC_NEG_MOMENT_CHECK, &CAnalysisOptionsPage::OnBnClickedNegMomentCheck)
 END_MESSAGE_MAP()
 
 BOOL CAnalysisOptionsPage::OnInitDialog()
@@ -87,7 +92,7 @@ BOOL CAnalysisOptionsPage::OnInitDialog()
 
    CPropertyPage::OnInitDialog();
 
-   // TODO:  Add extra initialization here
+   OnNegMomCheckChanged();
 
    return TRUE;  // return TRUE unless you set the focus to a control
                  // EXCEPTION: OCX Property Pages should return FALSE
@@ -99,4 +104,22 @@ BOOL CAnalysisOptionsPage::OnInitDialog()
 void CAnalysisOptionsPage::OnHelp() 
 {
    EAFHelp(EAFGetDocument()->GetDocumentationSetName(), IDH_OPTIONS_ANALYSIS);
+}
+
+
+void CAnalysisOptionsPage::OnBnClickedNegMomentCheck()
+{
+   OnNegMomCheckChanged();
+}
+
+void CAnalysisOptionsPage::OnNegMomCheckChanged()
+{
+   BOOL bEnableUserInput= IsDlgButtonChecked(IDC_NEG_MOMENT_CHECK) == BST_CHECKED ? TRUE : FALSE;
+
+   CWnd* pCtrl = GetDlgItem(IDC_NEG_MOMENT_WIDTH);
+   pCtrl->EnableWindow(bEnableUserInput);
+   pCtrl = GetDlgItem(IDC_NEG_MOMENT_WIDTH_UNIT);
+   pCtrl->EnableWindow(bEnableUserInput);
+   pCtrl = GetDlgItem(IDC_STATIC_MOM);
+   pCtrl->EnableWindow(bEnableUserInput);
 }

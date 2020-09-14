@@ -9,5 +9,6 @@ Compute emergency vehicle rating factors using | Select the method for computing
 Compute permit rating factors using | Select the method for computing permit rating factors
 Maximum Live Load Step Size | Enter the maximum live load step size
 Maximum Number of Lanes | Enter the maximum number of lanes to be considered in the analysis. Enter the keyword ALL to analyze for all lanes. Generally, controlling rating factors do not occur when all lanes are loaded. Using less than all of the lanes will decrease analysis time without impacting accuracy.
+Analysis Locations for Negative Moment over Columns | By default, XBRate will perform negative cap moment rating calculations at faces of columns, column centerlines, and other interior column locations. However, computations in these interior location are not in the flexural "B" zone, possibly resulting in overly conservative, inaccurate results. Enable this option so that negative cap moment is analyzed at column face locations outward for columns having a greater or equal width than the specified value.
 
 > NOTE: See Load Rating Options, @ref appendix_a_load_rating_options_analysis tab, for additional information on live load step size and number of lanes.

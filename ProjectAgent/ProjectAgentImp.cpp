@@ -183,6 +183,9 @@ CProjectAgentImp::CProjectAgentImp()
    m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
 
+   m_bDoAnalyzeNegativeMomentBetweenFOC = false;
+   m_MinColumnWidthForNegMoment = ::ConvertToSysUnits(4.0,unitMeasure::Feet); // txdot's default
+
    m_bExportingModel = false;
 }
 
@@ -478,7 +481,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // Also, need to save/load this data per pier
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
-      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
          pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
          pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
 
@@ -514,6 +517,9 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          pStrSave->put_Property(_T("CheckYieldStressLimit"), CComVariant(CheckYieldStressLimit()));
          pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(GetYieldStressLimitCoefficient()));
+
+         pStrSave->put_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"), CComVariant(m_bDoAnalyzeNegativeMomentBetweenFOC)); // added in version 4
+         pStrSave->put_Property(_T("MinColumnWidthForNegMoment"), CComVariant(m_MinColumnWidthForNegMoment)); // added in version 4
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),2.0);
@@ -731,7 +737,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    } // end if bIsStandAlone or bExportingModel
    else
    {
-      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
@@ -739,6 +745,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
          pStrSave->put_Property(_T("SystemFactorFlexure"), CComVariant(m_SysFactorFlexure)); // added in version 3
          pStrSave->put_Property(_T("SystemFactorShear"), CComVariant(m_SysFactorShear)); // added in version 3
+         pStrSave->put_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"), CComVariant(m_bDoAnalyzeNegativeMomentBetweenFOC)); // added in version 4
+         pStrSave->put_Property(_T("MinColumnWidthForNegMoment"), CComVariant(m_MinColumnWidthForNegMoment)); // added in version 4
          pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
@@ -944,6 +952,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             var.vt = VT_R8;
             hr = pStrLoad->get_Property(_T("YieldStressCoefficient"), &var);
             m_YieldStressCoefficient = var.dblVal;
+
+            if (3 < version)
+            {
+               var.vt = VT_BOOL;
+               hr = pStrLoad->get_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"),&var);
+               m_bDoAnalyzeNegativeMomentBetweenFOC = (var.boolVal == VARIANT_TRUE ? true : false);
+
+               var.vt = VT_R8;
+               hr = pStrLoad->get_Property(_T("MinColumnWidthForNegMoment"),&var);
+               m_MinColumnWidthForNegMoment = var.dblVal;
+            }
 
             hr = pStrLoad->EndUnit(); // RatingSpecification
          }
@@ -1322,7 +1341,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("SystemFactorShear"), &var);
             m_SysFactorShear = var.dblVal;
+         }
 
+         if (3 < version)
+         {
+            var.vt = VT_BOOL;
+            hr = pStrLoad->get_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"),&var);
+            m_bDoAnalyzeNegativeMomentBetweenFOC = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("MinColumnWidthForNegMoment"),&var);
+            m_MinColumnWidthForNegMoment = var.dblVal;
          }
 
          hr = pStrLoad->EndUnit(); // RatingSpecification
@@ -2787,6 +2816,22 @@ IndexType CProjectAgentImp::GetMaxLoadedLanes() const
    return m_MaxLoadedLanes;
 }
 
+bool CProjectAgentImp::GetDoAnalyzeNegativeMomentBetweenFocOptions(Float64* pminColumnWidth)
+{
+   *pminColumnWidth = m_MinColumnWidthForNegMoment;
+   return m_bDoAnalyzeNegativeMomentBetweenFOC;
+}
+
+void CProjectAgentImp::SetDoAnalyzeNegativeMomentBetweenFocOptions(bool bDoUseOption, Float64 minColumnWidth)
+{
+   if (bDoUseOption != m_bDoAnalyzeNegativeMomentBetweenFOC || (bDoUseOption && !IsEqual(minColumnWidth, m_MinColumnWidthForNegMoment)))
+   {
+      m_bDoAnalyzeNegativeMomentBetweenFOC = bDoUseOption;
+      m_MinColumnWidthForNegMoment = minColumnWidth;
+      Fire_OnProjectChanged();
+   }
+}
+
 //////////////////////////////////////////////////////////
 // IXBRRatingSpecification
 bool CProjectAgentImp::IsRatingEnabled(pgsTypes::LoadRatingType ratingType) const
@@ -2915,6 +2960,42 @@ bool CProjectAgentImp::IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) 
 {
    return (::IsPermitRatingType(ratingType) && m_PermitRatingMethod == xbrTypes::ermWSDOT ? true : false);
 }
+
+bool CProjectAgentImp::DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const
+{
+   bool doCheck = true;
+
+   // We only need to skip between FOC if user settings say so
+   GET_IFACE(IXBRProject, pProject);
+   Float64 minColWidth;
+   bool bCheckColWidth = pProject->GetDoAnalyzeNegativeMomentBetweenFocOptions(&minColWidth);
+   if (bCheckColWidth)
+   {
+      // We could create a lot of compexity here and vet pois column by column. But the normal case is that all columns are the same width.
+      // Check if any columns are wider that the threshold, and use the same option for all
+      Float64 maxColWid = -Float64_Max;
+      IndexType nCols = GetColumnCount(pierID);
+      for (IndexType icol = 0; icol < nCols; icol++)
+      {
+         CColumnData::ColumnShapeType shapeType;
+         Float64 D1, D2;
+         CColumnData::ColumnHeightMeasurementType columnHeightType;
+         Float64 H;
+         pProject->GetColumnProperties(pierID, icol, &shapeType, &D1, &D2, &columnHeightType, &H);
+
+         maxColWid = max(maxColWid, D1);
+
+         if (IsGE(minColWidth, maxColWid))
+         {
+            doCheck = false;
+            break;
+         }
+      }
+   }
+
+   return doCheck;
+}
+
 
 //////////////////////////////////////////////////////////
 // IXBRProjectEdit

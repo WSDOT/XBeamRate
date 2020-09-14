@@ -59,7 +59,6 @@ void xbrLoadRater::SetBroker(IBroker* pBroker)
 xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx)
 {
    GET_IFACE(IXBRPointOfInterest,pPOI);
-   std::vector<xbrPointOfInterest> vMomentPoi( pPOI->GetMomentRatingPointsOfInterest(pierID) );
 
    GET_IFACE(IXBRProject, pProject);
    xbrTypes::PierType pierType = pProject->GetPierType(pierID);
@@ -70,12 +69,12 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    GET_IFACE(IXBRRatingSpecification, pRatingSpec);
 
    // Rate for flexure
-   MomentRating(pierID,stage,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
+   MomentRating(pierID,stage,ratingType,vehicleIdx,ratingArtifact);
 
    // Rate for yield stress ratio, if applicable
    if ( ::IsPermitRatingType(ratingType) && pRatingSpec->CheckYieldStressLimit() )
    {
-      CheckReinforcementYielding(pierID,stage,vMomentPoi,ratingType,vehicleIdx,ratingArtifact);
+      CheckReinforcementYielding(pierID,stage,ratingType,vehicleIdx,ratingArtifact);
    }
 
    // Rate for shear, if applicable
@@ -88,18 +87,14 @@ xbrRatingArtifact xbrLoadRater::RateXBeam(PierIDType pierID,pgsTypes::LoadRating
    return ratingArtifact;
 }
 
-void xbrLoadRater::MomentRating(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::MomentRating(PierIDType pierID, xbrTypes::Stage stage,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE(IXBRPointOfInterest,pPOI);
 
    GET_IFACE(IProgress, pProgress);
    CEAFAutoProgress ap(pProgress);
    pProgress->UpdateMessage(_T("Load rating for moment"));
-
-   std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
-   std::vector<Float64> vLLIMmin,vLLIMmax;
-   std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
-   GetMoments(pierID, ratingType, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
 
    GET_IFACE(IXBRMomentCapacity,pMomentCapacity);
 
@@ -121,21 +116,29 @@ void xbrLoadRater::MomentRating(PierIDType pierID, xbrTypes::Stage stage, const 
 
    Float64 W = (vehicleIdx == INVALID_INDEX ? 0 : pProject->GetVehicleWeight(pierID,ratingType,vehicleIdx));
 
-   CollectionIndexType nPOI = vPoi.size();
-   for ( CollectionIndexType i = 0; i < nPOI; i++ )
+   for ( int j = 0; j < 2; j++ )
    {
-      const xbrPointOfInterest& poi = vPoi[i];
+      bool bPositiveMoment = (j == 0 ? true : false);
 
-      Float64 DC   = vDC[i];
-      Float64 DW   = vDW[i];
-      Float64 CR   = vCR[i];
-      Float64 SH   = vSH[i];
-      Float64 RE   = vRE[i];
-      Float64 PS   = vPS[i];
+      // Poi lists may be different for positive and negative moment
+      std::vector<xbrPointOfInterest> vPoi( pPOI->GetMomentRatingPointsOfInterest(pierID, !bPositiveMoment) );
+      CollectionIndexType nPOI = vPoi.size();
 
-      for ( int j = 0; j < 2; j++ )
+      std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
+      std::vector<Float64> vLLIMmin,vLLIMmax;
+      std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
+      GetMoments(pierID, ratingType, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
+
+      for ( CollectionIndexType i = 0; i < nPOI; i++ )
       {
-         bool bPositiveMoment = (j == 0 ? true : false);
+         const xbrPointOfInterest& poi = vPoi[i];
+
+         Float64 DC   = vDC[i];
+         Float64 DW   = vDW[i];
+         Float64 CR   = vCR[i];
+         Float64 SH   = vSH[i];
+         Float64 RE   = vRE[i];
+         Float64 PS   = vPS[i];
 
          Float64 LLIM          = (bPositiveMoment ? vLLIMmax[i] : vLLIMmin[i]); // Live load (includes mpf)
          IndexType llConfigIdx = (bPositiveMoment ? vMaxLLConfigIdx[i] : vMinLLConfigIdx[i]);
@@ -400,7 +403,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
    }
 }
 
-void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
+void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage stage,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact)
 {
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
    GET_IFACE(IProgress, pProgress);
@@ -415,6 +418,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRSectionProperties,pSectProps);
    GET_IFACE(IXBRRebar,pRebar);
+   GET_IFACE(IXBRPointOfInterest,pPOI);
 
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    Float64 K = pRatingSpec->GetYieldStressLimitCoefficient();
@@ -434,13 +438,17 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage
    pMaterial->GetRebarProperties(pierID,&Es,&fy,&fu);
 
    // Create artifacts
-   for (const auto& poi : vPoi)
+   for ( int i = 0; i < 2; i++ )
    {
-      Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
+      bool bPositiveMoment = (i == 0 ? true : false);
 
-      for ( int i = 0; i < 2; i++ )
+      // Poi lists may be different for positive and negative moment
+      std::vector<xbrPointOfInterest> vPoi( pPOI->GetMomentRatingPointsOfInterest(pierID, !bPositiveMoment) );
+      CollectionIndexType nPOI = vPoi.size();
+
+      for (const auto& poi : vPoi)
       {
-         bool bPositiveMoment = (i == 0 ? true : false);
+         Float64 Hxb = pSectProps->GetDepth(pierID,stage,poi);
 
          // this also gives us accees to Mlegal and Mpermit for the controlling case (WSDOT method)
          const xbrMomentRatingArtifact* pMomentRatingArtifact = ratingArtifact.GetMomentRatingArtifact(poi,bPositiveMoment);

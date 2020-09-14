@@ -175,7 +175,7 @@ public:
 public:
    virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib) const override;
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx) const override;
-   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID) const override;
+   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID, bool bNegativeMoment) const override;
    virtual std::vector<xbrPointOfInterest> GetShearRatingPointsOfInterest(PierIDType pierID) const override;
    virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) const override;
    virtual xbrPointOfInterest ConvertPierCoordinateToPoi(PierIDType pierID,Float64 Xp) const override;
@@ -227,7 +227,7 @@ private:
    void ValidateStirrupZones(PierIDType pierID,xbrTypes::Stage stage) const;
    void ValidateStirrupZones(PierIDType pierID,const xbrStirrupData& stirrupData,std::vector<StirrupZone>* pvStirrupZones) const;
 
-   std::vector<xbrPointOfInterest> GetRatingPointsOfInterest(PierIDType pierID,bool bShear) const;
+   std::vector<xbrPointOfInterest> GetRatingPointsOfInterest(PierIDType pierID,bool bShear, bool bNegativeMoment) const;
 };
 
 OBJECT_ENTRY_AUTO(CLSID_PierAgent, CPierAgentImp)

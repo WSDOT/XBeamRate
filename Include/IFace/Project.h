@@ -252,6 +252,10 @@ interface IXBRProject : IUnknown
 
    virtual void SetMaxLoadedLanes(IndexType nLanesMax) = 0;
    virtual IndexType GetMaxLoadedLanes() const = 0;
+
+   // returns true if negative moment not to be anlyzed between FOC if column width .gt. minimum value
+   virtual bool GetDoAnalyzeNegativeMomentBetweenFocOptions(Float64* minColumnWidth) = 0;
+   virtual void SetDoAnalyzeNegativeMomentBetweenFocOptions(bool bDoUseOption, Float64 minColumnWidth) = 0;
 };
 
 /*****************************************************************************

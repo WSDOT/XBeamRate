@@ -67,6 +67,9 @@ interface IXBRRatingSpecification : IUnknown
    virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() const = 0;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) = 0;
    virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) const = 0;
+
+   // Determine this from user settings and column size
+   virtual bool DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const = 0;
 };
 
 /*****************************************************************************

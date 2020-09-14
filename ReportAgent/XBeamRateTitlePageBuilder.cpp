@@ -208,13 +208,13 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    (*pTable)(row++,1) << _T("Face of column");
 
    (*pTable)(row,0) << Sub2(_T("FOC"),_T("dv")) << Sub2(_T(", FOC"),_T("dv2"));
-   (*pTable)(row++, 1) << Sub2(_T("d"), _T("v")) << Sub2(_T(" or d"), _T("v")) << _T(" /2 from face of column");
+   (*pTable)(row++, 1) << Sub2(_T("d"), _T("v")) << Sub2(_T(" or d"), _T("v")) << _T("/2 from face of column");
 
    (*pTable)(row,0) << _T("MP");
-   (*pTable)(row++,1) << _T("mid-point of cap between columns");
+   (*pTable)(row++,1) << _T("Mid-point of cap between columns");
 
    (*pTable)(row,0) << _T("ST");
-   (*pTable)(row++,1) << _T("section change");
+   (*pTable)(row++,1) << _T("Section change");
 
    // Throw in a page break
    pPara = new rptParagraph;

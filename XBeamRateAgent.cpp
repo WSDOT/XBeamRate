@@ -653,6 +653,8 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
    pPage->m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
    pPage->m_SystemFactorShear = pProject->GetSystemFactorShear();
 
+   pPage->m_bDoAnalyzeNegativeMomentBetweenFOC = pProject->GetDoAnalyzeNegativeMomentBetweenFocOptions(&(pPage->m_MinColumnWidthForNegMoment));
+
    return pPage;
 }
 
@@ -672,6 +674,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    oldOptions.m_MaxLoadedLanes = pProject->GetMaxLoadedLanes();
    oldOptions.m_SystemFactorFlexure = pProject->GetSystemFactorFlexure();
    oldOptions.m_SystemFactorShear = pProject->GetSystemFactorShear();
+   
+   oldOptions.m_bDoAnalyzeNegativeMomentBetweenFOC = pProject->GetDoAnalyzeNegativeMomentBetweenFocOptions(&(oldOptions.m_MinColumnWidthForNegMoment));
 
    txnLoadRatingOptions newOptions;
    newOptions.m_AnalysisType = pLROPage->m_AnalysisType;
@@ -681,7 +685,8 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    newOptions.m_MaxLoadedLanes = pLROPage->m_MaxLoadedLanes;
    newOptions.m_SystemFactorFlexure = pLROPage->m_SystemFactorFlexure;
    newOptions.m_SystemFactorShear = pLROPage->m_SystemFactorShear;
-
+   newOptions.m_bDoAnalyzeNegativeMomentBetweenFOC = pLROPage->m_bDoAnalyzeNegativeMomentBetweenFOC;
+   newOptions.m_MinColumnWidthForNegMoment = pLROPage->m_MinColumnWidthForNegMoment;
 
    txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldOptions,newOptions);
    return pTxn;

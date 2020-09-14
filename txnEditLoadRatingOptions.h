@@ -31,6 +31,8 @@ struct txnLoadRatingOptions
    IndexType m_MaxLoadedLanes;
    Float64 m_SystemFactorFlexure;
    Float64 m_SystemFactorShear;
+   bool m_bDoAnalyzeNegativeMomentBetweenFOC;
+   Float64 m_MinColumnWidthForNegMoment;
 };
 
 class txnEditLoadRatingOptions :

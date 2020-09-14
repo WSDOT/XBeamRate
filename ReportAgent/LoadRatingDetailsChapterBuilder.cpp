@@ -76,6 +76,7 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
    xbrTypes::PermitRatingMethod permitRatingMethod = pRatingSpec->GetPermitRatingMethod();
+   m_bReportNegativeMomentBetweenFOCs = pRatingSpec->DoCheckNegativeMomentBetweenFOCs(pierID);
 
    int n = (int)pgsTypes::lrLoadRatingTypeCount;
    for ( int i = 0; i < n; i++ )
@@ -280,7 +281,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
       const xbrMomentRatingArtifact& artifact = iter->second;
       Float64 RF = artifact.GetRatingFactor();
 
-      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi) )
+      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi, !bPositiveMoment) )
       {
          continue;
       }
@@ -480,7 +481,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
 
       Float64 RF = artifact.GetRatingFactor();
 
-      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi) )
+      if ( 1.0 <= RF && !ReportAtThisPoi(poi,controllingPoi,false) )
       {
          continue;
       }
@@ -679,11 +680,10 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
 
       Float64 SR = artifact.GetStressRatio();
 
-      if ( 1.0 <= SR && !ReportAtThisPoi(poi,controllingPoi) )
+      if ( 1.0 <= SR && !ReportAtThisPoi(poi,controllingPoi, !bPositiveMoment) )
       {
          continue;
       }
-
 
       (*table)(row,col++) << location.SetValue(poi);
       (*table)(row,col++) << moment.SetValue(artifact.GetDeadLoadMoment());
@@ -780,7 +780,7 @@ void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,I
    }
 }
 
-bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest& poi,const xbrPointOfInterest& controllingPoi) const
+bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest& poi,const xbrPointOfInterest& controllingPoi, bool IsNegativeMoment) const
 {
    if (!m_bReportEvenIncrements)
    {
@@ -788,11 +788,19 @@ bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest&
    }
    else
    {
-      if (poi == controllingPoi ||
-         poi.HasAttribute(POI_GRID) ||
-         poi.HasAttribute(POI_COLUMN_LEFT) ||
-         poi.HasAttribute(POI_COLUMN_RIGHT)
-         )
+      if (IsNegativeMoment && !m_bReportNegativeMomentBetweenFOCs)
+      {
+         if (poi == controllingPoi ||
+             poi.HasAttribute(POI_GRID) ||
+             poi.HasAttribute(POI_FACEOFCOLUMN))
+         {
+            return true;
+         }
+      }
+      else if (poi == controllingPoi ||
+               poi.HasAttribute(POI_GRID) ||
+               poi.HasAttribute(POI_COLUMN_LEFT) ||
+               poi.HasAttribute(POI_COLUMN_RIGHT))
       {
          return true;
       }

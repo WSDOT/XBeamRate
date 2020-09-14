@@ -484,7 +484,7 @@ BEGIN
     EDITTEXT        IDC_PHI_SHEAR,136,89,40,14,ES_RIGHT | ES_AUTOHSCROLL
 END
 
-IDD_ANALYSIS_OPTIONS DIALOGEX 0, 0, 293, 154
+IDD_ANALYSIS_OPTIONS DIALOGEX 0, 0, 439, 170
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Analysis"
 FONT 8, "MS Shell Dlg", 400, 0, 0x0
@@ -497,6 +497,12 @@ BEGIN
     LTEXT           "(Enter maximum number of lanes to consider or enter the keyword ALL to analyze all lanes)",IDC_STATIC,7,46,186,20
     COMBOBOX        IDC_REACTION_APPLICATION,7,89,198,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     LTEXT           "Live Load Reactions",IDC_STATIC,7,78,64,8
+    GROUPBOX        "Analysis Locations for Negative Moment over Columns",IDC_STATIC,7,111,424,43
+    CONTROL         "If column width equals or exceeds",IDC_NEG_MOMENT_CHECK,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,128,120,10
+    EDITTEXT        IDC_NEG_MOMENT_WIDTH,135,125,40,14,ES_RIGHT | ES_AUTOHSCROLL
+    LTEXT           "un",IDC_NEG_MOMENT_WIDTH_UNIT,177,129,8,8
+    LTEXT           ", then only analyze locations outside of the effective column faces",IDC_STATIC_MOM,187,129,213,8
 END
 
 
@@ -610,9 +616,9 @@ BEGIN
     IDD_ANALYSIS_OPTIONS, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 286
+        RIGHTMARGIN, 432
         TOPMARGIN, 7
-        BOTTOMMARGIN, 147
+        BOTTOMMARGIN, 163
     END
 END
 #endif    // APSTUDIO_INVOKED
