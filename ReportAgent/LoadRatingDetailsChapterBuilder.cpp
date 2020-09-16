@@ -809,4 +809,6 @@ bool CLoadRatingDetailsChapterBuilder::ReportAtThisPoi(const xbrPointOfInterest&
          return false;
       }
    }
+
+   return false;
 }
