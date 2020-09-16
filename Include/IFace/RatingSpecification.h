@@ -71,20 +71,3 @@ interface IXBRRatingSpecification : IUnknown
    // Determine this from user settings and column size
    virtual bool DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const = 0;
 };
-
-/*****************************************************************************
-INTERFACE
-   IRatingSpecificationEventSink
-
-   Callback interface for rating specification input change events.
-
-DESCRIPTION
-   Callback interface for rating specification input change events.
-*****************************************************************************/
-// {A6C8DDDC-572F-4e59-9B58-009A147DEB6B}
-DEFINE_GUID(IID_IXBRRatingSpecificationEventSink, 
-0xa6c8dddc, 0x572f, 0x4e59, 0x9b, 0x58, 0x0, 0x9a, 0x14, 0x7d, 0xeb, 0x6b);
-interface IXBRRatingSpecificationEventSink : IUnknown
-{
-   virtual HRESULT OnRatingSpecificationChanged() = 0;
-};

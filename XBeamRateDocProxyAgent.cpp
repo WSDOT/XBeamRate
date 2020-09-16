@@ -87,12 +87,6 @@ void CXBeamRateDocProxyAgent::AdviseEventSinks()
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
 
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRRatingSpecificationEventSink, &pCP );
-   ATLASSERT( SUCCEEDED(hr) );
-   hr = pCP->Advise( GetUnknown(), &m_dwRatingSpecCookie );
-   ATLASSERT( SUCCEEDED(hr) );
-   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-
    hr = pBrokerInit->FindConnectionPoint( IID_IEAFDisplayUnitsEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Advise( GetUnknown(), &m_dwDisplayUnitsCookie );
@@ -112,12 +106,6 @@ void CXBeamRateDocProxyAgent::UnadviseEventSinks()
    hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
    ATLASSERT( SUCCEEDED(hr) );
    hr = pCP->Unadvise( m_dwProjectCookie );
-   ATLASSERT( SUCCEEDED(hr) );
-   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRRatingSpecificationEventSink, &pCP );
-   ATLASSERT( SUCCEEDED(hr) );
-   hr = pCP->Unadvise( m_dwRatingSpecCookie );
    ATLASSERT( SUCCEEDED(hr) );
    pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
 
@@ -229,19 +217,6 @@ HRESULT CXBeamRateDocProxyAgent::OnProjectChanged()
    //m_pMyDocument->UpdateAllViews(0,0,0);
 
    FireEvent( 0, HINT_PROJECTCHANGED, nullptr );
-   return S_OK;
-}
-
-////////////////////////////////////////////////////////////////////
-// IXBRRatingSpecificationEventSink
-HRESULT CXBeamRateDocProxyAgent::OnRatingSpecificationChanged()
-{
-   AFX_MANAGE_STATE(AfxGetAppModuleState());
-   m_pMyDocument->SetModifiedFlag();
-
-   //m_pMyDocument->UpdateAllViews(0,0,0);
-
-   FireEvent( 0, HINT_RATINGSPECCHANGED, nullptr );
    return S_OK;
 }
 
