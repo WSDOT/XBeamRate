@@ -3426,16 +3426,32 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    W = pPier->GetXBeamWidth();
    pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,X3,X4,W);
 
-   // Upper Cross Beam Diaphragm
+   // Upper Cross Beam Diaphragm. Basically, this is vertical distance from top of lower cross beam to bottom of slab
+   // Take max of diaphgram depth and max girder bearing deducts
    // (don't use the pPier object here... use the pBridge interface... it resolves
    // diaphragm dimensions that are computed based on bridge component geometry)
    Float64 Wback, Hback;
    pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Back,&Wback,&Hback);
    Float64 Wahead, Hahead;
    pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Ahead,&Wahead,&Hahead);
-
-   Float64 H = Max(Hback,Hahead); // height from top of lower cross beam to bottom of slab
    W = Wback + Wahead;
+   Float64 Hdiap = Max(Hback,Hahead);
+
+   Float64 Hbd = 0;
+   std::vector<BearingElevationDetails> vBackElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Back);
+   for (const auto& elevdet : vBackElevDetails)
+   {
+      Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);
+   }
+
+   std::vector<BearingElevationDetails> vAheadElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Ahead);
+   for (const auto& elevdet : vAheadElevDetails)
+   {
+      Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);
+   }
+
+   Float64 H = max(Hdiap, Hbd);
+
    pierData.SetDiaphragmDimensions(H,W);
 
    // Column Layout
