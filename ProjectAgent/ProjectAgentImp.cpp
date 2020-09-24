@@ -1385,7 +1385,7 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
          {
             column.SetTransverseFixity(pgsTypes::ctftTopFixedBottomFixed);
 
-            CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixed has been changed to Fixed"));
+            CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixity has been changed to Fixed"));
             xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID, m_scidBridgeInfo, strMsg);
 
             GET_IFACE(IEAFStatusCenter, pStatusCenter);
