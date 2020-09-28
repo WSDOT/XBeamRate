@@ -23,7 +23,7 @@ var XBRateDrive = "F:";
 var objNet = new ActiveXObject( "WScript.Network" );
 var machine = objNet.ComputerName;
 machine = machine.toUpperCase();
-if (machine=="RDPTHINKPAD")
+if (machine=="RICHARDSDELL")
    XBRateDrive = "C:";
 else if (machine=="HQB0630025")
    XBRateDrive = "F:";
