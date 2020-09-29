@@ -167,47 +167,59 @@ void CPierLayoutPage::DoDataExchange(CDataExchange* pDX)
       DDV_UnitValueGreaterThanZero(pDX, IDC_H1, pParent->m_PierData.m_PierData.GetH1(), pDisplayUnits->GetSpanLengthUnit());
       DDV_UnitValueGreaterThanZero(pDX, IDC_H3, pParent->m_PierData.m_PierData.GetH3(), pDisplayUnits->GetSpanLengthUnit());
 
-      // X2 and X4 must be >= 0
+      // X1, X2, X3 and X4 must be >= 0
+      DDV_UnitValueZeroOrMore(pDX, IDC_X1, pParent->m_PierData.m_PierData.GetX1(), pDisplayUnits->GetSpanLengthUnit());
       DDV_UnitValueZeroOrMore(pDX, IDC_X2, pParent->m_PierData.m_PierData.GetX2(), pDisplayUnits->GetSpanLengthUnit());
+      DDV_UnitValueZeroOrMore(pDX, IDC_X3, pParent->m_PierData.m_PierData.GetX3(), pDisplayUnits->GetSpanLengthUnit());
       DDV_UnitValueZeroOrMore(pDX, IDC_X4, pParent->m_PierData.m_PierData.GetX4(), pDisplayUnits->GetSpanLengthUnit());
 
-      if (0 < pParent->m_PierData.m_PierData.GetH2())
+      // Left end
+      if (0 < pParent->m_PierData.m_PierData.GetX1())
       {
          // if H2 > 0, then X1 must be > 0
-         DDV_UnitValueGreaterThanZero(pDX, IDC_X1, pParent->m_PierData.m_PierData.GetX1(), pDisplayUnits->GetSpanLengthUnit());
+         if ( IsZero(pParent->m_PierData.m_PierData.GetH2()) )
+         {
+            pDX->PrepareCtrl(IDC_H2);
+            AfxMessageBox(_T("H2 must be greater than zero when X1 is greater than zero."));
+            pDX->Fail();
+         }
+         else if ( pParent->m_PierData.m_PierData.GetX1() < pParent->m_PierData.m_PierData.GetX2() )
+         {
+            pDX->PrepareCtrl(IDC_X1);
+            AfxMessageBox(_T("X1 must be greater than X2 when X1 is greater than zero."));
+            pDX->Fail();
+         }
       }
-      else if (IsZero(pParent->m_PierData.m_PierData.GetH2()) && !IsZero(pParent->m_PierData.m_PierData.GetX1()))
+      else if ( !IsZero(pParent->m_PierData.m_PierData.GetH2()) )
       {
-         // if H2 is zero, then X1 must also be zero
-         pDX->PrepareCtrl(IDC_X1);
-         AfxMessageBox(_T("X1 must be 0 when H2 is 0."));
+         // if X1 is zero, then H2 must also be zero
+         pDX->PrepareCtrl(IDC_H2);
+         AfxMessageBox(_T("H2 must be zero when X1 is zero"));
          pDX->Fail();
       }
 
-      if (0 < pParent->m_PierData.m_PierData.GetH4())
+      // Right end
+      if (0 < pParent->m_PierData.m_PierData.GetX3())
       {
          // if H4 > 0, then X3 must be > 0
-         DDV_UnitValueGreaterThanZero(pDX, IDC_X3, pParent->m_PierData.m_PierData.GetX3(), pDisplayUnits->GetSpanLengthUnit());
+         if ( IsZero(pParent->m_PierData.m_PierData.GetH4()) )
+         {
+            pDX->PrepareCtrl(IDC_H4);
+            AfxMessageBox(_T("H4 must be greater than zero when X3 is greater than zero."));
+            pDX->Fail();
+         }
+         else if ( pParent->m_PierData.m_PierData.GetX3() < pParent->m_PierData.m_PierData.GetX4() )
+         {
+            pDX->PrepareCtrl(IDC_X3);
+            AfxMessageBox(_T("X3 must be greater than X4 when X3 is greater than zero."));
+            pDX->Fail();
+         }
       }
-      else if (IsZero(pParent->m_PierData.m_PierData.GetH4()) && !IsZero(pParent->m_PierData.m_PierData.GetX3()))
+      else if ( !IsZero(pParent->m_PierData.m_PierData.GetH4()) )
       {
-         // if H4 is zero, then X3 must also be zero
-         pDX->PrepareCtrl(IDC_X3);
-         AfxMessageBox(_T("X3 must be 0 when H4 is 0."));
-         pDX->Fail();
-      }
-
-      if (pParent->m_PierData.m_PierData.GetX1() < pParent->m_PierData.m_PierData.GetX2())
-      {
-         pDX->PrepareCtrl(IDC_X2);
-         AfxMessageBox(_T("X2 must be less than X1"));
-         pDX->Fail();
-      }
-
-      if (pParent->m_PierData.m_PierData.GetX3() < pParent->m_PierData.m_PierData.GetX4())
-      {
-         pDX->PrepareCtrl(IDC_X4);
-         AfxMessageBox(_T("X4 must be less than X3"));
+         // if X3 is zero, then H4 must also be zero
+         pDX->PrepareCtrl(IDC_H4);
+         AfxMessageBox(_T("H4 must be zero when X3 is zero"));
          pDX->Fail();
       }
 

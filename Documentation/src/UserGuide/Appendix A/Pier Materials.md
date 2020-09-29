@@ -12,6 +12,9 @@ f'c | Enter the concrete strength
 Ec | When check, enter the modulus of elasticity of the concrete. Otherwise the modulus of elasticity is computed in accordance with the AASHTO LRFD Specifications and the concrete properties
 [More Properites...] | Opens the @subpage appendix_a_concrete window.
 
+Reinforcement Coordinates
+-------------
+![](ReinforcementDatum.png)
 
 Longitudinal Reinforcement
 -----------------------------

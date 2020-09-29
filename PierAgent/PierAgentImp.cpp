@@ -301,6 +301,13 @@ Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx
 
    Float64 Xxb;
    bearingLayout->get_BearingLocation(brgLineIdx,brgIdx,&Xxb);
+
+   GET_IFACE(IXBRProject, pProject);
+   const xbrPierData& pierData = pProject->GetPierData(pierID);
+   Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
+   pierData.GetLowerXBeamDimensions(&H1, &H2, &H3, &H4, &X1, &X2, &X3, &X4, &W);
+   Xxb -= X2; // now it is the location in cross beam coordinates
+
    return Xxb;
 }
 
