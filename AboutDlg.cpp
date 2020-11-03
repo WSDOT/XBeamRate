@@ -50,6 +50,8 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
    DDX_Control(pDX,IDC_WSDOT,m_WSDOT);
+   DDX_Control(pDX, IDC_TXDOT, m_TxDOT);
+   DDX_Control(pDX, IDC_BRIDGESIGHT, m_BridgeSight);
 }
 
 

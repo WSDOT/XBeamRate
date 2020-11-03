@@ -15,6 +15,7 @@
 #define IDR_GRAPHS                      134
 #define IDR_GRAPHING                    139
 #define IDC_APPICON                     140
+#define IDI_BSS                         191
 #define IDR_PGSUPEREXPORTER             200
 #define IDR_PGSPLICEEXPORTER            201
 #define IDC_COMBO1                      202
@@ -35,6 +36,7 @@
 #define IDD_SECTION_CUT                 211
 #define IDR_PGS_PIER_VIEW_CTX           212
 #define IDR_XBR_PIER_VIEW_CTX           213
+#define IDI_TXDOT                       239
 #define IDR_PGSUPERCOMPONENTINFO        300
 #define IDR_PGSPLICECOMPONENTINFO       301
 #define IDC_PERMIT_FACTORS              304
@@ -48,6 +50,8 @@
 #define IDC_SYSTEM_FACTOR_FLEXURE       347
 #define IDC_SYSTEM_FACTOR_SHEAR         348
 #define IDC_LOCATION                    1260
+#define IDC_TXDOT                       1668
+#define IDC_BRIDGESIGHT                 1670
 #define IDC_SLIDER                      1807
 #define ID_EDIT_PROJECTNAME             32771
 #define ID_REPORTS_THISISAPLACEHOLDER   32774
@@ -63,7 +67,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        214
+#define _APS_NEXT_RESOURCE_VALUE        215
 #define _APS_NEXT_COMMAND_VALUE         32790
 #define _APS_NEXT_CONTROL_VALUE         206
 #define _APS_NEXT_SYMED_VALUE           103

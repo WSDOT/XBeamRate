@@ -52,4 +52,6 @@ protected:
 
    UINT m_ResourceID;
    CMFCLinkCtrl m_WSDOT;
+   CMFCLinkCtrl m_TxDOT;
+   CMFCLinkCtrl m_BridgeSight;
 };
