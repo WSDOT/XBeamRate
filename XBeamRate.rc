@@ -155,6 +155,8 @@ BEGIN
             MENUITEM "This is a placeholder",       ID_REPORTS_THISISAPLACEHOLDER
         END
         MENUITEM "&Pier View",                  ID_VIEW_PIER
+        MENUITEM SEPARATOR
+        MENUITEM "Status &Center",              EAFID_VIEW_STATUSCENTER
     END
     POPUP "&Window"
     BEGIN
@@ -242,6 +244,10 @@ BEGIN
     SEPARATOR
     BUTTON      ID_VIEW_GRAPHS
     BUTTON      ID_VIEW_REPORTS
+    SEPARATOR
+    BUTTON      EAFID_VIEW_STATUSCENTER
+    BUTTON      EAFID_VIEW_STATUSCENTER2
+    BUTTON      EAFID_VIEW_STATUSCENTER3
     SEPARATOR
     BUTTON      EAFID_AUTOCALC_UPDATENOW
 END
@@ -474,6 +480,15 @@ BEGIN
     ID_WINDOW_TILE_HORZ     "Arrange windows as non-overlapping tiles\nTile Windows"
     ID_WINDOW_TILE_VERT     "Arrange windows as non-overlapping tiles\nTile Windows"
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE
+BEGIN
+    EAFID_VIEW_STATUSCENTER "View Status Center Window\nView Status Center Window"
+    EAFID_VIEW_STATUSCENTER2 
+                            "View Status Center Window\nView Status Center Window"
+    EAFID_VIEW_STATUSCENTER3 
+                            "View Status Center Window\nView Status Center Window"
 END
 
 #endif    // English (United States) resources

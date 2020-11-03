@@ -85,7 +85,7 @@ END_CONNECTION_POINT_MAP()
 
 public:
    void SetDocument(CXBeamRateDoc* pDoc);
-   //void OnStatusChanged();
+   void OnStatusChanged();
    void OnUIHintsReset();
 
 // IAgentEx

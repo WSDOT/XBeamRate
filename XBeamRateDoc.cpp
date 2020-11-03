@@ -73,6 +73,8 @@ BEGIN_MESSAGE_MAP(CXBeamRateDoc, CEAFBrokerDocument)
 	ON_UPDATE_COMMAND_UI(EAFID_AUTOCALC_UPDATENOW, OnUpdateUpdateNow)
    ON_COMMAND(ID_HELP_FINDER,OnHelpFinder)
 	//}}AFX_MSG_MAP
+   ON_UPDATE_COMMAND_UI_RANGE(EAFID_VIEW_STATUSCENTER, EAFID_VIEW_STATUSCENTER3, CEAFBrokerDocument::OnUpdateViewStatusCenter)
+   ON_COMMAND_RANGE(EAFID_VIEW_STATUSCENTER, EAFID_VIEW_STATUSCENTER3, OnViewStatusCenter)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -103,6 +105,11 @@ CXBeamRateDoc::~CXBeamRateDoc()
 void CXBeamRateDoc::OnHelpFinder()
 {
    EAFHelp(EAFGetDocument()->GetDocumentationSetName(),IDH_XBRATE);
+}
+
+void CXBeamRateDoc::OnViewStatusCenter(UINT nID)
+{
+   CEAFBrokerDocument::OnViewStatusCenter();
 }
 
 // CEAFAutoCalcDocMixin overrides
@@ -510,6 +517,15 @@ void CXBeamRateDoc::BrokerShutDown()
    CEAFBrokerDocument::BrokerShutDown();
 
    m_pMyDocProxyAgent = nullptr;
+}
+
+void CXBeamRateDoc::OnStatusChanged()
+{
+   CEAFBrokerDocument::OnStatusChanged();
+   if (m_pMyDocProxyAgent)
+   {
+      m_pMyDocProxyAgent->OnStatusChanged();
+   }
 }
 
 void CXBeamRateDoc::PopulateReportMenu()

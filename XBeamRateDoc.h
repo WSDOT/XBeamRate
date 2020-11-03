@@ -118,7 +118,8 @@ protected:
    afx_msg void OnUpdateNow();
 	afx_msg void OnUpdateUpdateNow(CCmdUI* pCmdUI);
    afx_msg void OnHelpFinder();
-	DECLARE_MESSAGE_MAP()
+   afx_msg void OnViewStatusCenter(UINT nID);
+   DECLARE_MESSAGE_MAP()
 
    // callback IDs for any status callbacks we register
    StatusCallbackIDType m_scidInformationalError;
@@ -134,6 +135,7 @@ protected:
    virtual BOOL OpenTheDocument(LPCTSTR lpszPathName) override;
    virtual void OnCreateFinalize() override;
    virtual void BrokerShutDown() override;
+   virtual void OnStatusChanged() override;
 
    // called when the UI Hints have been reset
    virtual void OnUIHintsReset() override;
