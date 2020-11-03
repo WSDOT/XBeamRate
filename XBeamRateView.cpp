@@ -1152,6 +1152,8 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
+
    IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
@@ -1176,7 +1178,7 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
          CComQIPtr<iSimpleDrawPointStrategy> theStrategy(strategy);
          theStrategy->SetPointType(ptSquare);
-         theStrategy->SetColor(BLACK);
+         theStrategy->SetColor(Xbrg < 0 || Lxb < Xbrg ? RED : BLACK); // use red if bearing is off the cross beam
 
          displayList->AddDisplayObject(doPnt);
       }

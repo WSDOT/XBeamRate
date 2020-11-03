@@ -65,5 +65,5 @@ eafTypes::StatusSeverityType xbrBridgeStatusCallback::GetSeverity() const
 
 void xbrBridgeStatusCallback::Execute(CEAFStatusItem* pStatusItem)
 {
-   EAFShowStatusMessage(pStatusItem,m_Severity,TRUE,TRUE);
+   EAFShowStatusMessage(pStatusItem,m_Severity,TRUE, m_Severity == eafTypes::statusError ? TRUE : FALSE);
 }

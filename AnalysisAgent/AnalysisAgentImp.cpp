@@ -38,6 +38,8 @@
 #include <XBeamRateExt\StatusItem.h>
 #include <XBeamRateExt\XBeamAnalysisResult.h>
 
+#include <PgsExt\GirderLabel.h>
+
 #include <numeric>
 #include <algorithm>
 
@@ -111,7 +113,8 @@ STDMETHODIMP CAnalysisAgentImp::Init()
    m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
 
    // Register status callbacks that we want to use
-   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
+   m_scidBridgeWarning = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusWarning));
+   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError));
 
    return AGENT_S_SECONDPASSINIT;
 }
@@ -708,6 +711,7 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
    CComPtr<IFem2dDistributedLoadCollection> reDistLoads;
    reLoading->get_DistributedLoads(&reDistLoads);
 
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
@@ -718,6 +722,28 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+
+         if (Xbrg < 0 || Lxb < Xbrg)
+         {
+            // bearing is off the model... skip it
+            CString strMsg;
+            if (1 < nBearings)
+            {
+               strMsg.Format(_T("Bearing %d on Bearing Line %d is not on the cross beam."), LABEL_INDEX(brgIdx), LABEL_INDEX(brgLineIdx));
+            }
+            else
+            {
+               strMsg.Format(_T("Bearing %d is not on the cross beam."), LABEL_INDEX(brgIdx));
+            }
+            strMsg += _T(" Permanent load reactions at this bearing have been ignored.");
+
+            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_StatusGroupID, m_scidBridgeWarning, strMsg);
+
+            GET_IFACE(IEAFStatusCenter, pStatusCenter);
+            pStatusCenter->Add(pStatusItem);
+
+            continue;
+         }
 
          Float64 DC, DW, CR, SH, PS, RE, W;
          pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);

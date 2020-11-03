@@ -1967,6 +1967,8 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L,POI_SECTIONCHANGE));
 
+   Float64 Lxb = GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
+
    // need to pick up shear jumps at points of concentrated load
    // put POI at at bearing locations
    IndexType nBrgLines = pProject->GetBearingLineCount(pierID);
@@ -1978,6 +1980,12 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = GetBearingLocation(pierID,brgLineIdx,brgIdx);
+
+         if (Xbrg < 0 || Lxb < Xbrg)
+         {
+            // bearing is off the model... skip it
+            continue;
+         }
 
          if ( reactionType == xbrTypes::rltConcentrated )
          {
