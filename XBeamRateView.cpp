@@ -1245,19 +1245,26 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          pgsPointOfInterest gdrPoi;
-         if (grpIdx == backGroupIdx && pierIdx != 0)
+         if (pBridge->IsInteriorPier(pierIdx))
          {
-            PoiList vPoi;
-            pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
-            ATLASSERT(vPoi.size() == 1);
-            gdrPoi = vPoi.front();
+            gdrPoi = poi;
          }
          else
          {
-            PoiList vPoi;
-            pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
-            ATLASSERT(vPoi.size() == 1);
-            gdrPoi = vPoi.front();
+            if (grpIdx == backGroupIdx && pierIdx != 0)
+            {
+               PoiList vPoi;
+               pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
+               ATLASSERT(vPoi.size() == 1);
+               gdrPoi = vPoi.front();
+            }
+            else
+            {
+               PoiList vPoi;
+               pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
+               ATLASSERT(vPoi.size() == 1);
+               gdrPoi = vPoi.front();
+            }
          }
 
          CComPtr<IShape> shape;
