@@ -228,7 +228,7 @@ void CXBeamRateAgent::CreateMenus()
    UINT viewPos = pMenu->FindMenuItem(_T("View"));
    CEAFMenu* pViewMenu = pMenu->GetSubMenu(viewPos);
    UINT graphsPos = pViewMenu->FindMenuItem(_T("Graphs"));
-   pViewMenu->InsertMenu(graphsPos-1,ID_VIEW_PIER,_T("&Pier View"),this);
+   pViewMenu->InsertMenu(graphsPos,ID_VIEW_PIER,_T("&Pier View"),this);
 }
 
 void CXBeamRateAgent::RemoveMenus()
