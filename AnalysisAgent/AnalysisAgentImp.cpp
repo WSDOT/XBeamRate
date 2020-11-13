@@ -496,7 +496,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 
       pModelData->m_InitLevel = MODEL_INIT_LOADS;
 
-#if defined _DEBUG
+#if defined _DEBUG || defined _BETA_VERSION
       CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
       CComPtr<IStructuredSave2> save;
       save.CoCreateInstance(CLSID_StructuredSave2);
