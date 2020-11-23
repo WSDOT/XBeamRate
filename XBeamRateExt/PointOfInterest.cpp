@@ -168,7 +168,7 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("Col_left");
+      strAttrib += _T("Col_left ");
       nAttributes++;
    }
 
@@ -179,7 +179,7 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("Col_right");
+      strAttrib += _T("Col_right ");
       nAttributes++;
    }
 
@@ -234,7 +234,7 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("FoC_dv2");
+      strAttrib += _T("FoC_dv2 ");
       nAttributes++;
    }
 
@@ -245,7 +245,7 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("FoC_dv");
+      strAttrib += _T("FoC_dv ");
       nAttributes++;
    }
 
