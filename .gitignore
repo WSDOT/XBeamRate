@@ -341,5 +341,6 @@ RegressionTest/Current/*.dbr
 RegressionTest/Current/*.dbp
 RegressionTest/Current/*.err
 RegressionTest/Current/*.Test
+XBeamRate_Fem2d.xml
 *.bat
 !Run*.bat
