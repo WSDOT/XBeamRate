@@ -436,8 +436,6 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 
    m_GraphController.FillLoadingList();
-
-   m_GraphColor.SetGraphCount(m_GraphDefinitions.GetGraphDefinitionCount());
 }
 
 void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)
