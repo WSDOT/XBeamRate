@@ -1092,8 +1092,11 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfTyp
 
 void CAnalysisAgentImp::Invalidate(bool bCreateNewDataStructures)
 {
-   GET_IFACE(IEAFStatusCenter, pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
+   if (m_pBroker)
+   {
+      GET_IFACE(IEAFStatusCenter, pStatusCenter);
+      pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
+   }
 
    InvalidateModels(bCreateNewDataStructures);
    InvalidateResults(bCreateNewDataStructures);
