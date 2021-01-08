@@ -1092,6 +1092,9 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfTyp
 
 void CAnalysisAgentImp::Invalidate(bool bCreateNewDataStructures)
 {
+   GET_IFACE(IEAFStatusCenter, pStatusCenter);
+   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
+
    InvalidateModels(bCreateNewDataStructures);
    InvalidateResults(bCreateNewDataStructures);
 }
@@ -1108,54 +1111,36 @@ HRESULT CAnalysisAgentImp::OnProjectChanged()
 // IBridgeDescriptionEventSink
 HRESULT CAnalysisAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnGirderFamilyChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnLiveLoadChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnConstructionLoadChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
