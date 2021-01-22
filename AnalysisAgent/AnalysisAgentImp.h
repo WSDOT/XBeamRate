@@ -168,6 +168,7 @@ public:
 
 private:
    DECLARE_EAF_AGENT_DATA;
+   StatusCallbackIDType m_scidBridgeWarning;
    StatusCallbackIDType m_scidBridgeError;
 
    void Invalidate(bool bCreateNewDataStructures = true);

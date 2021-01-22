@@ -1152,6 +1152,8 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
    GET_IFACE2(pBroker,IXBRPier,pPier);
 
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
+
    IndexType nBearingLines = pPier->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
    {
@@ -1176,7 +1178,7 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
 
          CComQIPtr<iSimpleDrawPointStrategy> theStrategy(strategy);
          theStrategy->SetPointType(ptSquare);
-         theStrategy->SetColor(BLACK);
+         theStrategy->SetColor(Xbrg < 0 || Lxb < Xbrg ? RED : BLACK); // use red if bearing is off the cross beam
 
          displayList->AddDisplayObject(doPnt);
       }
@@ -1243,19 +1245,26 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          pgsPointOfInterest gdrPoi;
-         if (grpIdx == backGroupIdx && pierIdx != 0)
+         if (pBridge->IsInteriorPier(pierIdx))
          {
-            PoiList vPoi;
-            pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
-            ATLASSERT(vPoi.size() == 1);
-            gdrPoi = vPoi.front();
+            gdrPoi = poi;
          }
          else
          {
-            PoiList vPoi;
-            pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
-            ATLASSERT(vPoi.size() == 1);
-            gdrPoi = vPoi.front();
+            if (grpIdx == backGroupIdx && pierIdx != 0)
+            {
+               PoiList vPoi;
+               pPoi->GetPointsOfInterest(segmentKey, POI_END_FACE, &vPoi);
+               ATLASSERT(vPoi.size() == 1);
+               gdrPoi = vPoi.front();
+            }
+            else
+            {
+               PoiList vPoi;
+               pPoi->GetPointsOfInterest(segmentKey, POI_START_FACE, &vPoi);
+               ATLASSERT(vPoi.size() == 1);
+               gdrPoi = vPoi.front();
+            }
          }
 
          CComPtr<IShape> shape;

@@ -2,7 +2,7 @@ Substructure {#appendix_a_pier_substructure}
 ============
 Geometric information about the substructure is defined on this tab.
 
-> NOTE: All dimensiosn are in the plane of the pier
+> NOTE: All dimensions are in the plane of the pier
 
 Pier Cap Dimensions
 --------------------
@@ -17,7 +17,7 @@ Base of column is defined by | Select an option for how the base of the column i
 Col | Index of the column
 Height | Height of column when base is defined by column height
 Bottom Elev | Bottom elevation of column when base is defined by bottom elevation
-Fixity | Transverse base fixity of the columns
+Fixity | Transverse fixity of the columns
 Shape | Select the column span,  Circle or Rectangle.
 Diameter/Width | Diameter of a circular column or width of a rectangular column. Width is measured in the plane of the pier.
 Depth | Depth of the column. Depth is measured normal to the plane of the pier.

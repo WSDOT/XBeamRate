@@ -27,6 +27,8 @@
 
 #include <IFace\Project.h>
 #include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 #include <algorithm>
 #include <Math\Math.h>
 
@@ -63,6 +65,12 @@ private:
 bool ComparePoiLocation(const xbrPointOfInterest& poi1,const xbrPointOfInterest& poi2)
 {
    if ( poi1.IsColumnPOI() != poi2.IsColumnPOI() )
+   {
+      return false;
+   }
+
+   if ((poi1.HasAttribute(POI_COLUMN_LEFT) && poi2.HasAttribute(POI_COLUMN_RIGHT)) || 
+       (poi2.HasAttribute(POI_COLUMN_LEFT) && poi1.HasAttribute(POI_COLUMN_RIGHT))) // do not merge these
    {
       return false;
    }
@@ -293,6 +301,13 @@ Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx
 
    Float64 Xxb;
    bearingLayout->get_BearingLocation(brgLineIdx,brgIdx,&Xxb);
+
+   GET_IFACE(IXBRProject, pProject);
+   const xbrPierData& pierData = pProject->GetPierData(pierID);
+   Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
+   pierData.GetLowerXBeamDimensions(&H1, &H2, &H3, &H4, &X1, &X2, &X3, &X4, &W);
+   Xxb -= X2; // now it is the location in cross beam coordinates
+
    return Xxb;
 }
 
@@ -385,7 +400,7 @@ Float64 CPierAgentImp::GetBottomColumnElevation(PierIDType pierID,IndexType colI
    return botElev;
 }
 
-pgsTypes::ColumnFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx) const
+pgsTypes::ColumnTransverseFixityType CPierAgentImp::GetColumnFixity(PierIDType pierID,IndexType colIdx) const
 {
    GET_IFACE(IXBRProject,pProject);
    return pProject->GetColumnFixity(pierID,colIdx);
@@ -840,7 +855,7 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
    }
    else
    {
-      Ec = lrfdConcreteUtil::ModE(concrete.Fc,concrete.StrengthDensity,false);
+      Ec = lrfdConcreteUtil::ModE((matConcrete::Type)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
       if ( lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion() )
       {
          Ec *= (concrete.EcK1*concrete.EcK2);
@@ -1244,14 +1259,14 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetColumnPointsOfInterest(PierIDT
    return std::vector<xbrPointOfInterest>();
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID) const
+std::vector<xbrPointOfInterest> CPierAgentImp::GetMomentRatingPointsOfInterest(PierIDType pierID, bool bNegativeMoment) const
 {
-   return GetRatingPointsOfInterest(pierID,false);
+   return GetRatingPointsOfInterest(pierID,false, bNegativeMoment);
 }
 
 std::vector<xbrPointOfInterest> CPierAgentImp::GetShearRatingPointsOfInterest(PierIDType pierID) const
 {
-   return GetRatingPointsOfInterest(pierID,true);
+   return GetRatingPointsOfInterest(pierID,true, false);
 }
 
 Float64 CPierAgentImp::ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) const
@@ -1952,47 +1967,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 
    vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,L,POI_SECTIONCHANGE));
 
-   // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
-   Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID)-X2; 
-
-   // left column
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-delta,POI_COLUMNDELTA));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+delta,POI_COLUMNDELTA));
-
-   // put POI at faces of left column
-   CColumnData::ColumnShapeType shapeType;
-   Float64 D1, D2;
-   CColumnData::ColumnHeightMeasurementType measureType;
-   Float64 H;
-   pProject->GetColumnProperties(pierID,0,&shapeType,&D1,&D2,&measureType,&H);
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-D1/2,POI_FACEOFCOLUMN));
-   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+D1/2,POI_FACEOFCOLUMN));
-
-   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
-   if ( 1 < nColumns )
-   {
-      SpacingIndexType nSpaces = nColumns - 1;
-      Float64 X = LeftOH;
-      for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
-      {
-         Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
-  
-         // put POI at mid-point between columns
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+space/2,POI_MIDPOINT));
-
-         X += space;
-
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-delta,POI_COLUMNDELTA));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+delta,POI_COLUMNDELTA));
-
-         // put POI at faces of column
-         pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-D1/2,POI_FACEOFCOLUMN));
-         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+D1/2,POI_FACEOFCOLUMN));
-      }
-   }
+   Float64 Lxb = GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    // need to pick up shear jumps at points of concentrated load
    // put POI at at bearing locations
@@ -2005,6 +1980,12 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = GetBearingLocation(pierID,brgLineIdx,brgIdx);
+
+         if (Xbrg < 0 || Lxb < Xbrg)
+         {
+            // bearing is off the model... skip it
+            continue;
+         }
 
          if ( reactionType == xbrTypes::rltConcentrated )
          {
@@ -2044,6 +2025,104 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
       vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_WHEELLINE));
    }
 
+   // Put POI at each side of a column so we pick up jumps in the moment and shear diagrams
+   Float64 LeftOH = pProject->GetXBeamLeftOverhang(pierID)-X2; 
+
+   // left column
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN_LEFT));
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH,POI_COLUMN_RIGHT));
+
+   // put POI at faces of left column
+   CColumnData::ColumnShapeType shapeType;
+   Float64 D1, D2;
+   CColumnData::ColumnHeightMeasurementType measureType;
+   Float64 H;
+   pProject->GetColumnProperties(pierID,0,&shapeType,&D1,&D2,&measureType,&H);
+
+   GET_IFACE(IXBRShearCapacity, pShearCap);
+
+   // Left face, with D/2 and D
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH-D1/2,       POI_FACEOFCOLUMN));
+   Float64 capDv = pShearCap->GetDv(pierID, xbrTypes::Stage::Stage1, vPoi.back());
+
+   Float64 ploc = LeftOH - D1/2 - capDv/2;
+   if (ploc > 0.0)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV2));
+   }
+
+   ploc = LeftOH - D1/2 - capDv;
+   if (ploc > 0.0)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV));
+   }
+
+   // Right face
+   vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,LeftOH+D1/2,POI_FACEOFCOLUMN));
+   capDv = pShearCap->GetDv(pierID, xbrTypes::Stage::Stage1, vPoi.back());
+
+   ploc = LeftOH + D1/2 + capDv/2;
+   if (ploc < L)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV2));
+   }
+
+   ploc = LeftOH + D1/2 + capDv;
+   if (ploc < L)
+   {
+      vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV));
+   }
+
+   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
+   if ( 1 < nColumns )
+   {
+      SpacingIndexType nSpaces = nColumns - 1;
+      Float64 X = LeftOH;
+      for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
+      {
+         Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
+  
+         // put POI at mid-point between columns
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+space/2,POI_MIDPOINT));
+
+         X += space;
+
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN_LEFT));
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X,POI_COLUMN_RIGHT));
+
+         // put POI at faces of column
+         pProject->GetColumnProperties(pierID,spaceIdx,&shapeType,&D1,&D2,&measureType,&H);
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X-D1/2,POI_FACEOFCOLUMN));
+         capDv = pShearCap->GetDv(pierID, xbrTypes::Stage::Stage1, vPoi.back());
+
+         ploc = X - D1/2 - capDv/2;
+         if (ploc > 0.0)
+         {
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV2));
+         }
+
+         ploc = X - D1/2 - capDv;
+         if (ploc > 0.0)
+         {
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV));
+         }
+
+         vPoi.push_back(xbrPointOfInterest(m_NextPoiID++,X+D1/2,POI_FACEOFCOLUMN));
+         capDv = pShearCap->GetDv(pierID, xbrTypes::Stage::Stage1, vPoi.back());
+
+         ploc = X + D1/2 + capDv/2;
+         if (ploc < L)
+         {
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV2));
+         }
+
+         ploc = X + D1/2 + capDv;
+         if (ploc < L)
+         {
+            vPoi.push_back(xbrPointOfInterest(m_NextPoiID++, ploc, POI_FOC_DV));
+         }
+      }
+   }
 
    SimplifyPOIList(vPoi); // sorts, merges, and removes duplicates
 
@@ -2167,10 +2246,23 @@ void CPierAgentImp::GetCrownPoint(PierIDType pierID,IPoint2d** ppPoint) const
    deckProfile->get_Item(maxIdx,ppPoint);
 }
 
-std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear) const
+std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDType pierID,bool bShear,bool bNegativeMoment) const
 {
-   // load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
-   // for shear, don't include any poi that are between faces of column
+   // Load rate at grid points, bearings, mid-point between columns, section change poi, face of columns, and centerline columns
+
+   // For shear, and possibly negative moment, don't include any pois that are between faces of column
+   bool bSkipOverColumn = false;
+   if (bShear)
+   {
+      bSkipOverColumn = true;
+   }
+   else if (bNegativeMoment)
+   {
+      // user settings and column size determines this
+      GET_IFACE(IXBRRatingSpecification, pSpec);
+      bSkipOverColumn = !pSpec->DoCheckNegativeMomentBetweenFOCs(pierID);
+   }
+
    const std::vector<xbrPointOfInterest>& vPoi = GetPointsOfInterest(pierID);
 
    bool bOverColumn = false;
@@ -2179,7 +2271,7 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
    {
       if ( poi.HasAttribute(POI_FACEOFCOLUMN) )
       {
-         if ( bShear )
+         if ( bSkipOverColumn )
          {
             // only keep track if we are between faces of column
             // if we are getting shear poi
@@ -2192,7 +2284,10 @@ std::vector<xbrPointOfInterest> CPierAgentImp::GetRatingPointsOfInterest(PierIDT
            (poi.HasAttribute(POI_GRID) || 
             poi.HasAttribute(POI_BRG)  || 
             poi.HasAttribute(POI_MIDPOINT) || 
-            poi.HasAttribute(POI_COLUMN) || 
+            poi.HasAttribute(POI_COLUMN_LEFT) || 
+            poi.HasAttribute(POI_COLUMN_RIGHT) || 
+            poi.HasAttribute(POI_FOC_DV) || 
+            poi.HasAttribute(POI_FOC_DV2) || 
             poi.HasAttribute(POI_SECTIONCHANGE)) 
          )
       {

@@ -76,6 +76,7 @@ void txnEditLoadRatingOptions::Execute(int i)
    pProject->SetMaxLoadedLanes(m_Options[i].m_MaxLoadedLanes);
    pProject->SetSystemFactorFlexure(m_Options[i].m_SystemFactorFlexure);
    pProject->SetSystemFactorShear(m_Options[i].m_SystemFactorShear);
+   pProject->SetDoAnalyzeNegativeMomentBetweenFocOptions(m_Options[i].m_bDoAnalyzeNegativeMomentBetweenFOC, m_Options[i].m_MinColumnWidthForNegMoment);
 
    pEvents->FirePendingEvents();
 }

@@ -58,7 +58,7 @@ CRatingOptionsPage::~CRatingOptionsPage()
 
 void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+   CPropertyPage::DoDataExchange(pDX);
 
    COptionsDlg* pParent = (COptionsDlg*)GetParent();
 

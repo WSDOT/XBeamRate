@@ -167,6 +167,8 @@ void CAgentCmdTarget::OnEditOptions()
    pProject->GetFlexureResistanceFactors(&oldOptions.m_PhiC,&oldOptions.m_PhiT);
    oldOptions.m_PhiV = pProject->GetShearResistanceFactor();
 
+   oldOptions.m_bDoAnalyzeNegativeMomentBetweenFOC = pProject->GetDoAnalyzeNegativeMomentBetweenFocOptions(&oldOptions.m_MinColumnWidthForNegMoment);
+
    COptionsDlg dlg;
    dlg.SetOptions(oldOptions);
    if ( dlg.DoModal() == IDOK )

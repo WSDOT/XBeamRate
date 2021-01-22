@@ -11,6 +11,7 @@
 #define IDD_PIER_LAYOUT_PAGE            106
 #define IDD_BEARINGS_PAGE               202
 #define IDD_SUPERSTRUCTURE_LAYOUT_PAGE  204
+#define IDC_NEG_MOMENT_CHECK            204
 #define IDD_DESIGN_LIVE_LOAD_REACTIONS  205
 #define IDD_LEGAL_LIVE_LOAD_REACTIONS   206
 #define IDD_PERMIT_LIVE_LOAD_REACTIONS  207
@@ -132,8 +133,11 @@
 #define IDC_PERMIT_FACTORS2             326
 #define IDC_EMERGENCY_FACTORS           326
 #define IDC_DESIGN_RATING               327
+#define IDC_NEG_MOMENT_WIDTH            327
 #define IDC_AHEAD_BRG_OFFSET_LABEL2     328
+#define IDC_NEG_MOMENT_WIDTH_UNIT       328
 #define IDC_DESIGN_SHEAR                329
+#define IDC_STATIC_MOM                  329
 #define IDC_LEGAL_RATING                330
 #define IDC_PS_SERVICE_I                331
 #define IDC_LEGAL_SHEAR                 332
@@ -243,7 +247,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        211
 #define _APS_NEXT_COMMAND_VALUE         50009
-#define _APS_NEXT_CONTROL_VALUE         327
+#define _APS_NEXT_CONTROL_VALUE         330
 #define _APS_NEXT_SYMED_VALUE           103
 #endif
 #endif

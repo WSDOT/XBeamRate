@@ -70,7 +70,7 @@ std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(std::shared_ptr
          *pChapter << pPara;
 
          CString strMsg;
-         strMsg.Format(_T("Pier %d is modeled as idealized. Idealized piers cannot be load rated."),LABEL_PIER(pPier->GetIndex()));
+         strMsg.Format(_T("Pier %s is modeled as idealized. Idealized piers cannot be load rated."),LABEL_PIER(pPier->GetIndex()));
          *pPara << strMsg << rptNewLine;
          
          return pReport;

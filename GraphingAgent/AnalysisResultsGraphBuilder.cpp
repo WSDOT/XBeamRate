@@ -270,7 +270,7 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphData()
    Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN | POI_COLUMNDELTA | POI_MIDPOINT);
+   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN_LEFT | POI_COLUMN_RIGHT | POI_MIDPOINT | POI_FOC_DV2 | POI_FOC_DV);
    std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
    if ( 0 <= vWLPoi.front().GetDistFromStart() )
    {
@@ -436,8 +436,6 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    m_GraphDefinitions.AddGraphDefinition(CXBRAnalysisResultsGraphDefinition(graphID++,_T("Capacity")));
 
    m_GraphController.FillLoadingList();
-
-   m_GraphColor.SetGraphCount(m_GraphDefinitions.GetGraphDefinitionCount());
 }
 
 void CXBRAnalysisResultsGraphBuilder::DrawGraphNow(CWnd* pGraphWnd,CDC* pDC)

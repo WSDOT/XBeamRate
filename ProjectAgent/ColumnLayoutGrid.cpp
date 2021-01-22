@@ -24,6 +24,7 @@
 #include "stdafx.h"
 #include "ColumnLayoutGrid.h"
 #include <EAF\EAFDisplayUnits.h>
+#include <PGSuperUIUtil.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -144,7 +145,7 @@ void CColumnLayoutGrid::CustomInit()
 			.SetValue(cv)
 		);
 
-   cv.Format(_T("S\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
+   cv.Format(_T("S\nSpacing\n(%s)"),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -301,6 +302,8 @@ void CColumnLayoutGrid::SetColumnData(const xbrPierData& pier)
       }
    }
 
+   ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
+
    GetParam()->SetLockReadOnly(TRUE);
    GetParam()->EnableUndo(TRUE);
 }
@@ -323,12 +326,14 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
       );
 
    // Fixity
+   CString strChoiceList = CString(CFCB_TBFIX_STR) + CString(_T("\n")) + CString(CFCB_TFIX_BPIN_STR) + CString(_T("\n")) + CString(CFCB_TPIN_BFIX_STR);
+
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
 		.SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
-		.SetChoiceList(_T("Fixed\nPinned"))
-      .SetValue(column.GetTransverseFixity() == pgsTypes::cftFixed ? _T("Fixed") : _T("Pinned"))
+		.SetChoiceList( strChoiceList )
+      .SetValue( GetTransverseFixityString(column.GetTransverseFixity()))
       .SetHorizontalAlignment(DT_RIGHT)
       );
 
@@ -418,14 +423,8 @@ void CColumnLayoutGrid::GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* p
 
    // Fixity
    CString strFixity = GetCellValue(row,col++);
-   if ( strFixity == _T("Fixed") )
-   {
-      pColumn->SetTransverseFixity(pgsTypes::cftFixed);
-   }
-   else
-   {
-      pColumn->SetTransverseFixity(pgsTypes::cftPinned);
-   }
+   pgsTypes::ColumnTransverseFixityType fixity = GetTransverseFixityTypeFromString(strFixity);
+   pColumn->SetTransverseFixity(fixity);
 
    // Shape Details
    CString strShape = GetCellValue(row,col++);

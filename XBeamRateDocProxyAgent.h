@@ -56,7 +56,6 @@ class CXBeamRateDocProxyAgent :
    public IXBeamRate,
    public IXBRUIEvents,
    public IXBRProjectEventSink,
-   public IXBRRatingSpecificationEventSink,
    public IEAFDisplayUnitsEventSink,
    public IXBRVersionInfo,
    public IXBRViews,
@@ -74,7 +73,6 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
    COM_INTERFACE_ENTRY(IXBeamRate)
    COM_INTERFACE_ENTRY(IXBRUIEvents)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
-   COM_INTERFACE_ENTRY(IXBRRatingSpecificationEventSink)
    COM_INTERFACE_ENTRY(IEAFDisplayUnitsEventSink)
    COM_INTERFACE_ENTRY(IXBRVersionInfo)
    COM_INTERFACE_ENTRY(IXBRViews)
@@ -87,8 +85,8 @@ END_CONNECTION_POINT_MAP()
 
 public:
    void SetDocument(CXBeamRateDoc* pDoc);
-   //void OnStatusChanged();
-   void OnResetHints();
+   void OnStatusChanged();
+   void OnUIHintsReset();
 
 // IAgentEx
 public:
@@ -111,10 +109,6 @@ public:
 // IXBRProjectEventSink
 public:
    virtual HRESULT OnProjectChanged() override;
-
-// IXBRRatingSpecificationEventSink
-public:
-   virtual HRESULT OnRatingSpecificationChanged() override;
 
 // IEAFDisplayUnitsEventSink
 public:
@@ -149,7 +143,6 @@ private:
    void AdviseEventSinks();
    void UnadviseEventSinks();
    DWORD m_dwProjectCookie;
-   DWORD m_dwRatingSpecCookie;
    DWORD m_dwDisplayUnitsCookie;
 
    void CreateToolBars();

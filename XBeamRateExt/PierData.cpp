@@ -52,9 +52,9 @@ xbrPierData::xbrPierData()
    m_W = ::ConvertToSysUnits(5,unitMeasure::Feet);
 
    m_H1 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_H2 = ::ConvertToSysUnits(1,unitMeasure::Feet);
+   m_H2 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_H3 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_H4 = ::ConvertToSysUnits(1,unitMeasure::Feet);
+   m_H4 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_X1 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_X2 = ::ConvertToSysUnits(0,unitMeasure::Feet);
    m_X3 = ::ConvertToSysUnits(0,unitMeasure::Feet);
@@ -94,6 +94,9 @@ xbrPierData::xbrPierData()
    bearingLine.SetReferenceBearing(pgsTypes::omtAlignment,0,::ConvertToSysUnits(0,unitMeasure::Feet));
    bearingLine.SetBearingCount(1);
    m_vBearingLines.push_back(bearingLine);
+
+   m_Concrete.StrengthDensity = ::ConvertToSysUnits(0.145, unitMeasure::KipPerFeet3); // plan concrete LRFD Table 3.5.1-1
+   m_Concrete.WeightDensity = ::ConvertToSysUnits(0.155, unitMeasure::KipPerFeet3); // 10 kcf allowance for reinforcement (BDM Ch 3).
 }
 
 xbrPierData::xbrPierData(const xbrPierData& other)

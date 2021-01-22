@@ -27,6 +27,7 @@
 
 #include <IFace\VersionInfo.h>
 #include <IFace\Project.h>
+#include <IFace\StatusCenter.h>
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <EAF\EAFDocument.h>
@@ -72,7 +73,7 @@ bool CXBeamRateTitlePageBuilder::NeedsUpdate(CReportHint* pHint,std::shared_ptr<
 
 rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecification>& pRptSpec)
 {
-   std::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification,CReportSpecification>(pRptSpec);
+   std::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification, CReportSpecification>(pRptSpec);
 
    // Create a title page for the report
    rptChapter* pTitlePage = new rptChapter;
@@ -85,9 +86,9 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
 
    *pPara << title.c_str();
 
-   if ( pXBRRptSpec->GetPierID() != INVALID_INDEX )
+   if (pXBRRptSpec->GetPierID() != INVALID_INDEX)
    {
-      GET_IFACE(IBridgeDescription,pIBridgeDesc);
+      GET_IFACE(IBridgeDescription, pIBridgeDesc);
 
       const CPierData2* pPier = pIBridgeDesc->FindPier(pXBRRptSpec->GetPierID());
       ATLASSERT(pPier);
@@ -113,7 +114,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    pPara = new rptParagraph;
    pPara->SetStyleName(rptStyleManager::GetReportSubtitleStyle());
    *pTitlePage << pPara;
-   GET_IFACE(IXBRVersionInfo,pVerInfo);
+   GET_IFACE(IXBRVersionInfo, pVerInfo);
    *pPara << pVerInfo->GetVersionString() << rptNewLine;
 
    // Title page art image.
@@ -121,9 +122,9 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    // We will just do it here locally.
    CAutoRegistry ar(_T("XBeamRate"));
    CWinApp* pApp = (CWinApp*)AfxGetApp();
-   std::_tstring strImageName(pApp->GetProfileString(_T("Settings"),_T("ReportCoverImage"),_T("xbr_title_page_art.gif")));
+   std::_tstring strImageName(pApp->GetProfileString(_T("Settings"), _T("ReportCoverImage"), _T("xbr_title_page_art.gif")));
    std::_tstring strImage;
-   if ( strImageName == _T("xbr_title_page_art.gif") )
+   if (strImageName == _T("xbr_title_page_art.gif"))
    {
       strImage = std::_tstring(rptStyleManager::GetImagePath()) + strImageName;
    }
@@ -134,8 +135,8 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
 
    WIN32_FIND_DATA file_find_data;
    HANDLE hFind;
-   hFind = FindFirstFile(strImage.c_str(),&file_find_data);
-   if ( hFind != INVALID_HANDLE_VALUE )
+   hFind = FindFirstFile(strImage.c_str(), &file_find_data);
+   if (hFind != INVALID_HANDLE_VALUE)
    {
       *pPara << rptRcImage(strImage) << rptNewLine;
    }
@@ -146,35 +147,118 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    // use the IProjectProperties and report in PGSuper format
    ////////////////////////////
 
-   GET_IFACE(IEAFDocument,pDocument);
-   GET_IFACE(IXBRProjectProperties,pProps);
-   rptParagraph* pPara3 = new rptParagraph( rptStyleManager::GetHeadingStyle() );
+   GET_IFACE(IEAFDocument, pDocument);
+   GET_IFACE(IXBRProjectProperties, pProps);
+   rptParagraph* pPara3 = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pTitlePage << pPara3;
 
-   rptRcTable* pTbl = rptStyleManager::CreateTableNoHeading(2,_T("Project Properties"));
+   rptRcTable* pTbl = rptStyleManager::CreateTableNoHeading(2, _T("Project Properties"));
 
-   pTbl->SetColumnStyle(0,rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetColumnStyle(1,rptStyleManager::GetTableCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
-   pTbl->SetStripeRowColumnStyle(1,rptStyleManager::GetTableStripeRowCellStyle( CB_NONE | CJ_LEFT ) );
+   pTbl->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTbl->SetColumnStyle(1, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTbl->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTbl->SetStripeRowColumnStyle(1, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
 
    *pPara3 << rptNewLine << rptNewLine << rptNewLine;
 
    *pPara3 << pTbl;
-   (*pTbl)(0,0) << _T("Bridge Name");
-   (*pTbl)(0,1) << pProps->GetBridgeName();
-   (*pTbl)(1,0) << _T("Bridge ID");
-   (*pTbl)(1,1) << pProps->GetBridgeID();
-   (*pTbl)(2,0) << _T("Company");
-   (*pTbl)(2,1) << pProps->GetCompany();
-   (*pTbl)(3,0) << _T("Engineer");
-   (*pTbl)(3,1) << pProps->GetEngineer();
-   (*pTbl)(4,0) << _T("Job Number");
-   (*pTbl)(4,1) << pProps->GetJobNumber();
-   (*pTbl)(5,0) << _T("Comments");
-   (*pTbl)(5,1) << pProps->GetComments();
-   (*pTbl)(6,0) << _T("File");
-   (*pTbl)(6,1) << pDocument->GetFilePath();
+   (*pTbl)(0, 0) << _T("Bridge Name");
+   (*pTbl)(0, 1) << pProps->GetBridgeName();
+   (*pTbl)(1, 0) << _T("Bridge ID");
+   (*pTbl)(1, 1) << pProps->GetBridgeID();
+   (*pTbl)(2, 0) << _T("Company");
+   (*pTbl)(2, 1) << pProps->GetCompany();
+   (*pTbl)(3, 0) << _T("Engineer");
+   (*pTbl)(3, 1) << pProps->GetEngineer();
+   (*pTbl)(4, 0) << _T("Job Number");
+   (*pTbl)(4, 1) << pProps->GetJobNumber();
+   (*pTbl)(5, 0) << _T("Comments");
+   (*pTbl)(5, 1) << pProps->GetComments();
+   (*pTbl)(6, 0) << _T("File");
+   (*pTbl)(6, 1) << pDocument->GetFilePath();
+
+   // Notes table
+   rptRcTable* pTable;
+   int row = 0;
+
+   pPara = new rptParagraph;
+   pPara->SetStyleName(rptStyleManager::GetHeadingStyle());
+   *pTitlePage << pPara;
+
+   *pPara << _T("Notes") << rptNewLine;
+
+   pTable = rptStyleManager::CreateDefaultTable(2);
+   pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetColumnStyle(1, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+   pTable->SetStripeRowColumnStyle(1, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+
+   *pPara << pTable << rptNewLine;
+
+   row = 0;
+   (*pTable)(row, 0) << _T("Symbol");
+   (*pTable)(row++, 1) << _T("Definition");
+
+   (*pTable)(row, 0) << _T("Brg");
+   (*pTable)(row++, 1) << _T("Bearing location");
+
+   (*pTable)(row, 0) << Sub2(_T("Col"), _T("left")) << Sub2(_T(", Col"), _T("right"));
+   (*pTable)(row++, 1) << _T("Just left or right of CL column");
+
+   (*pTable)(row, 0) << _T("FOC");
+   (*pTable)(row++, 1) << _T("Face of column");
+
+   (*pTable)(row, 0) << Sub2(_T("FOC"), _T("dv")) << Sub2(_T(", FOC"), _T("dv2"));
+   (*pTable)(row++, 1) << Sub2(_T("d"), _T("v")) << Sub2(_T(" or d"), _T("v")) << _T("/2 from face of column");
+
+   (*pTable)(row, 0) << _T("MP");
+   (*pTable)(row++, 1) << _T("Mid-point of cap between columns");
+
+   (*pTable)(row, 0) << _T("ST");
+   (*pTable)(row++, 1) << _T("Section change");
+
+   ///////////////////////////////////
+   // Status items
+   GET_IFACE(IEAFStatusCenter, pStatusCenter);
+   CollectionIndexType nItems = pStatusCenter->Count();
+
+   if (0 < nItems)
+   {
+      pPara = new rptParagraph;
+      pPara->SetStyleName(rptStyleManager::GetHeadingStyle());
+      *pTitlePage << pPara;
+
+      *pPara << _T("Status Items") << rptNewLine;
+
+      pTable = rptStyleManager::CreateDefaultTable(2);
+      pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+      pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+      pTable->SetColumnStyle(1, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+      pTable->SetStripeRowColumnStyle(1, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+
+      *pPara << pTable << rptNewLine;
+
+      (*pTable)(0, 0) << _T("Level");
+      (*pTable)(0, 1) << _T("Description");
+
+      row = 1;
+      CString strSeverityType[] = { _T("Information"), _T("Warning"), _T("Error") };
+      for (CollectionIndexType i = 0; i < nItems; i++)
+      {
+         CEAFStatusItem* pItem = pStatusCenter->GetByIndex(i);
+
+         eafTypes::StatusSeverityType severity = pStatusCenter->GetSeverity(pItem);
+
+         // Set text and cell background
+         rptRiStyle::FontColor colors[] = { rptRiStyle::LightGreen, rptRiStyle::Yellow, rptRiStyle::Red };
+         rptRiStyle::FontColor color = colors[severity];
+         (*pTable)(row, 0) << new rptRcBgColor(color);
+         (*pTable)(row, 0).SetFillBackGroundColor(color);
+
+         (*pTable)(row, 0) << strSeverityType[severity];
+         (*pTable)(row++, 1) << pItem->GetDescription();
+      }
+   }
 
 
    // Throw in a page break

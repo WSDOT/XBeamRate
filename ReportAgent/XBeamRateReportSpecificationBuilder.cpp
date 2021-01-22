@@ -49,24 +49,30 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
+   std::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
+
    CPierReportDlg dlg(m_pBroker,rptDesc,pOldRptSpec);
+
+   if (pOldGRptSpec)
+   {
+      dlg.m_bReportEvenIncrements = pOldGRptSpec->GetDoReportEvenIncrements();
+   }
 
    if ( dlg.DoModal() == IDOK )
    {
       // If possible, copy information from old spec. Otherwise header/footer and other info will be lost
-      std::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
-
       std::shared_ptr<CReportSpecification> pNewRptSpec;
       if(pOldGRptSpec)
       {
          std::shared_ptr<CXBeamRateReportSpecification> pNewGRptSpec(std::make_shared<CXBeamRateReportSpecification>(*pOldGRptSpec) );
          pNewGRptSpec->SetPierID(dlg.m_PierID);
+         pNewGRptSpec->SetDoReportEvenIncrements(dlg.m_bReportEvenIncrements);
 
          pNewRptSpec = std::static_pointer_cast<CReportSpecification>(pNewGRptSpec);
       }
       else
       {
-         pNewRptSpec = std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID);
+         pNewRptSpec = std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,dlg.m_PierID, dlg.m_bReportEvenIncrements);
       }
 
       std::vector<std::_tstring> chList = dlg.m_ChapterList;
@@ -102,8 +108,8 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
       }
    }
 
-   // Use all chapters at the maximum level
-   std::shared_ptr<CReportSpecification> pRptSpec(std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,pierID) );
+   // Use all chapters at the maximum level, and report at even increments
+   std::shared_ptr<CReportSpecification> pRptSpec(std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,pierID,true) );
    rptDesc.ConfigureReportSpecification(pRptSpec);
    return pRptSpec;
 }

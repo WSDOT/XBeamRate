@@ -16,6 +16,10 @@ Item | Description
 Condition State List | Use the drop down list to select a condition state of the cross beam.
 Condition Factor | The conditation factor associated with the selected condition state is show here. If the condition state is Other, enter the condition factor
 
+Reinforcement Coordinates
+-------------
+![](ReinforcementDatum.png)
+
 ## Longitudinal Reinforcement
 Define the longitudinal reinforcement in the cross beam. Reinforcement is defined as horizontal rows of reinforcement.
 

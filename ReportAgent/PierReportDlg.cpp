@@ -56,6 +56,7 @@ CPierReportDlg::CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDes
 : CDialog(CPierReportDlg::IDD, pParent), m_RptDesc(rptDesc), m_pInitRptSpec(pRptSpec)
 {
    m_PierID = INVALID_ID;
+   m_bReportEvenIncrements = true;
 
    m_pBroker = pBroker;
 }
@@ -72,6 +73,7 @@ void CPierReportDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LIST, m_ChList);
 
    DDX_CBItemData(pDX, IDC_PIER, m_PierID);
+   DDX_CBIndex(pDX, IDC_EVEN_INCREMENTS, m_ReportEvenIncrementsIval);
 
    if ( pDX->m_bSaveAndValidate )
    {
@@ -98,6 +100,8 @@ void CPierReportDlg::DoDataExchange(CDataExchange* pDX)
          AfxMessageBox(IDS_E_NOCHAPTERS);
          pDX->Fail();
       }
+
+      m_bReportEvenIncrements = m_ReportEvenIncrementsIval == 0;
    }
 }
 
@@ -138,6 +142,8 @@ BOOL CPierReportDlg::OnInitDialog()
 {
    CWnd* pwndTitle = GetDlgItem(IDC_REPORT_TITLE);
    pwndTitle->SetWindowText(m_RptDesc.GetReportName());
+
+   m_ReportEvenIncrementsIval = m_bReportEvenIncrements ? 0 : 1;
 
    if ( IsStandAlone())
    {
@@ -187,7 +193,7 @@ BOOL CPierReportDlg::OnInitDialog()
       for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
       {
          CString strPierLabel;
-         strPierLabel.Format(_T("Pier %d"),LABEL_PIER(pierIdx));
+         strPierLabel.Format(_T("Pier %s"),LABEL_PIER(pierIdx));
          int idx = pCB->AddString(strPierLabel);
 
          const CPierData2* pPier = pBridgeDesc->GetPier(pierIdx);

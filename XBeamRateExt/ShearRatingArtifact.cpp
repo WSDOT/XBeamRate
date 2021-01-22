@@ -621,16 +621,27 @@ Float64 xbrShearRatingArtifact::GetRatingFactor(Float64 Vllim,Float64 VllimAdj) 
    Float64 C = p * m_CapacityRedutionFactor * m_Vn;
    Float64 RFtop = C - fabs(m_gDC*m_Vdc + m_gDW*m_Vdw + m_gCR*m_Vcr + m_gSH*m_Vsh + m_gRE*m_Vre + m_gPS*m_Vps);
 
+   // WSDOT rating equation changed in July 2019 BDM
+   //if (
+   //   (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
+   //   ||
+   //   (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
+   //   )
+   //{
+   //   RFtop -= fabs(m_gLL*VllimAdj); // WSDOT BDM Eqn. 13.1.1A-2
+   //}
+
+   Float64 RFbot = fabs(m_gLL*Vllim);
+   
+   // WSDOT rating equation changed in July 2019 BDM
    if (
       (::IsPermitRatingType(m_RatingType) && m_PermitRatingMethod == xbrTypes::prmWSDOT)
       ||
       (::IsEmergencyRatingType(m_RatingType) && m_EmergencyRatingMethod == xbrTypes::ermWSDOT)
       )
    {
-      RFtop -= fabs(m_gLL*VllimAdj); // WSDOT BDM Eqn. 13.1.1A-2
+      RFbot -= fabs(m_gLL*VllimAdj); // WSDOT BDM Eqn. 13.1.1A-2
    }
-
-   Float64 RFbot = fabs(m_gLL*Vllim);
 
    if (IsZero(C) && IsZero(RFtop) && IsZero(RFbot))
    {

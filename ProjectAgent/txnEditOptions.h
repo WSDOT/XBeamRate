@@ -52,6 +52,9 @@ struct txnEditOptionsData
    Float64 m_PhiC;
    Float64 m_PhiT;
    Float64 m_PhiV;
+
+   bool m_bDoAnalyzeNegativeMomentBetweenFOC;
+   Float64 m_MinColumnWidthForNegMoment; // min column width before we have to analyze between FOC's
 };
 
 class txnEditOptions :

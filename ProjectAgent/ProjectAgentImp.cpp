@@ -183,6 +183,9 @@ CProjectAgentImp::CProjectAgentImp()
    m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
    m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
 
+   m_bDoAnalyzeNegativeMomentBetweenFOC = false;
+   m_MinColumnWidthForNegMoment = ::ConvertToSysUnits(4.0,unitMeasure::Feet); // txdot's default
+
    m_bExportingModel = false;
 }
 
@@ -244,7 +247,7 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    CEAFAutoProgress ap(pProgress);
 
    CString strMsg;
-   strMsg.Format(_T("Exporting Pier %d to XBRate"),LABEL_PIER(pierIdx));
+   strMsg.Format(_T("Exporting Pier %s to XBRate"),LABEL_PIER(pierIdx));
    pProgress->UpdateMessage(strMsg);
 
    AutoRevert<PierIDType> revert_pier_id(&m_SavePierID, pierID, INVALID_ID); // this is the ID of the pier we are saving... revert to INVALID_ID on exit
@@ -478,7 +481,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // Also, need to save/load this data per pier
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
-      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
          pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
          pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
 
@@ -514,6 +517,9 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
 
          pStrSave->put_Property(_T("CheckYieldStressLimit"), CComVariant(CheckYieldStressLimit()));
          pStrSave->put_Property(_T("YieldStressCoefficient"), CComVariant(GetYieldStressLimitCoefficient()));
+
+         pStrSave->put_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"), CComVariant(m_bDoAnalyzeNegativeMomentBetweenFOC)); // added in version 4
+         pStrSave->put_Property(_T("MinColumnWidthForNegMoment"), CComVariant(m_MinColumnWidthForNegMoment)); // added in version 4
       pStrSave->EndUnit(); // RatingSpecification
 
       pStrSave->BeginUnit(_T("LoadFactors"),2.0);
@@ -717,7 +723,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          Float64 elev = pAlignment->GetElevation(pierStation,0.0);
          pierData.SetDeckElevation(elev);
          pierData.SetCrownSlope(-sl, sr);
-         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(1,pierStation));
+         IndexType ctrnpt = pAlignment->GetControllingCrownPointIndex(pierStation);
+         pierData.SetCrownPointOffset(pAlignment->GetCrownPointOffset(ctrnpt,pierStation));
 
          // ok, save it
          pierData.Save(pStrSave, nullptr);
@@ -731,7 +738,7 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
    } // end if bIsStandAlone or bExportingModel
    else
    {
-      pStrSave->BeginUnit(_T("RatingSpecification"),3.0);
+      pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
          pStrSave->put_Property(_T("AnalysisType"),CComVariant(m_AnalysisType));
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(m_EmergencyRatingMethod)); // added in version 2
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(m_PermitRatingMethod));
@@ -739,6 +746,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          pStrSave->put_Property(_T("MaxLoadedLanes"),CComVariant(m_MaxLoadedLanes));
          pStrSave->put_Property(_T("SystemFactorFlexure"), CComVariant(m_SysFactorFlexure)); // added in version 3
          pStrSave->put_Property(_T("SystemFactorShear"), CComVariant(m_SysFactorShear)); // added in version 3
+         pStrSave->put_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"), CComVariant(m_bDoAnalyzeNegativeMomentBetweenFOC)); // added in version 4
+         pStrSave->put_Property(_T("MinColumnWidthForNegMoment"), CComVariant(m_MinColumnWidthForNegMoment)); // added in version 4
          pStrSave->EndUnit(); // RatingSpecification
 
       std::map<PierIDType,xbrPierData>::iterator iter(m_PierData.begin());
@@ -944,6 +953,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
             var.vt = VT_R8;
             hr = pStrLoad->get_Property(_T("YieldStressCoefficient"), &var);
             m_YieldStressCoefficient = var.dblVal;
+
+            if (3 < version)
+            {
+               var.vt = VT_BOOL;
+               hr = pStrLoad->get_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"),&var);
+               m_bDoAnalyzeNegativeMomentBetweenFOC = (var.boolVal == VARIANT_TRUE ? true : false);
+
+               var.vt = VT_R8;
+               hr = pStrLoad->get_Property(_T("MinColumnWidthForNegMoment"),&var);
+               m_MinColumnWidthForNegMoment = var.dblVal;
+            }
 
             hr = pStrLoad->EndUnit(); // RatingSpecification
          }
@@ -1322,7 +1342,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             hr = pStrLoad->get_Property(_T("SystemFactorShear"), &var);
             m_SysFactorShear = var.dblVal;
+         }
 
+         if (3 < version)
+         {
+            var.vt = VT_BOOL;
+            hr = pStrLoad->get_Property(_T("DoAnalyzeNegativeMomentBetweenFOC"),&var);
+            m_bDoAnalyzeNegativeMomentBetweenFOC = (var.boolVal == VARIANT_TRUE ? true : false);
+
+            var.vt = VT_R8;
+            hr = pStrLoad->get_Property(_T("MinColumnWidthForNegMoment"),&var);
+            m_MinColumnWidthForNegMoment = var.dblVal;
          }
 
          hr = pStrLoad->EndUnit(); // RatingSpecification
@@ -1350,12 +1380,12 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
       if (pierData.GetColumnCount() == 1)
       {
          auto& column = pierData.GetColumnData(0);
-         pgsTypes::ColumnFixityType fixity = column.GetTransverseFixity();
-         if (fixity == pgsTypes::cftPinned)
+         pgsTypes::ColumnTransverseFixityType fixity = column.GetTransverseFixity();
+         if (fixity == pgsTypes::ctftTopFixedBottomPinned)
          {
-            column.SetTransverseFixity(pgsTypes::cftFixed);
+            column.SetTransverseFixity(pgsTypes::ctftTopFixedBottomFixed);
 
-            CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixed has been changed to Fixed"));
+            CString strMsg(_T("Single column piers cannot have a pinned fixity. The support fixity has been changed to Fixed"));
             xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_XBeamRateStatusGroupID, m_scidBridgeInfo, strMsg);
 
             GET_IFACE(IEAFStatusCenter, pStatusCenter);
@@ -1970,7 +2000,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          GET_IFACE(IGirder,pIGirder);
          GET_IFACE(IBridge,pBridge);
          CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
-         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetBottomFlangeCount(segmentKey);
          ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
 
          GET_IFACE(IPointOfInterest,pPoi);
@@ -2031,7 +2061,7 @@ Float64 CProjectAgentImp::GetBearingWidth(PierIDType pierID,IndexType brgLineIdx
          GET_IFACE(IGirder,pIGirder);
          GET_IFACE(IBridge,pBridge);
          CSegmentKey segmentKey = pBridge->GetSegmentAtPier(pierIdx,girderKey);
-         FlangeIndexType nBottomFlanges = pIGirder->GetNumberOfBottomFlanges(segmentKey);
+         FlangeIndexType nBottomFlanges = pIGirder->GetBottomFlangeCount(segmentKey);
          ATLASSERT(nBottomFlanges == 0 || nBottomFlanges == 1);
 
          GET_IFACE(IPointOfInterest,pPoi);
@@ -2270,7 +2300,7 @@ void CProjectAgentImp::GetColumnProperties(PierIDType pierID,ColumnIndexType col
    *pheightType = columnData.GetColumnHeightMeasurementType();
 }
 
-pgsTypes::ColumnFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const
+pgsTypes::ColumnTransverseFixityType CProjectAgentImp::GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const
 {
    return GetPrivatePierData(pierID).GetColumnData(colIdx).GetTransverseFixity();
 }
@@ -2353,8 +2383,11 @@ Float64 CProjectAgentImp::GetShearResistanceFactor() const
 
 void CProjectAgentImp::SetSystemFactorFlexure(Float64 sysFactor)
 {
-   m_SysFactorFlexure = sysFactor;
-   Fire_OnRatingSpecificationChanged();
+   if (sysFactor != m_SysFactorFlexure)
+   {
+      m_SysFactorFlexure = sysFactor;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetSystemFactorFlexure() const
@@ -2364,8 +2397,11 @@ Float64 CProjectAgentImp::GetSystemFactorFlexure() const
 
 void CProjectAgentImp::SetSystemFactorShear(Float64 sysFactor)
 {
-   m_SysFactorShear = sysFactor;
-   Fire_OnRatingSpecificationChanged();
+   if (sysFactor != m_SysFactorShear)
+   {
+      m_SysFactorShear = sysFactor;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetSystemFactorShear() const
@@ -2787,6 +2823,22 @@ IndexType CProjectAgentImp::GetMaxLoadedLanes() const
    return m_MaxLoadedLanes;
 }
 
+bool CProjectAgentImp::GetDoAnalyzeNegativeMomentBetweenFocOptions(Float64* pminColumnWidth)
+{
+   *pminColumnWidth = m_MinColumnWidthForNegMoment;
+   return m_bDoAnalyzeNegativeMomentBetweenFOC;
+}
+
+void CProjectAgentImp::SetDoAnalyzeNegativeMomentBetweenFocOptions(bool bDoUseOption, Float64 minColumnWidth)
+{
+   if (bDoUseOption != m_bDoAnalyzeNegativeMomentBetweenFOC || (bDoUseOption && !IsEqual(minColumnWidth, m_MinColumnWidthForNegMoment)))
+   {
+      m_bDoAnalyzeNegativeMomentBetweenFOC = bDoUseOption;
+      m_MinColumnWidthForNegMoment = minColumnWidth;
+      Fire_OnProjectChanged();
+   }
+}
+
 //////////////////////////////////////////////////////////
 // IXBRRatingSpecification
 bool CProjectAgentImp::IsRatingEnabled(pgsTypes::LoadRatingType ratingType) const
@@ -2809,8 +2861,11 @@ void CProjectAgentImp::EnableRating(pgsTypes::LoadRatingType ratingType,bool bEn
 
 void CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType,bool bRateForShear)
 {
-   m_bRateForShear[ratingType] = bRateForShear;
-   Fire_OnRatingSpecificationChanged();
+   if (m_bRateForShear[ratingType] != bRateForShear)
+   {
+      m_bRateForShear[ratingType] = bRateForShear;
+      Fire_OnProjectChanged();
+   }
 }
 
 bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType) const
@@ -2828,8 +2883,11 @@ bool CProjectAgentImp::RateForShear(pgsTypes::LoadRatingType ratingType) const
 
 void CProjectAgentImp::CheckYieldStressLimit(bool bCheckYieldStress)
 {
-   m_bCheckYieldStress = bCheckYieldStress;
-   Fire_OnRatingSpecificationChanged();
+   if (m_bCheckYieldStress != bCheckYieldStress)
+   {
+      m_bCheckYieldStress = bCheckYieldStress;
+      Fire_OnProjectChanged();
+   }
 }
 
 bool CProjectAgentImp::CheckYieldStressLimit() const
@@ -2847,8 +2905,11 @@ bool CProjectAgentImp::CheckYieldStressLimit() const
 
 void CProjectAgentImp::SetYieldStressLimitCoefficient(Float64 x)
 {
-   m_YieldStressCoefficient = x;
-   Fire_OnRatingSpecificationChanged();
+   if (m_YieldStressCoefficient != x)
+   {
+      m_YieldStressCoefficient = x;
+      Fire_OnProjectChanged();
+   }
 }
 
 Float64 CProjectAgentImp::GetYieldStressLimitCoefficient() const
@@ -2874,7 +2935,7 @@ void CProjectAgentImp::SetAnalysisMethodForReactions(pgsTypes::AnalysisType anal
    if ( analysisType != m_AnalysisType )
    {
       m_AnalysisType = analysisType;
-      Fire_OnRatingSpecificationChanged();
+      Fire_OnProjectChanged();
    }
 }
 
@@ -2883,12 +2944,12 @@ xbrTypes::EmergencyRatingMethod CProjectAgentImp::GetEmergencyRatingMethod() con
    return m_EmergencyRatingMethod;
 }
 
-void CProjectAgentImp::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod permitRatingMethod)
+void CProjectAgentImp::SetEmergencyRatingMethod(xbrTypes::EmergencyRatingMethod emergencyRatingMethod)
 {
-   if (m_EmergencyRatingMethod != permitRatingMethod)
+   if (m_EmergencyRatingMethod != emergencyRatingMethod)
    {
-      m_EmergencyRatingMethod = permitRatingMethod;
-      Fire_OnRatingSpecificationChanged();
+      m_EmergencyRatingMethod = emergencyRatingMethod;
+      Fire_OnProjectChanged();
    }
 }
 
@@ -2907,7 +2968,7 @@ void CProjectAgentImp::SetPermitRatingMethod(xbrTypes::PermitRatingMethod permit
    if ( m_PermitRatingMethod != permitRatingMethod )
    {
       m_PermitRatingMethod = permitRatingMethod;
-      Fire_OnRatingSpecificationChanged();
+      Fire_OnProjectChanged();
    }
 }
 
@@ -2915,6 +2976,42 @@ bool CProjectAgentImp::IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) 
 {
    return (::IsPermitRatingType(ratingType) && m_PermitRatingMethod == xbrTypes::ermWSDOT ? true : false);
 }
+
+bool CProjectAgentImp::DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const
+{
+   bool doCheck = true;
+
+   // We only need to skip between FOC if user settings say so
+   GET_IFACE(IXBRProject, pProject);
+   Float64 minColWidth;
+   bool bCheckColWidth = pProject->GetDoAnalyzeNegativeMomentBetweenFocOptions(&minColWidth);
+   if (bCheckColWidth)
+   {
+      // We could create a lot of compexity here and vet pois column by column. But the normal case is that all columns are the same width.
+      // Check if any columns are wider that the threshold, and use the same option for all
+      Float64 maxColWid = -Float64_Max;
+      IndexType nCols = GetColumnCount(pierID);
+      for (IndexType icol = 0; icol < nCols; icol++)
+      {
+         CColumnData::ColumnShapeType shapeType;
+         Float64 D1, D2;
+         CColumnData::ColumnHeightMeasurementType columnHeightType;
+         Float64 H;
+         pProject->GetColumnProperties(pierID, icol, &shapeType, &D1, &D2, &columnHeightType, &H);
+
+         maxColWid = max(maxColWid, D1);
+
+         if (IsGE(minColWidth, maxColWid))
+         {
+            doCheck = false;
+            break;
+         }
+      }
+   }
+
+   return doCheck;
+}
+
 
 //////////////////////////////////////////////////////////
 // IXBRProjectEdit
@@ -2964,11 +3061,6 @@ void CProjectAgentImp::FirePendingEvents()
 	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
       {
 	      Fire_OnProjectChanged();
-      }
-
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_RATINGSPECIFICATION) )
-      {
-	      Fire_OnRatingSpecificationChanged();
       }
 
       // tell event listeners that it is time to fire their events
@@ -3334,16 +3426,32 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    W = pPier->GetXBeamWidth();
    pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,X3,X4,W);
 
-   // Upper Cross Beam Diaphragm
+   // Upper Cross Beam Diaphragm. Basically, this is vertical distance from top of lower cross beam to bottom of slab
+   // Take max of diaphgram depth and max girder bearing deducts
    // (don't use the pPier object here... use the pBridge interface... it resolves
    // diaphragm dimensions that are computed based on bridge component geometry)
    Float64 Wback, Hback;
    pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Back,&Wback,&Hback);
    Float64 Wahead, Hahead;
    pBridge->GetPierDiaphragmSize(pierIdx,pgsTypes::Ahead,&Wahead,&Hahead);
-
-   Float64 H = Max(Hback,Hahead); // height from top of lower cross beam to bottom of slab
    W = Wback + Wahead;
+   Float64 Hdiap = Max(Hback,Hahead);
+
+   Float64 Hbd = 0;
+   std::vector<BearingElevationDetails> vBackElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Back);
+   for (const auto& elevdet : vBackElevDetails)
+   {
+      Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);
+   }
+
+   std::vector<BearingElevationDetails> vAheadElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Ahead);
+   for (const auto& elevdet : vAheadElevDetails)
+   {
+      Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);
+   }
+
+   Float64 H = max(Hdiap, Hbd);
+
    pierData.SetDiaphragmDimensions(H,W);
 
    // Column Layout

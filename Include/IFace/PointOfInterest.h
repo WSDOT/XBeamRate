@@ -31,7 +31,7 @@ interface IXBRPointOfInterest : public IUnknown
 {
    virtual std::vector<xbrPointOfInterest> GetXBeamPointsOfInterest(PierIDType pierID,PoiAttributeType attrib = 0) const = 0;
    virtual std::vector<xbrPointOfInterest> GetColumnPointsOfInterest(PierIDType pierID,ColumnIndexType colIdx) const = 0;
-   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID) const = 0;
+   virtual std::vector<xbrPointOfInterest> GetMomentRatingPointsOfInterest(PierIDType pierID, bool bNegativeMoment) const = 0;
    virtual std::vector<xbrPointOfInterest> GetShearRatingPointsOfInterest(PierIDType pierID) const = 0;
 
    virtual Float64 ConvertPoiToPierCoordinate(PierIDType pierID,const xbrPointOfInterest& poi) const = 0;

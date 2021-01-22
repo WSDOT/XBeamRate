@@ -58,12 +58,12 @@ m_Severity(severity), m_HelpID(helpID)
 {
 }
 
-eafTypes::StatusSeverityType xbrBridgeStatusCallback::GetSeverity()
+eafTypes::StatusSeverityType xbrBridgeStatusCallback::GetSeverity() const
 {
    return m_Severity;
 }
 
 void xbrBridgeStatusCallback::Execute(CEAFStatusItem* pStatusItem)
 {
-   EAFShowStatusMessage(pStatusItem,m_Severity,TRUE,TRUE);
+   EAFShowStatusMessage(pStatusItem,m_Severity,TRUE, m_Severity == eafTypes::statusError ? TRUE : FALSE);
 }

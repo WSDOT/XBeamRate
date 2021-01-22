@@ -44,14 +44,19 @@ public:
    Float64 m_SystemFactorFlexure;
    Float64 m_SystemFactorShear;
 
+   bool m_bDoAnalyzeNegativeMomentBetweenFOC;
+   Float64 m_MinColumnWidthForNegMoment;
+
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
    void FillAnalysisModeComboBox();
    void FillEmergencyRatingMethodComboBox();
    void FillPermitRatingMethodComboBox();
+   void OnNegMomCheckChanged();
 
    afx_msg void OnHelp();
+   afx_msg void OnBnClickedNegMomentCheck();
 
 	DECLARE_MESSAGE_MAP()
 };

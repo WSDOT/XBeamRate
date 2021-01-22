@@ -52,7 +52,6 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>,
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public CProxyIXBREventsEventSink<CProjectAgentImp>,
-   public CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>,
    public IAgentEx,
    public IAgentUIIntegration,
    public IAgentPersist,
@@ -98,7 +97,6 @@ END_COM_MAP()
 BEGIN_CONNECTION_POINT_MAP(CProjectAgentImp)
    CONNECTION_POINT_ENTRY( IID_IXBRProjectEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBRProjectPropertiesEventSink )
-   CONNECTION_POINT_ENTRY( IID_IXBRRatingSpecificationEventSink )
    CONNECTION_POINT_ENTRY( IID_IXBREventsSink )
 END_CONNECTION_POINT_MAP()
 
@@ -226,7 +224,7 @@ public:
    virtual Float64 GetColumnHeight(PierIDType pierID,ColumnIndexType colIdx) const override;
    virtual CColumnData::ColumnHeightMeasurementType GetColumnHeightMeasurementType(PierIDType pierID,ColumnIndexType colIdx) const override;
    virtual Float64 GetColumnSpacing(PierIDType pierID,SpacingIndexType spaceIdx) const override;
-   virtual pgsTypes::ColumnFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const override;
+   virtual pgsTypes::ColumnTransverseFixityType GetColumnFixity(PierIDType pierID,ColumnIndexType colIdx) const override;
 
    virtual void SetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType shapeType,Float64 D1,Float64 D2,CColumnData::ColumnHeightMeasurementType heightType,Float64 H) override;
    virtual void GetColumnProperties(PierIDType pierID,ColumnIndexType colIdx,CColumnData::ColumnShapeType* pshapeType,Float64* pD1,Float64* pD2,CColumnData::ColumnHeightMeasurementType* pheightType,Float64* pH) const override;
@@ -280,6 +278,9 @@ public:
    virtual void SetMaxLoadedLanes(IndexType nLanesMax) override;
    virtual IndexType GetMaxLoadedLanes() const override;
 
+   virtual bool GetDoAnalyzeNegativeMomentBetweenFocOptions(Float64* minColumnWidth) override;
+   virtual void SetDoAnalyzeNegativeMomentBetweenFocOptions(bool bDoUseOption, Float64 minColumnWidth) override;
+
 // IXBRRatingSpecification
 public:
    virtual bool IsRatingEnabled(pgsTypes::LoadRatingType ratingType) const override;
@@ -307,6 +308,8 @@ public:
    virtual xbrTypes::PermitRatingMethod GetPermitRatingMethod() const override;
    virtual void SetPermitRatingMethod(xbrTypes::PermitRatingMethod permitRatingMethod) override;
    virtual bool IsWSDOTPermitRating(pgsTypes::LoadRatingType ratingType) const override;
+
+   virtual bool DoCheckNegativeMomentBetweenFOCs(PierIDType pierID) const override;
 
 // IXBRProjectEdit
 public:
@@ -386,6 +389,9 @@ private:
    Float64 m_MaxLLStepSize; // maximum step size for moving live load
    IndexType m_MaxLoadedLanes; // maximum number of loaded lanes to consider (INVALID_INDEX means to consider all lanes)
 
+   bool m_bDoAnalyzeNegativeMomentBetweenFOC;
+   Float64 m_MinColumnWidthForNegMoment; // min column width before we have to analyze between FOC's
+
    // Load Factors
    Float64 m_gDC_StrengthI;
    Float64 m_gDW_StrengthI;
@@ -440,7 +446,6 @@ private:
 
    friend CProxyIXBRProjectPropertiesEventSink<CProjectAgentImp>;
    friend CProxyIXBRProjectEventSink<CProjectAgentImp>;
-   friend CProxyIXBRRatingSpecificationEventSink<CProjectAgentImp>;
 
    void CreateMenus();
    void RemoveMenus();

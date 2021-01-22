@@ -38,6 +38,8 @@
 #include <XBeamRateExt\StatusItem.h>
 #include <XBeamRateExt\XBeamAnalysisResult.h>
 
+#include <PgsExt\GirderLabel.h>
+
 #include <numeric>
 #include <algorithm>
 
@@ -111,7 +113,8 @@ STDMETHODIMP CAnalysisAgentImp::Init()
    m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
 
    // Register status callbacks that we want to use
-   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError)); 
+   m_scidBridgeWarning = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusWarning));
+   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError));
 
    return AGENT_S_SECONDPASSINIT;
 }
@@ -364,9 +367,9 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             joint.Release();
             joints->Create(jntID++,pThisNode->X,-columnHeight,&joint);
 
-            pgsTypes::ColumnFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
+            pgsTypes::ColumnTransverseFixityType columnFixity = pPier->GetColumnFixity(pierID,colIdx);
             joint->Support(); // fully fixed
-            if ( columnFixity == pgsTypes::cftPinned )
+            if ( columnFixity == pgsTypes::ctftTopFixedBottomPinned )
             {
                joint->ReleaseDof(jrtMz);
             }
@@ -377,6 +380,12 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
             mbr.Release();
             members->Create(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol,&mbr);
+
+            // Release top end of member, if specified
+            if (columnFixity == pgsTypes::ctftTopPinnedBottomFixed)
+            {
+               mbr->ReleaseEnd(metStart, mbrReleaseMz);
+            }
 
             colIdx++;
          }
@@ -487,7 +496,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 
       pModelData->m_InitLevel = MODEL_INIT_LOADS;
 
-#if defined _DEBUG
+#if defined _DEBUG || defined _BETA_VERSION
       CComQIPtr<IStructuredStorage2> ss(pModelData->m_Model);
       CComPtr<IStructuredSave2> save;
       save.CoCreateInstance(CLSID_StructuredSave2);
@@ -702,6 +711,7 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
    CComPtr<IFem2dDistributedLoadCollection> reDistLoads;
    reLoading->get_DistributedLoads(&reDistLoads);
 
+   Float64 Lxb = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    IndexType nBearingLines = pProject->GetBearingLineCount(pierID);
    for ( IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
@@ -712,6 +722,28 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
       for ( IndexType brgIdx = 0; brgIdx < nBearings; brgIdx++ )
       {
          Float64 Xbrg = pPier->GetBearingLocation(pierID,brgLineIdx,brgIdx);
+
+         if (Xbrg < 0 || Lxb < Xbrg)
+         {
+            // bearing is off the model... skip it
+            CString strMsg;
+            if (1 < nBearings)
+            {
+               strMsg.Format(_T("Bearing %d on Bearing Line %d is not on the cross beam."), LABEL_INDEX(brgIdx), LABEL_INDEX(brgLineIdx));
+            }
+            else
+            {
+               strMsg.Format(_T("Bearing %d is not on the cross beam."), LABEL_INDEX(brgIdx));
+            }
+            strMsg += _T(" Permanent load reactions at this bearing have been ignored.");
+
+            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_StatusGroupID, m_scidBridgeWarning, strMsg);
+
+            GET_IFACE(IEAFStatusCenter, pStatusCenter);
+            pStatusCenter->Add(pStatusItem);
+
+            continue;
+         }
 
          Float64 DC, DW, CR, SH, PS, RE, W;
          pProject->GetBearingReactions(pierID,brgLineIdx,brgIdx,&DC,&DW,&CR,&SH,&PS,&RE,&W);
@@ -979,6 +1011,14 @@ void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPoint
 
    Float64 Xpoi = poi.GetDistFromStart();
    GetXBeamFemModelLocation(pModelData,Xpoi,pMbrID,pMbrLocation);
+
+   // We know that GetXBeamFemModelLocation will always return the member to the left of a joint location if at a joint.
+   // For a POI_COLUMN_RIGHT, we want the member to the right
+   if (poi.HasAttribute(POI_COLUMN_RIGHT))
+   {
+      (*pMbrID)++;
+      *pMbrLocation = 0.0;
+   }
 }
 
 void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const
@@ -1052,6 +1092,12 @@ LoadCaseIDType CAnalysisAgentImp::GetLoadCaseID(xbrTypes::ProductForceType pfTyp
 
 void CAnalysisAgentImp::Invalidate(bool bCreateNewDataStructures)
 {
+   if (m_pBroker)
+   {
+      GET_IFACE(IEAFStatusCenter, pStatusCenter);
+      pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
+   }
+
    InvalidateModels(bCreateNewDataStructures);
    InvalidateResults(bCreateNewDataStructures);
 }
@@ -1068,54 +1114,36 @@ HRESULT CAnalysisAgentImp::OnProjectChanged()
 // IBridgeDescriptionEventSink
 HRESULT CAnalysisAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnGirderFamilyChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnLiveLoadChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName)
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }
 
 HRESULT CAnalysisAgentImp::OnConstructionLoadChanged()
 {
-   GET_IFACE(IEAFStatusCenter,pStatusCenter);
-   pStatusCenter->RemoveByStatusGroupID(m_StatusGroupID);
-
    Invalidate();
    return S_OK;
 }

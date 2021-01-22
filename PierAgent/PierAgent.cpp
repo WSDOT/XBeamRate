@@ -50,6 +50,8 @@
 #include <EAF\EAFTransactions.h>
 
 #include <IFace\AnalysisResults.h>
+#include <IFace\LoadRating.h>
+#include <IFace\RatingSpecification.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

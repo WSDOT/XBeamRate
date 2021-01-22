@@ -55,6 +55,8 @@ CConcreteGeneralPage::CConcreteGeneralPage() : CPropertyPage(CConcreteGeneralPag
 	//}}AFX_DATA_INIT
    m_MinNWCDensity = lrfdConcreteUtil::GetNWCDensityLimit();
    m_MaxLWCDensity = lrfdConcreteUtil::GetLWCDensityLimit();
+
+   lrfdConcreteUtil::GetUHPCStrengthRange(&m_MinFcUHPC, &m_MaxFcUHPC);
 }
 
 
@@ -140,7 +142,6 @@ BOOL CConcreteGeneralPage::OnInitDialog()
 {
    CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
    GetDlgItem(IDC_FC_LABEL)->SetWindowText(_T("Strength - f'c"));
-   GetDlgItem(IDC_DS_TITLE)->SetWindowText(_T("Unit Weight (used to compute Ec)"));
    GetDlgItem(IDC_MOD_E)->SetWindowText(_T("Mod. Elasticity, Ec"));
 
    CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
@@ -238,12 +239,13 @@ void CConcreteGeneralPage::UpdateEc()
       strK1.Format(_T("%f"),pParent->Concrete.EcK1);
       strK2.Format(_T("%f"),pParent->Concrete.EcK1);
 
-      CString strEc = CConcreteDetailsDlg::UpdateEc(strFc,strDensity,strK1,strK2);
+      pgsTypes::ConcreteType type = GetConcreteType();
+      CString strEc = CConcreteDetailsDlg::UpdateEc(type,strFc,strDensity,strK1,strK2);
       m_ctrlEc.SetWindowText(strEc);
    }
 }
 
-pgsTypes::ConcreteType CConcreteGeneralPage::GetConreteType()
+pgsTypes::ConcreteType CConcreteGeneralPage::GetConcreteType()
 {
    CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
    pgsTypes::ConcreteType type = (pgsTypes::ConcreteType)pcbConcreteType->GetItemData(pcbConcreteType->GetCurSel());
@@ -252,16 +254,14 @@ pgsTypes::ConcreteType CConcreteGeneralPage::GetConreteType()
 
 void CConcreteGeneralPage::OnConcreteType()
 {
-   CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
-   pgsTypes::ConcreteType type = (pgsTypes::ConcreteType)pcbConcreteType->GetItemData(pcbConcreteType->GetCurSel());
-
    GetDlgItem(IDC_DS)->Invalidate();
    GetDlgItem(IDC_DW)->Invalidate();
+   UpdateEc();
 }
 
 HBRUSH CConcreteGeneralPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-   HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+   HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
    if ( pWnd->GetDlgCtrlID() == IDC_DS && 0 < pWnd->GetWindowTextLength())
    {
@@ -293,7 +293,7 @@ HBRUSH CConcreteGeneralPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
             Float64 value;
             DDX_UnitValue(&dx, IDC_DS, value, pDisplayUnits->GetDensityUnit() );
 
-            if ( !IsDensityInRange(value,GetConreteType()) )
+            if ( !IsDensityInRange(value,GetConcreteType()) )
             {
                pDC->SetTextColor( RED );
             }
@@ -314,18 +314,41 @@ void CConcreteGeneralPage::OnOK()
    CConcreteDetailsDlg* pParent = (CConcreteDetailsDlg*)GetParent();
    if ( !m_bErrorInDDX && !IsDensityInRange(pParent->Concrete.StrengthDensity,pParent->Concrete.Type) )
    {
-      AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal || pParent->Concrete.Type == pgsTypes::UHPC ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
+      AFX_MANAGE_STATE(AfxGetStaticModuleState());
+      AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
+   }
+
+   if (!m_bErrorInDDX && !IsStrengthInRange(pParent->Concrete.Fc, pParent->Concrete.Type))
+   {
+      AFX_MANAGE_STATE(AfxGetStaticModuleState());
+      AfxMessageBox(_T("The concrete strength is not in the normal range for UHPC.\nThe concrete will be treated as UHPC."));
    }
 }
 
 bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteType type)
 {
-   if ( type == pgsTypes::Normal || type == pgsTypes::UHPC )
+   if (type == pgsTypes::UHPC)
+   {
+      return true; // no density range for UHPC
+   }
+   else if (type == pgsTypes::Normal)
    {
       return ( IsLE(m_MinNWCDensity,density) );
    }
    else
    {
       return ( IsLE(density,m_MaxLWCDensity) );
+   }
+}
+
+bool CConcreteGeneralPage::IsStrengthInRange(Float64 fc, pgsTypes::ConcreteType type)
+{
+   if (type == pgsTypes::UHPC)
+   {
+      return InRange(m_MinFcUHPC, fc, m_MaxFcUHPC);
+   }
+   else
+   {
+      return true; // no range limit for other concrete types
    }
 }

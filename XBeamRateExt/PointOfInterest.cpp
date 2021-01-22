@@ -67,7 +67,17 @@ bool xbrPointOfInterest::operator<(const xbrPointOfInterest& other) const
 {
    if ( m_ColumnIndex == other.m_ColumnIndex )
    {
-      return m_Xpoi < other.m_Xpoi;
+      // We want to put right of column poi at end of =='s list
+      bool bpcr = HasAttribute(POI_COLUMN_RIGHT);
+      bool botherpcr = other.HasAttribute(POI_COLUMN_RIGHT);
+      if (m_Xpoi == other.m_Xpoi && botherpcr && !bpcr )
+      {
+         return true; 
+      }
+      else
+      {
+         return m_Xpoi < other.m_Xpoi;
+      }
    }
 
    return m_ColumnIndex < other.m_ColumnIndex;
@@ -151,14 +161,25 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
       nAttributes++;
    }
 
-   if ( HasAttribute(POI_COLUMN) )
+   if ( HasAttribute(POI_COLUMN_LEFT) )
    {
       if ( 0 < nAttributes )
       {
          strAttrib += _T(", ");
       }
 
-      strAttrib += _T("Col");
+      strAttrib += _T("Col_left ");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_COLUMN_RIGHT) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("Col_right ");
       nAttributes++;
    }
 
@@ -206,6 +227,28 @@ std::_tstring xbrPointOfInterest::GetAttributes(bool bIncludeMarkup) const
       nAttributes++;
    }
 
+   if ( HasAttribute(POI_FOC_DV2) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("FoC_dv2 ");
+      nAttributes++;
+   }
+
+   if ( HasAttribute(POI_FOC_DV) )
+   {
+      if ( 0 < nAttributes )
+      {
+         strAttrib += _T(", ");
+      }
+
+      strAttrib += _T("FoC_dv ");
+      nAttributes++;
+   }
+
    if ( HasAttribute(POI_MIDPOINT) )
    {
       if ( 0 < nAttributes )
@@ -231,14 +274,14 @@ void xbrPointOfInterest::UpdateAttributeString()
       os << _T("POI_SECTIONCHANGE | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN) )
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_LEFT) )
    {
-      os << _T("POI_COLUMN | ");
+      os << _T("POI_COLUMN_LEFT | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMNDELTA) )
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_RIGHT) )
    {
-      os << _T("POI_COLUMNDELTA | ");
+      os << _T("POI_COLUMN_RIGHT | ");
    }
 
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )
@@ -264,6 +307,16 @@ void xbrPointOfInterest::UpdateAttributeString()
    if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )
    {
       os << _T("POI_MIDPOINT | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV2) )
+   {
+      os << _T("POI_FOC_dv2 | ");
+   }
+
+   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV) )
+   {
+      os << _T("POI_FOC_dv | ");
    }
 
    os << std::endl;
