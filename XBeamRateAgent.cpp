@@ -290,7 +290,7 @@ void CXBeamRateAgent::RegisterUIExtensions()
 {
    // Tell PGSuper/PGSplice that we want to add stuff to its dialogs
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
-   m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
+   m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this,nullptr);
    m_EditLoadRatingOptionsCallbackID = pExtendUI->RegisterEditLoadRatingOptionsCallback(this);
 
    // Add a command callback to the bridge view
