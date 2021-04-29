@@ -603,8 +603,6 @@ matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
 
 void CLongitudinalRebarGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)
 {
-   CGXGridCore::OnModifyCell(nRow,nCol);
-
    if ( nCol == 2 )
    {
       GetParam()->EnableUndo(FALSE);
@@ -635,5 +633,9 @@ void CLongitudinalRebarGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)
 
       GetParam()->SetLockReadOnly(TRUE);
       GetParam()->EnableUndo(TRUE);
+   }
+   else
+   {
+      __super::OnModifyCell(nRow, nCol);
    }
 }
