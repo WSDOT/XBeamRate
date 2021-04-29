@@ -473,8 +473,6 @@ void CColumnLayoutGrid::OnClickedButtonRowCol(ROWCOL nRow,ROWCOL nCol)
 
 void CColumnLayoutGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)
 {
-   CGXGridCore::OnModifyCell(nRow,nCol);
-
    if ( nCol == 3 )
    {
       GetParam()->EnableUndo(FALSE);
@@ -504,5 +502,9 @@ void CColumnLayoutGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)
 
       GetParam()->SetLockReadOnly(TRUE);
       GetParam()->EnableUndo(TRUE);
+   }
+   else
+   {
+      __super::OnModifyCell(nRow, nCol);
    }
 }
