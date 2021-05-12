@@ -80,7 +80,7 @@ BEGIN
             VALUE "FileDescription", "PierAgent Module"
             VALUE "FileVersion", "6.1.0.0"
             VALUE "InternalName", "PierAgent"
-            VALUE "LegalCopyright", "Copyright © 1999-2020, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2021, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "PierAgent.DLL"
             VALUE "ProductName", "XBRate"
             VALUE "ProductVersion", "6.1.0.0"
