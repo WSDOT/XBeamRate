@@ -1935,11 +1935,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
-         Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
+         PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
-         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
-         dc[0] -= Pback;
-         dc[1] -= Pahead;
+         pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
+         dc[0] -= backSide.P;
+         dc[1] -= aheadSide.P;
 
          *pDC = dc[brgLineIdx];
          *pDW = dw[brgLineIdx];
@@ -1987,10 +1987,10 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
 
          // superstructure pier diaphragm dead load is applied to the pier model and is included
          // in the superstructure reactions. subtract out the pier diaphragm load. don't want to count it twice
-         Float64 Pback, Mback, backMomentArm, Pahead, Mahead, aheadMomentArm;
+         PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
-         pProductLoads->GetPierDiaphragmLoads(pierIdx,girderKey.girderIndex,&Pback,&Mback,&backMomentArm,&Pahead,&Mahead,&aheadMomentArm);
-         *pDC -= (Pback + Pahead);
+         pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
+         *pDC -= (backSide.P + aheadSide.P);
       }
 
       if ( UseUniformLoads(pierID,brgLineIdx) )
