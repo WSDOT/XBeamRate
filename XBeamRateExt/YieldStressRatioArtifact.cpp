@@ -41,7 +41,7 @@ xbrYieldStressRatioArtifact::xbrYieldStressRatioArtifact()
    m_PermitRatingMethod = xbrTypes::prmAASHTO;
 
    m_VehicleIndex = INVALID_INDEX;
-   m_VehicleWeight = -9999999;
+   m_VehicleWeight = -99999;
    m_strVehicleName = _T("Unknown");
 
    m_AllowableStressRatio = 0.9;

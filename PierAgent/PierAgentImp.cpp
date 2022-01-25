@@ -868,7 +868,7 @@ Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
-   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(lrfdConcreteUtil::DensityType)concrete.Type);
+   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(matConcrete::Type)concrete.Type);
    Float64 lambda = GetXBeamLambda(pierID);
    return lambda*fr;
 }
