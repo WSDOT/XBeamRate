@@ -52,7 +52,7 @@
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -60,7 +60,7 @@
     <CodeAnalysisRuleAssemblies />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -73,7 +73,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\Include;$(WBFLDIR)\Include;$(WBFLDIR)\Include\$(Platform);$(PGSUPERDIR)\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDXBREXTLIB;_GXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -83,7 +83,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX64</TargetMachine>
@@ -97,7 +97,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\Include;$(WBFLDIR)\Include;$(WBFLDIR)\Include\$(Platform);$(PGSUPERDIR)\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BUILDXBREXTLIB;_GXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -107,7 +107,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>

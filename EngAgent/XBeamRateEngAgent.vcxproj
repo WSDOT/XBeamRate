@@ -52,7 +52,7 @@
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <OutDir>$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>true</LinkIncremental>
@@ -61,7 +61,7 @@
     <CodeAnalysisRuleAssemblies />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <OutDir>$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
+    <OutDir>$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(Platform)\$(Configuration)\</IntDir>
     <IgnoreImportLibrary>true</IgnoreImportLibrary>
     <LinkIncremental>false</LinkIncremental>
@@ -76,7 +76,7 @@
     </CustomBuildStep>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -86,7 +86,7 @@
     <ClCompile>
       <AdditionalOptions>/Zm600  %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\Include;$(WBFLDIR)\Include;$(WBFLDIR)\Include\$(Platform);$(PGSUPERDIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_AFXDLL;_ATL_NO_UUIDOF;_DEBUG;WIN32;_WINDOWS;ENABLE_LOGGING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -106,7 +106,7 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\EngAgent.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -130,7 +130,7 @@
     </CustomBuildStep>
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MkTypLibCompatible>true</MkTypLibCompatible>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <TargetEnvironment>X64</TargetEnvironment>
@@ -139,7 +139,7 @@
     </Midl>
     <ClCompile>
       <AdditionalOptions>/Zm500  %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>.\;..\Include;$(WBFLDIR)\Include;$(WBFLDIR)\Include\$(Platform);$(PGSUPERDIR)\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_AFXDLL;_ATL_NO_UUIDOF;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -158,7 +158,7 @@
       <AdditionalDependencies>odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>$(WBFLDIR)\RegFreeCOM\$(Platform)\$(Configuration);$(BRIDGELINKDIR)\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);$(ARPDIR)\BridgeLink\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>.\EngAgent.def</ModuleDefinitionFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
