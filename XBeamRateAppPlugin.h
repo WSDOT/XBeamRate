@@ -50,7 +50,7 @@ public:
    HRESULT FinalConstruct();
    void FinalRelease();
 
-   LPCTSTR GetAppName() { return _T("XBeamRate"); }
+   LPCTSTR GetAppName() const { return _T("XBeamRate"); }
 
    void GetAppUnitSystem(IAppUnitSystem** ppAppUnitSystem);
 
@@ -82,6 +82,7 @@ public:
 
 // IEAFAppCommandLine
 public:
+   virtual CString GetCommandLineAppName() const override;
    virtual CString GetUsageMessage() override;
    virtual BOOL ProcessCommandLineOptions(CEAFCommandLineInfo& cmdInfo) override;
 

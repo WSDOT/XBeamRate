@@ -185,6 +185,12 @@ void CXBeamRateAppPlugin::SaveCustomReportInformation()
 
 ////////////////////////////////////////////////////////
 // IEAFCommandLineInfo
+
+CString CXBeamRateAppPlugin::GetCommandLineAppName() const
+{
+   return GetAppName();
+}
+
 CString CXBeamRateAppPlugin::GetUsageMessage()
 {
    CXBRateCommandLineInfo cmdInfo;
