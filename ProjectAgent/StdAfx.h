@@ -36,7 +36,12 @@
 
 #include <MFCTools\MFCTools.h>
 
+#if defined _NOGRID
+#include <NoGrid.h>
+#else
 #include <grid\gxall.h>
+#endif
+
 #include <afxwin.h>
 #include <afxdlgs.h>
 

@@ -32,7 +32,12 @@
 #include <Units\Units.h>
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFHelp.h>
+
+#if defined _NOGRID
+#include <NoGrid.h>
+#else
 #include <grid\gxall.h>
+#endif
 
 #include <XBRate.hh>
 

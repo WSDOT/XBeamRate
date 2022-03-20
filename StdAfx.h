@@ -42,4 +42,8 @@ extern CComModule _Module;
 
 #include <XBRate.hh>
 
+#if defined _NOGRID
+#include <NoGrid.h>
+#else
 #include <grid\gxall.h>
+#endif
