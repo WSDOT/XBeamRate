@@ -53,8 +53,6 @@
 
 #include <MFCTools\AutoRegistry.h>
 
-#include "..\resource.h" // for ID_VIEW_PIER
-
 #include "PierExporter.h"
 
 #ifdef _DEBUG
