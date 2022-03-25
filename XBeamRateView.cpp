@@ -1245,7 +1245,8 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          pgsPointOfInterest gdrPoi;
-         if (pBridge->IsInteriorPier(pierIdx))
+
+         if (pBridge->IsInteriorPier(pierIdx) && IsSegmentContinuousOverPier(pBridge->GetPierSegmentConnectionType(pierIdx)))
          {
             gdrPoi = poi;
          }
