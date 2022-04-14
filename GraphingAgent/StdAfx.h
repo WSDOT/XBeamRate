@@ -29,8 +29,12 @@
 #include <XBeamRateAll.h>
 #include "GraphColors.h"
 
-#include <GraphManager\GraphManager.h>
-#include <GraphicsLib\GraphicsLib.h>
+#include <Graphing/GraphManager.h>
+#include <Graphing/GraphXY.h>
+#include <Graphing/AxisXY.h>
+#include <Graphing/GraphColor.h>
+#include <Graphing/GraphingTypes.h>
+
 #include <PgsExt\GirderLabel.h>
 
 #include <XBRate.hh>

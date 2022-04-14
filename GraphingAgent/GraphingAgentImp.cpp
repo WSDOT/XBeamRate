@@ -155,7 +155,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
 {
    GET_IFACE(IGraphManager,pGraphMgr);
 
-   CXBRAnalysisResultsGraphBuilder* pAnalysisResultsGraphBuilder = new CXBRAnalysisResultsGraphBuilder;
+   std::unique_ptr<CXBRAnalysisResultsGraphBuilder> pAnalysisResultsGraphBuilder = std::make_unique<CXBRAnalysisResultsGraphBuilder>();
    pAnalysisResultsGraphBuilder->InitDocumentation(_T("XBRate"),IDH_ANALYSIS_RESULTS);
    
    if ( IsPGSExtension() )
@@ -165,10 +165,10 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
       pAnalysisResultsGraphBuilder->SetName(_T("Cross Beam Analysis Results"));
    }
 
-   VERIFY(pGraphMgr->AddGraphBuilder( pAnalysisResultsGraphBuilder ));
+   VERIFY(pGraphMgr->AddGraphBuilder( std::move(pAnalysisResultsGraphBuilder) ));
 
 
-   CXBRLiveLoadGraphBuilder* pLiveLoadGraphBuilder = new CXBRLiveLoadGraphBuilder;
+   std::unique_ptr<CXBRLiveLoadGraphBuilder> pLiveLoadGraphBuilder = std::make_unique<CXBRLiveLoadGraphBuilder>();
    pLiveLoadGraphBuilder->InitDocumentation(_T("XBRate"),IDH_LIVE_LOAD_RESULTS);
    
    if ( IsPGSExtension() )
@@ -178,7 +178,7 @@ HRESULT CGraphingAgentImp::InitGraphBuilders()
       pLiveLoadGraphBuilder->SetName(_T("Cross Beam Live Load Results"));
    }
 
-   VERIFY(pGraphMgr->AddGraphBuilder( pLiveLoadGraphBuilder ));
+   VERIFY(pGraphMgr->AddGraphBuilder( std::move(pLiveLoadGraphBuilder) ));
 
    return S_OK;
 }

@@ -38,7 +38,7 @@ public:
 
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID) override;
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
-   virtual CGraphBuilder* Clone() const override;
+   virtual std::unique_ptr<WBFL::Graphing::GraphBuilder> Clone() const override;
    virtual void CreateViewController(IEAFViewController** ppController) override;
    void ExportGraphData(LPCTSTR rstrDefaultFileName);
 
@@ -68,7 +68,7 @@ protected:
 
    LPCTSTR GetGraphTitle(ActionType actionType);
 
-   grGraphXY m_Graph;
+   WBFL::Graphing::GraphXY m_Graph;
    arvPhysicalConverter* m_pXFormat;
    arvPhysicalConverter* m_pYFormat;
 

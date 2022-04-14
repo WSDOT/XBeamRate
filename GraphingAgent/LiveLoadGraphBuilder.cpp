@@ -49,7 +49,9 @@
 #include <PgsExt\Helpers.h>
 
 #include <MFCTools\Format.h>
-#include <Graphing\ExportGraphXYTool.h>
+#include <MFCTools\Text.h>
+
+#include <Graphs/ExportGraphXYTool.h>
 
 #include <algorithm>
 
@@ -114,12 +116,12 @@ CEAFGraphControlWindow* CXBRLiveLoadGraphBuilder::GetGraphControlWindow()
    return &m_GraphController;
 }
 
-CGraphBuilder* CXBRLiveLoadGraphBuilder::Clone() const
+std::unique_ptr<WBFL::Graphing::GraphBuilder> CXBRLiveLoadGraphBuilder::Clone() const
 {
    // set the module state or the commands wont route to the
    // the graph control window
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return new CXBRLiveLoadGraphBuilder(*this);
+   return std::make_unique<CXBRLiveLoadGraphBuilder>(*this);
 }
 
 void CXBRLiveLoadGraphBuilder::CreateViewController(IEAFViewController** ppController)
@@ -434,8 +436,8 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
          pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Mmax));
       }
       else
       {
@@ -446,10 +448,10 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
          Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
 
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vrmax));
       }
    }
 }
@@ -471,8 +473,8 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
          pResults->GetMoment(pierID,ratingType,vehicleIdx,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Mmax));
       }
       else
       {
@@ -482,10 +484,10 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
          Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vrmax));
       }
    }
 }
@@ -505,15 +507,15 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
       {
          Float64 Mz = pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
          Mz = m_pYFormat->Convert(Mz);
-         m_Graph.AddPoint(graphIdx, GraphPoint(X,Mz));
+         m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Mz));
       }
       else
       {
          sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
          Float64 Vl = m_pYFormat->Convert(Fy.Left());
          Float64 Vr = m_pYFormat->Convert(Fy.Right());
-         m_Graph.AddPoint(graphIdx,GraphPoint(X,Vl));
-         m_Graph.AddPoint(graphIdx,GraphPoint(X,Vr));
+         m_Graph.AddPoint(graphIdx,WBFL::Graphing::Point(X,Vl));
+         m_Graph.AddPoint(graphIdx,WBFL::Graphing::Point(X,Vr));
       }
    }
 }
@@ -542,8 +544,8 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
          pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
          Mpermit = m_pYFormat->Convert(Mpermit);
          Mlegal  = m_pYFormat->Convert(Mlegal);
-         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Mpermit));
-         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Mlegal));
+         m_Graph.AddPoint(permitGraphIdx,WBFL::Graphing::Point(X,Mpermit));
+         m_Graph.AddPoint(legalGraphIdx, WBFL::Graphing::Point(X,Mlegal));
       }
       else
       {
@@ -553,10 +555,10 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
          Vpermit.Right() = m_pYFormat->Convert(Vpermit.Right());
          Vlegal.Left() = m_pYFormat->Convert(Vlegal.Left());
          Vlegal.Right() = m_pYFormat->Convert(Vlegal.Right());
-         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Vpermit.Left()));
-         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Vpermit.Right()));
-         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Vlegal.Left()));
-         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Vlegal.Right()));
+         m_Graph.AddPoint(permitGraphIdx,WBFL::Graphing::Point(X,Vpermit.Left()));
+         m_Graph.AddPoint(permitGraphIdx,WBFL::Graphing::Point(X,Vpermit.Right()));
+         m_Graph.AddPoint(legalGraphIdx, WBFL::Graphing::Point(X,Vlegal.Left()));
+         m_Graph.AddPoint(legalGraphIdx, WBFL::Graphing::Point(X,Vlegal.Right()));
       }
    }
 }
@@ -571,13 +573,13 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    IndexType permitLaneIdx = m_GraphController.GetPermitLaneIndex();
    WheelLineConfiguration wheelLineConfig = pProductForces->GetLiveLoadConfiguration(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx);
 
-   grlibPointMapper mapper( m_Graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );
+   WBFL::Graphing::PointMapper mapper( m_Graph.GetClientAreaPointMapper(pDC->GetSafeHdc()) );
    LONG x,y;
    mapper.WPtoDP(0,0,&x,&y);
 
    // Get world extents and world origin
-   GraphSize wExt  = mapper.GetWorldExt();
-   GraphPoint wOrg = mapper.GetWorldOrg();
+   WBFL::Graphing::Size wExt  = mapper.GetWorldExt();
+   WBFL::Graphing::Point wOrg = mapper.GetWorldOrg();
    
    // get device extents and device origin
    LONG dx,dy;
@@ -600,7 +602,7 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    CPen permit_pen(PS_SOLID,1,GREEN);
    CPen* pOldPen = pDC->SelectObject(&legal_pen);
 
-   HFONT hFont = grGraphTool::CreateRotatedFont(pDC->GetSafeHdc(),900,8);
+   HFONT hFont = CreateRotatedFont(pDC->GetSafeHdc(),900,8,_T("Arial"));
    HGDIOBJ hOldFont = pDC->SelectObject(hFont);
 
    UINT oldTextAlign = pDC->GetTextAlign();
@@ -662,6 +664,8 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    pDC->SelectObject(hOldFont);
    pDC->SetTextAlign(oldTextAlign);
    pDC->SetBkMode(nBkMode);
+
+   DeleteObject(hFont);
 }
 
 void CXBRLiveLoadGraphBuilder::ExportGraphData(LPCTSTR rstrDefaultFileName)

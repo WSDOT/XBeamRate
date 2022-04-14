@@ -38,7 +38,7 @@ public:
 
    virtual BOOL CreateGraphController(CWnd* pParent,UINT nID) override;
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
-   virtual CGraphBuilder* Clone() const;
+   virtual std::unique_ptr<WBFL::Graphing::GraphBuilder> Clone() const;
    const CXBRAnalysisResultsGraphDefinitions& GetGraphDefinitions();
 
    void UpdateGraphDefinitions();
@@ -68,8 +68,8 @@ protected:
 
    LPCTSTR GetGraphTitle(ActionType actionType);
 
-   grGraphColor m_GraphColor;
-   grGraphXY m_Graph;
+   WBFL::Graphing::GraphColor m_GraphColor;
+   WBFL::Graphing::GraphXY m_Graph;
    arvPhysicalConverter* m_pXFormat;
    arvPhysicalConverter* m_pYFormat;
 

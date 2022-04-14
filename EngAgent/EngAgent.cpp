@@ -36,7 +36,6 @@
 
 #include "EngAgentCLSID.h"
 
-#include <WBFLSections_i.c>
 #include <WBFLCore_i.c>
 #include <WBFLRCCapacity_i.c>
 #include <WBFLGeometry_i.c>
