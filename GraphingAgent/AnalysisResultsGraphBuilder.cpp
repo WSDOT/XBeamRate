@@ -46,6 +46,7 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
+#include <Graphing\ExportGraphXYTool.h>
 
 #include <algorithm>
 
@@ -679,4 +680,9 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
          m_Graph.AddPoint(minGraphIdx,GraphPoint(X,-V));
       }
    }
+}
+
+void CXBRAnalysisResultsGraphBuilder::ExportGraphData(LPCTSTR rstrDefaultFileName)
+{
+   CExportGraphXYTool::ExportGraphData(m_Graph,rstrDefaultFileName);
 }

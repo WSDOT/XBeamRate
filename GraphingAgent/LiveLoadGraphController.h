@@ -57,6 +57,8 @@ protected:
 
 	//{{AFX_MSG(CXBRLiveLoadGraphController)
    afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
+   afx_msg void OnGraphExportClicked();
+   afx_msg void OnCommandUIGraphExport(CCmdUI* pCmdUI);
    //}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

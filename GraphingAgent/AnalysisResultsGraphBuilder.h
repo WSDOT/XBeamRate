@@ -44,6 +44,7 @@ public:
    void UpdateGraphDefinitions();
 
    virtual void CreateViewController(IEAFViewController** ppController) override;
+   void ExportGraphData(LPCTSTR rstrDefaultFileName);
 
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow() override;

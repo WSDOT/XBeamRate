@@ -40,6 +40,7 @@ public:
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
    virtual CGraphBuilder* Clone() const override;
    virtual void CreateViewController(IEAFViewController** ppController) override;
+   void ExportGraphData(LPCTSTR rstrDefaultFileName);
 
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow() override;

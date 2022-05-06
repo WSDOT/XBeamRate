@@ -49,6 +49,7 @@
 #include <PgsExt\Helpers.h>
 
 #include <MFCTools\Format.h>
+#include <Graphing\ExportGraphXYTool.h>
 
 #include <algorithm>
 
@@ -661,4 +662,9 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    pDC->SelectObject(hOldFont);
    pDC->SetTextAlign(oldTextAlign);
    pDC->SetBkMode(nBkMode);
+}
+
+void CXBRLiveLoadGraphBuilder::ExportGraphData(LPCTSTR rstrDefaultFileName)
+{
+   CExportGraphXYTool::ExportGraphData(m_Graph,rstrDefaultFileName);
 }

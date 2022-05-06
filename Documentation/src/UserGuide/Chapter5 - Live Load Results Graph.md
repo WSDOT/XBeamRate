@@ -20,6 +20,7 @@ Select a Live Load Configuration to see the results for a specific live load cas
 
 Use the < and > buttons to step through the various live load configurations.
 
+**Exporting Graph Data**: Data from this graph can be exported to a file by clicking on the *Export Graph Data* button. See @ref ug_exporting_graph_data for more information.
 
 ## Emergency Vehicle and Permit Live Load Configurations
 

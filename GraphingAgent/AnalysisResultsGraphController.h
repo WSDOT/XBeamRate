@@ -49,6 +49,8 @@ protected:
    virtual BOOL OnInitDialog() override;
 
 	//{{AFX_MSG(CXBRAnalysisResultsGraphController)
+   afx_msg void OnGraphExportClicked();
+   afx_msg void OnCommandUIGraphExport(CCmdUI* pCmdUI);
    //}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
