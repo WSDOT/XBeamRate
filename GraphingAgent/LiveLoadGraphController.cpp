@@ -37,7 +37,7 @@
 
 #include <EAF\EAFUtilities.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
-#include <Graphing\ExportGraphXYTool.h>
+#include <Graphs\ExportGraphXYTool.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

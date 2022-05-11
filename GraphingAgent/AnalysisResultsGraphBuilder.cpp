@@ -46,7 +46,7 @@
 
 #include <\ARP\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
-#include <Graphing\ExportGraphXYTool.h>
+#include <Graphs\ExportGraphXYTool.h>
 
 #include <algorithm>
 
