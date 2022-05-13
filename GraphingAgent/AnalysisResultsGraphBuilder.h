@@ -27,7 +27,14 @@
 #include "AnalysisResultsGraphDefinition.h"
 
 class CEAFGraphChildFrame;
-class arvPhysicalConverter;
+
+namespace WBFL
+{
+   namespace Units
+   {
+      class PhysicalConverter;
+   };
+};
 
 class CXBRAnalysisResultsGraphBuilder : public CEAFAutoCalcGraphBuilder
 {
@@ -70,8 +77,8 @@ protected:
 
    WBFL::Graphing::GraphColor m_GraphColor;
    WBFL::Graphing::GraphXY m_Graph;
-   arvPhysicalConverter* m_pXFormat;
-   arvPhysicalConverter* m_pYFormat;
+   WBFL::Units::PhysicalConverter* m_pXFormat;
+   WBFL::Units::PhysicalConverter* m_pYFormat;
 
    DECLARE_MESSAGE_MAP()
 

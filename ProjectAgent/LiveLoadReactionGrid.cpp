@@ -316,10 +316,10 @@ void CLiveLoadReactionGrid::GetLiveLoadData(ROWCOL row,xbrLiveLoadReactionData& 
    reactionData.Name = GetCellValue(row,1);
    
    Float64 llim = _tstof(GetCellValue(row,2));
-   reactionData.LLIM = ::ConvertToSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   reactionData.LLIM = WBFL::Units::ConvertToSysUnits(llim,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    
    Float64 w = _tstof(GetCellValue(row,3));
-   reactionData.W = ::ConvertToSysUnits(w,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+   reactionData.W = WBFL::Units::ConvertToSysUnits(w,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
 }
 
 CString CLiveLoadReactionGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)

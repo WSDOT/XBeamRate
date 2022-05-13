@@ -36,8 +36,8 @@ xbrLongitudinalRebarData::RebarRow::RebarRow():
    Length(0), 
    BarSize(matRebar::bs10), 
    NumberOfBars(1), 
-   Cover(::ConvertToSysUnits(2.0,unitMeasure::Inch)), 
-   BarSpacing(::ConvertToSysUnits(6.0,unitMeasure::Inch)),
+   Cover(WBFL::Units::ConvertToSysUnits(2.0,WBFL::Units::Measure::Inch)), 
+   BarSpacing(WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Inch)),
    bHookStart(false),
    bHookEnd(false)
 {;}

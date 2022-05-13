@@ -40,7 +40,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\Format.h>
 
-#include <Units\SysUnits.h>
+#include <Units\Convert.h>
 
 #include "LoadRater.h"
 
@@ -821,10 +821,10 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
    Float64 fc = pProject->GetConcrete(pierID).Fc;
    Float64 bv = pProject->GetXBeamWidth(pierID);
-   Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
+   Float64 fc_us = WBFL::Units::ConvertFromSysUnits(fc,WBFL::Units::Measure::KSI);
    Float64 lambda = pMaterial->GetXBeamLambda(pierID);
    Float64 Vc_us = 0.0316*lambda*beta*sqrt(fc_us)*bv*dv;
-   Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
+   Float64 Vc = WBFL::Units::ConvertToSysUnits(Vc_us,WBFL::Units::Measure::KSI);
    Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
    Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
    Float64 Vs = Vs1 + Vs2; // total capacity due to reinforcement

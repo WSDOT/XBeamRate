@@ -210,7 +210,7 @@ void CBearingLayoutGrid::AddBearing()
    Float64 DC, DW, CR, SH, PS, RE, W, S;
    GetBearingData(nRows,&DC,&DW,&CR,&SH,&PS,&RE,&W,&S); // bearing data in the last row (we want DC and DW)
 
-   Float64 Sdefault = ::ConvertToSysUnits(6.0,unitMeasure::Feet); // default spacing
+   Float64 Sdefault = WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Feet); // default spacing
    Float64 Wdefault = Sdefault;
    if ( 1 < nRows )
    {
@@ -579,67 +579,67 @@ void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Flo
    Float64 DC = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pDC = ::ConvertToSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pDC = WBFL::Units::ConvertToSysUnits(DC,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pDC = ::ConvertToSysUnits(DC,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pDC = WBFL::Units::ConvertToSysUnits(DC,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 DW = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pDW = ::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pDW = WBFL::Units::ConvertToSysUnits(DW,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pDW = ::ConvertToSysUnits(DW,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pDW = WBFL::Units::ConvertToSysUnits(DW,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 CR = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pCR = ::ConvertToSysUnits(CR,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pCR = WBFL::Units::ConvertToSysUnits(CR,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pCR = ::ConvertToSysUnits(CR,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pCR = WBFL::Units::ConvertToSysUnits(CR,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 SH = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pSH = ::ConvertToSysUnits(SH,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pSH = WBFL::Units::ConvertToSysUnits(SH,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pSH = ::ConvertToSysUnits(SH,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pSH = WBFL::Units::ConvertToSysUnits(SH,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 PS = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pPS = ::ConvertToSysUnits(PS,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pPS = WBFL::Units::ConvertToSysUnits(PS,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pPS = ::ConvertToSysUnits(PS,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pPS = WBFL::Units::ConvertToSysUnits(PS,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 RE = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltConcentrated )
    {
-      *pRE = ::ConvertToSysUnits(RE,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
+      *pRE = WBFL::Units::ConvertToSysUnits(RE,pDisplayUnits->GetGeneralForceUnit().UnitOfMeasure);
    }
    else
    {
-      *pRE = ::ConvertToSysUnits(RE,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
+      *pRE = WBFL::Units::ConvertToSysUnits(RE,pDisplayUnits->GetForcePerLengthUnit().UnitOfMeasure);
    }
 
    Float64 W = _tstof(GetCellValue(row,col++));
    if ( m_ReactionLoadType == xbrTypes::rltUniform )
    {
-      *pW = ::ConvertToSysUnits(W,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+      *pW = WBFL::Units::ConvertToSysUnits(W,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
    }
    else
    {
@@ -647,7 +647,7 @@ void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Flo
    }
 
    Float64 S = _tstof(GetCellValue(row,col++));
-   *pS = ::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
+   *pS = WBFL::Units::ConvertToSysUnits(S,pDisplayUnits->GetSpanLengthUnit().UnitOfMeasure);
 }
 
 CString CBearingLayoutGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)

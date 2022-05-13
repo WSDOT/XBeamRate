@@ -392,7 +392,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetValue(GetRebarLayoutType(rebarData.LayoutType))
       );
 
-   Float64 value = ::ConvertFromSysUnits(rebarData.Start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   Float64 value = WBFL::Units::ConvertFromSysUnits(rebarData.Start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -400,7 +400,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetValue(value)
       );
 
-   value = ::ConvertFromSysUnits(rebarData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(rebarData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -421,7 +421,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
    }
 
    // Cover
-   value = ::ConvertFromSysUnits(rebarData.Cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(rebarData.Cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -459,7 +459,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       );
 
    // Spacing
-   value = ::ConvertFromSysUnits(rebarData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(rebarData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -514,14 +514,14 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::R
    rebarData.LayoutType = GetRebarLayoutType(strLayout);
 
    Float64 start = _tstof(GetCellValue(row,col++));
-   rebarData.Start = ::ConvertToSysUnits(start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   rebarData.Start = WBFL::Units::ConvertToSysUnits(start,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 
    Float64 length = _tstof(GetCellValue(row,col++));
-   rebarData.Length = ::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   rebarData.Length = WBFL::Units::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 
    // Cover
    Float64 cover = _tstof(GetCellValue(row,col++));
-   rebarData.Cover = ::ConvertToSysUnits(cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   rebarData.Cover = WBFL::Units::ConvertToSysUnits(cover,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 
    // Bar Size
    rebarData.BarSize = GetBarSize(row,col++);
@@ -532,7 +532,7 @@ void CLongitudinalRebarGrid::GetRebarData(ROWCOL row,xbrLongitudinalRebarData::R
 
    // Spacing;
    Float64 spacing = _tstof(GetCellValue(row,col++));
-   rebarData.BarSpacing = ::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   rebarData.BarSpacing = WBFL::Units::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 
    CString strCheck = GetCellValue(row,col++);
    rebarData.bHookStart = (strCheck == _T("1") ? true : false);

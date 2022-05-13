@@ -32,7 +32,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFAutoProgress.h>
 #include <MathEx.h>
-#include <UnitMgt\UnitValueNumericalFormatTools.h>
+#include <Units\UnitValueNumericalFormatTools.h>
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
@@ -62,8 +62,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 // create a dummy unit conversion tool to pacify the graph constructor
-static unitmgtLengthData DUMMY(unitMeasure::Meter);
-static LengthTool        DUMMY_TOOL(DUMMY);
+static WBFL::Units::LengthData DUMMY(WBFL::Units::Measure::Meter);
+static WBFL::Units::LengthTool DUMMY_TOOL(DUMMY);
 
 BEGIN_MESSAGE_MAP(CXBRLiveLoadGraphBuilder, CEAFAutoCalcGraphBuilder)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRLiveLoadGraphBuilder::OnGraphTypeChanged)
@@ -235,9 +235,9 @@ void CXBRLiveLoadGraphBuilder::InitGraph()
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   m_pXFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   m_pXFormat = new WBFL::Units::LengthTool(pDisplayUnits->GetSpanLengthUnit());
    m_Graph.SetXAxisValueFormat(*m_pXFormat);
-   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
+   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((WBFL::Units::LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
 }
 
 void CXBRLiveLoadGraphBuilder::UpdateYAxisUnits()
@@ -254,19 +254,19 @@ void CXBRLiveLoadGraphBuilder::UpdateYAxisUnits()
    {
    case actionMoment:
       {
-      const unitmgtMomentData& momentUnit = pDisplayUnits->GetMomentUnit();
-      m_pYFormat = new MomentTool(momentUnit);
+      const WBFL::Units::MomentData& momentUnit = pDisplayUnits->GetMomentUnit();
+      m_pYFormat = new WBFL::Units::MomentTool(momentUnit);
       m_Graph.SetYAxisValueFormat(*m_pYFormat);
-      std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)m_pYFormat)->UnitTag() + _T(")");
+      std::_tstring strYAxisTitle = _T("Moment (") + ((WBFL::Units::MomentTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
       }
    case actionShear:
       {
-      const unitmgtForceData& shearUnit = pDisplayUnits->GetShearUnit();
-      m_pYFormat = new ShearTool(shearUnit);
+      const WBFL::Units::ForceData& shearUnit = pDisplayUnits->GetShearUnit();
+      m_pYFormat = new WBFL::Units::ShearTool(shearUnit);
       m_Graph.SetYAxisValueFormat(*m_pYFormat);
-      std::_tstring strYAxisTitle = _T("Shear (") + ((ShearTool*)m_pYFormat)->UnitTag() + _T(")");
+      std::_tstring strYAxisTitle = _T("Shear (") + ((WBFL::Units::ShearTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
       }

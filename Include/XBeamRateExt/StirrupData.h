@@ -46,7 +46,7 @@ public:
       Float64 nBars;
 
       StirrupZone():
-      Length(0), BarSpacing(::ConvertToSysUnits(6.0,unitMeasure::Inch)), BarSize(matRebar::bs6), nBars(4)
+      Length(0), BarSpacing(WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Inch)), BarSize(matRebar::bs6), nBars(4)
       {;}
 
       bool operator==(const StirrupZone& other) const

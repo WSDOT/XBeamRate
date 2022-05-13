@@ -29,7 +29,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-rptXBRPointOfInterest::rptXBRPointOfInterest(const unitLength* pUnitOfMeasure,
+rptXBRPointOfInterest::rptXBRPointOfInterest(const WBFL::Units::Length* pUnitOfMeasure,
                                        Float64 zeroTolerance,
                                        bool bShowUnitTag) :
 rptLengthUnitValue(pUnitOfMeasure,zeroTolerance,bShowUnitTag),m_bPrefixAttributes(true)

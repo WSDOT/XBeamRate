@@ -205,10 +205,10 @@ void GetLaneInfo(Float64 Wcc,Float64* pWlane,IndexType* pnLanes,Float64* pWloade
    // ==========
 
    // LRFR 6A.2.3.2
-   Float64 w10 = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
-   Float64 w12 = ::ConvertToSysUnits(12.0,unitMeasure::Feet);
-   Float64 w18 = ::ConvertToSysUnits(18.0,unitMeasure::Feet);
-   Float64 w20 = ::ConvertToSysUnits(20.0,unitMeasure::Feet);
+   Float64 w10 = WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet);
+   Float64 w12 = WBFL::Units::ConvertToSysUnits(12.0,WBFL::Units::Measure::Feet);
+   Float64 w18 = WBFL::Units::ConvertToSysUnits(18.0,WBFL::Units::Measure::Feet);
+   Float64 w20 = WBFL::Units::ConvertToSysUnits(20.0,WBFL::Units::Measure::Feet);
    if ( Wcc < w12 )
    {
       *pWlane = 0;

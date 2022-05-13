@@ -30,7 +30,7 @@
 #include <IFace\RatingSpecification.h>
 #include <EAF\EAFDisplayUnits.h>
 
-#include <Units\SysUnitsMgr.h>
+#include <Units\System.h>
 #include <MFCTools\Format.h>
 
 #include <EAF\EAFAutoProgress.h>
@@ -406,7 +406,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
          // live load is applied to a load transfer model.
 
          // dummy properties of the transfer model
-         //Float64 Y = ::ConvertToSysUnits(1.0,unitMeasure::Inch); // offset the transfer model a small distance above the XBeam model
+         //Float64 Y = WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Inch); // offset the transfer model a small distance above the XBeam model
 
          // Live load is on the deck, so the height of the transfer model is the height of the superstructure diaphram plus the deck thickness
          Float64 H,W;
@@ -977,7 +977,7 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
    GET_IFACE(IXBRMaterial,pMaterial);
 
    Float64 density = pMaterial->GetXBeamDensity(pierID);
-   Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
+   Float64 unitWeight = density*WBFL::Units::System::GetGravitationalAcceleration();
 
    std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
    std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
@@ -1169,7 +1169,7 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID) const
 
    GET_IFACE(IXBRMaterial,pMaterial);
    Float64 density = pMaterial->GetXBeamDensity(pierID);
-   Float64 unitWeight = density*unitSysUnitsMgr::GetGravitationalAcceleration();
+   Float64 unitWeight = density*WBFL::Units::System::GetGravitationalAcceleration();
 
    Float64 w = H*W*unitWeight;
    return w;
@@ -2549,7 +2549,7 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
 
 #if defined _DEBUG
          // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
-         Float64 w2 = ::ConvertToSysUnits(2.0,unitMeasure::Feet); // 2' shy distance from curb-line
+         Float64 w2 = WBFL::Units::ConvertToSysUnits(2.0,WBFL::Units::Measure::Feet); // 2' shy distance from curb-line
          w2 /= cos(skew);
          ATLASSERT(IsEqual(vWheelLinePositions.back() + stepSize*nStepsRemaining + w2,Wcc));
 #endif
@@ -2608,7 +2608,7 @@ void CAnalysisAgentImp::GetLaneGapConfiguration(IndexType nTotalSteps,IndexType 
 
 std::vector<Float64> CAnalysisAgentImp::GetWheelLinePositions(Float64 skew,Float64 stepSize,Float64 wLoadedLane,const std::vector<IndexType>& vGapPosition) const
 {
-   Float64 w3 = ::ConvertToSysUnits(3.0,unitMeasure::Feet); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
+   Float64 w3 = WBFL::Units::ConvertToSysUnits(3.0,WBFL::Units::Measure::Feet); // 6 ft spacing between wheel lines... wheel line is +/-3' from CL lane
    w3 /= cos(skew); // we are working in the plane of the pier, so make skew adjustment
 
    std::vector<Float64> vLoadPositions;

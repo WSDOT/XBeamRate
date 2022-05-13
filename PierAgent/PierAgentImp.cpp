@@ -1935,7 +1935,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
 
-   Float64 delta = ::ConvertToSysUnits(0.001,unitMeasure::Feet);
+   Float64 delta = WBFL::Units::ConvertToSysUnits(0.001,WBFL::Units::Measure::Feet);
 
    Float64 H1, H2, X1, X2;
    Float64 H3, H4, X3, X4;
@@ -2005,7 +2005,7 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
    }
 
    // Need POI on a one-foot grid
-   Float64 step = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   Float64 step = WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Feet);
    Float64 Xpoi = 0;
    while ( ::IsLE(Xpoi,(L/2 - step)) )
    {

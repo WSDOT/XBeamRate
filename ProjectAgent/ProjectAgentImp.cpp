@@ -142,19 +142,19 @@ CProjectAgentImp::CProjectAgentImp()
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3"),0,::ConvertToSysUnits(50.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3S2"),0,::ConvertToSysUnits(72.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3-3"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3"),0,WBFL::Units::ConvertToSysUnits(50.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3S2"),0,WBFL::Units::ConvertToSysUnits(72.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3-3"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,::ConvertToSysUnits(54.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,WBFL::Units::ConvertToSysUnits(54.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,WBFL::Units::ConvertToSysUnits(62.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,WBFL::Units::ConvertToSysUnits(69.5,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,WBFL::Units::ConvertToSysUnits(77.5,WBFL::Units::Measure::Kip)));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV2"), 0, ::ConvertToSysUnits(57.5, unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV3"), 0, ::ConvertToSysUnits(86.0, unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV2"), 0, WBFL::Units::ConvertToSysUnits(57.5, WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV3"), 0, WBFL::Units::ConvertToSysUnits(86.0, WBFL::Units::Measure::Kip)));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
@@ -178,11 +178,11 @@ CProjectAgentImp::CProjectAgentImp()
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
    m_EmergencyRatingMethod = xbrTypes::ermWSDOT;
 
-   m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   m_MaxLLStepSize = WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Feet);
    m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
 
    m_bDoAnalyzeNegativeMomentBetweenFOC = false;
-   m_MinColumnWidthForNegMoment = ::ConvertToSysUnits(4.0,unitMeasure::Feet); // txdot's default
+   m_MinColumnWidthForNegMoment = WBFL::Units::ConvertToSysUnits(4.0,WBFL::Units::Measure::Feet); // txdot's default
 
    m_bExportingModel = false;
 }

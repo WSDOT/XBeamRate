@@ -319,7 +319,7 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   Float64 value = ::ConvertFromSysUnits(zoneData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   Float64 value = WBFL::Units::ConvertFromSysUnits(zoneData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 	SetStyleRange(CGXRange(row,1), CGXStyle()
 			.SetUserAttribute(GX_IDS_UA_VALID_MIN, _T("0.0e01"))
 			.SetUserAttribute(GX_IDS_UA_VALID_MAX, _T("1.0e99"))
@@ -338,7 +338,7 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
       .SetValue(lrfdRebarPool::GetBarSize(zoneData.BarSize).c_str())
       );
 
-   value = ::ConvertFromSysUnits(zoneData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(zoneData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 	SetStyleRange(CGXRange(row,3), CGXStyle()
 			.SetUserAttribute(GX_IDS_UA_VALID_MIN, _T("0.0e01"))
 			.SetUserAttribute(GX_IDS_UA_VALID_MAX, _T("1.0e99"))
@@ -378,7 +378,7 @@ bool CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
    else
    {
       Float64 length = _tstof(GetCellValue(row,1));
-      zoneData.Length = ::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+      zoneData.Length = WBFL::Units::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 
       if ( zoneData.Length <= 0 )
       {
@@ -392,7 +392,7 @@ bool CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
    zoneData.BarSize = GetBarSize(row,2);
 
    Float64 spacing = _tstof(GetCellValue(row,3));
-   zoneData.BarSpacing = ::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   zoneData.BarSpacing = WBFL::Units::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 
    Float64 nBars = _tstof(GetCellValue(row,4));
    zoneData.nBars = nBars;
