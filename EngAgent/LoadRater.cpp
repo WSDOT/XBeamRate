@@ -267,12 +267,12 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
 
    for( const auto& poi : vPoi)
    {
-      sysSectionValue vDC = pAnalysisResults->GetShear(pierID,xbrTypes::lcDC,poi);
-      sysSectionValue vDW = pAnalysisResults->GetShear(pierID,xbrTypes::lcDW,poi);
-      sysSectionValue vCR = pAnalysisResults->GetShear(pierID,xbrTypes::lcCR,poi);
-      sysSectionValue vSH = pAnalysisResults->GetShear(pierID,xbrTypes::lcSH,poi);
-      sysSectionValue vRE = pAnalysisResults->GetShear(pierID,xbrTypes::lcRE,poi);
-      sysSectionValue vPS = pAnalysisResults->GetShear(pierID,xbrTypes::lcPS,poi);
+      WBFL::System::SectionValue vDC = pAnalysisResults->GetShear(pierID,xbrTypes::lcDC,poi);
+      WBFL::System::SectionValue vDW = pAnalysisResults->GetShear(pierID,xbrTypes::lcDW,poi);
+      WBFL::System::SectionValue vCR = pAnalysisResults->GetShear(pierID,xbrTypes::lcCR,poi);
+      WBFL::System::SectionValue vSH = pAnalysisResults->GetShear(pierID,xbrTypes::lcSH,poi);
+      WBFL::System::SectionValue vRE = pAnalysisResults->GetShear(pierID,xbrTypes::lcRE,poi);
+      WBFL::System::SectionValue vPS = pAnalysisResults->GetShear(pierID,xbrTypes::lcPS,poi);
 
       Float64 DC   = MaxMagnitude(vDC.Left(),vDC.Right());
       Float64 DW   = MaxMagnitude(vDW.Left(),vDW.Right());
@@ -294,7 +294,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
          // moments include multiple presence factor
          if ( vehicleIdx == INVALID_INDEX )
          {
-            sysSectionValue vLLIMmin, vLLIMmax;
+            WBFL::System::SectionValue vLLIMmin, vLLIMmax;
             IndexType minLLLeftConfigIdx, minLLRightConfigIdx, maxLLLeftConfigIdx, maxLLRightConfigIdx;
             pAnalysisResults->GetShear(pierID,ratingType,poi,&vLLIMmin,&vLLIMmax,&minLLLeftConfigIdx, &minLLRightConfigIdx, &maxLLLeftConfigIdx, &maxLLRightConfigIdx);
             LLIM = MaxMagnitude(vLLIMmin.Left(),vLLIMmin.Right(),vLLIMmax.Left(),vLLIMmax.Right());
@@ -320,7 +320,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
                ATLASSERT(false); // should never get here
             }
 
-            sysSectionValue Vmin, Vmax;
+            WBFL::System::SectionValue Vmin, Vmax;
             IndexType minLLConfigIdx, maxLLConfigIdx;
             pAnalysisResults->GetShear(pierID,ratingType,vehIdx,poi,&Vmin,&Vmax,&minLLConfigIdx,&maxLLConfigIdx);
             if ( i == 0 || i == 1 )
@@ -334,7 +334,7 @@ void xbrLoadRater::ShearRating(PierIDType pierID, xbrTypes::Stage stage, const s
          }
          else
          {
-            sysSectionValue vLLIMmin, vLLIMmax;
+            WBFL::System::SectionValue vLLIMmin, vLLIMmax;
             IndexType minLLConfigIdx, maxLLConfigIdx;
             pAnalysisResults->GetShear(pierID,ratingType,vehicleIdx,poi,&vLLIMmin,&vLLIMmax,&minLLConfigIdx,&maxLLConfigIdx);
             LLIM = MaxMagnitude(vLLIMmin.Left(),vLLIMmin.Right(),vLLIMmax.Left(),vLLIMmax.Right());

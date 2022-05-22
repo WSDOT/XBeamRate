@@ -74,9 +74,9 @@ void txnEditReinforcement::Execute(int i)
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditReinforcement::CreateClone() const
+std::unique_ptr<CEAFTransaction> txnEditReinforcement::CreateClone() const
 {
-   return new txnEditReinforcement(m_PierID,m_Reinforcement[0],m_Reinforcement[1]);
+   return std::make_unique<txnEditReinforcement>(m_PierID,m_Reinforcement[0],m_Reinforcement[1]);
 }
 
 std::_tstring txnEditReinforcement::Name() const
@@ -84,12 +84,12 @@ std::_tstring txnEditReinforcement::Name() const
    return _T("Edit Cross Beam Reinforcement");
 }
 
-bool txnEditReinforcement::IsUndoable()
+bool txnEditReinforcement::IsUndoable() const
 {
    return true;
 }
 
-bool txnEditReinforcement::IsRepeatable()
+bool txnEditReinforcement::IsRepeatable() const
 {
    return false;
 }

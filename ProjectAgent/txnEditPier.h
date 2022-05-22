@@ -25,6 +25,7 @@
 #include <WBFLCore.h>
 #include <XBeamRateExt\PierData.h>
 #include <XBeamRateExt\LiveLoadReactionData.h>
+#include <EAF\EAFTransaction.h>
 
 class txnDeadLoadReaction
 {
@@ -85,7 +86,7 @@ public:
 };
 
 class txnEditPier :
-   public txnTransaction
+   public CEAFTransaction
 {
 public:
    txnEditPier(const txnEditPierData& oldPierData,const txnEditPierData& newPierData);
@@ -93,10 +94,10 @@ public:
 
    virtual bool Execute();
    virtual void Undo();
-   virtual txnTransaction* CreateClone() const;
+   virtual std::unique_ptr<CEAFTransaction>CreateClone() const;
    virtual std::_tstring Name() const;
-   virtual bool IsUndoable();
-   virtual bool IsRepeatable();
+   virtual bool IsUndoable() const;
+   virtual bool IsRepeatable() const;
 
 private:
    void Execute(int i);

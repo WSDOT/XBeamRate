@@ -199,7 +199,7 @@ void CStirrupGrid::AddZone()
 
 BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState)
 {
-   if ( sysFlags<WORD>::IsSet(nHitState,GX_HITEND) )
+   if ( WBFL::System::Flags<WORD>::IsSet(nHitState,GX_HITEND) )
    {
       CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
 

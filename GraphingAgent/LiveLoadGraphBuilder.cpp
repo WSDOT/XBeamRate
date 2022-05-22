@@ -441,7 +441,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
       }
       else
       {
-         sysSectionValue FyMin, FyMax;
+         WBFL::System::SectionValue FyMin, FyMax;
          pResults->GetShear(pierID,ratingType,poi,&FyMin,&FyMax,nullptr,nullptr,nullptr,nullptr);
          Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
@@ -478,7 +478,7 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
       }
       else
       {
-         sysSectionValue FyMin, FyMax;
+         WBFL::System::SectionValue FyMin, FyMax;
          pResults->GetShear(pierID,ratingType,vehicleIdx,poi,&FyMin,&FyMax,nullptr,nullptr);
          Float64 Vlmin = m_pYFormat->Convert(FyMin.Left());
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
@@ -511,7 +511,7 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
       }
       else
       {
-         sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
+         WBFL::System::SectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
          Float64 Vl = m_pYFormat->Convert(Fy.Left());
          Float64 Vr = m_pYFormat->Convert(Fy.Right());
          m_Graph.AddPoint(graphIdx,WBFL::Graphing::Point(X,Vl));
@@ -549,7 +549,7 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
       }
       else
       {
-         sysSectionValue Vpermit, Vlegal;
+         WBFL::System::SectionValue Vpermit, Vlegal;
          pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Vpermit,&Vlegal);
          Vpermit.Left() = m_pYFormat->Convert(Vpermit.Left());
          Vpermit.Right() = m_pYFormat->Convert(Vpermit.Right());

@@ -200,18 +200,18 @@ void CAgentCmdTarget::OnProjectProperties()
 
    if ( dlg.DoModal() == IDOK )
    {
-      txnEditProjectProperties* pTxn = new txnEditProjectProperties( pProjProp->GetBridgeName(), dlg.m_Bridge,
+      std::unique_ptr<txnEditProjectProperties> pTxn(std::make_unique<txnEditProjectProperties>( pProjProp->GetBridgeName(), dlg.m_Bridge,
                                                                      pProjProp->GetBridgeID(),   dlg.m_BridgeID,
                                                                      pProjProp->GetJobNumber(),  dlg.m_JobNumber,
                                                                      pProjProp->GetEngineer(),   dlg.m_Engineer,
                                                                      pProjProp->GetCompany(),    dlg.m_Company,
-                                                                     pProjProp->GetComments(),   dlg.m_Comments );
+                                                                     pProjProp->GetComments(),   dlg.m_Comments ));
 
          
       ShowProjectPropertiesOnNewProject(dlg.m_bShowProjectProperties);
 
       GET_IFACE(IEAFTransactions,pTransactions);
-      pTransactions->Execute(pTxn);
+      pTransactions->Execute(std::move(pTxn));
    }
 
 }

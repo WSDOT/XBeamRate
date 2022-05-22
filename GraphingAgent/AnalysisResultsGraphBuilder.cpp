@@ -492,7 +492,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,c
       }
       else
       {
-         sysSectionValue V = pResults->GetShear(pierID,pfType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,pfType,poi);
          Float64 Vl = m_pYFormat->Convert(V.Left());
          Float64 Vr = m_pYFormat->Convert(V.Right());
          m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vl));
@@ -523,7 +523,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,
       }
       else
       {
-         sysSectionValue V = pResults->GetShear(pierID,comboType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,comboType,poi);
          Float64 Vl = m_pYFormat->Convert(V.Left());
          Float64 Vr = m_pYFormat->Convert(V.Right());
          m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vl));
@@ -556,7 +556,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
@@ -594,7 +594,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,nullptr,nullptr,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
@@ -632,7 +632,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,con
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,limitState,poi,&Vmin,&Vmax);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());

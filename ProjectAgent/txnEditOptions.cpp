@@ -105,9 +105,9 @@ void txnEditOptions::Execute(int i)
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditOptions::CreateClone() const
+std::unique_ptr<CEAFTransaction> txnEditOptions::CreateClone() const
 {
-   return new txnEditOptions(m_Options[0],m_Options[1]);
+   return std::make_unique<txnEditOptions>(m_Options[0],m_Options[1]);
 }
 
 std::_tstring txnEditOptions::Name() const
@@ -115,12 +115,12 @@ std::_tstring txnEditOptions::Name() const
    return _T("Edit Options");
 }
 
-bool txnEditOptions::IsUndoable()
+bool txnEditOptions::IsUndoable() const
 {
    return true;
 }
 
-bool txnEditOptions::IsRepeatable()
+bool txnEditOptions::IsRepeatable() const
 {
    return false;
 }

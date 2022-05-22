@@ -199,20 +199,20 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 void RegisterComponents(bool bRegister)
 {
    // Component information objects
-   sysComCatMgr::RegWithCategory(CLSID_PGSuperComponentInfo,CATID_PGSuperComponentInfo,bRegister);
-   sysComCatMgr::RegWithCategory(CLSID_PGSpliceComponentInfo,CATID_PGSpliceComponentInfo,bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_PGSuperComponentInfo,CATID_PGSuperComponentInfo,bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_PGSpliceComponentInfo,CATID_PGSpliceComponentInfo,bRegister);
 
    // These components are for the "stand alone" XBeam Rate application
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin,    CATID_BridgeLinkAppPlugin, bRegister);
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_XBeamRateAppPlugin,    CATID_BridgeLinkAppPlugin, bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_XBeamRateComponentInfo,CATID_BridgeLinkComponentInfo,bRegister);
 
    // These components are for the PGSuper and PGSplice extension agents
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSuperExtensionAgent,  bRegister);
-   sysComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSpliceExtensionAgent, bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSuperExtensionAgent,  bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_XBeamRateAgent, CATID_PGSpliceExtensionAgent, bRegister);
 
    // These components are exporter plugins
-   sysComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSuperDataExporter,    bRegister);
-   sysComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSpliceDataExporter,   bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSuperDataExporter,    bRegister);
+   WBFL::System::ComCatMgr::RegWithCategory(CLSID_PGSuperDataExporter,   CATID_PGSpliceDataExporter,   bRegister);
 }
 
 STDAPI DllRegisterServer(void)

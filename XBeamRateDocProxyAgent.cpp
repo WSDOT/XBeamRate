@@ -43,6 +43,8 @@
 
 #include "XBeamRateVersionInfoImpl.h"
 
+#include <EAF\EAFTxnManager.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -150,7 +152,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::Init2()
 
 STDMETHODIMP CXBeamRateDocProxyAgent::Reset()
 {
-   txnTxnManager::GetInstance()->Clear();
+   CEAFTxnManager::GetInstance()->Clear();
    return S_OK;
 }
 

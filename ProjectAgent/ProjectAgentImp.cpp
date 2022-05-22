@@ -3051,12 +3051,12 @@ void CProjectAgentImp::FirePendingEvents()
       m_EventHoldCount--;
 
       // Fire our events
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECTPROPERTIES) )
+	   if ( WBFL::System::Flags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECTPROPERTIES) )
       {
 	      Fire_OnProjectPropertiesChanged();
       }
 
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
+	   if ( WBFL::System::Flags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
       {
 	      Fire_OnProjectChanged();
       }

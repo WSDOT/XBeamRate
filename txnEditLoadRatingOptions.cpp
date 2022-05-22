@@ -81,9 +81,9 @@ void txnEditLoadRatingOptions::Execute(int i)
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditLoadRatingOptions::CreateClone() const
+std::unique_ptr<CEAFTransaction> txnEditLoadRatingOptions::CreateClone() const
 {
-   return new txnEditLoadRatingOptions(m_Options[0],m_Options[1]);
+   return std::make_unique<txnEditLoadRatingOptions>(m_Options[0],m_Options[1]);
 }
 
 std::_tstring txnEditLoadRatingOptions::Name() const
@@ -91,12 +91,12 @@ std::_tstring txnEditLoadRatingOptions::Name() const
    return _T("Edit Cross Beam Load Rating Options");
 }
 
-bool txnEditLoadRatingOptions::IsUndoable()
+bool txnEditLoadRatingOptions::IsUndoable() const
 {
    return true;
 }
 
-bool txnEditLoadRatingOptions::IsRepeatable()
+bool txnEditLoadRatingOptions::IsRepeatable() const
 {
    return false;
 }

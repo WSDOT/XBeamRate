@@ -38,7 +38,7 @@ public:
 
       if ( 0 < pT->m_EventHoldCount )
       {
-         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECTPROPERTIES);
+         WBFL::System::Flags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECTPROPERTIES);
          return S_OK;
       }
 
@@ -74,7 +74,7 @@ public:
 
       if ( 0 < pT->m_EventHoldCount )
       {
-         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECT);
+         WBFL::System::Flags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECT);
          return S_OK;
       }
 
