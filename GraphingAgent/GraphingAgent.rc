@@ -13,13 +13,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (U.S.) resources
+// English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
-#ifdef _WIN32
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #pragma code_page(1252)
-#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -59,8 +57,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,1,0,0
- PRODUCTVERSION 6,1,0,0
+ FILEVERSION 7,0,0,7
+ PRODUCTVERSION 7,0,0,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -78,12 +76,12 @@ BEGIN
             VALUE "Comments", "A member of the Alternate Route Project"
             VALUE "CompanyName", "Washington State Department of Transportation"
             VALUE "FileDescription", "GraphingAgent Module"
-            VALUE "FileVersion", "6.1.0.0"
+            VALUE "FileVersion", "7.0.0.7"
             VALUE "InternalName", "GraphingAgent"
-            VALUE "LegalCopyright", "Copyright © 1999-2021, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2022, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "GraphingAgent.DLL"
             VALUE "ProductName", "XBRate"
-            VALUE "ProductVersion", "6.1.0.0"
+            VALUE "ProductVersion", "7.0.0.7"
         END
     END
     BLOCK "VarFileInfo"
@@ -99,14 +97,14 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER, DIALOG
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 157
         TOPMARGIN, 7
-        BOTTOMMARGIN, 361
+        BOTTOMMARGIN, 344
     END
 
     IDD_LIVE_LOAD_GRAPH_CONTROLLER, DIALOG
@@ -114,7 +112,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 157
         TOPMARGIN, 7
-        BOTTOMMARGIN, 367
+        BOTTOMMARGIN, 392
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -125,17 +123,18 @@ END
 // Dialog
 //
 
-IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER DIALOGEX 0, 0, 164, 368
+IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER DIALOGEX 0, 0, 164, 351
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
     CONTROL         "Moment",IDC_MOMENT,"Button",BS_AUTORADIOBUTTON,7,8,35,10
     CONTROL         "Shear",IDC_SHEAR,"Button",BS_AUTORADIOBUTTON,48,8,29,10
-    LISTBOX         IDC_LOADING,7,25,150,336,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
+    LISTBOX         IDC_LOADING,7,25,150,302,LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_PIERS,86,7,71,30,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Export Graph Data...",IDC_EXPORT_GRAPH_BTN,31,336,81,14
 END
 
-IDD_LIVE_LOAD_GRAPH_CONTROLLER DIALOGEX 0, 0, 164, 374
+IDD_LIVE_LOAD_GRAPH_CONTROLLER DIALOGEX 0, 0, 164, 399
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 400, 0, 0x1
 BEGIN
@@ -151,6 +150,7 @@ BEGIN
     LTEXT           "Emergency vehicle in Lane",IDC_PERMIT_LANE_NOTE,42,356,84,8,NOT WS_VISIBLE
     EDITTEXT        IDC_PERMIT_LANE,128,353,29,14,ES_AUTOHSCROLL | ES_READONLY | NOT WS_VISIBLE
     CONTROL         "",IDC_PERMIT_LANE_SPINNER,"msctls_updown32",UDS_SETBUDDYINT | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | UDS_HOTTRACK | NOT WS_VISIBLE,146,353,11,14
+    PUSHBUTTON      "Export Graph Data...",IDC_EXPORT_GRAPH_BTN,31,378,81,14
 END
 
 
@@ -160,6 +160,7 @@ END
 //
 
 IDR_GRAPHINGAGENT       REGISTRY                "GraphingAgent.rgs"
+
 IDR_GRAPHINGAGENTMODULE REGISTRY                "GraphingAgentModule.rgs"
 
 
@@ -173,18 +174,23 @@ BEGIN
     0
 END
 
+IDD_ANALYSIS_RESULTS_GRAPH_CONTROLLER AFX_DIALOG_LAYOUT
+BEGIN
+    0
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // String Table
 //
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PROJNAME            "GraphingAgent"
 END
 
-#endif    // English (U.S.) resources
+#endif    // English (United States) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

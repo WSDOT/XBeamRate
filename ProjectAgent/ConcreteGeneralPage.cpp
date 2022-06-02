@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,7 @@ CConcreteGeneralPage::CConcreteGeneralPage() : CPropertyPage(CConcreteGeneralPag
    m_MinNWCDensity = lrfdConcreteUtil::GetNWCDensityLimit();
    m_MaxLWCDensity = lrfdConcreteUtil::GetLWCDensityLimit();
 
-   lrfdConcreteUtil::GetUHPCStrengthRange(&m_MinFcUHPC, &m_MaxFcUHPC);
+   lrfdConcreteUtil::GetPCIUHPCStrengthRange(&m_MinFcUHPC, &m_MaxFcUHPC);
 }
 
 
@@ -105,7 +105,8 @@ void CConcreteGeneralPage::DoDataExchange(CDataExchange* pDX)
 
       DDX_UnitValueAndTag(pDX, IDC_AGG_SIZE, IDC_AGG_SIZE_UNIT, pParent->Concrete.MaxAggregateSize, pDisplayUnits->GetComponentDimUnit() );
       DDV_UnitValueGreaterThanZero(pDX, IDC_AGG_SIZE, pParent->Concrete.MaxAggregateSize, pDisplayUnits->GetComponentDimUnit() );
-      
+
+
       if ( pDX->m_bSaveAndValidate && m_ctrlEcCheck.GetCheck() == 1 )
       {
          m_ctrlEc.GetWindowText(m_strUserEc);
@@ -317,18 +318,13 @@ void CConcreteGeneralPage::OnOK()
       AFX_MANAGE_STATE(AfxGetStaticModuleState());
       AfxMessageBox(pParent->Concrete.Type == pgsTypes::Normal ? IDS_NWC_MESSAGE : IDS_LWC_MESSAGE,MB_OK | MB_ICONINFORMATION);
    }
-
-   if (!m_bErrorInDDX && !IsStrengthInRange(pParent->Concrete.Fc, pParent->Concrete.Type))
-   {
-      AFX_MANAGE_STATE(AfxGetStaticModuleState());
-      AfxMessageBox(_T("The concrete strength is not in the normal range for UHPC.\nThe concrete will be treated as UHPC."));
-   }
 }
 
 bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteType type)
 {
-   if (type == pgsTypes::UHPC)
+   if (type == pgsTypes::PCI_UHPC)
    {
+      ATLASSERT(false); // the UI should prevent uhpc
       return true; // no density range for UHPC
    }
    else if (type == pgsTypes::Normal)
@@ -338,17 +334,5 @@ bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteTy
    else
    {
       return ( IsLE(density,m_MaxLWCDensity) );
-   }
-}
-
-bool CConcreteGeneralPage::IsStrengthInRange(Float64 fc, pgsTypes::ConcreteType type)
-{
-   if (type == pgsTypes::UHPC)
-   {
-      return InRange(m_MinFcUHPC, fc, m_MaxFcUHPC);
-   }
-   else
-   {
-      return true; // no range limit for other concrete types
    }
 }

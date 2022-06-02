@@ -1,11 +1,11 @@
-cd \ARP\XBeamRate\Documentation
+cd %ARPDIR%\XBeamRate\Documentation
 
 rmdir /S /Q doc
 doxygen Doxygen.dox
 
-\ARP\BridgeLink\RegFreeCOM\x64\Release\MakeDocMap XBRate
-rmdir /S /Q \ARP\BridgeLink\Docs\XBRate\%1\
-mkdir \ARP\BridgeLink\Docs\XBRate\%1\
-copy \ARP\XBeamRate\Documentation\doc\html\* \ARP\BridgeLink\Docs\XBRate\%1\
-copy \ARP\XBeamRate\Documentation\XBRate.dm \ARP\BridgeLink\Docs\XBRate\%1\
+%ARPDIR%\BridgeLink\RegFreeCOM\x64\Release\MakeDocMap XBRate
+rmdir /S /Q %ARPDIR%\BridgeLink\Docs\XBRate\%1\
+mkdir %ARPDIR%\BridgeLink\Docs\XBRate\%1\
+copy %ARPDIR%\XBeamRate\Documentation\doc\html\* %ARPDIR%\BridgeLink\Docs\XBRate\%1\
+copy %ARPDIR%\XBeamRate\Documentation\XBRate.dm %ARPDIR%\BridgeLink\Docs\XBRate\%1\
 

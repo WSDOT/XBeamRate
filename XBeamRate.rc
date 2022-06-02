@@ -52,8 +52,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 6,1,0,0
- PRODUCTVERSION 6,1,0,0
+ FILEVERSION 7,0,0,7
+ PRODUCTVERSION 7,0,0,7
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -69,12 +69,12 @@ BEGIN
         BLOCK "040904B0"
         BEGIN
             VALUE "FileDescription", "XBRate Module"
-            VALUE "FileVersion", "6.1.0.0"
+            VALUE "FileVersion", "7.0.0.7"
             VALUE "InternalName", "XBRate"
-            VALUE "LegalCopyright", "Copyright © 1999-2021, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2022, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "XBeamRate.DLL"
             VALUE "ProductName", "XBRate Module"
-            VALUE "ProductVersion", "6.1.0.0"
+            VALUE "ProductVersion", "7.0.0.7"
         END
     END
     BLOCK "VarFileInfo"
@@ -141,6 +141,7 @@ BEGIN
         MENUITEM "Turn &AutoCalc On",           EAFID_TOGGLE_AUTOCALC
         MENUITEM "&Reporting...",               EAFID_OPTIONS_REPORTING
         MENUITEM "&Hints...",                   EAFID_OPTIONS_HINTS
+        MENUITEM "AutoSave...",                 EAFID_OPTIONS_AUTOSAVE
     END
     POPUP "&View"
     BEGIN

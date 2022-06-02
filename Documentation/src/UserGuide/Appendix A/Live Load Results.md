@@ -23,3 +23,4 @@ When the WSDOT BDM rating equation is used for Emergency Vehicle or Permit live 
 
 The live load configuration is schematically shown on the graph including the wheel line reactions and positions.
 
+**Exporting Graph Data**: Data from this graph can be exported to a file by clicking on the *Export Graph Data* button. See @ref ug_exporting_graph_data for more information.

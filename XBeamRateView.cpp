@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -1245,7 +1245,8 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          IntervalIndexType intervalIdx = pIntervals->GetErectSegmentInterval(segmentKey);
 
          pgsPointOfInterest gdrPoi;
-         if (pBridge->IsInteriorPier(pierIdx))
+
+         if (pBridge->IsInteriorPier(pierIdx) && IsSegmentContinuousOverPier(pBridge->GetPierSegmentConnectionType(pierIdx)))
          {
             gdrPoi = poi;
          }

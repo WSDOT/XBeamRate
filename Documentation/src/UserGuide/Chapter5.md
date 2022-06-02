@@ -29,7 +29,7 @@ To create the graphical results from PGSuper/PGSplice:
 Select *View > Graphs > Cross Beam Analysis Results* to create the Analysis Results graph
 Select *View > Graphs > Cross Beam Live Load Results* to create the Live Load Results graph
 
-
+**Exporting Graph Data**: Data from these graphs can be exported to a file by clicking on the *Export Graph Data* button. See @subpage ug_exporting_graph_data for more information.
 
 ## Other Topics
 @subpage chapter5_load_rating_report

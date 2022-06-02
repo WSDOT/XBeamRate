@@ -234,6 +234,7 @@
 #define IDC_COMPANY                     1854
 #define IDC_COMMENTS                    1855
 #define IDC_SHOW_DIALOG                 1856
+#define ID_VIEW_PIER                    33030
 #define ID_EDIT_PROJECT_NAME            50000
 #define ID_EDIT_PIER                    50001
 #define ID_EDIT_OPTIONS                 50002

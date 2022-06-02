@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -33,12 +33,29 @@
 #include <PgsExt\BridgeDescription2.h>
 #include <EAF\EAFUtilities.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
+#include <Graphing\ExportGraphXYTool.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+static LPCTSTR GetActionName(ActionType action)
+{
+   switch (action)
+   {
+   case actionShear:
+      return _T("Shear");
+   case actionMoment:
+      return _T("Moment");
+   case actionLoadRating:
+      return _T("Rating Factor");
+   default:
+      ATLASSERT(false); // is there a new action type?
+      return _T("Unknown Action");
+   };
+}
 
 
 IMPLEMENT_DYNCREATE(CXBRAnalysisResultsGraphController,CEAFGraphControlWindow)
@@ -49,7 +66,9 @@ CXBRAnalysisResultsGraphController::CXBRAnalysisResultsGraphController()
 
 BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphController, CEAFGraphControlWindow)
 	//{{AFX_MSG_MAP(CXBRAnalysisResultsGraphController)
-	//}}AFX_MSG_MAP
+   ON_BN_CLICKED(IDC_EXPORT_GRAPH_BTN,OnGraphExportClicked)
+   ON_UPDATE_COMMAND_UI(IDC_EXPORT_GRAPH_BTN,OnCommandUIGraphExport)
+   //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 BOOL CXBRAnalysisResultsGraphController::OnInitDialog()
@@ -210,3 +229,28 @@ void CXBRAnalysisResultsGraphController::FillLoadingList()
       plbLoading->SetCurSel(0);
    }
 }
+
+void CXBRAnalysisResultsGraphController::OnGraphExportClicked()
+{
+   // Build default file name
+   CString strProjectFileNameNoPath = CExportGraphXYTool::GetTruncatedFileName();
+
+   PierIDType pierID = GetPierID();
+   CString pierName = _T("Pier_") + CString(LABEL_PIER(pierID));
+
+   ActionType action = GetActionType();
+   CString actionName = GetActionName(action);
+
+   CString strDefaultFileName = strProjectFileNameNoPath + _T("_") + pierName + _T("_") + actionName;
+   strDefaultFileName.Replace(' ','_'); // prefer not to have spaces or ,'s in file names
+   strDefaultFileName.Replace(',','_');
+
+   ((CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder())->ExportGraphData(strDefaultFileName);
+}
+
+// this has to be implemented otherwise button will not be enabled.
+void CXBRAnalysisResultsGraphController::OnCommandUIGraphExport(CCmdUI* pCmdUI)
+{
+   pCmdUI->Enable(TRUE);
+}
+

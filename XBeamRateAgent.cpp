@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -290,7 +290,7 @@ void CXBeamRateAgent::RegisterUIExtensions()
 {
    // Tell PGSuper/PGSplice that we want to add stuff to its dialogs
    GET_IFACE(IExtendPGSuperUI,pExtendUI);
-   m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this);
+   m_EditPierCallbackID = pExtendUI->RegisterEditPierCallback(this,nullptr);
    m_EditLoadRatingOptionsCallbackID = pExtendUI->RegisterEditLoadRatingOptionsCallback(this);
 
    // Add a command callback to the bridge view

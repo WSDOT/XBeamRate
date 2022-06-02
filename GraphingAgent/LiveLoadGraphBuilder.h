@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -40,6 +40,7 @@ public:
    virtual void DrawGraphNow(CWnd* pGraphWnd,CDC* pDC) override;
    virtual CGraphBuilder* Clone() const override;
    virtual void CreateViewController(IEAFViewController** ppController) override;
+   void ExportGraphData(LPCTSTR rstrDefaultFileName);
 
 protected:
    virtual CEAFGraphControlWindow* GetGraphControlWindow() override;

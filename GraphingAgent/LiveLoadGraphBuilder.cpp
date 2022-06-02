@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -49,6 +49,7 @@
 #include <PgsExt\Helpers.h>
 
 #include <MFCTools\Format.h>
+#include <Graphing\ExportGraphXYTool.h>
 
 #include <algorithm>
 
@@ -433,8 +434,8 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
          pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
       }
       else
       {
@@ -445,10 +446,10 @@ void CXBRLiveLoadGraphBuilder::BuildControllingLiveLoadGraph(PierIDType pierID,c
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
          Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
 
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
       }
    }
 }
@@ -470,8 +471,8 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
          pResults->GetMoment(pierID,ratingType,vehicleIdx,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Mmin));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
       }
       else
       {
@@ -481,10 +482,10 @@ void CXBRLiveLoadGraphBuilder::BuildControllingVehicularLiveLoadGraph(PierIDType
          Float64 Vrmin = m_pYFormat->Convert(FyMin.Right());
          Float64 Vlmax = m_pYFormat->Convert(FyMax.Left());
          Float64 Vrmax = m_pYFormat->Convert(FyMax.Right());
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,gpPoint2d(X,Vrmin));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,gpPoint2d(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
       }
    }
 }
@@ -504,15 +505,15 @@ void CXBRLiveLoadGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const std::v
       {
          Float64 Mz = pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
          Mz = m_pYFormat->Convert(Mz);
-         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Mz));
+         m_Graph.AddPoint(graphIdx, GraphPoint(X,Mz));
       }
       else
       {
          sysSectionValue Fy = pResults->GetShear(pierID,ratingType,vehicleIdx,llConfigIdx,poi);
          Float64 Vl = m_pYFormat->Convert(Fy.Left());
          Float64 Vr = m_pYFormat->Convert(Fy.Right());
-         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vl));
-         m_Graph.AddPoint(graphIdx,gpPoint2d(X,Vr));
+         m_Graph.AddPoint(graphIdx,GraphPoint(X,Vl));
+         m_Graph.AddPoint(graphIdx,GraphPoint(X,Vr));
       }
    }
 }
@@ -541,8 +542,8 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
          pResults->GetMoment(pierID,ratingType,vehicleIdx,llConfigIdx,permitLaneIdx,poi,&Mpermit,&Mlegal);
          Mpermit = m_pYFormat->Convert(Mpermit);
          Mlegal  = m_pYFormat->Convert(Mlegal);
-         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Mpermit));
-         m_Graph.AddPoint(legalGraphIdx, gpPoint2d(X,Mlegal));
+         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Mpermit));
+         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Mlegal));
       }
       else
       {
@@ -552,10 +553,10 @@ void CXBRLiveLoadGraphBuilder::BuildWSDOTPermitLiveLoadGraph(PierIDType pierID,c
          Vpermit.Right() = m_pYFormat->Convert(Vpermit.Right());
          Vlegal.Left() = m_pYFormat->Convert(Vlegal.Left());
          Vlegal.Right() = m_pYFormat->Convert(Vlegal.Right());
-         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Left()));
-         m_Graph.AddPoint(permitGraphIdx,gpPoint2d(X,Vpermit.Right()));
-         m_Graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Left()));
-         m_Graph.AddPoint(legalGraphIdx,gpPoint2d(X,Vlegal.Right()));
+         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Vpermit.Left()));
+         m_Graph.AddPoint(permitGraphIdx,GraphPoint(X,Vpermit.Right()));
+         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Vlegal.Left()));
+         m_Graph.AddPoint(legalGraphIdx, GraphPoint(X,Vlegal.Right()));
       }
    }
 }
@@ -575,8 +576,8 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    mapper.WPtoDP(0,0,&x,&y);
 
    // Get world extents and world origin
-   gpSize2d wExt  = mapper.GetWorldExt();
-   gpPoint2d wOrg = mapper.GetWorldOrg();
+   GraphSize wExt  = mapper.GetWorldExt();
+   GraphPoint wOrg = mapper.GetWorldOrg();
    
    // get device extents and device origin
    LONG dx,dy;
@@ -661,4 +662,9 @@ void CXBRLiveLoadGraphBuilder::DrawLiveLoadConfig(CWnd* pGraphWnd,CDC* pDC,PierI
    pDC->SelectObject(hOldFont);
    pDC->SetTextAlign(oldTextAlign);
    pDC->SetBkMode(nBkMode);
+}
+
+void CXBRLiveLoadGraphBuilder::ExportGraphData(LPCTSTR rstrDefaultFileName)
+{
+   CExportGraphXYTool::ExportGraphData(m_Graph,rstrDefaultFileName);
 }

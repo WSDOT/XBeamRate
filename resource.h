@@ -58,6 +58,7 @@
 #define ID_VIEW_GRAPHS                  32775
 #define ID_GRAPHS_THISISAPLACEHOLDER    32776
 #define ID_VIEW_REPORTS                 32777
+#define ID_OPTIONS_AUTOSAVE             32790
 #define ID_VIEW_PIER                    33030
 #define IDM_EXPORT_PIER                 33031
 #define IDM_EDIT_PIER                   33032
@@ -68,7 +69,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        215
-#define _APS_NEXT_COMMAND_VALUE         32790
+#define _APS_NEXT_COMMAND_VALUE         32792
 #define _APS_NEXT_CONTROL_VALUE         206
 #define _APS_NEXT_SYMED_VALUE           103
 #endif

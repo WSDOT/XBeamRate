@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2021  Washington State Department of Transportation
+// Copyright © 1999-2022  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -86,5 +86,4 @@ protected:
    virtual void OnOK() override;
    pgsTypes::ConcreteType GetConcreteType();
    bool IsDensityInRange(Float64 density,pgsTypes::ConcreteType type);
-   bool IsStrengthInRange(Float64 fc, pgsTypes::ConcreteType type);
 };
