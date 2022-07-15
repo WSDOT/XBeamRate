@@ -432,8 +432,8 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 c;
       solution->get_NeutralAxisDepth(&c);
 
-      matRebar::Type rebarType;
-      matRebar::Grade rebarGrade;
+      WBFL::Materials::Rebar::Type rebarType;
+      WBFL::Materials::Rebar::Grade rebarGrade;
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
       Float64 et  = (dt - c)*0.003/c;
@@ -801,10 +801,10 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRMaterial,pMaterial);
 
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
-   Float64 fy = matRebar::GetYieldStrength(type,grade);
+   Float64 fy = WBFL::Materials::Rebar::GetYieldStrength(type,grade);
 
    Float64 dv1 = GetDv(pierID,xbrTypes::Stage1,poi);
    Float64 dv2 = GetDv(pierID,stage,poi);

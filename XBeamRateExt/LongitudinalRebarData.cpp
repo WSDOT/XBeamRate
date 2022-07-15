@@ -34,7 +34,7 @@ xbrLongitudinalRebarData::RebarRow::RebarRow():
    LayoutType(xbrTypes::blFullLength), 
    Start(0), 
    Length(0), 
-   BarSize(matRebar::bs10), 
+   BarSize(WBFL::Materials::Rebar::Size::bs10), 
    NumberOfBars(1), 
    Cover(WBFL::Units::ConvertToSysUnits(2.0,WBFL::Units::Measure::Inch)), 
    BarSpacing(WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Inch)),
@@ -112,7 +112,7 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pPro
       pStrSave->put_Property(_T("Length"),       CComVariant(rebar_row.Length));
       pStrSave->put_Property(_T("Cover"),        CComVariant(rebar_row.Cover));
       pStrSave->put_Property(_T("NumberOfBars"), CComVariant(rebar_row.NumberOfBars));
-      pStrSave->put_Property(_T("BarSize"),      CComVariant(rebar_row.BarSize));
+      pStrSave->put_Property(_T("BarSize"),      CComVariant(std::underlying_type<WBFL::Materials::Rebar::Size>::type(rebar_row.BarSize)));
       pStrSave->put_Property(_T("BarSpacing"),   CComVariant(rebar_row.BarSpacing));
       pStrSave->put_Property(_T("StartHook"),    CComVariant(rebar_row.bHookStart));
       pStrSave->put_Property(_T("EndHook"),      CComVariant(rebar_row.bHookEnd));
@@ -165,7 +165,7 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pPro
 
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("BarSize"), &var );
-         rebar_row.BarSize = matRebar::Size(var.lVal);
+         rebar_row.BarSize = WBFL::Materials::Rebar::Size(var.lVal);
 
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("BarSpacing"), &var);

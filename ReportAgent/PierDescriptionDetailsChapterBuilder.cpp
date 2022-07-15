@@ -384,7 +384,7 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 
    col = 0;
 
-   (*pTable)(row,col++) << lrfdConcreteUtil::GetTypeName( (matConcrete::Type)concrete.Type, true );
+   (*pTable)(row,col++) << lrfdConcreteUtil::GetTypeName( (WBFL::Materials::ConcreteType)concrete.Type, true );
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 Ec = pMaterial->GetXBeamEc(pierID);
@@ -434,8 +434,8 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
 
    std::_tstring strName = lrfdRebarPool::GetMaterialName(type,grade);

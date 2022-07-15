@@ -159,10 +159,10 @@ public:
    void SetConditionFactor(Float64 conditionFactor);
 
    // Material
-   void SetRebarMaterial(matRebar::Type type,matRebar::Grade grade);
-   void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) const;
-   matRebar::Type& GetRebarType();
-   matRebar::Grade& GetRebarGrade();
+   void SetRebarMaterial(WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade);
+   void GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const;
+   WBFL::Materials::Rebar::Type& GetRebarType();
+   WBFL::Materials::Rebar::Grade& GetRebarGrade();
 
    void SetConcreteMaterial(const CConcreteMaterial& concrete);
    CConcreteMaterial& GetConcreteMaterial();
@@ -240,8 +240,8 @@ protected:
    Float64 m_ConditionFactor;
 
    // Materials
-   matRebar::Type m_RebarType;
-   matRebar::Grade m_RebarGrade;
+   WBFL::Materials::Rebar::Type m_RebarType;
+   WBFL::Materials::Rebar::Grade m_RebarGrade;
    CConcreteMaterial m_Concrete;
 
    // Rebar

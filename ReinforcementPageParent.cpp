@@ -69,12 +69,12 @@ xbrTypes::PierType CReinforcementPageParent::GetPierType()
    }
 }
 
-matRebar::Type& CReinforcementPageParent::GetRebarType()
+WBFL::Materials::Rebar::Type& CReinforcementPageParent::GetRebarType()
 {
    return m_PierData.GetRebarType();
 }
 
-matRebar::Grade& CReinforcementPageParent::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& CReinforcementPageParent::GetRebarGrade()
 {
    return m_PierData.GetRebarGrade();
 }

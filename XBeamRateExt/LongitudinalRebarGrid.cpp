@@ -430,13 +430,13 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       );
 
    // Bar Size
-   matRebar::Type type = pParent->GetRebarType();
-   matRebar::Grade grade = pParent->GetRebarGrade();
+   WBFL::Materials::Rebar::Type type = pParent->GetRebarType();
+   WBFL::Materials::Rebar::Grade grade = pParent->GetRebarGrade();
    CString strBarSizeChoiceList;
    lrfdRebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
-      const matRebar* pRebar = rebarIter.GetCurrentRebar();
+      const auto* pRebar = rebarIter.GetCurrentRebar();
       strBarSizeChoiceList += pRebar->GetName().c_str();
       strBarSizeChoiceList += _T("\n");
    }
@@ -581,12 +581,12 @@ xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row
    }
 }
 
-matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
+WBFL::Materials::Rebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
    std::_tstring strBarSize = GetCellValue(row,col);
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
    lrfdRebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
@@ -598,7 +598,7 @@ matRebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
    }
 
    ATLASSERT(false); // should never get here
-   return matRebar::bs3;
+   return WBFL::Materials::Rebar::Size::bs3;
 }
 
 void CLongitudinalRebarGrid::OnModifyCell(ROWCOL nRow,ROWCOL nCol)

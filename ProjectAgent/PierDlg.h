@@ -50,8 +50,8 @@ public:
    virtual xbrPierData* GetXBRPierData() override;
    virtual CConcreteMaterial& GetConcrete() override;
    virtual xbrTypes::PierType GetPierType() override;
-   virtual matRebar::Type& GetRebarType() override;
-   virtual matRebar::Grade& GetRebarGrade() override;
+   virtual WBFL::Materials::Rebar::Type& GetRebarType() override;
+   virtual WBFL::Materials::Rebar::Grade& GetRebarGrade() override;
    virtual CConcreteMaterial& GetConcreteMaterial() override;
    virtual xbrLongitudinalRebarData& GetLongitudinalRebar() override;
    virtual xbrStirrupData& GetLowerXBeamStirrups() override;

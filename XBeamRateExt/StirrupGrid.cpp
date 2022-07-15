@@ -154,13 +154,13 @@ void CStirrupGrid::CustomInit(LPCTSTR lpszGridName)
 
 
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
    lrfdRebarIter rebarIter(type,grade,true/*stirrup only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
-      const matRebar* pRebar = rebarIter.GetCurrentRebar();
+      const auto* pRebar = rebarIter.GetCurrentRebar();
       m_strBarSizeChoiceList += pRebar->GetName().c_str();
       m_strBarSizeChoiceList += _T("\n");
    }
@@ -415,12 +415,12 @@ CString CStirrupGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
    }
 }
 
-matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
+WBFL::Materials::Rebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
    std::_tstring strBarSize = GetCellValue(row,col);
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
    lrfdRebarIter rebarIter(type,grade,true/*stirrups only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
@@ -432,7 +432,7 @@ matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
    }
 
    ATLASSERT(false); // should never get here
-   return matRebar::bs3;
+   return WBFL::Materials::Rebar::Size::bs3;
 }
 
 void CStirrupGrid::SetSymmetry(bool isSymmetrical)

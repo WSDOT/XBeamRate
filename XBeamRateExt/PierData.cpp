@@ -76,14 +76,14 @@ xbrPierData::xbrPierData()
    m_ConditionFactor = 1.0;
 
    // Materials
-   m_RebarType = matRebar::A615;
-   m_RebarGrade = matRebar::Grade60;
+   m_RebarType = WBFL::Materials::Rebar::Type::A615;
+   m_RebarGrade = WBFL::Materials::Rebar::Grade::Grade60;
 
    //// Rebar
    //xbrLongitudinalRebarData::RebarRow row;
    //row.Datum = xbrTypes::Bottom;
    //row.LayoutType = xbrTypes::blFullLength;
-   //row.BarSize = matRebar::bs11;
+   //row.BarSize = WBFL::Materials::Rebar::Size::bs11;
    //row.BarSpacing = WBFL::Units::ConvertToSysUnits(6,WBFL::Units::Measure::Inch);
    //row.Cover = WBFL::Units::ConvertToSysUnits(2,WBFL::Units::Measure::Inch);
    //row.NumberOfBars = 5;
@@ -542,24 +542,24 @@ void xbrPierData::SetConditionFactor(Float64 conditionFactor)
    m_ConditionFactor = conditionFactor;
 }
 
-void xbrPierData::SetRebarMaterial(matRebar::Type type,matRebar::Grade grade)
+void xbrPierData::SetRebarMaterial(WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
 {
    m_RebarType = type;
    m_RebarGrade = grade;
 }
 
-void xbrPierData::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) const
+void xbrPierData::GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
 {
    *pType = m_RebarType;
    *pGrade = m_RebarGrade;
 }
 
-matRebar::Type& xbrPierData::GetRebarType()
+WBFL::Materials::Rebar::Type& xbrPierData::GetRebarType()
 {
    return m_RebarType;
 }
 
-matRebar::Grade& xbrPierData::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& xbrPierData::GetRebarGrade()
 {
    return m_RebarGrade;
 }
@@ -787,7 +787,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
    m_Concrete.Save(pStrSave,nullptr);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
-      pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
+      pStrSave->put_Property(_T("RebarType"),CComVariant(std::underlying_type<WBFL::Materials::Rebar::Type>::type(m_RebarType)));
       pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
       m_LongitudinalRebar.Save(pStrSave,nullptr);
       m_LowerXBeamStirrups.Save(pStrSave);
@@ -1034,10 +1034,10 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
 
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("RebarType"),&var);
-         m_RebarType = (matRebar::Type)(var.lVal);
+         m_RebarType = (WBFL::Materials::Rebar::Type)(var.lVal);
 
          hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
-         m_RebarGrade = (matRebar::Grade)(var.lVal);
+         m_RebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
 
          hr = m_LongitudinalRebar.Load(pStrLoad,nullptr);
          hr = m_LowerXBeamStirrups.Load(pStrLoad);

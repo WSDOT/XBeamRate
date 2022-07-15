@@ -30,8 +30,8 @@
 
 struct xbrEditReinforcementData
 {
-   matRebar::Type Type;
-   matRebar::Grade Grade;
+   WBFL::Materials::Rebar::Type Type;
+   WBFL::Materials::Rebar::Grade Grade;
    xbrLongitudinalRebarData LongitudinalRebar;
    xbrStirrupData LowerXBeamStirrups;
    xbrStirrupData FullDepthStirrups;

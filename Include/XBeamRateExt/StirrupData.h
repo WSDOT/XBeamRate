@@ -23,7 +23,7 @@
 #pragma once
 
 #include <XBeamRateExt\XBRExtExp.h>
-#include <Material\Rebar.h>
+#include <Materials/Rebar.h>
 #include <Units\Units.h>
 
 
@@ -42,11 +42,11 @@ public:
    public:
       Float64 Length;
       Float64 BarSpacing;
-      matRebar::Size BarSize;
+      WBFL::Materials::Rebar::Size BarSize;
       Float64 nBars;
 
       StirrupZone():
-      Length(0), BarSpacing(WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Inch)), BarSize(matRebar::bs6), nBars(4)
+      Length(0), BarSpacing(WBFL::Units::ConvertToSysUnits(6.0,WBFL::Units::Measure::Inch)), BarSize(WBFL::Materials::Rebar::Size::bs6), nBars(4)
       {;}
 
       bool operator==(const StirrupZone& other) const

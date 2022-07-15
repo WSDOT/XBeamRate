@@ -89,21 +89,21 @@ StageIndexType GetStageIndex(xbrTypes::Stage stage)
 }
 
 
-BarSize GetBarSize(matRebar::Size size)
+BarSize GetBarSize(WBFL::Materials::Rebar::Size size)
 {
    switch(size)
    {
-   case matRebar::bs3:  return bs3;
-   case matRebar::bs4:  return bs4;
-   case matRebar::bs5:  return bs5;
-   case matRebar::bs6:  return bs6;
-   case matRebar::bs7:  return bs7;
-   case matRebar::bs8:  return bs8;
-   case matRebar::bs9:  return bs9;
-   case matRebar::bs10: return bs10;
-   case matRebar::bs11: return bs11;
-   case matRebar::bs14: return bs14;
-   case matRebar::bs18: return bs18;
+   case WBFL::Materials::Rebar::Size::bs3:  return bs3;
+   case WBFL::Materials::Rebar::Size::bs4:  return bs4;
+   case WBFL::Materials::Rebar::Size::bs5:  return bs5;
+   case WBFL::Materials::Rebar::Size::bs6:  return bs6;
+   case WBFL::Materials::Rebar::Size::bs7:  return bs7;
+   case WBFL::Materials::Rebar::Size::bs8:  return bs8;
+   case WBFL::Materials::Rebar::Size::bs9:  return bs9;
+   case WBFL::Materials::Rebar::Size::bs10: return bs10;
+   case WBFL::Materials::Rebar::Size::bs11: return bs11;
+   case WBFL::Materials::Rebar::Size::bs14: return bs14;
+   case WBFL::Materials::Rebar::Size::bs18: return bs18;
    default:
       ATLASSERT(false); // should not get here
    }
@@ -112,16 +112,16 @@ BarSize GetBarSize(matRebar::Size size)
    return bs3;
 }
 
-RebarGrade GetRebarGrade(matRebar::Grade grade)
+RebarGrade GetRebarGrade(WBFL::Materials::Rebar::Grade grade)
 {
    RebarGrade matGrade;
    switch(grade)
    {
-   case matRebar::Grade40: matGrade = Grade40; break;
-   case matRebar::Grade60: matGrade = Grade60; break;
-   case matRebar::Grade75: matGrade = Grade75; break;
-   case matRebar::Grade80: matGrade = Grade80; break;
-   case matRebar::Grade100: matGrade = Grade100; break;
+   case WBFL::Materials::Rebar::Grade40: matGrade = Grade40; break;
+   case WBFL::Materials::Rebar::Grade::Grade60: matGrade = Grade60; break;
+   case WBFL::Materials::Rebar::Grade75: matGrade = Grade75; break;
+   case WBFL::Materials::Rebar::Grade80: matGrade = Grade80; break;
+   case WBFL::Materials::Rebar::Grade100: matGrade = Grade100; break;
    default:
       ATLASSERT(false);
    }
@@ -137,9 +137,9 @@ RebarGrade GetRebarGrade(matRebar::Grade grade)
    return matGrade;
 }
 
-MaterialSpec GetRebarSpecification(matRebar::Type type)
+MaterialSpec GetRebarSpecification(WBFL::Materials::Rebar::Type type)
 {
-   return (type == matRebar::A615 ? msA615 : (type == matRebar::A706 ? msA706 : msA1035));
+   return (type == WBFL::Materials::Rebar::Type::A615 ? msA615 : (type == WBFL::Materials::Rebar::Type::A706 ? msA706 : msA1035));
 }
 
 
@@ -855,7 +855,7 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
    }
    else
    {
-      Ec = lrfdConcreteUtil::ModE((matConcrete::Type)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
+      Ec = lrfdConcreteUtil::ModE((WBFL::Materials::ConcreteType)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
       if ( lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion() )
       {
          Ec *= (concrete.EcK1*concrete.EcK2);
@@ -868,7 +868,7 @@ Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
-   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(matConcrete::Type)concrete.Type);
+   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(WBFL::Materials::ConcreteType)concrete.Type);
    Float64 lambda = GetXBeamLambda(pierID);
    return lambda*fr;
 }
@@ -878,7 +878,7 @@ Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID) const
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
 
-   Float64 lambda = lrfdConcreteUtil::ComputeConcreteDensityModificationFactor((matConcrete::Type)concrete.Type,concrete.StrengthDensity,concrete.bHasFct,concrete.Fct,concrete.Fc);
+   Float64 lambda = lrfdConcreteUtil::ComputeConcreteDensityModificationFactor((WBFL::Materials::ConcreteType)concrete.Type,concrete.StrengthDensity,concrete.bHasFct,concrete.Fct,concrete.Fc);
    return lambda;
 }
 
@@ -890,14 +890,14 @@ Float64 CPierAgentImp::GetColumnEc(PierIDType pierID,IndexType colIdx) const
 
 void CPierAgentImp::GetRebarProperties(PierIDType pierID,Float64* pE,Float64* pFy,Float64* pFu) const
 {
-   matRebar::Type rebarType;
-   matRebar::Grade rebarGrade;
+   WBFL::Materials::Rebar::Type rebarType;
+   WBFL::Materials::Rebar::Grade rebarGrade;
    GET_IFACE(IXBRProject,pProject);
    pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
-   *pE  = matRebar::GetE(rebarType,rebarGrade);
-   *pFy = matRebar::GetYieldStrength(rebarType,rebarGrade);
-   *pFu = matRebar::GetUltimateStrength(rebarType,rebarGrade);
+   *pE  = WBFL::Materials::Rebar::GetE(rebarType,rebarGrade);
+   *pFy = WBFL::Materials::Rebar::GetYieldStrength(rebarType,rebarGrade);
+   *pFu = WBFL::Materials::Rebar::GetUltimateStrength(rebarType,rebarGrade);
 }
 
 
@@ -1020,7 +1020,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    CComBSTR name;
    rebar->get_Name(&name);
 
-   matRebar::Size size = lrfdRebarPool::GetBarSize(OLE2CT(name));
+   WBFL::Materials::Rebar::Size size = lrfdRebarPool::GetBarSize(OLE2CT(name));
 
    Float64 Ab, db, fy;
    rebar->get_NominalArea(&Ab);
@@ -1031,11 +1031,11 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
    Float64 fc = concrete.Fc;
 
-   matConcrete::Type type = matConcrete::Normal;
+   WBFL::Materials::ConcreteType type = WBFL::Materials::ConcreteType::Normal;
    bool hasFct = false;
    Float64 Fct = 0.0;
 
-   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (matConcrete::Type)type, fc, hasFct, Fct, concrete.StrengthDensity );
+   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (WBFL::Materials::ConcreteType)type, fc, hasFct, Fct, concrete.StrengthDensity );
 
 
    // Get distances from section cut to ends of bar
@@ -1616,8 +1616,8 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    CComPtr<IUnitConvert> unit_convert;
    unitServer->get_UnitConvert(&unit_convert);
 
-   matRebar::Type rebarType;
-   matRebar::Grade rebarGrade;
+   WBFL::Materials::Rebar::Type rebarType;
+   WBFL::Materials::Rebar::Grade rebarGrade;
    pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
    RebarGrade matGrade = GetRebarGrade(rebarGrade);
@@ -1777,8 +1777,8 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
    Float64 L = GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
    GET_IFACE(IXBRProject,pProject);
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
    lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
 
@@ -1790,7 +1790,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       for ( ; iter != end; iter++ )
       {
          const xbrStirrupData::StirrupZone& zone(*iter);
-         const matRebar* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
+         const auto* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
          Float64 av = pRebar->GetNominalArea();
          Float64 Av = av*zone.nBars;
          
@@ -1860,7 +1860,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
       for ( ; iter != end; iter++ )
       {
          const xbrStirrupData::StirrupZone& zone(*iter);
-         const matRebar* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
+         const auto* pRebar = pRebarPool->GetRebar(type,grade,zone.BarSize);
          Float64 av = pRebar->GetNominalArea();
          Float64 Av = av*zone.nBars;
          

@@ -216,7 +216,7 @@ private:
       Float64 Xstart;
       Float64 Xend;
       Float64 Length;
-      matRebar::Size BarSize;
+      WBFL::Materials::Rebar::Size BarSize;
       Float64 S;
       Float64 Av_over_S;
       Float64 nLegs;

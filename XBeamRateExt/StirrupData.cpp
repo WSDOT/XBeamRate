@@ -120,7 +120,7 @@ HRESULT xbrStirrupData::Load(IStructuredLoad* pStrLoad)
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("BarSize"),&var);
          BarSizeType key = var.lVal;
-         zone.BarSize = matRebar::Size(key);
+         zone.BarSize = WBFL::Materials::Rebar::Size(key);
 
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("nBars"),&var);

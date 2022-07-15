@@ -2198,13 +2198,13 @@ Float64 CProjectAgentImp::GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatin
    }
 }
 
-void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade)
+void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
 {
    GetPrivatePierData(pierID).SetRebarMaterial(type,grade);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade) const
+void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
 {
    GetPrivatePierData(pierID).GetRebarMaterial(pType,pGrade);
 }
