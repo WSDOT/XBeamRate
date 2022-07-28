@@ -59,10 +59,10 @@
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>
-#include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
-#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
-#include <\ARP\PGSuper\Include\IFace\RatingSpecification.h>
-#include <\ARP\PGSuper\Include\IFace\ResistanceFactors.h>
+#include <..\..\PGSuper\Include\IFace\AnalysisResults.h>
+#include <..\..\PGSuper\Include\IFace\PointOfInterest.h>
+#include <..\..\PGSuper\Include\IFace\RatingSpecification.h>
+#include <..\..\PGSuper\Include\IFace\ResistanceFactors.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
 #ifdef _DEBUG

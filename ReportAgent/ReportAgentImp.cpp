@@ -42,7 +42,7 @@
 #include "MomentCapacityDetailsChapterBuilder.h"
 #include "ShearCapacityDetailsChapterBuilder.h"
 
-#include <\ARP\PGSuper\Include\IFace\Views.h>
+#include <..\..\PGSuper\Include\IFace\Views.h>
 #include <EAF\EAFUIIntegration.h>
 #include <EAF\EAFReportView.h>
 

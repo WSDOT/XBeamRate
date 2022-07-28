@@ -40,15 +40,15 @@
 #include <PgsExt\BridgeDescription2.h>
 #include <PgsExt\Helpers.h>
 
-#include <\ARP\PGSuper\Include\IFace\Bridge.h>
-#include <\ARP\PGSuper\Include\IFace\Alignment.h>
-#include <\ARP\PGSuper\Include\IFace\Intervals.h>
-#include <\ARP\PGSuper\Include\IFace\AnalysisResults.h>
-#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
-#include <\ARP\PGSuper\Include\IFace\RatingSpecification.h>
-#include <\ARP\PGSuper\Include\IFace\ResistanceFactors.h>
-#include <\ARP\PGSuper\Include\IFace\EditByUI.h>
-#include <\ARP\PGSuper\Include\IFace\BeamFactory.h>
+#include <..\..\PGSuper\Include\IFace\Bridge.h>
+#include <..\..\PGSuper\Include\IFace\Alignment.h>
+#include <..\..\PGSuper\Include\IFace\Intervals.h>
+#include <..\..\PGSuper\Include\IFace\AnalysisResults.h>
+#include <..\..\PGSuper\Include\IFace\PointOfInterest.h>
+#include <..\..\PGSuper\Include\IFace\RatingSpecification.h>
+#include <..\..\PGSuper\Include\IFace\ResistanceFactors.h>
+#include <..\..\PGSuper\Include\IFace\EditByUI.h>
+#include <..\..\PGSuper\Include\IFace\BeamFactory.h>
 #include <Plugins\BeamFamilyCLSID.h>
 
 #include <MFCTools\AutoRegistry.h>
