@@ -29,7 +29,7 @@
 #include <IFace\Project.h>
 #include <IFace\StatusCenter.h>
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <EAF\EAFDocument.h>
 
 #include <PgsExt\PierData2.h>

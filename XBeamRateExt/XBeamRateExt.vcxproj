@@ -73,7 +73,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories);$(ARPDIR)\BridgeLink\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;$(ARPDIR)\XBeamRate\Documentation;%(AdditionalIncludeDirectories);$(ARPDIR)\BridgeLink\Include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;BUILDXBREXTLIB;_GXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -97,7 +97,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;\ARP\XBeamRate\Documentation;%(AdditionalIncludeDirectories);$(ARPDIR)\BridgeLink\Include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\Include;$(ARPDIR)\WBFL\Include;$(ARPDIR)\WBFL\Include\$(Platform);$(ARPDIR)\PGSuper\Include;$(ARPDIR)\XBeamRate\Documentation;%(AdditionalIncludeDirectories);$(ARPDIR)\BridgeLink\Include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;BUILDXBREXTLIB;_GXDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>

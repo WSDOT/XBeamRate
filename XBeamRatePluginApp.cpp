@@ -58,14 +58,14 @@
 
 // PGSuper/PGSplice Interfaces
 #include <IFace\ExtendUI.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
-#include <\ARP\PGSuper\Include\IFace\DocumentType.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\DocumentType.h>
 #include <IFace\EditByUI.h>
 #include <IFace\Bridge.h>
 #include <IFace\Selection.h>
 #include <IFace\ViewEvents.h>
 #include <IFace\Intervals.h>
-#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
+#include <..\..\PGSuper\Include\IFace\PointOfInterest.h>
 #include <IFace\Alignment.h>
 
 #include "PGSComponentInfo.h"

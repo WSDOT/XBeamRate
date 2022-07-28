@@ -30,7 +30,7 @@
 #include <IFace\Project.h>
 #include <IFace\Pier.h>
 #include <IFace\PointOfInterest.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
 #include <PgsExt\GirderLabel.h>
