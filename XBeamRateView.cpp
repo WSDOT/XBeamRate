@@ -39,11 +39,11 @@
 #include <IFace\LoadRating.h>
 #include <IFace\Pier.h>
 #include <IFace\EditByUI.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
-#include <\ARP\PGSuper\Include\IFace\Bridge.h>
-#include <\ARP\PGSuper\Include\IFace\PointOfInterest.h>
-#include <\ARP\PGSuper\Include\IFace\Intervals.h>
-#include <\ARP\PGSuper\Include\Hints.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Bridge.h>
+#include <..\..\PGSuper\Include\IFace\PointOfInterest.h>
+#include <..\..\PGSuper\Include\IFace\Intervals.h>
+#include <..\..\PGSuper\Include\Hints.h>
 #include <IFace\Alignment.h>
 #include <MFCTools\Format.h>
 

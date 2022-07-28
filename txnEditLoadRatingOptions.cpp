@@ -26,7 +26,7 @@
 
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 
 #include <PgsExt\BridgeDescription2.h>
 

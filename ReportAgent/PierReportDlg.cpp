@@ -35,7 +35,7 @@
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\BridgeDescription2.h>
 
 #include <EAF\EAFDocument.h>

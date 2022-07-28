@@ -36,7 +36,7 @@
 #include <IFace\Project.h>
 
 #include <IFace\ExtendUI.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 
 #include <IFace\ViewEvents.h>
 #include <IFace\VersionInfo.h>

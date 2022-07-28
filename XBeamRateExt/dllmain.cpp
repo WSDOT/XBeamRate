@@ -31,7 +31,7 @@
 #include <IFace\Project.h>
 #include <IFace\LoadRating.h>
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <EAF\EAFStatusCenter.h>
 
 #include <WBFLGeometry_i.c>

@@ -24,7 +24,7 @@
 #include "XBeamRateReportBuilder.h"
 #include "XBeamRateReportSpecification.h"
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <PgsExt\GirderLabel.h>
 

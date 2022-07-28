@@ -29,7 +29,7 @@
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
 #include <IFace\RatingSpecification.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 
 #include <PgsExt\GirderLabel.h>
 #include <PgsExt\BridgeDescription2.h>

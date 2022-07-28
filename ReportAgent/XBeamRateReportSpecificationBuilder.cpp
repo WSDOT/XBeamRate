@@ -26,7 +26,7 @@
 #include "PierReportDlg.h"
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
 #ifdef _DEBUG

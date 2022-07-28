@@ -35,7 +35,7 @@ CLASS
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
 #include <IFace\Test.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 
 #include <PgsExt\BridgeDescription2.h>
 #include <PgsExt\GirderLabel.h>

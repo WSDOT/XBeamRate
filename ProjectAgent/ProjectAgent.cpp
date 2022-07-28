@@ -54,8 +54,8 @@
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\VersionInfo.h>
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
-#include <\ARP\PGSuper\Include\IFace\EditByUI.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\EditByUI.h>
 #include <IFace\Bridge.h>
 #include <IFace\Alignment.h>
 #include <IFace\Intervals.h>

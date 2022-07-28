@@ -27,7 +27,7 @@
 #include "AnalysisResultsGraphBuilder.h"
 
 #include <IFace\XBeamRateAgent.h>
-#include <\ARP\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
 
 #include <PgsExt\GirderLabel.h>
 #include <PgsExt\BridgeDescription2.h>

@@ -54,9 +54,9 @@
 #include <IFace\VersionInfo.h>
 #include <IFace\Pier.h>
 
-#include <\ARP\PGSuper\Include\IFace\Project.h>
-#include <\ARP\PGSuper\Include\IFace\Selection.h>
-#include <\ARP\PGSuper\Include\IFace\Views.h>
+#include <..\..\PGSuper\Include\IFace\Project.h>
+#include <..\..\PGSuper\Include\IFace\Selection.h>
+#include <..\..\PGSuper\Include\IFace\Views.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
