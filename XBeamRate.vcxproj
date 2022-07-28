@@ -70,7 +70,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <CustomBuildStep>
       <Message>Copying files to BridgeLink</Message>
-      <Command>xcopy /y/d \ARP\XBeamRate\XBRate.tip $(ARPDIR)\BridgeLink\
+      <Command>xcopy /y/d $(ARPDIR)\XBeamRate\XBRate.tip $(ARPDIR)\BridgeLink\
 </Command>
       <Inputs>\ARP\XBeamRate\XBRate.tip;%(Inputs)</Inputs>
       <Outputs>$(ARPDIR)\BridgeLink\XBRate.tip;%(Outputs)</Outputs>
@@ -120,7 +120,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildStep>
       <Message>Copying files to BridgeLink</Message>
-      <Command>xcopy /y/d \ARP\XBeamRate\XBRate.tip $(ARPDIR)\BridgeLink\
+      <Command>xcopy /y/d $(ARPDIR)\XBeamRate\XBRate.tip $(ARPDIR)\BridgeLink\
 </Command>
       <Inputs>\ARP\XBeamRate\XBRate.tip;%(Inputs)</Inputs>
       <Outputs>$(ARPDIR)\BridgeLink\XBRate.tip;%(Outputs)</Outputs>
