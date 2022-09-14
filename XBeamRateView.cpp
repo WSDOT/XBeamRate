@@ -829,7 +829,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    // Create a function that represents the bottom of the cross beam
    // We will use it to make the top of the column match the bottom of the
    // cross beam.
-   mathPwLinearFunction2dUsingPoints fn;
+   WBFL::Math::PiecewiseFunction fn;
    CComPtr<IPoint2dCollection> points;
    pPier->GetBottomSurface(pierID,xbrTypes::Stage1,&points);
    CComPtr<IEnumPoint2d> enumPoints;
