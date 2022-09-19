@@ -45,7 +45,7 @@ CXBeamRateReportSpecificationBuilder::~CXBeamRateReportSpecificationBuilder(void
 {
 }
 
-std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pOldRptSpec)
+std::shared_ptr<WBFL::Reporting::ReportSpecification> CXBeamRateReportSpecificationBuilder::CreateReportSpec(const WBFL::Reporting::ReportDescription& rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification>& pOldRptSpec) const
 {
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -61,14 +61,14 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
    if ( dlg.DoModal() == IDOK )
    {
       // If possible, copy information from old spec. Otherwise header/footer and other info will be lost
-      std::shared_ptr<CReportSpecification> pNewRptSpec;
+      std::shared_ptr<WBFL::Reporting::ReportSpecification> pNewRptSpec;
       if(pOldGRptSpec)
       {
          std::shared_ptr<CXBeamRateReportSpecification> pNewGRptSpec(std::make_shared<CXBeamRateReportSpecification>(*pOldGRptSpec) );
          pNewGRptSpec->SetPierID(dlg.m_PierID);
          pNewGRptSpec->SetDoReportEvenIncrements(dlg.m_bReportEvenIncrements);
 
-         pNewRptSpec = std::static_pointer_cast<CReportSpecification>(pNewGRptSpec);
+         pNewRptSpec = std::static_pointer_cast<WBFL::Reporting::ReportSpecification>(pNewGRptSpec);
       }
       else
       {
@@ -84,7 +84,7 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
    return nullptr;
 }
 
-std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::CreateDefaultReportSpec(const CReportDescription& rptDesc)
+std::shared_ptr<WBFL::Reporting::ReportSpecification> CXBeamRateReportSpecificationBuilder::CreateDefaultReportSpec(const WBFL::Reporting::ReportDescription& rptDesc) const
 {
    PierIDType pierID = INVALID_ID;
 
@@ -98,7 +98,7 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
 
       if ( selPierIdx == INVALID_INDEX )
       {
-         return CreateReportSpec(rptDesc,std::shared_ptr<CReportSpecification>());
+         return CreateReportSpec(rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification>());
       }
 
       if ( selPierIdx != INVALID_INDEX )
@@ -109,7 +109,7 @@ std::shared_ptr<CReportSpecification> CXBeamRateReportSpecificationBuilder::Crea
    }
 
    // Use all chapters at the maximum level, and report at even increments
-   std::shared_ptr<CReportSpecification> pRptSpec(std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,pierID,true) );
+   std::shared_ptr<WBFL::Reporting::ReportSpecification> pRptSpec(std::make_shared<CXBeamRateReportSpecification>(rptDesc.GetReportName(),m_pBroker,pierID,true) );
    rptDesc.ConfigureReportSpecification(pRptSpec);
    return pRptSpec;
 }

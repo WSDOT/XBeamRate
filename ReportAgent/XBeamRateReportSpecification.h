@@ -28,10 +28,10 @@ class CXBeamRateReportSpecification :
    public CEAFBrokerReportSpecification
 {
 public:
-   CXBeamRateReportSpecification(LPCTSTR strReportName,IBroker* pBroker,PierIDType pierID, bool bReportEvenIncrements);
+   CXBeamRateReportSpecification(const std::_tstring& strReportName,IBroker* pBroker,PierIDType pierID, bool bReportEvenIncrements);
    ~CXBeamRateReportSpecification(void);
 
-   PierIDType GetPierID();
+   PierIDType GetPierID() const;
    void SetPierID(PierIDType pier);
 
    bool GetDoReportEvenIncrements() const;

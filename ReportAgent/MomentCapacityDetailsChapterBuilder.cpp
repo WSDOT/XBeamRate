@@ -50,9 +50,9 @@ LPCTSTR CMomentCapacityDetailsChapterBuilder::GetName() const
    return TEXT("Moment Capacity Details");
 }
 
-rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -194,7 +194,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(CReportSpecification* pR
    return pChapter;
 }
 
-CChapterBuilder* CMomentCapacityDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CMomentCapacityDetailsChapterBuilder::Clone() const
 {
-   return new CMomentCapacityDetailsChapterBuilder;
+   return std::make_unique<CMomentCapacityDetailsChapterBuilder>();
 }

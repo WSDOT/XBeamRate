@@ -63,11 +63,11 @@ LPCTSTR CPierDescriptionDetailsChapterBuilder::GetName() const
    return TEXT("Pier Description Details");
 }
 
-rptChapter* CPierDescriptionDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CPierDescriptionDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    USES_CONVERSION;
 
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -91,9 +91,9 @@ rptChapter* CPierDescriptionDetailsChapterBuilder::Build(CReportSpecification* p
 }
 
 
-CChapterBuilder* CPierDescriptionDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CPierDescriptionDetailsChapterBuilder::Clone() const
 {
-   return new CPierDescriptionDetailsChapterBuilder;
+   return std::make_unique<CPierDescriptionDetailsChapterBuilder>();
 }
 
 void write_superstructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)

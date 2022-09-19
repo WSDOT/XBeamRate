@@ -37,13 +37,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 CXBeamRateReportBuilder::CXBeamRateReportBuilder(LPCTSTR strName,bool bHidden,bool bIncludeTimingChapter) :
-CReportBuilder(strName,bHidden,bIncludeTimingChapter)
+WBFL::Reporting::ReportBuilder(strName,bHidden,bIncludeTimingChapter)
 {
 }
 
-std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(std::shared_ptr<CReportSpecification>& pRptSpec)
+std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec.get());
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    CComPtr<IBroker> pBroker;
    pXBRRptSpec->GetBroker(&pBroker);
@@ -83,5 +83,5 @@ std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(std::shared_ptr
    }
 #endif
 
-   return CReportBuilder::CreateReport(pRptSpec);
+   return WBFL::Reporting::ReportBuilder::CreateReport(pRptSpec);
 }

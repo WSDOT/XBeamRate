@@ -52,9 +52,9 @@ LPCTSTR CShearCapacityDetailsChapterBuilder::GetName() const
    return TEXT("Shear Capacity Details");
 }
 
-rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -486,7 +486,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    return pChapter;
 }
 
-CChapterBuilder* CShearCapacityDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CShearCapacityDetailsChapterBuilder::Clone() const
 {
-   return new CShearCapacityDetailsChapterBuilder;
+   return std::make_unique<CShearCapacityDetailsChapterBuilder>();
 }

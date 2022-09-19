@@ -165,22 +165,22 @@ void CReportAgentImp::InitReportBuilders()
 {
    GET_IFACE(IReportManager,pRptMgr);
 
-   std::shared_ptr<CReportSpecificationBuilder> pRptSpecBuilder(std::make_shared<CXBeamRateReportSpecificationBuilder>(m_pBroker) );
+   std::shared_ptr<WBFL::Reporting::ReportSpecificationBuilder> pRptSpecBuilder(std::make_shared<CXBeamRateReportSpecificationBuilder>(m_pBroker) );
 
-   std::unique_ptr<CXBeamRateReportBuilder> pReportBuilder(std::make_unique<CXBeamRateReportBuilder>(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report")));
+   std::shared_ptr<WBFL::Reporting::ReportBuilder> pReportBuilder(std::make_shared<CXBeamRateReportBuilder>(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report")));
    m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
 #endif
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
-   pReportBuilder->AddTitlePageBuilder(std::shared_ptr<CTitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CLoadRatingChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CPierDescriptionDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CLoadingDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<CChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
-   pRptMgr->AddReportBuilder(pReportBuilder.release());
+   pReportBuilder->AddTitlePageBuilder(std::shared_ptr<WBFL::Reporting::TitlePageBuilder>(new CXBeamRateTitlePageBuilder(m_pBroker,pReportBuilder->GetName())));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadRatingChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CPierDescriptionDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadingDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
+   pRptMgr->AddReportBuilder(pReportBuilder);
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -206,7 +206,7 @@ HRESULT CReportAgentImp::OnProjectChanged()
          {
             // Get the report spec so we can get the report name
             CEAFReportView* pReportView = (CEAFReportView*)pView;
-            std::shared_ptr<CReportSpecification> pReportSpec = pReportView->GetReportSpecification();
+            auto pReportSpec = pReportView->GetReportSpecification();
 
             // is it one of our reports?
             std::set<std::_tstring>::iterator found = m_ReportNames.find(pReportSpec->GetReportName());

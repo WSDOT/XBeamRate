@@ -54,9 +54,9 @@ LPCTSTR CLoadRatingChapterBuilder::GetName() const
    return TEXT("Load Rating");
 }
 
-rptChapter* CLoadRatingChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CLoadRatingChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    CComPtr<IBroker> pBroker;
    pXBRRptSpec->GetBroker(&pBroker);
@@ -179,7 +179,7 @@ rptChapter* CLoadRatingChapterBuilder::Build(CReportSpecification* pRptSpec,Uint
    return pChapter;
 }
 
-CChapterBuilder* CLoadRatingChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CLoadRatingChapterBuilder::Clone() const
 {
-   return new CLoadRatingChapterBuilder;
+   return std::make_unique<CLoadRatingChapterBuilder>();
 }

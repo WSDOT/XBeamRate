@@ -45,7 +45,7 @@ bool CXBeamRateChapterBuilder::Select() const
    return true;
 }
 
-rptChapter* CXBeamRateChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CXBeamRateChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    ASSERT( level <= GetMaxLevel() );
 
