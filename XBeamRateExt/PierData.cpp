@@ -787,8 +787,8 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
    m_Concrete.Save(pStrSave,nullptr);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
-      pStrSave->put_Property(_T("RebarType"),CComVariant(std::underlying_type<WBFL::Materials::Rebar::Type>::type(m_RebarType)));
-      pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
+      pStrSave->put_Property(_T("RebarType"),CComVariant(+m_RebarType));
+      pStrSave->put_Property(_T("RebarGrade"),CComVariant(+m_RebarGrade));
       m_LongitudinalRebar.Save(pStrSave,nullptr);
       m_LowerXBeamStirrups.Save(pStrSave);
       m_FullDepthStirrups.Save(pStrSave);

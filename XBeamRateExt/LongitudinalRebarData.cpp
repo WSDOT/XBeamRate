@@ -112,7 +112,7 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pPro
       pStrSave->put_Property(_T("Length"),       CComVariant(rebar_row.Length));
       pStrSave->put_Property(_T("Cover"),        CComVariant(rebar_row.Cover));
       pStrSave->put_Property(_T("NumberOfBars"), CComVariant(rebar_row.NumberOfBars));
-      pStrSave->put_Property(_T("BarSize"),      CComVariant(std::underlying_type<WBFL::Materials::Rebar::Size>::type(rebar_row.BarSize)));
+      pStrSave->put_Property(_T("BarSize"),      CComVariant(+rebar_row.BarSize));
       pStrSave->put_Property(_T("BarSpacing"),   CComVariant(rebar_row.BarSpacing));
       pStrSave->put_Property(_T("StartHook"),    CComVariant(rebar_row.bHookStart));
       pStrSave->put_Property(_T("EndHook"),      CComVariant(rebar_row.bHookEnd));
