@@ -222,6 +222,9 @@
     <ClInclude Include="StdAfx.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\PGSuper\Graphs\Graphs.vcxproj">
+      <Project>{a29f3c02-af58-4e29-a791-caa5a1ce28b6}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\..\PGSuper\PgsExt\PgsExt.vcxproj">
       <Project>{716009be-959b-4338-80f5-69abb0b12a91}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

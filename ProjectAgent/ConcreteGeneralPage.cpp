@@ -322,12 +322,8 @@ void CConcreteGeneralPage::OnOK()
 
 bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteType type)
 {
-   if (type == pgsTypes::PCI_UHPC)
-   {
-      ATLASSERT(false); // the UI should prevent uhpc
-      return true; // no density range for UHPC
-   }
-   else if (type == pgsTypes::Normal)
+   ATLASSERT(!IsUHPC(type)); // piers should not be UHPC
+   if (type == pgsTypes::Normal)
    {
       return ( IsLE(m_MinNWCDensity,density) );
    }

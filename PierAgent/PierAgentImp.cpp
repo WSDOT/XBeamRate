@@ -1035,7 +1035,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    bool hasFct = false;
    Float64 Fct = 0.0;
 
-   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, (WBFL::Materials::ConcreteType)type, fc, hasFct, Fct, concrete.StrengthDensity );
+   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, type, fc, hasFct, Fct, concrete.StrengthDensity, false, false, true );
 
 
    // Get distances from section cut to ends of bar
