@@ -1407,6 +1407,13 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    xbrTypes::PierType pierType = pProject->GetPierType(pierID);
    pierModel->put_Type((PierType)pierType);
 
+   CComPtr<IAngle> skew;
+   skew.CoCreateInstance(CLSID_Angle);
+   skew->FromString(CComBSTR(pierData.GetSkew()));
+   pierModel->putref_SkewAngle(skew);
+   Float64 skew_angle;
+   skew->get_Value(&skew_angle);
+
    // Superstructure Information
    pgsTypes::OffsetMeasurementType curbLineDatum = pierData.GetCurbLineDatum();
 
@@ -1450,24 +1457,24 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
          }
       }
 
-      // left curbline point
+      // left curb line point
       Float64 elevLCL = elevCP - sl*(leftCLO - cpo);
       CComPtr<IPoint2d> pntLCL;
       pntLCL.CoCreateInstance(CLSID_Point2d);
-      pntLCL->Move(leftCLO,elevLCL);
+      pntLCL->Move(leftCLO/cos(skew_angle), elevLCL);
       deckProfile->Add(pntLCL);
 
       // Crown Point
       CComPtr<IPoint2d> pntCP;
       pntCP.CoCreateInstance(CLSID_Point2d);
-      pntCP->Move(cpo,elevCP);
+      pntCP->Move(cpo / cos(skew_angle),elevCP);
       deckProfile->Add(pntCP);
 
       // right curb line point
       Float64 elevRCL = elevCP + sr*(rightCLO - cpo);
       CComPtr<IPoint2d> pntRCL;
       pntRCL.CoCreateInstance(CLSID_Point2d);
-      pntRCL->Move(rightCLO,elevRCL);
+      pntRCL->Move(rightCLO / cos(skew_angle),elevRCL);
       deckProfile->Add(pntRCL);
 
       pierModel->putref_DeckProfile(deckProfile);
@@ -1480,12 +1487,6 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    }
 
    pierModel->put_DeckThickness(pierData.GetDeckThickness());
-
-   CComPtr<IAngle> skew;
-   skew.CoCreateInstance(CLSID_Angle);
-   skew->FromString(CComBSTR(pierData.GetSkew()));
-   pierModel->putref_SkewAngle(skew);
-
 
    // Create Cross Beam
    CComPtr<ILinearCrossBeam> xbeam;

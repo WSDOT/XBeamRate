@@ -472,6 +472,8 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    GET_IFACE2(pBroker,IXBRPier,pPier);
    Float64 skew = pPier->GetSkewAngle(pierID);
 
+   Float64 cos_skew = cos(skew);
+
    GET_IFACE2(pBroker,IXBRProject,pProject);
 
    // Model a vertical line for the alignment
@@ -509,7 +511,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    {
       // Model a vertical line for the bridge line
       // Let X = BLO be at the alignment and Y = the alignment elevation
-      Float64 X = BLO;
+      Float64 X = BLO/cos_skew;
       pnt1.Release();
       pnt1.CoCreateInstance(CLSID_Point2d);
       pnt1->Move(X,Yt);
@@ -538,11 +540,11 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
 
       Float64 Ylc = pPier->GetElevation(pierID,0);
-      Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
+      Float64 Yrc = pPier->GetElevation(pierID,(RCO-LCO)/cos_skew);
       CComPtr<IPoint2d> pnt3;
       pnt1.Release();
       pnt1.CoCreateInstance(CLSID_Point2d);
-      LCO /= cos(skew); // skew adjust
+      LCO /= cos_skew; // skew adjust
       pnt1->Move(LCO,Ylc);
 
       pnt2.Release();
@@ -550,7 +552,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       pnt2->Move(0,Ydeck);
 
       pnt3.CoCreateInstance(CLSID_Point2d);
-      RCO /= cos(skew); // skew adjust
+      RCO /= cos_skew; // skew adjust
       pnt3->Move(RCO,Yrc);
 
       CComPtr<iPolyLineDisplayObject> doDeck;
@@ -1636,26 +1638,29 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    BuildDimensionLine(displayList,pntTop,pntBot);
 
    // Curb-to-curb width
+
+   // This is a basic dimension generated from the curb line offset. It does not take
+   // into account geometric effects of the roadway curvature
    Float64 skew = pPier->GetSkewAngle(pierID);
 
    Float64 LCO, RCO;
-   pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+   pProject->GetCurbLineOffset(pierID, &LCO, &RCO);
 
-   Float64 Ylc = pPier->GetElevation(pierID,0);
-   Float64 Yrc = pPier->GetElevation(pierID,RCO-LCO);
+   Float64 Ylc = pPier->GetElevation(pierID, 0);
+   Float64 Yrc = pPier->GetElevation(pierID, RCO - LCO);
    Float64 Y = Max(Ylc, Yrc);
 
    CComPtr<IPoint2d> pntLC;
    pntLC.CoCreateInstance(CLSID_Point2d);
    LCO /= cos(skew); // skew adjust
-   pntLC->Move(LCO,Y);
+   pntLC->Move(LCO, Y);
 
    CComPtr<IPoint2d> pntRC;
    pntRC.CoCreateInstance(CLSID_Point2d);
    RCO /= cos(skew); // skew adjust
-   pntRC->Move(RCO,Y);
+   pntRC->Move(RCO, Y);
 
-   BuildDimensionLine(displayList,pntLC,pntRC);
+   BuildDimensionLine(displayList, pntLC, pntRC);
 }
 
 void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)

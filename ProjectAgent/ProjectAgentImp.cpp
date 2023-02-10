@@ -716,11 +716,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
          GET_IFACE(IBridge, pBridge);
          Float64 pierStation = pBridge->GetPierStation(pierIdx);
          GET_IFACE(IRoadway, pAlignment);
-         Float64 sl = pAlignment->GetSlope(pierStation, pierData.GetLeftCurbLineOffset());
-         Float64 sr = pAlignment->GetSlope(pierStation,  pierData.GetRightCurbLineOffset());
          Float64 elev = pAlignment->GetElevation(pierStation,0.0);
          pierData.SetDeckElevation(elev);
-         pierData.SetCrownSlope(-sl, sr);
          IndexType ctrnpt = pAlignment->GetAlignmentPointIndex(pierStation);
          pierData.SetCrownPointOffset(pAlignment->GetAlignmentOffset(ctrnpt,pierStation));
 
