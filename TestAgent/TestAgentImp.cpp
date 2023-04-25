@@ -148,7 +148,7 @@ CString CTestAgentImp::GetProcessID()
    // because we never compared results from one process to another
    // as described in the 12-50 process. Since the move to 
    // GIT VCS, merging files is difficult and it is especially difficult
-   // with reg test results that have the version number incoded in it
+   // with reg test results that have the version number encoded in it
    //
    // now using a "generic" number for the process id
    return CString(_T("0.0.0.0"));

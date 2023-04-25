@@ -1985,7 +1985,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
-         *pDC -= (backSide.P + aheadSide.P);
+         *pDC += (backSide.P + aheadSide.P); // the loads have negative values because they are downwards. Add the load to "subtract" it out of DC
       }
 
       if ( UseUniformLoads(pierID,brgLineIdx) )
