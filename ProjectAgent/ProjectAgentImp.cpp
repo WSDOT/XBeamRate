@@ -3384,12 +3384,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 skew;
    skewAngle->get_Value(&skew);
 
-   CComPtr<IDirection> pierDirection;
-   pBridge->GetPierDirection(pierIdx,&pierDirection);
-
    GET_IFACE(IRoadway,pRoadway);
    CComPtr<IPoint2dCollection> deckProfile;
-   pRoadway->GetRoadwaySurface(pierStation,pierDirection,&deckProfile);
+   pRoadway->GetRoadwaySurface(pierStation,skewAngle,&deckProfile);
    pierData.SetDeckSurfaceType(xbrPierData::Profile);
    pierData.SetDeckProfile(deckProfile);
 
