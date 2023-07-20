@@ -129,8 +129,8 @@ public:
 
 // IXBRViews
 public:
-   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec=TRUE) override;
-   virtual void CreateGraphView(CollectionIndexType graphIdx) override;
+   virtual void CreateReportView(IndexType rptIdx,BOOL bPromptForSpec=TRUE) override;
+   virtual void CreateGraphView(IndexType graphIdx) override;
    virtual void CreatePierView() override;
 
 // IXBREditByUI

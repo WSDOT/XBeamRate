@@ -33,7 +33,7 @@
 #include <Math\Math.h>
 
 #include <PsgLib\UnitServer.h>
-#include <Lrfd\Lrfd.h>
+#include <LRFD\Lrfd.h>
 #include <EAF\EAFAutoProgress.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
@@ -130,7 +130,7 @@ RebarGrade GetRebarGrade(WBFL::Materials::Rebar::Grade grade)
    if ( matGrade == Grade100 )
    {
       // grade 100 wasn't introduced until 6th Edition, 2013 interims
-      ATLASSERT(lrfdVersionMgr::SixthEditionWith2013Interims <= lrfdVersionMgr::GetVersion());
+      ATLASSERT(WBFL::LRFD::LRFDVersionMgr::Version::SixthEditionWith2013Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
    }
 #endif
 
@@ -855,8 +855,8 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
    }
    else
    {
-      Ec = lrfdConcreteUtil::ModE((WBFL::Materials::ConcreteType)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
-      if ( lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion() )
+      Ec = WBFL::LRFD::ConcreteUtil::ModE((WBFL::Materials::ConcreteType)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
+      if ( WBFL::LRFD::LRFDVersionMgr::Version::ThirdEditionWith2005Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
       {
          Ec *= (concrete.EcK1*concrete.EcK2);
       }
@@ -868,7 +868,7 @@ Float64 CPierAgentImp::GetXBeamModulusOfRupture(PierIDType pierID) const
 {
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
-   Float64 fr = lrfdConcreteUtil::ModRupture(concrete.Fc,(WBFL::Materials::ConcreteType)concrete.Type);
+   Float64 fr = WBFL::LRFD::ConcreteUtil::ModRupture(concrete.Fc,(WBFL::Materials::ConcreteType)concrete.Type);
    Float64 lambda = GetXBeamLambda(pierID);
    return lambda*fr;
 }
@@ -878,7 +878,7 @@ Float64 CPierAgentImp::GetXBeamLambda(PierIDType pierID) const
    GET_IFACE(IXBRProject,pProject);
    const CConcreteMaterial& concrete = pProject->GetConcrete(pierID);
 
-   Float64 lambda = lrfdConcreteUtil::ComputeConcreteDensityModificationFactor((WBFL::Materials::ConcreteType)concrete.Type,concrete.StrengthDensity,concrete.bHasFct,concrete.Fct,concrete.Fc);
+   Float64 lambda = WBFL::LRFD::ConcreteUtil::ComputeConcreteDensityModificationFactor((WBFL::Materials::ConcreteType)concrete.Type,concrete.StrengthDensity,concrete.bHasFct,concrete.Fct,concrete.Fc);
    return lambda;
 }
 
@@ -1020,7 +1020,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    CComBSTR name;
    rebar->get_Name(&name);
 
-   WBFL::Materials::Rebar::Size size = lrfdRebarPool::GetBarSize(OLE2CT(name));
+   WBFL::Materials::Rebar::Size size = WBFL::LRFD::RebarPool::GetBarSize(OLE2CT(name));
 
    Float64 Ab, db, fy;
    rebar->get_NominalArea(&Ab);
@@ -1035,7 +1035,7 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    bool hasFct = false;
    Float64 Fct = 0.0;
 
-   REBARDEVLENGTHDETAILS details = lrfdRebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, type, fc, hasFct, Fct, concrete.StrengthDensity, false, false, true );
+   WBFL::LRFD::REBARDEVLENGTHDETAILS details = WBFL::LRFD::Rebar::GetRebarDevelopmentLengthDetails(size, Ab, db, fy, type, fc, hasFct, Fct, concrete.StrengthDensity, false, false, true );
 
 
    // Get distances from section cut to ends of bar
@@ -1781,7 +1781,7 @@ void CPierAgentImp::ValidateStirrupZones(PierIDType pierID,const xbrStirrupData&
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
-   lrfdRebarPool* pRebarPool = lrfdRebarPool::GetInstance();
+   const auto* pRebarPool = WBFL::LRFD::RebarPool::GetInstance();
 
    if ( stirrupData.Symmetric )
    {

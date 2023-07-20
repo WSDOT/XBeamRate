@@ -79,9 +79,9 @@ END_MESSAGE_MAP()
 
 CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder() :
 CEAFAutoCalcGraphBuilder(),
-m_Graph(DUMMY_TOOL,DUMMY_TOOL),
-m_pXFormat(0),
-m_pYFormat(0)
+m_Graph(&DUMMY_TOOL, &DUMMY_TOOL),
+m_pXFormat(nullptr),
+m_pYFormat(nullptr)
 {
    SetName(_T("Live Load Results"));
    InitGraph();
@@ -89,9 +89,9 @@ m_pYFormat(0)
 
 CXBRLiveLoadGraphBuilder::CXBRLiveLoadGraphBuilder(const CXBRLiveLoadGraphBuilder& other) :
 CEAFAutoCalcGraphBuilder(other),
-m_Graph(DUMMY_TOOL,DUMMY_TOOL),
-m_pXFormat(0),
-m_pYFormat(0)
+m_Graph(&DUMMY_TOOL, &DUMMY_TOOL),
+m_pXFormat(nullptr),
+m_pYFormat(nullptr)
 {
    InitGraph();
 }
@@ -236,7 +236,7 @@ void CXBRLiveLoadGraphBuilder::InitGraph()
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    m_pXFormat = new WBFL::Units::LengthTool(pDisplayUnits->GetSpanLengthUnit());
-   m_Graph.SetXAxisValueFormat(*m_pXFormat);
+   m_Graph.SetXAxisValueFormat(m_pXFormat);
    m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((WBFL::Units::LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
 }
 
@@ -256,7 +256,7 @@ void CXBRLiveLoadGraphBuilder::UpdateYAxisUnits()
       {
       const WBFL::Units::MomentData& momentUnit = pDisplayUnits->GetMomentUnit();
       m_pYFormat = new WBFL::Units::MomentTool(momentUnit);
-      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      m_Graph.SetYAxisValueFormat(m_pYFormat);
       std::_tstring strYAxisTitle = _T("Moment (") + ((WBFL::Units::MomentTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
@@ -265,13 +265,13 @@ void CXBRLiveLoadGraphBuilder::UpdateYAxisUnits()
       {
       const WBFL::Units::ForceData& shearUnit = pDisplayUnits->GetShearUnit();
       m_pYFormat = new WBFL::Units::ShearTool(shearUnit);
-      m_Graph.SetYAxisValueFormat(*m_pYFormat);
+      m_Graph.SetYAxisValueFormat(m_pYFormat);
       std::_tstring strYAxisTitle = _T("Shear (") + ((WBFL::Units::ShearTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
       }
    default:
-      ASSERT(0); 
+      ASSERT(false); 
    }
 }
 

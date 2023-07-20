@@ -273,12 +273,12 @@ HRESULT CXBeamRateDoc::WriteTheDocument(IStructuredSave* pStrSave)
    return S_OK;
 }
 
-void CXBeamRateDoc::CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt)
+void CXBeamRateDoc::CreateReportView(IndexType rptIdx,BOOL bPrompt)
 {
    m_pMyDocProxyAgent->CreateReportView(rptIdx,bPrompt);
 }
 
-void CXBeamRateDoc::CreateGraphView(CollectionIndexType graphIdx)
+void CXBeamRateDoc::CreateGraphView(IndexType graphIdx)
 {
    m_pMyDocProxyAgent->CreateGraphView(graphIdx);
 }

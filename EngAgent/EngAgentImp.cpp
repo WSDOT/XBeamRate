@@ -73,7 +73,7 @@ HRESULT CEngAgentImp::FinalConstruct()
    ATLASSERT(SUCCEEDED(hr));
 
    CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
-   if ( lrfdVersionMgr::GetUnits() == lrfdVersionMgr::US )
+   if ( WBFL::LRFD::LRFDVersionMgr::GetUnits() == WBFL::LRFD::LRFDVersionMgr::Units::US )
    {
       solver->put_UnitMode(suUS);
    }
@@ -205,8 +205,8 @@ Float64 CEngAgentImp::GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
    Float64 Mcr = McrDetails.Mcr;
 
-   bool bAfter2002 = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002 = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -437,8 +437,8 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
       Float64 et  = (dt - c)*0.003/c;
-      Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
-      Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
+      Float64 ecl = WBFL::LRFD::Rebar::GetCompressionControlledStrainLimit(rebarGrade);
+      Float64 etl = WBFL::LRFD::Rebar::GetTensionControlledStrainLimit(rebarGrade);
       phi = PhiC + (PhiT - PhiC)*(et - ecl)/(etl - ecl);
       phi = ::ForceIntoRange(PhiC,phi,PhiT);
 
@@ -459,7 +459,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 sumTd = 0;
       CComPtr<IDblArray> vfs;
       solution->get_fs(&vfs);
-      CollectionIndexType nRebarLayers;
+      IndexType nRebarLayers;
       rcBeam->get_RebarLayerCount(&nRebarLayers);
       for (IndexType idx = 0; idx < nRebarLayers; idx++)
       {
@@ -477,7 +477,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 
       CComPtr<IDblArray> vfps;
       solution->get_fps(&vfps);
-      CollectionIndexType nStrandLayers;
+      IndexType nStrandLayers;
       rcBeam->get_StrandLayerCount(&nStrandLayers);
       for (IndexType idx = 0; idx < nStrandLayers; idx++)
       {
@@ -514,7 +514,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 void CEngAgentImp::GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3) const
 {
    // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
    {
       *pG1 = 1.6; // all other concrete structures (not-segmental)
       *pG2 = 1.1; // bonded strand/tendon
@@ -556,7 +556,7 @@ CrackingMomentDetails CEngAgentImp::ComputeCrackingMoment(PierIDType pierID,xbrT
 
    Float64 Mcr = g3*((g1*fr + g2*fcpe)*Sc - Mdnc*(Sc/Snc-1));
 
-   if ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
    {
       Float64 McrLimit = Sc*fr;
       McrDetails.McrLimit = McrLimit;
@@ -588,8 +588,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -607,7 +607,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    pAnalysisResults->GetMoment(pierID,limitState,poi,&MuMin,&MuMax);
    Mu = (bPositiveMoment ? MuMax : MuMin);
 
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
    {
       MrMin1 = Mcr;
    }
@@ -643,8 +643,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcrack = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -681,7 +681,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
    Mu = gDC*Mdc + gDW*Mdw + gCR*Mcr + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
 
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
    {
       MrMin1 = Mcrack;
    }
@@ -1033,7 +1033,7 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
       return details;
    }
 
-   if ( lrfrVersionMgr::GetVersion() < lrfrVersionMgr::SecondEditionWith2015Interims )
+   if ( WBFL::LRFD::LRFRVersionMgr::GetVersion() < WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims )
    {
       // before 2015, shear capacity was based strictly on stirrups at a section
       GET_IFACE(IXBRStirrups,pStirrups);

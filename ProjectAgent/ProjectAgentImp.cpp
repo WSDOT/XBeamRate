@@ -480,8 +480,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
-         pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
-         pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
+         pStrSave->put_Property(_T("LRFD"),CComVariant(WBFL::LRFD::LRFDVersionMgr::GetVersionString(true)));
+         pStrSave->put_Property(_T("LRFR"),CComVariant(WBFL::LRFD::LRFRVersionMgr::GetVersionString(true)));
 
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(GetEmergencyRatingMethod())); // added in version 3
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(GetPermitRatingMethod()));
@@ -824,13 +824,13 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFD"),&var);
-            lrfdVersionMgr::Version lrfdVersion = lrfdVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            lrfdVersionMgr::SetVersion(lrfdVersion);
+            WBFL::LRFD::LRFDVersionMgr::Version lrfdVersion = WBFL::LRFD::LRFDVersionMgr::GetVersion(OLE2T(var.bstrVal));
+            WBFL::LRFD::LRFDVersionMgr::SetVersion(lrfdVersion);
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFR"),&var);
-            lrfrVersionMgr::Version lrfrVersion = lrfrVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            lrfrVersionMgr::SetVersion(lrfrVersion);
+            WBFL::LRFD::LRFRVersionMgr::Version lrfrVersion = WBFL::LRFD::LRFRVersionMgr::GetVersion(OLE2T(var.bstrVal));
+            WBFL::LRFD::LRFRVersionMgr::SetVersion(lrfrVersion);
 
             if (2 < version)
             {

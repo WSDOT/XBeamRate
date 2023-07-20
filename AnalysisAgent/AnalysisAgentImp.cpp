@@ -1491,7 +1491,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
    GET_IFACE(IXBRProject,pProject);
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
-   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
 
    if ( ::IsPermitRatingType(ratingType) && nLoadedLanes == 1 )
    {
@@ -1546,7 +1546,7 @@ WBFL::System::SectionValue CAnalysisAgentImp::GetShear(PierIDType pierID,pgsType
    Float64 R = pProject->GetLiveLoadReaction(pierID,ratingType,vehicleIdx); // single lane reaction
 
    IndexType nLoadedLanes = GetLoadedLaneCount(pierID,llConfigIdx);
-   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
 
    if ( ::IsPermitRatingType(ratingType) && nLoadedLanes == 1 )
    {
@@ -1684,7 +1684,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    *pMpermit = IsZero(*pMpermit) ? 0 : *pMpermit;
    *pMlegal  = IsZero(*pMlegal)  ? 0 : *pMlegal;
 
-   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
    {
       mpf = 1.0;
@@ -1810,7 +1810,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    pVlegal->Left()   = IsZero(pVlegal->Left())   ? 0 : pVlegal->Left();
    pVlegal->Right()  = IsZero(pVlegal->Right())  ? 0 : pVlegal->Right();
 
-   Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+   Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
    if ( nLoadedLanes == 1 )
    {
       mpf = 1.0;
@@ -1866,7 +1866,7 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    bool bIsPermitRating = ::IsPermitRatingType(ratingType);
    if ( bIsPermitRating )
    {
-      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
+      Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
       *pMin = liveLoadResult.m_MzMin_SingleLane/mpf;
       *pMax = liveLoadResult.m_MzMax_SingleLane/mpf;
    }
@@ -1916,7 +1916,7 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
    bool bIsPermitRating = ::IsPermitRatingType(ratingType);
    if ( bIsPermitRating )
    {
-      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
+      Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(1); // mpf for one loaded lane
       *pMin = liveLoadResult.m_FyMin_SingleLane/mpf;
       *pMax = liveLoadResult.m_FyMax_SingleLane/mpf;
    }
@@ -2825,7 +2825,7 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
          pProgress->UpdateMessage(strProgressMsg);
       }
 
-      Float64 mpf = lrfdUtility::GetMultiplePresenceFactor(nLoadedLanes);
+      Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
 
       Float64 FxLeft(0), FyLeft(0), MzLeft(0);
       Float64 FxRight(0), FyRight(0), MzRight(0);

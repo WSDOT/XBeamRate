@@ -27,8 +27,8 @@
 
 struct txnEditOptionsData
 {
-   lrfdVersionMgr::Version m_LRFDVersion;
-   lrfrVersionMgr::Version m_LRFRVersion;
+   WBFL::LRFD::LRFDVersionMgr::Version m_LRFDVersion;
+   WBFL::LRFD::LRFRVersionMgr::Version m_LRFRVersion;
 
    bool m_bDesignRating;
    bool m_bDesignRateForShear;

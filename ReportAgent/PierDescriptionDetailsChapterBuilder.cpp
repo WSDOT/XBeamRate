@@ -303,8 +303,8 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   bool bK1 = (lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion());
-   bool bLambda = (lrfdVersionMgr::SeventhEditionWith2016Interims <= lrfdVersionMgr::GetVersion());
+   bool bK1 = (WBFL::LRFD::LRFDVersionMgr::Version::ThirdEditionWith2005Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
+   bool bLambda = (WBFL::LRFD::LRFDVersionMgr::Version::SeventhEditionWith2016Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
 
 
    ColumnIndexType nColumns = 7;
@@ -384,7 +384,7 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 
    col = 0;
 
-   (*pTable)(row,col++) << lrfdConcreteUtil::GetTypeName( (WBFL::Materials::ConcreteType)concrete.Type, true );
+   (*pTable)(row,col++) << WBFL::LRFD::ConcreteUtil::GetTypeName( (WBFL::Materials::ConcreteType)concrete.Type, true );
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 Ec = pMaterial->GetXBeamEc(pierID);
@@ -438,7 +438,7 @@ void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,r
    WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
 
-   std::_tstring strName = lrfdRebarPool::GetMaterialName(type,grade);
+   std::_tstring strName = WBFL::LRFD::RebarPool::GetMaterialName(type,grade);
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 E, fy, fu;
@@ -519,7 +519,7 @@ void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pD
       }
 
       (*pTable)(row,col++) << dim.SetValue(rebarRow.Cover);
-      (*pTable)(row,col++) << lrfdRebarPool::GetBarSize(rebarRow.BarSize);
+      (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetBarSize(rebarRow.BarSize);
       (*pTable)(row,col++) << rebarRow.NumberOfBars;
       (*pTable)(row,col++) << dim.SetValue(rebarRow.BarSpacing);
 
@@ -617,7 +617,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
       {
          (*pTable)(row,col++) << length.SetValue(stirrupZone.Length);
       }
-      (*pTable)(row,col++) << lrfdRebarPool::GetBarSize(stirrupZone.BarSize);
+      (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetBarSize(stirrupZone.BarSize);
       (*pTable)(row,col++) << dim.SetValue(stirrupZone.BarSpacing);
       (*pTable)(row,col++) << stirrupZone.nBars;
 

@@ -433,7 +433,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
    WBFL::Materials::Rebar::Type type = pParent->GetRebarType();
    WBFL::Materials::Rebar::Grade grade = pParent->GetRebarGrade();
    CString strBarSizeChoiceList;
-   lrfdRebarIter rebarIter(type,grade);
+   WBFL::LRFD::RebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       const auto* pRebar = rebarIter.GetCurrentRebar();
@@ -447,7 +447,7 @@ bool CLongitudinalRebarGrid::SetRebarData(ROWCOL row,const xbrLongitudinalRebarD
       .SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
       .SetChoiceList(strBarSizeChoiceList)
       .SetHorizontalAlignment(DT_RIGHT)
-      .SetValue(lrfdRebarPool::GetBarSize(rebarData.BarSize).c_str())
+      .SetValue(WBFL::LRFD::RebarPool::GetBarSize(rebarData.BarSize).c_str())
       );
 
    // Bar Count
@@ -588,7 +588,7 @@ WBFL::Materials::Rebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCO
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(type,grade);
+   WBFL::LRFD::RebarIter rebarIter(type,grade);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )

@@ -22,7 +22,7 @@
 
 #include "StdAfx.h"
 #include <XBeamRateExt\StirrupData.h>
-#include <Lrfd\RebarPool.h>
+#include <LRFD\RebarPool.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

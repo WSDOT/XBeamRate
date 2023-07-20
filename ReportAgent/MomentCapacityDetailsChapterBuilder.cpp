@@ -73,7 +73,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
    *pChapter << pPara;
 
    ColumnIndexType nColumns = 10;
-   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
    {
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
    }
@@ -96,7 +96,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
 
       ColumnIndexType col = 0;
       (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-      if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+      if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
       {
          (*pTable)(0,col++) << Sub2(symbol(alpha),_T("1"));
       }
@@ -138,7 +138,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
 #endif
 
          (*pTable)(row,col++) << location.SetValue(poi);
-         if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+         if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
          {
             (*pTable)(row,col++) << alpha1;
          }

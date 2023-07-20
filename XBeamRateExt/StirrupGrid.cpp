@@ -29,7 +29,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFApp.h>
-#include <Lrfd\RebarPool.h>
+#include <LRFD\RebarPool.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -157,7 +157,7 @@ void CStirrupGrid::CustomInit(LPCTSTR lpszGridName)
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(type,grade,true/*stirrup only*/);
+   WBFL::LRFD::RebarIter rebarIter(type,grade,true/*stirrup only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       const auto* pRebar = rebarIter.GetCurrentRebar();
@@ -335,7 +335,7 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
 		.SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
 		.SetChoiceList(m_strBarSizeChoiceList)
       .SetHorizontalAlignment(DT_RIGHT)
-      .SetValue(lrfdRebarPool::GetBarSize(zoneData.BarSize).c_str())
+      .SetValue(WBFL::LRFD::RebarPool::GetBarSize(zoneData.BarSize).c_str())
       );
 
    value = WBFL::Units::ConvertFromSysUnits(zoneData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
@@ -422,7 +422,7 @@ WBFL::Materials::Rebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(type,grade,true/*stirrups only*/);
+   WBFL::LRFD::RebarIter rebarIter(type,grade,true/*stirrups only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )

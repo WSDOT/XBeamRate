@@ -53,7 +53,7 @@ public:
 
 // Implementation
 public:
-   virtual bool CreateReport(CollectionIndexType rptIdx,bool bPromptForSpec);
+   virtual bool CreateReport(IndexType rptIdx,bool bPromptForSpec);
 
 protected:
 	virtual ~CXBeamRateReportView();

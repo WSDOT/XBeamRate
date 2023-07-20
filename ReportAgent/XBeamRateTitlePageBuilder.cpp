@@ -220,7 +220,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(const std::shared_ptr<const WBFL::
    ///////////////////////////////////
    // Status items
    GET_IFACE(IEAFStatusCenter, pStatusCenter);
-   CollectionIndexType nItems = pStatusCenter->Count();
+   IndexType nItems = pStatusCenter->Count();
 
    if (0 < nItems)
    {
@@ -243,7 +243,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(const std::shared_ptr<const WBFL::
 
       row = 1;
       CString strSeverityType[] = { _T("Information"), _T("Warning"), _T("Error") };
-      for (CollectionIndexType i = 0; i < nItems; i++)
+      for (IndexType i = 0; i < nItems; i++)
       {
          CEAFStatusItem* pItem = pStatusCenter->GetByIndex(i);
 

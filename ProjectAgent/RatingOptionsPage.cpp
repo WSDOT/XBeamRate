@@ -100,8 +100,8 @@ BOOL CRatingOptionsPage::OnInitDialog()
    FillEmergencyFactorList();
    FillPermitFactorList();
 
-   GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(lrfdVersionMgr::GetCodeString());
-   GetDlgItem(IDC_LRFR_LABEL)->SetWindowText(lrfrVersionMgr::GetCodeString());
+   GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(WBFL::LRFD::LRFDVersionMgr::GetCodeString());
+   GetDlgItem(IDC_LRFR_LABEL)->SetWindowText(WBFL::LRFD::LRFRVersionMgr::GetCodeString());
 
    FillLRFDList();
    FillLRFRList();
@@ -142,9 +142,9 @@ void CRatingOptionsPage::FillLRFDList()
 {
    CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFD);
    int idx;
-   for ( int i = 1; i < (int)lrfdVersionMgr::LastVersion; i++ )
+   for ( int i = 1; i < (int)WBFL::LRFD::LRFDVersionMgr::Version::LastVersion; i++ )
    {
-      idx = pSpec->AddString(lrfdVersionMgr::GetVersionString((lrfdVersionMgr::Version)(i)));
+      idx = pSpec->AddString(WBFL::LRFD::LRFDVersionMgr::GetVersionString((WBFL::LRFD::LRFDVersionMgr::Version)(i)));
       pSpec->SetItemData(idx,(DWORD)(i));
    }
 }
@@ -153,9 +153,9 @@ void CRatingOptionsPage::FillLRFRList()
 {
    CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFR);
    int idx;
-   for ( int i = 1; i < (int)lrfrVersionMgr::LastVersion; i++ )
+   for ( int i = 1; i < (int)WBFL::LRFD::LRFRVersionMgr::Version::LastVersion; i++ )
    {
-      idx = pSpec->AddString(lrfrVersionMgr::GetVersionString((lrfrVersionMgr::Version)(i)));
+      idx = pSpec->AddString(WBFL::LRFD::LRFRVersionMgr::GetVersionString((WBFL::LRFD::LRFRVersionMgr::Version)(i)));
       pSpec->SetItemData(idx,(DWORD)(i));
    }
 }

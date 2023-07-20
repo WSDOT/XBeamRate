@@ -340,7 +340,7 @@ BOOL CReinforcementPage::OnSetActive()
 void CReinforcementPage::UpdateConcreteTypeLabel()
 {
    CString strLabel;
-   strLabel.Format(_T("%s"),lrfdConcreteUtil::GetTypeName((WBFL::Materials::ConcreteType)m_pParent->GetConcrete().Type,true).c_str());
+   strLabel.Format(_T("%s"),WBFL::LRFD::ConcreteUtil::GetTypeName((WBFL::Materials::ConcreteType)m_pParent->GetConcrete().Type,true).c_str());
    GetDlgItem(IDC_CONCRETE_TYPE_LABEL)->SetWindowText(strLabel);
 }
 

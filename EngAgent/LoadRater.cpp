@@ -122,14 +122,14 @@ void xbrLoadRater::MomentRating(PierIDType pierID, xbrTypes::Stage stage,pgsType
 
       // Poi lists may be different for positive and negative moment
       std::vector<xbrPointOfInterest> vPoi( pPOI->GetMomentRatingPointsOfInterest(pierID, !bPositiveMoment) );
-      CollectionIndexType nPOI = vPoi.size();
+      IndexType nPOI = vPoi.size();
 
       std::vector<Float64> vDC, vDW, vCR, vSH, vRE, vPS;
       std::vector<Float64> vLLIMmin,vLLIMmax;
       std::vector<IndexType> vMinLLConfigIdx, vMaxLLConfigIdx;
       GetMoments(pierID, ratingType, vehicleIdx, vPoi, vDC, vDW, vCR, vSH, vRE, vPS, vLLIMmin, vLLIMmax, vMinLLConfigIdx, vMaxLLConfigIdx);
 
-      for ( CollectionIndexType i = 0; i < nPOI; i++ )
+      for ( IndexType i = 0; i < nPOI; i++ )
       {
          const xbrPointOfInterest& poi = vPoi[i];
 
@@ -444,7 +444,7 @@ void xbrLoadRater::CheckReinforcementYielding(PierIDType pierID, xbrTypes::Stage
 
       // Poi lists may be different for positive and negative moment
       std::vector<xbrPointOfInterest> vPoi( pPOI->GetMomentRatingPointsOfInterest(pierID, !bPositiveMoment) );
-      CollectionIndexType nPOI = vPoi.size();
+      IndexType nPOI = vPoi.size();
 
       for (const auto& poi : vPoi)
       {

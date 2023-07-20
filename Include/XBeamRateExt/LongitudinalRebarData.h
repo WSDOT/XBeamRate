@@ -50,7 +50,7 @@ public:
       Float64 Start;
       Float64 Length;
       WBFL::Materials::Rebar::Size BarSize;
-      CollectionIndexType NumberOfBars;
+      IndexType NumberOfBars;
       Float64     Cover;
       Float64     BarSpacing;
       bool bHookStart;
