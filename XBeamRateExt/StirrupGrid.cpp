@@ -417,7 +417,7 @@ CString CStirrupGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
 
 WBFL::Materials::Rebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
-   std::_tstring strBarSize = GetCellValue(row,col);
+   std::_tstring strBarSize = (LPCTSTR)GetCellValue(row,col);
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;

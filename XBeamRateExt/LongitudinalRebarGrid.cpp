@@ -583,7 +583,7 @@ xbrTypes::LongitudinalRebarDatumType CLongitudinalRebarGrid::GetDatum(ROWCOL row
 
 WBFL::Materials::Rebar::Size CLongitudinalRebarGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
-   std::_tstring strBarSize = GetCellValue(row,col);
+   std::_tstring strBarSize = (LPCTSTR)GetCellValue(row,col);
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;

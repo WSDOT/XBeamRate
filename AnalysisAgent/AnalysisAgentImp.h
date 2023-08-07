@@ -264,7 +264,7 @@ private:
    typedef struct UnitLiveLoadResult
    {
       // unit load results are moment/shear for a unit lane reaction in each loaded lane
-      // multplied by the multiple presence factor.
+      // multiplied by the multiple presence factor.
       // to get actual moment/shear for a lane reaction case, simply scale the stored values
       // by a single lane reaction.
       bool operator<(const UnitLiveLoadResult& other)const {return m_idPOI < other.m_idPOI;}

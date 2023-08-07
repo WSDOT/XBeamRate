@@ -3106,7 +3106,7 @@ void CAnalysisAgentImp::InvalidateResults(bool bCreateNewDataStructures)
    std::map<PierIDType,std::set<UnitLiveLoadResult>>* pOldResults = m_pUnitLiveLoadResults.release();
    if ( bCreateNewDataStructures )
    {
-      m_pUnitLiveLoadResults = std::auto_ptr<std::map<PierIDType,std::set<UnitLiveLoadResult>>>(new std::map<PierIDType,std::set<UnitLiveLoadResult>>());
+      m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType,std::set<UnitLiveLoadResult>>>();
    }
 
 #if defined _USE_MULTITHREADING

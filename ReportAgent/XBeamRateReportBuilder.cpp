@@ -41,7 +41,7 @@ WBFL::Reporting::ReportBuilder(strName,bHidden,bIncludeTimingChapter)
 {
 }
 
-std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
+std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(const std::shared_ptr<const WBFL::Reporting::ReportSpecification> pRptSpec) const
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 

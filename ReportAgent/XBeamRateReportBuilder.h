@@ -37,5 +37,5 @@ class CXBeamRateReportBuilder : public WBFL::Reporting::ReportBuilder
 {
 public:
 	CXBeamRateReportBuilder(LPCTSTR strName,bool bHidden = false,bool bIncludeTimingChapter=false);
-   virtual std::shared_ptr<rptReport> CreateReport(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const override;
+   virtual std::shared_ptr<rptReport> CreateReport(const std::shared_ptr<const WBFL::Reporting::ReportSpecification> pRptSpec) const override;
 };
