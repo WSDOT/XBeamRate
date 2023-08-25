@@ -1912,7 +1912,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
             dc[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDC,bat,resultsType);
             dw[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDWRating,bat,resultsType);
 
-            if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+            if ( pLossParams->GetLossMethod() == PrestressLossCriteria::LossMethodType::TIME_STEP )
             {
                cr[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcCR,bat,resultsType);
                sh[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcSH,bat,resultsType);
@@ -1965,7 +1965,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType).Fy;
 
          GET_IFACE(ILossParameters,pLossParams);
-         if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+         if ( pLossParams->GetLossMethod() == PrestressLossCriteria::LossMethodType::TIME_STEP )
          {
             *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType).Fy;
             *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType).Fy;

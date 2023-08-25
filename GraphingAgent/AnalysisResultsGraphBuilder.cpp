@@ -362,7 +362,7 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    if ( IsPGSExtension() )
    {
       GET_IFACE2( pBroker, ILossParameters, pLossParams);
-      if ( pLossParams->GetLossMethod() != pgsTypes::TIME_STEP )
+      if ( pLossParams->GetLossMethod() != PrestressLossCriteria::LossMethodType::TIME_STEP )
       {
          // PGS extension and not time-step analysis... don't include time dependent loads
          bIncludeTimeDependentLoads = false;
