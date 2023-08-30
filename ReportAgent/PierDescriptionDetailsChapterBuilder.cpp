@@ -303,8 +303,8 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   bool bK1 = (WBFL::LRFD::LRFDVersionMgr::Version::ThirdEditionWith2005Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
-   bool bLambda = (WBFL::LRFD::LRFDVersionMgr::Version::SeventhEditionWith2016Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
+   bool bK1 = (WBFL::LRFD::BDSManager::Edition::ThirdEditionWith2005Interims <= WBFL::LRFD::BDSManager::GetEdition());
+   bool bLambda = (WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims <= WBFL::LRFD::BDSManager::GetEdition());
 
 
    ColumnIndexType nColumns = 7;

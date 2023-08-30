@@ -480,8 +480,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
-         pStrSave->put_Property(_T("LRFD"),CComVariant(WBFL::LRFD::LRFDVersionMgr::GetVersionString(true)));
-         pStrSave->put_Property(_T("LRFR"),CComVariant(WBFL::LRFD::LRFRVersionMgr::GetVersionString(true)));
+         pStrSave->put_Property(_T("LRFD"),CComVariant(WBFL::LRFD::BDSManager::GetEditionAsString(true)));
+         pStrSave->put_Property(_T("LRFR"),CComVariant(WBFL::LRFD::MBEManager::GetEditionAsString(true)));
 
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(GetEmergencyRatingMethod())); // added in version 3
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(GetPermitRatingMethod()));
@@ -824,17 +824,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFD"),&var);
-            WBFL::LRFD::LRFDVersionMgr::Version lrfdVersion = WBFL::LRFD::LRFDVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            WBFL::LRFD::LRFDVersionMgr::SetVersion(lrfdVersion);
+            WBFL::LRFD::BDSManager::Edition lrfdEdition = WBFL::LRFD::BDSManager::GetEdition(OLE2T(var.bstrVal));
+            WBFL::LRFD::BDSManager::SetEdition(lrfdEdition);
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFR"),&var);
-            WBFL::LRFD::LRFRVersionMgr::Version lrfrVersion = WBFL::LRFD::LRFRVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            WBFL::LRFD::LRFRVersionMgr::SetVersion(lrfrVersion);
+            WBFL::LRFD::MBEManager::Edition lrfrEdition = WBFL::LRFD::MBEManager::GetEdition(OLE2T(var.bstrVal));
+            WBFL::LRFD::MBEManager::SetEdition(lrfrEdition);
 
             if (2 < version)
             {
-               // added in vesrion 3
+               // added in version 3
                var.vt = VT_I4;
                hr = pStrLoad->get_Property(_T("EmergencyRatingMethod"), &var);
                m_EmergencyRatingMethod = (xbrTypes::EmergencyRatingMethod)var.lVal;

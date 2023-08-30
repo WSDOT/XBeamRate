@@ -62,8 +62,8 @@ void CRatingOptionsPage::DoDataExchange(CDataExchange* pDX)
 
    COptionsDlg* pParent = (COptionsDlg*)GetParent();
 
-   DDX_CBItemData(pDX,IDC_LRFD,pParent->m_Options.m_LRFDVersion);
-   DDX_CBItemData(pDX,IDC_LRFR,pParent->m_Options.m_LRFRVersion);
+   DDX_CBItemData(pDX,IDC_LRFD,pParent->m_Options.m_LRFDEdition);
+   DDX_CBItemData(pDX,IDC_LRFR,pParent->m_Options.m_LRFREdition);
 
 
    DDX_Check_Bool(pDX,IDC_DESIGN_RATING,pParent->m_Options.m_bDesignRating);
@@ -100,8 +100,8 @@ BOOL CRatingOptionsPage::OnInitDialog()
    FillEmergencyFactorList();
    FillPermitFactorList();
 
-   GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(WBFL::LRFD::LRFDVersionMgr::GetCodeString());
-   GetDlgItem(IDC_LRFR_LABEL)->SetWindowText(WBFL::LRFD::LRFRVersionMgr::GetCodeString());
+   GetDlgItem(IDC_LRFD_LABEL)->SetWindowText(WBFL::LRFD::BDSManager::GetSpecificationName());
+   GetDlgItem(IDC_LRFR_LABEL)->SetWindowText(WBFL::LRFD::MBEManager::GetSpecificationName());
 
    FillLRFDList();
    FillLRFRList();
@@ -141,22 +141,20 @@ void CRatingOptionsPage::FillPermitFactorList()
 void CRatingOptionsPage::FillLRFDList()
 {
    CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFD);
-   int idx;
-   for ( int i = 1; i < (int)WBFL::LRFD::LRFDVersionMgr::Version::LastVersion; i++ )
+   for (auto e : pgsTypes::enum_range<WBFL::LRFD::BDSManager::Edition>(WBFL::LRFD::BDSManager::Edition::FirstEdition1994, WBFL::LRFD::BDSManager::GetLatestEdition()))
    {
-      idx = pSpec->AddString(WBFL::LRFD::LRFDVersionMgr::GetVersionString((WBFL::LRFD::LRFDVersionMgr::Version)(i)));
-      pSpec->SetItemData(idx,(DWORD)(i));
+      int idx = pSpec->AddString(WBFL::LRFD::BDSManager::GetEditionAsString(e));
+      pSpec->SetItemData(idx, (DWORD)(e));
    }
 }
 
 void CRatingOptionsPage::FillLRFRList()
 {
    CComboBox* pSpec = (CComboBox*)GetDlgItem(IDC_LRFR);
-   int idx;
-   for ( int i = 1; i < (int)WBFL::LRFD::LRFRVersionMgr::Version::LastVersion; i++ )
+   for (auto e : pgsTypes::enum_range<WBFL::LRFD::MBEManager::Edition>(WBFL::LRFD::MBEManager::Edition::FirstEdition2008, WBFL::LRFD::MBEManager::GetLatestEdition()))
    {
-      idx = pSpec->AddString(WBFL::LRFD::LRFRVersionMgr::GetVersionString((WBFL::LRFD::LRFRVersionMgr::Version)(i)));
-      pSpec->SetItemData(idx,(DWORD)(i));
+      int idx = pSpec->AddString(WBFL::LRFD::MBEManager::GetEditionAsString(e));
+      pSpec->SetItemData(idx, (DWORD)(e));
    }
 }
 

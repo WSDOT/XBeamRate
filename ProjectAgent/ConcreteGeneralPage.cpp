@@ -146,7 +146,7 @@ BOOL CConcreteGeneralPage::OnInitDialog()
    GetDlgItem(IDC_MOD_E)->SetWindowText(_T("Mod. Elasticity, Ec"));
 
    CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
-   if ( WBFL::LRFD::LRFDVersionMgr::GetVersion() < WBFL::LRFD::LRFDVersionMgr::Version::SeventhEditionWith2016Interims )
+   if ( WBFL::LRFD::BDSManager::GetEdition() < WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims )
    {  
       int idx = pcbConcreteType->AddString(_T("Normal weight"));
       pcbConcreteType->SetItemData(idx,(DWORD_PTR)pgsTypes::Normal);

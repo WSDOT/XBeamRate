@@ -65,8 +65,8 @@ void txnEditOptions::Execute(int i)
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
-   WBFL::LRFD::LRFDVersionMgr::SetVersion(m_Options[i].m_LRFDVersion);
-   WBFL::LRFD::LRFRVersionMgr::SetVersion(m_Options[i].m_LRFRVersion);
+   WBFL::LRFD::BDSManager::SetEdition(m_Options[i].m_LRFDEdition);
+   WBFL::LRFD::MBEManager::SetEdition(m_Options[i].m_LRFREdition);
 
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);

@@ -73,7 +73,7 @@ HRESULT CEngAgentImp::FinalConstruct()
    ATLASSERT(SUCCEEDED(hr));
 
    CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
-   if ( WBFL::LRFD::LRFDVersionMgr::GetUnits() == WBFL::LRFD::LRFDVersionMgr::Units::US )
+   if ( WBFL::LRFD::BDSManager::GetUnits() == WBFL::LRFD::BDSManager::Units::US )
    {
       solver->put_UnitMode(suUS);
    }
@@ -205,8 +205,8 @@ Float64 CEngAgentImp::GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
    Float64 Mcr = McrDetails.Mcr;
 
-   bool bAfter2002 = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
+   bool bAfter2002 = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -514,7 +514,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 void CEngAgentImp::GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3) const
 {
    // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
-   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       *pG1 = 1.6; // all other concrete structures (not-segmental)
       *pG2 = 1.1; // bonded strand/tendon
@@ -556,7 +556,7 @@ CrackingMomentDetails CEngAgentImp::ComputeCrackingMoment(PierIDType pierID,xbrT
 
    Float64 Mcr = g3*((g1*fr + g2*fcpe)*Sc - Mdnc*(Sc/Snc-1));
 
-   if ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       Float64 McrLimit = Sc*fr;
       McrDetails.McrLimit = McrLimit;
@@ -588,8 +588,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -607,7 +607,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    pAnalysisResults->GetMoment(pierID,limitState,poi,&MuMin,&MuMax);
    Mu = (bPositiveMoment ? MuMax : MuMin);
 
-   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       MrMin1 = Mcr;
    }
@@ -643,8 +643,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( WBFL::LRFD::LRFDVersionMgr::Version::SecondEditionWith2003Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( WBFL::LRFD::LRFDVersionMgr::GetVersion() <  WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcrack = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -681,7 +681,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
    Mu = gDC*Mdc + gDW*Mdw + gCR*Mcr + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
 
-   if ( WBFL::LRFD::LRFDVersionMgr::Version::SixthEdition2012 <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       MrMin1 = Mcrack;
    }
@@ -1033,7 +1033,7 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
       return details;
    }
 
-   if ( WBFL::LRFD::LRFRVersionMgr::GetVersion() < WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims )
+   if ( WBFL::LRFD::MBEManager::GetEdition() < WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims )
    {
       // before 2015, shear capacity was based strictly on stirrups at a section
       GET_IFACE(IXBRStirrups,pStirrups);

@@ -121,7 +121,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
 
    rptRcTable* pAvSTable1 = nullptr;
    rptRcTable* pAvSTable2 = nullptr;
-   if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
@@ -165,7 +165,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    pPara = new rptParagraph;
    *pChapter << pPara;
    std::_tstring strImage;
-   if ( WBFL::LRFD::LRFDVersionMgr::GetVersion() < WBFL::LRFD::LRFDVersionMgr::Version::SeventhEditionWith2016Interims )
+   if ( WBFL::LRFD::BDSManager::GetEdition() < WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims )
    {
       strImage = _T("XBeamVc.png");
    }
@@ -272,7 +272,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    }
 
    ColumnIndexType AvSTableCol = 0;
-   if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
    {
       (*pAvSTable1)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
       (*pAvSTable1)(0,AvSTableCol++) << _T("Stirrup Zones");
@@ -383,7 +383,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.dv);
       }
 
-      if ( WBFL::LRFD::LRFRVersionMgr::Version::SecondEditionWith2015Interims <= WBFL::LRFD::LRFRVersionMgr::GetVersion() )
+      if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
       {
          const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
          (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi);

@@ -141,8 +141,8 @@ void CAgentCmdTarget::OnEditOptions()
    GET_IFACE(IXBRRatingSpecification,pRatingSpec);
    
    txnEditOptionsData oldOptions;
-   oldOptions.m_LRFDVersion = WBFL::LRFD::LRFDVersionMgr::GetVersion();
-   oldOptions.m_LRFRVersion = WBFL::LRFD::LRFRVersionMgr::GetVersion();
+   oldOptions.m_LRFDEdition = WBFL::LRFD::BDSManager::GetEdition();
+   oldOptions.m_LRFREdition = WBFL::LRFD::MBEManager::GetEdition();
 
    oldOptions.m_bDesignRating = pRatingSpec->IsRatingEnabled(pgsTypes::lrDesign_Inventory);
    oldOptions.m_bDesignRateForShear = pRatingSpec->RateForShear(pgsTypes::lrDesign_Inventory);

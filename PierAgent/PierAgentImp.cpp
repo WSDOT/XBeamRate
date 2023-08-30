@@ -130,7 +130,7 @@ RebarGrade GetRebarGrade(WBFL::Materials::Rebar::Grade grade)
    if ( matGrade == Grade100 )
    {
       // grade 100 wasn't introduced until 6th Edition, 2013 interims
-      ATLASSERT(WBFL::LRFD::LRFDVersionMgr::Version::SixthEditionWith2013Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion());
+      ATLASSERT(WBFL::LRFD::BDSManager::Edition::SixthEditionWith2013Interims <= WBFL::LRFD::BDSManager::GetEdition());
    }
 #endif
 
@@ -856,7 +856,7 @@ Float64 CPierAgentImp::GetXBeamEc(PierIDType pierID) const
    else
    {
       Ec = WBFL::LRFD::ConcreteUtil::ModE((WBFL::Materials::ConcreteType)concrete.Type,concrete.Fc,concrete.StrengthDensity,false);
-      if ( WBFL::LRFD::LRFDVersionMgr::Version::ThirdEditionWith2005Interims <= WBFL::LRFD::LRFDVersionMgr::GetVersion() )
+      if ( WBFL::LRFD::BDSManager::Edition::ThirdEditionWith2005Interims <= WBFL::LRFD::BDSManager::GetEdition() )
       {
          Ec *= (concrete.EcK1*concrete.EcK2);
       }
