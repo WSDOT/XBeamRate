@@ -1844,7 +1844,7 @@ void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineId
 void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) const
 {
    // Detect the configurations from PGSuper/PGSplice that we can't model
-   // Throwns an unwind exception if we can't model this thing
+   // Throws an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
 
    // Initialize results
@@ -1900,11 +1900,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          ReactionLocation location[2];
          location[0].PierIdx   = pierIdx;
          location[0].GirderKey = girderKey;
-         location[0].Face      = rftAhead;
+         location[0].Face      = rftBack;
 
          location[1].PierIdx   = pierIdx;
          location[1].GirderKey = girderKey;
-         location[1].Face      = rftBack;
+         location[1].Face      = rftAhead;
 
          GET_IFACE(ILossParameters,pLossParams);
          for ( int i = 0; i < 2; i++ )
@@ -1933,8 +1933,10 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
-         dc[0] -= backSide.P;
-         dc[1] -= aheadSide.P;
+         CHECK(backSide.P <= 0);
+         CHECK(aheadSide.P <= 0);
+         dc[0] += backSide.P; // "add" because the load is negative
+         dc[1] += aheadSide.P;
 
          *pDC = dc[brgLineIdx];
          *pDW = dw[brgLineIdx];
@@ -1985,6 +1987,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
+         CHECK((backSide.P + aheadSide.P) <= 0);
          *pDC += (backSide.P + aheadSide.P); // the loads have negative values because they are downwards. Add the load to "subtract" it out of DC
       }
 
