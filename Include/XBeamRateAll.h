@@ -52,16 +52,14 @@ using namespace ATL;
 
 #include <XBeamRateTypes.h>
 
-#include <WBFLAll.h>
-#include <WBFLAtlExt.h>
-#include <WBFLCore.h>
-
-
 #if defined _DEBUG
+#undef WBFL_DEBUG
 #define WBFL_DEBUG
 #endif
 
-#include <WBFLDebug.h>
+#include <WBFLAll.h>
+#include <WBFLAtlExt.h>
+#include <WBFLCore.h>
 
 #include <AgentTools.h>
 #include <System\System.h>
