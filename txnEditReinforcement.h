@@ -23,14 +23,15 @@
 #pragma once
 
 #include <WBFLCore.h>
+#include <EAF\EAFTransaction.h>
 
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\StirrupData.h>
 
 struct xbrEditReinforcementData
 {
-   matRebar::Type Type;
-   matRebar::Grade Grade;
+   WBFL::Materials::Rebar::Type Type;
+   WBFL::Materials::Rebar::Grade Grade;
    xbrLongitudinalRebarData LongitudinalRebar;
    xbrStirrupData LowerXBeamStirrups;
    xbrStirrupData FullDepthStirrups;
@@ -39,7 +40,7 @@ struct xbrEditReinforcementData
 };
 
 class txnEditReinforcement :
-   public txnTransaction
+   public CEAFTransaction
 {
 public:
    txnEditReinforcement(PierIDType pierID,const xbrEditReinforcementData& oldReinforcement,const xbrEditReinforcementData& newReinforcement);
@@ -47,10 +48,10 @@ public:
 
    virtual bool Execute();
    virtual void Undo();
-   virtual txnTransaction* CreateClone() const;
+   virtual std::unique_ptr<CEAFTransaction> CreateClone() const;
    virtual std::_tstring Name() const;
-   virtual bool IsUndoable();
-   virtual bool IsRepeatable();
+   virtual bool IsUndoable() const;
+   virtual bool IsRepeatable() const;
 
 private:
    void Execute(int i);

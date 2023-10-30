@@ -52,9 +52,9 @@ LPCTSTR CShearCapacityDetailsChapterBuilder::GetName() const
    return TEXT("Shear Capacity Details");
 }
 
-rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -79,17 +79,17 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   *pPara << _T("Shear resistance computed by LRFD ") << LrfdCw8th(_T("5.8.3.4.1"),_T("5.7.3.4.1")) << _T(" - Simplified Procedure for Nonprestressed Sections") << rptNewLine;
+   *pPara << _T("Shear resistance computed by LRFD ") << WBFL::LRFD::LrfdCw8th(_T("5.8.3.4.1"),_T("5.7.3.4.1")) << _T(" - Simplified Procedure for Nonprestressed Sections") << rptNewLine;
 
    pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    if ( pierType == xbrTypes::pctIntegral )
    {
-      *pPara << _T("Effective Shear Dimension - Lower Cross Beam - LRFD ") << LrfdCw8th(_T("5.8.2.9"),_T("5.7.2.8")) << rptNewLine;
+      *pPara << _T("Effective Shear Dimension - Lower Cross Beam - LRFD ") << WBFL::LRFD::LrfdCw8th(_T("5.8.2.9"),_T("5.7.2.8")) << rptNewLine;
    }
    else
    {
-      *pPara << _T("Effective Shear Dimension - LRFD ") << LrfdCw8th(_T("5.8.2.9"), _T("5.7.2.8")) << rptNewLine;
+      *pPara << _T("Effective Shear Dimension - LRFD ") << WBFL::LRFD::LrfdCw8th(_T("5.8.2.9"), _T("5.7.2.8")) << rptNewLine;
    }
 
    pPara = new rptParagraph;
@@ -104,7 +104,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
-      *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD ") << LrfdCw8th(_T("5.8.2.9"), _T("5.7.2.8")) << rptNewLine;
+      *pPara << _T("Effective Shear Dimension - Full Depth Cross Beam - LRFD ") << WBFL::LRFD::LrfdCw8th(_T("5.8.2.9"), _T("5.7.2.8")) << rptNewLine;
    }
 
    rptRcTable* pDvTable2 = nullptr;
@@ -121,7 +121,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    rptRcTable* pAvSTable1 = nullptr;
    rptRcTable* pAvSTable2 = nullptr;
-   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
@@ -165,7 +165,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    pPara = new rptParagraph;
    *pChapter << pPara;
    std::_tstring strImage;
-   if ( lrfdVersionMgr::GetVersion() < lrfdVersionMgr::SeventhEditionWith2016Interims )
+   if ( WBFL::LRFD::BDSManager::GetEdition() < WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims )
    {
       strImage = _T("XBeamVc.png");
    }
@@ -173,7 +173,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    {
       strImage = _T("XBeamVc_2016.png");
    }
-   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + strImage,rptRcImage::Middle) << _T(" LRFD Eqn ") << LrfdCw8th(_T("5.8.3.3-3"),_T("5.7.3.3-3")) << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + strImage,rptRcImage::Middle) << _T(" LRFD Eqn ") << WBFL::LRFD::LrfdCw8th(_T("5.8.3.3-3"),_T("5.7.3.3-3")) << rptNewLine;
 
    rptRcTable* pVcTable = rptStyleManager::CreateDefaultTable(6);
    *pPara << pVcTable << rptNewLine;
@@ -187,11 +187,11 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    *pChapter << pPara;
    if ( pierType == xbrTypes::pctIntegral )
    {
-      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << LrfdCw8th(_T("C5.8.3.3-1"),_T("C5.7.3.3-1")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << WBFL::LRFD::LrfdCw8th(_T("C5.8.3.3-1"),_T("C5.7.3.3-1")) << rptNewLine;
    }
    else
    {
-      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << LrfdCw8th(_T("C5.8.3.3-1"), _T("C5.7.3.3-1")) << rptNewLine;
+      *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << WBFL::LRFD::LrfdCw8th(_T("C5.8.3.3-1"), _T("C5.7.3.3-1")) << rptNewLine;
    }
 
    rptRcTable* pVsTable = rptStyleManager::CreateDefaultTable((pierType == xbrTypes::pctIntegral ? 8 : 6));
@@ -204,7 +204,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVn.png"),rptRcImage::Middle) << _T(" LRFD Eqns ") << LrfdCw8th(_T("5.8.3.3-1"),_T("5.7.3.3-1")) << _T(" and ") << LrfdCw8th(_T("5.8.3.3-2"),_T("5.7.3.3-2")) << rptNewLine;
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVn.png"),rptRcImage::Middle) << _T(" LRFD Eqns ") << WBFL::LRFD::LrfdCw8th(_T("5.8.3.3-1"),_T("5.7.3.3-1")) << _T(" and ") << WBFL::LRFD::LrfdCw8th(_T("5.8.3.3-2"),_T("5.7.3.3-2")) << rptNewLine;
 
    rptRcTable* pVnTable = rptStyleManager::CreateDefaultTable(11);
    *pPara << pVnTable << rptNewLine;
@@ -272,7 +272,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    }
 
    ColumnIndexType AvSTableCol = 0;
-   if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
    {
       (*pAvSTable1)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
       (*pAvSTable1)(0,AvSTableCol++) << _T("Stirrup Zones");
@@ -383,7 +383,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.dv);
       }
 
-      if ( lrfrVersionMgr::SecondEditionWith2015Interims <= lrfrVersionMgr::GetVersion() )
+      if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
       {
          const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
          (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi);
@@ -486,7 +486,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(CReportSpecification* pRp
    return pChapter;
 }
 
-CChapterBuilder* CShearCapacityDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CShearCapacityDetailsChapterBuilder::Clone() const
 {
-   return new CShearCapacityDetailsChapterBuilder;
+   return std::make_unique<CShearCapacityDetailsChapterBuilder>();
 }

@@ -29,7 +29,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFApp.h>
-#include <Lrfd\RebarPool.h>
+#include <LRFD\RebarPool.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -154,13 +154,13 @@ void CStirrupGrid::CustomInit(LPCTSTR lpszGridName)
 
 
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(type,grade,true/*stirrup only*/);
+   WBFL::LRFD::RebarIter rebarIter(type,grade,true/*stirrup only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
-      const matRebar* pRebar = rebarIter.GetCurrentRebar();
+      const auto* pRebar = rebarIter.GetCurrentRebar();
       m_strBarSizeChoiceList += pRebar->GetName().c_str();
       m_strBarSizeChoiceList += _T("\n");
    }
@@ -199,7 +199,7 @@ void CStirrupGrid::AddZone()
 
 BOOL CStirrupGrid::OnLButtonHitRowCol(ROWCOL nHitRow,ROWCOL nHitCol,ROWCOL nDragRow,ROWCOL nDragCol,CPoint point,UINT flags,WORD nHitState)
 {
-   if ( sysFlags<WORD>::IsSet(nHitState,GX_HITEND) )
+   if ( WBFL::System::Flags<WORD>::IsSet(nHitState,GX_HITEND) )
    {
       CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
 
@@ -319,7 +319,7 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   Float64 value = ::ConvertFromSysUnits(zoneData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   Float64 value = WBFL::Units::ConvertFromSysUnits(zoneData.Length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 	SetStyleRange(CGXRange(row,1), CGXStyle()
 			.SetUserAttribute(GX_IDS_UA_VALID_MIN, _T("0.0e01"))
 			.SetUserAttribute(GX_IDS_UA_VALID_MAX, _T("1.0e99"))
@@ -335,10 +335,10 @@ void CStirrupGrid::SetZoneData(ROWCOL row,const xbrStirrupData::StirrupZone& zon
 		.SetControl(GX_IDS_CTRL_CBS_DROPDOWNLIST)
 		.SetChoiceList(m_strBarSizeChoiceList)
       .SetHorizontalAlignment(DT_RIGHT)
-      .SetValue(lrfdRebarPool::GetBarSize(zoneData.BarSize).c_str())
+      .SetValue(WBFL::LRFD::RebarPool::GetBarSize(zoneData.BarSize).c_str())
       );
 
-   value = ::ConvertFromSysUnits(zoneData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(zoneData.BarSpacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 	SetStyleRange(CGXRange(row,3), CGXStyle()
 			.SetUserAttribute(GX_IDS_UA_VALID_MIN, _T("0.0e01"))
 			.SetUserAttribute(GX_IDS_UA_VALID_MAX, _T("1.0e99"))
@@ -378,7 +378,7 @@ bool CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
    else
    {
       Float64 length = _tstof(GetCellValue(row,1));
-      zoneData.Length = ::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+      zoneData.Length = WBFL::Units::ConvertToSysUnits(length,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 
       if ( zoneData.Length <= 0 )
       {
@@ -392,7 +392,7 @@ bool CStirrupGrid::GetZoneData(ROWCOL row,xbrStirrupData::StirrupZone& zoneData)
    zoneData.BarSize = GetBarSize(row,2);
 
    Float64 spacing = _tstof(GetCellValue(row,3));
-   zoneData.BarSpacing = ::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
+   zoneData.BarSpacing = WBFL::Units::ConvertToSysUnits(spacing,pDisplayUnits->GetComponentDimUnit().UnitOfMeasure);
 
    Float64 nBars = _tstof(GetCellValue(row,4));
    zoneData.nBars = nBars;
@@ -415,14 +415,14 @@ CString CStirrupGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)
    }
 }
 
-matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
+WBFL::Materials::Rebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
 {
-   std::_tstring strBarSize = GetCellValue(row,col);
+   std::_tstring strBarSize = (LPCTSTR)GetCellValue(row,col);
    CReinforcementPage* pParent = (CReinforcementPage*)GetParent();
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pParent->GetRebarMaterial(&type,&grade);
-   lrfdRebarIter rebarIter(type,grade,true/*stirrups only*/);
+   WBFL::LRFD::RebarIter rebarIter(type,grade,true/*stirrups only*/);
    for ( rebarIter.Begin(); rebarIter; rebarIter.Next() )
    {
       if ( rebarIter.GetCurrentRebar()->GetName() == strBarSize )
@@ -432,7 +432,7 @@ matRebar::Size CStirrupGrid::GetBarSize(ROWCOL row,ROWCOL col)
    }
 
    ATLASSERT(false); // should never get here
-   return matRebar::bs3;
+   return WBFL::Materials::Rebar::Size::bs3;
 }
 
 void CStirrupGrid::SetSymmetry(bool isSymmetrical)

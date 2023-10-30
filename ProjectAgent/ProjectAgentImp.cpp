@@ -142,19 +142,19 @@ CProjectAgentImp::CProjectAgentImp()
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Truck Train [90%(Truck + Lane)]"),0,0));
    m_LiveLoadReactions[pgsTypes::lrDesign_Operating][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("LRFD Low Boy (Dual Tandem + Lane)"),0,0));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3"),0,::ConvertToSysUnits(50.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3S2"),0,::ConvertToSysUnits(72.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3-3"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3"),0,WBFL::Units::ConvertToSysUnits(50.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3S2"),0,WBFL::Units::ConvertToSysUnits(72.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type 3-3"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Routine][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("0.75(Two Type 3-3 separated by 30ft) + Lane Load"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,::ConvertToSysUnits(80.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,::ConvertToSysUnits(54.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,::ConvertToSysUnits(62.0,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,::ConvertToSysUnits(69.5,unitMeasure::Kip)));
-   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,::ConvertToSysUnits(77.5,unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Notional Rating Load (NRL)"),0,WBFL::Units::ConvertToSysUnits(80.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU4"),0,WBFL::Units::ConvertToSysUnits(54.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU5"),0,WBFL::Units::ConvertToSysUnits(62.0,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU6"),0,WBFL::Units::ConvertToSysUnits(69.5,WBFL::Units::Measure::Kip)));
+   //m_LiveLoadReactions[pgsTypes::lrLegal_Special][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("SU7"),0,WBFL::Units::ConvertToSysUnits(77.5,WBFL::Units::Measure::Kip)));
 
-   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV2"), 0, ::ConvertToSysUnits(57.5, unitMeasure::Kip)));
-   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV3"), 0, ::ConvertToSysUnits(86.0, unitMeasure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV2"), 0, WBFL::Units::ConvertToSysUnits(57.5, WBFL::Units::Measure::Kip)));
+   m_LiveLoadReactions[pgsTypes::lrLegal_Emergency][INVALID_ID].push_back(xbrLiveLoadReactionData(_T("Type EV3"), 0, WBFL::Units::ConvertToSysUnits(86.0, WBFL::Units::Measure::Kip)));
 
    xbrPierData pierData;
    IndexType nBearingLines = pierData.GetBearingLineCount();
@@ -178,11 +178,11 @@ CProjectAgentImp::CProjectAgentImp()
    m_PermitRatingMethod = xbrTypes::prmWSDOT;
    m_EmergencyRatingMethod = xbrTypes::ermWSDOT;
 
-   m_MaxLLStepSize = ::ConvertToSysUnits(1.0,unitMeasure::Feet);
+   m_MaxLLStepSize = WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Feet);
    m_MaxLoadedLanes = 4; // usually, anything beyond 4 lanes doesn't control
 
    m_bDoAnalyzeNegativeMomentBetweenFOC = false;
-   m_MinColumnWidthForNegMoment = ::ConvertToSysUnits(4.0,unitMeasure::Feet); // txdot's default
+   m_MinColumnWidthForNegMoment = WBFL::Units::ConvertToSysUnits(4.0,WBFL::Units::Measure::Feet); // txdot's default
 
    m_bExportingModel = false;
 }
@@ -480,8 +480,8 @@ STDMETHODIMP CProjectAgentImp::Save(IStructuredSave* pStrSave)
       // when this is a PGSuper/PGSplice extension, there can be many piers
 
       pStrSave->BeginUnit(_T("RatingSpecification"),4.0);
-         pStrSave->put_Property(_T("LRFD"),CComVariant(lrfdVersionMgr::GetVersionString(true)));
-         pStrSave->put_Property(_T("LRFR"),CComVariant(lrfrVersionMgr::GetVersionString(true)));
+         pStrSave->put_Property(_T("LRFD"),CComVariant(WBFL::LRFD::BDSManager::GetEditionAsString(true)));
+         pStrSave->put_Property(_T("LRFR"),CComVariant(WBFL::LRFD::MBEManager::GetEditionAsString(true)));
 
          pStrSave->put_Property(_T("EmergencyRatingMethod"), CComVariant(GetEmergencyRatingMethod())); // added in version 3
          pStrSave->put_Property(_T("PermitRatingMethod"), CComVariant(GetPermitRatingMethod()));
@@ -824,17 +824,17 @@ STDMETHODIMP CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFD"),&var);
-            lrfdVersionMgr::Version lrfdVersion = lrfdVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            lrfdVersionMgr::SetVersion(lrfdVersion);
+            WBFL::LRFD::BDSManager::Edition lrfdEdition = WBFL::LRFD::BDSManager::GetEdition(OLE2T(var.bstrVal));
+            WBFL::LRFD::BDSManager::SetEdition(lrfdEdition);
 
             var.vt = VT_BSTR;
             pStrLoad->get_Property(_T("LRFR"),&var);
-            lrfrVersionMgr::Version lrfrVersion = lrfrVersionMgr::GetVersion(OLE2T(var.bstrVal));
-            lrfrVersionMgr::SetVersion(lrfrVersion);
+            WBFL::LRFD::MBEManager::Edition lrfrEdition = WBFL::LRFD::MBEManager::GetEdition(OLE2T(var.bstrVal));
+            WBFL::LRFD::MBEManager::SetEdition(lrfrEdition);
 
             if (2 < version)
             {
-               // added in vesrion 3
+               // added in version 3
                var.vt = VT_I4;
                hr = pStrLoad->get_Property(_T("EmergencyRatingMethod"), &var);
                m_EmergencyRatingMethod = (xbrTypes::EmergencyRatingMethod)var.lVal;
@@ -1844,7 +1844,7 @@ void CProjectAgentImp::SetBearingReactions(PierIDType pierID,IndexType brgLineId
 void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineIdx,IndexType brgIdx,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW) const
 {
    // Detect the configurations from PGSuper/PGSplice that we can't model
-   // Throwns an unwind exception if we can't model this thing
+   // Throws an unwind exception if we can't model this thing
    CanModelPier(pierID,m_XBeamRateStatusGroupID,m_scidBridgeError);
 
    // Initialize results
@@ -1900,11 +1900,11 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          ReactionLocation location[2];
          location[0].PierIdx   = pierIdx;
          location[0].GirderKey = girderKey;
-         location[0].Face      = rftAhead;
+         location[0].Face      = rftBack;
 
          location[1].PierIdx   = pierIdx;
          location[1].GirderKey = girderKey;
-         location[1].Face      = rftBack;
+         location[1].Face      = rftAhead;
 
          GET_IFACE(ILossParameters,pLossParams);
          for ( int i = 0; i < 2; i++ )
@@ -1912,7 +1912,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
             dc[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDC,bat,resultsType);
             dw[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcDWRating,bat,resultsType);
 
-            if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+            if ( pLossParams->GetLossMethod() == PrestressLossCriteria::LossMethodType::TIME_STEP )
             {
                cr[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcCR,bat,resultsType);
                sh[i] = pBearingDesign->GetBearingCombinedReaction(loadRatingIntervalIdx,location[i],lcSH,bat,resultsType);
@@ -1933,8 +1933,10 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
-         dc[0] -= backSide.P;
-         dc[1] -= aheadSide.P;
+         CHECK(backSide.P <= 0);
+         CHECK(aheadSide.P <= 0);
+         dc[0] += backSide.P; // "add" because the load is negative
+         dc[1] += aheadSide.P;
 
          *pDC = dc[brgLineIdx];
          *pDW = dw[brgLineIdx];
@@ -1965,7 +1967,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          *pDW = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcDWRating,bat,resultsType).Fy;
 
          GET_IFACE(ILossParameters,pLossParams);
-         if ( pLossParams->GetLossMethod() == pgsTypes::TIME_STEP )
+         if ( pLossParams->GetLossMethod() == PrestressLossCriteria::LossMethodType::TIME_STEP )
          {
             *pCR = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcCR,bat,resultsType).Fy;
             *pSH = pReactions->GetReaction(girderKey,pierIdx,pgsTypes::stPier,loadRatingIntervalIdx,lcSH,bat,resultsType).Fy;
@@ -1985,6 +1987,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
          PIER_DIAPHRAGM_LOAD_DETAILS backSide, aheadSide;
          GET_IFACE(IProductLoads,pProductLoads);
          pProductLoads->GetPierDiaphragmLoads(pierIdx, girderKey.girderIndex, &backSide, &aheadSide);
+         CHECK((backSide.P + aheadSide.P) <= 0);
          *pDC += (backSide.P + aheadSide.P); // the loads have negative values because they are downwards. Add the load to "subtract" it out of DC
       }
 
@@ -2195,13 +2198,13 @@ Float64 CProjectAgentImp::GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatin
    }
 }
 
-void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade)
+void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
 {
    GetPrivatePierData(pierID).SetRebarMaterial(type,grade);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade) const
+void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
 {
    GetPrivatePierData(pierID).GetRebarMaterial(pType,pGrade);
 }
@@ -3048,12 +3051,12 @@ void CProjectAgentImp::FirePendingEvents()
       m_EventHoldCount--;
 
       // Fire our events
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECTPROPERTIES) )
+	   if ( WBFL::System::Flags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECTPROPERTIES) )
       {
 	      Fire_OnProjectPropertiesChanged();
       }
 
-	   if ( sysFlags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
+	   if ( WBFL::System::Flags<Uint32>::IsSet(m_PendingEvents,EVT_PROJECT) )
       {
 	      Fire_OnProjectChanged();
       }
@@ -3384,12 +3387,9 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 skew;
    skewAngle->get_Value(&skew);
 
-   CComPtr<IDirection> pierDirection;
-   pBridge->GetPierDirection(pierIdx,&pierDirection);
-
    GET_IFACE(IRoadway,pRoadway);
    CComPtr<IPoint2dCollection> deckProfile;
-   pRoadway->GetRoadwaySurface(pierStation,pierDirection,&deckProfile);
+   pRoadway->GetRoadwaySurface(pierStation,skewAngle,&deckProfile);
    pierData.SetDeckSurfaceType(xbrPierData::Profile);
    pierData.SetDeckProfile(deckProfile);
 
@@ -3433,13 +3433,15 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    Float64 Hdiap = Max(Hback,Hahead);
 
    Float64 Hbd = 0;
-   std::vector<BearingElevationDetails> vBackElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Back);
+
+   // Compute elevation ignoring effects on non-recoverable deformations. We don't need to perform a full structural analysis to get the values we want
+   std::vector<BearingElevationDetails> vBackElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Back, ALL_GIRDERS,true);
    for (const auto& elevdet : vBackElevDetails)
    {
       Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);
    }
 
-   std::vector<BearingElevationDetails> vAheadElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Ahead);
+   std::vector<BearingElevationDetails> vAheadElevDetails = pBridge->GetBearingElevationDetails(pierIdx, pgsTypes::Ahead,ALL_GIRDERS,true);
    for (const auto& elevdet : vAheadElevDetails)
    {
       Hbd = max(Hbd, elevdet.BrgHeight + elevdet.Hg + elevdet.SlabOffset - elevdet.GrossSlabDepth);

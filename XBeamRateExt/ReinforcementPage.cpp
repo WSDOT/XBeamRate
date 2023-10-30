@@ -161,7 +161,7 @@ IReinforcementPageParent* CReinforcementPage::GetPageParent()
    return m_pParent;
 }
 
-void CReinforcementPage::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade)
+void CReinforcementPage::GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade)
 {
    // The grids use this method to get the rebar material
    *pType = m_pParent->GetRebarType();
@@ -340,7 +340,7 @@ BOOL CReinforcementPage::OnSetActive()
 void CReinforcementPage::UpdateConcreteTypeLabel()
 {
    CString strLabel;
-   strLabel.Format(_T("%s"),lrfdConcreteUtil::GetTypeName((matConcrete::Type)m_pParent->GetConcrete().Type,true).c_str());
+   strLabel.Format(_T("%s"),WBFL::LRFD::ConcreteUtil::GetTypeName((WBFL::Materials::ConcreteType)m_pParent->GetConcrete().Type,true).c_str());
    GetDlgItem(IDC_CONCRETE_TYPE_LABEL)->SetWindowText(strLabel);
 }
 

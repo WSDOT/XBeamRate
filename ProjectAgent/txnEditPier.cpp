@@ -193,9 +193,9 @@ void txnEditPier::Execute(int i)
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditPier::CreateClone() const
+std::unique_ptr<CEAFTransaction> txnEditPier::CreateClone() const
 {
-   return new txnEditPier(m_PierData[0],m_PierData[1]);
+   return std::make_unique<txnEditPier>(m_PierData[0],m_PierData[1]);
 }
 
 std::_tstring txnEditPier::Name() const
@@ -203,12 +203,12 @@ std::_tstring txnEditPier::Name() const
    return _T("Edit Pier");
 }
 
-bool txnEditPier::IsUndoable()
+bool txnEditPier::IsUndoable() const
 {
    return true;
 }
 
-bool txnEditPier::IsRepeatable()
+bool txnEditPier::IsRepeatable() const
 {
    return false;
 }

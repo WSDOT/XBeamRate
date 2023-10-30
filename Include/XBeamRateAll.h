@@ -28,7 +28,6 @@
 #endif
 
 #define VC_EXTRALEAN
-#define COM_STDMETHOD_CAN_THROW
 
 #define _ATL_APARTMENT_THREADED
 #define _ATL_NO_AUTOMATIC_NAMESPACE
@@ -53,16 +52,14 @@ using namespace ATL;
 
 #include <XBeamRateTypes.h>
 
-#include <WBFLAll.h>
-#include <WBFLAtlExt.h>
-#include <WBFLCore.h>
-
-
 #if defined _DEBUG
+#undef WBFL_DEBUG
 #define WBFL_DEBUG
 #endif
 
-#include <WBFLDebug.h>
+#include <WBFLAll.h>
+#include <WBFLAtlExt.h>
+#include <WBFLCore.h>
 
 #include <AgentTools.h>
 #include <System\System.h>

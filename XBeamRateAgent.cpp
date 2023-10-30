@@ -275,10 +275,10 @@ void CXBeamRateAgent::RemoveToolbar()
 //   // Create report spec builders
 //   //
 //
-//   std::shared_ptr<CReportSpecificationBuilder> pMyRptSpecBuilder( std::make_shared<CMyReportSpecificationBuilder>(m_pBroker) );
+//   std::shared_ptr<WBFL::Reporting::ReportSpecificationBuilder> pMyRptSpecBuilder( std::make_shared<CMyReportSpecificationBuilder>(m_pBroker) );
 //
 //   // My report
-//   std::unique_ptr<CReportBuilder> pRptBuilder(std::make_unique<CReportBuilder>(_T("Extension Agent Report"));
+//   std::unique_ptr<WBFL::Reporting::ReportBuilder> pRptBuilder(std::make_unique<WBFL::Reporting::ReportBuilder>(_T("Extension Agent Report"));
 //   pRptBuilder->SetMenuBitmap(&m_bmpMenu);
 //   pRptBuilder->AddTitlePageBuilder( std::make_shared<CPGSuperTitlePageBuilder>(m_pBroker,pRptBuilder->GetName(),false)) );
 //   pRptBuilder->SetReportSpecificationBuilder( pMyRptSpecBuilder );
@@ -596,7 +596,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditPierData* pEditPierData,
    return nullptr;
 }
 
-txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
+std::unique_ptr<CEAFTransaction> CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData)
 {
    if ( pPage == nullptr )
    {
@@ -626,8 +626,7 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditPierData* pEditP
    newReinforcement.ConditionFactorType = pParent->GetConditionFactorType();
    newReinforcement.ConditionFactor = pParent->GetConditionFactor();
 
-   txnEditReinforcement* pTxn = new txnEditReinforcement(pEditPierData->GetPierData()->GetID(),oldReinforcement,newReinforcement);
-   return pTxn;
+   return std::make_unique<txnEditReinforcement>(pEditPierData->GetPierData()->GetID(),oldReinforcement,newReinforcement);
 }
 
 IDType CXBeamRateAgent::GetEditBridgeCallbackID()
@@ -658,7 +657,7 @@ CPropertyPage* CXBeamRateAgent::CreatePropertyPage(IEditLoadRatingOptions* pLoad
    return pPage;
 }
 
-txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions)
+std::unique_ptr<CEAFTransaction> CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions)
 {
    CLoadRatingOptionsPage* pLROPage = (CLoadRatingOptionsPage*)pPage;
 
@@ -688,8 +687,7 @@ txnTransaction* CXBeamRateAgent::OnOK(CPropertyPage* pPage,IEditLoadRatingOption
    newOptions.m_bDoAnalyzeNegativeMomentBetweenFOC = pLROPage->m_bDoAnalyzeNegativeMomentBetweenFOC;
    newOptions.m_MinColumnWidthForNegMoment = pLROPage->m_MinColumnWidthForNegMoment;
 
-   txnEditLoadRatingOptions* pTxn = new txnEditLoadRatingOptions(oldOptions,newOptions);
-   return pTxn;
+   return std::make_unique<txnEditLoadRatingOptions>(oldOptions,newOptions);
 }
 
 /////////////////////////////////////////////////////////////////////////////////

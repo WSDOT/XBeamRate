@@ -40,7 +40,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <MFCTools\Format.h>
 
-#include <Units\SysUnits.h>
+#include <Units\Convert.h>
 
 #include "LoadRater.h"
 
@@ -73,7 +73,7 @@ HRESULT CEngAgentImp::FinalConstruct()
    ATLASSERT(SUCCEEDED(hr));
 
    CComQIPtr<ILRFDSolver2> solver(m_MomentCapacitySolver);
-   if ( lrfdVersionMgr::GetUnits() == lrfdVersionMgr::US )
+   if ( WBFL::LRFD::BDSManager::GetUnits() == WBFL::LRFD::BDSManager::Units::US )
    {
       solver->put_UnitMode(suUS);
    }
@@ -205,8 +205,8 @@ Float64 CEngAgentImp::GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
    Float64 Mcr = McrDetails.Mcr;
 
-   bool bAfter2002 = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002 = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -432,13 +432,13 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 c;
       solution->get_NeutralAxisDepth(&c);
 
-      matRebar::Type rebarType;
-      matRebar::Grade rebarGrade;
+      WBFL::Materials::Rebar::Type rebarType;
+      WBFL::Materials::Rebar::Grade rebarGrade;
       pProject->GetRebarMaterial(pierID,&rebarType,&rebarGrade);
 
       Float64 et  = (dt - c)*0.003/c;
-      Float64 ecl = lrfdRebar::GetCompressionControlledStrainLimit(rebarGrade);
-      Float64 etl = lrfdRebar::GetTensionControlledStrainLimit(rebarGrade);
+      Float64 ecl = WBFL::LRFD::Rebar::GetCompressionControlledStrainLimit(rebarGrade);
+      Float64 etl = WBFL::LRFD::Rebar::GetTensionControlledStrainLimit(rebarGrade);
       phi = PhiC + (PhiT - PhiC)*(et - ecl)/(etl - ecl);
       phi = ::ForceIntoRange(PhiC,phi,PhiT);
 
@@ -459,7 +459,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
       Float64 sumTd = 0;
       CComPtr<IDblArray> vfs;
       solution->get_fs(&vfs);
-      CollectionIndexType nRebarLayers;
+      IndexType nRebarLayers;
       rcBeam->get_RebarLayerCount(&nRebarLayers);
       for (IndexType idx = 0; idx < nRebarLayers; idx++)
       {
@@ -477,7 +477,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 
       CComPtr<IDblArray> vfps;
       solution->get_fps(&vfps);
-      CollectionIndexType nStrandLayers;
+      IndexType nStrandLayers;
       rcBeam->get_StrandLayerCount(&nStrandLayers);
       for (IndexType idx = 0; idx < nStrandLayers; idx++)
       {
@@ -514,7 +514,7 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,xbrT
 void CEngAgentImp::GetCrackingMomentFactors(PierIDType pierID,Float64* pG1,Float64* pG2,Float64* pG3) const
 {
    // gamma factors from LRFD 5.7.3.3.2 (LRFD 6th Edition, 2012)
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       *pG1 = 1.6; // all other concrete structures (not-segmental)
       *pG2 = 1.1; // bonded strand/tendon
@@ -556,7 +556,7 @@ CrackingMomentDetails CEngAgentImp::ComputeCrackingMoment(PierIDType pierID,xbrT
 
    Float64 Mcr = g3*((g1*fr + g2*fcpe)*Sc - Mdnc*(Sc/Snc-1));
 
-   if ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       Float64 McrLimit = Sc*fr;
       McrDetails.McrLimit = McrLimit;
@@ -588,8 +588,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcr = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -607,7 +607,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    pAnalysisResults->GetMoment(pierID,limitState,poi,&MuMin,&MuMax);
    Mu = (bPositiveMoment ? MuMax : MuMin);
 
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       MrMin1 = Mcr;
    }
@@ -643,8 +643,8 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
    const MomentCapacityDetails& MnDetails  = GetMomentCapacityDetails(pierID,stage,poi,bPositiveMoment);
    const CrackingMomentDetails& McrDetails = GetCrackingMomentDetails(pierID,stage,poi,bPositiveMoment);
 
-   bool bAfter2002  = ( lrfdVersionMgr::SecondEditionWith2003Interims <= lrfdVersionMgr::GetVersion() ? true : false );
-   bool bBefore2012 = ( lrfdVersionMgr::GetVersion() <  lrfdVersionMgr::SixthEdition2012 ? true : false );
+   bool bAfter2002  = ( WBFL::LRFD::BDSManager::Edition::SecondEditionWith2003Interims <= WBFL::LRFD::BDSManager::GetEdition() ? true : false );
+   bool bBefore2012 = ( WBFL::LRFD::BDSManager::GetEdition() <  WBFL::LRFD::BDSManager::Edition::SixthEdition2012 ? true : false );
    if ( bAfter2002 && bBefore2012 )
    {
       Mcrack = (bPositiveMoment ? Max(McrDetails.Mcr,McrDetails.McrLimit) : Min(McrDetails.Mcr,McrDetails.McrLimit));
@@ -681,7 +681,7 @@ MinMomentCapacityDetails CEngAgentImp::ComputeMinMomentCapacity(PierIDType pierI
 
    Mu = gDC*Mdc + gDW*Mdw + gCR*Mcr + gSH*Msh + gRE*Mre + gPS*Mps + gLL*(Mpermit + Mlegal);
 
-   if ( lrfdVersionMgr::SixthEdition2012 <= lrfdVersionMgr::GetVersion() )
+   if ( WBFL::LRFD::BDSManager::Edition::SixthEdition2012 <= WBFL::LRFD::BDSManager::GetEdition() )
    {
       MrMin1 = Mcrack;
    }
@@ -801,10 +801,10 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IXBRMaterial,pMaterial);
 
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
-   Float64 fy = matRebar::GetYieldStrength(type,grade);
+   Float64 fy = WBFL::Materials::Rebar::GetYieldStrength(type,grade);
 
    Float64 dv1 = GetDv(pierID,xbrTypes::Stage1,poi);
    Float64 dv2 = GetDv(pierID,stage,poi);
@@ -821,10 +821,10 @@ ShearCapacityDetails CEngAgentImp::ComputeShearCapacity(PierIDType pierID,xbrTyp
    // Also need to account for x-beam type (integral, continuous, expansion... only integral has upper diaphragm)
    Float64 fc = pProject->GetConcrete(pierID).Fc;
    Float64 bv = pProject->GetXBeamWidth(pierID);
-   Float64 fc_us = ::ConvertFromSysUnits(fc,unitMeasure::KSI);
+   Float64 fc_us = WBFL::Units::ConvertFromSysUnits(fc,WBFL::Units::Measure::KSI);
    Float64 lambda = pMaterial->GetXBeamLambda(pierID);
    Float64 Vc_us = 0.0316*lambda*beta*sqrt(fc_us)*bv*dv;
-   Float64 Vc = ::ConvertToSysUnits(Vc_us,unitMeasure::KSI);
+   Float64 Vc = WBFL::Units::ConvertToSysUnits(Vc_us,WBFL::Units::Measure::KSI);
    Float64 Vs1 = Av_over_S1*fy*dv1/(tan(theta)); // lower x-beam reinforcement capacity
    Float64 Vs2 = Av_over_S2*fy*dv2/(tan(theta)); // full x-beam reinforcement capacity
    Float64 Vs = Vs1 + Vs2; // total capacity due to reinforcement
@@ -1033,7 +1033,7 @@ AvOverSDetails CEngAgentImp::ComputeAverageAvOverS(PierIDType pierID,xbrTypes::S
       return details;
    }
 
-   if ( lrfrVersionMgr::GetVersion() < lrfrVersionMgr::SecondEditionWith2015Interims )
+   if ( WBFL::LRFD::MBEManager::GetEdition() < WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims )
    {
       // before 2015, shear capacity was based strictly on stirrups at a section
       GET_IFACE(IXBRStirrups,pStirrups);

@@ -37,10 +37,10 @@ xbrPierData::xbrPierData()
    m_strSkew = _T("00 00 00.0 L");
    m_BridgeLineOffset = 0;
    m_CurbLineDatum = pgsTypes::omtAlignment;
-   m_LeftCurbOffset  = -::ConvertToSysUnits(10.0,unitMeasure::Feet);
-   m_RightCurbOffset = ::ConvertToSysUnits(10.0,unitMeasure::Feet);
+   m_LeftCurbOffset  = -WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet);
+   m_RightCurbOffset = WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet);
 
-   m_tDeck = ::ConvertToSysUnits(8.0,unitMeasure::Inch);
+   m_tDeck = WBFL::Units::ConvertToSysUnits(8.0,WBFL::Units::Measure::Inch);
 
    m_DeckSurfaceType = Simplified;
    m_DeckElevation = 0;
@@ -48,18 +48,18 @@ xbrPierData::xbrPierData()
    m_LeftCrownSlope = -0.02;
    m_RightCrownSlope = -0.02;
 
-   m_H = ::ConvertToSysUnits(3,unitMeasure::Feet);
-   m_W = ::ConvertToSysUnits(5,unitMeasure::Feet);
+   m_H = WBFL::Units::ConvertToSysUnits(3,WBFL::Units::Measure::Feet);
+   m_W = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
 
-   m_H1 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_H2 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_H3 = ::ConvertToSysUnits(5,unitMeasure::Feet);
-   m_H4 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_X1 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_X2 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_X3 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_X4 = ::ConvertToSysUnits(0,unitMeasure::Feet);
-   m_XW = ::ConvertToSysUnits(5,unitMeasure::Feet);
+   m_H1 = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
+   m_H2 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_H3 = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
+   m_H4 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X1 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X2 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X3 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X4 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_XW = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
 
    CColumnData column;
    m_vColumnData.push_back(column);
@@ -68,35 +68,35 @@ xbrPierData::xbrPierData()
    m_RefColumnOffset = 0;
    m_RefColumnDatum = pgsTypes::omtAlignment;
 
-   m_X5 = ::ConvertToSysUnits(10,unitMeasure::Feet);
-   m_X6 = ::ConvertToSysUnits(10,unitMeasure::Feet);
+   m_X5 = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
+   m_X6 = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
 
    // Load Rating Condition
    m_ConditionFactorType = pgsTypes::cfGood;
    m_ConditionFactor = 1.0;
 
    // Materials
-   m_RebarType = matRebar::A615;
-   m_RebarGrade = matRebar::Grade60;
+   m_RebarType = WBFL::Materials::Rebar::Type::A615;
+   m_RebarGrade = WBFL::Materials::Rebar::Grade::Grade60;
 
    //// Rebar
    //xbrLongitudinalRebarData::RebarRow row;
    //row.Datum = xbrTypes::Bottom;
    //row.LayoutType = xbrTypes::blFullLength;
-   //row.BarSize = matRebar::bs11;
-   //row.BarSpacing = ::ConvertToSysUnits(6,unitMeasure::Inch);
-   //row.Cover = ::ConvertToSysUnits(2,unitMeasure::Inch);
+   //row.BarSize = WBFL::Materials::Rebar::Size::bs11;
+   //row.BarSpacing = WBFL::Units::ConvertToSysUnits(6,WBFL::Units::Measure::Inch);
+   //row.Cover = WBFL::Units::ConvertToSysUnits(2,WBFL::Units::Measure::Inch);
    //row.NumberOfBars = 5;
    //m_LongitudinalRebar.RebarRows.push_back(row);
 
    // Bearings
    xbrBearingLineData bearingLine;
-   bearingLine.SetReferenceBearing(pgsTypes::omtAlignment,0,::ConvertToSysUnits(0,unitMeasure::Feet));
+   bearingLine.SetReferenceBearing(pgsTypes::omtAlignment,0,WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet));
    bearingLine.SetBearingCount(1);
    m_vBearingLines.push_back(bearingLine);
 
-   m_Concrete.StrengthDensity = ::ConvertToSysUnits(0.145, unitMeasure::KipPerFeet3); // plan concrete LRFD Table 3.5.1-1
-   m_Concrete.WeightDensity = ::ConvertToSysUnits(0.155, unitMeasure::KipPerFeet3); // 10 kcf allowance for reinforcement (BDM Ch 3).
+   m_Concrete.StrengthDensity = WBFL::Units::ConvertToSysUnits(0.145, WBFL::Units::Measure::KipPerFeet3); // plan concrete LRFD Table 3.5.1-1
+   m_Concrete.WeightDensity = WBFL::Units::ConvertToSysUnits(0.155, WBFL::Units::Measure::KipPerFeet3); // 10 kcf allowance for reinforcement (BDM Ch 3).
 }
 
 xbrPierData::xbrPierData(const xbrPierData& other)
@@ -423,7 +423,7 @@ void xbrPierData::SetColumnCount(ColumnIndexType nColumns)
       m_vColumnData.resize(nColumns,m_vColumnData.back());
       if ( m_vColumnSpacing.size() == 0 && nColumns != 1)
       {
-         m_vColumnSpacing.push_back(::ConvertToSysUnits(10.0,unitMeasure::Feet));
+         m_vColumnSpacing.push_back(WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet));
       }
       m_vColumnSpacing.resize(nColumns-1,m_vColumnSpacing.back());
    }
@@ -542,24 +542,24 @@ void xbrPierData::SetConditionFactor(Float64 conditionFactor)
    m_ConditionFactor = conditionFactor;
 }
 
-void xbrPierData::SetRebarMaterial(matRebar::Type type,matRebar::Grade grade)
+void xbrPierData::SetRebarMaterial(WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
 {
    m_RebarType = type;
    m_RebarGrade = grade;
 }
 
-void xbrPierData::GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade) const
+void xbrPierData::GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
 {
    *pType = m_RebarType;
    *pGrade = m_RebarGrade;
 }
 
-matRebar::Type& xbrPierData::GetRebarType()
+WBFL::Materials::Rebar::Type& xbrPierData::GetRebarType()
 {
    return m_RebarType;
 }
 
-matRebar::Grade& xbrPierData::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& xbrPierData::GetRebarGrade()
 {
    return m_RebarGrade;
 }
@@ -787,8 +787,8 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
    m_Concrete.Save(pStrSave,nullptr);
 
    pStrSave->BeginUnit(_T("Reinforcement"),1.0);
-      pStrSave->put_Property(_T("RebarType"),CComVariant(m_RebarType));
-      pStrSave->put_Property(_T("RebarGrade"),CComVariant(m_RebarGrade));
+      pStrSave->put_Property(_T("RebarType"),CComVariant(+m_RebarType));
+      pStrSave->put_Property(_T("RebarGrade"),CComVariant(+m_RebarGrade));
       m_LongitudinalRebar.Save(pStrSave,nullptr);
       m_LowerXBeamStirrups.Save(pStrSave);
       m_FullDepthStirrups.Save(pStrSave);
@@ -1034,10 +1034,10 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
 
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("RebarType"),&var);
-         m_RebarType = (matRebar::Type)(var.lVal);
+         m_RebarType = (WBFL::Materials::Rebar::Type)(var.lVal);
 
          hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
-         m_RebarGrade = (matRebar::Grade)(var.lVal);
+         m_RebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
 
          hr = m_LongitudinalRebar.Load(pStrLoad,nullptr);
          hr = m_LowerXBeamStirrups.Load(pStrLoad);

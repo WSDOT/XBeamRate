@@ -173,13 +173,13 @@ public:
 public:
    virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData) override;
    virtual CPropertyPage* CreatePropertyPage(IEditPierData* pEditPierData,CPropertyPage* pBridgePropertyPage) override;
-   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData) override;
+   virtual std::unique_ptr<CEAFTransaction> OnOK(CPropertyPage* pPage,IEditPierData* pEditPierData) override;
    virtual IDType GetEditBridgeCallbackID() override;
 
 // IEditLoadRatingOptionsCallback
 public:
    virtual CPropertyPage* CreatePropertyPage(IEditLoadRatingOptions* pLoadRatingOptions) override;
-   virtual txnTransaction* OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions) override;
+   virtual std::unique_ptr<CEAFTransaction> OnOK(CPropertyPage* pPage,IEditLoadRatingOptions* pLoadRatingOptions) override;
 
 // IProjectPropertiesEventSink
 public:

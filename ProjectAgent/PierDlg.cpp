@@ -91,12 +91,12 @@ xbrTypes::PierType CPierDlg::GetPierType()
    return m_PierData.m_PierData.GetPierType();
 }
 
-matRebar::Type& CPierDlg::GetRebarType()
+WBFL::Materials::Rebar::Type& CPierDlg::GetRebarType()
 {
    return m_PierData.m_PierData.GetRebarType();
 }
 
-matRebar::Grade& CPierDlg::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& CPierDlg::GetRebarGrade()
 {
    return m_PierData.m_PierData.GetRebarGrade();
 }

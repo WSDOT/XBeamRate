@@ -470,7 +470,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
                Float64 Mpermit, Mlegal; // Moments include multiple presence factor
                pAnalysisResults->GetMoment(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Mpermit,&Mlegal);
 
-               // Mininum reinforcement is a function of Mu... for the WSDOT Permit rating method, we need to compute it
+               // Minimum reinforcement is a function of Mu... for the WSDOT Permit rating method, we need to compute it
                // for every combination of Mpermit and Mlegal
 
                // NOTE: K can be less than zero when we are rating for negative moment and the minumum moment demand (Mu)
@@ -483,7 +483,7 @@ Float64 xbrMomentRatingArtifact::GetRatingFactor() const
 
                // it is really expensive to compute K and it is usually 1.0 anyway.
                // Here is the strategy. Assume K to be 1.0 and compute the rating factor
-               // if the current rating factor is within 10% of the mininum factor found so far,
+               // if the current rating factor is within 10% of the Minimum factor found so far,
                // or if this is our first time through the loop, compute the actual K and re-compute
                // the rating factor using the actual K.
 

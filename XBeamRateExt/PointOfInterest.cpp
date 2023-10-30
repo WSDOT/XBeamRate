@@ -131,7 +131,7 @@ bool xbrPointOfInterest::HasAttributes() const
 
 bool xbrPointOfInterest::HasAttribute(PoiAttributeType attribute) const
 {
-   return sysFlags<PoiAttributeType>::IsSet(m_Attributes,attribute) ? true : false;
+   return WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,attribute) ? true : false;
 }
 
 void xbrPointOfInterest::ClearAttributes()
@@ -269,52 +269,52 @@ void xbrPointOfInterest::UpdateAttributeString()
    m_strAttributes.clear();
    std::_tostringstream os;
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_SECTIONCHANGE) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_SECTIONCHANGE) )
    {
       os << _T("POI_SECTIONCHANGE | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_LEFT) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_LEFT) )
    {
       os << _T("POI_COLUMN_LEFT | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_RIGHT) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_COLUMN_RIGHT) )
    {
       os << _T("POI_COLUMN_RIGHT | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_BRG) )
    {
       os << _T("POI_BRG | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_WHEELLINE) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_WHEELLINE) )
    {
       os << _T("POI_WHEELLINE | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_GRID) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_GRID) )
    {
       os << _T("POI_GRID | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FACEOFCOLUMN) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_FACEOFCOLUMN) )
    {
       os << _T("POI_FACEOFCOLUMN | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_MIDPOINT) )
    {
       os << _T("POI_MIDPOINT | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV2) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV2) )
    {
       os << _T("POI_FOC_dv2 | ");
    }
 
-   if ( sysFlags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV) )
+   if ( WBFL::System::Flags<PoiAttributeType>::IsSet(m_Attributes,POI_FOC_DV) )
    {
       os << _T("POI_FOC_dv | ");
    }

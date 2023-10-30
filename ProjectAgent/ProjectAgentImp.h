@@ -206,8 +206,8 @@ public:
    virtual Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
    virtual Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
 
-   virtual void SetRebarMaterial(PierIDType pierID,matRebar::Type type,matRebar::Grade grade) override;
-   virtual void GetRebarMaterial(PierIDType pierID,matRebar::Type* pType,matRebar::Grade* pGrade) const override;
+   virtual void SetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade) override;
+   virtual void GetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const override;
 
    virtual void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete) override;
    virtual const CConcreteMaterial& GetConcrete(PierIDType pierID) const override;

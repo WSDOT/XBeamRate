@@ -102,7 +102,7 @@ BOOL CXBeamRateReportView::PreTranslateMessage(MSG* pMsg)
 	return CEAFAutoCalcReportView::PreTranslateMessage(pMsg);
 }
 
-HRESULT CXBeamRateReportView::UpdateReportBrowser(CReportHint* pHint)
+HRESULT CXBeamRateReportView::UpdateReportBrowser(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint)
 {
    //CComPtr<IBroker> pBroker;
    //EAFGetBroker(&pBroker);
@@ -138,7 +138,7 @@ void CXBeamRateReportView::RefreshReport()
    CEAFAutoCalcReportView::RefreshReport();
 }
 
-CReportHint* CXBeamRateReportView::TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint)
+WBFL::Reporting::ReportHint* CXBeamRateReportView::TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint)
 {
    //if ( lHint == HINT_GIRDERCHANGED )
    //{
@@ -159,7 +159,7 @@ int CXBeamRateReportView::OnCreate(LPCREATESTRUCT lpCreateStruct)
    return 0;
 }
 
-bool CXBeamRateReportView::CreateReport(CollectionIndexType rptIdx,bool bPromptForSpec)
+bool CXBeamRateReportView::CreateReport(IndexType rptIdx,bool bPromptForSpec)
 {
    // Everything in this version of CreateReport is done in support of multi-view report
    // creation because the underlying framework doesn't support it directly.

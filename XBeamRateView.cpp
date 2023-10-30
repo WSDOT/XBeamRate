@@ -85,7 +85,7 @@
 
 // The End/Section view of the pier is offset from the Elevation
 // view by this amount.
-const Float64 EndOffset = ::ConvertToSysUnits(10,unitMeasure::Feet);
+const Float64 EndOffset = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
 
 const SelectionType g_selectionType = stNone; // nothing is selectable, except for the section cut object
 //const SelectionType g_selectionType = stAll;
@@ -481,7 +481,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    Float64 X = 0;
    Float64 Xcl = pPier->ConvertPierToCurbLineCoordinate(pierID,X);
    Float64 Ydeck = pPier->GetElevation(pierID,Xcl); // deck elevation at alignment
-   Float64 Yt = Ydeck + ::ConvertToSysUnits(1.0,unitMeasure::Feet); // add a little so it projects over the roadway surface
+   Float64 Yt = Ydeck + WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Feet); // add a little so it projects over the roadway surface
    CComPtr<IPoint2d> pnt1;
    pnt1.CoCreateInstance(CLSID_Point2d);
    pnt1->Move(X,Yt);
@@ -799,7 +799,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    CComPtr<IPoint2d> pntBC;
    position->get_LocatorPoint(lpBottomCenter,&pntBC);
-   pntBC->Offset(0,-::ConvertToSysUnits(3.0,unitMeasure::Feet));
+   pntBC->Offset(0,-WBFL::Units::ConvertToSysUnits(3.0,WBFL::Units::Measure::Feet));
 
    CComPtr<iTextBlock> doLabel;
    doLabel.CoCreateInstance(CLSID_TextBlock);
@@ -831,7 +831,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    // Create a function that represents the bottom of the cross beam
    // We will use it to make the top of the column match the bottom of the
    // cross beam.
-   mathPwLinearFunction2dUsingPoints fn;
+   WBFL::Math::PiecewiseFunction fn;
    CComPtr<IPoint2dCollection> points;
    pPier->GetBottomSurface(pierID,xbrTypes::Stage1,&points);
    CComPtr<IEnumPoint2d> enumPoints;

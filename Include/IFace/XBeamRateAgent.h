@@ -64,8 +64,8 @@ DEFINE_GUID(IID_IXBRViews,
 0x49b3dfcf, 0x5611, 0x42d7, 0x8b, 0x19, 0xa1, 0xfc, 0x52, 0x77, 0x88, 0x46);
 interface IXBRViews : IUnknown
 {
-   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec=TRUE) = 0;
-   virtual void CreateGraphView(CollectionIndexType graphIdx) = 0;
+   virtual void CreateReportView(IndexType rptIdx,BOOL bPromptForSpec=TRUE) = 0;
+   virtual void CreateGraphView(IndexType graphIdx) = 0;
    virtual void CreatePierView() = 0;
 };
 

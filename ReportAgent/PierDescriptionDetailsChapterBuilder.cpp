@@ -63,11 +63,11 @@ LPCTSTR CPierDescriptionDetailsChapterBuilder::GetName() const
    return TEXT("Pier Description Details");
 }
 
-rptChapter* CPierDescriptionDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CPierDescriptionDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    USES_CONVERSION;
 
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
@@ -91,9 +91,9 @@ rptChapter* CPierDescriptionDetailsChapterBuilder::Build(CReportSpecification* p
 }
 
 
-CChapterBuilder* CPierDescriptionDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CPierDescriptionDetailsChapterBuilder::Clone() const
 {
-   return new CPierDescriptionDetailsChapterBuilder;
+   return std::make_unique<CPierDescriptionDetailsChapterBuilder>();
 }
 
 void write_superstructure_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
@@ -303,8 +303,8 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   bool bK1 = (lrfdVersionMgr::ThirdEditionWith2005Interims <= lrfdVersionMgr::GetVersion());
-   bool bLambda = (lrfdVersionMgr::SeventhEditionWith2016Interims <= lrfdVersionMgr::GetVersion());
+   bool bK1 = (WBFL::LRFD::BDSManager::Edition::ThirdEditionWith2005Interims <= WBFL::LRFD::BDSManager::GetEdition());
+   bool bLambda = (WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims <= WBFL::LRFD::BDSManager::GetEdition());
 
 
    ColumnIndexType nColumns = 7;
@@ -384,7 +384,7 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 
    col = 0;
 
-   (*pTable)(row,col++) << lrfdConcreteUtil::GetTypeName( (matConcrete::Type)concrete.Type, true );
+   (*pTable)(row,col++) << WBFL::LRFD::ConcreteUtil::GetTypeName( (WBFL::Materials::ConcreteType)concrete.Type, true );
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 Ec = pMaterial->GetXBeamEc(pierID);
@@ -434,11 +434,11 @@ void write_concrete_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptCha
 void write_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDisplayUnits,rptChapter* pChapter,PierIDType pierID)
 {
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   matRebar::Type type;
-   matRebar::Grade grade;
+   WBFL::Materials::Rebar::Type type;
+   WBFL::Materials::Rebar::Grade grade;
    pProject->GetRebarMaterial(pierID,&type,&grade);
 
-   std::_tstring strName = lrfdRebarPool::GetMaterialName(type,grade);
+   std::_tstring strName = WBFL::LRFD::RebarPool::GetMaterialName(type,grade);
 
    GET_IFACE2(pBroker,IXBRMaterial,pMaterial);
    Float64 E, fy, fu;
@@ -519,7 +519,7 @@ void write_longitudinal_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pD
       }
 
       (*pTable)(row,col++) << dim.SetValue(rebarRow.Cover);
-      (*pTable)(row,col++) << lrfdRebarPool::GetBarSize(rebarRow.BarSize);
+      (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetBarSize(rebarRow.BarSize);
       (*pTable)(row,col++) << rebarRow.NumberOfBars;
       (*pTable)(row,col++) << dim.SetValue(rebarRow.BarSpacing);
 
@@ -617,7 +617,7 @@ void write_transverse_reinforcement_data(IBroker* pBroker,IEAFDisplayUnits* pDis
       {
          (*pTable)(row,col++) << length.SetValue(stirrupZone.Length);
       }
-      (*pTable)(row,col++) << lrfdRebarPool::GetBarSize(stirrupZone.BarSize);
+      (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetBarSize(stirrupZone.BarSize);
       (*pTable)(row,col++) << dim.SetValue(stirrupZone.BarSpacing);
       (*pTable)(row,col++) << stirrupZone.nBars;
 

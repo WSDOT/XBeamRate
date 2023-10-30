@@ -173,7 +173,7 @@ void CTestAgentImp::RunProductLoadActionsTest(std::_tostream& os,LPCTSTR lpszPro
          Float64 M = pResults->GetMoment(pierID,pfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << M << std::endl;
 
-         sysSectionValue V = pResults->GetShear(pierID,pfType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,pfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << V.Right() << std::endl;
       }
    }
@@ -198,7 +198,7 @@ void CTestAgentImp::RunCombinedLoadActionsTest(std::_tostream& os,LPCTSTR lpszPr
          Float64 M = pResults->GetMoment(pierID,cfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << M << std::endl;
 
-         sysSectionValue V = pResults->GetShear(pierID,cfType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,cfType,poi);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T(", ") << poi.GetDistFromStart() << _T(", ") << V.Right() << std::endl;
       }
    }
@@ -227,7 +227,7 @@ void CTestAgentImp::RunLiveLoadActionsTest(std::_tostream& os,LPCTSTR lpszProces
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T("a, ") << poi.GetDistFromStart() << _T(", ") << Mmin << _T(", ") << minVehicleIdx << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Mmax << _T(", ") << maxVehicleIdx << std::endl;
 
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,nullptr,&minVehicleIdx,nullptr,&maxVehicleIdx);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("a, ") << poi.GetDistFromStart() << _T(", ") << Vmin.Right() << _T(", ") << minVehicleIdx << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Vmax.Right() << _T(", ") << maxVehicleIdx << std::endl;
@@ -265,7 +265,7 @@ void CTestAgentImp::RunLimitStateLoadActionsTest(std::_tostream& os,LPCTSTR lpsz
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T("a, ") << poi.GetDistFromStart() << _T(", ") << Mmin << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)strMomentTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Mmax << std::endl;
 
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,limitState,poi,&Vmin,&Vmax);
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("a, ") << poi.GetDistFromStart() << _T(", ") << Vmin.Right() << std::endl;
          os << lpszProcessID << _T(", ") << (LPCTSTR)strShearTestID << _T("b, ") << poi.GetDistFromStart() << _T(", ") << Vmax.Right() << std::endl;

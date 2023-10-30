@@ -30,7 +30,7 @@
 #include "ConcreteGeneralPage.h"
 
 #include <System\Tokenizer.h>
-#include <Lrfd\Lrfd.h>
+#include <LRFD\Lrfd.h>
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\Bridge.h>
 
@@ -53,10 +53,10 @@ CConcreteGeneralPage::CConcreteGeneralPage() : CPropertyPage(CConcreteGeneralPag
 	//{{AFX_DATA_INIT(CConcreteGeneralPage)
 		// NOTE: the ClassWizard will add member initialization here
 	//}}AFX_DATA_INIT
-   m_MinNWCDensity = lrfdConcreteUtil::GetNWCDensityLimit();
-   m_MaxLWCDensity = lrfdConcreteUtil::GetLWCDensityLimit();
+   m_MinNWCDensity = WBFL::LRFD::ConcreteUtil::GetNWCDensityLimit();
+   m_MaxLWCDensity = WBFL::LRFD::ConcreteUtil::GetLWCDensityLimit();
 
-   lrfdConcreteUtil::GetPCIUHPCStrengthRange(&m_MinFcUHPC, &m_MaxFcUHPC);
+   WBFL::LRFD::ConcreteUtil::GetPCIUHPCStrengthRange(&m_MinFcUHPC, &m_MaxFcUHPC);
 }
 
 
@@ -146,7 +146,7 @@ BOOL CConcreteGeneralPage::OnInitDialog()
    GetDlgItem(IDC_MOD_E)->SetWindowText(_T("Mod. Elasticity, Ec"));
 
    CComboBox* pcbConcreteType = (CComboBox*)GetDlgItem(IDC_CONCRETE_TYPE);
-   if ( lrfdVersionMgr::GetVersion() < lrfdVersionMgr::SeventhEditionWith2016Interims )
+   if ( WBFL::LRFD::BDSManager::GetEdition() < WBFL::LRFD::BDSManager::Edition::SeventhEditionWith2016Interims )
    {  
       int idx = pcbConcreteType->AddString(_T("Normal weight"));
       pcbConcreteType->SetItemData(idx,(DWORD_PTR)pgsTypes::Normal);
@@ -322,12 +322,8 @@ void CConcreteGeneralPage::OnOK()
 
 bool CConcreteGeneralPage::IsDensityInRange(Float64 density,pgsTypes::ConcreteType type)
 {
-   if (type == pgsTypes::PCI_UHPC)
-   {
-      ATLASSERT(false); // the UI should prevent uhpc
-      return true; // no density range for UHPC
-   }
-   else if (type == pgsTypes::Normal)
+   ATLASSERT(!IsUHPC(type)); // piers should not be UHPC
+   if (type == pgsTypes::Normal)
    {
       return ( IsLE(m_MinNWCDensity,density) );
    }

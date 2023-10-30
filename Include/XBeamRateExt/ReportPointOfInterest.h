@@ -36,7 +36,7 @@ class XBREXTCLASS rptXBRPointOfInterest : public rptLengthUnitValue
 {
 public:
    //------------------------------------------------------------------------
-   rptXBRPointOfInterest(const unitLength* pUnitOfMeasure = 0,
+   rptXBRPointOfInterest(const WBFL::Units::Length* pUnitOfMeasure = 0,
                       Float64 zeroTolerance = 0.,
                       bool bShowUnitTag = true);
 

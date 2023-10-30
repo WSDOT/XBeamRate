@@ -65,8 +65,8 @@ void txnEditOptions::Execute(int i)
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
-   lrfdVersionMgr::SetVersion(m_Options[i].m_LRFDVersion);
-   lrfrVersionMgr::SetVersion(m_Options[i].m_LRFRVersion);
+   WBFL::LRFD::BDSManager::SetEdition(m_Options[i].m_LRFDEdition);
+   WBFL::LRFD::MBEManager::SetEdition(m_Options[i].m_LRFREdition);
 
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Inventory,m_Options[i].m_bDesignRating);
    pRatingSpec->EnableRating(pgsTypes::lrDesign_Operating,m_Options[i].m_bDesignRating);
@@ -105,9 +105,9 @@ void txnEditOptions::Execute(int i)
    pEvents->FirePendingEvents();
 }
 
-txnTransaction* txnEditOptions::CreateClone() const
+std::unique_ptr<CEAFTransaction> txnEditOptions::CreateClone() const
 {
-   return new txnEditOptions(m_Options[0],m_Options[1]);
+   return std::make_unique<txnEditOptions>(m_Options[0],m_Options[1]);
 }
 
 std::_tstring txnEditOptions::Name() const
@@ -115,12 +115,12 @@ std::_tstring txnEditOptions::Name() const
    return _T("Edit Options");
 }
 
-bool txnEditOptions::IsUndoable()
+bool txnEditOptions::IsUndoable() const
 {
    return true;
 }
 
-bool txnEditOptions::IsRepeatable()
+bool txnEditOptions::IsRepeatable() const
 {
    return false;
 }

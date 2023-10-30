@@ -82,7 +82,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 HRESULT RegisterAgent(bool bRegister)
 {
    HRESULT hr = S_OK;
-   hr = sysComCatMgr::RegWithCategory(CLSID_TestAgent,CATID_XBeamRateAgent,bRegister);
+   hr = WBFL::System::ComCatMgr::RegWithCategory(CLSID_TestAgent,CATID_XBeamRateAgent,bRegister);
    if ( FAILED(hr) )
       return hr;
 

@@ -198,7 +198,7 @@ void CColumnLayoutGrid::AddColumn()
       GetColumnData(nRows,&columnData,&S); // get column data from the last row
    }
 
-   S = ::ConvertToSysUnits(10.0,unitMeasure::Feet); // default spacing
+   S = WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet); // default spacing
    if ( 1 < nRows )
    {
       // get the spacing between the last two columns
@@ -317,7 +317,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
    ROWCOL col = 1;
 
    // Height/Bottom Elevation
-   Float64 value = ::ConvertFromSysUnits(column.GetColumnHeight(),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   Float64 value = WBFL::Units::ConvertFromSysUnits(column.GetColumnHeight(),pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++), CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -347,7 +347,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
 
    Float64 D1, D2;
    column.GetColumnDimensions(&D1,&D2);
-   value = ::ConvertFromSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++),CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -355,7 +355,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
       .SetValue(value)
       );
 
-   value = ::ConvertFromSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col++),CGXStyle()
       .SetEnabled(TRUE)
       .SetReadOnly(FALSE)
@@ -377,7 +377,7 @@ void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float
    // Spacing
    // Set the value for the spacing to the next column and disable this cell
    // This assumes this column is in the last row and spacing to next isn't applicable
-   value = ::ConvertFromSysUnits(S,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   value = WBFL::Units::ConvertFromSysUnits(S,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    SetStyleRange(CGXRange(row,col), CGXStyle()
       .SetEnabled(FALSE)
       .SetReadOnly(TRUE)
@@ -418,7 +418,7 @@ void CColumnLayoutGrid::GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* p
    ROWCOL col = 1;
 
    Float64 H = _tstof(GetCellValue(row,col++));
-   H = ::ConvertToSysUnits(H,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   H = WBFL::Units::ConvertToSysUnits(H,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    pColumn->SetColumnHeight(H);
 
    // Fixity
@@ -438,14 +438,14 @@ void CColumnLayoutGrid::GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* p
    }
 
    Float64 D1 = _tstof(GetCellValue(row,col++));
-   D1 = ::ConvertToSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   D1 = WBFL::Units::ConvertToSysUnits(D1,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    Float64 D2 = _tstof(GetCellValue(row,col++));
-   D2 = ::ConvertToSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   D2 = WBFL::Units::ConvertToSysUnits(D2,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
    pColumn->SetColumnDimensions(D1,D2);
    
    // Spacing
    Float64 S = _tstof(GetCellValue(row,col++));
-   *pS = ::ConvertToSysUnits(S,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
+   *pS = WBFL::Units::ConvertToSysUnits(S,pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure);
 }
 
 CString CColumnLayoutGrid::GetCellValue(ROWCOL nRow, ROWCOL nCol)

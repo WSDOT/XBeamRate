@@ -30,7 +30,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 
-CXBeamRateReportSpecification::CXBeamRateReportSpecification(LPCTSTR strReportName,IBroker* pBroker,PierIDType pierID,bool bReportEvenIncrements) :
+CXBeamRateReportSpecification::CXBeamRateReportSpecification(const std::_tstring& strReportName,IBroker* pBroker,PierIDType pierID,bool bReportEvenIncrements) :
 CEAFBrokerReportSpecification(strReportName,pBroker),
 m_PierID(pierID),
 m_bReportEvenIncrements(bReportEvenIncrements)
@@ -41,7 +41,7 @@ CXBeamRateReportSpecification::~CXBeamRateReportSpecification(void)
 {
 }
 
-PierIDType CXBeamRateReportSpecification::GetPierID()
+PierIDType CXBeamRateReportSpecification::GetPierID() const
 {
    return m_PierID;
 }

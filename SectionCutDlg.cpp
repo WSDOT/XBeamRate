@@ -84,7 +84,7 @@ BOOL CSectionCutDlg::OnInitDialog()
    m_Slider.SetRange(0,(int)(m_vPOI.size()-1)); // the range is number of spaces along slider... 
 
    // initial the slider position to the current poi location
-   CollectionIndexType pos = m_vPOI.size()/2; // default is mid-span
+   IndexType pos = m_vPOI.size()/2; // default is mid-span
    std::vector<xbrPointOfInterest>::iterator iter;
    for ( iter = m_vPOI.begin(); iter != m_vPOI.end(); iter++ )
    {

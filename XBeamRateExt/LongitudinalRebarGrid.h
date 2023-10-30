@@ -79,7 +79,7 @@ private:
    void GetRebarData(ROWCOL row,xbrLongitudinalRebarData::RebarRow& rebarData);
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
    xbrTypes::LongitudinalRebarDatumType GetDatum(ROWCOL row,ROWCOL col);
-   matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
+   WBFL::Materials::Rebar::Size GetBarSize(ROWCOL row,ROWCOL col);
    LPCTSTR GetRebarLayoutType(xbrTypes::LongitudinalRebarLayoutType layoutType);
    xbrTypes::LongitudinalRebarLayoutType GetRebarLayoutType(LPCTSTR lpszLayoutType);
 };

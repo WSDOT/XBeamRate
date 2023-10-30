@@ -79,7 +79,7 @@ private:
    CString GetCellValue(ROWCOL nRow, ROWCOL nCol);
 
    // set up styles for interior rows
-   matRebar::Size GetBarSize(ROWCOL row,ROWCOL col);
+   WBFL::Materials::Rebar::Size GetBarSize(ROWCOL row,ROWCOL col);
    bool m_IsSymmetrical;
    CString m_strGridName;
    CString m_strBarSizeChoiceList;

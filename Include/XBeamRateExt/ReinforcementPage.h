@@ -47,8 +47,8 @@ interface IReinforcementPageParent
    virtual CConcreteMaterial& GetConcrete() = 0;
    virtual xbrTypes::PierType GetPierType() = 0;
 
-   virtual matRebar::Type& GetRebarType() = 0;
-   virtual matRebar::Grade& GetRebarGrade() = 0;
+   virtual WBFL::Materials::Rebar::Type& GetRebarType() = 0;
+   virtual WBFL::Materials::Rebar::Grade& GetRebarGrade() = 0;
    virtual CConcreteMaterial& GetConcreteMaterial() = 0;
    virtual xbrLongitudinalRebarData& GetLongitudinalRebar() = 0;
    virtual xbrStirrupData& GetLowerXBeamStirrups() = 0;
@@ -78,7 +78,7 @@ public:
 
 // Dialog Data
 
-   void GetRebarMaterial(matRebar::Type* pType,matRebar::Grade* pGrade);
+   void GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade);
 
    void OnEnableDelete(UINT nIDC,bool bEnableDelete);
 

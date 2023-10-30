@@ -445,7 +445,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
             {
                Float64 rf;
 
-               sysSectionValue Vpermit, Vlegal; // Shear include multiple presence factor
+               WBFL::System::SectionValue Vpermit, Vlegal; // Shear include multiple presence factor
                pAnalysisResults->GetShear(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Vpermit,&Vlegal);
    
                Float64 vp = MaxMagnitude(Vpermit.Left(),Vpermit.Right());
@@ -478,7 +478,7 @@ Float64 xbrShearRatingArtifact::GetRatingFactor() const
             {
                Float64 rf;
 
-               sysSectionValue Vpermit, Vlegal;
+               WBFL::System::SectionValue Vpermit, Vlegal;
                pAnalysisResults->GetShear(m_PierID,m_RatingType,vehicleIdx,llConfigIdx,permitLaneIdx,m_POI,&Vpermit,&Vlegal);
 
                Float64 vp = MaxMagnitude(Vpermit.Left(),Vpermit.Right());

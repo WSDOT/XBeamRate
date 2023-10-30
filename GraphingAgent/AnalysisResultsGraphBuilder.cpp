@@ -32,7 +32,7 @@
 #include <EAF\EAFDisplayUnits.h>
 #include <EAF\EAFAutoProgress.h>
 #include <MathEx.h>
-#include <UnitMgt\UnitValueNumericalFormatTools.h>
+#include <Units\UnitValueNumericalFormatTools.h>
 
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
@@ -46,7 +46,7 @@
 
 #include <..\..\PGSuper\Include\IFace\Project.h>
 #include <PgsExt\PierData2.h>
-#include <Graphing\ExportGraphXYTool.h>
+#include <Graphs\ExportGraphXYTool.h>
 
 #include <algorithm>
 
@@ -58,8 +58,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 // create a dummy unit conversion tool to pacify the graph constructor
-static unitmgtLengthData DUMMY(unitMeasure::Meter);
-static LengthTool        DUMMY_TOOL(DUMMY);
+static WBFL::Units::LengthData DUMMY(WBFL::Units::Measure::Meter);
+static WBFL::Units::LengthTool DUMMY_TOOL(DUMMY);
 
 BEGIN_MESSAGE_MAP(CXBRAnalysisResultsGraphBuilder, CEAFAutoCalcGraphBuilder)
    ON_BN_CLICKED(IDC_MOMENT, &CXBRAnalysisResultsGraphBuilder::OnGraphTypeChanged)
@@ -71,9 +71,9 @@ END_MESSAGE_MAP()
 
 CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder() :
 CEAFAutoCalcGraphBuilder(),
-m_Graph(DUMMY_TOOL,DUMMY_TOOL),
-m_pXFormat(0),
-m_pYFormat(0)
+m_Graph(&DUMMY_TOOL,&DUMMY_TOOL),
+m_pXFormat(nullptr),
+m_pYFormat(nullptr)
 {
    SetName(_T("Analysis Results"));
    InitGraph();
@@ -81,9 +81,9 @@ m_pYFormat(0)
 
 CXBRAnalysisResultsGraphBuilder::CXBRAnalysisResultsGraphBuilder(const CXBRAnalysisResultsGraphBuilder& other) :
 CEAFAutoCalcGraphBuilder(other),
-m_Graph(DUMMY_TOOL,DUMMY_TOOL),
-m_pXFormat(0),
-m_pYFormat(0)
+m_Graph(&DUMMY_TOOL, &DUMMY_TOOL),
+m_pXFormat(nullptr),
+m_pYFormat(nullptr)
 {
    InitGraph();
 }
@@ -108,12 +108,12 @@ CEAFGraphControlWindow* CXBRAnalysisResultsGraphBuilder::GetGraphControlWindow()
    return &m_GraphController;
 }
 
-CGraphBuilder* CXBRAnalysisResultsGraphBuilder::Clone() const
+std::unique_ptr<WBFL::Graphing::GraphBuilder> CXBRAnalysisResultsGraphBuilder::Clone() const
 {
    // set the module state or the commands wont route to the
    // the graph control window
    AFX_MANAGE_STATE(AfxGetStaticModuleState());
-   return new CXBRAnalysisResultsGraphBuilder(*this);
+   return std::make_unique<CXBRAnalysisResultsGraphBuilder>(*this);
 }
 
 void CXBRAnalysisResultsGraphBuilder::CreateViewController(IEAFViewController** ppController)
@@ -210,9 +210,9 @@ void CXBRAnalysisResultsGraphBuilder::InitGraph()
    EAFGetBroker(&pBroker);
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-   m_pXFormat = new LengthTool(pDisplayUnits->GetSpanLengthUnit());
-   m_Graph.SetXAxisValueFormat(*m_pXFormat);
-   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
+   m_pXFormat = new WBFL::Units::LengthTool(pDisplayUnits->GetSpanLengthUnit());
+   m_Graph.SetXAxisValueFormat(m_pXFormat);
+   m_Graph.SetXAxisTitle(std::_tstring(_T("Location (") + ((WBFL::Units::LengthTool*)m_pXFormat)->UnitTag() + _T(")")).c_str());
 }
 
 void CXBRAnalysisResultsGraphBuilder::UpdateYAxisUnits()
@@ -229,19 +229,19 @@ void CXBRAnalysisResultsGraphBuilder::UpdateYAxisUnits()
    {
    case actionMoment:
       {
-      const unitmgtMomentData& momentUnit = pDisplayUnits->GetMomentUnit();
-      m_pYFormat = new MomentTool(momentUnit);
-      m_Graph.SetYAxisValueFormat(*m_pYFormat);
-      std::_tstring strYAxisTitle = _T("Moment (") + ((MomentTool*)m_pYFormat)->UnitTag() + _T(")");
+      const WBFL::Units::MomentData& momentUnit = pDisplayUnits->GetMomentUnit();
+      m_pYFormat = new WBFL::Units::MomentTool(momentUnit);
+      m_Graph.SetYAxisValueFormat(m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Moment (") + ((WBFL::Units::MomentTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
       }
    case actionShear:
       {
-      const unitmgtForceData& shearUnit = pDisplayUnits->GetShearUnit();
-      m_pYFormat = new ShearTool(shearUnit);
-      m_Graph.SetYAxisValueFormat(*m_pYFormat);
-      std::_tstring strYAxisTitle = _T("Shear (") + ((ShearTool*)m_pYFormat)->UnitTag() + _T(")");
+      const WBFL::Units::ForceData& shearUnit = pDisplayUnits->GetShearUnit();
+      m_pYFormat = new WBFL::Units::ShearTool(shearUnit);
+      m_Graph.SetYAxisValueFormat(m_pYFormat);
+      std::_tstring strYAxisTitle = _T("Shear (") + ((WBFL::Units::ShearTool*)m_pYFormat)->UnitTag() + _T(")");
       m_Graph.SetYAxisTitle(strYAxisTitle.c_str());
       break;
       }
@@ -362,7 +362,7 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphDefinitions()
    if ( IsPGSExtension() )
    {
       GET_IFACE2( pBroker, ILossParameters, pLossParams);
-      if ( pLossParams->GetLossMethod() != pgsTypes::TIME_STEP )
+      if ( pLossParams->GetLossMethod() != PrestressLossCriteria::LossMethodType::TIME_STEP )
       {
          // PGS extension and not time-step analysis... don't include time dependent loads
          bIncludeTimeDependentLoads = false;
@@ -487,16 +487,16 @@ void CXBRAnalysisResultsGraphBuilder::BuildProductForceGraph(PierIDType pierID,c
       {
          Float64 Mz = pResults->GetMoment(pierID,pfType,poi);
          Mz = m_pYFormat->Convert(Mz);
-         GraphPoint point(X,Mz);
+         WBFL::Graphing::Point point(X,Mz);
          m_Graph.AddPoint(graphIdx,point);
       }
       else
       {
-         sysSectionValue V = pResults->GetShear(pierID,pfType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,pfType,poi);
          Float64 Vl = m_pYFormat->Convert(V.Left());
          Float64 Vr = m_pYFormat->Convert(V.Right());
-         m_Graph.AddPoint(graphIdx, GraphPoint(X,Vl));
-         m_Graph.AddPoint(graphIdx, GraphPoint(X,Vr));
+         m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vl));
+         m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vr));
       }
    }
 }
@@ -518,16 +518,16 @@ void CXBRAnalysisResultsGraphBuilder::BuildCombinedForceGraph(PierIDType pierID,
       {
          Float64 Mz = pResults->GetMoment(pierID,comboType,poi);
          Mz = m_pYFormat->Convert(Mz);
-         GraphPoint point(X,Mz);
+         WBFL::Graphing::Point point(X,Mz);
          m_Graph.AddPoint(graphIdx,point);
       }
       else
       {
-         sysSectionValue V = pResults->GetShear(pierID,comboType,poi);
+         WBFL::System::SectionValue V = pResults->GetShear(pierID,comboType,poi);
          Float64 Vl = m_pYFormat->Convert(V.Left());
          Float64 Vr = m_pYFormat->Convert(V.Right());
-         m_Graph.AddPoint(graphIdx, GraphPoint(X,Vl));
-         m_Graph.AddPoint(graphIdx, GraphPoint(X,Vr));
+         m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vl));
+         m_Graph.AddPoint(graphIdx, WBFL::Graphing::Point(X,Vr));
       }
    }
 }
@@ -551,21 +551,21 @@ void CXBRAnalysisResultsGraphBuilder::BuildVehicularLiveLoadGraph(PierIDType pie
          pResults->GetMoment(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx, WBFL::Graphing::Point(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx, WBFL::Graphing::Point(X,Mmin));
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,graphDef.m_VehicleIndex,poi,&Vmin,&Vmax,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
          Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
          Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vrmin));
       }
    }
 }
@@ -589,21 +589,21 @@ void CXBRAnalysisResultsGraphBuilder::BuildLiveLoadGraph(PierIDType pierID,const
          pResults->GetMoment(pierID,ratingType,poi,&Mmin,&Mmax,nullptr,nullptr);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Mmin));
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,ratingType,poi,&Vmin,&Vmax,nullptr,nullptr,nullptr,nullptr);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
          Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
          Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vrmin));
       }
    }
 }
@@ -627,21 +627,21 @@ void CXBRAnalysisResultsGraphBuilder::BuildLimitStateGraph(PierIDType pierID,con
          pResults->GetMoment(pierID,limitState,poi,&Mmin,&Mmax);
          Mmin = m_pYFormat->Convert(Mmin);
          Mmax = m_pYFormat->Convert(Mmax);
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Mmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Mmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Mmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Mmin));
       }
       else
       {
-         sysSectionValue Vmin, Vmax;
+         WBFL::System::SectionValue Vmin, Vmax;
          pResults->GetShear(pierID,limitState,poi,&Vmin,&Vmax);
          Float64 Vlmax = m_pYFormat->Convert(Vmax.Left());
          Float64 Vrmax = m_pYFormat->Convert(Vmax.Right());
          Float64 Vlmin = m_pYFormat->Convert(Vmin.Left());
          Float64 Vrmin = m_pYFormat->Convert(Vmin.Right());
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vlmax));
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,Vrmax));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vlmin));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,Vrmin));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vlmax));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,Vrmax));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vlmin));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,Vrmin));
       }
    }
 }
@@ -664,7 +664,7 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
       {
          Float64 Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,true);
          Mz = m_pYFormat->Convert(Mz);
-         GraphPoint point(X,Mz);
+         WBFL::Graphing::Point point(X,Mz);
          m_Graph.AddPoint(maxGraphIdx,point);
 
          Mz = pMomentCapacity->GetMomentCapacity(pierID,stage,poi,false);
@@ -676,8 +676,8 @@ void CXBRAnalysisResultsGraphBuilder::BuildCapacityGraph(PierIDType pierID,const
       {
          Float64 V = pShearCapacity->GetShearCapacity(pierID,stage,poi);
          V = m_pYFormat->Convert(V);
-         m_Graph.AddPoint(maxGraphIdx,GraphPoint(X,V));
-         m_Graph.AddPoint(minGraphIdx,GraphPoint(X,-V));
+         m_Graph.AddPoint(maxGraphIdx,WBFL::Graphing::Point(X,V));
+         m_Graph.AddPoint(minGraphIdx,WBFL::Graphing::Point(X,-V));
       }
    }
 }

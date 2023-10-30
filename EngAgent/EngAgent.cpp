@@ -36,7 +36,6 @@
 
 #include "EngAgentCLSID.h"
 
-#include <WBFLSections_i.c>
 #include <WBFLCore_i.c>
 #include <WBFLRCCapacity_i.c>
 #include <WBFLGeometry_i.c>
@@ -86,7 +85,7 @@ STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID* ppv)
 HRESULT RegisterAgent(bool bRegister)
 {
    HRESULT hr = S_OK;
-   hr = sysComCatMgr::RegWithCategory(CLSID_EngAgent,CATID_XBeamRateAgent,bRegister);
+   hr = WBFL::System::ComCatMgr::RegWithCategory(CLSID_EngAgent,CATID_XBeamRateAgent,bRegister);
    if ( FAILED(hr) )
       return hr;
 

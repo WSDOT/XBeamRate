@@ -57,9 +57,9 @@ LPCTSTR CLoadRatingDetailsChapterBuilder::GetName() const
    return TEXT("Load Rating Details");
 }
 
-rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSpec,Uint16 level) const
+rptChapter* CLoadRatingDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
 {
-   CXBeamRateReportSpecification* pXBRRptSpec = dynamic_cast<CXBeamRateReportSpecification*>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    m_bReportEvenIncrements = pXBRRptSpec->GetDoReportEvenIncrements();
 
@@ -143,9 +143,9 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(CReportSpecification* pRptSp
    return pChapter;
 }
 
-CChapterBuilder* CLoadRatingDetailsChapterBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::ChapterBuilder> CLoadRatingDetailsChapterBuilder::Clone() const
 {
-   return new CLoadRatingDetailsChapterBuilder;
+   return std::make_unique<CLoadRatingDetailsChapterBuilder>();
 }
 
 void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const

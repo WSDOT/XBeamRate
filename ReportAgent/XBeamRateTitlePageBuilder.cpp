@@ -45,13 +45,13 @@ static char THIS_FILE[] = __FILE__;
 
 
 CXBeamRateTitlePageBuilder::CXBeamRateTitlePageBuilder(IBroker* pBroker,LPCTSTR strTitle) :
-CTitlePageBuilder(strTitle),
+WBFL::Reporting::TitlePageBuilder(strTitle),
 m_pBroker(pBroker)
 {
 }
 
 CXBeamRateTitlePageBuilder::CXBeamRateTitlePageBuilder(const CXBeamRateTitlePageBuilder& other) :
-CTitlePageBuilder(other),
+WBFL::Reporting::TitlePageBuilder(other),
 m_pBroker(other.m_pBroker)
 {
 }
@@ -60,20 +60,20 @@ CXBeamRateTitlePageBuilder::~CXBeamRateTitlePageBuilder(void)
 {
 }
 
-CTitlePageBuilder* CXBeamRateTitlePageBuilder::Clone() const
+std::unique_ptr<WBFL::Reporting::TitlePageBuilder> CXBeamRateTitlePageBuilder::Clone() const
 {
-   return new CXBeamRateTitlePageBuilder(*this);
+   return std::make_unique<CXBeamRateTitlePageBuilder>(*this);
 }
 
-bool CXBeamRateTitlePageBuilder::NeedsUpdate(CReportHint* pHint,std::shared_ptr<CReportSpecification>& pRptSpec)
+bool CXBeamRateTitlePageBuilder::NeedsUpdate(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint,const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
 {
    // don't let the title page control whether or not a report needs updating
    return false;
 }
 
-rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecification>& pRptSpec)
+rptChapter* CXBeamRateTitlePageBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
 {
-   std::shared_ptr<CXBeamRateReportSpecification> pXBRRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification, CReportSpecification>(pRptSpec);
+   auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
    // Create a title page for the report
    rptChapter* pTitlePage = new rptChapter;
@@ -109,7 +109,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
 
    pPara = new rptParagraph(rptStyleManager::GetCopyrightStyle());
    *pTitlePage << pPara;
-   *pPara << _T("Copyright ") << symbol(COPYRIGHT) << _T(" ") << sysDate().Year() << _T(", WSDOT, All Rights Reserved") << rptNewLine;
+   *pPara << _T("Copyright ") << symbol(COPYRIGHT) << _T(" ") << WBFL::System::Date().Year() << _T(", WSDOT, All Rights Reserved") << rptNewLine;
 
    pPara = new rptParagraph;
    pPara->SetStyleName(rptStyleManager::GetReportSubtitleStyle());
@@ -220,7 +220,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
    ///////////////////////////////////
    // Status items
    GET_IFACE(IEAFStatusCenter, pStatusCenter);
-   CollectionIndexType nItems = pStatusCenter->Count();
+   IndexType nItems = pStatusCenter->Count();
 
    if (0 < nItems)
    {
@@ -243,7 +243,7 @@ rptChapter* CXBeamRateTitlePageBuilder::Build(std::shared_ptr<CReportSpecificati
 
       row = 1;
       CString strSeverityType[] = { _T("Information"), _T("Warning"), _T("Error") };
-      for (CollectionIndexType i = 0; i < nItems; i++)
+      for (IndexType i = 0; i < nItems; i++)
       {
          CEAFStatusItem* pItem = pStatusCenter->GetByIndex(i);
 

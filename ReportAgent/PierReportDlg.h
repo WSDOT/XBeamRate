@@ -29,7 +29,7 @@ class CPierReportDlg : public CDialog
 	DECLARE_DYNAMIC(CPierReportDlg)
 
 public:
-	CPierReportDlg(IBroker* pBroker,const CReportDescription& rptDesc,std::shared_ptr<CReportSpecification>& pRptSpec,CWnd* pParent = nullptr);
+	CPierReportDlg(IBroker* pBroker,const WBFL::Reporting::ReportDescription& rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification>& pRptSpec,CWnd* pParent = nullptr);
 	virtual ~CPierReportDlg();
 
 // Dialog Data
@@ -48,10 +48,10 @@ protected:
 
    CCheckListBox	m_ChList;
 
-   const CReportDescription& m_RptDesc;
+   const WBFL::Reporting::ReportDescription& m_RptDesc;
    IBroker* m_pBroker;
 
-   std::shared_ptr<CReportSpecification> m_pInitRptSpec; // report spec for initializing the dialog
+   std::shared_ptr<WBFL::Reporting::ReportSpecification> m_pInitRptSpec; // report spec for initializing the dialog
 
    int m_ReportEvenIncrementsIval;
 

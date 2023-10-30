@@ -25,17 +25,17 @@
 #include <ReportManager\TitlePageBuilder.h>
 #include <WBFLCore.h>
 
-class CXBeamRateTitlePageBuilder : public CTitlePageBuilder
+class CXBeamRateTitlePageBuilder : public WBFL::Reporting::TitlePageBuilder
 {
 public:
    CXBeamRateTitlePageBuilder(IBroker* pBroker,LPCTSTR strTitle);
    CXBeamRateTitlePageBuilder(const CXBeamRateTitlePageBuilder& other);
    ~CXBeamRateTitlePageBuilder(void);
 
-   virtual rptChapter* Build(std::shared_ptr<CReportSpecification>& pRptSpec) override;
-   virtual bool NeedsUpdate(CReportHint* pHint,std::shared_ptr<CReportSpecification>& pRptSpec) override;
+   virtual rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const override;
+   virtual bool NeedsUpdate(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint,const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const override;
 
-   virtual CTitlePageBuilder* Clone() const override;
+   virtual std::unique_ptr<WBFL::Reporting::TitlePageBuilder> Clone() const override;
 
 protected:
    CComPtr<IBroker> m_pBroker;

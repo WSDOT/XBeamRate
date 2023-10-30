@@ -38,7 +38,7 @@
 #include "ConcreteDetailsDlg.h"
 
 #include <System\Tokenizer.h>
-#include <Lrfd\ConcreteUtil.h>
+#include <LRFD\ConcreteUtil.h>
 #include <EAF\EAFDisplayUnits.h>
 #include <IFace\Project.h>
 
@@ -93,10 +93,10 @@ CString CConcreteDetailsDlg::UpdateEc(pgsTypes::ConcreteType type, const CString
    CString strEc;
    Float64 fc, density, k1,k2;
    Float64 ec = 0;
-   if (sysTokenizer::ParseDouble(strFc, &fc) && 
-       sysTokenizer::ParseDouble(strDensity,&density) &&
-       sysTokenizer::ParseDouble(strK1,&k1) &&
-       sysTokenizer::ParseDouble(strK2,&k2) &&
+   if (WBFL::System::Tokenizer::ParseDouble(strFc, &fc) && 
+       WBFL::System::Tokenizer::ParseDouble(strDensity,&density) &&
+       WBFL::System::Tokenizer::ParseDouble(strK1,&k1) &&
+       WBFL::System::Tokenizer::ParseDouble(strK2,&k2) &&
        0 <= density && 0 <= fc && 0 <= k1 && 0 <= k2
        )
    {
@@ -104,13 +104,13 @@ CString CConcreteDetailsDlg::UpdateEc(pgsTypes::ConcreteType type, const CString
          EAFGetBroker(&pBroker);
          GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
-         const unitPressure& stress_unit = pDisplayUnits->GetStressUnit().UnitOfMeasure;
-         const unitDensity& density_unit = pDisplayUnits->GetDensityUnit().UnitOfMeasure;
+         const WBFL::Units::Pressure& stress_unit = pDisplayUnits->GetStressUnit().UnitOfMeasure;
+         const WBFL::Units::Density& density_unit = pDisplayUnits->GetDensityUnit().UnitOfMeasure;
 
-         fc       = ::ConvertToSysUnits(fc,      stress_unit);
-         density  = ::ConvertToSysUnits(density, density_unit);
+         fc       = WBFL::Units::ConvertToSysUnits(fc,      stress_unit);
+         density  = WBFL::Units::ConvertToSysUnits(density, density_unit);
 
-         ec = k1*k2*lrfdConcreteUtil::ModE((matConcrete::Type)type,fc,density,false);
+         ec = k1*k2*WBFL::LRFD::ConcreteUtil::ModE((WBFL::Materials::ConcreteType)type,fc,density,false);
 
          strEc.Format(_T("%s"),FormatDimension(ec,pDisplayUnits->GetModEUnit(),false));
    }

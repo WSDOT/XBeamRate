@@ -25,7 +25,7 @@
 
 #include <ReportManager\ChapterBuilder.h>
 
-class CXBeamRateChapterBuilder : public CChapterBuilder
+class CXBeamRateChapterBuilder : public WBFL::Reporting::ChapterBuilder
 {
 public:
    CXBeamRateChapterBuilder();
@@ -36,5 +36,5 @@ public:
    virtual bool Select() const override;
 
    // creates a new chapter object and configures it with the correct style for our reports
-   virtual rptChapter* Build(CReportSpecification* pRptSpec,Uint16 level) const override;
+   virtual rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const override;
 };

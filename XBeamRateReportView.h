@@ -53,14 +53,14 @@ public:
 
 // Implementation
 public:
-   virtual bool CreateReport(CollectionIndexType rptIdx,bool bPromptForSpec);
+   virtual bool CreateReport(IndexType rptIdx,bool bPromptForSpec);
 
 protected:
 	virtual ~CXBeamRateReportView();
 
-   virtual HRESULT UpdateReportBrowser(CReportHint* pHint) override;
+   virtual HRESULT UpdateReportBrowser(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint) override;
    virtual void RefreshReport() override;
-   virtual CReportHint* TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint) override;
+   virtual WBFL::Reporting::ReportHint* TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint) override;
 
 #ifdef _DEBUG
 	virtual void AssertValid() const override;

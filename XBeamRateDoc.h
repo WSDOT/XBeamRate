@@ -94,8 +94,8 @@ protected:
    virtual HINSTANCE GetResourceInstance() override;
    virtual HRESULT LoadTheDocument(IStructuredLoad* pStrLoad) override;
    virtual HRESULT WriteTheDocument(IStructuredSave* pStrSave) override;
-   virtual void CreateReportView(CollectionIndexType rptIdx,BOOL bPrompt) override;
-   virtual void CreateGraphView(CollectionIndexType graphIdx) override;
+   virtual void CreateReportView(IndexType rptIdx,BOOL bPrompt) override;
+   virtual void CreateGraphView(IndexType graphIdx) override;
 
    virtual void LoadDocumentSettings() override;
    virtual void SaveDocumentSettings() override;

@@ -49,8 +49,8 @@ public:
       xbrTypes::LongitudinalRebarLayoutType LayoutType;
       Float64 Start;
       Float64 Length;
-      matRebar::Size BarSize;
-      CollectionIndexType NumberOfBars;
+      WBFL::Materials::Rebar::Size BarSize;
+      IndexType NumberOfBars;
       Float64     Cover;
       Float64     BarSpacing;
       bool bHookStart;

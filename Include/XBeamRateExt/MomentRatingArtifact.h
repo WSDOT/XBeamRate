@@ -152,7 +152,7 @@ protected:
    mutable VehicleIndexType m_PermitVehicleIdx; // index of the vehicles, for this rating type, associted with the min rating factor
    mutable Float64 m_Mpermit; // permit load response associated with min rating factor
    mutable Float64 m_Mlegal; // legal load response associated with min rating factor
-   mutable Float64 m_K; // mininum reinforcement factor associted with min rating factor
+   mutable Float64 m_K; // Minimum reinforcement factor associted with min rating factor
 
    PierIDType m_PierID;
    xbrPointOfInterest m_POI;

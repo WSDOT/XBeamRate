@@ -38,14 +38,14 @@ public:
 
       if ( 0 < pT->m_EventHoldCount )
       {
-         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECTPROPERTIES);
+         WBFL::System::Flags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECTPROPERTIES);
          return S_OK;
       }
 
       pT->Lock();
 		HRESULT ret = S_OK;
-		IUnknown** pp = m_vec.begin();
-		while (pp < m_vec.end())
+		IUnknown** pp = this->m_vec.begin();
+		while (pp < this->m_vec.end())
 		{
 			if (*pp != nullptr)
 			{
@@ -74,14 +74,14 @@ public:
 
       if ( 0 < pT->m_EventHoldCount )
       {
-         sysFlags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECT);
+         WBFL::System::Flags<Uint32>::Set(&pT->m_PendingEvents,EVT_PROJECT);
          return S_OK;
       }
 
       pT->Lock();
 		HRESULT ret = S_OK;
-		IUnknown** pp = m_vec.begin();
-		while (pp < m_vec.end())
+		IUnknown** pp = this->m_vec.begin();
+		while (pp < this->m_vec.end())
 		{
 			if (*pp != nullptr)
 			{
@@ -110,8 +110,8 @@ public:
 
       pT->Lock();
 		HRESULT ret = S_OK;
-		IUnknown** pp = m_vec.begin();
-		while (pp < m_vec.end())
+		IUnknown** pp = this->m_vec.begin();
+		while (pp < this->m_vec.end())
 		{
 			if (*pp != nullptr)
 			{
@@ -130,8 +130,8 @@ public:
 
       pT->Lock();
 		HRESULT ret = S_OK;
-		IUnknown** pp = m_vec.begin();
-		while (pp < m_vec.end())
+		IUnknown** pp = this->m_vec.begin();
+		while (pp < this->m_vec.end())
 		{
 			if (*pp != nullptr)
 			{
@@ -150,8 +150,8 @@ public:
 
       pT->Lock();
 		HRESULT ret = S_OK;
-		IUnknown** pp = m_vec.begin();
-		while (pp < m_vec.end())
+		IUnknown** pp = this->m_vec.begin();
+		while (pp < this->m_vec.end())
 		{
 			if (*pp != nullptr)
 			{

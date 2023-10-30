@@ -43,6 +43,8 @@
 
 #include "XBeamRateVersionInfoImpl.h"
 
+#include <EAF\EAFTxnManager.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -150,7 +152,7 @@ STDMETHODIMP CXBeamRateDocProxyAgent::Init2()
 
 STDMETHODIMP CXBeamRateDocProxyAgent::Reset()
 {
-   txnTxnManager::GetInstance()->Clear();
+   CEAFTxnManager::GetInstance().Clear();
    return S_OK;
 }
 
@@ -358,7 +360,7 @@ CString CXBeamRateDocProxyAgent::GetVersion(bool bIncludeBuildNumber)
 
 /////////////////////////////////////////////////////////////////////
 // IXBRViews
-void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,BOOL bPromptForSpec)
+void CXBeamRateDocProxyAgent::CreateReportView(IndexType rptIdx,BOOL bPromptForSpec)
 {
    CEAFReportViewCreationData data;
    data.m_RptIdx = rptIdx;
@@ -371,7 +373,7 @@ void CXBeamRateDocProxyAgent::CreateReportView(CollectionIndexType rptIdx,BOOL b
    pViewReg->CreateView(m_ReportViewKey,(LPVOID)&data);
 }
 
-void CXBeamRateDocProxyAgent::CreateGraphView(CollectionIndexType graphIdx)
+void CXBeamRateDocProxyAgent::CreateGraphView(IndexType graphIdx)
 {
    CEAFGraphViewCreationData data;
    GET_IFACE(IGraphManager,pGraphMgr);
