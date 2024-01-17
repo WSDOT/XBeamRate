@@ -78,7 +78,7 @@ BEGIN
             VALUE "FileDescription", "GraphingAgent Module"
             VALUE "FileVersion", "8.0.0.5"
             VALUE "InternalName", "GraphingAgent"
-            VALUE "LegalCopyright", "Copyright © 1999-2023, Washington State Department of Transportation, All Rights Reserved"
+            VALUE "LegalCopyright", "Copyright © 1999-2024, Washington State Department of Transportation, All Rights Reserved"
             VALUE "OriginalFilename", "GraphingAgent.DLL"
             VALUE "ProductName", "XBRate"
             VALUE "ProductVersion", "8.0.0.5"
