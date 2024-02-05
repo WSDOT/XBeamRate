@@ -31,12 +31,12 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <DManip\DManip.h>
-#include <DManipTools\DManipTools.h>
+#include <DManip/DManip.h>
 #include <XBeamRateExt\PointOfInterest.h>
 
 class CXBeamRateDoc;
 class CXBeamRateChildFrame;
+interface IShape;
 
 #define HINT_SECTION_CUT_MOVED 1
 
@@ -68,8 +68,8 @@ public:
 
    virtual void OnInitialUpdate() override;
 
-   virtual DROPEFFECT CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point) override;
-   virtual void OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point) override;
+   virtual DROPEFFECT CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,const WBFL::Geometry::Point2d& point) override;
+   virtual void OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,const WBFL::Geometry::Point2d& point) override;
 
    PierIDType GetPierID();
    PierIndexType GetPierIndex();
@@ -97,9 +97,9 @@ protected:
    void UpdateDimensionsDisplayObjects();
    void UpdateSectionCutDisplayObjects();
 
-   void CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO);
-   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine = 0);
-   void BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine = nullptr);
+   std::shared_ptr<WBFL::DManip::iLineDisplayObject> CreateLineDisplayObject(const WBFL::Geometry::Point2d& pntStart,const WBFL::Geometry::Point2d& pntEnd);
+   void BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint);
+   void BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint,Float64 dimension);
    void SkewGirderShape(Float64 skew,Float64 shear,IShape* pShape,IShape** ppSkewedShape);
 
 	virtual void HandleLButtonDblClk(UINT nFlags, CPoint logPoint) override;

@@ -56,6 +56,7 @@
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
 #include <WBFLGenericBridge.h>
+#include <WBFLGeometry/GeomHelpers.h>
 
 #include <PGSuperColors.h>
 #define COLUMN_LINE_COLOR              GREY50
@@ -87,14 +88,7 @@
 // view by this amount.
 const Float64 EndOffset = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
 
-const SelectionType g_selectionType = stNone; // nothing is selectable, except for the section cut object
-//const SelectionType g_selectionType = stAll;
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+const WBFL::DManip::SelectionType g_selectionType = WBFL::DManip::SelectionType::None; // nothing is selectable, except for the section cut object
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateView
@@ -235,69 +229,30 @@ int CXBeamRateView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
    EnableToolTips();
 
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
 
-   CDisplayObjectFactory* factory = new CDisplayObjectFactory();
-   CComPtr<iDisplayObjectFactory> doFactory;
-   doFactory.Attach((iDisplayObjectFactory*)factory->GetInterface(&IID_iDisplayObjectFactory));
-   dispMgr->AddDisplayObjectFactory(doFactory);
+   auto doFactory = std::make_shared<CDisplayObjectFactory>();
+   m_pDispMgr->AddDisplayObjectFactory(doFactory);
 
-   dispMgr->EnableLBtnSelect(TRUE);
-   dispMgr->EnableRBtnSelect(TRUE);
-   dispMgr->SetSelectionLineColor(SELECTED_OBJECT_LINE_COLOR);
-   dispMgr->SetSelectionFillColor(SELECTED_OBJECT_FILL_COLOR);
+   m_pDispMgr->EnableLBtnSelect(TRUE);
+   m_pDispMgr->EnableRBtnSelect(TRUE);
+   m_pDispMgr->SetSelectionLineColor(SELECTED_OBJECT_LINE_COLOR);
+   m_pDispMgr->SetSelectionFillColor(SELECTED_OBJECT_FILL_COLOR);
 
-   CDisplayView::SetMappingMode(DManip::Isotropic);
+   CDisplayView::SetMappingMode(WBFL::DManip::MapMode::Isotropic);
 
    // Setup display lists
-   CComPtr<iDisplayList> displayList;
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(SECTION_CUT_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(DIMENSIONS_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(ROADWAY_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(REBAR_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(STIRRUP_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(BEARING_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(GIRDER_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(XBEAM_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
-
-   displayList.Release();
-   ::CoCreateInstance(CLSID_DisplayList,nullptr,CLSCTX_ALL,IID_iDisplayList,(void**)&displayList);
-   displayList->SetID(COLUMN_DISPLAY_LIST_ID);
-   dispMgr->AddDisplayList(displayList);
+   m_pDispMgr->CreateDisplayList(SECTION_CUT_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(DIMENSIONS_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(ROADWAY_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(REBAR_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(STIRRUP_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(BEARING_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(GIRDER_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(XBEAM_DISPLAY_LIST_ID);
+   m_pDispMgr->CreateDisplayList(COLUMN_DISPLAY_LIST_ID);
 
    m_pFrame = (CXBeamRateChildFrame*)GetParent();
-   ASSERT( m_pFrame != 0 );
+   ASSERT( m_pFrame != nullptr );
    ASSERT( m_pFrame->IsKindOf( RUNTIME_CLASS( CXBeamRateChildFrame ) ) );
 
    return 0;
@@ -324,26 +279,18 @@ PierIndexType CXBeamRateView::GetPierIndex()
 
 xbrPointOfInterest CXBeamRateView::GetCutLocation()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CComPtr<iDisplayList> pDL;
-   dispMgr->FindDisplayList(SECTION_CUT_DISPLAY_LIST_ID,&pDL);
+   auto pDL = m_pDispMgr->FindDisplayList(SECTION_CUT_DISPLAY_LIST_ID);
    ATLASSERT(pDL);
 
-   CComPtr<iDisplayObject> dispObj;
-   pDL->FindDisplayObject(SECTION_CUT_ID,&dispObj);
+   auto dispObj = pDL->FindDisplayObject(SECTION_CUT_ID);
 
    if ( dispObj == nullptr )
    {
       return xbrPointOfInterest();
    }
 
-   CComPtr<iDisplayObjectEvents> sink;
-   dispObj->GetEventSink(&sink);
-
-   CComQIPtr<iPointDisplayObject,&IID_iPointDisplayObject> point_disp(dispObj);
-   CComQIPtr<iSectionCutDrawStrategy,&IID_iSectionCutDrawStrategy> sectionCutStrategy(sink);
+   auto sink = dispObj->GetEventSink();
+   auto sectionCutStrategy = std::dynamic_pointer_cast<iSectionCutDrawStrategy>(sink);
 
    return sectionCutStrategy->GetCutPOI(m_pFrame->GetCurrentCutLocation());
 }
@@ -413,26 +360,21 @@ void CXBeamRateView::UpdateDisplayObjects()
    }
 
 
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
    // Capture the current selection before blasting all the 
    // display objects
-   DisplayObjectContainer vCurSel;
-   dispMgr->GetSelectedObjects(&vCurSel);
+   auto vCurSel = m_pDispMgr->GetSelectedObjects();
    ATLASSERT(vCurSel.size() < 2);
    IDType curSel = INVALID_ID;
    IDType listID = INVALID_ID;
    if ( vCurSel.size() == 1 )
    {
-      CComPtr<iDisplayObject> pDO = vCurSel[0];
+      auto pDO = vCurSel[0];
       curSel = pDO->GetID();
-      CComPtr<iDisplayList> pDL;
-      pDO->GetDisplayList(&pDL);
+      auto pDL = pDO->GetDisplayList();
       listID = pDL->GetID();
    }
 
-   dispMgr->ClearDisplayObjects();
+   m_pDispMgr->ClearDisplayObjects();
    m_DisplayObjectID = 0;
 
    UpdateRoadwayDisplayObjects();
@@ -448,21 +390,14 @@ void CXBeamRateView::UpdateDisplayObjects()
    // Re-instate the current selection
    if ( curSel != INVALID_ID )
    {
-      CComPtr<iDisplayObject> doSel;
-      dispMgr->FindDisplayObject(curSel,listID,atByID,&doSel);
-      dispMgr->SelectObject(doSel,TRUE);
+      auto doSel = m_pDispMgr->FindDisplayObject(curSel,listID,WBFL::DManip::AccessType::ByID);
+      m_pDispMgr->SelectObject(doSel,TRUE);
    }
 }
 
 void CXBeamRateView::UpdateRoadwayDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(ROADWAY_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(ROADWAY_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -482,51 +417,39 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    Float64 Xcl = pPier->ConvertPierToCurbLineCoordinate(pierID,X);
    Float64 Ydeck = pPier->GetElevation(pierID,Xcl); // deck elevation at alignment
    Float64 Yt = Ydeck + WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Feet); // add a little so it projects over the roadway surface
-   CComPtr<IPoint2d> pnt1;
-   pnt1.CoCreateInstance(CLSID_Point2d);
-   pnt1->Move(X,Yt);
+   WBFL::Geometry::Point2d pnt1(X, Yt);
 
    Float64 Yb = Yt - pPier->GetMaxColumnHeight(pierID);
-   CComPtr<IPoint2d> pnt2;
-   pnt2.CoCreateInstance(CLSID_Point2d);
-   pnt2->Move(X,Yb);
+   WBFL::Geometry::Point2d pnt2(X, Yb);
 
-   CComPtr<iLineDisplayObject> doAlignment;
-   CreateLineDisplayObject(pnt1,pnt2,&doAlignment);
-   CComPtr<iDrawLineStrategy> drawStrategy;
-   doAlignment->GetDrawLineStrategy(&drawStrategy);
-   CComQIPtr<iSimpleDrawLineStrategy> drawAlignmentStrategy(drawStrategy);
+   auto doAlignment = CreateLineDisplayObject(pnt1,pnt2);
+   auto drawStrategy = doAlignment->GetDrawLineStrategy();
+   auto drawAlignmentStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawLineStrategy>(drawStrategy);
    drawAlignmentStrategy->SetWidth(ALIGNMENT_LINE_WEIGHT);
    drawAlignmentStrategy->SetColor(ALIGNMENT_COLOR);
-   drawAlignmentStrategy->SetLineStyle(lsCenterline);
+   drawAlignmentStrategy->SetLineStyle(WBFL::DManip::LineStyleType::Centerline);
 
    // Don't add the object to the display list here... do it at the end
    // We want it to be drawn on top so it has to go into the display list last
    //displayList->AddDisplayObject(doAlignment);
 
    // Draw the bridge line if different then the alignment
-   CComPtr<iLineDisplayObject> doBridgeLine;
+   std::shared_ptr<WBFL::DManip::iLineDisplayObject> doBridgeLine;
    Float64 BLO = pProject->GetBridgeLineOffset(pierID);
    if ( !IsZero(BLO) )
    {
       // Model a vertical line for the bridge line
       // Let X = BLO be at the alignment and Y = the alignment elevation
       Float64 X = BLO/cos_skew;
-      pnt1.Release();
-      pnt1.CoCreateInstance(CLSID_Point2d);
-      pnt1->Move(X,Yt);
+      pnt1.Move(X,Yt);
+      pnt2.Move(X,Yb);
 
-      pnt2.Release();
-      pnt2.CoCreateInstance(CLSID_Point2d);
-      pnt2->Move(X,Yb);
-
-      CreateLineDisplayObject(pnt1,pnt2,&doBridgeLine);
-      CComPtr<iDrawLineStrategy> drawStrategy;
-      doBridgeLine->GetDrawLineStrategy(&drawStrategy);
-      CComQIPtr<iSimpleDrawLineStrategy> drawBridgeLineStrategy(drawStrategy);
+      doBridgeLine = CreateLineDisplayObject(pnt1,pnt2);
+      auto drawStrategy = doBridgeLine->GetDrawLineStrategy();
+      auto drawBridgeLineStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawLineStrategy>(drawStrategy);
       drawBridgeLineStrategy->SetWidth(BRIDGELINE_LINE_WEIGHT);
       drawBridgeLineStrategy->SetColor(BRIDGE_COLOR);
-      drawBridgeLineStrategy->SetLineStyle(lsCenterline);
+      drawBridgeLineStrategy->SetLineStyle(WBFL::DManip::LineStyleType::Centerline);
 
       //displayList->AddDisplayObject(doBridgeLine); // do this at the end
    }
@@ -541,30 +464,20 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
 
       Float64 Ylc = pPier->GetElevation(pierID,0);
       Float64 Yrc = pPier->GetElevation(pierID,(RCO-LCO)/cos_skew);
-      CComPtr<IPoint2d> pnt3;
-      pnt1.Release();
-      pnt1.CoCreateInstance(CLSID_Point2d);
       LCO /= cos_skew; // skew adjust
-      pnt1->Move(LCO,Ylc);
+      pnt1.Move(LCO,Ylc);
+      pnt2.Move(0,Ydeck);
 
-      pnt2.Release();
-      pnt2.CoCreateInstance(CLSID_Point2d);
-      pnt2->Move(0,Ydeck);
-
-      pnt3.CoCreateInstance(CLSID_Point2d);
       RCO /= cos_skew; // skew adjust
-      pnt3->Move(RCO,Yrc);
+      WBFL::Geometry::Point2d pnt3(RCO,Yrc);
 
-      CComPtr<iPolyLineDisplayObject> doDeck;
-      doDeck.CoCreateInstance(CLSID_PolyLineDisplayObject);
-      doDeck->SetID(m_DisplayObjectID++);
+      auto doDeck = WBFL::DManip::PolyLineDisplayObject::Create(m_DisplayObjectID++);
       doDeck->AddPoint(pnt1);
       doDeck->AddPoint(pnt2);
       doDeck->AddPoint(pnt3);
-      doDeck->put_PointType(plpNone);
-      doDeck->put_Color(PROFILE_COLOR);
-      doDeck->put_Width(PROFILE_LINE_WEIGHT);
-      doDeck->Commit();
+      doDeck->SetPointType(WBFL::DManip::PointType::None);
+      doDeck->SetColor(PROFILE_COLOR);
+      doDeck->SetWidth(PROFILE_LINE_WEIGHT);
 
       displayList->AddDisplayObject(doDeck);
    }
@@ -590,40 +503,34 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       pgsTypes::SupportedDeckType deckType = pDeck->GetDeckType();
       if ( deckType != pgsTypes::sdtNone )
       {
-         CComPtr<iPointDisplayObject> dispObj;
-         dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+         auto dispObj = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
 
          CComPtr<IShape> shape;
          pShapes->GetSlabShape(pierStation,pierDirection,true/*include haunch*/,&shape);
 
-         CComPtr<iShapeDrawStrategy> strategy;
-         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+         auto strategy = WBFL::DManip::ShapeDrawStrategy::Create();
 
-         strategy->SetShape(shape);
+         strategy->SetShape(geomUtil::ConvertShape(shape));
          strategy->SetSolidLineColor(IsStructuralDeck(deckType) ? DECK_BORDER_COLOR : NONSTRUCTURAL_DECK_BORDER_COLOR);
          strategy->SetSolidFillColor(IsStructuralDeck(deckType) ? DECK_FILL_COLOR : NONSTRUCTURAL_DECK_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
          strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
-         strategy->DoFill(true);
+         strategy->Fill(true);
 
          dispObj->SetDrawingStrategy(strategy);
 
-         CComPtr<iShapeGravityWellStrategy> gravity_well;
-         gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-         gravity_well->SetShape(shape);
+         auto gravity_well = WBFL::DManip::ShapeGravityWellStrategy::Create();
+         gravity_well->SetShape(geomUtil::ConvertShape(shape));
 
          dispObj->SetGravityWellStrategy(gravity_well);
 
          dispObj->SetSelectionType(g_selectionType);
 
-         dispObj->SetID(m_DisplayObjectID++);
-
          displayList->AddDisplayObject(dispObj);
       }
 
       // Left Hand Barrier
-      CComPtr<iPointDisplayObject> left_dispObj;
-      left_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+      auto left_dispObj = WBFL::DManip::PointDisplayObject::Create();
 
       Float64 left_curb_offset  = pBridge->GetLeftCurbOffset(pierIdx);
       Float64 right_curb_offset = pBridge->GetRightCurbOffset(pierIdx);
@@ -631,17 +538,15 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       CComPtr<IShape> left_shape;
       pShapes->GetLeftTrafficBarrierShape(pierStation,pierDirection,&left_shape);
 
-      CComPtr<iShapeDrawStrategy> strategy;
       if ( left_shape )
       {
-         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-
-         strategy->SetShape(left_shape);
+         auto strategy = WBFL::DManip::ShapeDrawStrategy::Create();
+         strategy->SetShape(geomUtil::ConvertShape(left_shape));
          strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
          strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
          strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
-         strategy->DoFill(true);
+         strategy->Fill(true);
          strategy->HasBoundingShape(false);
 
          left_dispObj->SetDrawingStrategy(strategy);
@@ -650,23 +555,20 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
       }
 
       // Right Hand Barrier
-      CComPtr<iPointDisplayObject> right_dispObj;
-      right_dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+      auto right_dispObj = WBFL::DManip::PointDisplayObject::Create();
 
       CComPtr<IShape> right_shape;
       pShapes->GetRightTrafficBarrierShape(pierStation,pierDirection,&right_shape);
 
       if ( right_shape )
       {
-         strategy.Release();
-         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-
-         strategy->SetShape(right_shape);
+         auto strategy = WBFL::DManip::ShapeDrawStrategy::Create();
+         strategy->SetShape(geomUtil::ConvertShape(right_shape));
          strategy->SetSolidLineColor(BARRIER_BORDER_COLOR);
          strategy->SetSolidFillColor(BARRIER_FILL_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
          strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
-         strategy->DoFill(true);
+         strategy->Fill(true);
          strategy->HasBoundingShape(false);
 
          right_dispObj->SetDrawingStrategy(strategy);
@@ -684,13 +586,7 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
 
 void CXBeamRateView::UpdateXBeamDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(XBEAM_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(XBEAM_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -702,60 +598,50 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    GET_IFACE2(pBroker,IXBRSectionProperties,pSectProp);
 
    // Model Upper Cross Beam (Elevation)
-   CComPtr<IPoint2d> point;
-   point.CoCreateInstance(CLSID_Point2d);
-   point->Move(0,0);
+   WBFL::Geometry::Point2d point(0, 0);
 
    if ( pProject->GetPierType(pierID) != xbrTypes::pctExpansion )
    {
-      CComPtr<iPointDisplayObject> doUpperXBeam;
-      doUpperXBeam.CoCreateInstance(CLSID_PointDisplayObject);
-      doUpperXBeam->SetID(m_DisplayObjectID++);
-      doUpperXBeam->SetPosition(point,FALSE,FALSE);
+      auto doUpperXBeam = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+      doUpperXBeam->SetPosition(point,false,false);
       doUpperXBeam->SetSelectionType(g_selectionType);
 
       CComPtr<IShape> upperXBeamShape;
       pPier->GetUpperXBeamProfile(pierID,&upperXBeamShape);
 
-      CComPtr<iShapeDrawStrategy> upperXBeamDrawStrategy;
-      upperXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-      upperXBeamDrawStrategy->SetShape(upperXBeamShape);
+      auto upperXBeamDrawStrategy = WBFL::DManip::ShapeDrawStrategy::Create();
+      upperXBeamDrawStrategy->SetShape(geomUtil::ConvertShape(upperXBeamShape));
       upperXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
       upperXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
-      upperXBeamDrawStrategy->DoFill(TRUE);
+      upperXBeamDrawStrategy->Fill(true);
 
       doUpperXBeam->SetDrawingStrategy(upperXBeamDrawStrategy);
 
-      CComPtr<iShapeGravityWellStrategy> upper_xbeam_gravity_well;
-      upper_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-      upper_xbeam_gravity_well->SetShape(upperXBeamShape);
+      auto upper_xbeam_gravity_well = WBFL::DManip::ShapeGravityWellStrategy::Create();
+      upper_xbeam_gravity_well->SetShape(geomUtil::ConvertShape(upperXBeamShape));
       doUpperXBeam->SetGravityWellStrategy(upper_xbeam_gravity_well);
 
       displayList->AddDisplayObject(doUpperXBeam);
    }
 
    // Model Lower Cross Beam (Elevation)
-   CComPtr<iPointDisplayObject> doLowerXBeam;
-   doLowerXBeam.CoCreateInstance(CLSID_PointDisplayObject);
-   doLowerXBeam->SetID(m_DisplayObjectID++);
-   doLowerXBeam->SetPosition(point,FALSE,FALSE);
+   auto doLowerXBeam = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+   doLowerXBeam->SetPosition(point,false,false);
    doLowerXBeam->SetSelectionType(g_selectionType);
 
    CComPtr<IShape> lowerXBeamShape;
    pPier->GetLowerXBeamProfile(pierID,&lowerXBeamShape);
 
-   CComPtr<iShapeDrawStrategy> lowerXBeamDrawStrategy;
-   lowerXBeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-   lowerXBeamDrawStrategy->SetShape(lowerXBeamShape);
+   auto lowerXBeamDrawStrategy = WBFL::DManip::ShapeDrawStrategy::Create();
+   lowerXBeamDrawStrategy->SetShape(geomUtil::ConvertShape(lowerXBeamShape));
    lowerXBeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
    lowerXBeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
-   lowerXBeamDrawStrategy->DoFill(TRUE);
+   lowerXBeamDrawStrategy->Fill(true);
 
    doLowerXBeam->SetDrawingStrategy(lowerXBeamDrawStrategy);
 
-   CComPtr<iShapeGravityWellStrategy> lower_xbeam_gravity_well;
-   lower_xbeam_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-   lower_xbeam_gravity_well->SetShape(lowerXBeamShape);
+   auto lower_xbeam_gravity_well = WBFL::DManip::ShapeGravityWellStrategy::Create();
+   lower_xbeam_gravity_well->SetShape(geomUtil::ConvertShape(lowerXBeamShape));
    doLowerXBeam->SetGravityWellStrategy(lower_xbeam_gravity_well);
 
    displayList->AddDisplayObject(doLowerXBeam);
@@ -766,10 +652,8 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
 
    Float64 XxbCut = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
 
-   CComPtr<iPointDisplayObject> doXBeamSection;
-   doXBeamSection.CoCreateInstance(CLSID_PointDisplayObject);
-   doXBeamSection->SetID(m_DisplayObjectID++);
-   doXBeamSection->SetPosition(point,FALSE,FALSE);
+   auto doXBeamSection = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+   doXBeamSection->SetPosition(point,false,false);
    doXBeamSection->SetSelectionType(g_selectionType);
 
    CComPtr<IShape> xbeamShape;
@@ -777,18 +661,16 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    CComQIPtr<IXYPosition> position(xbeamShape);
    position->Offset(EndOffset+Lxb,0);
 
-   CComPtr<iShapeDrawStrategy> xbeamDrawStrategy;
-   xbeamDrawStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-   xbeamDrawStrategy->SetShape(xbeamShape);
+   auto xbeamDrawStrategy = WBFL::DManip::ShapeDrawStrategy::Create();
+   xbeamDrawStrategy->SetShape(geomUtil::ConvertShape(xbeamShape));
    xbeamDrawStrategy->SetSolidLineColor(XBEAM_LINE_COLOR);
    xbeamDrawStrategy->SetSolidFillColor(XBEAM_FILL_COLOR);
-   xbeamDrawStrategy->DoFill(TRUE);
+   xbeamDrawStrategy->Fill(true);
 
    doXBeamSection->SetDrawingStrategy(xbeamDrawStrategy);
 
-   CComPtr<iShapeGravityWellStrategy> xbeam_section_gravity_well;
-   xbeam_section_gravity_well.CoCreateInstance(CLSID_ShapeGravityWellStrategy);
-   xbeam_section_gravity_well->SetShape(xbeamShape);
+   auto xbeam_section_gravity_well = WBFL::DManip::ShapeGravityWellStrategy::Create();
+   xbeam_section_gravity_well->SetShape(geomUtil::ConvertShape(xbeamShape));
    doXBeamSection->SetGravityWellStrategy(xbeam_section_gravity_well);
 
    displayList->AddDisplayObject(doXBeamSection);
@@ -801,24 +683,17 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    position->get_LocatorPoint(lpBottomCenter,&pntBC);
    pntBC->Offset(0,-WBFL::Units::ConvertToSysUnits(3.0,WBFL::Units::Measure::Feet));
 
-   CComPtr<iTextBlock> doLabel;
-   doLabel.CoCreateInstance(CLSID_TextBlock);
+   auto doLabel = WBFL::DManip::TextBlock::Create();
    doLabel->SetText(strSectionCutLabel);
    doLabel->SetBkMode(TRANSPARENT);
    doLabel->SetTextAlign(TA_TOP | TA_CENTER);
-   doLabel->SetPosition(pntBC);
+   doLabel->SetPosition(geomUtil::GetPoint(pntBC));
    displayList->AddDisplayObject(doLabel);
 }
 
 void CXBeamRateView::UpdateColumnDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(COLUMN_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(COLUMN_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -858,34 +733,25 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       Float64 H;
       pProject->GetColumnProperties(pierID,colIdx,&colShapeType,&d1,&d2,&columnHeightType,&H);
 
-      CComPtr<IPoint2d> pntTop, pntBot;
-      pntTop.CoCreateInstance(CLSID_Point2d);
-      pntTop->Move(XpCol,Ytop);
-
-      pntBot.CoCreateInstance(CLSID_Point2d);
-      pntBot->Move(XpCol,Ybot);
+      WBFL::Geometry::Point2d pntTop(XpCol,Ytop);
+      WBFL::Geometry::Point2d pntBot(XpCol,Ybot);
    
-      CComPtr<iPointDisplayObject> doTop;
-      doTop.CoCreateInstance(CLSID_PointDisplayObject);
-      doTop->Visible(FALSE);
-      doTop->SetPosition(pntTop,FALSE,FALSE);
-      CComQIPtr<iConnectable> connectable1(doTop);
-      CComPtr<iSocket> socket1;
-      connectable1->AddSocket(0,pntTop,&socket1);
+      auto doTop = WBFL::DManip::PointDisplayObject::Create();
+      doTop->Visible(false);
+      doTop->SetPosition(pntTop,false,false);
+      auto connectable1 = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doTop);
+      auto socket1 = connectable1->AddSocket(0,pntTop);
 
-      CComPtr<iPointDisplayObject> doBot;
-      doBot.CoCreateInstance(CLSID_PointDisplayObject);
-      doBot->Visible(FALSE);
-      doBot->SetPosition(pntBot,FALSE,FALSE);
-      CComQIPtr<iConnectable> connectable2(doBot);
-      CComPtr<iSocket> socket2;
-      connectable2->AddSocket(0,pntBot,&socket2);
+      auto doBot = WBFL::DManip::PointDisplayObject::Create();
+      doBot->Visible(false);
+      doBot->SetPosition(pntBot,false,false);
+      auto connectable2 =  std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doBot);
+      auto socket2 = connectable2->AddSocket(0,pntBot);
 
       // Create the shape of the column
-      CComPtr<IPolyShape> columnShape;
-      columnShape.CoCreateInstance(CLSID_PolyShape);
+      auto columnShape = std::make_shared<WBFL::Geometry::Polygon>();
       Float64 X1,X2,X3;
-      pntTop->get_X(&X2);
+      X2 = pntTop.X();
       X1 = X2-d1/2;
       X3 = X2+d1/2;
       Float64 Y1 = fn.Evaluate(X1);
@@ -898,23 +764,18 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       columnShape->AddPoint(X3,Ybot);
       columnShape->AddPoint(X1,Ybot);
 
-      CComQIPtr<IShape> shape(columnShape);
-
-      CComPtr<iPointDisplayObject> doColumn;
-      doColumn.CoCreateInstance(CLSID_PointDisplayObject);
-      doColumn->SetID(m_DisplayObjectID++);
-      doColumn->SetPosition(pntTop,FALSE,FALSE);
+      auto doColumn = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+      doColumn->SetPosition(pntTop,false,false);
       doColumn->SetSelectionType(g_selectionType);
 
-      CComPtr<iShapeDrawStrategy> drawColumnStrategy;
-      drawColumnStrategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
+      auto drawColumnStrategy = WBFL::DManip::ShapeDrawStrategy::Create();
       doColumn->SetDrawingStrategy(drawColumnStrategy);
 
-      drawColumnStrategy->SetShape(shape);
+      drawColumnStrategy->SetShape(columnShape);
       drawColumnStrategy->SetSolidLineColor(COLUMN_LINE_COLOR);
       drawColumnStrategy->SetSolidLineWidth(COLUMN_LINE_WEIGHT);
       drawColumnStrategy->SetSolidFillColor(COLUMN_FILL_COLOR);
-      drawColumnStrategy->DoFill(TRUE);
+      drawColumnStrategy->Fill(true);
 
       displayList->AddDisplayObject(doColumn);
    }
@@ -922,13 +783,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
 void CXBeamRateView::UpdateRebarDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(REBAR_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(REBAR_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -946,14 +801,11 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
       CComPtr<IPoint2dCollection> points;
       pRebar->GetRebarProfile(pierID,rowIdx,&points); // in Cross Beam Coordinates
 
-      CComPtr<iPolyLineDisplayObject> doRebar;
-      doRebar.CoCreateInstance(CLSID_PolyLineDisplayObject);
-      doRebar->SetID(m_DisplayObjectID++);
-      doRebar->AddPoints(points);
-      doRebar->put_PointType(plpNone);
-      doRebar->put_Color(REBAR_COLOR);
-      doRebar->put_Width(REBAR_LINE_WEIGHT);
-      doRebar->Commit();
+      auto doRebar = WBFL::DManip::PolyLineDisplayObject::Create(m_DisplayObjectID++);
+      doRebar->AddPoints(geomUtil::CreatePointCollection(points));
+      doRebar->SetPointType(WBFL::DManip::PointType::None);
+      doRebar->SetColor(REBAR_COLOR);
+      doRebar->SetWidth(REBAR_LINE_WEIGHT);
       displayList->AddDisplayObject(doRebar);
    }
 
@@ -976,11 +828,8 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
       pntBar->Offset(EndOffset+Lxb,0);
 
-      CComPtr<iPointDisplayObject> doBar;
-      doBar.CoCreateInstance(CLSID_PointDisplayObject);
-      doBar->SetID(m_DisplayObjectID++);
-      doBar->SetPosition(pntBar,FALSE,FALSE);
-      
+      auto doBar = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+      doBar->SetPosition(geomUtil::GetPoint(pntBar),false,false);
 
       displayList->AddDisplayObject(doBar);
 
@@ -990,13 +839,7 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
 
 void CXBeamRateView::UpdateStirrupDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(STIRRUP_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(STIRRUP_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -1065,62 +908,45 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
                Ytop -= H;
             }
 
-            CComPtr<IPoint2d> pntTop;
-            pntTop.CoCreateInstance(CLSID_Point2d);
             Float64 X = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xxb);
-            pntTop->Move(X,Ytop);
+            WBFL::Geometry::Point2d pntTop(X,Ytop);
 
-            CComPtr<iPointDisplayObject> doTopPnt;
-            doTopPnt.CoCreateInstance(CLSID_PointDisplayObject);
-            doTopPnt->SetID(m_DisplayObjectID++);
-            doTopPnt->SetPosition(pntTop,FALSE,FALSE);
+            auto doTopPnt = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+            doTopPnt->SetPosition(pntTop,false,false);
 
-            CComQIPtr<iConnectable> startConnectable(doTopPnt);
-            CComPtr<iSocket> startSocket;
-            startConnectable->AddSocket(0,pntTop,&startSocket);
+            auto startConnectable = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doTopPnt);
+            auto startSocket = startConnectable->AddSocket(0,pntTop);
 
-            CComPtr<iDrawPointStrategy> draw_point_strategy;
-            doTopPnt->GetDrawingStrategy(&draw_point_strategy);
-            CComQIPtr<iSimpleDrawPointStrategy> thePointDrawStrategy(draw_point_strategy);
+            auto draw_point_strategy = doTopPnt->GetDrawingStrategy();
+            auto thePointDrawStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawPointStrategy>(draw_point_strategy);
             thePointDrawStrategy->SetColor(color);
-            thePointDrawStrategy->SetPointType(ptNone);
+            thePointDrawStrategy->SetPointType(WBFL::DManip::PointType::None);
 
-            CComPtr<IPoint2d> pntBottom;
-            pntBottom.CoCreateInstance(CLSID_Point2d);
-            pntBottom->Move(X,Ybot);
+            WBFL::Geometry::Point2d pntBottom(X,Ybot);
 
-            CComPtr<iPointDisplayObject> doBottomPnt;
-            doBottomPnt.CoCreateInstance(CLSID_PointDisplayObject);
-            doBottomPnt->SetID(m_DisplayObjectID++);
-            doBottomPnt->SetPosition(pntBottom,FALSE,FALSE);
+            auto doBottomPnt = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+            doBottomPnt->SetPosition(pntBottom,false,false);
 
-            CComQIPtr<iConnectable> endConnectable(doBottomPnt);
-            CComPtr<iSocket> endSocket;
-            endConnectable->AddSocket(0,pntBottom,&endSocket);
+            auto endConnectable = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doBottomPnt);
+            auto endSocket = endConnectable->AddSocket(0,pntBottom);
 
-            draw_point_strategy.Release();
-            doBottomPnt->GetDrawingStrategy(&draw_point_strategy);
-            thePointDrawStrategy.Release();
-            draw_point_strategy.QueryInterface(&thePointDrawStrategy);
+            draw_point_strategy = doBottomPnt->GetDrawingStrategy();
+            thePointDrawStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawPointStrategy>(draw_point_strategy);
             thePointDrawStrategy->SetColor(STIRRUP_COLOR);
-            thePointDrawStrategy->SetPointType(ptNone);
+            thePointDrawStrategy->SetPointType(WBFL::DManip::PointType::None);
 
-            CComPtr<iLineDisplayObject> doLine;
-            doLine.CoCreateInstance(CLSID_LineDisplayObject);
-            doLine->SetID(m_DisplayObjectID++);
-            CComQIPtr<iConnector> connector(doLine);
-            CComPtr<iPlug> startPlug, endPlug;
-            connector->GetStartPlug(&startPlug);
-            connector->GetEndPlug(&endPlug);
+            auto doLine = WBFL::DManip::LineDisplayObject::Create(m_DisplayObjectID++);
+            auto connector = std::dynamic_pointer_cast<WBFL::DManip::iConnector>(doLine);
+            auto startPlug = connector->GetStartPlug();
+            auto endPlug = connector->GetEndPlug();
             startPlug->SetSocket(startSocket);
             endPlug->SetSocket(endSocket);
 
-            CComPtr<iDrawLineStrategy> strategy;
-            doLine->GetDrawLineStrategy(&strategy);
-            CComQIPtr<iSimpleDrawLineStrategy> theStrategy(strategy);
+            auto strategy = doLine->GetDrawLineStrategy();
+            auto theStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawLineStrategy>(strategy);
             theStrategy->SetColor(color);
-            theStrategy->SetEndType(leNone);
-            theStrategy->SetLineStyle(lsSolid);
+            theStrategy->SetEndType(WBFL::DManip::PointType::None);
+            theStrategy->SetLineStyle(WBFL::DManip::LineStyleType::Solid);
             theStrategy->SetWidth((UINT)nLegs/2); // the more legs, the thicker the stirrup line
 
             displayList->AddDisplayObject(doTopPnt);
@@ -1139,13 +965,7 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
       return;
    }
 
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(BEARING_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(BEARING_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -1166,20 +986,15 @@ void CXBeamRateView::UpdateBearingDisplayObjects()
          Float64 Xp   = pPier->ConvertCrossBeamToPierCoordinate(pierID,Xbrg);
          Float64 Y    = pPier->GetBearingElevation(pierID,brgLineIdx,brgIdx);
 
-         CComPtr<IPoint2d> pnt;
-         pnt.CoCreateInstance(CLSID_Point2d);
-         pnt->Move(Xp,Y);
+         WBFL::Geometry::Point2d pnt(Xp,Y);
 
-         CComPtr<iPointDisplayObject> doPnt;
-         doPnt.CoCreateInstance(CLSID_PointDisplayObject);
-         doPnt->SetID(m_DisplayObjectID++);
-         doPnt->SetPosition(pnt,FALSE,FALSE);
+         auto doPnt = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+         doPnt->SetPosition(pnt,false,false);
 
-         CComPtr<iDrawPointStrategy> strategy;
-         doPnt->GetDrawingStrategy(&strategy);
+         auto strategy = doPnt->GetDrawingStrategy();
 
-         CComQIPtr<iSimpleDrawPointStrategy> theStrategy(strategy);
-         theStrategy->SetPointType(ptSquare);
+         auto theStrategy = std::dynamic_pointer_cast<WBFL::DManip::SimpleDrawPointStrategy>(strategy);
+         theStrategy->SetPointType(WBFL::DManip::PointType::Square);
          theStrategy->SetColor(Xbrg < 0 || Lxb < Xbrg ? RED : BLACK); // use red if bearing is off the cross beam
 
          displayList->AddDisplayObject(doPnt);
@@ -1195,13 +1010,7 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
       return;
    }
 
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(GIRDER_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(GIRDER_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -1295,40 +1104,36 @@ void CXBeamRateView::UpdateGirderDisplayObjects()
          CComPtr<IShape> skewedShape;
          SkewGirderShape(skew,shear,shape,&skewedShape);
 
-         CComPtr<iPointDisplayObject> dispObj;
-         dispObj.CoCreateInstance(CLSID_PointDisplayObject);
+         auto dispObj = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
 
          CComQIPtr<IXYPosition> position(skewedShape);
          CComPtr<IPoint2d> topCenter;
          position->get_LocatorPoint(lpTopCenter,&topCenter);
 
-         dispObj->SetPosition(topCenter,FALSE,FALSE);
+         dispObj->SetPosition(geomUtil::GetPoint(topCenter),false,false);
 
-         CComPtr<iShapeDrawStrategy> strategy;
-         strategy.CoCreateInstance(CLSID_ShapeDrawStrategy);
-         strategy->SetShape(skewedShape);
+         auto strategy = WBFL::DManip::ShapeDrawStrategy::Create();
+         strategy->SetShape(geomUtil::ConvertShape(skewedShape));
          strategy->SetSolidLineColor(SEGMENT_BORDER_COLOR);
          strategy->SetVoidLineColor(VOID_BORDER_COLOR);
          strategy->SetVoidFillColor(GetSysColor(COLOR_WINDOW));
          if ( grpIdx == backGroupIdx )
          {
             strategy->SetSolidFillColor(SEGMENT_FILL_COLOR);
-            strategy->SetSolidLineStyle(lsSolid);
-            strategy->SetVoidLineStyle(lsSolid);
+            strategy->SetSolidLineStyle(WBFL::DManip::LineStyleType::Solid);
+            strategy->SetVoidLineStyle(WBFL::DManip::LineStyleType::Solid);
          }
          else
          {
             strategy->SetSolidFillColor(SEGMENT_FILL_GHOST_COLOR);
-            strategy->SetSolidLineStyle(lsDash);
-            strategy->SetVoidLineStyle(lsDash);
+            strategy->SetSolidLineStyle(WBFL::DManip::LineStyleType::Dash);
+            strategy->SetVoidLineStyle(WBFL::DManip::LineStyleType::Dash);
          }
-         strategy->DoFill(true);
+         strategy->Fill(true);
 
          dispObj->SetDrawingStrategy(strategy);
 
          dispObj->SetSelectionType(g_selectionType);
-
-         dispObj->SetID(m_DisplayObjectID++);
 
          displayList->AddDisplayObject(dispObj);
       }
@@ -1340,29 +1145,22 @@ void CXBeamRateView::UpdateSectionCutDisplayObjects()
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
 
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
+   auto display_list = m_pDispMgr->FindDisplayList(SECTION_CUT_DISPLAY_LIST_ID);
 
-   CComPtr<iDisplayList> display_list;
-   dispMgr->FindDisplayList(SECTION_CUT_DISPLAY_LIST_ID,&display_list);
+   auto factory = m_pDispMgr->GetDisplayObjectFactory(0);
 
-   CComPtr<iDisplayObjectFactory> factory;
-   dispMgr->GetDisplayObjectFactory(0, &factory);
+   auto disp_obj = factory->Create(CSectionCutDisplayImpl::ms_Format,nullptr);
 
-   CComPtr<iDisplayObject> disp_obj;
-   factory->Create(CSectionCutDisplayImpl::ms_Format,nullptr,&disp_obj);
+   auto sink = disp_obj->GetEventSink();
 
-   CComPtr<iDisplayObjectEvents> sink;
-   disp_obj->GetEventSink(&sink);
+   disp_obj->SetSelectionType(WBFL::DManip::SelectionType::All);
 
-   disp_obj->SetSelectionType(stAll);
-
-   CComQIPtr<iPointDisplayObject,&IID_iPointDisplayObject> point_disp(disp_obj);
+   auto point_disp = std::dynamic_pointer_cast<WBFL::DManip::iPointDisplayObject>(disp_obj);
    point_disp->SetMaxTipWidth(TOOLTIP_WIDTH);
    point_disp->SetToolTipText(_T("Drag me to move section cut.\r\nDouble click to enter the cut location\r\nPress CTRL + -> to move ahead\r\nPress CTRL + <- to move back"));
    point_disp->SetTipDisplayTime(TOOLTIP_DURATION);
 
-   CComQIPtr<iSectionCutDrawStrategy,&IID_iSectionCutDrawStrategy> section_cut_strategy(sink);
+   auto section_cut_strategy = std::dynamic_pointer_cast<iSectionCutDrawStrategy>(sink);
    section_cut_strategy->Init(m_pFrame,point_disp, m_pFrame);
    section_cut_strategy->SetColor(CUT_COLOR);
 
@@ -1374,13 +1172,7 @@ void CXBeamRateView::UpdateSectionCutDisplayObjects()
 
 void CXBeamRateView::UpdateDimensionsDisplayObjects()
 {
-   CComPtr<iDisplayMgr> dispMgr;
-   GetDisplayMgr(&dispMgr);
-
-   CDManipClientDC dc(this);
-
-   CComPtr<iDisplayList> displayList;
-   dispMgr->FindDisplayList(DIMENSIONS_DISPLAY_LIST_ID,&displayList);
+   auto displayList = m_pDispMgr->FindDisplayList(DIMENSIONS_DISPLAY_LIST_ID);
 
    CComPtr<IBroker> pBroker;
    EAFGetBroker(&pBroker);
@@ -1414,9 +1206,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Upper Cross Beam - Top Left
    CComPtr<IPoint2d> pnt;
    topUpperXBeamProfile->get_Item(0, &pnt);
-   CComPtr<IPoint2d> uxbTL;
-   uxbTL.CoCreateInstance(CLSID_Point2d);
-   uxbTL->MoveEx(pnt);
+   WBFL::Geometry::Point2d uxbTL(geomUtil::GetPoint(pnt));
 
    // we want all vertical dimensions on the left side to be at this x-location
    Float64 Xl;
@@ -1425,27 +1215,21 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Upper Cross Beam - Bottom Left (Lower Cross Beam - Top Left)
    pnt.Release();
    topLowerXBeamProfile->get_Item(0, &pnt);
-   CComPtr<IPoint2d> uxbBL;
-   uxbBL.CoCreateInstance(CLSID_Point2d);
-   uxbBL->MoveEx(pnt);
-   uxbBL->put_X(Xl);
+   WBFL::Geometry::Point2d uxbBL(geomUtil::GetPoint(pnt));
+   uxbBL.X() = Xl;
 
    // Lower Cross Beam - Bottom Left
    pnt.Release();
    bottomXBeamProfile->get_Item(0, &pnt);
-   CComPtr<IPoint2d> lxbBL;
-   lxbBL.CoCreateInstance(CLSID_Point2d);
-   lxbBL->MoveEx(pnt);
-   lxbBL->put_X(Xl);
+   WBFL::Geometry::Point2d lxbBL(geomUtil::GetPoint(pnt));
+   lxbBL.X() = Xl;
 
    // Upper Cross Beam - Top Right
    pnt.Release();
    IndexType nPoints;
    topUpperXBeamProfile->get_Count(&nPoints);
    topUpperXBeamProfile->get_Item(nPoints - 1, &pnt);
-   CComPtr<IPoint2d> uxbTR;
-   uxbTR.CoCreateInstance(CLSID_Point2d);
-   uxbTR->MoveEx(pnt);
+   WBFL::Geometry::Point2d uxbTR(geomUtil::GetPoint(pnt));
 
    // we want all vertical dimensions on the right side to be at this x-location
    Float64 Xr;
@@ -1455,19 +1239,15 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pnt.Release();
    topLowerXBeamProfile->get_Count(&nPoints);
    topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
-   CComPtr<IPoint2d> uxbBR;
-   uxbBR.CoCreateInstance(CLSID_Point2d);
-   uxbBR->MoveEx(pnt);
-   uxbBR->put_X(Xr);
+   WBFL::Geometry::Point2d uxbBR(geomUtil::GetPoint(pnt));
+   uxbBR.X() = Xr;
 
    // Lower Cross Beam - Bottom Right
    pnt.Release();
    bottomXBeamProfile->get_Count(&nPoints);
    bottomXBeamProfile->get_Item(nPoints - 1, &pnt);
-   CComPtr<IPoint2d> lxbBR;
-   lxbBR.CoCreateInstance(CLSID_Point2d);
-   lxbBR->MoveEx(pnt);
-   lxbBR->put_X(Xr);
+   WBFL::Geometry::Point2d lxbBR(geomUtil::GetPoint(pnt));
+   lxbBR.X() = Xr;
 
    // Height of upper cross beam
    if (pierType != xbrTypes::pctExpansion)
@@ -1481,13 +1261,11 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    BuildDimensionLine(displayList, uxbBR, lxbBR); // H3 Dimension
 
    // Lower cross beam bottom taper, vertical dimensions
-   CComPtr<IPoint2d> lxbBLC, lxbBRC;
-   lxbBLC.CoCreateInstance(CLSID_Point2d);
-   lxbBRC.CoCreateInstance(CLSID_Point2d);
-   lxbBLC->MoveEx(lxbBL);
-   lxbBLC->Offset(0, -H2);
-   lxbBRC->MoveEx(lxbBR);
-   lxbBRC->Offset(0, -H4);
+   WBFL::Geometry::Point2d lxbBLC, lxbBRC;
+   lxbBLC.Move(lxbBL);
+   lxbBLC.Offset(0, -H2);
+   lxbBRC.Move(lxbBR);
+   lxbBRC.Offset(0, -H4);
 
    BuildDimensionLine(displayList, lxbBLC, lxbBL); // H2 Dimension
    BuildDimensionLine(displayList, lxbBR, lxbBRC); // H4 Dimension
@@ -1495,27 +1273,23 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Lower cross beam bottom taper, horizontal dimensions
    pnt.Release();
    topLowerXBeamProfile->get_Item(0, &pnt);
-   CComPtr<IPoint2d> lxbBL1, lxbBR1;
-   lxbBL1.CoCreateInstance(CLSID_Point2d);
-   lxbBR1.CoCreateInstance(CLSID_Point2d);
-   lxbBL1->MoveEx(pnt);
-   lxbBL1->Offset(0, -H1 - H2);
+   WBFL::Geometry::Point2d lxbBL1, lxbBR1;
+   lxbBL1.Move(geomUtil::GetPoint(pnt));
+   lxbBL1.Offset(0, -H1 - H2);
 
    pnt.Release();
    topLowerXBeamProfile->get_Count(&nPoints);
    topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
-   lxbBR1->MoveEx(pnt);
-   lxbBR1->Offset(0, -H3 - H4);
+   lxbBR1.Move(geomUtil::GetPoint(pnt));
+   lxbBR1.Offset(0, -H3 - H4);
 
-   CComPtr<IPoint2d> lxbBL2, lxbBR2;
-   lxbBL2.CoCreateInstance(CLSID_Point2d);
-   lxbBR2.CoCreateInstance(CLSID_Point2d);
+   WBFL::Geometry::Point2d lxbBL2, lxbBR2;
    Float64 y;
-   lxbBL1->Location(&Xl,&y); // TRICKY: changing Xl to now be the x-location of left dimensions for the columns
-   lxbBL2->Move(Xl+X1,y);
+   std::tie(Xl,y) = lxbBL1.GetLocation(); // TRICKY: changing Xl to now be the x-location of left dimensions for the columns
+   lxbBL2.Move(Xl+X1,y);
 
-   lxbBR1->Location(&Xr,&y);
-   lxbBR2->Move(Xr-X3,y); // TRICKY: changing Xr to now be the x-location of right dimensions for the columns
+   std::tie(Xr,y) = lxbBR1.GetLocation();
+   lxbBR2.Move(Xr-X3,y); // TRICKY: changing Xr to now be the x-location of right dimensions for the columns
 
    // Horizontal Cross Beam Dimensions
    BuildDimensionLine(displayList,lxbBL2,lxbBL1); // X1 Dimension
@@ -1534,11 +1308,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       Float64 YtopCol = pPier->GetTopColumnElevation(pierID,colIdx);
       Float64 YbotCol = pPier->GetBottomColumnElevation(pierID,colIdx);
 
-      CComPtr<IPoint2d> pntTop, pntBot;
-      pntTop.CoCreateInstance(CLSID_Point2d);
-      pntBot.CoCreateInstance(CLSID_Point2d);
-      pntTop->Move(XpCol,YtopCol);
-      pntBot->Move(XpCol,YbotCol);
+      WBFL::Geometry::Point2d pntTop(XpCol, YtopCol);
+      WBFL::Geometry::Point2d pntBot(XpCol, YbotCol);
       BuildDimensionLine(displayList,pntTop,pntBot); // Column Height
 
       YbotColMin = Min(YbotColMin,YbotCol);
@@ -1548,17 +1319,13 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // than proceeds with the spacing between columns at their base)
    // create the dimension line with rightpt,leftpt so the text comes
    // out on the correct side
-   CComPtr<IPoint2d> pntLeft;
-   pntLeft.CoCreateInstance(CLSID_Point2d);
-   pntLeft->Move(Xl,YbotColMin);
+   WBFL::Geometry::Point2d pntLeft(Xl, YbotColMin);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 XxbCol = pPier->GetColumnLocation(pierID,colIdx);
       Float64 XpCol = pPier->ConvertCrossBeamToPierCoordinate(pierID,XxbCol);
 
-      CComPtr<IPoint2d> pntRight;
-      pntRight.CoCreateInstance(CLSID_Point2d);
-      pntRight->Move(XpCol,YbotColMin);
+      WBFL::Geometry::Point2d pntRight(XpCol,YbotColMin);
      
       BuildDimensionLine(displayList,pntRight,pntLeft); // first time this is X5, then S
 
@@ -1566,9 +1333,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    }
 
    // Right cross beam cantilever
-   CComPtr<IPoint2d> pntRight;
-   pntRight.CoCreateInstance(CLSID_Point2d);
-   pntRight->Move(Xr,YbotColMin);
+   WBFL::Geometry::Point2d pntRight(Xr,YbotColMin);
    BuildDimensionLine(displayList,pntRight,pntLeft); // X6 Dimension
 
    //
@@ -1601,13 +1366,12 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
       }
 
       CComQIPtr<IXYPosition> position(shape);
-      pntLeft.Release();
-      pntRight.Release();
-      position->get_LocatorPoint(lpTopLeft,&pntLeft);
-      position->get_LocatorPoint(lpTopRight,&pntRight);
-      pntLeft->Offset(EndOffset+Lxb,0);
-      pntRight->Offset(EndOffset+Lxb,0);
-      BuildDimensionLine(displayList,pntLeft,pntRight);
+      CComPtr<IPoint2d> pnt_left, pnt_right;
+      position->get_LocatorPoint(lpTopLeft,&pnt_left);
+      position->get_LocatorPoint(lpTopRight,&pnt_right);
+      pnt_left->Offset(EndOffset+Lxb,0);
+      pnt_right->Offset(EndOffset+Lxb,0);
+      BuildDimensionLine(displayList,geomUtil::GetPoint(pnt_left),geomUtil::GetPoint(pnt_right));
    }
 
    // Lower Cross Beam (End View)
@@ -1615,13 +1379,12 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pSectProp->GetXBeamShape(pierID,xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
 
    CComQIPtr<IXYPosition> position(lowerXBeamShape);
-   pntLeft.Release();
-   pntRight.Release();
-   position->get_LocatorPoint(lpBottomLeft,&pntLeft);
-   position->get_LocatorPoint(lpBottomRight,&pntRight);
-   pntLeft->Offset(EndOffset+Lxb,0);
-   pntRight->Offset(EndOffset+Lxb,0);
-   BuildDimensionLine(displayList,pntRight,pntLeft);
+   CComPtr<IPoint2d> pnt_left, pnt_right;
+   position->get_LocatorPoint(lpBottomLeft,&pnt_left);
+   position->get_LocatorPoint(lpBottomRight,&pnt_right);
+   pnt_left->Offset(EndOffset+Lxb,0);
+   pnt_right->Offset(EndOffset+Lxb,0);
+   BuildDimensionLine(displayList,geomUtil::GetPoint(pnt_right),geomUtil::GetPoint(pnt_left));
 
    // End View Height
    CComPtr<IShape> xbeamShape;
@@ -1635,7 +1398,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    position->get_LocatorPoint(lpBottomRight,&pntBot);
    pntTop->Offset(EndOffset+Lxb,0);
    pntBot->Offset(EndOffset+Lxb,0);
-   BuildDimensionLine(displayList,pntTop,pntBot);
+   BuildDimensionLine(displayList,geomUtil::GetPoint(pntTop),geomUtil::GetPoint(pntBot));
 
    // Curb-to-curb width
 
@@ -1650,73 +1413,56 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 Yrc = pPier->GetElevation(pierID, RCO - LCO);
    Float64 Y = Max(Ylc, Yrc);
 
-   CComPtr<IPoint2d> pntLC;
-   pntLC.CoCreateInstance(CLSID_Point2d);
    LCO /= cos(skew); // skew adjust
-   pntLC->Move(LCO, Y);
+   WBFL::Geometry::Point2d pntLC(LCO, Y);
 
-   CComPtr<IPoint2d> pntRC;
-   pntRC.CoCreateInstance(CLSID_Point2d);
    RCO /= cos(skew); // skew adjust
-   pntRC->Move(RCO, Y);
+   WBFL::Geometry::Point2d pntRC(RCO, Y);
 
    BuildDimensionLine(displayList, pntLC, pntRC);
 }
 
-void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)
+void CXBeamRateView::BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint)
 {
-   Float64 distance;
-   toPoint->DistanceEx(fromPoint,&distance);
+   Float64 distance = toPoint.Distance(fromPoint);
    if ( !IsZero(distance) )
    {
-      BuildDimensionLine(pDL,fromPoint,toPoint,distance,ppDimLine);
+      BuildDimensionLine(pDL,fromPoint,toPoint,distance);
    }
 }
 
-void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,Float64 dimension,iDimensionLine** ppDimLine)
+void CXBeamRateView::BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint,Float64 dimension)
 {
    // put points at locations and make them sockets
-   CComPtr<iPointDisplayObject> from_rep;
-   ::CoCreateInstance(CLSID_PointDisplayObject,nullptr,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&from_rep);
-   from_rep->SetPosition(fromPoint,FALSE,FALSE);
-   from_rep->SetID(m_DisplayObjectID++);
-   CComQIPtr<iConnectable,&IID_iConnectable> from_connectable(from_rep);
-   CComPtr<iSocket> from_socket;
-   from_connectable->AddSocket(0,fromPoint,&from_socket);
-   from_rep->Visible(FALSE);
+   auto from_rep = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+   from_rep->SetPosition(fromPoint,false,false);
+   auto from_connectable = std::shared_ptr<WBFL::DManip::iConnectable>(from_rep);
+   auto from_socket = from_connectable->AddSocket(0,fromPoint);
+   from_rep->Visible(false);
    pDL->AddDisplayObject(from_rep);
 
-   CComPtr<iPointDisplayObject> to_rep;
-   ::CoCreateInstance(CLSID_PointDisplayObject,nullptr,CLSCTX_ALL,IID_iPointDisplayObject,(void**)&to_rep);
-   to_rep->SetPosition(toPoint,FALSE,FALSE);
-   to_rep->SetID(m_DisplayObjectID++);
-   CComQIPtr<iConnectable,&IID_iConnectable> to_connectable(to_rep);
-   CComPtr<iSocket> to_socket;
-   to_connectable->AddSocket(0,toPoint,&to_socket);
-   to_rep->Visible(FALSE);
+   auto to_rep = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+   to_rep->SetPosition(toPoint,false,false);
+   auto to_connectable = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(to_rep);
+   auto to_socket = to_connectable->AddSocket(0,toPoint);
+   to_rep->Visible(false);
    pDL->AddDisplayObject(to_rep);
 
    // Create the dimension line object
-   CComPtr<iDimensionLine> dimLine;
-   ::CoCreateInstance(CLSID_DimensionLineDisplayObject,nullptr,CLSCTX_ALL,IID_iDimensionLine,(void**)&dimLine);
+   auto dimLine = WBFL::DManip::DimensionLine::Create(m_DisplayObjectID++);
 
-   dimLine->SetArrowHeadStyle(DManip::ahsFilled);
+   dimLine->SetArrowHeadStyle(WBFL::DManip::ArrowHeadStyleType::Filled);
 
    // Attach connector (the dimension line) to the sockets 
-   CComPtr<iConnector> connector;
-   dimLine->QueryInterface(IID_iConnector,(void**)&connector);
-   CComPtr<iPlug> startPlug;
-   CComPtr<iPlug> endPlug;
-   connector->GetStartPlug(&startPlug);
-   connector->GetEndPlug(&endPlug);
+   auto connector = std::dynamic_pointer_cast<WBFL::DManip::iConnector>(dimLine);
+   auto startPlug = connector->GetStartPlug();
+   auto endPlug = connector->GetEndPlug();
 
-   DWORD dwCookie;
-   from_socket->Connect(startPlug,&dwCookie);
-   to_socket->Connect(endPlug,&dwCookie);
+   from_socket->Connect(startPlug);
+   to_socket->Connect(endPlug);
 
    // Create the text block and attach it to the dimension line
-   CComPtr<iTextBlock> textBlock;
-   ::CoCreateInstance(CLSID_TextBlock,nullptr,CLSCTX_ALL,IID_iTextBlock,(void**)&textBlock);
+   auto textBlock = WBFL::DManip::TextBlock::Create();
 
    // Format the dimension text
    CComPtr<IBroker> pBroker;
@@ -1729,16 +1475,8 @@ void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,I
 
    dimLine->SetTextBlock(textBlock);
 
-   // Assign the span id to the dimension line (so they are the same)
-   dimLine->SetID(m_DisplayObjectID++);
 
    pDL->AddDisplayObject(dimLine);
-
-   if ( ppDimLine )
-   {
-      (*ppDimLine) = dimLine;
-      (*ppDimLine)->AddRef();
-   }
 }
 
 void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
@@ -1759,39 +1497,33 @@ void CXBeamRateView::HandleLButtonDblClk(UINT nFlags, CPoint logPoint)
    }
 }
 
-void CXBeamRateView::CreateLineDisplayObject(IPoint2d* pntStart,IPoint2d* pntEnd,iLineDisplayObject** ppLineDO)
+std::shared_ptr<WBFL::DManip::iLineDisplayObject> CXBeamRateView::CreateLineDisplayObject(const WBFL::Geometry::Point2d& pntStart, const WBFL::Geometry::Point2d& pntEnd)
 {
-   CComPtr<iPointDisplayObject> doPntStart;
-   doPntStart.CoCreateInstance(CLSID_PointDisplayObject);
-   doPntStart->Visible(FALSE);
-   doPntStart->SetPosition(pntStart,FALSE,FALSE);
-   CComQIPtr<iConnectable> connectable1(doPntStart);
-   CComPtr<iSocket> socket1;
-   connectable1->AddSocket(0,pntStart,&socket1);
+   auto doPntStart = WBFL::DManip::PointDisplayObject::Create();
+   doPntStart->Visible(false);
+   doPntStart->SetPosition(pntStart,false,false);
+   auto connectable1 = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doPntStart);
+   auto socket1 = connectable1->AddSocket(0,pntStart);
 
-   CComPtr<iPointDisplayObject> doPntEnd;
-   doPntEnd.CoCreateInstance(CLSID_PointDisplayObject);
-   doPntEnd->Visible(FALSE);
-   doPntEnd->SetPosition(pntEnd,FALSE,FALSE);
-   CComQIPtr<iConnectable> connectable2(doPntEnd);
-   CComPtr<iSocket> socket2;
-   connectable2->AddSocket(0,pntEnd,&socket2);
+   auto doPntEnd = WBFL::DManip::PointDisplayObject::Create();
+   doPntEnd->Visible(false);
+   doPntEnd->SetPosition(pntEnd,false,false);
+   auto connectable2 = std::dynamic_pointer_cast<WBFL::DManip::iConnectable>(doPntEnd);
+   auto socket2 = connectable2->AddSocket(0,pntEnd);
 
-   CComPtr<iLineDisplayObject> doLine;
-   doLine.CoCreateInstance(CLSID_LineDisplayObject);
+   auto doLine = WBFL::DManip::LineDisplayObject::Create();
 
-   CComQIPtr<iConnector> connector(doLine);
-   CComPtr<iPlug> startPlug, endPlug;
-   connector->GetStartPlug(&startPlug);
-   connector->GetEndPlug(&endPlug);
-   DWORD dwCookie;
-   connectable1->Connect(0,atByID,startPlug,&dwCookie);
-   connectable2->Connect(0,atByID,endPlug,  &dwCookie);
+   auto connector = std::dynamic_pointer_cast<WBFL::DManip::iConnector>(doLine);
+   auto startPlug = connector->GetStartPlug();
+   auto endPlug = connector->GetEndPlug();
 
-   doLine.CopyTo(ppLineDO);
+   connectable1->Connect(0,WBFL::DManip::AccessType::ByID,startPlug);
+   connectable2->Connect(0,WBFL::DManip::AccessType::ByID,endPlug);
+
+   return doLine;
 }
 
-DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,IPoint2d* point)
+DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,const WBFL::Geometry::Point2d& point)
 {
    // This override has to determine if the thing being dragged over it can
    // be dropped. In order to do that, it must unpackage the OleDataObject.
@@ -1806,8 +1538,7 @@ DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,
    {
       // need to peek at our object first and make sure it's coming from the local process
       // this is ugly because it breaks encapsulation of CBridgeSectionCutDisplayImpl
-      CComPtr<iDragDataSource> source;               
-      ::CoCreateInstance(CLSID_DragDataSource,nullptr,CLSCTX_ALL,IID_iDragDataSource,(void**)&source);
+      auto source = WBFL::DManip::DragDataSource::Create();
       source->SetDataObject(pDataObject);
       source->PrepareFormat(CSectionCutDisplayImpl::ms_Format);
 
@@ -1827,7 +1558,7 @@ DROPEFFECT CXBeamRateView::CanDrop(COleDataObject* pDataObject,DWORD dwKeyState,
    return DROPEFFECT_NONE;
 }
 
-void CXBeamRateView::OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect,IPoint2d* point)
+void CXBeamRateView::OnDropped(COleDataObject* pDataObject,DROPEFFECT dropEffect, const WBFL::Geometry::Point2d& point)
 {
    AfxMessageBox(_T("CBridgePlanView::OnDropped"));
 }
