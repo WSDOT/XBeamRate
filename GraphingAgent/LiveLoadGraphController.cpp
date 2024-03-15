@@ -148,10 +148,25 @@ ActionType CXBRLiveLoadGraphController::GetActionType()
 
 PierIDType CXBRLiveLoadGraphController::GetPierID()
 {
+   auto pierIdx = GetPierIndex();
+   if (pierIdx == INVALID_INDEX)
+      return INVALID_ID;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   GET_IFACE2(pBroker, IBridgeDescription, pIBridgeDesc);
+   const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+   const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
+   return pPierData->GetID();
+}
+
+PierIndexType CXBRLiveLoadGraphController::GetPierIndex()
+{
    CComboBox* pcbPier = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPier->GetCurSel();
-   PierIDType pierID = (PierIDType)(pcbPier->GetItemData(curSel));
-   return pierID;
+   PierIndexType pierIdx = (PierIndexType)(pcbPier->GetItemData(curSel));
+   return pierIdx;
 }
 
 pgsTypes::LoadRatingType CXBRLiveLoadGraphController::GetLoadRatingType()
@@ -219,7 +234,7 @@ void CXBRLiveLoadGraphController::FillPierList()
    if ( IsStandAlone() )
    {
       int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
-      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
+      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_INDEX);
       // so when we get the pier index there is something to return
       pcbPiers->ShowWindow(SW_HIDE);
    }
@@ -239,11 +254,10 @@ void CXBRLiveLoadGraphController::FillPierList()
          const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
          if ( pPierData->GetPierModelType() == pgsTypes::pmtPhysical )
          {
-            PierIDType pierID = pPierData->GetID();
             CString strPier;
             strPier.Format(_T("Pier %s"),LABEL_PIER(pierIdx));
             int idx = pcbPiers->AddString(strPier);
-            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
          }
       }
    }
@@ -432,8 +446,8 @@ void CXBRLiveLoadGraphController::OnGraphExportClicked()
    // Build default file name
    CString strProjectFileNameNoPath = CExportGraphXYTool::GetTruncatedFileName();
 
-   PierIDType pierID = GetPierID();
-   CString pierName = _T("Pier_") + CString(LABEL_PIER(pierID));
+   auto pierIdx = GetPierIndex();
+   CString pierName = _T("Pier_") + CString(LABEL_PIER(pierIdx));
 
    ActionType action = GetActionType();
    CString actionName = GetActionName(action);

@@ -37,6 +37,7 @@ public:
    CXBRAnalysisResultsGraphDefinitions GetSelectedGraphDefinitions();
    ActionType GetActionType();
    PierIDType GetPierID();
+   PierIndexType GetPierIndex();
 
    void EnableControls(BOOL bEnable);
 
