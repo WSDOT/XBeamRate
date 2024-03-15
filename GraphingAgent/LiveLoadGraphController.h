@@ -35,6 +35,7 @@ public:
    void UpdatePermitLaneLabel();
    IndexType GetSelectedLiveLoadConfiguration();
    ActionType GetActionType();
+   PierIndexType GetPierIndex();
    PierIDType GetPierID();
    pgsTypes::LoadRatingType GetLoadRatingType();
    VehicleIndexType GetVehicleIndex();
