@@ -273,12 +273,12 @@ void CXBRAnalysisResultsGraphBuilder::UpdateGraphData()
    GET_IFACE2(pBroker,IXBRPointOfInterest,pPoi);
    std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_GRID | POI_BRG | POI_FACEOFCOLUMN | POI_COLUMN_LEFT | POI_COLUMN_RIGHT | POI_MIDPOINT | POI_FOC_DV2 | POI_FOC_DV);
    std::vector<xbrPointOfInterest> vWLPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_WHEELLINE);
-   if ( 0 <= vWLPoi.front().GetDistFromStart() )
+   if ( !vWLPoi.empty() && 0 <= vWLPoi.front().GetDistFromStart() )
    {
       vPoi.insert(vPoi.begin(),vWLPoi.front());
    }
 
-   if ( vWLPoi.back().GetDistFromStart() <= Lxb )
+   if (!vWLPoi.empty() && vWLPoi.back().GetDistFromStart() <= Lxb )
    {
       vPoi.insert(vPoi.end(),vWLPoi.back());
    }

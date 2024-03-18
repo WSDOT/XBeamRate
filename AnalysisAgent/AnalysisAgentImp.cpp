@@ -397,7 +397,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
       // create the "superstructure" model upon which we will run the live load
       if ( pProject->GetReactionLoadApplicationType(pierID) == xbrTypes::rlaCrossBeam )
       {
-         // live load is applied directly to the cross beam... the superstruture members
+         // live load is applied directly to the cross beam... the superstructure members
          // and the XBeam members are one in the same
          pModelData->m_SuperstructureMembers = pModelData->m_XBeamMembers;
       }
@@ -408,7 +408,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
          // dummy properties of the transfer model
          //Float64 Y = WBFL::Units::ConvertToSysUnits(1.0,WBFL::Units::Measure::Inch); // offset the transfer model a small distance above the XBeam model
 
-         // Live load is on the deck, so the height of the transfer model is the height of the superstructure diaphram plus the deck thickness
+         // Live load is on the deck, so the height of the transfer model is the height of the superstructure diaphragm plus the deck thickness
          Float64 H,W;
          pProject->GetDiaphragmDimensions(pierID,&H,&W);
          Float64 tSlab = pProject->GetDeckThickness(pierID);
@@ -2489,6 +2489,12 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID,&LCO,&RCO); // this are measured normal to the alignment
    LCO /= cos(skew); // divide by cos(skew) to get measured in plane of pier
+   if (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtBridge)
+   {
+      Float64 BLO = pProject->GetBridgeLineOffset(pierID);
+      LCO += BLO;
+      RCO += BLO;
+   }
    Float64 XcurbLine = pPier->ConvertPierToCrossBeamCoordinate(pierID,LCO);
 
    CString strProgressMsg;
@@ -2548,10 +2554,14 @@ void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pM
          IndexType nStepsRemaining = nTotalSteps - nStepsUsed;
 
 #if defined _DEBUG
-         // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
-         Float64 w2 = WBFL::Units::ConvertToSysUnits(2.0,WBFL::Units::Measure::Feet); // 2' shy distance from curb-line
-         w2 /= cos(skew);
-         ATLASSERT(IsEqual(vWheelLinePositions.back() + stepSize*nStepsRemaining + w2,Wcc));
+         // 2ft curb line rule doesn't apply for lanes less than 10 ft wide
+         if (WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet) <= wLoadedLane)
+         {
+            // at the last step, the right wheel line, in the right-most lane, must be 2' from the right curb line
+            Float64 w2 = WBFL::Units::ConvertToSysUnits(2.0, WBFL::Units::Measure::Feet); // 2' shy distance from curb-line
+            w2 /= cos(skew);
+            ATLASSERT(IsEqual(vWheelLinePositions.back() + stepSize * nStepsRemaining + w2, Wcc));
+         }
 #endif
 
          // Step the wheel line reaction configuration towards the right curb line, analyzing the
@@ -2768,7 +2778,7 @@ struct Result
 
 void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
-   GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
+   GET_IFACE_NOCHECK(IEAFDisplayUnits,pDisplayUnits); // this interface is not used in the rare case that the superstructure width is smaller than a lane, there are no lanes so there aren't any live load results
    GET_IFACE(IProgress,pProgress);
    CEAFAutoProgress ap(pProgress);
    CString strProgressMsg;
@@ -2954,20 +2964,6 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
          }
       }
    }
-
-   ATLASSERT(minMz_llConfigIdx != INVALID_INDEX);
-   ATLASSERT(maxMz_llConfigIdx != INVALID_INDEX);
-   ATLASSERT(minFyLeft_llConfigIdx != INVALID_INDEX);
-   ATLASSERT(maxFyLeft_llConfigIdx != INVALID_INDEX);
-   ATLASSERT(minFyRight_llConfigIdx != INVALID_INDEX);
-   ATLASSERT(maxFyRight_llConfigIdx != INVALID_INDEX);
-
-   ATLASSERT(minMz_llConfigIdx_SingleLane != INVALID_INDEX);
-   ATLASSERT(maxMz_llConfigIdx_SingleLane != INVALID_INDEX);
-   ATLASSERT(minFyLeft_llConfigIdx_SingleLane != INVALID_INDEX);
-   ATLASSERT(maxFyLeft_llConfigIdx_SingleLane != INVALID_INDEX);
-   ATLASSERT(minFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
-   ATLASSERT(maxFyRight_llConfigIdx_SingleLane != INVALID_INDEX);
 
    UnitLiveLoadResult liveLoadResult;
    liveLoadResult.m_idPOI = poi.GetID();

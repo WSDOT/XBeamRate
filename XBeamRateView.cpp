@@ -459,22 +459,34 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    {
       // Stand-alone... we don't have an actual deck modeled, so
       // just show the curb-to-curb extents of the roadway surface
+      auto doDeck = WBFL::DManip::PolyLineDisplayObject::Create(m_DisplayObjectID++);
+
       Float64 LCO, RCO;
       pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+      if (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtBridge)
+      {
+         LCO += BLO;
+         RCO += BLO;
+      }
 
       Float64 Ylc = pPier->GetElevation(pierID,0);
-      Float64 Yrc = pPier->GetElevation(pierID,(RCO-LCO)/cos_skew);
       LCO /= cos_skew; // skew adjust
       pnt1.Move(LCO,Ylc);
-      pnt2.Move(0,Ydeck);
+      doDeck->AddPoint(pnt1);
 
+      Float64 CPO = pProject->GetCrownPointOffset(pierID);
+      if (LCO <= CPO && CPO <= RCO)
+      {
+         // add crown point if it is between the left and right curblines
+         pnt2.Move(CPO, Ydeck);
+         doDeck->AddPoint(pnt2);
+      }
+
+      Float64 Yrc = pPier->GetElevation(pierID, (RCO - LCO) / cos_skew);
       RCO /= cos_skew; // skew adjust
       WBFL::Geometry::Point2d pnt3(RCO,Yrc);
-
-      auto doDeck = WBFL::DManip::PolyLineDisplayObject::Create(m_DisplayObjectID++);
-      doDeck->AddPoint(pnt1);
-      doDeck->AddPoint(pnt2);
       doDeck->AddPoint(pnt3);
+
       doDeck->SetPointType(WBFL::DManip::PointType::None);
       doDeck->SetColor(PROFILE_COLOR);
       doDeck->SetWidth(PROFILE_LINE_WEIGHT);
@@ -1408,6 +1420,12 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID, &LCO, &RCO);
+   if (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtBridge)
+   {
+      Float64 BLO = pProject->GetBridgeLineOffset(pierID);
+      LCO += BLO;
+      RCO += BLO;
+   }
 
    Float64 Ylc = pPier->GetElevation(pierID, 0);
    Float64 Yrc = pPier->GetElevation(pierID, RCO - LCO);
@@ -1419,13 +1437,13 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    RCO /= cos(skew); // skew adjust
    WBFL::Geometry::Point2d pntRC(RCO, Y);
 
-   BuildDimensionLine(displayList, pntLC, pntRC);
+   BuildDimensionLine(displayList, pntLC, pntRC, false /*don't omit if zero distance*/);
 }
 
-void CXBeamRateView::BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint)
+void CXBeamRateView::BuildDimensionLine(std::shared_ptr<WBFL::DManip::iDisplayList> pDL, const WBFL::Geometry::Point2d& fromPoint, const WBFL::Geometry::Point2d& toPoint, bool bOmitForZeroDistance)
 {
    Float64 distance = toPoint.Distance(fromPoint);
-   if ( !IsZero(distance) )
+   if ( !IsZero(distance) || !bOmitForZeroDistance)
    {
       BuildDimensionLine(pDL,fromPoint,toPoint,distance);
    }
