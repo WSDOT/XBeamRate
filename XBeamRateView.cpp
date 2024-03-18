@@ -536,31 +536,38 @@ void CXBeamRateView::UpdateRoadwayDisplayObjects()
    {
       // Stand-alone... we don't have an actual deck modeled, so
       // just show the curb-to-curb extents of the roadway surface
-      Float64 LCO, RCO;
-      pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
-
-      Float64 Ylc = pPier->GetElevation(pierID,0);
-      Float64 Yrc = pPier->GetElevation(pierID,(RCO-LCO)/cos_skew);
-      CComPtr<IPoint2d> pnt3;
-      pnt1.Release();
-      pnt1.CoCreateInstance(CLSID_Point2d);
-      LCO /= cos_skew; // skew adjust
-      pnt1->Move(LCO,Ylc);
-
-      pnt2.Release();
-      pnt2.CoCreateInstance(CLSID_Point2d);
-      pnt2->Move(0,Ydeck);
-
-      pnt3.CoCreateInstance(CLSID_Point2d);
-      RCO /= cos_skew; // skew adjust
-      pnt3->Move(RCO,Yrc);
-
       CComPtr<iPolyLineDisplayObject> doDeck;
       doDeck.CoCreateInstance(CLSID_PolyLineDisplayObject);
       doDeck->SetID(m_DisplayObjectID++);
+
+      Float64 LCO, RCO;
+      pProject->GetCurbLineOffset(pierID,&LCO,&RCO);
+      if (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtBridge)
+      {
+         LCO += BLO;
+         RCO += BLO;
+      }
+
+      Float64 Ylc = pPier->GetElevation(pierID,0);
+      LCO /= cos_skew; // skew adjust
+      pnt1->Move(LCO,Ylc);
       doDeck->AddPoint(pnt1);
-      doDeck->AddPoint(pnt2);
+
+      Float64 CPO = pProject->GetCrownPointOffset(pierID);
+      if (LCO <= CPO && CPO <= RCO)
+      {
+         // add crown point if it is between the left and right curblines
+         pnt2->Move(CPO, Ydeck);
+         doDeck->AddPoint(pnt2);
+      }
+
+      Float64 Yrc = pPier->GetElevation(pierID, (RCO - LCO) / cos_skew);
+      RCO /= cos_skew; // skew adjust
+      CComPtr<IPoint2d> pnt3;
+      pnt3.CoCreateInstance(CLSID_Point2d);
+      pnt3->Move(RCO,Yrc);
       doDeck->AddPoint(pnt3);
+
       doDeck->put_PointType(plpNone);
       doDeck->put_Color(PROFILE_COLOR);
       doDeck->put_Width(PROFILE_LINE_WEIGHT);
@@ -1645,6 +1652,12 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 LCO, RCO;
    pProject->GetCurbLineOffset(pierID, &LCO, &RCO);
+   if (pProject->GetCurbLineDatum(pierID) == pgsTypes::omtBridge)
+   {
+      Float64 BLO = pProject->GetBridgeLineOffset(pierID);
+      LCO += BLO;
+      RCO += BLO;
+   }
 
    Float64 Ylc = pPier->GetElevation(pierID, 0);
    Float64 Yrc = pPier->GetElevation(pierID, RCO - LCO);
@@ -1660,16 +1673,16 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    RCO /= cos(skew); // skew adjust
    pntRC->Move(RCO, Y);
 
-   BuildDimensionLine(displayList, pntLC, pntRC);
+   BuildDimensionLine(displayList, pntLC, pntRC, nullptr, false /*don't omit if zero distance*/);
 }
 
-void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint,IPoint2d* toPoint,iDimensionLine** ppDimLine)
+void CXBeamRateView::BuildDimensionLine(iDisplayList* pDL, IPoint2d* fromPoint, IPoint2d* toPoint, iDimensionLine** ppDimLine, bool bOmitForZeroDistance)
 {
    Float64 distance;
-   toPoint->DistanceEx(fromPoint,&distance);
-   if ( !IsZero(distance) )
+   toPoint->DistanceEx(fromPoint, &distance);
+   if (!IsZero(distance) || !bOmitForZeroDistance)
    {
-      BuildDimensionLine(pDL,fromPoint,toPoint,distance,ppDimLine);
+      BuildDimensionLine(pDL, fromPoint, toPoint, distance, ppDimLine);
    }
 }
 
