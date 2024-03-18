@@ -447,14 +447,22 @@ void CXBRLiveLoadGraphController::OnGraphExportClicked()
    CString strProjectFileNameNoPath = CExportGraphXYTool::GetTruncatedFileName();
 
    auto pierIdx = GetPierIndex();
-   CString pierName = _T("Pier_") + CString(LABEL_PIER(pierIdx));
 
    ActionType action = GetActionType();
    CString actionName = GetActionName(action);
 
-   CString strDefaultFileName = strProjectFileNameNoPath + _T("_") + pierName + _T("_") + actionName;
-   strDefaultFileName.Replace(' ','_'); // prefer not to have spaces or ,'s in file names
-   strDefaultFileName.Replace(',','_');
+   CString strDefaultFileName = strProjectFileNameNoPath;
+
+   if (pierIdx != INVALID_INDEX)
+   {
+      CString pierName = _T("Pier_") + CString(LABEL_PIER(pierIdx));
+      strDefaultFileName += _T("_") + pierName;
+   }
+
+   strDefaultFileName += _T("_") + actionName;
+
+   strDefaultFileName.Replace(' ', '_'); // prefer not to have spaces or ,'s in file names
+   strDefaultFileName.Replace(',', '_');
 
    ((CXBRLiveLoadGraphBuilder*)GetGraphBuilder())->ExportGraphData(strDefaultFileName);
 }
