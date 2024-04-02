@@ -158,6 +158,11 @@ STDMETHODIMP CAnalysisAgentImp::GetClassID(CLSID* pCLSID)
    return S_OK;
 }
 
+IndexType CAnalysisAgentImp::GetPriority()
+{
+   return 0;
+}
+
 STDMETHODIMP CAnalysisAgentImp::ShutDown()
 {
    //

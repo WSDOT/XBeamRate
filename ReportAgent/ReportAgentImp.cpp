@@ -213,8 +213,7 @@ HRESULT CReportAgentImp::OnProjectChanged()
             if ( found != m_ReportNames.end() )
             {
                // yes, it is one of our reports... update it.
-               pReportView->UpdateNow(0);
-               // OnUpdate is a protected method so we can't access it
+               pReportView->OnUpdate(nullptr, 0, nullptr);
             }
          }
          else

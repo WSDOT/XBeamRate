@@ -382,6 +382,11 @@ STDMETHODIMP CProjectAgentImp::GetClassID(CLSID* pCLSID)
    return S_OK;
 }
 
+IndexType CProjectAgentImp::GetPriority()
+{
+   return 0;
+}
+
 STDMETHODIMP CProjectAgentImp::ShutDown()
 {
    CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
