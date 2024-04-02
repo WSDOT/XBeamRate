@@ -216,7 +216,11 @@ void CXBRAnalysisResultsGraphController::FillPierList()
 void CXBRAnalysisResultsGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int curSel = plbLoading->GetCurSel();
+   int nSel = plbLoading->GetSelCount();
+   CArray<int, int> selectedItems;
+   selectedItems.SetSize(nSel);
+   plbLoading->GetSelItems(nSel, selectedItems.GetData());
+
    plbLoading->ResetContent();
 
    CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
@@ -230,17 +234,10 @@ void CXBRAnalysisResultsGraphController::FillLoadingList()
       plbLoading->SetItemData(idx,graphDefinition.m_ID);
    }
 
-   if (curSel != LB_ERR)
+   for (int i = 0; i < nSel; i++)
    {
-      curSel = plbLoading->SetCurSel(curSel);
-      if (curSel == LB_ERR)
-      {
-         plbLoading->SetCurSel(0);
-      }
-   }
-   else
-   {
-      plbLoading->SetCurSel(0);
+      int idx = selectedItems[i];
+      plbLoading->SetSel(idx);
    }
 }
 
