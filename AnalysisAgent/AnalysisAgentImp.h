@@ -59,6 +59,7 @@ class ATL_NO_VTABLE CAnalysisAgentImp :
 	//public IConnectionPointContainerImpl<CAnalysisAgentImp>, // needed if we implement a connection point
    //public CProxyIProjectEventSink<CAnalysisAgentImp>,// needed if we implement a connection point
    public IAgentEx,
+   public IAgentPriority,
    public IXBRProductForces,
    public IXBRAnalysisResults,
    public IXBRProjectEventSink,
@@ -78,6 +79,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_ANALYSISAGENT)
 BEGIN_COM_MAP(CAnalysisAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IAgentPriority)
    COM_INTERFACE_ENTRY(IXBRProductForces)
 	COM_INTERFACE_ENTRY(IXBRAnalysisResults)
    COM_INTERFACE_ENTRY(IXBRProjectEventSink)
@@ -99,6 +101,10 @@ public:
 	STDMETHOD(ShutDown)() override;
    STDMETHOD(Init2)() override;
    STDMETHOD(GetClassID)(CLSID* pCLSID) override;
+
+   // IAgentPriority
+public:
+   IndexType GetPriority() override;
 
 // IXBRProductForces
 public:

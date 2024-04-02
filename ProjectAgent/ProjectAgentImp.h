@@ -53,6 +53,7 @@ class ATL_NO_VTABLE CProjectAgentImp :
    public CProxyIXBRProjectEventSink<CProjectAgentImp>,
    public CProxyIXBREventsEventSink<CProjectAgentImp>,
    public IAgentEx,
+   public IAgentPriority,
    public IAgentUIIntegration,
    public IAgentPersist,
    public IEAFCommandCallback,
@@ -81,6 +82,7 @@ DECLARE_REGISTRY_RESOURCEID(IDR_PROJECTAGENT)
 BEGIN_COM_MAP(CProjectAgentImp)
 	COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IAgentPriority)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
 	COM_INTERFACE_ENTRY(IAgentPersist)
    COM_INTERFACE_ENTRY_IID(IID_IXBRProjectProperties,IXBRProjectProperties)
@@ -109,6 +111,10 @@ public:
 	STDMETHOD(ShutDown)() override;
    STDMETHOD(Init2)() override;
    STDMETHOD(GetClassID)(CLSID* pCLSID) override;
+
+// IAgentPriority
+public:
+   IndexType GetPriority() override;
 
 // IAgentUIIntegration
 public:
