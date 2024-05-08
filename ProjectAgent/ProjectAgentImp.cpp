@@ -384,7 +384,7 @@ STDMETHODIMP CProjectAgentImp::GetClassID(CLSID* pCLSID)
 
 IndexType CProjectAgentImp::GetPriority()
 {
-   return 0;
+   return 1;
 }
 
 STDMETHODIMP CProjectAgentImp::ShutDown()
