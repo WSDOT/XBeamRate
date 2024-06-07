@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2023  Washington State Department of Transportation
+// Copyright © 1999-2024  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -33,8 +33,6 @@
 
 #include <WBFLGeometry.h>
 #include <WBFLUnitServer.h>
-#include <WBFLDManip.h>
-#include <WBFLDManipTools.h>
 #include <WBFLReportManagerAgent.h>
 #include <WBFLGraphManagerAgent.h>
 
@@ -75,9 +73,6 @@
 #include <WBFLReportManagerAgent_i.c>
 #include <WBFLGraphManagerAgent_i.c>
 #include <WBFLGeometry_i.c>
-#include <WBFLDManip_i.c>
-#include <WBFLDManipTools_i.c>
-#include <DManip\DManip.h>
 
 #include "XBeamRateAppPlugin.h"
 #include "XBeamRateDocProxyAgent.h"

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2023  Washington State Department of Transportation
+// Copyright © 1999-2024  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -25,34 +25,19 @@
 // DisplayObjectFactory.h : header file
 //
 
-#include <DManip\DManip.h>
+#include <DManip/DisplayObjectFactory.h>
 
 /////////////////////////////////////////////////////////////////////////////
 // CDisplayObjectFactory command target
 
-class CDisplayObjectFactory : public CCmdTarget
+class CDisplayObjectFactory : public WBFL::DManip::iDisplayObjectFactory
 {
 public:
 	CDisplayObjectFactory();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-
-// Implementation
-protected:
 	virtual ~CDisplayObjectFactory();
 
-   DECLARE_INTERFACE_MAP()
-
-   // iDisplayObjectFactory Implementation
-   BEGIN_INTERFACE_PART(Factory,iDisplayObjectFactory)
-      STDMETHOD_(void,Create)(CLIPFORMAT cfFormat,COleDataObject* pDataObject,iDisplayObject** dispObj) override;
-   END_INTERFACE_PART(Factory)
+   virtual std::shared_ptr<WBFL::DManip::iDisplayObject> Create(CLIPFORMAT cfFormat, COleDataObject* pDataObject) const override;
 
 private:
-   CComPtr<iDisplayObjectFactory> m_Factory;
+   std::shared_ptr<WBFL::DManip::iDisplayObjectFactory> m_Factory;
 };

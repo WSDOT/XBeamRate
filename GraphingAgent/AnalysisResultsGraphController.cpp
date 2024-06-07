@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2023  Washington State Department of Transportation
+// Copyright © 1999-2024  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -133,10 +133,25 @@ ActionType CXBRAnalysisResultsGraphController::GetActionType()
 
 PierIDType CXBRAnalysisResultsGraphController::GetPierID()
 {
+   auto pierIdx = GetPierIndex();
+   if (pierIdx == INVALID_INDEX)
+      return INVALID_ID;
+
+   CComPtr<IBroker> pBroker;
+   EAFGetBroker(&pBroker);
+
+   GET_IFACE2(pBroker, IBridgeDescription, pIBridgeDesc);
+   const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
+   const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
+   return pPierData->GetID();
+}
+
+PierIndexType CXBRAnalysisResultsGraphController::GetPierIndex()
+{
    CComboBox* pcbPier = (CComboBox*)GetDlgItem(IDC_PIERS);
    int curSel = pcbPier->GetCurSel();
-   PierIDType pierID = (PierIDType)(pcbPier->GetItemData(curSel));
-   return pierID;
+   PierIndexType pierIdx = (PierIndexType)(pcbPier->GetItemData(curSel));
+   return pierIdx;
 }
 
 BOOL CALLBACK EnableChildWindow(HWND hwnd,LPARAM lParam)
@@ -167,7 +182,7 @@ void CXBRAnalysisResultsGraphController::FillPierList()
    if ( IsStandAlone() )
    {
       int idx = pcbPiers->AddString(_T("Stand Alone Mode")); // put a dummy pier in the combo box
-      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_ID);
+      pcbPiers->SetItemData(idx,(DWORD_PTR)INVALID_INDEX);
       // so when we get the pier index there is something to return
       pcbPiers->ShowWindow(SW_HIDE);
    }
@@ -187,11 +202,10 @@ void CXBRAnalysisResultsGraphController::FillPierList()
          const CPierData2* pPierData = pBridgeDesc->GetPier(pierIdx);
          if ( pPierData->GetPierModelType() == pgsTypes::pmtPhysical )
          {
-            PierIDType pierID = pPierData->GetID();
             CString strPier;
             strPier.Format(_T("Pier %s"),LABEL_PIER(pierIdx));
             int idx = pcbPiers->AddString(strPier);
-            pcbPiers->SetItemData(idx,(DWORD_PTR)pierID);
+            pcbPiers->SetItemData(idx,(DWORD_PTR)pierIdx);
          }
       }
    }
@@ -202,7 +216,11 @@ void CXBRAnalysisResultsGraphController::FillPierList()
 void CXBRAnalysisResultsGraphController::FillLoadingList()
 {
    CListBox* plbLoading = (CListBox*)GetDlgItem(IDC_LOADING);
-   int curSel = plbLoading->GetCurSel();
+   int nSel = plbLoading->GetSelCount();
+   CArray<int, int> selectedItems;
+   selectedItems.SetSize(nSel);
+   plbLoading->GetSelItems(nSel, selectedItems.GetData());
+
    plbLoading->ResetContent();
 
    CXBRAnalysisResultsGraphBuilder* pGraphBuilder = (CXBRAnalysisResultsGraphBuilder*)GetGraphBuilder();
@@ -216,17 +234,10 @@ void CXBRAnalysisResultsGraphController::FillLoadingList()
       plbLoading->SetItemData(idx,graphDefinition.m_ID);
    }
 
-   if (curSel != LB_ERR)
+   for (int i = 0; i < nSel; i++)
    {
-      curSel = plbLoading->SetCurSel(curSel);
-      if (curSel == LB_ERR)
-      {
-         plbLoading->SetCurSel(0);
-      }
-   }
-   else
-   {
-      plbLoading->SetCurSel(0);
+      int idx = selectedItems[i];
+      plbLoading->SetSel(idx);
    }
 }
 
@@ -235,13 +246,21 @@ void CXBRAnalysisResultsGraphController::OnGraphExportClicked()
    // Build default file name
    CString strProjectFileNameNoPath = CExportGraphXYTool::GetTruncatedFileName();
 
-   PierIDType pierID = GetPierID();
-   CString pierName = _T("Pier_") + CString(LABEL_PIER(pierID));
-
+   auto pierIdx = GetPierIndex();
+   
    ActionType action = GetActionType();
    CString actionName = GetActionName(action);
 
-   CString strDefaultFileName = strProjectFileNameNoPath + _T("_") + pierName + _T("_") + actionName;
+   CString strDefaultFileName = strProjectFileNameNoPath;
+   
+   if (pierIdx != INVALID_INDEX)
+   {
+      CString pierName = _T("Pier_") + CString(LABEL_PIER(pierIdx));
+      strDefaultFileName += _T("_") + pierName;
+   }
+
+   strDefaultFileName += _T("_") + actionName;
+
    strDefaultFileName.Replace(' ','_'); // prefer not to have spaces or ,'s in file names
    strDefaultFileName.Replace(',','_');
 
