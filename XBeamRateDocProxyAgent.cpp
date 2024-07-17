@@ -173,6 +173,13 @@ STDMETHODIMP CXBeamRateDocProxyAgent::GetClassID(CLSID* pCLSID)
 }
 
 ////////////////////////////////////////////////////////////////////
+// IAgentPriority
+IndexType CXBeamRateDocProxyAgent::GetPriority()
+{
+   return 0;
+}
+
+////////////////////////////////////////////////////////////////////
 // IAgentUIIntegration
 STDMETHODIMP CXBeamRateDocProxyAgent::IntegrateWithUI(BOOL bIntegrate)
 {
