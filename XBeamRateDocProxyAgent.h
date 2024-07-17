@@ -52,6 +52,7 @@ class CXBeamRateDocProxyAgent :
 	public IConnectionPointContainerImpl<CXBeamRateDocProxyAgent>,
    //public CProxyIExtendUIEventSink<CXBeamRateDocProxyAgent>,
    public IAgentEx,
+   public IAgentPriority,
    public IAgentUIIntegration,
    public IXBeamRate,
    public IXBRUIEvents,
@@ -69,6 +70,7 @@ BEGIN_COM_MAP(CXBeamRateDocProxyAgent)
 	COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
    COM_INTERFACE_ENTRY(IAgent)
    COM_INTERFACE_ENTRY(IAgentEx)
+   COM_INTERFACE_ENTRY(IAgentPriority)
    COM_INTERFACE_ENTRY(IAgentUIIntegration)
    COM_INTERFACE_ENTRY(IXBeamRate)
    COM_INTERFACE_ENTRY(IXBRUIEvents)
@@ -97,6 +99,10 @@ public:
 	STDMETHOD(Reset)() override;
 	STDMETHOD(ShutDown)() override;
    STDMETHOD(GetClassID)(CLSID* pCLSID) override;
+
+   // IAgentPriority
+public:
+   IndexType GetPriority() override;
 
 // IAgentUIIntegration
 public:
