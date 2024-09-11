@@ -82,7 +82,8 @@ END_MESSAGE_MAP()
 
 #define XBR_PLUGIN_COMMAND_COUNT 256
 
-CXBeamRateDoc::CXBeamRateDoc()
+CXBeamRateDoc::CXBeamRateDoc() :
+   CEAFBrokerDocument(true,true)
 {
 	// TODO: add one-time construction code here
    UINT nCommands = GetPluginCommandManager()->ReserveCommandIDRange(XBR_PLUGIN_COMMAND_COUNT);
@@ -179,13 +180,6 @@ BOOL CXBeamRateDoc::LoadSpecialAgents(IBrokerInitEx2* pBrokerInit)
    
    HRESULT hr = pBrokerInit->AddAgent( pAgent );
    if ( FAILED(hr) )
-   {
-      return FALSE;
-   }
-
-   // we want to use some special agents
-   CLSID clsid[] = {CLSID_ReportManagerAgent,CLSID_GraphManagerAgent};
-   if ( !CEAFBrokerDocument::LoadAgents(pBrokerInit, clsid, sizeof(clsid)/sizeof(CLSID) ) )
    {
       return FALSE;
    }
