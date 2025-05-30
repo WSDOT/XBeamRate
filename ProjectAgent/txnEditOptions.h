@@ -22,8 +22,8 @@
 
 #pragma once
 
-#include <WBFLCore.h>
-#include <EAF\EAFTransaction.h>
+
+#include <EAF\Transaction.h>
 
 struct txnEditOptionsData
 {
@@ -59,7 +59,7 @@ struct txnEditOptionsData
 };
 
 class txnEditOptions :
-   public CEAFTransaction
+   public WBFL::EAF::Transaction
 {
 public:
    txnEditOptions(const txnEditOptionsData& oldOptionsData,const txnEditOptionsData& newOptionsData);
@@ -67,7 +67,7 @@ public:
 
    virtual bool Execute();
    virtual void Undo();
-   virtual std::unique_ptr<CEAFTransaction>CreateClone() const;
+   virtual std::unique_ptr<WBFL::EAF::Transaction>CreateClone() const;
    virtual std::_tstring Name() const;
    virtual bool IsUndoable() const;
    virtual bool IsRepeatable() const;

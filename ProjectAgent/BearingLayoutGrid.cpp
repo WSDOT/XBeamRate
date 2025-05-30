@@ -22,14 +22,10 @@
 
 
 #include "stdafx.h"
+#include "ProjectAgent.h"
 #include "BearingLayoutGrid.h"
 #include <EAF\EAFDisplayUnits.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 GRID_IMPLEMENT_REGISTER(CBearingLayoutGrid, CS_DBLCLKS, 0, 0, 0);
 
@@ -86,8 +82,8 @@ void CBearingLayoutGrid::CustomInit(xbrTypes::ReactionLoadType reactionLoadType)
 		);
 
 
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+    auto pBroker = EAFGetBroker();
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
 // set text along top row
@@ -329,8 +325,8 @@ IndexType CBearingLayoutGrid::GetBearingCount()
 
 void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64 CR,Float64 SH,Float64 PS,Float64 RE,Float64 W,Float64 S)
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    ROWCOL col = 1;
@@ -479,8 +475,8 @@ void CBearingLayoutGrid::SetBearingData(ROWCOL row,Float64 DC,Float64 DW,Float64
 
 void CBearingLayoutGrid::OnReactionLoadTypeChanged()
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    CString strDC,strDW,strCR,strSH,strPS,strRE;
@@ -570,8 +566,8 @@ void CBearingLayoutGrid::AddBearingRow(Float64 DC,Float64 DW,Float64 CR,Float64 
 
 void CBearingLayoutGrid::GetBearingData(ROWCOL row,Float64* pDC,Float64* pDW,Float64* pCR,Float64* pSH,Float64* pPS,Float64* pRE,Float64* pW,Float64* pS)
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    ROWCOL col = 1;

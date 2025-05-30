@@ -196,8 +196,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PierAgent.def" />
-    <None Include="PierAgent.rgs" />
-    <None Include="PierAgentModule.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="PierAgent.rc" />

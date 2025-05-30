@@ -22,8 +22,6 @@
 
 #pragma once
 
-struct IBroker;
-
 #include <MFCTools\WsdotCalculationSheet.h>
 
 /*****************************************************************************
@@ -36,18 +34,5 @@ CLASS
 class XBRateCalculationSheet : public WsdotCalculationSheet
 {
 public:
-   XBRateCalculationSheet(IBroker* pBroker);
-   XBRateCalculationSheet(const XBRateCalculationSheet& rOther);
-   virtual ~XBRateCalculationSheet();
-
-   XBRateCalculationSheet& operator = (const XBRateCalculationSheet& rOther);
-
-protected:
-   void MakeCopy(const XBRateCalculationSheet& rOther);
-   void MakeAssignment(const XBRateCalculationSheet& rOther);
-
-private:
-   IBroker* m_pBroker;
-
    XBRateCalculationSheet();
 };

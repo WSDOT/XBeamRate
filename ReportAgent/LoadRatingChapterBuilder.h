@@ -20,41 +20,15 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-
 #pragma once
+
 #include "XBeamRateChapterBuilder.h"
-
-
-/*****************************************************************************
-CLASS 
-   CLoadRatingChapterBuilder
-
-   Reports load rating outcome.
-
-
-DESCRIPTION
-   Reports load rating outcome.
-
-LOG
-   rab : 12.07.2009 : Created file
-*****************************************************************************/
 
 class CLoadRatingChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CLoadRatingChapterBuilder();
 
-   //------------------------------------------------------------------------
    virtual LPCTSTR GetName() const override;
-
-   //------------------------------------------------------------------------
    virtual rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const override;
-
-   //------------------------------------------------------------------------
-   virtual std::unique_ptr<WBFL::Reporting::ChapterBuilder> Clone() const override;
-
-private:
-   // Prevent accidental copying and assignment
-   CLoadRatingChapterBuilder(const CLoadRatingChapterBuilder&) = delete;
-   CLoadRatingChapterBuilder& operator=(const CLoadRatingChapterBuilder&) = delete;
 };

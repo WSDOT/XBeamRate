@@ -21,7 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include <EAF\EAFTransaction.h>
+#include <EAF\Transaction.h>
 
 struct txnLoadRatingOptions
 {
@@ -37,7 +37,7 @@ struct txnLoadRatingOptions
 };
 
 class txnEditLoadRatingOptions :
-   public CEAFTransaction
+   public WBFL::EAF::Transaction
 {
 public:
    txnEditLoadRatingOptions(const txnLoadRatingOptions& oldOptions,const txnLoadRatingOptions& newOptions);
@@ -45,7 +45,7 @@ public:
 
    virtual bool Execute();
    virtual void Undo();
-   virtual std::unique_ptr<CEAFTransaction> CreateClone() const;
+   virtual std::unique_ptr<WBFL::EAF::Transaction> CreateClone() const;
    virtual std::_tstring Name() const;
    virtual bool IsUndoable() const;
    virtual bool IsRepeatable() const;

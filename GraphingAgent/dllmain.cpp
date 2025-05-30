@@ -26,14 +26,16 @@
 #include "resource.h"
 #include "dllmain.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#include "GraphingAgentCLSID.h"
+#include "GraphingAgentImp.h"
 
+#include <EAF\ComponentModule.h>
 
-CGraphingAgentModule _AtlModule;
+WBFL::EAF::ComponentModule Module_;
+
+EAF_BEGIN_OBJECT_MAP(ObjectMap)
+   EAF_OBJECT_ENTRY(CLSID_XBeamRateGraphingAgent,CGraphingAgentImp)
+EAF_END_OBJECT_MAP()
 
 class CGraphingAgentModuleApp : public CWinApp
 {
@@ -53,10 +55,12 @@ CGraphingAgentModuleApp theApp;
 
 BOOL CGraphingAgentModuleApp::InitInstance()
 {
+   Module_.Init(ObjectMap);
 	return CWinApp::InitInstance();
 }
 
 int CGraphingAgentModuleApp::ExitInstance()
 {
+   Module_.Term();
 	return CWinApp::ExitInstance();
 }

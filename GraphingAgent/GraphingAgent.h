@@ -20,7 +20,6 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_GraphingAgent_H_
-#define INCLUDED_GraphingAgent_H_
+#pragma once
 
-#endif // INCLUDED_GraphingAgent_H_
+#include <AgentTools.h>

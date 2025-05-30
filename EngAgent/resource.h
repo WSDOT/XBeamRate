@@ -25,7 +25,7 @@
 // Used by EngAgent.rc
 //
 #define IDS_PROJNAME                    100
-#define IDR_ENGAGENT                101
+
 #define IDR_ENGAGENTMODULE          102
 
 // Next default values for new objects

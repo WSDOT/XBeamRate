@@ -24,6 +24,7 @@
 //
 
 #include "stdafx.h"
+#include "ProjectAgent.h"
 #include "resource.h"
 #include "BearingsPage.h"
 #include "PierDlg.h"
@@ -36,11 +37,6 @@
 
 #pragma warning(disable:4244)
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
 void DDX_BearingGrid(CDataExchange* pDX,CBearingLayoutGrid& grid,xbrBearingLineData& brgLineData,std::vector<txnDeadLoadReaction>& deadLoadReactions)
@@ -74,8 +70,8 @@ void CBearingsPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+    auto pBroker = EAFGetBroker();
+
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 
    CPierDlg* pParent = (CPierDlg*)GetParent();

@@ -98,7 +98,6 @@ END
 // REGISTRY
 //
 
-IDR_ENGAGENT       REGISTRY                "EngAgent.rgs"
 IDR_ENGAGENTMODULE REGISTRY                "EngAgentModule.rgs"
 
 /////////////////////////////////////////////////////////////////////////////

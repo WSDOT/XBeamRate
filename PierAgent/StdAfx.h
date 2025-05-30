@@ -28,7 +28,6 @@
 #pragma once
 
 #include <XBeamRateAll.h>
-using namespace ATL;
 
 #include <WBFLGenericBridge.h>
 #include <WBFLGeometry.h>

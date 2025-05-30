@@ -26,22 +26,10 @@
 #include <ReportManager\ChapterBuilder.h>
 #include "XBeamRateChapterBuilder.h"
 
-/*****************************************************************************
-CLASS 
-   CLoadingDetailsChapterBuilder
-
-*****************************************************************************/
-
 class CLoadingDetailsChapterBuilder : public CXBeamRateChapterBuilder
 {
 public:
    CLoadingDetailsChapterBuilder();
    virtual LPCTSTR GetName() const override;
    rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const;
-   virtual std::unique_ptr<WBFL::Reporting::ChapterBuilder> Clone() const override;
-
-private:
-   // Prevent accidental copying and assignment
-   CLoadingDetailsChapterBuilder(const CLoadingDetailsChapterBuilder&) = delete;
-   CLoadingDetailsChapterBuilder& operator=(const CLoadingDetailsChapterBuilder&) = delete;
 };

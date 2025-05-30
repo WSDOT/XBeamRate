@@ -23,11 +23,6 @@
 #include "stdafx.h"
 #include <XBeamRateExt\LongitudinalRebarData.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 xbrLongitudinalRebarData::RebarRow::RebarRow():
    Datum(xbrTypes::Bottom), 
@@ -97,7 +92,7 @@ bool xbrLongitudinalRebarData::operator != (const xbrLongitudinalRebarData& rOth
 }
 
 
-HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pProgress)
+HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress> pProgress)
 {
    HRESULT hr = S_OK;
 
@@ -124,7 +119,7 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,IProgress* pPro
    return hr;
 }
 
-HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,IProgress* pProgress)
+HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress> pProgress)
 {
    USES_CONVERSION;
    CComVariant var;

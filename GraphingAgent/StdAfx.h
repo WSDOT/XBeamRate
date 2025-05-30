@@ -35,6 +35,6 @@
 #include <Graphing/GraphColor.h>
 #include <Graphing/GraphingTypes.h>
 
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
 
 #include <XBRate.hh>

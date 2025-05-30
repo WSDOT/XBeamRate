@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <EAF\EAFBrokerReportSpecificationBuilder.h>
+#include <EAF\BrokerReportSpecificationBuilder.h>
 
 class CXBeamRateReportSpecificationBuilder :
-   public CEAFBrokerReportSpecificationBuilder
+   public WBFL::EAF::BrokerReportSpecificationBuilder
 {
 public:
-   CXBeamRateReportSpecificationBuilder(IBroker* pBroker);
+   CXBeamRateReportSpecificationBuilder(std::weak_ptr<WBFL::EAF::Broker> pBroker);
    ~CXBeamRateReportSpecificationBuilder(void);
 
    virtual std::shared_ptr<WBFL::Reporting::ReportSpecification> CreateReportSpec(const WBFL::Reporting::ReportDescription& rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification> pRptSpec) const override;

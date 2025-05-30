@@ -33,12 +33,13 @@
 #include <Units\System.h>
 #include <MFCTools\Format.h>
 
-#include <EAF\EAFAutoProgress.h>
+#include <EAF/AutoProgress.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <XBeamRateExt\StatusItem.h>
 #include <XBeamRateExt\XBeamAnalysisResult.h>
 
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
+#include <psgLib/RatingLibraryEntry.h>
 
 #include <numeric>
 #include <algorithm>
@@ -46,11 +47,6 @@
 #include <System\Flags.h>
 #include <LRFD\Utility.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 #define MAX_CASES 10
 
@@ -59,135 +55,69 @@ static char THIS_FILE[] = __FILE__;
 // apply the multiple presence factor.
 /////////////////////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////////////////////
-// CAnalysisAgentImp
-CAnalysisAgentImp::CAnalysisAgentImp()
-{
-   m_pBroker = 0;
-}
-
-CAnalysisAgentImp::~CAnalysisAgentImp()
-{
-}
-
-HRESULT CAnalysisAgentImp::FinalConstruct()
-{
-   m_pModelData = std::make_unique<std::map<PierIDType,ModelData>>();
-   m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType,std::set<UnitLiveLoadResult> > >();
-   return S_OK;
-}
-
-void CAnalysisAgentImp::FinalRelease()
-{
-   Invalidate(false);
-}
-
-#if defined _DEBUG
-bool CAnalysisAgentImp::AssertValid() const
-{
-   return true;
-}
-#endif // _DEBUG
-
 //////////////////////////////////////////////////////////////////////
 // IAgent
-STDMETHODIMP CAnalysisAgentImp::SetBroker(IBroker* pBroker)
-{
-   EAF_AGENT_SET_BROKER(pBroker);
-   return S_OK;
-}
 
-STDMETHODIMP CAnalysisAgentImp::RegInterfaces()
-{
-   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-
-   pBrokerInit->RegInterface( IID_IXBRProductForces, this);
-   pBrokerInit->RegInterface( IID_IXBRAnalysisResults,    this );
-
-   return S_OK;
-};
-
-STDMETHODIMP CAnalysisAgentImp::Init()
+bool CAnalysisAgentImp::Init()
 {
    EAF_AGENT_INIT; // this macro defines pStatusCenter
+
+   m_pModelData = std::make_unique<std::map<PierIDType, ModelData>>();
+   m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType, std::set<UnitLiveLoadResult> > >();
+
+   GET_IFACE(IEAFStatusCenter, pStatusCenter);
    m_StatusGroupID = pStatusCenter->CreateStatusGroupID();
 
    // Register status callbacks that we want to use
-   m_scidBridgeWarning = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusWarning));
-   m_scidBridgeError = pStatusCenter->RegisterCallback(new xbrBridgeStatusCallback(eafTypes::statusError));
+   m_scidBridgeWarning = pStatusCenter->RegisterCallback(std::make_shared<xbrBridgeStatusCallback>(WBFL::EAF::StatusSeverityType::Warning));
+   m_scidBridgeError = pStatusCenter->RegisterCallback(std::make_shared<xbrBridgeStatusCallback>(WBFL::EAF::StatusSeverityType::Error));
 
-   return AGENT_S_SECONDPASSINIT;
-}
-
-STDMETHODIMP CAnalysisAgentImp::Init2()
-{
    //
    // Attach to connection points
    //
-   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   CComPtr<IConnectionPoint> pCP;
-   HRESULT hr = S_OK;
+   m_dwProjectCookie = REGISTER_EVENT_SINK(IXBRProjectEventSink);
+   m_dwBridgeDescCookie = REGISTER_EVENT_SINK(IBridgeDescriptionEventSink);
 
-   // Connection point for the bridge description
-   hr = pBrokerInit->FindConnectionPoint( IID_IXBRProjectEventSink, &pCP );
-   ATLASSERT( SUCCEEDED(hr) );
-   hr = pCP->Advise( GetUnknown(), &m_dwProjectCookie );
-   ATLASSERT( SUCCEEDED(hr) );
-   pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-
-   // Connection point for the bridge description
-   hr = pBrokerInit->FindConnectionPoint( IID_IBridgeDescriptionEventSink, &pCP );
-   if ( SUCCEEDED(hr) )
-   {
-      hr = pCP->Advise( GetUnknown(), &m_dwBridgeDescCookie );
-      ATLASSERT( SUCCEEDED(hr) );
-      pCP.Release(); // Recycle the IConnectionPoint smart pointer so we can use it again.
-   }
-
-   return S_OK;
+   return true;
 }
 
-STDMETHODIMP CAnalysisAgentImp::Reset()
+bool CAnalysisAgentImp::RegisterInterfaces()
 {
-   return S_OK;
+   EAF_AGENT_REGISTER_INTERFACES;
+   REGISTER_INTERFACE(IXBRProductForces);
+   REGISTER_INTERFACE(IXBRAnalysisResults);
+
+   return true;
+};
+
+bool CAnalysisAgentImp::Reset()
+{
+   EAF_AGENT_RESET;
+   Invalidate(false);
+   return true;
 }
 
-STDMETHODIMP CAnalysisAgentImp::GetClassID(CLSID* pCLSID)
+bool CAnalysisAgentImp::ShutDown()
 {
-   *pCLSID = CLSID_AnalysisAgent;
-   return S_OK;
-}
+   EAF_AGENT_SHUTDOWN;
 
-IndexType CAnalysisAgentImp::GetPriority()
-{
-   return 0;
-}
-
-STDMETHODIMP CAnalysisAgentImp::ShutDown()
-{
    //
    // Detach to connection points
    //
-   CComQIPtr<IBrokerInitEx2,&IID_IBrokerInitEx2> pBrokerInit(m_pBroker);
-   CComPtr<IConnectionPoint> pCP;
-   HRESULT hr = S_OK;
+   UNREGISTER_EVENT_SINK(IXBRProjectEventSink, m_dwProjectCookie);
+   UNREGISTER_EVENT_SINK(IBridgeDescriptionEventSink, m_dwBridgeDescCookie);
 
-   hr = pBrokerInit->FindConnectionPoint(IID_IXBRProjectEventSink, &pCP );
-   ATLASSERT( SUCCEEDED(hr) );
-   hr = pCP->Unadvise( m_dwProjectCookie );
-   ATLASSERT( SUCCEEDED(hr) );
-   pCP.Release(); // Recycle the connection point
-
-   hr = pBrokerInit->FindConnectionPoint(IID_IBridgeDescriptionEventSink, &pCP );
-   if ( SUCCEEDED(hr) )
-   {
-      hr = pCP->Unadvise( m_dwBridgeDescCookie );
-      ATLASSERT( SUCCEEDED(hr) );
-      pCP.Release(); // Recycle the connection point
-   }
-
-   EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return S_OK;
+}
+
+CLSID CAnalysisAgentImp::GetCLSID() const
+{
+   return CLSID_XBeamRateAnalysisAgent;
+}
+
+IndexType CAnalysisAgentImp::GetPriority() const
+{
+   return 0;
 }
 
 CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,int level) const
@@ -230,8 +160,8 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
       return;
    }
 
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
 
    if ( MODEL_INIT_TOPOLOGY <= level && pModelData->m_InitLevel < MODEL_INIT_TOPOLOGY )
    {
@@ -742,10 +672,8 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
             }
             strMsg += _T(" Permanent load reactions at this bearing have been ignored.");
 
-            xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(m_StatusGroupID, m_scidBridgeWarning, strMsg);
-
             GET_IFACE(IEAFStatusCenter, pStatusCenter);
-            pStatusCenter->Add(pStatusItem);
+            pStatusCenter->Add(std::make_shared<xbrBridgeStatusItem>(m_StatusGroupID, m_scidBridgeWarning, strMsg));
 
             continue;
          }
@@ -1854,8 +1782,8 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
 {
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
 
    CString strProgressMsg;
    strProgressMsg.Format(_T("Getting live load moment for %s, %s, at %s"),
@@ -1904,8 +1832,8 @@ void CAnalysisAgentImp::GetShear(PierIDType pierID,pgsTypes::LoadRatingType rati
 {
    GET_IFACE(IXBRProject,pProject);
    GET_IFACE(IEAFDisplayUnits,pDisplayUnits);
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
 
    CString strProgressMsg;
    strProgressMsg.Format(_T("Getting live load shear for %s, %s, at %s"),
@@ -2468,8 +2396,8 @@ std::vector<xbrTypes::ProductForceType> CAnalysisAgentImp::GetLoads(xbrTypes::Co
 
 void CAnalysisAgentImp::ComputeLiveLoadLocations(PierIDType pierID,ModelData* pModelData) const
 {
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
 
    GET_IFACE(IXBRPier,pPier);
    Float64 Wcc = pPier->GetCurbToCurbWidth(pierID); // normal to alignment
@@ -2710,8 +2638,8 @@ std::vector<LoadCaseIDType> CAnalysisAgentImp::InitializeWheelLineLoads(ModelDat
 
 void CAnalysisAgentImp::ApplyWheelLineLoadsToFemModel(ModelData* pModelData) const
 {
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
    CString strProgressMsg;
 
    IndexType nLaneConfigurations = pModelData->m_LaneConfigurations.size();
@@ -2784,8 +2712,8 @@ struct Result
 void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPointOfInterest& poi) const
 {
    GET_IFACE_NOCHECK(IEAFDisplayUnits,pDisplayUnits); // this interface is not used in the rare case that the superstructure width is smaller than a lane, there are no lanes so there aren't any live load results
-   GET_IFACE(IProgress,pProgress);
-   CEAFAutoProgress ap(pProgress);
+   GET_IFACE(IEAFProgress,pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress);
    CString strProgressMsg;
 
    Float64 MzMin = DBL_MAX;
@@ -3076,17 +3004,20 @@ std::vector<Float64> CAnalysisAgentImp::GetWheelLineLocations(ModelData* pModelD
 
 void CAnalysisAgentImp::InvalidateModels(bool bCreateNewDataStructures)
 {
-   std::map<PierIDType,ModelData>* pOldModelData = m_pModelData.release();
-   if ( bCreateNewDataStructures )
+   if (m_pModelData)
    {
-      m_pModelData = std::make_unique<std::map<PierIDType,ModelData>>();
-   }
+      std::map<PierIDType, ModelData>* pOldModelData = m_pModelData.release();
+      if (bCreateNewDataStructures)
+      {
+         m_pModelData = std::make_unique<std::map<PierIDType, ModelData>>();
+      }
 
 #if defined _USE_MULTITHREADING
-   m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteModels,(LPVOID)(pOldModelData));
+      m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteModels, (LPVOID)(pOldModelData));
 #else
-   CAnalysisAgentImp::DeleteModels((LPVOID)(pOldModelData));
+      CAnalysisAgentImp::DeleteModels((LPVOID)(pOldModelData));
 #endif
+   }
 }
 
 UINT CAnalysisAgentImp::DeleteModels(LPVOID pParam)
@@ -3094,8 +3025,11 @@ UINT CAnalysisAgentImp::DeleteModels(LPVOID pParam)
    WATCH(_T("Begin: DeleteModels"));
    
    std::map<PierIDType,ModelData>* pModelData = (std::map<PierIDType,ModelData>*)pParam;
-   pModelData->clear();
-   delete pModelData;
+   if (pModelData)
+   {
+      pModelData->clear();
+      delete pModelData;
+   }
 
    WATCH(_T("End: DeleteModels"));
 
@@ -3104,17 +3038,20 @@ UINT CAnalysisAgentImp::DeleteModels(LPVOID pParam)
 
 void CAnalysisAgentImp::InvalidateResults(bool bCreateNewDataStructures)
 {
-   std::map<PierIDType,std::set<UnitLiveLoadResult>>* pOldResults = m_pUnitLiveLoadResults.release();
-   if ( bCreateNewDataStructures )
+   if (m_pUnitLiveLoadResults)
    {
-      m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType,std::set<UnitLiveLoadResult>>>();
-   }
+      std::map<PierIDType, std::set<UnitLiveLoadResult>>* pOldResults = m_pUnitLiveLoadResults.release();
+      if (bCreateNewDataStructures)
+      {
+         m_pUnitLiveLoadResults = std::make_unique<std::map<PierIDType, std::set<UnitLiveLoadResult>>>();
+      }
 
 #if defined _USE_MULTITHREADING
-   m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteResults,(LPVOID)(pOldResults));
+      m_ThreadManager.CreateThread(CAnalysisAgentImp::DeleteResults, (LPVOID)(pOldResults));
 #else
-   CAnalysisAgentImp::DeleteResults((LPVOID)(pOldResults));
+      CAnalysisAgentImp::DeleteResults((LPVOID)(pOldResults));
 #endif
+   }
 }
 
 UINT CAnalysisAgentImp::DeleteResults(LPVOID pParam)
@@ -3122,8 +3059,11 @@ UINT CAnalysisAgentImp::DeleteResults(LPVOID pParam)
    WATCH(_T("Begin: DeleteResults"));
    
    std::map<PierIDType,std::set<UnitLiveLoadResult>>* pResults = (std::map<PierIDType,std::set<UnitLiveLoadResult>>*)pParam;
-   pResults->clear();
-   delete pResults;
+   if (pResults)
+   {
+      pResults->clear();
+      delete pResults;
+   }
 
    WATCH(_T("End: DeleteResults"));
 

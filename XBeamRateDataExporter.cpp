@@ -20,55 +20,37 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// PGSuperExporter.cpp : Implementation of CPGSuperExporter
 #include "stdafx.h"
+#include <AgentTools.h>
 #include "XBeamRateAgent.h"
-#include "PGSuperExporter.h"
+#include "XBeamRateDataExporter.h"
 
 #include <IFace\Project.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-HRESULT CPGSuperDataExporter::FinalConstruct()
+STDMETHODIMP CXBeamRateDataExporter::Init(UINT nCmdID)
 {
    return S_OK;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// CPGSuperDataExporter
-
-STDMETHODIMP CPGSuperDataExporter::Init(UINT nCmdID)
+CString CXBeamRateDataExporter::GetMenuText() const
 {
-   return S_OK;
+   return CString("Piers to XBRate");
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetMenuText(BSTR*  bstrText) const
+HBITMAP CXBeamRateDataExporter::GetBitmapHandle() const
 {
-   *bstrText = CComBSTR("Piers to XBRate");
-   return S_OK;
+   return nullptr;
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetBitmapHandle(HBITMAP* phBmp) const
+CString CXBeamRateDataExporter::GetCommandHintText() const
 {
-   *phBmp = nullptr;
-   return S_OK;
+   return CString("Export a pier to XBRate\nTool tip text");
 }
 
-STDMETHODIMP CPGSuperDataExporter::GetCommandHintText(BSTR*  bstrText) const
+HRESULT CXBeamRateDataExporter::Export(std::shared_ptr<WBFL::EAF::Broker> pBroker)
 {
-   *bstrText = CComBSTR("Export a pier to XBRate\nTool tip text");
-   return S_OK;   
-}
-
-STDMETHODIMP CPGSuperDataExporter::Export(IBroker* pBroker)
-{
-   CComPtr<IXBRExport> pExport;
-   if ( FAILED(pBroker->GetInterface(IID_IXBRExport,(IUnknown**)&pExport)) )
+   GET_IFACE2(pBroker, IXBRExport, pExport);
+   if ( !pExport )
    {
       AfxMessageBox(_T("XBRate Extension is not enabled. Piers cannot be exported"),MB_ICONEXCLAMATION | MB_OK);
       return E_FAIL;

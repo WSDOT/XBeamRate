@@ -206,8 +206,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="TestAgent.def" />
-    <None Include="TestAgent.rgs" />
-    <None Include="TestAgentModule.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TestAgent.rc" />

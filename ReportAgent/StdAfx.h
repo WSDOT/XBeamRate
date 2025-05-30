@@ -32,10 +32,10 @@
 
 #include <Reporter\Reporter.h>
 #include <ReportManager\ReportManager.h>
-#include <EAF\EAFBrokerReportSpecification.h>
-#include <EAF\EAFHelp.h>
+#include <EAF\BrokerReportSpecification.h>
+#include <EAF\Help.h>
 
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
 
 #include <XBeamRateExt\ReportPointOfInterest.h>
 

@@ -25,8 +25,7 @@
 // Used by PierAgent.rc
 //
 #define IDS_PROJNAME                    100
-#define IDR_PIERAGENT                   101
-#define IDR_PIERAGENTMODULE             102
+
 
 // Next default values for new objects
 // 

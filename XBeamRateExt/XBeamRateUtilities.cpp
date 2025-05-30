@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <AgentTools.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
 #include <IFace\XBeamRateAgent.h>
 #include <EAF\EAFStatusCenter.h>
@@ -28,16 +29,11 @@
 #include <XBeamRateExt\StatusItem.h>
 
 #include <..\..\PGSuper\Include\IFace\Project.h>
-#include <PgsExt\BridgeDescription2.h>
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\BridgeDescription2.h>
+#include <PsgLib\GirderLabel.h>
 
 #include <MFCTools\Exceptions.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
 xbrTypes::PierType GetPierType(pgsTypes::BoundaryConditionType bcType)
@@ -86,13 +82,10 @@ xbrTypes::PierType GetPierType(pgsTypes::PierSegmentConnectionType connType)
 
 bool IsStandAlone()
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
-
-   CComPtr<IXBeamRateAgent> pAgent;
-   HRESULT hr = pBroker->GetInterface(IID_IXBeamRateAgent,(IUnknown**)&pAgent);
+   auto pBroker = EAFGetBroker();
+   GET_IFACE2(pBroker, IXBeamRateAgent, pAgent);
    // if we get the IXBeamRateAgent interface, XBRate is acting as an extension to PGSuper/PGSplice... we are not stand alone
-   return SUCCEEDED(hr) ? false : true;
+   return pAgent == nullptr ? true : false;
 }
 
 bool IsPGSExtension()
@@ -112,8 +105,8 @@ Uint16 CanModel(PierIDType pierID)
       return REASON_OK;
    }
 
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
 
    GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
    const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
@@ -156,8 +149,8 @@ bool CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,StatusCallba
    Uint16 reason = CanModel(pierID);
    if ( reason != REASON_OK )
    {
-      CComPtr<IBroker> pBroker;
-      EAFGetBroker(&pBroker);
+      auto pBroker = EAFGetBroker();
+
 
       GET_IFACE2(pBroker,IBridgeDescription,pIBridgeDesc);
       const CPierData2* pPier = pIBridgeDesc->FindPier(pierID);
@@ -180,10 +173,9 @@ bool CanModelPier(PierIDType pierID,StatusGroupIDType statusGroupID,StatusCallba
 
       CString strMsg;
       strMsg.Format(_T("XBRate cannot model Pier %s\r\n%s"),LABEL_PIER(pPier->GetIndex()),strReason);
-      xbrBridgeStatusItem* pStatusItem = new xbrBridgeStatusItem(statusGroupID,callbackID,strMsg);
 
       GET_IFACE2(pBroker,IEAFStatusCenter,pStatusCenter);
-      pStatusCenter->Add(pStatusItem);
+      pStatusCenter->Add(std::make_shared<xbrBridgeStatusItem>(statusGroupID, callbackID, strMsg));
 
       strMsg += _T("\n\nOpen status center to clear error");
 

@@ -22,6 +22,7 @@
 
 
 #include "StdAfx.h"
+#include "ReportAgent.h"
 #include <LoadRatingChapterBuilder.h>
 #include <RatingSummaryTable.h>
 
@@ -31,18 +32,6 @@
 
 #include <PgsExt\RatingArtifact.h>
 #include <PgsExt\CapacityToDemand.h>
-
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-/****************************************************************************
-CLASS
-   CLoadRatingChapterBuilder
-****************************************************************************/
 
 CLoadRatingChapterBuilder::CLoadRatingChapterBuilder() :
 CXBeamRateChapterBuilder()
@@ -58,8 +47,7 @@ rptChapter* CLoadRatingChapterBuilder::Build(const std::shared_ptr<const WBFL::R
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
-   CComPtr<IBroker> pBroker;
-   pXBRRptSpec->GetBroker(&pBroker);
+   auto pBroker = pXBRRptSpec->GetBroker();
 
    GET_IFACE2(pBroker,IXBRRatingSpecification,pRatingSpec);
 
@@ -177,9 +165,4 @@ rptChapter* CLoadRatingChapterBuilder::Build(const std::shared_ptr<const WBFL::R
    }
 
    return pChapter;
-}
-
-std::unique_ptr<WBFL::Reporting::ChapterBuilder> CLoadRatingChapterBuilder::Clone() const
-{
-   return std::make_unique<CLoadRatingChapterBuilder>();
 }

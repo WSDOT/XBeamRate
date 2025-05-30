@@ -23,7 +23,7 @@
 #pragma once
 
 #include <XBeamRateExt\XBRExtExp.h>
-#include <PgsExt\PierData2.h>
+#include <PsgLib\PierData2.h>
 
 xbrTypes::PierType XBREXTFUNC GetPierType(pgsTypes::BoundaryConditionType bcType);
 xbrTypes::PierType XBREXTFUNC GetPierType(pgsTypes::PierSegmentConnectionType connType);

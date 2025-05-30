@@ -21,8 +21,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#ifndef INCLUDED_ReportAgent_H_
-#define INCLUDED_ReportAgent_H_
+#pragma once
 
-
-#endif // INCLUDED_ReportAgent_H_
+#include <IFace/Tools.h>

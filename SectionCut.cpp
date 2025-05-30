@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <AgentTools.h>
 #include "SectionCut.h"
 #include <MathEx.h>
 #include <PGSuperColors.h>
@@ -68,8 +69,7 @@ void CSectionCutDisplayImpl::SetColor(COLORREF color)
 xbrPointOfInterest CSectionCutDisplayImpl::GetCutPOI(Float64 Xp)
 {
    PierIDType pierID = m_pFrame->GetPierID();
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
    GET_IFACE2(pBroker, IXBRPointOfInterest, pPoi);
    return pPoi->ConvertPierCoordinateToPoi(pierID, Xp);
 }
@@ -134,8 +134,8 @@ void CSectionCutDisplayImpl::GetBoundingBox(std::shared_ptr<const WBFL::DManip::
    Float64 height = y2-yo;
 
    PierIDType pierID = m_pFrame->GetPierID();
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
    
    GET_IFACE2(pBroker,IXBRPier,pPier);
    Float64 Xxb = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);

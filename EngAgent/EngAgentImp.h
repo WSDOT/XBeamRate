@@ -27,13 +27,13 @@
 
 #pragma once
 
-#include "resource.h"       // main symbols
+#include <EAF\Agent.h>
 #include <EngAgent.h>
 #include "EngAgentCLSID.h"
 
 #include <WBFLRCCapacity.h>
 
-#include <EAF\EAFInterfaceCache.h>
+#include <IFace\LoadRating.h>
 #include <IFace\Project.h>
 
 #if defined _USE_MULTITHREADING
@@ -42,11 +42,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CEngAgentImp
-class ATL_NO_VTABLE CEngAgentImp : 
-	public CComObjectRootEx<CComSingleThreadModel>,
-   //public CComRefCountTracer<CEngAgentImp,CComObjectRootEx<CComSingleThreadModel> >,
-	public CComCoClass<CEngAgentImp, &CLSID_EngAgent>,
-   public IAgentEx,
+class CEngAgentImp : public WBFL::EAF::Agent,
    public IXBRMomentCapacity,
    public IXBRShearCapacity,
    public IXBRCrackedSection,
@@ -54,78 +50,54 @@ class ATL_NO_VTABLE CEngAgentImp :
    public IXBRProjectEventSink
 {  
 public:
-	CEngAgentImp(); 
-   virtual ~CEngAgentImp();
+	CEngAgentImp() = default; 
 
-   DECLARE_PROTECT_FINAL_CONSTRUCT();
-
-   HRESULT FinalConstruct();
-   void FinalRelease();
-
-DECLARE_REGISTRY_RESOURCEID(IDR_ENGAGENT)
-
-BEGIN_COM_MAP(CEngAgentImp)
-	COM_INTERFACE_ENTRY(IAgent)
-   COM_INTERFACE_ENTRY(IAgentEx)
-	COM_INTERFACE_ENTRY(IXBRMomentCapacity)
-	COM_INTERFACE_ENTRY(IXBRShearCapacity)
-   COM_INTERFACE_ENTRY(IXBRCrackedSection)
-   COM_INTERFACE_ENTRY(IXBRArtifact)
-   COM_INTERFACE_ENTRY(IXBRProjectEventSink)
-	//COM_INTERFACE_ENTRY_IMPL(IConnectionPointContainer)
-END_COM_MAP()
-
-//BEGIN_CONNECTION_POINT_MAP(CEngAgentImp)
-//   CONNECTION_POINT_ENTRY( IID_IProjectEventSink )
-//END_CONNECTION_POINT_MAP()
-
-// IAgentEx
+// Agent
 public:
-	STDMETHOD(SetBroker)(/*[in]*/ IBroker* pBroker) override;
-   STDMETHOD(RegInterfaces)() override;
-	STDMETHOD(Init)() override;
-	STDMETHOD(Reset)() override;
-	STDMETHOD(ShutDown)() override;
-   STDMETHOD(Init2)() override;
-   STDMETHOD(GetClassID)(CLSID* pCLSID) override;
+   std::_tstring GetName() const override { return _T("XBeam Rate Eng Agent"); }
+   bool RegisterInterfaces() override;
+   bool Init() override;
+   bool Reset() override;
+   bool ShutDown() override;
+   CLSID GetCLSID() const override;
 
 // IXBRMomentCapacity
 public:
-   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
-   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
 
-   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
-   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
 
-   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
-   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
-   virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx) const override;
+   Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const override;
+   MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx) const override;
 
 // IXBRCrackedSection
 public:
-   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const override;
-   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const override;
+   Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const override;
+   const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const override;
 
 // IXBRShearCapacity
 public:
-   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
-   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
-   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
-   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
-   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
+   Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
+   const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
+   const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
+   Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
+   const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const override;
 
 // IXBRArtifact
 public:
-   virtual const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
+   const xbrRatingArtifact* GetXBeamRatingArtifact(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
 
 // IXBRProjectEventSink
 public:
-   virtual HRESULT OnProjectChanged() override;
+   HRESULT OnProjectChanged() override;
 
 private:
-   DECLARE_EAF_AGENT_DATA;
+   EAF_DECLARE_AGENT_DATA;
 
-   DWORD m_dwProjectCookie;
+   IDType m_dwProjectCookie;
 
 
    // PierID is not used to store results because the POI ID is sufficent
@@ -199,6 +171,4 @@ private:
    static UINT DeleteDataStructures(LPVOID pParam);
    void CreateDataStructures();
 };
-
-OBJECT_ENTRY_AUTO(CLSID_EngAgent, CEngAgentImp)
 
