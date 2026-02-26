@@ -500,6 +500,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
    }
 
    ROWCOL col = 1;
+   //DC
    SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -507,7 +508,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(strDC)
 		);
-
+   //DW
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -515,7 +516,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(strDW)
 		);
-
+    //CR
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -523,7 +524,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(strCR)
 		);
-
+    //SH
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -531,7 +532,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(strSH)
 		);
-
+    //PS
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -539,7 +540,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
          .SetVerticalAlignment(DT_VCENTER)
 			.SetValue(strPS)
 		);
-
+    //RE
 	SetStyleRange(CGXRange(0,col++), CGXStyle()
          .SetWrapText(TRUE)
 			.SetEnabled(FALSE)          // disables usage as current cell
@@ -550,7 +551,7 @@ void CBearingLayoutGrid::OnReactionLoadTypeChanged()
 
    // Hide/Show the "W" column
    BOOL bHide = (m_ReactionLoadType == xbrTypes::rltConcentrated ? TRUE : FALSE);
-   HideCols(col,col++,bHide);
+   HideCols(col,col,bHide);
 
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 }
