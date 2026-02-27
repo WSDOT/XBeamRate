@@ -128,16 +128,18 @@ Uint16 CanModel(PierIDType pierID)
       }
       else
       {
-         const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
-         const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
+         // See Mantis 1625 - there doesn't appear to be a good reason to have this restriction
+         // Removing it, but leaving the code here in case it needs to be re-instated.
+         //const CGirderGroupData* pBackGroup  = pPier->GetGirderGroup(pgsTypes::Back);
+         //const CGirderGroupData* pAheadGroup = pPier->GetGirderGroup(pgsTypes::Ahead);
 
-         ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
-         GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
-         GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
-         if ( nGirdersBack != nGirdersAhead )
-         {
-            return REASON_NG;
-         }
+         //ATLASSERT(pBackGroup->GetIndex() != pAheadGroup->GetIndex());
+         //GirderIndexType nGirdersBack  = pBackGroup->GetGirderCount();
+         //GirderIndexType nGirdersAhead = pAheadGroup->GetGirderCount();
+         //if ( nGirdersBack != nGirdersAhead )
+         //{
+         //   return REASON_NG;
+         //}
       }
    }
 
