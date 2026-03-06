@@ -2998,26 +2998,31 @@ HRESULT CProjectAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
 
 HRESULT CProjectAgentImp::OnGirderFamilyChanged()
 {
+   Invalidate();
    return S_OK;
 }
 
 HRESULT CProjectAgentImp::OnGirderChanged(const CGirderKey& girderKey,Uint32 lHint)
 {
+   Invalidate();
    return S_OK;
 }
 
 HRESULT CProjectAgentImp::OnLiveLoadChanged()
 {
+   Invalidate();
    return S_OK;
 }
 
 HRESULT CProjectAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName,LPCTSTR strNewName)
 {
+   Invalidate();
    return S_OK;
 }
 
 HRESULT CProjectAgentImp::OnConstructionLoadChanged()
 {
+   Invalidate();
    return S_OK;
 }
 

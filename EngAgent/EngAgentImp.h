@@ -36,6 +36,8 @@
 #include <IFace\LoadRating.h>
 #include <IFace\Project.h>
 
+#include <..\..\PGSuper\Include\IFace\Project.h>
+
 #if defined _USE_MULTITHREADING
 #include <PgsExt\ThreadManager.h>
 #endif
@@ -47,7 +49,8 @@ class CEngAgentImp : public WBFL::EAF::Agent,
    public IXBRShearCapacity,
    public IXBRCrackedSection,
    public IXBRArtifact,
-   public IXBRProjectEventSink
+   public IXBRProjectEventSink,
+   public IBridgeDescriptionEventSink
 {  
 public:
 	CEngAgentImp() = default; 
@@ -94,13 +97,23 @@ public:
 public:
    HRESULT OnProjectChanged() override;
 
+   // IBridgeDescriptionEventSink
+public:
+   HRESULT OnBridgeChanged(CBridgeChangedHint* pHint) override;
+   HRESULT OnGirderFamilyChanged() override;
+   HRESULT OnGirderChanged(const CGirderKey& girderKey, Uint32 lHint) override;
+   HRESULT OnLiveLoadChanged() override;
+   HRESULT OnLiveLoadNameChanged(LPCTSTR strOldName, LPCTSTR strNewName) override;
+   HRESULT OnConstructionLoadChanged() override;
+
 private:
    EAF_DECLARE_AGENT_DATA;
 
    IDType m_dwProjectCookie;
+   IDType m_dwBridgeDescCookie;
 
 
-   // PierID is not used to store results because the POI ID is sufficent
+   // PierID is not used to store results because the POI ID is sufficient
    // POI IDs are not duplicated between piers
    std::unique_ptr<std::map<IDType,MomentCapacityDetails>> m_pPositiveMomentCapacity[2]; // key = POI ID, array index = xbrTypes::Stage
    std::unique_ptr<std::map<IDType,MomentCapacityDetails>> m_pNegativeMomentCapacity[2];

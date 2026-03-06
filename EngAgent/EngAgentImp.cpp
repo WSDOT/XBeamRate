@@ -94,6 +94,7 @@ bool CEngAgentImp::Init()
    // Attach to connection points for interfaces this agent depends on
    //
    m_dwProjectCookie = REGISTER_EVENT_SINK(IXBRProjectEventSink);
+   m_dwBridgeDescCookie = REGISTER_EVENT_SINK(IBridgeDescriptionEventSink);
 
    return true;
 }
@@ -120,6 +121,7 @@ bool CEngAgentImp::ShutDown()
    // Detach to connection points
    //
    UNREGISTER_EVENT_SINK(IXBRProjectEventSink, m_dwProjectCookie);
+   UNREGISTER_EVENT_SINK(IBridgeDescriptionEventSink, m_dwBridgeDescCookie);
 
    //EAF_AGENT_CLEAR_INTERFACE_CACHE;
    return true;
@@ -350,6 +352,44 @@ HRESULT CEngAgentImp::OnProjectChanged()
 {
    Invalidate();
 
+   return S_OK;
+}
+
+//////////////////////////////////////////////////////////
+// IBridgeDescriptionEventSink
+HRESULT CEngAgentImp::OnBridgeChanged(CBridgeChangedHint* pHint)
+{
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CEngAgentImp::OnGirderFamilyChanged()
+{
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CEngAgentImp::OnGirderChanged(const CGirderKey& girderKey, Uint32 lHint)
+{
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CEngAgentImp::OnLiveLoadChanged()
+{
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CEngAgentImp::OnLiveLoadNameChanged(LPCTSTR strOldName, LPCTSTR strNewName)
+{
+   Invalidate();
+   return S_OK;
+}
+
+HRESULT CEngAgentImp::OnConstructionLoadChanged()
+{
+   Invalidate();
    return S_OK;
 }
 
