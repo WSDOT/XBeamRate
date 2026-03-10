@@ -27,17 +27,12 @@
 #include <MFCTools\Prompts.h>
 #include <WBFLSTL.h>
 
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
 
 #include <IFace\Bridge.h>
 #include <EAF\EAFApp.h>
-#include <PgsExt\BridgeDescription2.h>
+#include <PsgLib\BridgeDescription2.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
 
@@ -70,7 +65,7 @@ void CPierChoiceValidator::DisplayValidationErrorMessage()
 
 ////////////////////////////////////////////////
 
-CPierExporter::CPierExporter(IBroker* pBroker,CProjectAgentImp* pProjectAgent)
+CPierExporter::CPierExporter(std::weak_ptr<WBFL::EAF::Broker> pBroker,CProjectAgentImp* pProjectAgent)
 {
    m_pBroker = pBroker;
    m_pProjectAgent = pProjectAgent;
@@ -81,7 +76,8 @@ HRESULT CPierExporter::Export(PierIndexType pierIdx)
    if ( pierIdx == INVALID_INDEX )
    {
       // Prompt for pier
-      GET_IFACE(IBridge,pBridge);
+      auto broker = m_pBroker.lock();
+      GET_IFACE2(broker,IBridge,pBridge);
       PierIndexType nPiers = pBridge->GetPierCount();
       CString strPiers;
       for ( PierIndexType pIdx = 0; pIdx < nPiers; pIdx++ )
@@ -143,7 +139,7 @@ HRESULT CPierExporter::Export(PierIndexType pierIdx)
       }
       else
       {
-         AfxMessageBox(_T("An error occured while exporting the pier data."),MB_ICONEXCLAMATION | MB_OK);
+         AfxMessageBox(_T("An error occurred while exporting the pier data."),MB_ICONEXCLAMATION | MB_OK);
          return E_FAIL;
       }
    }
@@ -155,7 +151,8 @@ HRESULT CPierExporter::BatchExport()
 {
    std::vector<PierIndexType> vPiers;
    CString strPiers;
-   GET_IFACE(IBridgeDescription,pIBridgeDesc);
+   auto broker = m_pBroker.lock();
+   GET_IFACE2(broker,IBridgeDescription,pIBridgeDesc);
    PierIndexType nPiers = pIBridgeDesc->GetPierCount();
    for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )
    {
@@ -195,7 +192,7 @@ HRESULT CPierExporter::BatchExport()
          if ( FAILED(hr) )
          {
             CString strMsg;
-            strMsg.Format(_T("An error occured while exporting Pier %s."),LABEL_PIER(pierIdx));
+            strMsg.Format(_T("An error occurred while exporting Pier %s."),LABEL_PIER(pierIdx));
             AfxMessageBox(strMsg,MB_ICONEXCLAMATION | MB_OK);
          }
       }
@@ -223,7 +220,8 @@ INT_PTR CPierExporter::GetFileName(const CString& strDefaultFileName,CString& st
 CString CPierExporter::GetDefaultPierExportFile(PierIndexType pierIdx)
 {
    CString strDefaultFileName;
-   GET_IFACE(IEAFDocument,pDoc);
+   auto broker = m_pBroker.lock();
+   GET_IFACE2(broker,IEAFDocument,pDoc);
 
    strDefaultFileName.Format(_T("%s%s_Pier_%s.xbr"),
                              pDoc->GetFileRoot(), // path to the file

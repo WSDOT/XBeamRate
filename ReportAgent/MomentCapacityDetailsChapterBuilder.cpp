@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+#include "ReportAgent.h"
 #include "MomentCapacityDetailsChapterBuilder.h"
 #include <EAF\EAFDisplayUnits.h>
 
@@ -29,22 +30,10 @@
 
 #include "XBeamRateReportSpecification.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-/****************************************************************************
-CLASS
-   CMomentCapacitDetailsChapterBuilder
-****************************************************************************/
 CMomentCapacityDetailsChapterBuilder::CMomentCapacityDetailsChapterBuilder()
 {
 }
 
-//======================== OPERATORS  =======================================
-//======================== OPERATIONS =======================================
 LPCTSTR CMomentCapacityDetailsChapterBuilder::GetName() const
 {
    return TEXT("Moment Capacity Details");
@@ -57,8 +46,8 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
    // This report does not use the passd span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
 
-   CComPtr<IBroker> pBroker;
-   pXBRRptSpec->GetBroker(&pBroker);
+   auto pBroker = pXBRRptSpec->GetBroker();
+
 
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
@@ -192,9 +181,4 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
    }
 
    return pChapter;
-}
-
-std::unique_ptr<WBFL::Reporting::ChapterBuilder> CMomentCapacityDetailsChapterBuilder::Clone() const
-{
-   return std::make_unique<CMomentCapacityDetailsChapterBuilder>();
 }

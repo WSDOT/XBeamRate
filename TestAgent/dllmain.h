@@ -21,11 +21,3 @@
 ///////////////////////////////////////////////////////////////////////
 
 // dllmain.h : Declaration of module class.
-
-class CTestAgentModule : public CAtlDllModuleT< CTestAgentModule >
-{
-public :
-	DECLARE_REGISTRY_APPID_RESOURCEID(IDR_TESTAGENTMODULE, "{54810131-BBD8-4366-BF7C-31AE2D6CEECE}")
-};
-
-extern class CTestAgentModule _AtlModule;

@@ -202,7 +202,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="EngAgent.def" />
-    <None Include="EngAgent.rgs" />
     <None Include="EngAgentModule.rgs" />
   </ItemGroup>
   <ItemGroup>

@@ -30,11 +30,6 @@
 
 #include "XBRateCalculationSheet.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateGraphView
@@ -83,10 +78,10 @@ bool CXBeamRateGraphView::DoResultsExist()
 
 void CXBeamRateGraphView::OnPrint(CDC* pDC, CPrintInfo* pInfo) 
 {
-   CComPtr<IBroker> pBroker;
-   EAFGetBroker(&pBroker);
+   auto pBroker = EAFGetBroker();
+
    
-   XBRateCalculationSheet border(pBroker);
+   XBRateCalculationSheet border;
 
    CRect rcPrint = border.Print(pDC, 1);
 

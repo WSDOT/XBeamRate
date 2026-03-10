@@ -23,5 +23,5 @@
 #pragma once
 
 // {23184501-3882-4e40-BF05-DD96D84F991B}
-DEFINE_GUID(CLSID_PierAgent, 
+DEFINE_GUID(CLSID_XBeamRatePierAgent,
 0x23184501, 0x3882, 0x4e40, 0xbf, 0x5, 0xdd, 0x96, 0xd8, 0x4f, 0x99, 0x1b);

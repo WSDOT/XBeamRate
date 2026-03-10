@@ -24,11 +24,11 @@
 
 #include <XBeamRateExt\XBRExtExp.h>
 #include <MFCTools\RebarMaterialComboBox.h>
-#include <PgsExt\ConcreteMaterial.h>
-#include <PgsExt\PierData2.h>
+#include <PsgLib\ConcreteMaterial.h>
+#include <PsgLib\PierData2.h>
 #include <XBeamRateExt\PierData.h>
 
-interface IEditPierData;
+class IEditPierData;
 class CLongitudinalRebarGrid;
 class CStirrupGrid;
 class xbrLongitudinalRebarData;

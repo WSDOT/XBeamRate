@@ -27,15 +27,14 @@
 class xbrLoadRater
 {
 public:
-   xbrLoadRater(IBroker* pBroker);
+   xbrLoadRater(std::weak_ptr<WBFL::EAF::Broker> pBroker);
    virtual ~xbrLoadRater(void);
-
-   void SetBroker(IBroker* pBroker);
 
    xbrRatingArtifact RateXBeam(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx);
 
 protected:
-   IBroker* m_pBroker;
+   std::weak_ptr<WBFL::EAF::Broker> m_pBroker;
+   inline std::shared_ptr<WBFL::EAF::Broker> GetBroker() const { return m_pBroker.lock(); }
 
    void MomentRating(PierIDType pierID,xbrTypes::Stage stage,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact);
    void ShearRating(PierIDType pierID, xbrTypes::Stage stage, const std::vector<xbrPointOfInterest>& vPoi,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx,xbrRatingArtifact& ratingArtifact);

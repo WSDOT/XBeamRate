@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 // dllmain.h : Declaration of module class.
+#include "resource.h"
 
 class CEngAgentModule : public CAtlDllModuleT< CEngAgentModule >
 {

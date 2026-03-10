@@ -20,9 +20,6 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_TestAgent_H_
-#define INCLUDED_TestAgent_H_
+#pragma once
 
-#include <IFace\Test.h>
-
-#endif // INCLUDED_TestAgent_H_
+#include <IFace/Tools.h>

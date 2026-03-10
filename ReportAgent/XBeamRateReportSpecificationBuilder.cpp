@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+#include "ReportAgent.h"
 #include "XBeamRateReportSpecificationBuilder.h"
 #include "XBeamRateReportSpecification.h"
 #include "PierReportDlg.h"
@@ -29,15 +30,10 @@
 #include <..\..\PGSuper\Include\IFace\Project.h>
 #include <IFace\Selection.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
-CXBeamRateReportSpecificationBuilder::CXBeamRateReportSpecificationBuilder(IBroker* pBroker) :
-CEAFBrokerReportSpecificationBuilder(pBroker)
+CXBeamRateReportSpecificationBuilder::CXBeamRateReportSpecificationBuilder(std::weak_ptr<WBFL::EAF::Broker> pBroker) :
+WBFL::EAF::BrokerReportSpecificationBuilder(pBroker)
 {
 }
 
@@ -51,7 +47,7 @@ std::shared_ptr<WBFL::Reporting::ReportSpecification> CXBeamRateReportSpecificat
 
    std::shared_ptr<CXBeamRateReportSpecification> pOldGRptSpec = std::dynamic_pointer_cast<CXBeamRateReportSpecification>(pOldRptSpec);
 
-   CPierReportDlg dlg(m_pBroker,rptDesc,pOldRptSpec);
+   CPierReportDlg dlg(rptDesc,pOldRptSpec);
 
    if (pOldGRptSpec)
    {
@@ -90,10 +86,10 @@ std::shared_ptr<WBFL::Reporting::ReportSpecification> CXBeamRateReportSpecificat
 
    if ( IsPGSExtension() )
    {
-      GET_IFACE(ISelection,pSelection);
+      GET_IFACE2(GetBroker(),ISelection,pSelection);
       PierIndexType selPierIdx = pSelection->GetSelectedPier();
 
-      GET_IFACE(IBridgeDescription,pIBridgeDesc);
+      GET_IFACE2(GetBroker(),IBridgeDescription,pIBridgeDesc);
       PierIndexType nPiers = pIBridgeDesc->GetPierCount();
 
       if ( selPierIdx == INVALID_INDEX )

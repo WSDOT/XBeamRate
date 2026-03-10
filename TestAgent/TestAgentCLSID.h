@@ -23,5 +23,5 @@
 #pragma once
 
 // {0444F3A6-7ED3-4e60-B8EC-D4BFCB1CC2EF}
-DEFINE_GUID(CLSID_TestAgent, 
+DEFINE_GUID(CLSID_XBeamRateTestAgent, 
 0x444f3a6, 0x7ed3, 0x4e60, 0xb8, 0xec, 0xd4, 0xbf, 0xcb, 0x1c, 0xc2, 0xef);

@@ -20,25 +20,26 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
+// PGSuperExporter.h : Declaration of the CPGSuperExporter
+
 #pragma once
 
-class CAgentCmdTarget : public CCmdTarget
+#include <Plugins\PGSuperIEPlugin.h>
+#include <EAF\ComponentObject.h>
+
+/////////////////////////////////////////////////////////////////////////////
+// CXBeamRateDataExporter
+class CXBeamRateDataExporter : public WBFL::EAF::ComponentObject,
+   public PGS::IDataExporter
 {
 public:
-   CAgentCmdTarget();
-   void Init(IBroker* pBroker);
+   CXBeamRateDataExporter() = default;
 
-   void ShowProjectPropertiesOnNewProject(bool bShow);
-   bool ShowProjectPropertiesOnNewProject() const;
-
-private:
-   IBroker* m_pBroker; // weak reference
-
-   bool m_bShowProjectProperties;
-
-   DECLARE_MESSAGE_MAP()
+// IDataExporter
 public:
-   afx_msg void OnEditPier();
-   afx_msg void OnEditOptions();
-   afx_msg void OnProjectProperties();
+   STDMETHOD(Init)(UINT nCmdID) override;
+   CString GetMenuText() const override;
+   HBITMAP GetBitmapHandle() const override;
+   CString GetCommandHintText() const override;
+   HRESULT Export(std::shared_ptr<WBFL::EAF::Broker> pBroker) override;
 };

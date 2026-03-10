@@ -20,9 +20,6 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_AnalysisAgent_H_
-#define INCLUDED_AnalysisAgent_H_
+#pragma once
 
-#include <IFace\AnalysisResults.h>
-
-#endif // INCLUDED_AnalysisAgent_H_
+#include <AgentTools.h>

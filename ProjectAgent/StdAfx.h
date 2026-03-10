@@ -32,7 +32,7 @@
 
 #include <EAF\EAFUtilities.h>
 #include <EAF\EAFResources.h>
-#include <EAF\EAFHelp.h>
+#include <EAF\Help.h>
 
 #include <MFCTools\MFCTools.h>
 

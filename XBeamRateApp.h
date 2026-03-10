@@ -20,43 +20,34 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-// PGSuperExporter.h : Declaration of the CPGSuperExporter
+#ifndef INCLUDED_APP_H_
+#define INCLUDED_APP_H_
 
-#ifndef __PGSUPEREXPORTER_H_
-#define __PGSUPEREXPORTER_H_
-
-#include <Plugins\PGSuperIEPlugin.h>
-#include "resource.h"       // main symbols
-
-/////////////////////////////////////////////////////////////////////////////
-// CPGSuperDataExporter
-class ATL_NO_VTABLE CPGSuperDataExporter : 
-	public CComObjectRootEx<CComSingleThreadModel>,
-	public CComCoClass<CPGSuperDataExporter, &CLSID_PGSuperDataExporter>,
-   public IPGSDataExporter
+#include <EAF\EAFDocTemplate.h>
+class CXBeamRateApp : public CWinApp
 {
 public:
-	CPGSuperDataExporter()
-	{
-	}
+   CXBeamRateApp();
 
-   HRESULT FinalConstruct();
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CXBeamRateApp)
+	public:
+    virtual BOOL InitInstance() override;
+    virtual int ExitInstance() override;
 
-DECLARE_REGISTRY_RESOURCEID(IDR_PGSUPEREXPORTER)
+    CString GetVersion(bool bIncludeBuildNumber) const;
 
-DECLARE_PROTECT_FINAL_CONSTRUCT()
+    virtual BOOL OnCmdMsg(UINT nID, int nCode, void* pExtra, AFX_CMDHANDLERINFO* pHandlerInfo) override;
 
-BEGIN_COM_MAP(CPGSuperDataExporter)
-   COM_INTERFACE_ENTRY(IPGSDataExporter)
-END_COM_MAP()
+	//}}AFX_VIRTUAL
 
-// IPGSDataExporter
+	//{{AFX_MSG(CXBeamRateApp)
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
 public:
-   STDMETHOD(Init)(UINT nCmdID) override;
-   STDMETHOD(GetMenuText)(/*[out,retval]*/BSTR*  bstrText) const override;
-   STDMETHOD(GetBitmapHandle)(/*[out]*/HBITMAP* phBmp) const override;
-   STDMETHOD(GetCommandHintText)(BSTR*  bstrText) const override;
-   STDMETHOD(Export)(/*[in]*/IBroker* pBroker) override;
+   HMENU m_hSharedMenu;
 };
 
-#endif //__PGSUPEREXPORTER_H_
+#endif // INCLUDED_APP_H_

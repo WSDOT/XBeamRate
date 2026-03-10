@@ -24,11 +24,6 @@
 #include "StdAfx.h"
 #include <XBeamRateChapterBuilder.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
 CXBeamRateChapterBuilder::CXBeamRateChapterBuilder()
@@ -50,9 +45,8 @@ rptChapter* CXBeamRateChapterBuilder::Build(const std::shared_ptr<const WBFL::Re
    ASSERT( level <= GetMaxLevel() );
 
    rptChapter* pChapter = new rptChapter(GetName());
-   rptParagraph* p_para = new rptParagraph;
-   p_para->SetStyleName(rptStyleManager::GetChapterTitleStyle());
-   *pChapter << p_para;
-   *p_para << GetName() << rptNewLine;
+   rptHeading* pHeading = rptStyleManager::CreateChapterHeading();
+   *pChapter << pHeading;
+   *pHeading << GetName() << rptNewLine;
    return pChapter;
 }

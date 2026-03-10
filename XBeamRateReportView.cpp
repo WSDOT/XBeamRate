@@ -27,11 +27,6 @@
 #include "XBeamRateReportView.h"
 #include "XBeamRateDoc.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 // CXBeamRateReportView
@@ -104,11 +99,10 @@ BOOL CXBeamRateReportView::PreTranslateMessage(MSG* pMsg)
 
 HRESULT CXBeamRateReportView::UpdateReportBrowser(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint)
 {
-   //CComPtr<IBroker> pBroker;
-   //EAFGetBroker(&pBroker);
+   //auto pBroker = EAFGetBroker();
 
-   //GET_IFACE2(pBroker,IProgress,pProgress);
-   //CEAFAutoProgress ap(pProgress);
+   //GET_IFACE2(pBroker,IEAFProgress,pProgress);
+   //WBFL::EAF::AutoProgress ap(pProgress);
 
    //pProgress->UpdateMessage(_T("Working..."));
 
@@ -129,10 +123,9 @@ HRESULT CXBeamRateReportView::UpdateReportBrowser(const std::shared_ptr<const WB
 
 void CXBeamRateReportView::RefreshReport()
 {
-   //CComPtr<IBroker> pBroker;
-   //EAFGetBroker(&pBroker);
-   //GET_IFACE2(pBroker,IProgress,pProgress);
-   //CEAFAutoProgress progress(pProgress);
+   //auto pBroker = EAFGetBroker();
+   //GET_IFACE2(pBroker,IEAFProgress,pProgress);
+   //WBFL::EAF::AutoProgress progress(pProgress);
    //pProgress->UpdateMessage(_T("Updating report..."));
 
    CEAFAutoCalcReportView::RefreshReport();

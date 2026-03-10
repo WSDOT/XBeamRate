@@ -21,6 +21,7 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+#include "ReportAgent.h"
 #include "LoadRatingDetailsChapterBuilder.h"
 #include <EAF\EAFDisplayUnits.h>
 
@@ -32,26 +33,15 @@
 #include "XBeamRateReportSpecification.h"
 
 #include <PgsExt\CapacityToDemand.h>
-#include <PgsExt\GirderLabel.h>
-#include <PgsExt\Helpers.h>
+#include <PsgLib\GirderLabel.h>
+#include <PsgLib\Helpers.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
-/****************************************************************************
-CLASS
-   CLoadRatingDetailsChapterBuilder
-****************************************************************************/
 CLoadRatingDetailsChapterBuilder::CLoadRatingDetailsChapterBuilder():
 m_bReportEvenIncrements(true)
 {
 }
 
-//======================== OPERATORS  =======================================
-//======================== OPERATIONS =======================================
 LPCTSTR CLoadRatingDetailsChapterBuilder::GetName() const
 {
    return TEXT("Load Rating Details");
@@ -63,11 +53,10 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(const std::shared_ptr<const 
 
    m_bReportEvenIncrements = pXBRRptSpec->GetDoReportEvenIncrements();
 
-   // This report does not use the passd span and girder parameters
+   // This report does not use the passed span and girder parameters
    rptChapter* pChapter = CXBeamRateChapterBuilder::Build(pRptSpec,level);
 
-   CComPtr<IBroker> pBroker;
-   pXBRRptSpec->GetBroker(&pBroker);
+   auto pBroker = pXBRRptSpec->GetBroker();
 
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
@@ -143,12 +132,8 @@ rptChapter* CLoadRatingDetailsChapterBuilder::Build(const std::shared_ptr<const 
    return pChapter;
 }
 
-std::unique_ptr<WBFL::Reporting::ChapterBuilder> CLoadRatingDetailsChapterBuilder::Clone() const
-{
-   return std::make_unique<CLoadRatingDetailsChapterBuilder>();
-}
 
-void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,std::shared_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -355,7 +340,7 @@ void CLoadRatingDetailsChapterBuilder::MomentRatingDetails(rptChapter* pChapter,
    } // next poi
 }
 
-void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,std::shared_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -546,7 +531,7 @@ void CLoadRatingDetailsChapterBuilder::ShearRatingDetails(rptChapter* pChapter,I
    } // next poi
 }
 
-void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* pChapter,IBroker* pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* pChapter, std::shared_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker, IXBRRatingSpecification, pSpec);
 
@@ -722,7 +707,7 @@ void CLoadRatingDetailsChapterBuilder::ReinforcementYieldingDetails(rptChapter* 
    }
 }
 
-void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter,IBroker* pBroker,const xbrRatingArtifact* pRatingArtifact) const
+void CLoadRatingDetailsChapterBuilder::LoadPostingDetails(rptChapter* pChapter, std::shared_ptr<WBFL::EAF::Broker> pBroker,const xbrRatingArtifact* pRatingArtifact) const
 {
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
 

@@ -21,7 +21,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#ifndef INCLUDED_PierAgent_H_
-#define INCLUDED_PierAgent_H_
+#pragma once
 
-#endif // INCLUDED_PierAgent_H_
+#include <AgentTools.h>

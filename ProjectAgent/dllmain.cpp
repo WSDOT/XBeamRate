@@ -27,14 +27,15 @@
 #include "resource.h"
 #include "dllmain.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#include "ProjectAgentCLSID.h"
+#include "ProjectAgentImp.h"
+#include <EAF\ComponentModule.h>
 
+WBFL::EAF::ComponentModule Module_;
 
-CProjectAgentModule _AtlModule;
+EAF_BEGIN_OBJECT_MAP(ObjectMap)
+   EAF_OBJECT_ENTRY(CLSID_XBeamRateProjectAgent, CProjectAgentImp)
+EAF_END_OBJECT_MAP()
 
 class CProjectAgentModuleApp : public CWinApp
 {
@@ -54,6 +55,7 @@ CProjectAgentModuleApp theApp;
 
 BOOL CProjectAgentModuleApp::InitInstance()
 {
+   Module_.Init(ObjectMap);
    GXInit();
 
    SetRegistryKey(_T("Washington State Department of Transportation"));
@@ -63,6 +65,7 @@ BOOL CProjectAgentModuleApp::InitInstance()
 
 int CProjectAgentModuleApp::ExitInstance()
 {
+   Module_.Term();
    GXForceTerminate();
 	return CWinApp::ExitInstance();
 }

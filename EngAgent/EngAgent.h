@@ -20,9 +20,7 @@
 // Bridge_Support@wsdot.wa.gov
 ///////////////////////////////////////////////////////////////////////
 
-#ifndef INCLUDED_EngAgent_H_
-#define INCLUDED_EngAgent_H_
+#pragma once
 
-#include <IFace\LoadRating.h>
+#include <IFace\Tools.h>
 
-#endif // INCLUDED_EngAgent_H_

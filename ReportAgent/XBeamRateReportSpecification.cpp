@@ -23,15 +23,10 @@
 #include "StdAfx.h"
 #include "XBeamRateReportSpecification.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 
-CXBeamRateReportSpecification::CXBeamRateReportSpecification(const std::_tstring& strReportName,IBroker* pBroker,PierIDType pierID,bool bReportEvenIncrements) :
-CEAFBrokerReportSpecification(strReportName,pBroker),
+CXBeamRateReportSpecification::CXBeamRateReportSpecification(const std::_tstring& strReportName, std::weak_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID,bool bReportEvenIncrements) :
+WBFL::EAF::BrokerReportSpecification(strReportName,pBroker),
 m_PierID(pierID),
 m_bReportEvenIncrements(bReportEvenIncrements)
 {

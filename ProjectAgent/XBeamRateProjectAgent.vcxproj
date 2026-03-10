@@ -202,7 +202,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AASHTOConcretePage.cpp" />
-    <ClCompile Include="AgentCmdTarget.cpp" />
     <ClCompile Include="AnalysisOptionsPage.cpp" />
     <ClCompile Include="BearingLayoutGrid.cpp" />
     <ClCompile Include="BearingsPage.cpp" />
@@ -234,8 +233,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="ProjectAgent.def" />
-    <None Include="ProjectAgent.rgs" />
-    <None Include="ProjectAgentModule.rgs" />
     <None Include="res\Dimensions_Alignment.emf" />
     <None Include="res\Dimensions_Alignment_Continuous.emf" />
     <None Include="res\Dimensions_Alignment_Expansion.emf" />
@@ -253,7 +250,6 @@
     <ClInclude Include="..\Include\IFace\Project.h" />
     <ClInclude Include="..\Include\IFace\RatingSpecification.h" />
     <ClInclude Include="AASHTOConcretePage.h" />
-    <ClInclude Include="AgentCmdTarget.h" />
     <ClInclude Include="AnalysisOptionsPage.h" />
     <ClInclude Include="BearingLayoutGrid.h" />
     <ClInclude Include="BearingsPage.h" />

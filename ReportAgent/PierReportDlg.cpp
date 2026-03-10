@@ -30,35 +30,28 @@
 #include <IFace\Bridge.h>
 #include <IFace\DocumentType.h>
 
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
 #include <MFCTools\CustomDDX.h>
 
 #include <XBeamRateExt\XBeamRateUtilities.h>
 
 #include <..\..\PGSuper\Include\IFace\Project.h>
-#include <PgsExt\BridgeDescription2.h>
+#include <PsgLib\BridgeDescription2.h>
 
 #include <EAF\EAFDocument.h>
 
 #include "XBeamRateReportSpecification.h"
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 // PierReportDlg dialog
 
 IMPLEMENT_DYNAMIC(CPierReportDlg, CDialog)
 
-CPierReportDlg::CPierReportDlg(IBroker* pBroker,const WBFL::Reporting::ReportDescription& rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification>& pRptSpec,CWnd* pParent)
+CPierReportDlg::CPierReportDlg(const WBFL::Reporting::ReportDescription& rptDesc,std::shared_ptr<WBFL::Reporting::ReportSpecification>& pRptSpec,CWnd* pParent)
 : CDialog(CPierReportDlg::IDD, pParent), m_RptDesc(rptDesc), m_pInitRptSpec(pRptSpec)
 {
    m_PierID = INVALID_ID;
    m_bReportEvenIncrements = true;
-
-   m_pBroker = pBroker;
 }
 
 CPierReportDlg::~CPierReportDlg()
@@ -187,7 +180,8 @@ BOOL CPierReportDlg::OnInitDialog()
 
       m_PierID = INVALID_ID;
 
-      GET_IFACE(IBridgeDescription,pIBridgeDesc);
+      auto broker = EAFGetBroker();
+      GET_IFACE2(broker,IBridgeDescription,pIBridgeDesc);
       const CBridgeDescription2* pBridgeDesc = pIBridgeDesc->GetBridgeDescription();
       PierIndexType nPiers = pBridgeDesc->GetPierCount();
       for ( PierIndexType pierIdx = 0; pierIdx < nPiers; pierIdx++ )

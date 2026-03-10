@@ -26,7 +26,7 @@
 //
 
 #include "resource.h"
-#include <PgsExt\ColumnData.h>
+#include <PsgLib\ColumnData.h>
 #include "ColumnLayoutGrid.h"
 
 /////////////////////////////////////////////////////////////////////////////

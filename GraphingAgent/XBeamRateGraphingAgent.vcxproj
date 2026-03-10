@@ -206,8 +206,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="GraphingAgent.def" />
-    <None Include="GraphingAgent.rgs" />
-    <None Include="GraphingAgentModule.rgs" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="GraphingAgent.rc" />

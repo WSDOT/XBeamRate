@@ -21,10 +21,6 @@
 ///////////////////////////////////////////////////////////////////////
 
 
-#ifndef INCLUDED_PROJECTAGENT_H_
-#define INCLUDED_PROJECTAGENT_H_
+#pragma once
 
-#include <IFace\Project.h>
-#include <IFace\RatingSpecification.h>
-
-#endif // INCLUDED_PROJECTAGENT_H_
+#include <IFace/Tools.h>

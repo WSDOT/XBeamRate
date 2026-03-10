@@ -25,7 +25,7 @@
 #include <XBeamRateExt\ReinforcementPage.h>
 #include <XBeamRateExt\PierData.h>
 
-// This class is a wrapper between the reinforcement propery page
+// This class is a wrapper between the reinforcement property page
 // and the pier data
 class CReinforcementPageParent : public IReinforcementPageParent
 {

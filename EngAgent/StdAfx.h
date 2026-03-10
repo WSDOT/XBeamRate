@@ -29,4 +29,3 @@
 #include <XBeamRateAll.h>
 
 #include <LRFD\LRFD.h>
-#include <EAF\EAFAutoProgress.h>

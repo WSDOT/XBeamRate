@@ -25,8 +25,6 @@
 // Used by AnalysisAgent.rc
 //
 #define IDS_PROJNAME                    100
-#define IDR_ANALYSISAGENT                101
-#define IDR_ANALYSISAGENTMODULE          102
 
 // Next default values for new objects
 // 

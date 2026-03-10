@@ -25,7 +25,7 @@
 #include "ConcreteGeneralPage.h"
 #include "AASHTOConcretePage.h"
 
-#include <PgsExt\ConcreteMaterial.h>
+#include <PsgLib\ConcreteMaterial.h>
 
 // ConcreteDetailsDlg.h : header file
 //

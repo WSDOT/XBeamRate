@@ -27,12 +27,12 @@ class CProjectAgentImp;
 class CPierExporter
 {
 public:
-   CPierExporter(IBroker* pBroker,CProjectAgentImp* pProjectAgent);
+   CPierExporter(std::weak_ptr<WBFL::EAF::Broker> pBroker,CProjectAgentImp* pProjectAgent);
    HRESULT Export(PierIndexType pierIdx);
    HRESULT BatchExport();
 
 private:
-   IBroker* m_pBroker; // weak reference
+   std::weak_ptr<WBFL::EAF::Broker> m_pBroker; // weak reference
    CProjectAgentImp* m_pProjectAgent;
 
    INT_PTR GetFileName(const CString& strDefaultFileName,CString& strFileName);

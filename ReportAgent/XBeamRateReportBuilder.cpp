@@ -21,20 +21,16 @@
 ///////////////////////////////////////////////////////////////////////
 
 #include "StdAfx.h"
+#include "ReportAgent.h"
 #include "XBeamRateReportBuilder.h"
 #include "XBeamRateReportSpecification.h"
 
 #include <..\..\PGSuper\Include\IFace\Project.h>
 #include <XBeamRateExt\XBeamRateUtilities.h>
-#include <PgsExt\GirderLabel.h>
+#include <PsgLib\GirderLabel.h>
 
-#include <EAF\EAFAutoProgress.h>
+#include <EAF/AutoProgress.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
 
 CXBeamRateReportBuilder::CXBeamRateReportBuilder(LPCTSTR strName,bool bHidden,bool bIncludeTimingChapter) :
 WBFL::Reporting::ReportBuilder(strName,bHidden,bIncludeTimingChapter)
@@ -45,11 +41,11 @@ std::shared_ptr<rptReport> CXBeamRateReportBuilder::CreateReport(const std::shar
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 
-   CComPtr<IBroker> pBroker;
-   pXBRRptSpec->GetBroker(&pBroker);
+   auto pBroker = pXBRRptSpec->GetBroker();
 
-   GET_IFACE2(pBroker,IProgress, pProgress);
-   CEAFAutoProgress ap(pProgress,0);
+
+   GET_IFACE2(pBroker,IEAFProgress, pProgress);
+   WBFL::EAF::AutoProgress ap(pProgress,0);
    CString strMsg;
    strMsg.Format(_T("Building %s"),pRptSpec->GetReportName().c_str());
    pProgress->UpdateMessage(strMsg);

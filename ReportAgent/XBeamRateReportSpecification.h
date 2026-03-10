@@ -22,13 +22,13 @@
 
 #pragma once
 
-#include <EAF\EAFBrokerReportSpecification.h>
+#include <EAF\BrokerReportSpecification.h>
 
 class CXBeamRateReportSpecification :
-   public CEAFBrokerReportSpecification
+   public WBFL::EAF::BrokerReportSpecification
 {
 public:
-   CXBeamRateReportSpecification(const std::_tstring& strReportName,IBroker* pBroker,PierIDType pierID, bool bReportEvenIncrements);
+   CXBeamRateReportSpecification(const std::_tstring& strReportName,std::weak_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID, bool bReportEvenIncrements);
    ~CXBeamRateReportSpecification(void);
 
    PierIDType GetPierID() const;

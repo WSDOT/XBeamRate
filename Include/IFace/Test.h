@@ -32,7 +32,8 @@ DESCRIPTION
 // {CE8A4F81-A616-4ed7-8A88-9982C0096B14}
 DEFINE_GUID(IID_IXBRTest, 
 0xce8a4f81, 0xa616, 0x4ed7, 0x8a, 0x88, 0x99, 0x82, 0xc0, 0x9, 0x6b, 0x14);
-interface IXBRTest : public IUnknown
+class IXBRTest
 {
+public:
    virtual HRESULT RunTest(PierIDType pierID,LPCTSTR lpszResultsFile) = 0;
 };

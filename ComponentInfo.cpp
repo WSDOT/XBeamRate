@@ -28,22 +28,6 @@
 #include <EAF\EAFDocument.h>
 #include <MFCTools\VersionInfo.h>
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
-
-
-HRESULT CXBeamRateComponentInfo::FinalConstruct()
-{
-   return S_OK;
-}
-
-void CXBeamRateComponentInfo::FinalRelease()
-{
-}
-
 BOOL CXBeamRateComponentInfo::Init(CEAFApp* pApp)
 {
    return TRUE;
