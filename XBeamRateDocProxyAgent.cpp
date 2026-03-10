@@ -125,13 +125,6 @@ IndexType CXBeamRateDocProxyAgent::GetPriority() const
 }
 
 ////////////////////////////////////////////////////////////////////
-// IAgentPriority
-IndexType CXBeamRateDocProxyAgent::GetPriority()
-{
-   return 0;
-}
-
-////////////////////////////////////////////////////////////////////
 // IAgentUIIntegration
 bool CXBeamRateDocProxyAgent::IntegrateWithUI(bool bIntegrate)
 {
