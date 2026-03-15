@@ -394,6 +394,7 @@ void CReinforcementPage::OnMoreProperties()
 {
    UpdateData(TRUE);
    CConcreteDetailsDlg dlg(true  /*properties are based on f'c*/,
+                           false /*don't include UHPC*/,
                            false /*don't enable Compute Time Parameters option*/,
                            false /*hide the CopyFromLibrary buton*/);
 
