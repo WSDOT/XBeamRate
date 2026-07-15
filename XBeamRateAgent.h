@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright ï¿½ 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,6 @@ class CXBeamRateAgent : public CCmdTarget, // it's very important CCmdTarget is 
    public IEditLoadRatingOptionsCallback,
    public IProjectPropertiesEventSink,
    public IXBRProjectEventSink,
-   public IXBeamRate,
    public IXBRVersionInfo,
    public IEAFProcessCommandLine,
    public IBridgePlanViewEventCallback,
@@ -74,10 +73,6 @@ public:
 // IXBeamRateAgent
 public:
    bool IsExtendingPGSuper() override;
-
-// IXBeamRate
-public:
-   void GetUnitServer(IUnitServer** ppUnitServer) override;
 
 // IXBRVersionInfo
 public:

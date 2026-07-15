@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright ï¿½ 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -49,7 +49,6 @@ CLASS
 class CXBeamRateDocProxyAgent : public WBFL::EAF::Agent,
    public WBFL::EAF::IAgentPriority,
    public WBFL::EAF::IAgentUIIntegration,
-   public IXBeamRate,
    public IXBRUIEvents,
    public IXBRProjectEventSink,
    public IEAFDisplayUnitsEventSink,
@@ -81,10 +80,6 @@ public:
 // IAgentUIIntegration
 public:
    bool IntegrateWithUI(bool bIntegrate) override;
-
-// IXBeamRate
-public:
-   void GetUnitServer(IUnitServer** ppUnitServer) override;
 
 // IXBRProjectEventSink
 public:

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright ï¿½ 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -99,7 +99,6 @@ bool CXBeamRateAgent::RegisterInterfaces()
    EAF_AGENT_REGISTER_INTERFACES;
 
    REGISTER_INTERFACE(IXBeamRateAgent);
-   REGISTER_INTERFACE(IXBeamRate);
    REGISTER_INTERFACE(IXBRVersionInfo);
 
    return true;
@@ -316,14 +315,6 @@ CString CXBeamRateAgent::GetVersion(bool bIncludeBuildNumber)
 bool CXBeamRateAgent::IsExtendingPGSuper()
 {
    return true;
-}
-
-////////////////////////////////////////////////////////////////////
-// IXBeamRate
-void CXBeamRateAgent::GetUnitServer(IUnitServer** ppUnitServer)
-{
-   GET_IFACE(IDocumentUnitSystem,pDocUnits);
-   pDocUnits->GetUnitServer(ppUnitServer);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright ï¿½ 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -80,7 +80,6 @@ void CXBeamRateDocProxyAgent::UnadviseEventSinks()
 bool CXBeamRateDocProxyAgent::RegisterInterfaces()
 {
    EAF_AGENT_REGISTER_INTERFACES;
-   REGISTER_INTERFACE(IXBeamRate);
    REGISTER_INTERFACE(IXBRUIEvents);
    REGISTER_INTERFACE(IXBRVersionInfo);
    REGISTER_INTERFACE(IXBRViews);
@@ -144,20 +143,6 @@ bool CXBeamRateDocProxyAgent::IntegrateWithUI(bool bIntegrate)
    }
 
    return S_OK;
-}
-
-////////////////////////////////////////////////////////////////////
-// IXBeamRate
-void CXBeamRateDocProxyAgent::GetUnitServer(IUnitServer** ppUnitServer)
-{
-   CEAFDocTemplate* pTemplate = (CEAFDocTemplate*)(m_pMyDocument->GetDocTemplate());
-   auto pluginApp = pTemplate->GetPluginApp();
-   auto pXBeamRate = std::dynamic_pointer_cast<CXBeamRatePluginApp>(pluginApp);
-
-   CComPtr<IAppUnitSystem> appUnitSystem;
-   pXBeamRate->GetAppUnitSystem(&appUnitSystem);
-
-   appUnitSystem->get_UnitServer(ppUnitServer);
 }
 
 ////////////////////////////////////////////////////////////////////
