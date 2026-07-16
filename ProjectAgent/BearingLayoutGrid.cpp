@@ -221,7 +221,10 @@ void CBearingLayoutGrid::AddBearing()
    GetParam()->SetLockReadOnly(FALSE);
 
    // set the default spacing in the last row
-   SetBearingData(nRows,DC,DW,CR,SH,PS,RE,Wdefault,Sdefault);
+   if (nRows > 0)
+   {
+       SetBearingData(nRows, DC, DW, CR, SH, PS, RE, Wdefault, Sdefault);
+   }
 
    // add the new bearing (adds row to the grid)
    AddBearingRow(DC,DW,CR,SH,PS,RE,Wdefault,0);
