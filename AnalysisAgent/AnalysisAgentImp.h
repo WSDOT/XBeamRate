@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright Â© 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@
 
 #include <IFace\Project.h>
 
-#include <WBFLFem2d.h>
+#include <FEA2D/Model.h>
 
 #include <..\..\PGSuper\Include\IFace\Project.h>
 
@@ -178,7 +178,7 @@ private:
 
    typedef struct ModelData
    {
-      CComPtr<IFem2dModel> m_Model;
+      std::unique_ptr<WBFL::FEA2D::Model> m_Model;
       
       std::vector<BeamMember> m_XBeamMembers; // these members make up the cap beam
       std::vector<BeamMember> m_SuperstructureMembers; // these are the members where the live load is applied
