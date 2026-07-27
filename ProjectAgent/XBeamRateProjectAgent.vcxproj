@@ -33,9 +33,6 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-    <Import Project="$(XSDDIR)\etc\vc-10.0\xsd-cxx-tree.props" />
-  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
@@ -79,11 +76,6 @@
       <Message />
       <Command />
     </CustomBuildStep>
-    <CXX_Tree_Mapping_Rule>
-      <CharType>1</CharType>
-      <GenSerialization>true</GenSerialization>
-      <GenDoxygen>false</GenDoxygen>
-    </CXX_Tree_Mapping_Rule>
     <Midl>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -143,11 +135,6 @@
       <Message />
       <Command />
     </CustomBuildStep>
-    <CXX_Tree_Mapping_Rule>
-      <CharType>1</CharType>
-      <GenSerialization>true</GenSerialization>
-      <GenDoxygen>false</GenDoxygen>
-    </CXX_Tree_Mapping_Rule>
     <Midl>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ARPDIR)\WBFL\RegFreeCOM\$(Platform)\$(Configuration);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -294,9 +281,6 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(XSDDIR)\etc\vc-10.0\xsd-cxx-tree.targets" />
-  </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties RESOURCE_FILE="ProjectAgent.rc" />
