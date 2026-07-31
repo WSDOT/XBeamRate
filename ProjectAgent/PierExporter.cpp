@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright Â© 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@
 #include "PierExporter.h"
 #include "ProjectAgentImp.h"
 #include <MFCTools\Prompts.h>
-#include <WBFLSTL.h>
+#include <numeric>
 
 #include <PsgLib\GirderLabel.h>
 
@@ -176,7 +176,7 @@ HRESULT CPierExporter::BatchExport()
    // make a default choice list of 0,1,2,...
    std::vector<int> vDefChoices;
    vDefChoices.resize(vPiers.size());
-   std::generate(vDefChoices.begin(),vDefChoices.end(),IncrementValue<int>(0));
+   std::iota(vDefChoices.begin(),vDefChoices.end(),0);
 
    CPierChoiceValidator validator;
    std::vector<int> vChoices = AfxMultiChoice(_T("Export Piers to XBRate"),_T("Select Piers to Export"),strPiers,&validator,vDefChoices,TRUE,TRUE);
