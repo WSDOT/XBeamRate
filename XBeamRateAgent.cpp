@@ -232,7 +232,7 @@ void CXBeamRateAgent::RemoveToolbar()
 //   // My report
 //   std::unique_ptr<WBFL::Reporting::ReportBuilder> pRptBuilder(std::make_unique<WBFL::Reporting::ReportBuilder>(_T("Extension Agent Report"));
 //   pRptBuilder->SetMenuBitmap(&m_bmpMenu);
-//   pRptBuilder->AddTitlePageBuilder( std::make_shared<CPGSuperTitlePageBuilder>(m_pBroker,pRptBuilder->GetName(),false)) );
+//   pRptBuilder->SetTitlePageBuilder( std::make_shared<CPGSuperTitlePageBuilder>(m_pBroker,pRptBuilder->GetName(),false)) );
 //   pRptBuilder->SetReportSpecificationBuilder( pMyRptSpecBuilder );
 //   pRptBuilder->AddChapterBuilder( std::make_shared<CMyChapterBuilder>) );
 //   pRptMgr->AddReportBuilder( pRptBuilder.release() );
