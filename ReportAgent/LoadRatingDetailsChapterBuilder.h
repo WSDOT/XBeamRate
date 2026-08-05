@@ -34,7 +34,7 @@ class CLoadRatingDetailsChapterBuilder : public CXBeamRateChapterBuilder
 public:
    CLoadRatingDetailsChapterBuilder();
    virtual LPCTSTR GetName() const override;
-   rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const;
+   rptChapter* Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec,Uint16 level) const;
 
 private:
    void MomentRatingDetails(rptChapter* pChapter,std::shared_ptr<WBFL::EAF::Broker> pBroker,PierIDType pierID,pgsTypes::LoadRatingType ratingType,bool bPositiveMoment,const xbrRatingArtifact* pRatingArtifact) const;

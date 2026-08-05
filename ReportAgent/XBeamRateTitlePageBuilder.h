@@ -25,13 +25,13 @@
 #include <ReportManager\TitlePageBuilder.h>
 
 
-class CXBeamRateTitlePageBuilder : public WBFL::Reporting::TitlePageBuilder
+class CXBeamRateTitlePageBuilder : public WBFL::ReportMgr::TitlePageBuilder
 {
 public:
-   using WBFL::Reporting::TitlePageBuilder::TitlePageBuilder;
+   using WBFL::ReportMgr::TitlePageBuilder::TitlePageBuilder;
 
-   rptChapter* Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const override;
-   bool NeedsUpdate(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint,const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const override;
+   rptChapter* Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec) const override;
+   bool NeedsUpdate(const std::shared_ptr<const WBFL::ReportMgr::ReportHint>& pHint,const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec) const override;
 
-   std::unique_ptr<WBFL::Reporting::TitlePageBuilder> Clone() const override;
+   std::unique_ptr<WBFL::ReportMgr::TitlePageBuilder> Clone() const override;
 };

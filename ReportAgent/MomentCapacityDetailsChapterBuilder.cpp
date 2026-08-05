@@ -39,7 +39,7 @@ LPCTSTR CMomentCapacityDetailsChapterBuilder::GetName() const
    return TEXT("Moment Capacity Details");
 }
 
-rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
+rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 

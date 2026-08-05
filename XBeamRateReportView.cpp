@@ -97,7 +97,7 @@ BOOL CXBeamRateReportView::PreTranslateMessage(MSG* pMsg)
 	return CEAFAutoCalcReportView::PreTranslateMessage(pMsg);
 }
 
-HRESULT CXBeamRateReportView::UpdateReportBrowser(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint)
+HRESULT CXBeamRateReportView::UpdateReportBrowser(const std::shared_ptr<const WBFL::ReportMgr::ReportHint>& pHint)
 {
    //auto pBroker = EAFGetBroker();
 
@@ -131,7 +131,7 @@ void CXBeamRateReportView::RefreshReport()
    CEAFAutoCalcReportView::RefreshReport();
 }
 
-WBFL::Reporting::ReportHint* CXBeamRateReportView::TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint)
+WBFL::ReportMgr::ReportHint* CXBeamRateReportView::TranslateHint(CView* pSender, LPARAM lHint, CObject* pHint)
 {
    //if ( lHint == HINT_GIRDERCHANGED )
    //{

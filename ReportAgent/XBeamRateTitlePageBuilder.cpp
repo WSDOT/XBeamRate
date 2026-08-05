@@ -39,18 +39,18 @@
 #include <MFCTools\AutoRegistry.h>
 
 
-std::unique_ptr<WBFL::Reporting::TitlePageBuilder> CXBeamRateTitlePageBuilder::Clone() const
+std::unique_ptr<WBFL::ReportMgr::TitlePageBuilder> CXBeamRateTitlePageBuilder::Clone() const
 {
    return std::make_unique<CXBeamRateTitlePageBuilder>(*this);
 }
 
-bool CXBeamRateTitlePageBuilder::NeedsUpdate(const std::shared_ptr<const WBFL::Reporting::ReportHint>& pHint,const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
+bool CXBeamRateTitlePageBuilder::NeedsUpdate(const std::shared_ptr<const WBFL::ReportMgr::ReportHint>& pHint,const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec) const
 {
    // don't let the title page control whether or not a report needs updating
    return false;
 }
 
-rptChapter* CXBeamRateTitlePageBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec) const
+rptChapter* CXBeamRateTitlePageBuilder::Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec) const
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
    auto pBroker = pXBRRptSpec->GetBroker();

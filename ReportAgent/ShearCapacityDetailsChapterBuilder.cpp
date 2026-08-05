@@ -42,7 +42,7 @@ LPCTSTR CShearCapacityDetailsChapterBuilder::GetName() const
    return TEXT("Shear Capacity Details");
 }
 
-rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
+rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 

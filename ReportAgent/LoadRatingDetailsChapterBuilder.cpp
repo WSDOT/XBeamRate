@@ -47,7 +47,7 @@ LPCTSTR CLoadRatingDetailsChapterBuilder::GetName() const
    return TEXT("Load Rating Details");
 }
 
-rptChapter* CLoadRatingDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::Reporting::ReportSpecification>& pRptSpec,Uint16 level) const
+rptChapter* CLoadRatingDetailsChapterBuilder::Build(const std::shared_ptr<const WBFL::ReportMgr::ReportSpecification>& pRptSpec,Uint16 level) const
 {
    auto pXBRRptSpec = std::dynamic_pointer_cast<const CXBeamRateReportSpecification>(pRptSpec);
 

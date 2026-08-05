@@ -95,21 +95,21 @@ void CReportAgentImp::InitReportBuilders()
 {
    GET_IFACE(IEAFReportManager,pRptMgr);
 
-   std::shared_ptr<WBFL::Reporting::ReportSpecificationBuilder> pRptSpecBuilder(std::make_shared<CXBeamRateReportSpecificationBuilder>(m_pBroker) );
+   std::shared_ptr<WBFL::ReportMgr::ReportSpecificationBuilder> pRptSpecBuilder(std::make_shared<CXBeamRateReportSpecificationBuilder>(m_pBroker) );
 
-   std::shared_ptr<WBFL::Reporting::ReportBuilder> pReportBuilder(std::make_shared<CXBeamRateReportBuilder>(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report")));
+   std::shared_ptr<WBFL::ReportMgr::ReportBuilder> pReportBuilder(std::make_shared<CXBeamRateReportBuilder>(IsStandAlone() ? _T("Load Rating Report") : _T("Cross Beam Load Rating Report")));
    m_ReportNames.insert(pReportBuilder->GetName());
 #if defined _DEBUG || defined _BETA_VERSION
    pReportBuilder->IncludeTimingChapter();
 #endif
    pReportBuilder->SetReportSpecificationBuilder( pRptSpecBuilder );
-   pReportBuilder->SetTitlePageBuilder(std::shared_ptr<WBFL::Reporting::TitlePageBuilder>(new CXBeamRateTitlePageBuilder(pReportBuilder->GetName())));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadRatingChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CPierDescriptionDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CLoadingDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
-   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::Reporting::ChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
+   pReportBuilder->SetTitlePageBuilder(std::shared_ptr<WBFL::ReportMgr::TitlePageBuilder>(new CXBeamRateTitlePageBuilder(pReportBuilder->GetName())));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CLoadRatingChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CLoadRatingDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CPierDescriptionDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CLoadingDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CMomentCapacityDetailsChapterBuilder()));
+   pReportBuilder->AddChapterBuilder(std::shared_ptr<WBFL::ReportMgr::ChapterBuilder>(new CShearCapacityDetailsChapterBuilder()));
    pRptMgr->AddReportBuilder(pReportBuilder);
 }
 
