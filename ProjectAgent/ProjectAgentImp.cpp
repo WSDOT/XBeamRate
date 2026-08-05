@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright Â© 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,8 @@
 #include "resource.h"
 #include "ProjectAgent.h"
 #include "ProjectAgentImp.h"
+
+#include <WBFLTools\StructuredStorageComAdapter.h>
 
 #include <XBeamRateExt\StatusItem.h>
 
@@ -280,7 +282,10 @@ HRESULT CProjectAgentImp::SavePier(PierIndexType pierIdx,LPCTSTR lpszPathName)
    pStrSave->put_Property(_T("CLSID"),CComVariant(postr));
    ::CoTaskMemFree(postr);
 
-   Save(pStrSave);
+   // Save() takes the native WBFL::System::IStructuredSave interface; wrap the COM pointer this
+   // hand-rolled mini-Broker-save already created, same as WBFL::EAF::Broker::SaveAgentData does.
+   CStructuredSave native_save(pStrSave);
+   Save(&native_save);
 
    pStrSave->EndUnit(); // Agent
    pStrSave->EndUnit(); // Broker
@@ -398,8 +403,14 @@ bool CProjectAgentImp::IntegrateWithUI(bool bIntegrate)
 
 //////////////////////////////////////////////////////////////////////
 // IAgentPersist
-bool CProjectAgentImp::Save(IStructuredSave* pStrSave)
+bool CProjectAgentImp::Save(WBFL::System::IStructuredSave* pNativeStrSave)
 {
+   // The internal save pipeline below is still COM-typed; unwrap back to the original COM
+   // pointer here until that call graph is migrated too. See WBFLTools\StructuredStorageComAdapter.h.
+   auto* pAdapter = dynamic_cast<CStructuredSave*>(pNativeStrSave);
+   ATLASSERT(pAdapter);
+   ::IStructuredSave* pStrSave = pAdapter->GetComInterface();
+
    HRESULT hr = S_OK;
 
    // Save project data, properties, reactions, settings, etc if we are in "stand alone" mode
@@ -721,8 +732,14 @@ bool CProjectAgentImp::Save(IStructuredSave* pStrSave)
    return true;
 }
 
-WBFL::EAF::Broker::LoadResult CProjectAgentImp::Load(IStructuredLoad* pStrLoad)
+WBFL::EAF::Broker::LoadResult CProjectAgentImp::Load(WBFL::System::IStructuredLoad* pNativeStrLoad)
 {
+   // The internal load pipeline below is still COM-typed; unwrap back to the original COM
+   // pointer here until that call graph is migrated too. See WBFLTools\StructuredStorageComAdapter.h.
+   auto* pAdapter = dynamic_cast<CStructuredLoad*>(pNativeStrLoad);
+   ATLASSERT(pAdapter);
+   ::IStructuredLoad* pStrLoad = pAdapter->GetComInterface();
+
    USES_CONVERSION;
    CHRException hr;
    CComVariant var;
