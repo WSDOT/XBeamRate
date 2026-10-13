@@ -1470,6 +1470,88 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            BuildDimensionLine(displayList, top, bottom);
        }
 
+       GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+
+       CString strRadius;
+       strRadius.Format(_T("%s"),
+           FormatDimension(R, pDisplayUnits->GetSpanLengthUnit()));
+
+       for (ColumnIndexType arcIdx = 0; arcIdx <= nColumns; ++arcIdx)
+       {
+           Float64 Xleft, Xright;
+
+           if (arcIdx == 0)
+           {
+               // Left overhang
+               Xleft = pPier->ConvertPierToCrossBeamCoordinate(
+                   pierID, lblc);
+
+               Xright = pPier->GetColumnLocation(pierID, 0);
+           }
+           else if (arcIdx == nColumns)
+           {
+               // Right overhang
+               Xleft = pPier->GetColumnLocation(
+                   pierID, nColumns - 1);
+
+               Xright = pPier->ConvertPierToCrossBeamCoordinate(
+                   pierID, lbrc);
+           }
+           else
+           {
+               // Between adjacent columns
+               Xleft = pPier->GetColumnLocation(pierID, arcIdx - 1);
+               Xright = pPier->GetColumnLocation(pierID, arcIdx);
+           }
+
+           const Float64 Xmid = (Xleft + Xright) / 2.0;
+
+           // Obtain the bottom surface elevations at the chord endpoints.
+           auto GetBottomY = [&](Float64 Xxb) -> Float64
+               {
+                   CComPtr<IShape> shape;
+
+                   pSectProp->GetXBeamShape(
+                       pierID,
+                       pgsTypes::Stage1,
+                       xbrPointOfInterest(INVALID_ID, Xxb),
+                       &shape);
+
+                   CComQIPtr<IXYPosition> position(shape);
+
+                   CComPtr<IPoint2d> pntBot;
+                   position->get_LocatorPoint(lpBottomCenter, &pntBot);
+
+                   Float64 Y;
+                   pntBot->get_Y(&Y);
+
+                   return Y;
+               };
+
+           const Float64 Yleft = GetBottomY(Xleft);
+           const Float64 Yright = GetBottomY(Xright);
+
+           // Midpoint of the chord, accounting for inclination.
+           const Float64 Ychord = (Yleft + Yright) / 2.0;
+
+           const Float64 XpMid =
+               pPier->ConvertCrossBeamToPierCoordinate(pierID, Xmid);
+
+           // Small offset below the chord.
+           WBFL::Geometry::Point2d ppRad(XpMid, Ychord - 0.5);
+
+           CString strRadiusLabel;
+           strRadiusLabel.Format(
+               _T("R%d = %s"), arcIdx + 1, strRadius);
+
+           auto doRadiusLabel = WBFL::DManip::TextBlock::Create();
+           doRadiusLabel->SetText(strRadiusLabel);
+           doRadiusLabel->SetBkMode(TRANSPARENT);
+           doRadiusLabel->SetTextAlign(TA_TOP | TA_CENTER);
+           doRadiusLabel->SetPosition(ppRad);
+
+           displayList->AddDisplayObject(doRadiusLabel);
+       }
    }
    else if (pierLayoutType == pgsTypes::pltUserDefined)
    {

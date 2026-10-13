@@ -186,8 +186,6 @@ void CUserDefinedPierLayoutDlg::DoDataExchange(CDataExchange* pDX)
 			const auto& xxb = ppData.Get_X();
 			const auto& y = ppData.Get_Y();
 
-             GET_IFACE2(pBroker, IXBRPier, pPier);
-
              if (xxb < prevPoint)
              {
                  CString msg = _T("Pier point must increase left to right along the crossbeam.");
