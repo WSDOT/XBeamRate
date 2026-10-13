@@ -179,21 +179,40 @@ void CUserDefinedPierLayoutDlg::DoDataExchange(CDataExchange* pDX)
 
         const IndexType nCols = m_Pier.GetColumnCount();
 
+        Float64 xxbRightColumn = m_XBeamOverhang[pgsTypes::stLeft] - m_XBeamEndSlopeOffset[pgsTypes::stLeft];
+
+        IndexType nSpaces = (nCols - 1);
+        for (IndexType idx = 0; idx < nSpaces; idx++)
+        {
+            Float64 spacing = m_Pier.GetColumnSpacing(idx);
+            xxbRightColumn += spacing;
+        }
+
+		Float64 xxbRightLimit = xxbRightColumn + m_XBeamOverhang[pgsTypes::stRight] - m_XBeamEndSlopeOffset[pgsTypes::stRight];
+
         Float64 prevPoint = -DBL_MAX;
 
         for (const auto& ppData : m_Pier.GetPierPointData())
         {
+            
 			const auto& xxb = ppData.Get_X();
 			const auto& y = ppData.Get_Y();
 
-             if (xxb < prevPoint)
-             {
-                 CString msg = _T("Pier point must increase left to right along the crossbeam.");
-                 AfxMessageBox(msg);
-                 pDX->Fail();
-             }
+            if (xxb < 0.0 || xxb > xxbRightLimit || y < 0.0)
+            {
+                CString msg = _T("Pier point is outside the top and sides of the lower crossbeam.");
+                AfxMessageBox(msg);
+                pDX->Fail();
+            }
 
-             prevPoint = xxb;
+            if (xxb < prevPoint)
+            {
+                CString msg = _T("Pier point must increase left to right along the crossbeam.");
+                AfxMessageBox(msg);
+                pDX->Fail();
+            }
+
+            prevPoint = xxb;
 
          }
 
