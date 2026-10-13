@@ -1412,9 +1412,6 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    Float64 refColOffset;
    pierData.GetRefColumnLocation(&refColMeasure, &refColIdx, &refColOffset);
 
-   //leftCLO = ConvertCrossBeamToPierCoordinate(pierID, leftCLO + X1L + refColOffset);
-   //rightCLO = ConvertCrossBeamToPierCoordinate(pierID, rightCLO);
-
    pierModel->put_CurbLineOffset(qcbLeft, leftCLO);
    pierModel->put_CurbLineOffset(qcbRight,rightCLO);
 
