@@ -1640,16 +1640,6 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            auto doPoint = WBFL::DManip::PointDisplayObject::Create();
            doPoint->SetPosition(pp, false, false);
            displayList->AddDisplayObject(doPoint);
-
-           /////////////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>for debugging
-
-           WBFL::Geometry::Point2d fromX(origX, Ypoint);
-           WBFL::Geometry::Point2d fromY(Xp, Ytop);
-
-           BuildDimensionLine(displayList, fromX, pp);
-           BuildDimensionLine(displayList, fromY, pp);
-
-           ///////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
        }
 
    }
