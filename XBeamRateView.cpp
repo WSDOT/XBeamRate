@@ -1293,7 +1293,6 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Float64 ublc;
    pnt->get_X(&ublc);
    WBFL::Geometry::Point2d uxbBL(geomUtil::GetPoint(pnt));
-   WBFL::Geometry::Point2d origin(geomUtil::GetPoint(pnt));
    uxbBL.X() = Xl;
 
    // Lower Cross Beam - Bottom Left
@@ -1489,6 +1488,14 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            pntTop.Release();
        }
 
+       Float64 origX = pPier->ConvertCrossBeamToPierCoordinate(pierID, 0.0);
+       Float64 origY = fnTop.Evaluate(origX) - H1L;
+       WBFL::Geometry::Point2d origin(origX, origY);
+
+       auto doOrigin = WBFL::DManip::PointDisplayObject::Create();
+       doOrigin->SetPosition(origin, false, false);
+       displayList->AddDisplayObject(doOrigin);
+
        CString strBlcLabel = _T("(0, 0)");
 
        auto doBlcLabel = WBFL::DManip::TextBlock::Create();
@@ -1500,8 +1507,9 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
        for (const auto& pnt : vPoints)
        {
-           Float64 Xcl = pnt.Get_X();
-		   Float64 Xp = pPier->ConvertCurbLineToPierCoordinate(pierID, Xcl);
+           Float64 Xxb = pnt.Get_X();
+
+		   Float64 Xp = pPier->ConvertCrossBeamToPierCoordinate(pierID, Xxb);
 
            const Float64 Ytop = fnTop.Evaluate(Xp);
 
@@ -1512,7 +1520,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
 
            CString strPntLabel;
-           strPntLabel.Format(_T("(%s,%s)"), ::FormatDimension(Xp - Xl, pDisplayUnits->GetSpanLengthUnit()), ::FormatDimension(Ytop - Ypoint, pDisplayUnits->GetSpanLengthUnit()));
+           strPntLabel.Format(_T("(%s,%s)"), ::FormatDimension(Xxb, pDisplayUnits->GetSpanLengthUnit()), ::FormatDimension(pnt.Get_Y(), pDisplayUnits->GetSpanLengthUnit()));
 
            auto doPntLabel = WBFL::DManip::TextBlock::Create();
            doPntLabel->SetText(strPntLabel);
@@ -1520,6 +1528,20 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            doPntLabel->SetTextAlign(TA_TOP | TA_CENTER);
            doPntLabel->SetPosition(pp);
            displayList->AddDisplayObject(doPntLabel);
+
+           auto doPoint = WBFL::DManip::PointDisplayObject::Create();
+           doPoint->SetPosition(pp, false, false);
+           displayList->AddDisplayObject(doPoint);
+
+           /////////////>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>for debugging
+
+           WBFL::Geometry::Point2d fromX(origX, Ypoint);
+           WBFL::Geometry::Point2d fromY(Xp, Ytop);
+
+           BuildDimensionLine(displayList, fromX, pp);
+           BuildDimensionLine(displayList, fromY, pp);
+
+           ///////<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
        }
 
    }

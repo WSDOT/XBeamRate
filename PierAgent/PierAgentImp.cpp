@@ -1358,6 +1358,34 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    GET_IFACE(IXBRProject,pProject);
    const xbrPierData& pierData = pProject->GetPierData(pierID);
 
+   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
+   Float64 HU, W2;
+   pierData.GetDiaphragmDimensions(&HU, &W2);
+   std::vector<CPierPointData> vPoints;
+   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+
+   // Create Cross Beam
+   CComPtr<IBasicCrossBeam> bxbeam;
+   CComPtr<IScallopedCrossBeam> sxbeam;
+   CComPtr<IPointDefinedCrossBeam> uxbeam;
+
+   HRESULT hr;
+   if (pierData.GetPierLayoutType() == pgsTypes::pltUserDefined)
+   {
+       hr = uxbeam.CoCreateInstance(CLSID_PointDefinedCrossBeam);
+       pierModel->putref_CrossBeam(uxbeam);
+   }
+   else if (pierData.GetPierLayoutType() == pgsTypes::pltScalloped)
+   {
+       hr = sxbeam.CoCreateInstance(CLSID_ScallopedCrossBeam);
+       pierModel->putref_CrossBeam(sxbeam);
+   }
+   else
+   {
+       hr = bxbeam.CoCreateInstance(CLSID_BasicCrossBeam);
+       pierModel->putref_CrossBeam(bxbeam);
+   }
+
    pgsTypes::PierType pierType = pProject->GetPierType(pierID);
    pierModel->put_Type((PierType)pierType);
 
@@ -1378,6 +1406,15 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
       leftCLO  += pierData.GetBridgeLineOffset();
       rightCLO += pierData.GetBridgeLineOffset();
    }
+
+   pgsTypes::OffsetMeasurementType refColMeasure;
+   ColumnIndexType refColIdx;
+   Float64 refColOffset;
+   pierData.GetRefColumnLocation(&refColMeasure, &refColIdx, &refColOffset);
+
+   //leftCLO = ConvertCrossBeamToPierCoordinate(pierID, leftCLO + X1L + refColOffset);
+   //rightCLO = ConvertCrossBeamToPierCoordinate(pierID, rightCLO);
+
    pierModel->put_CurbLineOffset(qcbLeft, leftCLO);
    pierModel->put_CurbLineOffset(qcbRight,rightCLO);
 
@@ -1442,30 +1479,93 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
 
    pierModel->put_DeckThickness(pierData.GetDeckThickness());
 
-   // Create Cross Beam
-   CComPtr<IBasicCrossBeam> bxbeam;
-   CComPtr<IScallopedCrossBeam> sxbeam;
-   CComPtr<IPointDefinedCrossBeam> uxbeam;
+   // Create Column Layout
+   CComPtr<IColumnLayout> columnLayout;
+   columnLayout.CoCreateInstance(CLSID_ColumnLayout);
 
-   HRESULT hr;
-   if (pierData.GetPierLayoutType() == pgsTypes::pltUserDefined)
+   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
+   SpacingIndexType nSpaces = nColumns - 1;
+   columnLayout->put_Uniform(VARIANT_FALSE);
+   columnLayout->put_ColumnCount(nColumns);
+   for (SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++)
    {
-	   hr = uxbeam.CoCreateInstance(CLSID_PointDefinedCrossBeam);
-   }
-   else if (pierData.GetPierLayoutType() == pgsTypes::pltScalloped)
-   {
-	   hr = sxbeam.CoCreateInstance(CLSID_ScallopedCrossBeam);
-   }
-   else
-   {
-       hr = bxbeam.CoCreateInstance(CLSID_BasicCrossBeam);
+       Float64 space = pProject->GetColumnSpacing(pierID, spaceIdx);
+       columnLayout->put_Spacing(spaceIdx, space);
    }
 
-   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
-   Float64 HU, W2;
-   pierData.GetDiaphragmDimensions(&HU, &W2);
-   std::vector<CPierPointData> vPoints;
-   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+   Float64 OHL = pProject->GetXBeamLeftOverhang(pierID);
+   Float64 OHR = pProject->GetXBeamRightOverhang(pierID);
+   columnLayout->put_Overhang(qcbLeft, OHL);
+   columnLayout->put_Overhang(qcbRight, OHR);
+
+
+   for (ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++)
+   {
+       CColumnData::ColumnHeightMeasurementType colMeasurementType = pProject->GetColumnHeightMeasurementType(pierID, colIdx);
+       Float64 h = pProject->GetColumnHeight(pierID, colIdx);
+
+       CComPtr<IColumn> column;
+       columnLayout->get_Column(colIdx, &column);
+
+       if (colMeasurementType == CColumnData::chtHeight)
+       {
+           column->put_Height(h);
+       }
+       else
+       {
+           column->put_BaseElevation(h);
+       }
+   }
+
+   // Set the reference column.
+   if (refColMeasure == pgsTypes::omtBridge)
+   {
+       // the reference column needs to be measured from the alignment
+       // for the product model
+       Float64 blo = pierData.GetBridgeLineOffset();
+       refColOffset += blo;
+   }
+   columnLayout->SetReferenceColumn(refColIdx, refColOffset);
+
+   //
+   // Create the bearing layout
+   //
+   CComPtr<IBearingLayout> bearingLayout;
+   bearingLayout.CoCreateInstance(CLSID_BearingLayout);
+   IndexType nBearingLines = pierData.GetBearingLineCount();
+   bearingLayout->put_BearingLineCount(nBearingLines);
+   for (IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++)
+   {
+       const xbrBearingLineData& brgLineData = pierData.GetBearingLineData(brgLineIdx);
+
+       bearingLayout->put_BearingLineOffset(brgLineIdx, brgLineData.GetBearingLineOffset());
+
+       pgsTypes::OffsetMeasurementType datum;
+       IndexType refBrgIdx;
+       Float64 refBrgOffset;
+       brgLineData.GetReferenceBearing(&datum, &refBrgIdx, &refBrgOffset);
+
+       if (datum == pgsTypes::omtBridge)
+       {
+           // the reference bearing needs to be measured from the alignment
+           // for the product model
+           refBrgOffset += pierData.GetBridgeLineOffset();
+       }
+       bearingLayout->SetReferenceBearing(brgLineIdx, refBrgIdx, refBrgOffset);
+
+       IndexType nBearings = brgLineData.GetBearingCount();
+       bearingLayout->put_BearingCount(brgLineIdx, nBearings);
+       for (IndexType spaceIdx = 0; spaceIdx < nBearings - 1; spaceIdx++)
+       {
+           Float64 s = brgLineData.GetSpacing(spaceIdx);
+           bearingLayout->put_Spacing(brgLineIdx, spaceIdx, s);
+       }
+   }
+
+   // finish the pier model (need pier to be complete because we need its geometry to layout the rebar)
+
+   pierModel->putref_BearingLayout(bearingLayout);
+   pierModel->putref_ColumnLayout(columnLayout);
 
    if (pierData.GetPierLayoutType() == pgsTypes::pltUserDefined)
    {
@@ -1483,9 +1583,11 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
 	   {
 		   CComPtr<IPoint2d> point;
 		   point.CoCreateInstance(CLSID_Point2d);
-           Float64 Xcl = pointData.Get_X();
+           Float64 Xxb = pointData.Get_X();
 
-           Float64 Xp = ConvertCurbLineToPierCoordinate(pierID, Xcl);
+           Float64 Xp = ConvertCrossBeamToPierCoordinate(pierID, Xxb);
+
+		   Float64 Xcl = ConvertCrossBeamToCurbLineCoordinate(pierID, Xxb);
 
            Float64 Ydeck = GetElevation(pierID, Xcl);
 
@@ -1525,112 +1627,6 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
        bxbeam->put_HU(HU);
        bxbeam->put_W2(W2);
    }
- 
-
-   // Create Column Layout
-   CComPtr<IColumnLayout> columnLayout;
-   columnLayout.CoCreateInstance(CLSID_ColumnLayout);
-
-   ColumnIndexType nColumns = pProject->GetColumnCount(pierID);
-   SpacingIndexType nSpaces = nColumns-1;
-   columnLayout->put_Uniform(VARIANT_FALSE);
-   columnLayout->put_ColumnCount(nColumns);
-   for ( SpacingIndexType spaceIdx = 0; spaceIdx < nSpaces; spaceIdx++ )
-   {
-      Float64 space = pProject->GetColumnSpacing(pierID,spaceIdx);
-      columnLayout->put_Spacing(spaceIdx,space);
-   }
-
-   Float64 X5 = pProject->GetXBeamLeftOverhang(pierID);
-   Float64 X6 = pProject->GetXBeamRightOverhang(pierID);
-   columnLayout->put_Overhang(qcbLeft, X5);
-   columnLayout->put_Overhang(qcbRight,X6);
-
-
-   for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
-   {
-      CColumnData::ColumnHeightMeasurementType colMeasurementType = pProject->GetColumnHeightMeasurementType(pierID,colIdx);
-      Float64 h = pProject->GetColumnHeight(pierID,colIdx);
-
-      CComPtr<IColumn> column;
-      columnLayout->get_Column(colIdx,&column);
-
-      if ( colMeasurementType == CColumnData::chtHeight )
-      {
-         column->put_Height(h);
-      }
-      else
-      {
-         column->put_BaseElevation(h);
-      }
-   }
-
-   // Set the reference column.
-   pgsTypes::OffsetMeasurementType refColMeasure;
-   ColumnIndexType refColIdx;
-   Float64 refColOffset;
-   pierData.GetRefColumnLocation(&refColMeasure,&refColIdx,&refColOffset);
-   if ( refColMeasure == pgsTypes::omtBridge )
-   {
-      // the reference column needs to be measured from the alignment
-      // for the product model
-      Float64 blo = pierData.GetBridgeLineOffset();
-      refColOffset += blo;
-   }
-   columnLayout->SetReferenceColumn(refColIdx,refColOffset);
-
-   //
-   // Create the bearing layout
-   //
-   CComPtr<IBearingLayout> bearingLayout;
-   bearingLayout.CoCreateInstance(CLSID_BearingLayout);
-   IndexType nBearingLines = pierData.GetBearingLineCount();
-   bearingLayout->put_BearingLineCount(nBearingLines);
-   for (IndexType brgLineIdx = 0; brgLineIdx < nBearingLines; brgLineIdx++ )
-   {
-      const xbrBearingLineData& brgLineData = pierData.GetBearingLineData(brgLineIdx);
-
-      bearingLayout->put_BearingLineOffset(brgLineIdx,brgLineData.GetBearingLineOffset());
-
-      pgsTypes::OffsetMeasurementType datum;
-      IndexType refBrgIdx;
-      Float64 refBrgOffset;
-      brgLineData.GetReferenceBearing(&datum,&refBrgIdx,&refBrgOffset);
-
-      if ( datum == pgsTypes::omtBridge )
-      {
-         // the reference bearing needs to be measured from the alignment
-         // for the product model
-         refBrgOffset += pierData.GetBridgeLineOffset();
-      }
-      bearingLayout->SetReferenceBearing(brgLineIdx,refBrgIdx,refBrgOffset);
-
-      IndexType nBearings = brgLineData.GetBearingCount();
-      bearingLayout->put_BearingCount(brgLineIdx,nBearings);
-      for ( IndexType spaceIdx = 0; spaceIdx < nBearings-1; spaceIdx++ )
-      {
-         Float64 s = brgLineData.GetSpacing(spaceIdx);
-         bearingLayout->put_Spacing(brgLineIdx,spaceIdx,s);
-      }
-   }
-
-   // finish the pier model (need pier to be complete because we need its geometry to layout the rebar)
-
-   if (pierData.GetPierLayoutType() == pgsTypes::pltUserDefined)
-   {
-       pierModel->putref_CrossBeam(uxbeam);
-   }
-   else if (pierData.GetPierLayoutType() == pgsTypes::pltScalloped)
-   {
-       pierModel->putref_CrossBeam(sxbeam);
-   }
-   else
-   {
-       pierModel->putref_CrossBeam(bxbeam);
-   }
-
-   pierModel->putref_BearingLayout(bearingLayout);
-   pierModel->putref_ColumnLayout(columnLayout);
 
    // XBeam Rebar Layout
    CComPtr<IRebarLayout> rebarLayout;
