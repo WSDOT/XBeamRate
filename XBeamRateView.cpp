@@ -1401,38 +1401,6 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
        //Radius and depth of bottom scallop
        // R = radius of bottom scallop arcs (same for both left and right)
        // D = depth of lower cross beam at column center
-
-       for (ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++)
-       {
-           // Left column arc center
-           Float64 XxbCol = pPier->GetColumnLocation(pierID, colIdx);
-           Float64 XpCol = pPier->ConvertCrossBeamToPierCoordinate(pierID, XxbCol);
-
-           // Get the top surface endpoints to interpolate Y at column center
-           pnt.Release();
-           topLowerXBeamProfile->get_Item(0, &pnt);
-           Float64 X0, Y0;
-           pnt->get_X(&X0);
-           pnt->get_Y(&Y0);
-
-           pnt.Release();
-           IndexType nPoints;
-           topLowerXBeamProfile->get_Count(&nPoints);
-           topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
-           Float64 Xn, Yn;
-           pnt->get_X(&Xn);
-           pnt->get_Y(&Yn);
-
-           // Interpolate Y value at column center accounting for slope
-           Float64 YtopCol = pPier->GetTopColumnElevation(pierID, colIdx);
-
-           // Create points for depth dimension (depth at column center)
-           // Depth is measured from the top of lower cross beam to the bottom of the scallop
-           WBFL::Geometry::Point2d depthBottomPoint(XpCol, YtopCol);
-           WBFL::Geometry::Point2d depthTopPoint(XpCol, YtopCol + D);
-           BuildDimensionLine(displayList, depthTopPoint, depthBottomPoint); // D Dimension
-
-       }
        
        for (ColumnIndexType colIdx = 0;
            colIdx + 1 < nColumns; colIdx++)
@@ -1445,30 +1413,88 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            Float64 XpMid =
                pPier->ConvertCrossBeamToPierCoordinate(pierID, Xmid);
 
-           CComPtr<IShape> shape;
+           Float64 XpCol =
+               pPier->ConvertCrossBeamToPierCoordinate(pierID, X1);
+
+           CComPtr<IShape> shape1;
            pSectProp->GetXBeamShape(
                pierID,
                pgsTypes::Stage1,
                xbrPointOfInterest(INVALID_ID, Xmid),
-               &shape);
+               &shape1);
 
-           CComQIPtr<IXYPosition> position(shape);
+           CComQIPtr<IXYPosition> position1(shape1);
 
-           CComPtr<IPoint2d> pntTop;
-           CComPtr<IPoint2d> pntBot;
+           CComPtr<IShape> shape2;
+           pSectProp->GetXBeamShape(
+               pierID,
+               pgsTypes::Stage1,
+               xbrPointOfInterest(INVALID_ID, X1),
+               &shape2);
 
-           position->get_LocatorPoint(lpTopCenter, &pntTop);
-           position->get_LocatorPoint(lpBottomCenter, &pntBot);
+           CComQIPtr<IXYPosition> position2(shape2);
 
-           Float64 Ytop, Ybot;
-           pntTop->get_Y(&Ytop);
-           pntBot->get_Y(&Ybot);
+           CComPtr<IPoint2d> pntTop1;
+           CComPtr<IPoint2d> pntBot1;
 
-           WBFL::Geometry::Point2d top(XpMid, Ytop);
-           WBFL::Geometry::Point2d bottom(XpMid, Ybot);
+           position1->get_LocatorPoint(lpTopCenter, &pntTop1);
+           position1->get_LocatorPoint(lpBottomCenter, &pntBot1);
 
-           BuildDimensionLine(displayList, top, bottom);
+           Float64 Ytop1, Ybot1;
+           pntTop1->get_Y(&Ytop1);
+           pntBot1->get_Y(&Ybot1);
+
+           WBFL::Geometry::Point2d top1(XpMid, Ytop1);
+           WBFL::Geometry::Point2d bottom1(XpMid, Ybot1);
+
+           BuildDimensionLine(displayList, top1, bottom1);
+
+           CComPtr<IPoint2d> pntTop2;
+           CComPtr<IPoint2d> pntBot2;
+
+           position2->get_LocatorPoint(lpTopCenter, &pntTop2);
+           position2->get_LocatorPoint(lpBottomCenter, &pntBot2);
+
+           Float64 Ytop2, Ybot2;
+           pntTop2->get_Y(&Ytop2);
+           pntBot2->get_Y(&Ybot2);
+
+           WBFL::Geometry::Point2d top2(XpCol, Ytop2);
+           WBFL::Geometry::Point2d bottom2(XpCol, Ybot2);
+
+           BuildDimensionLine(displayList, top2, bottom2);
        }
+
+       // Depth dimension at the last column 
+       Float64 Xlast = pPier->GetColumnLocation(pierID, nColumns - 1);
+
+       Float64 XpLast =
+           pPier->ConvertCrossBeamToPierCoordinate(pierID, Xlast);
+
+       CComPtr<IShape> shapeLast;
+       pSectProp->GetXBeamShape(
+           pierID,
+           pgsTypes::Stage1,
+           xbrPointOfInterest(INVALID_ID, Xlast),
+           &shapeLast);
+
+       CComQIPtr<IXYPosition> positionLast(shapeLast);
+
+       CComPtr<IPoint2d> pntTopLast;
+       CComPtr<IPoint2d> pntBotLast;
+
+       positionLast->get_LocatorPoint(lpTopCenter, &pntTopLast);
+       positionLast->get_LocatorPoint(lpBottomCenter, &pntBotLast);
+
+       Float64 YtopLast, YbotLast;
+       pntTopLast->get_Y(&YtopLast);
+       pntBotLast->get_Y(&YbotLast);
+
+       WBFL::Geometry::Point2d topLast(XpLast, YtopLast);
+       WBFL::Geometry::Point2d bottomLast(XpLast, YbotLast);
+
+       BuildDimensionLine(displayList, topLast, bottomLast);
+
 
        GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
 
