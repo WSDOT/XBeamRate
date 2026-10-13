@@ -1667,6 +1667,30 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    WBFL::Geometry::Point2d pntRight(ubrc,YbotColMin);
    BuildDimensionLine(displayList,pntRight,pntLeft); // OHR Dimension
 
+   // Reference column to alignment/bridge line dimension 
+
+   pgsTypes::OffsetMeasurementType refColMeasure;
+   ColumnIndexType refColIdx;
+   Float64 refColOffset;
+
+   pierData.GetRefColumnLocation(&refColMeasure, &refColIdx, &refColOffset);
+
+   Float64 XxbRefCol = pPier->GetColumnLocation(pierID, refColIdx);
+   Float64 XpRefCol =
+       pPier->ConvertCrossBeamToPierCoordinate(pierID, XxbRefCol);
+
+   // Alignment/bridge line is at X = 0 in pier coordinates
+   Float64 XpAlignment = 0.0;
+
+   // Position dimension above bottom column-spacing dimensions
+   Float64 Ydim = YbotColMin + 3.0;
+
+   WBFL::Geometry::Point2d pntRefCol(XpRefCol, Ydim);
+   WBFL::Geometry::Point2d pntAlignment(XpAlignment, Ydim);
+
+   BuildDimensionLine(displayList, pntRefCol, pntAlignment);
+
+
    //
    // Cross section dimensions
    //
