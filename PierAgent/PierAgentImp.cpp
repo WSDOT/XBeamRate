@@ -289,14 +289,7 @@ Float64 CPierAgentImp::GetColumnLocation(PierIDType pierID,IndexType colIdx) con
    pier->get_ColumnLayout(&columnLayout);
 
    Float64 Xxb;
-   columnLayout->get_ColumnLocation(colIdx,&Xxb); // this is the location of the column relative to the top of the lower cross beam
-
-   GET_IFACE(IXBRProject, pProject);
-   const xbrPierData& pierData = pProject->GetPierData(pierID);
-   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
-   std::vector<CPierPointData> vPoints;
-   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
-   Xxb -= X1L; // now it is the location in cross beam coordinates
+   columnLayout->get_ColumnLocation(colIdx,&Xxb);
 
    return Xxb;
 }
