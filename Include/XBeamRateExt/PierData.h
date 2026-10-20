@@ -161,6 +161,14 @@ public:
    Float64 GetColumnSpacing(SpacingIndexType spaceIdx) const;
    Float64& GetColumnSpacing(SpacingIndexType spaceIdx);
 
+   // Scallop depths are indexed by column; radii by the bay to its right.
+   void SetColumnScallopDepth(ColumnIndexType colIdx, Float64 depth);
+   Float64 GetColumnScallopDepth(ColumnIndexType colIdx) const;
+   void SetColumnScallopRadius(ColumnIndexType colIdx, Float64 radius);
+   Float64 GetColumnScallopRadius(ColumnIndexType colIdx) const;
+   void SetXBeamOverhangRadius(pgsTypes::SideType side, Float64 radius);
+   Float64 GetXBeamOverhangRadius(pgsTypes::SideType side) const;
+
    // Cross beam overhangs
    void SetXBeamOverhangs(Float64 OHL,Float64 OHR);
    void GetXBeamOverhangs(Float64* pOHL,Float64* pOHR) const;
@@ -249,7 +257,10 @@ protected:
    Float64 m_X2L, m_X2R;
    Float64 m_XW;
    Float64 m_XR;
-   Float64 m_XD;
+   Float64 m_XD; // legacy uniform depth, retained for older file migration
+   Float64 m_OverhangRadius[2];
+   std::vector<Float64> m_ScallopDepths;
+   std::vector<Float64> m_ScallopRadii;
    std::vector<CPierPointData> m_vPierPoints;
 
    // Column Layout

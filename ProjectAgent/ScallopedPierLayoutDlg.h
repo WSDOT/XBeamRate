@@ -82,13 +82,13 @@ protected:
 	void FillRefColumnComboBox(ColumnIndexType nColumns=INVALID_INDEX);
 	void FillHeightMeasureComboBox();
 	void FillTransverseLocationComboBox();
+    void ValidateScallopGeometry(CDataExchange* pDX);
 
 	ColumnIndexType m_RefColumnIdx;
 	Float64 m_TransverseOffset;
 	pgsTypes::OffsetMeasurementType m_TransverseOffsetMeasurement;
 	Float64 m_XBeamWidth;
-	Float64 m_XBeamRadius;
-	Float64 m_XBeamDepth;
+	Float64 m_XBeamOverhangRadius[2];
 	Float64 m_XBeamHeight[2];
 	Float64 m_XBeamTaperHeight[2];
 	Float64 m_XBeamTaperLength[2];

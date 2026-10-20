@@ -1599,8 +1599,20 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
 	   sxbeam->put_W1(W);
 	   sxbeam->put_HU(HU);
 	   sxbeam->put_W2(W2);
-	   sxbeam->put_D(D);
-	   sxbeam->put_R(R);
+       sxbeam->put_RL(pierData.GetXBeamOverhangRadius(pgsTypes::stLeft));
+       sxbeam->put_RR(pierData.GetXBeamOverhangRadius(pgsTypes::stRight));
+       for (ColumnIndexType colIdx = 0; colIdx < nColumns; ++colIdx)
+       {
+           hr = sxbeam->put_ColumnScallopDepth(colIdx, pierData.GetColumnScallopDepth(colIdx));
+           if (FAILED(hr))
+               throw hr;
+           if (colIdx + 1 < nColumns)
+           {
+               hr = sxbeam->put_ColumnScallopRadius(colIdx, pierData.GetColumnScallopRadius(colIdx));
+               if (FAILED(hr))
+                   throw hr;
+           }
+       }
    }
    else
    {

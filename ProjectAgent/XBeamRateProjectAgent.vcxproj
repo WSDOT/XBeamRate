@@ -270,6 +270,7 @@
     <ClInclude Include="RatingOptionsPage.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="ScallopedPierLayoutDlg.h" />
+    <ClInclude Include="ScallopGeometry.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="SuperstructureLayoutPage.h" />
     <ClInclude Include="txnEditOptions.h" />

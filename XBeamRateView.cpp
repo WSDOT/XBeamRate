@@ -1399,8 +1399,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    else if (pierLayoutType == pgsTypes::pltScalloped)
    {
        //Radius and depth of bottom scallop
-       // R = radius of bottom scallop arcs (same for both left and right)
-       // D = depth of lower cross beam at column center
+       // Depths follow the actual bottom profile at each column and bay.
        
        for (ColumnIndexType colIdx = 0;
            colIdx + 1 < nColumns; colIdx++)
@@ -1498,10 +1497,6 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
        GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
 
-       CString strRadius;
-       strRadius.Format(_T("%s"),
-           FormatDimension(R, pDisplayUnits->GetSpanLengthUnit()));
-
        for (ColumnIndexType arcIdx = 0; arcIdx <= nColumns; ++arcIdx)
        {
            Float64 Xleft, Xright;
@@ -1566,9 +1561,20 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
            // Small offset below the chord.
            WBFL::Geometry::Point2d ppRad(XpMid, Ychord - 0.5);
 
+           const Float64 radius = arcIdx == 0
+               ? pierData.GetXBeamOverhangRadius(pgsTypes::stLeft)
+               : arcIdx == nColumns
+                   ? pierData.GetXBeamOverhangRadius(pgsTypes::stRight)
+                   : pierData.GetColumnScallopRadius(arcIdx - 1);
+           const CString strRadius = FormatDimension(radius, pDisplayUnits->GetSpanLengthUnit());
+
            CString strRadiusLabel;
-           strRadiusLabel.Format(
-               _T("R%d = %s"), arcIdx + 1, strRadius);
+           if (arcIdx == 0)
+               strRadiusLabel.Format(_T("RL = %s"), strRadius.GetString());
+           else if (arcIdx == nColumns)
+               strRadiusLabel.Format(_T("RR = %s"), strRadius.GetString());
+           else
+               strRadiusLabel.Format(_T("R%d = %s"), arcIdx, strRadius.GetString());
 
            auto doRadiusLabel = WBFL::DManip::TextBlock::Create();
            doRadiusLabel->SetText(strRadiusLabel);

@@ -26,6 +26,7 @@
 #include "ColumnLayoutGrid.h"
 #include <EAF\EAFDisplayUnits.h>
 #include <PGSuperUIUtil.h>
+#include <cmath>
 
 
 GRID_IMPLEMENT_REGISTER(CColumnLayoutGrid, CS_DBLCLKS, 0, 0, 0);
@@ -64,7 +65,7 @@ void CColumnLayoutGrid::CustomInit()
    SetMergeCellsMode(gxnMergeDelayEval);
 
    const int num_rows = 0;
-   const int num_cols = 6;
+   const int num_cols = m_Scalloped ? 8 : 6;
 
 	SetRowCount(num_rows);
 	SetColCount(num_cols);
@@ -151,6 +152,16 @@ void CColumnLayoutGrid::CustomInit()
 		);
 
 
+   if (m_Scalloped)
+   {
+      cv.Format(_T("Bay Radius\n(%s)"), pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
+      SetStyleRange(CGXRange(0, 7), CGXStyle().SetWrapText(TRUE).SetEnabled(FALSE)
+         .SetHorizontalAlignment(DT_CENTER).SetVerticalAlignment(DT_VCENTER).SetValue(cv));
+      cv.Format(_T("Scallop Depth\n(%s)"), pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure.UnitTag().c_str());
+      SetStyleRange(CGXRange(0, 8), CGXStyle().SetWrapText(TRUE).SetEnabled(FALSE)
+         .SetHorizontalAlignment(DT_CENTER).SetVerticalAlignment(DT_VCENTER).SetValue(cv));
+   }
+
    // make it so that text fits correctly in header row
 	ResizeRowHeightsToFit(CGXRange(0,0,0,num_cols));
 
@@ -219,6 +230,20 @@ void CColumnLayoutGrid::AddColumn()
       AddColumn(columnData,0);
    }
 
+   if (m_Scalloped)
+   {
+      auto pBroker = EAFGetBroker();
+      GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+      const auto unit = pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure;
+      if (nRows > 0)
+         SetGeometryCell(nRows, 7, WBFL::Units::ConvertFromSysUnits(
+            WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet), unit));
+      SetGeometryCell(nRows + 1, 8, WBFL::Units::ConvertFromSysUnits(
+         WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet), unit));
+      UpdateLastRowStyles();
+      ResizeColWidthsToFit(CGXRange(0, 0, GetRowCount(), GetColCount()));
+   }
+
    GetParam()->SetLockReadOnly(TRUE);
    GetParam( )->EnableUndo(TRUE);
 }
@@ -233,7 +258,8 @@ void CColumnLayoutGrid::RemoveSelectedColumns()
    for ( int r = nSelRows-1; r >= 0; r-- )
    {
       ROWCOL selRow = selRows[r];
-      RemoveRows(selRow,selRow);
+      if (GetRowCount() > 1)
+         RemoveRows(selRow,selRow);
    }
 
    ROWCOL nRows = GetRowCount();
@@ -248,6 +274,8 @@ void CColumnLayoutGrid::RemoveSelectedColumns()
             );
    }
 
+   UpdateLastRowStyles();
+
    GetParam()->SetLockReadOnly(TRUE);
 	GetParam( )->EnableUndo(TRUE);
 }
@@ -255,6 +283,8 @@ void CColumnLayoutGrid::RemoveSelectedColumns()
 void CColumnLayoutGrid::GetColumnData(xbrPierData& pier)
 {
    ROWCOL nRows = GetRowCount();
+   if (nRows == 0)
+      return;
    pier.SetColumnCount((ColumnIndexType)nRows);
    for ( ROWCOL row = 1; row <= nRows; row++ )
    {
@@ -263,6 +293,17 @@ void CColumnLayoutGrid::GetColumnData(xbrPierData& pier)
       Float64 S;
       GetColumnData(row,&column,&S);
       pier.SetColumnData(colIdx,column);
+      if (m_Scalloped)
+      {
+         auto pBroker = EAFGetBroker();
+         GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+         const auto unit = pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure;
+         pier.SetColumnScallopDepth(colIdx, WBFL::Units::ConvertToSysUnits(
+            _tstof(GetCellValue(row, 8)), unit));
+         if (row < nRows)
+            pier.SetColumnScallopRadius(colIdx, WBFL::Units::ConvertToSysUnits(
+               _tstof(GetCellValue(row, 7)), unit));
+      }
       if ( row < nRows )
       {
          pier.SetColumnSpacing(colIdx,S);
@@ -298,10 +339,52 @@ void CColumnLayoutGrid::SetColumnData(const xbrPierData& pier)
       }
    }
 
+   if (m_Scalloped)
+   {
+      auto pBroker = EAFGetBroker();
+      GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+      const auto unit = pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure;
+      for (ROWCOL row = 1; row <= GetRowCount(); ++row)
+      {
+         SetGeometryCell(row, 8, WBFL::Units::ConvertFromSysUnits(
+            pier.GetColumnScallopDepth(row - 1), unit));
+         if (row < GetRowCount())
+            SetGeometryCell(row, 7, WBFL::Units::ConvertFromSysUnits(
+               pier.GetColumnScallopRadius(row - 1), unit));
+      }
+      UpdateLastRowStyles();
+   }
+
    ResizeColWidthsToFit(CGXRange(0,0,GetRowCount(),GetColCount()));
 
    GetParam()->SetLockReadOnly(TRUE);
    GetParam()->EnableUndo(TRUE);
+}
+
+void CColumnLayoutGrid::SetGeometryCell(ROWCOL row, ROWCOL col, Float64 value)
+{
+   SetStyleRange(CGXRange(row, col), CGXStyle().SetEnabled(TRUE).SetReadOnly(FALSE)
+      .SetInterior(::GetSysColor(COLOR_WINDOW)).SetTextColor(::GetSysColor(COLOR_WINDOWTEXT))
+      .SetHorizontalAlignment(DT_RIGHT).SetValue(value));
+}
+
+void CColumnLayoutGrid::UpdateLastRowStyles()
+{
+   const ROWCOL nRows = GetRowCount();
+   if (nRows == 0)
+      return;
+   for (ROWCOL row = 1; row <= nRows; ++row)
+   {
+      for (ROWCOL col : {ROWCOL(6), ROWCOL(7)})
+      {
+         if (col == 7 && !m_Scalloped)
+            continue;
+         const BOOL enabled = row < nRows;
+         SetStyleRange(CGXRange(row, col), CGXStyle().SetEnabled(enabled).SetReadOnly(!enabled)
+            .SetInterior(::GetSysColor(enabled ? COLOR_WINDOW : COLOR_BTNFACE))
+            .SetTextColor(::GetSysColor(enabled ? COLOR_WINDOWTEXT : COLOR_BTNFACE)));
+      }
+   }
 }
 
 void CColumnLayoutGrid::SetColumnData(ROWCOL row,const CColumnData& column,Float64 S)
@@ -525,6 +608,30 @@ void CColumnLayoutGrid::DDV_ColumnGrid(CDataExchange* pDX, CColumnLayoutGrid& gr
         {
             AfxMessageBox(_T("The pier must have at least one column"), MB_OK | MB_ICONEXCLAMATION);
             pDX->Fail();
+        }
+
+        if (grid.m_Scalloped)
+        {
+            for (ROWCOL row = 1; row <= grid.GetRowCount(); ++row)
+            {
+                for (ROWCOL col : {ROWCOL(6), ROWCOL(7), ROWCOL(8)})
+                {
+                    if (row == grid.GetRowCount() && col != 8)
+                        continue;
+                    CString text = grid.GetCellValue(row, col);
+                    text.Trim();
+                    TCHAR* end = nullptr;
+                    const Float64 value = _tcstod(text.GetString(), &end);
+                    if (text.IsEmpty() || end == text.GetString() || *end != 0 ||
+                        !std::isfinite(value) || value <= 0.0)
+                    {
+                        grid.SetCurrentCell(row, col);
+                        pDX->PrepareCtrl(grid.GetDlgCtrlID());
+                        AfxMessageBox(_T("Column spacing, bay radii, and scallop depths must be positive numbers."));
+                        pDX->Fail();
+                    }
+                }
+            }
         }
 
         if (grid.GetRowCount() == 1)

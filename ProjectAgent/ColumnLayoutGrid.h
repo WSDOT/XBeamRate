@@ -44,6 +44,7 @@ public:
 
 // Operations
 public:
+   void SetScalloped(bool scalloped) { m_Scalloped = scalloped; }
    void AddColumn();
    void RemoveSelectedColumns();
 
@@ -75,6 +76,9 @@ protected:
    virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol) override;
 
 private:
+   bool m_Scalloped = false;
+   void SetGeometryCell(ROWCOL row, ROWCOL col, Float64 value);
+   void UpdateLastRowStyles();
    void AddColumn(const CColumnData& column,Float64 S);
    void SetColumnData(ROWCOL row,const CColumnData& column,Float64 S);
    void GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* pS);

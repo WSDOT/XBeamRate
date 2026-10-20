@@ -3439,8 +3439,13 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pPier->GetXBeamDimensions(pgsTypes::stLeft, &H1L,&H2L,&X2L,&X1L);
    pPier->GetXBeamDimensions(pgsTypes::stRight,&H1R,&H2R,&X2R,&X1R);
    W = pPier->GetXBeamWidth();
-   D = pPier->GetXBeamDepth();
-   R = pPier->GetXBeamRadius();
+   // Keep legacy uniform fields for file compatibility; scalloped geometry
+   // uses the per-column/per-bay data copied below.
+   D = pPier->GetColumnScallopDepth(0);
+   R = pPier->GetXBeamOverhangRadius(pgsTypes::stLeft);
+   pierData.SetXBeamOverhangRadius(pgsTypes::stLeft, R);
+   pierData.SetXBeamOverhangRadius(pgsTypes::stRight,
+       pPier->GetXBeamOverhangRadius(pgsTypes::stRight));
    std::vector<CPierPointData> vPierPoints = pPier->GetPierPointData();
    pierData.SetLowerXBeamDimensions(H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D, vPierPoints);
 
@@ -3488,6 +3493,12 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    // Column Properties
    ColumnIndexType nColumns = pPier->GetColumnCount();
    pierData.SetColumnCount(nColumns);
+   for (ColumnIndexType colIdx = 0; colIdx < nColumns; ++colIdx)
+   {
+       pierData.SetColumnScallopDepth(colIdx, pPier->GetColumnScallopDepth(colIdx));
+       if (colIdx + 1 < nColumns)
+           pierData.SetColumnScallopRadius(colIdx, pPier->GetColumnScallopRadius(colIdx));
+   }
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       if ( colIdx < nColumns-1 )

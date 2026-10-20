@@ -62,6 +62,10 @@ xbrPierData::xbrPierData()
    m_XR = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
    m_XD = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
 
+   m_OverhangRadius[pgsTypes::stLeft] = m_XR;
+   m_OverhangRadius[pgsTypes::stRight] = m_XR;
+   m_ScallopDepths.push_back(m_XD);
+
    CColumnData column;
    m_vColumnData.push_back(column);
 
@@ -499,16 +503,17 @@ Float64& xbrPierData::GetRefColumnOffset()
 void xbrPierData::SetColumnCount(ColumnIndexType nColumns)
 {
    ATLASSERT(0 < nColumns && nColumns != INVALID_INDEX);
-   if ( m_vColumnData.size() != nColumns )
-   {
-      m_vColumnData.resize(nColumns,m_vColumnData.back());
-      if ( m_vColumnSpacing.size() == 0 && nColumns != 1)
-      {
-         m_vColumnSpacing.push_back(WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet));
-      }
-      m_vColumnSpacing.resize(nColumns-1,m_vColumnSpacing.back());
-   }
-   ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
+   if (nColumns == 0 || nColumns == INVALID_INDEX)
+      return;
+
+   const CColumnData column = m_vColumnData.empty() ? CColumnData() : m_vColumnData.back();
+   const Float64 spacing = m_vColumnSpacing.empty()
+      ? WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet)
+      : m_vColumnSpacing.back();
+   m_vColumnData.resize(nColumns, column);
+   m_vColumnSpacing.resize(nColumns - 1, spacing);
+   m_ScallopDepths.resize(nColumns, WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+   m_ScallopRadii.resize(nColumns - 1, WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
 }
 
 ColumnIndexType xbrPierData::GetColumnCount() const
@@ -520,11 +525,19 @@ void xbrPierData::AddColumn(const CColumnData& columnData,Float64 spacing)
 {
    m_vColumnData.push_back(columnData);
    m_vColumnSpacing.push_back(spacing);
+   m_ScallopDepths.push_back(WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+   m_ScallopRadii.push_back(WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
    ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 }
 
 void xbrPierData::RemoveColumn(ColumnIndexType colIdx)
 {
+   if (m_vColumnData.size() <= 1 || colIdx >= m_vColumnData.size())
+      return;
+   m_ScallopDepths.erase(m_ScallopDepths.begin() + colIdx);
+   const ColumnIndexType bayIdx = colIdx == m_vColumnData.size() - 1 ? colIdx - 1 : colIdx;
+   m_ScallopRadii.erase(m_ScallopRadii.begin() + bayIdx);
+
    // always remove the spacing to the right of the column, unless
    // this is the last column. If this is the last column remove
    // the left spacing
@@ -554,6 +567,42 @@ const CColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx) const
 CColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx)
 {
    return m_vColumnData[colIdx];
+}
+
+void xbrPierData::SetColumnScallopDepth(ColumnIndexType colIdx, Float64 depth)
+{
+   ATLASSERT(colIdx < m_ScallopDepths.size());
+   m_ScallopDepths.at(colIdx) = depth;
+}
+
+Float64 xbrPierData::GetColumnScallopDepth(ColumnIndexType colIdx) const
+{
+   ATLASSERT(colIdx < m_ScallopDepths.size());
+   return m_ScallopDepths.at(colIdx);
+}
+
+void xbrPierData::SetColumnScallopRadius(ColumnIndexType colIdx, Float64 radius)
+{
+   ATLASSERT(colIdx < m_ScallopRadii.size());
+   m_ScallopRadii.at(colIdx) = radius;
+}
+
+Float64 xbrPierData::GetColumnScallopRadius(ColumnIndexType colIdx) const
+{
+   ATLASSERT(colIdx < m_ScallopRadii.size());
+   return m_ScallopRadii.at(colIdx);
+}
+
+void xbrPierData::SetXBeamOverhangRadius(pgsTypes::SideType side, Float64 radius)
+{
+   ATLASSERT(side == pgsTypes::stLeft || side == pgsTypes::stRight);
+   m_OverhangRadius[side] = radius;
+}
+
+Float64 xbrPierData::GetXBeamOverhangRadius(pgsTypes::SideType side) const
+{
+   ATLASSERT(side == pgsTypes::stLeft || side == pgsTypes::stRight);
+   return m_OverhangRadius[side];
 }
 
 void xbrPierData::SetColumnSpacing(SpacingIndexType spaceIdx,Float64 S)
@@ -829,7 +878,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
       pStrSave->put_Property(_T("W"),CComVariant(m_W));
    pStrSave->EndUnit(); // Diaphragm
 
-   pStrSave->BeginUnit(_T("LowerCrossBeam"),2.0);
+   pStrSave->BeginUnit(_T("LowerCrossBeam"),3.0);
       pStrSave->put_Property(_T("PierLayoutType"),CComVariant(m_PierLayoutType));
       pStrSave->put_Property(_T("H1L"),CComVariant(m_H1L));
       pStrSave->put_Property(_T("H1R"),CComVariant(m_H1R));
@@ -841,6 +890,13 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
       pStrSave->put_Property(_T("X2R"),CComVariant(m_X2R));
       pStrSave->put_Property(_T("XR"), CComVariant(m_XR));
       pStrSave->put_Property(_T("XD"), CComVariant(m_XD));
+      pStrSave->put_Property(_T("RL"), CComVariant(m_OverhangRadius[pgsTypes::stLeft]));
+      pStrSave->put_Property(_T("RR"), CComVariant(m_OverhangRadius[pgsTypes::stRight]));
+      pStrSave->put_Property(_T("ScallopColumnCount"), CComVariant(GetColumnCount()));
+      for (Float64 depth : m_ScallopDepths)
+         pStrSave->put_Property(_T("ScallopDepth"), CComVariant(depth));
+      for (Float64 radius : m_ScallopRadii)
+         pStrSave->put_Property(_T("ScallopRadius"), CComVariant(radius));
 
       pStrSave->put_Property(_T("PierPointCount"), CComVariant(m_vPierPoints.size()));
       std::vector<CPierPointData>::iterator ppIterBegin = m_vPierPoints.begin();
@@ -909,6 +965,9 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
 HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress> pProgress)
 {
    USES_CONVERSION;
+   Float64 scallopVersion = 1.0;
+   m_XR = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
+   m_XD = WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet);
    CHRException hr;
    try
    {
@@ -1028,6 +1087,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
 
       {
          hr = pStrLoad->BeginUnit(_T("LowerCrossBeam"));
+         pStrLoad->get_Version(&scallopVersion);
 
          Float64 version;
          pStrLoad->get_Version(&version);
@@ -1111,6 +1171,35 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
              var.vt = VT_R8;
              hr = pStrLoad->get_Property(_T("XD"), &var);
              m_XD = var.dblVal;
+
+             if (version >= 3.0)
+             {
+                 var.vt = VT_R8;
+                 hr = pStrLoad->get_Property(_T("RL"), &var);
+                 m_OverhangRadius[pgsTypes::stLeft] = var.dblVal;
+                 var.vt = VT_R8;
+                 hr = pStrLoad->get_Property(_T("RR"), &var);
+                 m_OverhangRadius[pgsTypes::stRight] = var.dblVal;
+                 var.vt = VT_INDEX;
+                 hr = pStrLoad->get_Property(_T("ScallopColumnCount"), &var);
+                 const ColumnIndexType count = VARIANT2INDEX(var);
+                 if (count == 0 || count == INVALID_INDEX)
+                     throw E_FAIL;
+                 m_ScallopDepths.resize(count);
+                 m_ScallopRadii.resize(count - 1);
+                 for (auto& depth : m_ScallopDepths)
+                 {
+                     var.vt = VT_R8;
+                     hr = pStrLoad->get_Property(_T("ScallopDepth"), &var);
+                     depth = var.dblVal;
+                 }
+                 for (auto& radius : m_ScallopRadii)
+                 {
+                     var.vt = VT_R8;
+                     hr = pStrLoad->get_Property(_T("ScallopRadius"), &var);
+                     radius = var.dblVal;
+                 }
+             }
 
              m_vPierPoints.clear();
              var.vt = VT_INDEX;
@@ -1205,6 +1294,18 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 
          hr = pStrLoad->EndUnit(); // Columns
+         if (scallopVersion < 3.0)
+         {
+             m_OverhangRadius[pgsTypes::stLeft] = m_XR;
+             m_OverhangRadius[pgsTypes::stRight] = m_XR;
+             m_ScallopDepths.assign(m_vColumnData.size(), m_XD);
+             m_ScallopRadii.assign(m_vColumnSpacing.size(), m_XR);
+         }
+         else if (m_ScallopDepths.size() != m_vColumnData.size() ||
+                  m_ScallopRadii.size() != m_vColumnSpacing.size())
+         {
+             throw E_FAIL;
+         }
       }
 
       {
@@ -1324,6 +1425,10 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_XW = rOther.m_XW;
    m_XR = rOther.m_XR;
    m_XD = rOther.m_XD;
+   m_OverhangRadius[pgsTypes::stLeft] = rOther.m_OverhangRadius[pgsTypes::stLeft];
+   m_OverhangRadius[pgsTypes::stRight] = rOther.m_OverhangRadius[pgsTypes::stRight];
+   m_ScallopDepths = rOther.m_ScallopDepths;
+   m_ScallopRadii = rOther.m_ScallopRadii;
    m_vPierPoints = rOther.m_vPierPoints;
 
    m_vColumnData = rOther.m_vColumnData;
