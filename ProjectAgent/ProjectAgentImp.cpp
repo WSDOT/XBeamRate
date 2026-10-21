@@ -2225,15 +2225,15 @@ const CConcreteMaterial& CProjectAgentImp::GetConcrete(PierIDType pierID) const
    return GetPrivatePierData(pierID).GetConcreteMaterial();
 }
 
-void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l,Float64 x1r,Float64 x2l,Float64 x2r,Float64 w,Float64 r,Float64 d,std::vector<CPierPointData> pp)
+void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l,Float64 x1r,Float64 x2l,Float64 x2r,Float64 w,std::vector<CPierPointData> pp)
 {
-   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1l,h1r,h2l,h2r,x1l,x1r,x2l,x2r,w,r,d,pp);
+   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1l,h1r,h2l,h2r,x1l,x1r,x2l,x2r,w,pp);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID, Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, Float64* pr, Float64* d, std::vector<CPierPointData>* pp) const
+void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID, Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pp) const
 {
-   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1l,ph1r, ph2l, ph2r, px1l, px1r, px2l, px2r, pw, pr, d, pp);
+   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1l,ph1r, ph2l, ph2r, px1l, px1r, px2l, px2r, pw, pp);
 }
 
 Float64 CProjectAgentImp::GetXBeamLeftOverhang(PierIDType pierID) const
@@ -3435,19 +3435,16 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    const auto& pierLayoutType = pPier->GetPierLayoutType();
    pierData.SetPierLayoutType(pierLayoutType);
    Float64 H1L, H2L, H1R, H2R;
-   Float64 X2L, X1L, X2R, X1R, W, D, R;
+   Float64 X2L, X1L, X2R, X1R, W;
    pPier->GetXBeamDimensions(pgsTypes::stLeft, &H1L,&H2L,&X2L,&X1L);
    pPier->GetXBeamDimensions(pgsTypes::stRight,&H1R,&H2R,&X2R,&X1R);
    W = pPier->GetXBeamWidth();
-   // Keep legacy uniform fields for file compatibility; scalloped geometry
-   // uses the per-column/per-bay data copied below.
-   D = pPier->GetColumnScallopDepth(0);
-   R = pPier->GetXBeamOverhangRadius(pgsTypes::stLeft);
-   pierData.SetXBeamOverhangRadius(pgsTypes::stLeft, R);
+   pierData.SetXBeamOverhangRadius(pgsTypes::stLeft,
+       pPier->GetXBeamOverhangRadius(pgsTypes::stLeft));
    pierData.SetXBeamOverhangRadius(pgsTypes::stRight,
        pPier->GetXBeamOverhangRadius(pgsTypes::stRight));
    std::vector<CPierPointData> vPierPoints = pPier->GetPierPointData();
-   pierData.SetLowerXBeamDimensions(H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D, vPierPoints);
+   pierData.SetLowerXBeamDimensions(H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, vPierPoints);
 
    // Upper Cross Beam Diaphragm. Basically, this is vertical distance from top of lower cross beam to bottom of slab
    // Take max of diaphragm depth and max girder bearing deducts

@@ -352,9 +352,9 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             // offset for the live load transfer model
 
 
-             Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
+             Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
              std::vector<CPierPointData> vPoints;
-             pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+             pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
              Y = Max(H1L + H2L, H1R + H2R);
          }
 

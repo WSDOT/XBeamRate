@@ -1266,9 +1266,9 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    Xcrown = pPier->ConvertCurbLineToCrossBeamCoordinate(pierID,Xcrown);
    Float64 Xoffset = CPO - Xcrown;
 
-   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
+   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
    std::vector<CPierPointData> vPoints;
-   pProject->GetLowerXBeamDimensions(pierID , &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+   pProject->GetLowerXBeamDimensions(pierID , &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
 
    Float64 Dd, Hu;
    pProject->GetDiaphragmDimensions(pierID,&Hu,&Dd);

@@ -120,8 +120,8 @@ public:
    Float64& GetDiaphragmHeight();
    Float64& GetDiaphragmWidth();
 
-   void SetLowerXBeamDimensions(Float64 h1l, Float64 h1r, Float64 h2l, Float64 h2r, Float64 x1l, Float64 x1r, Float64 x2l, Float64 x2r, Float64 w, Float64 r, Float64 d, std::vector<CPierPointData> vpp);
-   void GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, Float64* pr, Float64* pd, std::vector<CPierPointData>* pvpp) const;
+   void SetLowerXBeamDimensions(Float64 h1l, Float64 h1r, Float64 h2l, Float64 h2r, Float64 x1l, Float64 x1r, Float64 x2l, Float64 x2r, Float64 w, std::vector<CPierPointData> vpp);
+   void GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pvpp) const;
    Float64& GetH1L();
    Float64& GetH1R();
    Float64& GetH2L();
@@ -131,8 +131,6 @@ public:
    Float64& GetX2L();
    Float64& GetX2R();
    Float64& GetW();
-   Float64& GetR();
-   Float64& GetD();
    void SetPierPointData(PierPointIndexType ppIdx, const CPierPointData& ppData);
    const std::vector<CPierPointData>& GetPierPointData() const;
 
@@ -256,8 +254,6 @@ protected:
    Float64 m_X1L, m_X1R;
    Float64 m_X2L, m_X2R;
    Float64 m_XW;
-   Float64 m_XR;
-   Float64 m_XD; // legacy uniform depth, retained for older file migration
    Float64 m_OverhangRadius[2];
    std::vector<Float64> m_ScallopDepths;
    std::vector<Float64> m_ScallopRadii;

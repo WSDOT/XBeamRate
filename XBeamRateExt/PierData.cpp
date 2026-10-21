@@ -59,12 +59,10 @@ xbrPierData::xbrPierData()
    m_X2L = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
    m_X2R = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
    m_XW = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
-   m_XR = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
-   m_XD = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
 
-   m_OverhangRadius[pgsTypes::stLeft] = m_XR;
-   m_OverhangRadius[pgsTypes::stRight] = m_XR;
-   m_ScallopDepths.push_back(m_XD);
+   m_OverhangRadius[pgsTypes::stLeft] = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
+   m_OverhangRadius[pgsTypes::stRight] = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
+   m_ScallopDepths.push_back(WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
 
    CColumnData column;
    m_vColumnData.push_back(column);
@@ -332,7 +330,7 @@ Float64& xbrPierData::GetDiaphragmWidth()
    return m_W;
 }
 
-void xbrPierData::SetLowerXBeamDimensions(Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l, Float64 x1r, Float64 x2l,Float64 x2r,Float64 w, Float64 r, Float64 d, std::vector<CPierPointData> vpp)
+void xbrPierData::SetLowerXBeamDimensions(Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l, Float64 x1r, Float64 x2l,Float64 x2r,Float64 w, std::vector<CPierPointData> vpp)
 {
    m_H1L = h1l;
    m_H1R = h1r;
@@ -345,13 +343,11 @@ void xbrPierData::SetLowerXBeamDimensions(Float64 h1l,Float64 h1r,Float64 h2l,Fl
    m_X2R = x2r;
 
    m_XW = w;
-   m_XR = r;
-   m_XD = d;
 
    m_vPierPoints = vpp;
 }
 
-void xbrPierData::GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, Float64* pr, Float64* pd, std::vector<CPierPointData>* pvpp) const
+void xbrPierData::GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pvpp) const
 {
    *ph1l = m_H1L;
    *ph1r = m_H1R;
@@ -364,8 +360,6 @@ void xbrPierData::GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64*
    *px2r = m_X2R;
 
    *pw  = m_XW;
-   *pr  = m_XR;
-   *pd  = m_XD;
 
    *pvpp = m_vPierPoints;
 }
@@ -413,16 +407,6 @@ Float64& xbrPierData::GetX2R()
 Float64& xbrPierData::GetW()
 {
    return m_XW;
-}
-
-Float64& xbrPierData::GetR()
-{
-   return m_XR;
-}
-
-Float64& xbrPierData::GetD()
-{
-   return m_XD;
 }
 
 void xbrPierData::SetPierPointData(PierPointIndexType ppIdx, const CPierPointData& ppData)
@@ -878,7 +862,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
       pStrSave->put_Property(_T("W"),CComVariant(m_W));
    pStrSave->EndUnit(); // Diaphragm
 
-   pStrSave->BeginUnit(_T("LowerCrossBeam"),3.0);
+   pStrSave->BeginUnit(_T("LowerCrossBeam"),2.0);
       pStrSave->put_Property(_T("PierLayoutType"),CComVariant(m_PierLayoutType));
       pStrSave->put_Property(_T("H1L"),CComVariant(m_H1L));
       pStrSave->put_Property(_T("H1R"),CComVariant(m_H1R));
@@ -888,8 +872,6 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
       pStrSave->put_Property(_T("X1R"),CComVariant(m_X1R));
       pStrSave->put_Property(_T("X2L"),CComVariant(m_X2L));
       pStrSave->put_Property(_T("X2R"),CComVariant(m_X2R));
-      pStrSave->put_Property(_T("XR"), CComVariant(m_XR));
-      pStrSave->put_Property(_T("XD"), CComVariant(m_XD));
       pStrSave->put_Property(_T("RL"), CComVariant(m_OverhangRadius[pgsTypes::stLeft]));
       pStrSave->put_Property(_T("RR"), CComVariant(m_OverhangRadius[pgsTypes::stRight]));
       pStrSave->put_Property(_T("ScallopColumnCount"), CComVariant(GetColumnCount()));
@@ -965,9 +947,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
 HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress> pProgress)
 {
    USES_CONVERSION;
-   Float64 scallopVersion = 1.0;
-   m_XR = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
-   m_XD = WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet);
+   Float64 lowerCrossBeamVersion = 1.0;
    CHRException hr;
    try
    {
@@ -1087,7 +1067,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
 
       {
          hr = pStrLoad->BeginUnit(_T("LowerCrossBeam"));
-         pStrLoad->get_Version(&scallopVersion);
+         pStrLoad->get_Version(&lowerCrossBeamVersion);
 
          Float64 version;
          pStrLoad->get_Version(&version);
@@ -1165,40 +1145,29 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
              m_X2R = var.dblVal;
 
              var.vt = VT_R8;
-             hr = pStrLoad->get_Property(_T("XR"), &var);
-             m_XR = var.dblVal;
-
+             hr = pStrLoad->get_Property(_T("RL"), &var);
+             m_OverhangRadius[pgsTypes::stLeft] = var.dblVal;
              var.vt = VT_R8;
-             hr = pStrLoad->get_Property(_T("XD"), &var);
-             m_XD = var.dblVal;
-
-             if (version >= 3.0)
+             hr = pStrLoad->get_Property(_T("RR"), &var);
+             m_OverhangRadius[pgsTypes::stRight] = var.dblVal;
+             var.vt = VT_INDEX;
+             hr = pStrLoad->get_Property(_T("ScallopColumnCount"), &var);
+             const ColumnIndexType count = VARIANT2INDEX(var);
+             if (count == 0 || count == INVALID_INDEX)
+                 throw E_FAIL;
+             m_ScallopDepths.resize(count);
+             m_ScallopRadii.resize(count - 1);
+             for (auto& depth : m_ScallopDepths)
              {
                  var.vt = VT_R8;
-                 hr = pStrLoad->get_Property(_T("RL"), &var);
-                 m_OverhangRadius[pgsTypes::stLeft] = var.dblVal;
+                 hr = pStrLoad->get_Property(_T("ScallopDepth"), &var);
+                 depth = var.dblVal;
+             }
+             for (auto& radius : m_ScallopRadii)
+             {
                  var.vt = VT_R8;
-                 hr = pStrLoad->get_Property(_T("RR"), &var);
-                 m_OverhangRadius[pgsTypes::stRight] = var.dblVal;
-                 var.vt = VT_INDEX;
-                 hr = pStrLoad->get_Property(_T("ScallopColumnCount"), &var);
-                 const ColumnIndexType count = VARIANT2INDEX(var);
-                 if (count == 0 || count == INVALID_INDEX)
-                     throw E_FAIL;
-                 m_ScallopDepths.resize(count);
-                 m_ScallopRadii.resize(count - 1);
-                 for (auto& depth : m_ScallopDepths)
-                 {
-                     var.vt = VT_R8;
-                     hr = pStrLoad->get_Property(_T("ScallopDepth"), &var);
-                     depth = var.dblVal;
-                 }
-                 for (auto& radius : m_ScallopRadii)
-                 {
-                     var.vt = VT_R8;
-                     hr = pStrLoad->get_Property(_T("ScallopRadius"), &var);
-                     radius = var.dblVal;
-                 }
+                 hr = pStrLoad->get_Property(_T("ScallopRadius"), &var);
+                 radius = var.dblVal;
              }
 
              m_vPierPoints.clear();
@@ -1294,12 +1263,11 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 
          hr = pStrLoad->EndUnit(); // Columns
-         if (scallopVersion < 3.0)
+         if (lowerCrossBeamVersion < 2.0)
          {
-             m_OverhangRadius[pgsTypes::stLeft] = m_XR;
-             m_OverhangRadius[pgsTypes::stRight] = m_XR;
-             m_ScallopDepths.assign(m_vColumnData.size(), m_XD);
-             m_ScallopRadii.assign(m_vColumnSpacing.size(), m_XR);
+             // Files predating bottom profiles have no scallop inputs.
+             m_ScallopDepths.assign(m_vColumnData.size(), WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+             m_ScallopRadii.assign(m_vColumnSpacing.size(), WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
          }
          else if (m_ScallopDepths.size() != m_vColumnData.size() ||
                   m_ScallopRadii.size() != m_vColumnSpacing.size())
@@ -1423,8 +1391,6 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_X2L = rOther.m_X2L;
    m_X2R = rOther.m_X2R;
    m_XW = rOther.m_XW;
-   m_XR = rOther.m_XR;
-   m_XD = rOther.m_XD;
    m_OverhangRadius[pgsTypes::stLeft] = rOther.m_OverhangRadius[pgsTypes::stLeft];
    m_OverhangRadius[pgsTypes::stRight] = rOther.m_OverhangRadius[pgsTypes::stRight];
    m_ScallopDepths = rOther.m_ScallopDepths;

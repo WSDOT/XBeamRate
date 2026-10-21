@@ -245,9 +245,9 @@ Float64 CPierAgentImp::GetBearingLocation(PierIDType pierID,IndexType brgLineIdx
 
    GET_IFACE(IXBRProject, pProject);
    const xbrPierData& pierData = pProject->GetPierData(pierID);
-   Float64 H1L, H1R, H2L, H2R, X1L,  X1R, X2L, X2R, W, R, D;
+   Float64 H1L, H1R, H2L, H2R, X1L,  X1R, X2L, X2R, W;
    std::vector<CPierPointData> vPoints;
-   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
    Xxb -= X1L; // now it is the location in cross beam coordinates
 
    return Xxb;
@@ -1351,11 +1351,11 @@ void CPierAgentImp::ValidatePierModel(PierIDType pierID) const
    GET_IFACE(IXBRProject,pProject);
    const xbrPierData& pierData = pProject->GetPierData(pierID);
 
-   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
+   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
    Float64 HU, W2;
    pierData.GetDiaphragmDimensions(&HU, &W2);
    std::vector<CPierPointData> vPoints;
-   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+   pierData.GetLowerXBeamDimensions(&H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
 
    // Create Cross Beam
    CComPtr<IBasicCrossBeam> bxbeam;
@@ -2018,9 +2018,9 @@ void CPierAgentImp::ValidatePointsOfInterest(PierIDType pierID) const
 
    Float64 delta = WBFL::Units::ConvertToSysUnits(0.001,WBFL::Units::Measure::Feet);
 
-   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, R, D;
+   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
    std::vector<CPierPointData> vPoints;
-   pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &R, &D, &vPoints);
+   pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
 
    Float64 L = GetXBeamLength(xbrTypes::xblBottomXBeam, pierID);
 
