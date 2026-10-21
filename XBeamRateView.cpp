@@ -1704,8 +1704,14 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Alignment/bridge line is at X = 0 in pier coordinates
    Float64 XpAlignment = 0.0;
 
-   // Position dimension above bottom column-spacing dimensions
-   Float64 Ydim = YbotColMin + 3.0;
+   // Match the lower end of the alignment/bridge-line marker drawn in UpdateRoadwayDisplayObjects.
+   const Float64 alignmentXcl = pPier->ConvertPierToCurbLineCoordinate(pierID, 0.0);
+   const Float64 alignmentBottom = pPier->GetElevation(pierID, alignmentXcl)
+       + WBFL::Units::ConvertToSysUnits(1.0, WBFL::Units::Measure::Feet)
+       - pPier->GetMaxColumnHeight(pierID);
+   // Place the reference-column dimension six inches below that marker.
+   const Float64 Ydim = alignmentBottom
+       - WBFL::Units::ConvertToSysUnits(0.5, WBFL::Units::Measure::Feet);
 
    WBFL::Geometry::Point2d pntRefCol(XpRefCol, Ydim);
    WBFL::Geometry::Point2d pntAlignment(XpAlignment, Ydim);
