@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright Â© 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -197,6 +197,23 @@ void CColumnLayoutGrid::AddColumn()
 {
    ROWCOL nRows = GetRowCount();
 
+   // Capture displayed values before inserting a row. The final radius cell
+   // is unused, so inherit the radius from the last existing bay.
+   Float64 scallopDepth = 0.0;
+   Float64 scallopRadius = 0.0;
+   if (m_Scalloped)
+   {
+      auto pBroker = EAFGetBroker();
+      GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+      const auto unit = pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure;
+      scallopDepth = nRows > 0 ? _tstof(GetCellValue(nRows, 8))
+         : WBFL::Units::ConvertFromSysUnits(
+            WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet), unit);
+      scallopRadius = nRows > 1 ? _tstof(GetCellValue(nRows - 1, 7))
+         : WBFL::Units::ConvertFromSysUnits(
+            WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet), unit);
+   }
+
    CColumnData columnData;
    Float64 S;
 
@@ -232,14 +249,9 @@ void CColumnLayoutGrid::AddColumn()
 
    if (m_Scalloped)
    {
-      auto pBroker = EAFGetBroker();
-      GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
-      const auto unit = pDisplayUnits->GetXSectionDimUnit().UnitOfMeasure;
       if (nRows > 0)
-         SetGeometryCell(nRows, 7, WBFL::Units::ConvertFromSysUnits(
-            WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet), unit));
-      SetGeometryCell(nRows + 1, 8, WBFL::Units::ConvertFromSysUnits(
-         WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet), unit));
+         SetGeometryCell(nRows, 7, scallopRadius);
+      SetGeometryCell(nRows + 1, 8, scallopDepth);
       UpdateLastRowStyles();
       ResizeColWidthsToFit(CGXRange(0, 0, GetRowCount(), GetColCount()));
    }
