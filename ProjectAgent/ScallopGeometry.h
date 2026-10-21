@@ -16,7 +16,7 @@ inline ArcError ValidateArc(Point p0, Point p1, double radius, const std::vector
    constexpr double tolerance = 1.0e-8;
    const double dx = p1.x - p0.x, dy = p1.y - p0.y;
    const double chord = std::hypot(dx, dy);
-   if (!std::isfinite(radius) || radius <= 0 || chord > 2 * radius + tolerance)
+   if (!std::isfinite(radius) || radius <= 0 || !std::isfinite(chord) || chord > 2 * radius)
       return ArcError::InvalidChord;
    if (chord < tolerance)
       return ArcError::None;

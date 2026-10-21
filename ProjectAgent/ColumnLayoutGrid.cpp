@@ -639,7 +639,10 @@ void CColumnLayoutGrid::DDV_ColumnGrid(CDataExchange* pDX, CColumnLayoutGrid& gr
                     {
                         grid.SetCurrentCell(row, col);
                         pDX->PrepareCtrl(grid.GetDlgCtrlID());
-                        AfxMessageBox(_T("Column spacing, bay radii, and scallop depths must be positive numbers."));
+                        CString message;
+                        message.Format(_T("Column %u: %s must be a positive, finite number."), row,
+                            col == 6 ? _T("spacing") : col == 7 ? _T("bay radius") : _T("scallop depth"));
+                        AfxMessageBox(message);
                         pDX->Fail();
                     }
                 }

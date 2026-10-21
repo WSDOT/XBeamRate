@@ -227,7 +227,24 @@ void CScallopedPierLayoutDlg::DoDataExchange(CDataExchange* pDX)
 void CScallopedPierLayoutDlg::ValidateScallopGeometry(CDataExchange* pDX)
 {
     using xbrScallop::Point;
+    for (Float64 value : {m_XBeamWidth, m_XBeamHeight[0], m_XBeamHeight[1],
+        m_XBeamEndSlopeOffset[0], m_XBeamEndSlopeOffset[1], m_XBeamOverhang[0],
+        m_XBeamOverhang[1], m_XBeamOverhangRadius[0], m_XBeamOverhangRadius[1], m_TransverseOffset})
+    {
+        if (!std::isfinite(value))
+        {
+            pDX->PrepareCtrl(IDC_W);
+            AfxMessageBox(_T("Cross beam dimensions and reference offset must be finite numbers."));
+            pDX->Fail();
+        }
+    }
     const ColumnIndexType count = m_Pier.GetColumnCount();
+    if (count == 0 || m_RefColumnIdx >= count)
+    {
+        pDX->PrepareCtrl(IDC_REFCOLUMN);
+        AfxMessageBox(_T("Select a valid reference column."));
+        pDX->Fail();
+    }
     std::vector<Float64> stations(count, m_XBeamOverhang[pgsTypes::stLeft]);
     for (ColumnIndexType i = 1; i < count; ++i)
         stations[i] = stations[i - 1] + m_Pier.GetColumnSpacing(i - 1);
@@ -313,14 +330,29 @@ void CScallopedPierLayoutDlg::ValidateScallopGeometry(CDataExchange* pDX)
         const auto error = xbrScallop::ValidateArc(ends[arcIdx], ends[arcIdx + 1], radius, top);
         if (error == xbrScallop::ArcError::None)
             continue;
-        pDX->PrepareCtrl(arcIdx == 0 ? IDC_RL : arcIdx == count ? IDC_RR : IDC_COLUMN_GRID);
-        CString message;
-        message.Format(_T("Scallop arc %u is invalid. %s"), arcIdx + 1,
+        if (error == xbrScallop::ArcError::AboveTop)
+        {
+            const ColumnIndexType column = arcIdx == 0 ? 0 : arcIdx == count ? count - 1
+                : m_Pier.GetColumnScallopDepth(arcIdx - 1) <= m_Pier.GetColumnScallopDepth(arcIdx) ? arcIdx - 1 : arcIdx;
+            pDX->PrepareCtrl(IDC_COLUMN_GRID);
+            m_ColumnLayoutGrid.SetCurrentCell(column + 1, 8);
+        }
+        else
+        {
+            pDX->PrepareCtrl(arcIdx == 0 ? IDC_RL : arcIdx == count ? IDC_RR : IDC_COLUMN_GRID);
+            if (arcIdx > 0 && arcIdx < count)
+                m_ColumnLayoutGrid.SetCurrentCell(arcIdx, 7);
+        }
+        CString location, message;
+        if (arcIdx == 0) location = _T("Left overhang");
+        else if (arcIdx == count) location = _T("Right overhang");
+        else location.Format(_T("Bay between columns %u and %u"), arcIdx, arcIdx + 1);
+        message.Format(_T("%s: %s"), location.GetString(),
             error == xbrScallop::ArcError::InvalidChord
-                ? _T("Its radius must be at least half the distance between its endpoints.")
+                ? _T("Radius must be at least half the distance between arc endpoints, including their elevation difference.")
                 : error == xbrScallop::ArcError::AboveTop
-                    ? _T("The arc extends above the top of the lower cross beam. Increase the column depth or radius.")
-                    : _T("The arc turns back past an endpoint. Increase its radius or adjust the endpoint depths."));
+                    ? _T("Arc extends above the lower cross beam top. Increase the column depth or radius.")
+                    : _T("Arc turns back past an endpoint. Increase the radius or adjust the endpoint depths."));
         AfxMessageBox(message);
         pDX->Fail();
     }
