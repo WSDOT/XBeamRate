@@ -174,10 +174,6 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,std::shared_ptr
          hr = pStrLoad->get_Property(_T("NumberOfBars"), &var);
          rebar_row.NumberOfBars = var.lVal;
 
-         var.vt = VT_I4;
-         hr = pStrLoad->get_Property(_T("BarSize"), &var );
-         rebar_row.BarSize = WBFL::Materials::Rebar::Size(var.lVal);
-
 		 if (2.0 <= version)
          {
              var.vt = VT_I4;
@@ -187,6 +183,11 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,std::shared_ptr
              hr = pStrLoad->get_Property(_T("BarGrade"), &var);
              rebar_row.BarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
          }
+
+         // Read in the same order as Save; structured storage is sequential.
+         var.vt = VT_I4;
+         hr = pStrLoad->get_Property(_T("BarSize"), &var );
+         rebar_row.BarSize = WBFL::Materials::Rebar::Size(var.lVal);
 
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("BarSpacing"), &var);

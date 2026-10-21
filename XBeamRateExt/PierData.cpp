@@ -1295,10 +1295,6 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
              WBFL::Materials::Rebar::Grade grade = (WBFL::Materials::Rebar::Grade)(var.lVal);
              m_StirrupRebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
 
-             for (auto& row : m_LongitudinalRebar.RebarRows)
-             {
-				 row.SetBarMaterial(type, grade);
-             }
          }
          else
          {
@@ -1312,6 +1308,13 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          }
 
          hr = m_LongitudinalRebar.Load(pStrLoad,nullptr);
+         if (version < 2.0)
+         {
+             // Legacy rows have no material fields. Apply the enclosing
+             // reinforcement material after Load has populated the rows.
+             for (auto& row : m_LongitudinalRebar.RebarRows)
+                 row.SetBarMaterial(m_StirrupRebarType, m_StirrupRebarGrade);
+         }
          hr = m_LowerXBeamStirrups.Load(pStrLoad);
          hr = m_FullDepthStirrups.Load(pStrLoad);
          hr = pStrLoad->EndUnit(); // Reinforcement
