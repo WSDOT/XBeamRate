@@ -190,6 +190,8 @@ BOOL CBearingsPage::OnInitDialog()
 
    CPropertyPage::OnInitDialog();
 
+   m_PrevBearingLineCount = pParent->m_PierData.m_PierData.GetBearingLineCount();
+
    OnBearingLineCountChanged();
 
    return TRUE;  // return TRUE unless you set the focus to a control
@@ -288,6 +290,16 @@ void CBearingsPage::OnBearingLineCountChanged()
 {
    CComboBox* pCB = (CComboBox*)GetDlgItem(IDC_BEARING_LINE_COUNT);
    int curSel = pCB->GetCurSel();
+
+
+   IndexType nBearingLines = (IndexType)pCB->GetItemData(curSel);
+   if (m_PrevBearingLineCount == 1 && nBearingLines == 2)
+   {
+	   OnCopyAhead();
+   }
+
+   m_PrevBearingLineCount = nBearingLines;
+
    int show = (curSel == 0 ? SW_HIDE : SW_SHOW);
 
    GetDlgItem(IDC_BACK_LABEL)->SetWindowText(curSel == 0 ? _T("Along CL Pier") : _T("Along Back Bearing Line"));

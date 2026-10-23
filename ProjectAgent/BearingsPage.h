@@ -40,6 +40,8 @@ public:
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX) override;    // DDX/DDV support
 
+	IndexType m_PrevBearingLineCount = 1;
+
    CBearingLayoutGrid m_Grid[2];
 
 	//{{AFX_MSG(CPierLayoutPage)
