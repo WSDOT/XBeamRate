@@ -25,10 +25,12 @@
 
 
 
+
+
 xbrPierData::xbrPierData()
 {
    m_ID = INVALID_ID;
-   m_ConnectionType = xbrTypes::pctIntegral;
+   m_ConnectionType = pgsTypes::pctIntegral;
    m_strSkew = _T("00 00 00.0 L");
    m_BridgeLineOffset = 0;
    m_CurbLineDatum = pgsTypes::omtAlignment;
@@ -36,6 +38,8 @@ xbrPierData::xbrPierData()
    m_RightCurbOffset = WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet);
 
    m_tDeck = WBFL::Units::ConvertToSysUnits(8.0,WBFL::Units::Measure::Inch);
+
+   m_PierLayoutType = pgsTypes::pltCommon;
 
    m_DeckSurfaceType = Simplified;
    m_DeckElevation = 0;
@@ -46,15 +50,19 @@ xbrPierData::xbrPierData()
    m_H = WBFL::Units::ConvertToSysUnits(3,WBFL::Units::Measure::Feet);
    m_W = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
 
-   m_H1 = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
-   m_H2 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
-   m_H3 = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
-   m_H4 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
-   m_X1 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
-   m_X2 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
-   m_X3 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
-   m_X4 = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_H1L = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
+   m_H1R = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
+   m_H2L = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_H2R = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X1L = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X1R = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X2L = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
+   m_X2R = WBFL::Units::ConvertToSysUnits(0,WBFL::Units::Measure::Feet);
    m_XW = WBFL::Units::ConvertToSysUnits(5,WBFL::Units::Measure::Feet);
+
+   m_OverhangRadius[pgsTypes::stLeft] = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
+   m_OverhangRadius[pgsTypes::stRight] = WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet);
+   m_ScallopDepths.push_back(WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
 
    CColumnData column;
    m_vColumnData.push_back(column);
@@ -63,16 +71,18 @@ xbrPierData::xbrPierData()
    m_RefColumnOffset = 0;
    m_RefColumnDatum = pgsTypes::omtAlignment;
 
-   m_X5 = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
-   m_X6 = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
+   m_ColumnFixity = pgsTypes::cftFixed;
+
+   m_OHL = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
+   m_OHR = WBFL::Units::ConvertToSysUnits(10,WBFL::Units::Measure::Feet);
 
    // Load Rating Condition
    m_ConditionFactorType = pgsTypes::cfGood;
    m_ConditionFactor = 1.0;
 
    // Materials
-   m_RebarType = WBFL::Materials::Rebar::Type::A615;
-   m_RebarGrade = WBFL::Materials::Rebar::Grade::Grade60;
+   m_StirrupRebarType = WBFL::Materials::Rebar::Type::A615;
+   m_StirrupRebarGrade = WBFL::Materials::Rebar::Grade::Grade60;
 
    //// Rebar
    //xbrLongitudinalRebarData::RebarRow row;
@@ -121,6 +131,16 @@ void xbrPierData::SetID(PierIDType id)
 PierIDType xbrPierData::GetID() const
 {
    return m_ID;
+}
+
+pgsTypes::PierLayoutType xbrPierData::GetPierLayoutType() const
+{
+    return m_PierLayoutType;
+}
+
+void xbrPierData::SetPierLayoutType(pgsTypes::PierLayoutType layoutType)
+{
+    m_PierLayoutType = layoutType;
 }
 
 void xbrPierData::SetSkew(LPCTSTR strSkew)
@@ -214,17 +234,17 @@ Float64& xbrPierData::GetBridgeLineOffset()
    return m_BridgeLineOffset;
 }
 
-void xbrPierData::SetPierType(xbrTypes::PierType type)
+void xbrPierData::SetPierType(pgsTypes::PierType type)
 {
    m_ConnectionType = type;
 }
 
-xbrTypes::PierType xbrPierData::GetPierType() const
+pgsTypes::PierType xbrPierData::GetPierType() const
 {
    return m_ConnectionType;
 }
 
-xbrTypes::PierType& xbrPierData::GetPierType()
+pgsTypes::PierType& xbrPierData::GetPierType()
 {
    return m_ConnectionType;
 }
@@ -310,75 +330,129 @@ Float64& xbrPierData::GetDiaphragmWidth()
    return m_W;
 }
 
-void xbrPierData::SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w)
+void xbrPierData::SetLowerXBeamDimensions(Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l, Float64 x1r, Float64 x2l,Float64 x2r,Float64 w, std::vector<CPierPointData> vpp)
 {
-   m_H1 = h1;
-   m_H2 = h2;
-   m_H3 = h3;
-   m_H4 = h4;
-   m_X1 = x1;
-   m_X2 = x2;
-   m_X3 = x3;
-   m_X4 = x4;
+   m_H1L = h1l;
+   m_H1R = h1r;
+   m_H2L = h2l;
+   m_H2R = h2r;
+
+   m_X1L = x1l;
+   m_X1R = x1r;
+   m_X2L = x2l;
+   m_X2R = x2r;
+
    m_XW = w;
+
+   m_vPierPoints = vpp;
 }
 
-void xbrPierData::GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) const
+void xbrPierData::GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pvpp) const
 {
-   *ph1 = m_H1;
-   *ph2 = m_H2;
-   *ph3 = m_H3;
-   *ph4 = m_H4;
-   *px1 = m_X1;
-   *px2 = m_X2;
-   *px3 = m_X3;
-   *px4 = m_X4;
+   *ph1l = m_H1L;
+   *ph1r = m_H1R;
+   *ph2l = m_H2L;
+   *ph2r = m_H2R;
+
+   *px1l = m_X1L;
+   *px1r = m_X1R;
+   *px2l = m_X2L;
+   *px2r = m_X2R;
+
    *pw  = m_XW;
+
+   *pvpp = m_vPierPoints;
 }
 
-Float64& xbrPierData::GetH1()
+Float64& xbrPierData::GetH1L()
 {
-   return m_H1;
+   return m_H1L;
 }
 
-Float64& xbrPierData::GetH2()
+Float64& xbrPierData::GetH1R()
 {
-   return m_H2;
+   return m_H1R;
 }
 
-Float64& xbrPierData::GetH3()
+Float64& xbrPierData::GetH2L()
 {
-   return m_H3;
+   return m_H2L;
 }
 
-Float64& xbrPierData::GetH4()
+Float64& xbrPierData::GetH2R()
 {
-   return m_H4;
+   return m_H2R;
 }
 
-Float64& xbrPierData::GetX1()
+Float64& xbrPierData::GetX1L()
 {
-   return m_X1;
+   return m_X1L;
 }
 
-Float64& xbrPierData::GetX2()
+Float64& xbrPierData::GetX1R()
 {
-   return m_X2;
+   return m_X1R;
 }
 
-Float64& xbrPierData::GetX3()
+Float64& xbrPierData::GetX2L()
 {
-   return m_X3;
+   return m_X2L;
 }
 
-Float64& xbrPierData::GetX4()
+Float64& xbrPierData::GetX2R()
 {
-   return m_X4;
+   return m_X2R;
 }
 
 Float64& xbrPierData::GetW()
 {
    return m_XW;
+}
+
+void xbrPierData::SetPierPointData(PierPointIndexType ppIdx, const CPierPointData& ppData)
+{
+    m_vPierPoints[ppIdx] = ppData;
+}
+
+const std::vector<CPierPointData>& xbrPierData::GetPierPointData() const
+{
+   return m_vPierPoints;
+}
+
+void xbrPierData::SetPierPointCount(PierPointIndexType nPierPoints)
+{
+    if (nPierPoints < m_vPierPoints.size())
+    {
+        m_vPierPoints.erase(m_vPierPoints.begin() + nPierPoints, m_vPierPoints.end());
+    }
+    else if (m_vPierPoints.size() < nPierPoints)
+    {
+        // the number of pier points is being increased... add pier points on the right side of the pier
+        PierPointIndexType nPierPointsToAdd = nPierPoints - m_vPierPoints.size();
+        CPierPointData pp;
+        if (!m_vPierPoints.empty())
+        {
+            pp = m_vPierPoints.back(); // right-most pier point
+            Float64 spacing = WBFL::Units::ConvertToSysUnits(4.0, WBFL::Units::Measure::Feet);
+            pp.Set_X(pp.Get_X() + spacing); // set the new pier point to be 4 feet to the right of the last pier point
+        }
+        m_vPierPoints.insert(m_vPierPoints.end(), nPierPointsToAdd, pp);
+    }
+}
+
+void xbrPierData::SetColumnFixity(pgsTypes::ColumnLongitudinalBaseFixityType fixityType)
+{
+    m_ColumnFixity = fixityType;
+}
+
+pgsTypes::ColumnLongitudinalBaseFixityType xbrPierData::GetColumnFixity() const
+{
+    return m_ColumnFixity;
+}
+
+PierPointIndexType xbrPierData::GetPierPointCount() const
+{
+    return m_vPierPoints.size();
 }
 
 void xbrPierData::SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset)
@@ -413,16 +487,17 @@ Float64& xbrPierData::GetRefColumnOffset()
 void xbrPierData::SetColumnCount(ColumnIndexType nColumns)
 {
    ATLASSERT(0 < nColumns && nColumns != INVALID_INDEX);
-   if ( m_vColumnData.size() != nColumns )
-   {
-      m_vColumnData.resize(nColumns,m_vColumnData.back());
-      if ( m_vColumnSpacing.size() == 0 && nColumns != 1)
-      {
-         m_vColumnSpacing.push_back(WBFL::Units::ConvertToSysUnits(10.0,WBFL::Units::Measure::Feet));
-      }
-      m_vColumnSpacing.resize(nColumns-1,m_vColumnSpacing.back());
-   }
-   ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
+   if (nColumns == 0 || nColumns == INVALID_INDEX)
+      return;
+
+   const CColumnData column = m_vColumnData.empty() ? CColumnData() : m_vColumnData.back();
+   const Float64 spacing = m_vColumnSpacing.empty()
+      ? WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet)
+      : m_vColumnSpacing.back();
+   m_vColumnData.resize(nColumns, column);
+   m_vColumnSpacing.resize(nColumns - 1, spacing);
+   m_ScallopDepths.resize(nColumns, WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+   m_ScallopRadii.resize(nColumns - 1, WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
 }
 
 ColumnIndexType xbrPierData::GetColumnCount() const
@@ -434,11 +509,19 @@ void xbrPierData::AddColumn(const CColumnData& columnData,Float64 spacing)
 {
    m_vColumnData.push_back(columnData);
    m_vColumnSpacing.push_back(spacing);
+   m_ScallopDepths.push_back(WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+   m_ScallopRadii.push_back(WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
    ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 }
 
 void xbrPierData::RemoveColumn(ColumnIndexType colIdx)
 {
+   if (m_vColumnData.size() <= 1 || colIdx >= m_vColumnData.size())
+      return;
+   m_ScallopDepths.erase(m_ScallopDepths.begin() + colIdx);
+   const ColumnIndexType bayIdx = colIdx == m_vColumnData.size() - 1 ? colIdx - 1 : colIdx;
+   m_ScallopRadii.erase(m_ScallopRadii.begin() + bayIdx);
+
    // always remove the spacing to the right of the column, unless
    // this is the last column. If this is the last column remove
    // the left spacing
@@ -470,6 +553,42 @@ CColumnData& xbrPierData::GetColumnData(ColumnIndexType colIdx)
    return m_vColumnData[colIdx];
 }
 
+void xbrPierData::SetColumnScallopDepth(ColumnIndexType colIdx, Float64 depth)
+{
+   ATLASSERT(colIdx < m_ScallopDepths.size());
+   m_ScallopDepths.at(colIdx) = depth;
+}
+
+Float64 xbrPierData::GetColumnScallopDepth(ColumnIndexType colIdx) const
+{
+   ATLASSERT(colIdx < m_ScallopDepths.size());
+   return m_ScallopDepths.at(colIdx);
+}
+
+void xbrPierData::SetColumnScallopRadius(ColumnIndexType colIdx, Float64 radius)
+{
+   ATLASSERT(colIdx < m_ScallopRadii.size());
+   m_ScallopRadii.at(colIdx) = radius;
+}
+
+Float64 xbrPierData::GetColumnScallopRadius(ColumnIndexType colIdx) const
+{
+   ATLASSERT(colIdx < m_ScallopRadii.size());
+   return m_ScallopRadii.at(colIdx);
+}
+
+void xbrPierData::SetXBeamOverhangRadius(pgsTypes::SideType side, Float64 radius)
+{
+   ATLASSERT(side == pgsTypes::stLeft || side == pgsTypes::stRight);
+   m_OverhangRadius[side] = radius;
+}
+
+Float64 xbrPierData::GetXBeamOverhangRadius(pgsTypes::SideType side) const
+{
+   ATLASSERT(side == pgsTypes::stLeft || side == pgsTypes::stRight);
+   return m_OverhangRadius[side];
+}
+
 void xbrPierData::SetColumnSpacing(SpacingIndexType spaceIdx,Float64 S)
 {
    m_vColumnSpacing[spaceIdx] = S;
@@ -485,26 +604,26 @@ Float64& xbrPierData::GetColumnSpacing(SpacingIndexType spaceIdx)
    return m_vColumnSpacing[spaceIdx];
 }
 
-void xbrPierData::SetXBeamOverhangs(Float64 X5,Float64 X6)
+void xbrPierData::SetXBeamOverhangs(Float64 OHL,Float64 OHR)
 {
-   m_X5 = X5;
-   m_X6 = X6;
+   m_OHL = OHL;
+   m_OHR = OHR;
 }
 
-void xbrPierData::GetXBeamOverhangs(Float64* pX5,Float64* pX6) const
+void xbrPierData::GetXBeamOverhangs(Float64* pOHL,Float64* pOHR) const
 {
-   *pX5 = m_X5;
-   *pX6 = m_X6;
+   *pOHL = m_OHL;
+   *pOHR = m_OHR;
 }
 
-Float64& xbrPierData::GetX5()
+Float64& xbrPierData::GetOHL()
 {
-   return m_X5;
+   return m_OHL;
 }
 
-Float64& xbrPierData::GetX6()
+Float64& xbrPierData::GetOHR()
 {
-   return m_X6;
+   return m_OHR;
 }
 
 pgsTypes::ConditionFactorType xbrPierData::GetConditionFactorType() const
@@ -537,26 +656,26 @@ void xbrPierData::SetConditionFactor(Float64 conditionFactor)
    m_ConditionFactor = conditionFactor;
 }
 
-void xbrPierData::SetRebarMaterial(WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
+void xbrPierData::SetStirrupMaterial(WBFL::Materials::Rebar::Type type, WBFL::Materials::Rebar::Grade grade)
 {
-   m_RebarType = type;
-   m_RebarGrade = grade;
+    m_StirrupRebarType = type;
+    m_StirrupRebarGrade = grade;
 }
 
-void xbrPierData::GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
+void xbrPierData::GetStirrupMaterial(WBFL::Materials::Rebar::Type* pType, WBFL::Materials::Rebar::Grade* pGrade) const
 {
-   *pType = m_RebarType;
-   *pGrade = m_RebarGrade;
+    *pType = m_StirrupRebarType;
+    *pGrade = m_StirrupRebarGrade;
 }
 
-WBFL::Materials::Rebar::Type& xbrPierData::GetRebarType()
+WBFL::Materials::Rebar::Type& xbrPierData::GetStirrupRebarType()
 {
-   return m_RebarType;
+    return m_StirrupRebarType;
 }
 
-WBFL::Materials::Rebar::Grade& xbrPierData::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& xbrPierData::GetStirrupRebarGrade()
 {
-   return m_RebarGrade;
+    return m_StirrupRebarGrade;
 }
 
 void xbrPierData::SetConcreteMaterial(const CConcreteMaterial& concrete)
@@ -691,7 +810,7 @@ Float64 xbrPierData::GetXBeamLength() const
    {
       L += s;
    }
-   L += (m_X5-m_X2) + (m_X6-m_X4);
+   L += (m_OHL-m_X1L) + (m_OHR-m_X1R);
    return L;
 }
 
@@ -743,24 +862,44 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
       pStrSave->put_Property(_T("W"),CComVariant(m_W));
    pStrSave->EndUnit(); // Diaphragm
 
-   pStrSave->BeginUnit(_T("LowerCrossBeam"),1.0);
-      pStrSave->put_Property(_T("H1"),CComVariant(m_H1));
-      pStrSave->put_Property(_T("H2"),CComVariant(m_H2));
-      pStrSave->put_Property(_T("H3"),CComVariant(m_H3));
-      pStrSave->put_Property(_T("H4"),CComVariant(m_H4));
-      pStrSave->put_Property(_T("X1"),CComVariant(m_X1));
-      pStrSave->put_Property(_T("X2"),CComVariant(m_X2));
-      pStrSave->put_Property(_T("X3"),CComVariant(m_X3));
-      pStrSave->put_Property(_T("X4"),CComVariant(m_X4));
+   pStrSave->BeginUnit(_T("LowerCrossBeam"),2.0);
+      pStrSave->put_Property(_T("PierLayoutType"),CComVariant(m_PierLayoutType));
+      pStrSave->put_Property(_T("H1L"),CComVariant(m_H1L));
+      pStrSave->put_Property(_T("H1R"),CComVariant(m_H1R));
+      pStrSave->put_Property(_T("H2L"),CComVariant(m_H2L));
+      pStrSave->put_Property(_T("H2R"),CComVariant(m_H2R));
+      pStrSave->put_Property(_T("X1L"),CComVariant(m_X1L));
+      pStrSave->put_Property(_T("X1R"),CComVariant(m_X1R));
+      pStrSave->put_Property(_T("X2L"),CComVariant(m_X2L));
+      pStrSave->put_Property(_T("X2R"),CComVariant(m_X2R));
+      pStrSave->put_Property(_T("RL"), CComVariant(m_OverhangRadius[pgsTypes::stLeft]));
+      pStrSave->put_Property(_T("RR"), CComVariant(m_OverhangRadius[pgsTypes::stRight]));
+      pStrSave->put_Property(_T("ScallopColumnCount"), CComVariant(GetColumnCount()));
+      for (Float64 depth : m_ScallopDepths)
+         pStrSave->put_Property(_T("ScallopDepth"), CComVariant(depth));
+      for (Float64 radius : m_ScallopRadii)
+         pStrSave->put_Property(_T("ScallopRadius"), CComVariant(radius));
+
+      pStrSave->put_Property(_T("PierPointCount"), CComVariant(m_vPierPoints.size()));
+      std::vector<CPierPointData>::iterator ppIterBegin = m_vPierPoints.begin();
+      std::vector<CPierPointData>::iterator ppIter = ppIterBegin;
+      std::vector<CPierPointData>::iterator ppIterEnd = m_vPierPoints.end();
+      for (; ppIter != ppIterEnd; ppIter++)
+      {
+          CPierPointData& pierPointData = *ppIter;
+          pierPointData.Save(pStrSave, pProgress);
+      }
+
       pStrSave->put_Property(_T("W"), CComVariant(m_XW));
+
    pStrSave->EndUnit(); // LowerCrossBeam
 
-   pStrSave->BeginUnit(_T("Columns"),1.0);
+   pStrSave->BeginUnit(_T("Columns"),2.0);
       pStrSave->put_Property(_T("RefColumn"),CComVariant(m_RefColumnIdx));
       pStrSave->put_Property(_T("RefColumnOffset"),CComVariant(m_RefColumnOffset));
       pStrSave->put_Property(_T("RefColumnDatum"),CComVariant(m_RefColumnDatum));
-      pStrSave->put_Property(_T("X5"),CComVariant(m_X5));
-      pStrSave->put_Property(_T("X6"),CComVariant(m_X6));
+      pStrSave->put_Property(_T("OHL"),CComVariant(m_OHL));
+      pStrSave->put_Property(_T("OHR"),CComVariant(m_OHR));
 
       std::vector<Float64>::iterator spacingIter = m_vColumnSpacing.begin();
       std::vector<CColumnData>::iterator columnIterBegin = m_vColumnData.begin();
@@ -781,9 +920,9 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
 
    m_Concrete.Save(pStrSave,nullptr);
 
-   pStrSave->BeginUnit(_T("Reinforcement"),1.0);
-      pStrSave->put_Property(_T("RebarType"),CComVariant(+m_RebarType));
-      pStrSave->put_Property(_T("RebarGrade"),CComVariant(+m_RebarGrade));
+   pStrSave->BeginUnit(_T("Reinforcement"),2.0);
+      pStrSave->put_Property(_T("StirrupRebarType"),CComVariant(+m_StirrupRebarType)); //modified to stirrup rebar type in version 2.0
+      pStrSave->put_Property(_T("StirrupRebarGrade"),CComVariant(+m_StirrupRebarGrade)); //modified to stirrup rebar grade in version 2.0
       m_LongitudinalRebar.Save(pStrSave,nullptr);
       m_LowerXBeamStirrups.Save(pStrSave);
       m_FullDepthStirrups.Save(pStrSave);
@@ -808,6 +947,7 @@ HRESULT xbrPierData::Save(IStructuredSave* pStrSave,std::shared_ptr<IEAFProgress
 HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress> pProgress)
 {
    USES_CONVERSION;
+   Float64 lowerCrossBeamVersion = 1.0;
    CHRException hr;
    try
    {
@@ -828,7 +968,7 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          hr = pStrLoad->BeginUnit(_T("Layout"));
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("SuperstructureConnectionType"),&var);
-         m_ConnectionType = (xbrTypes::PierType)(var.lVal);
+         m_ConnectionType = (pgsTypes::PierType)(var.lVal);
 
          var.vt = VT_BSTR;
          hr = pStrLoad->get_Property(_T("Skew"),&var);
@@ -927,38 +1067,128 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
 
       {
          hr = pStrLoad->BeginUnit(_T("LowerCrossBeam"));
+         pStrLoad->get_Version(&lowerCrossBeamVersion);
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("H1"),&var);
-         m_H1 = var.dblVal;
+         Float64 version;
+         pStrLoad->get_Version(&version);
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("H2"),&var);
-         m_H2 = var.dblVal;
+         if (version < 2.0)
+         {
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H1"), &var);
+             m_H1L = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("H3"),&var);
-         m_H3 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H2"), &var);
+             m_H2L = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("H4"),&var);
-         m_H4 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H3"), &var);
+             m_H1R = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X1"),&var);
-         m_X1 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H4"), &var);
+             m_H2R = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X2"),&var);
-         m_X2 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X1"), &var);
+             m_X2L = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X3"),&var);
-         m_X3 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X2"), &var);
+             m_X1L = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X4"),&var);
-         m_X4 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X3"), &var);
+             m_X2R = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X4"), &var);
+             m_X1R = var.dblVal;
+         }
+         else
+         {
+             var.vt = VT_I4;
+             hr = pStrLoad->get_Property(_T("PierLayoutType"), &var);
+             m_PierLayoutType = (pgsTypes::PierLayoutType)(var.lVal);
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H1L"), &var);
+             m_H1L = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H1R"), &var);
+             m_H1R = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H2L"), &var);
+             m_H2L = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("H2R"), &var);
+             m_H2R = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X1L"), &var);
+             m_X1L = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X1R"), &var);
+             m_X1R = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X2L"), &var);
+             m_X2L = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X2R"), &var);
+             m_X2R = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("RL"), &var);
+             m_OverhangRadius[pgsTypes::stLeft] = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("RR"), &var);
+             m_OverhangRadius[pgsTypes::stRight] = var.dblVal;
+             var.vt = VT_INDEX;
+             hr = pStrLoad->get_Property(_T("ScallopColumnCount"), &var);
+             const ColumnIndexType count = VARIANT2INDEX(var);
+             if (count == 0 || count == INVALID_INDEX)
+                 throw E_FAIL;
+             m_ScallopDepths.resize(count);
+             m_ScallopRadii.resize(count - 1);
+             for (auto& depth : m_ScallopDepths)
+             {
+                 var.vt = VT_R8;
+                 hr = pStrLoad->get_Property(_T("ScallopDepth"), &var);
+                 depth = var.dblVal;
+             }
+             for (auto& radius : m_ScallopRadii)
+             {
+                 var.vt = VT_R8;
+                 hr = pStrLoad->get_Property(_T("ScallopRadius"), &var);
+                 radius = var.dblVal;
+             }
+
+             m_vPierPoints.clear();
+             var.vt = VT_INDEX;
+             hr = pStrLoad->get_Property(_T("PierPointCount"), &var);
+             PierPointIndexType nPierPoints = VARIANT2INDEX(var);
+
+             m_vPierPoints.clear();
+
+             m_vPierPoints.reserve(nPierPoints);
+
+             for (PierPointIndexType ppIdx = 0; ppIdx < nPierPoints; ++ppIdx)
+             {
+                 CPierPointData pierPoint;
+
+                 hr = pierPoint.Load(pStrLoad, pProgress);
+
+                 m_vPierPoints.push_back(std::move(pierPoint));
+             }
+
+         }
 
          var.vt = VT_R8;
          hr = pStrLoad->get_Property(_T("W"),&var);
@@ -979,13 +1209,28 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          hr = pStrLoad->get_Property(_T("RefColumnDatum"),&var);
          m_RefColumnDatum = (pgsTypes::OffsetMeasurementType)var.lVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X5"),&var);
-         m_X5 = var.dblVal;
+         Float64 version;
+         pStrLoad->get_Version(&version);
+		 if (version < 2.0)
+         {
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X5"), &var);
+             m_OHL = var.dblVal;
 
-         var.vt = VT_R8;
-         hr = pStrLoad->get_Property(_T("X6"),&var);
-         m_X6 = var.dblVal;
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("X6"), &var);
+             m_OHR = var.dblVal;
+         }
+         else
+         {
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("OHL"), &var);
+             m_OHL = var.dblVal;
+
+             var.vt = VT_R8;
+             hr = pStrLoad->get_Property(_T("OHR"), &var);
+             m_OHR = var.dblVal;
+         }
 
          m_vColumnData.clear();
          m_vColumnSpacing.clear();
@@ -1018,6 +1263,17 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
          ATLASSERT(m_vColumnData.size() == m_vColumnSpacing.size()+1);
 
          hr = pStrLoad->EndUnit(); // Columns
+         if (lowerCrossBeamVersion < 2.0)
+         {
+             // Files predating bottom profiles have no scallop inputs.
+             m_ScallopDepths.assign(m_vColumnData.size(), WBFL::Units::ConvertToSysUnits(5.0, WBFL::Units::Measure::Feet));
+             m_ScallopRadii.assign(m_vColumnSpacing.size(), WBFL::Units::ConvertToSysUnits(10.0, WBFL::Units::Measure::Feet));
+         }
+         else if (m_ScallopDepths.size() != m_vColumnData.size() ||
+                  m_ScallopRadii.size() != m_vColumnSpacing.size())
+         {
+             throw E_FAIL;
+         }
       }
 
       {
@@ -1026,15 +1282,39 @@ HRESULT xbrPierData::Load(IStructuredLoad* pStrLoad,std::shared_ptr<IEAFProgress
 
       {
          hr = pStrLoad->BeginUnit(_T("Reinforcement"));
+         Float64 version;
+         pStrLoad->get_Version(&version);
 
-         var.vt = VT_I4;
-         hr = pStrLoad->get_Property(_T("RebarType"),&var);
-         m_RebarType = (WBFL::Materials::Rebar::Type)(var.lVal);
+		 if (version < 2.0)
+         {
+             var.vt = VT_I4;
+             hr = pStrLoad->get_Property(_T("RebarType"), &var);
+             WBFL::Materials::Rebar::Type type = (WBFL::Materials::Rebar::Type)(var.lVal);
+             m_StirrupRebarType = (WBFL::Materials::Rebar::Type)(var.lVal);
+             hr = pStrLoad->get_Property(_T("RebarGrade"), &var);
+             WBFL::Materials::Rebar::Grade grade = (WBFL::Materials::Rebar::Grade)(var.lVal);
+             m_StirrupRebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
 
-         hr = pStrLoad->get_Property(_T("RebarGrade"),&var);
-         m_RebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
+         }
+         else
+         {
+             var.vt = VT_I4;
+             hr = pStrLoad->get_Property(_T("StirrupRebarType"), &var);
+             WBFL::Materials::Rebar::Type type = (WBFL::Materials::Rebar::Type)(var.lVal);
+             m_StirrupRebarType = (WBFL::Materials::Rebar::Type)(var.lVal);
+             hr = pStrLoad->get_Property(_T("StirrupRebarGrade"), &var);
+             WBFL::Materials::Rebar::Grade grade = (WBFL::Materials::Rebar::Grade)(var.lVal);
+             m_StirrupRebarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
+         }
 
          hr = m_LongitudinalRebar.Load(pStrLoad,nullptr);
+         if (version < 2.0)
+         {
+             // Legacy rows have no material fields. Apply the enclosing
+             // reinforcement material after Load has populated the rows.
+             for (auto& row : m_LongitudinalRebar.RebarRows)
+                 row.SetBarMaterial(m_StirrupRebarType, m_StirrupRebarGrade);
+         }
          hr = m_LowerXBeamStirrups.Load(pStrLoad);
          hr = m_FullDepthStirrups.Load(pStrLoad);
          hr = pStrLoad->EndUnit(); // Reinforcement
@@ -1103,15 +1383,22 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
 
    m_tDeck = rOther.m_tDeck;
 
-   m_H1 = rOther.m_H1;
-   m_H2 = rOther.m_H2;
-   m_H3 = rOther.m_H3;
-   m_H4 = rOther.m_H4;
-   m_X1 = rOther.m_X1;
-   m_X2 = rOther.m_X2;
-   m_X3 = rOther.m_X3;
-   m_X4 = rOther.m_X4;
+   m_PierLayoutType = rOther.m_PierLayoutType;
+
+   m_H1L = rOther.m_H1L;
+   m_H1R = rOther.m_H1R;
+   m_H2L = rOther.m_H2L;
+   m_H2R = rOther.m_H2R;
+   m_X1L = rOther.m_X1L;
+   m_X1R = rOther.m_X1R;
+   m_X2L = rOther.m_X2L;
+   m_X2R = rOther.m_X2R;
    m_XW = rOther.m_XW;
+   m_OverhangRadius[pgsTypes::stLeft] = rOther.m_OverhangRadius[pgsTypes::stLeft];
+   m_OverhangRadius[pgsTypes::stRight] = rOther.m_OverhangRadius[pgsTypes::stRight];
+   m_ScallopDepths = rOther.m_ScallopDepths;
+   m_ScallopRadii = rOther.m_ScallopRadii;
+   m_vPierPoints = rOther.m_vPierPoints;
 
    m_vColumnData = rOther.m_vColumnData;
    m_vColumnSpacing = rOther.m_vColumnSpacing;
@@ -1120,11 +1407,11 @@ void xbrPierData::MakeCopy(const xbrPierData& rOther)
    m_RefColumnIdx    = rOther.m_RefColumnIdx;
    m_RefColumnOffset = rOther.m_RefColumnOffset;
 
-   m_X5              = rOther.m_X5;
-   m_X6              = rOther.m_X6;
+   m_OHL              = rOther.m_OHL;
+   m_OHR              = rOther.m_OHR;
 
-   m_RebarGrade = rOther.m_RebarGrade;
-   m_RebarType = rOther.m_RebarType;
+   m_StirrupRebarGrade = rOther.m_StirrupRebarGrade;
+   m_StirrupRebarType = rOther.m_StirrupRebarType;
 
    m_Concrete = rOther.m_Concrete;
 

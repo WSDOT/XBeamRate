@@ -35,10 +35,10 @@
 #include <AgentTools.h>
 #include <IFace\XBeamRateAgent.h>
 #include <IFace\Project.h>
+#include <IFace\Pier.h>
 
 #include <IFace\AnalysisResults.h>
 #include <IFace\LoadRating.h>
-#include <IFace\Pier.h>
 #include <IFace\EditByUI.h>
 #include <..\..\PGSuper\Include\IFace\Project.h>
 #include <..\..\PGSuper\Include\IFace\Bridge.h>
@@ -614,7 +614,7 @@ void CXBeamRateView::UpdateXBeamDisplayObjects()
    // Model Upper Cross Beam (Elevation)
    WBFL::Geometry::Point2d point(0, 0);
 
-   if ( pProject->GetPierType(pierID) != xbrTypes::pctExpansion )
+   if ( pProject->GetPierType(pierID) != pgsTypes::pctExpansion )
    {
       auto doUpperXBeam = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
       doUpperXBeam->SetPosition(point,false,false);
@@ -722,7 +722,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    // cross beam.
    WBFL::Math::PiecewiseFunction fn;
    CComPtr<IPoint2dCollection> points;
-   pPier->GetBottomSurface(pierID,xbrTypes::Stage1,&points);
+   pPier->GetBottomSurface(pierID,pgsTypes::Stage1,&points);
    CComPtr<IEnumPoint2d> enumPoints;
    points->get__Enum(&enumPoints);
    CComPtr<IPoint2d> pnt;
@@ -735,6 +735,7 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
    }
 
    IndexType nColumns = pPier->GetColumnCount(pierID);
+
    for (IndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 XxbCol = pPier->GetColumnLocation(pierID,colIdx);
@@ -747,8 +748,10 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
       Float64 H;
       pProject->GetColumnProperties(pierID,colIdx,&colShapeType,&d1,&d2,&columnHeightType,&H);
 
-      WBFL::Geometry::Point2d pntTop(XpCol,Ytop);
-      WBFL::Geometry::Point2d pntBot(XpCol,Ybot);
+	  xbrPierData pierData = pProject->GetPierData(pierID);
+
+      WBFL::Geometry::Point2d pntTop(XpCol, Ytop);
+      WBFL::Geometry::Point2d pntBot(XpCol, Ybot);
    
       auto doTop = WBFL::DManip::PointDisplayObject::Create();
       doTop->Visible(false);
@@ -764,19 +767,52 @@ void CXBeamRateView::UpdateColumnDisplayObjects()
 
       // Create the shape of the column
       auto columnShape = std::make_shared<WBFL::Geometry::Polygon>();
-      Float64 X1,X2,X3;
-      X2 = pntTop.X();
-      X1 = X2-d1/2;
-      X3 = X2+d1/2;
+      Float64 X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11;
+
+
+      X6 = pntTop.X();
+      X1 = X6 - d1 * 0.5;
+      X2 = X6 - d1 * 0.4;
+      X3 = X6 - d1 * 0.3;
+	  X4 = X6 - d1 * 0.2;
+      X5 = X6 - d1 * 0.1;
+      X7 = X6 + d1 * 0.1;
+      X8 = X6 + d1 * 0.2;
+      X9 = X6 + d1 * 0.3;
+      X10 = X6 + d1 * 0.4;
+      X11 = X6 + d1 * 0.5;
+
+      pgsTypes::OffsetMeasurementType refColMeasure;
+      ColumnIndexType refColIdx;
+      Float64 refColOffset;
+
+	  pierData.GetRefColumnLocation(&refColMeasure, &refColIdx, &refColOffset);
+
       Float64 Y1 = fn.Evaluate(X1);
       Float64 Y2 = fn.Evaluate(X2);
       Float64 Y3 = fn.Evaluate(X3);
+      Float64 Y4 = fn.Evaluate(X4);
+      Float64 Y5 = fn.Evaluate(X5);
+      Float64 Y6 = fn.Evaluate(X6);
+      Float64 Y7 = fn.Evaluate(X7);
+      Float64 Y8 = fn.Evaluate(X8);
+      Float64 Y9 = fn.Evaluate(X9);
+      Float64 Y10 = fn.Evaluate(X10);
+      Float64 Y11 = fn.Evaluate(X11);
 
-      columnShape->AddPoint(X1,Y1);
-      columnShape->AddPoint(X2,Y2);
-      columnShape->AddPoint(X3,Y3);
-      columnShape->AddPoint(X3,Ybot);
-      columnShape->AddPoint(X1,Ybot);
+      columnShape->AddPoint(X1, Y1);
+      columnShape->AddPoint(X2, Y2);
+      columnShape->AddPoint(X3, Y3);
+      columnShape->AddPoint(X4, Y4);
+      columnShape->AddPoint(X5, Y5);
+      columnShape->AddPoint(X6, Y6);
+      columnShape->AddPoint(X7, Y7);
+      columnShape->AddPoint(X8, Y8);
+      columnShape->AddPoint(X9, Y9);
+      columnShape->AddPoint(X10, Y10);
+      columnShape->AddPoint(X11, Y11);
+      columnShape->AddPoint(X11, Ybot);
+      columnShape->AddPoint(X1, Ybot);
 
       auto doColumn = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
       doColumn->SetPosition(pntTop,false,false);
@@ -830,22 +866,46 @@ void CXBeamRateView::UpdateRebarDisplayObjects()
    Float64 XxbCut = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
 
    CComPtr<IRebarSection> rebarSection;
-   pRebar->GetRebarSection(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,XxbCut),&rebarSection);
+   pRebar->GetRebarSection(pierID, pgsTypes::Stage2, xbrPointOfInterest(INVALID_ID, XxbCut), &rebarSection);
 
    CComPtr<IEnumRebarSectionItem> enumSectionItems;
    rebarSection->get__EnumRebarSectionItem(&enumSectionItems);
    CComPtr<IRebarSectionItem> sectionItem;
+
+   CComPtr<IPoint2dCollection> points;
+   pPier->GetTopSurface(pierID, pgsTypes::Stage1, &points);
+
+   WBFL::Math::PiecewiseFunction fn;
+   CComPtr<IEnumPoint2d> enumPoints;
+   points->get__Enum(&enumPoints);
+   CComPtr<IPoint2d> pnt;
+   while (enumPoints->Next(1, &pnt, nullptr) != S_FALSE)
+   {
+       Float64 x, y;
+       pnt->Location(&x, &y);
+       fn.AddPoint(x, y);
+       pnt.Release();
+   }
+
    while ( enumSectionItems->Next(1,&sectionItem,nullptr) != S_FALSE )
    {
       CComPtr<IPoint2d> pntBar;
       sectionItem->get_Location(&pntBar);
+      Float64 Xbar, YBar;
+      pntBar->get_X(&Xbar);
+      pntBar->get_Y(&YBar);
 
-      pntBar->Offset(EndOffset+Lxb,0);
+      GET_IFACE2(pBroker, IXBRProject, pProject);
 
-      auto doBar = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
-      doBar->SetPosition(geomUtil::GetPoint(pntBar),false,false);
+	  if (!(pProject->GetPierType(pierID) == pgsTypes::pctExpansion && YBar > fn.Evaluate(Xbar))) // ignore rebar in upper crossbeam for expansion piers
+      {
+          pntBar->Offset(EndOffset + Lxb, 0);
 
-      displayList->AddDisplayObject(doBar);
+          auto doBar = WBFL::DManip::PointDisplayObject::Create(m_DisplayObjectID++);
+          doBar->SetPosition(geomUtil::GetPoint(pntBar), false, false);
+
+          displayList->AddDisplayObject(doBar);
+      }
 
       sectionItem.Release();
    }
@@ -869,15 +929,15 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
-   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
+   pgsTypes::PierType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IXBRStirrups,pStirrups);
    // work backwards when drawing stirrups so lower XBeam stirrups are 
    // drawn second and not covered up by the full depth stirrups
    for ( int i = 1; 0 <= i; i-- ) 
    {
-      xbrTypes::Stage stage = (xbrTypes::Stage)i;
-      COLORREF color = (stage == xbrTypes::Stage1 ? STAGE1_STIRRUP_COLOR : STAGE2_STIRRUP_COLOR);
+      pgsTypes::Stage stage = (pgsTypes::Stage)i;
+      COLORREF color = (stage == pgsTypes::Stage1 ? STAGE1_STIRRUP_COLOR : STAGE2_STIRRUP_COLOR);
       IndexType nStirrupZones = pStirrups->GetStirrupZoneCount(pierID,stage);
       for ( IndexType zoneIdx = 0; zoneIdx < nStirrupZones; zoneIdx++ )
       {
@@ -908,16 +968,16 @@ void CXBeamRateView::UpdateStirrupDisplayObjects()
 
             Ytop -= tDeck;
 
-            Float64 D = pSectProps->GetDepth(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
+            Float64 D = pSectProps->GetDepth(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,Xxb));
             Float64 Ybot = Ytop - D;
 
-            if ( pierType != xbrTypes::pctIntegral )
+            if ( pierType != pgsTypes::pctIntegral )
             {
                // for non-integral, D is just the depth of the lower portion
                Ybot -= H;
             }
 
-            if ( stage == xbrTypes::Stage1 || pierType != xbrTypes::pctIntegral )
+            if ( stage == pgsTypes::Stage1 || pierType != pgsTypes::pctIntegral )
             {
                Ytop -= H;
             }
@@ -1199,23 +1259,24 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 tDeck = pProject->GetDeckThickness(pierID);
 
-   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
+   pgsTypes::PierType pierType = pProject->GetPierType(pierID);
 
    Float64 CPO = pPier->GetCrownPointOffset(pierID);
    Float64 Xcrown = pPier->GetCrownPointLocation(pierID);
    Xcrown = pPier->ConvertCurbLineToCrossBeamCoordinate(pierID,Xcrown);
    Float64 Xoffset = CPO - Xcrown;
 
-   Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
-   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W);
+   Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
+   std::vector<CPierPointData> vPoints;
+   pProject->GetLowerXBeamDimensions(pierID , &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
 
-   Float64 D, Hu;
-   pProject->GetDiaphragmDimensions(pierID,&Hu,&D);
+   Float64 Dd, Hu;
+   pProject->GetDiaphragmDimensions(pierID,&Hu,&Dd);
 
    CComPtr<IPoint2dCollection> topUpperXBeamProfile, topLowerXBeamProfile, bottomXBeamProfile;
-   pPier->GetTopSurface(pierID, xbrTypes::Stage1, &topLowerXBeamProfile);
-   pPier->GetTopSurface(pierID, xbrTypes::Stage2, &topUpperXBeamProfile);
-   pPier->GetBottomSurface(pierID, xbrTypes::Stage1, &bottomXBeamProfile);
+   pPier->GetTopSurface(pierID, pgsTypes::Stage1, &topLowerXBeamProfile);
+   pPier->GetTopSurface(pierID, pgsTypes::Stage2, &topUpperXBeamProfile);
+   pPier->GetBottomSurface(pierID, pgsTypes::Stage1, &bottomXBeamProfile);
 
    // Upper Cross Beam - Top Left
    CComPtr<IPoint2d> pnt;
@@ -1229,12 +1290,16 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // Upper Cross Beam - Bottom Left (Lower Cross Beam - Top Left)
    pnt.Release();
    topLowerXBeamProfile->get_Item(0, &pnt);
+   Float64 ublc;
+   pnt->get_X(&ublc);
    WBFL::Geometry::Point2d uxbBL(geomUtil::GetPoint(pnt));
    uxbBL.X() = Xl;
 
    // Lower Cross Beam - Bottom Left
    pnt.Release();
    bottomXBeamProfile->get_Item(0, &pnt);
+   Float64 lblc;
+   pnt->get_X(&lblc);
    WBFL::Geometry::Point2d lxbBL(geomUtil::GetPoint(pnt));
    lxbBL.X() = Xl;
 
@@ -1253,6 +1318,8 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pnt.Release();
    topLowerXBeamProfile->get_Count(&nPoints);
    topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
+   Float64 ubrc;
+   pnt->get_X(&ubrc);
    WBFL::Geometry::Point2d uxbBR(geomUtil::GetPoint(pnt));
    uxbBR.X() = Xr;
 
@@ -1260,61 +1327,333 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    pnt.Release();
    bottomXBeamProfile->get_Count(&nPoints);
    bottomXBeamProfile->get_Item(nPoints - 1, &pnt);
+   Float64 lbrc;
+   pnt->get_X(&lbrc);
    WBFL::Geometry::Point2d lxbBR(geomUtil::GetPoint(pnt));
    lxbBR.X() = Xr;
 
    // Height of upper cross beam
-   if (pierType != xbrTypes::pctExpansion)
+   if (pierType != pgsTypes::pctExpansion)
    {
       BuildDimensionLine(displayList, uxbBL, uxbTL);
       BuildDimensionLine(displayList, uxbTR, uxbBR);
    }
 
    // Height of lower cross beam
-   BuildDimensionLine(displayList, lxbBL, uxbBL); // H1 Dimension
-   BuildDimensionLine(displayList, uxbBR, lxbBR); // H3 Dimension
+   BuildDimensionLine(displayList, lxbBL, uxbBL); // H1L Dimension
+   BuildDimensionLine(displayList, uxbBR, lxbBR); // H1R Dimension
 
-   // Lower cross beam bottom taper, vertical dimensions
-   WBFL::Geometry::Point2d lxbBLC, lxbBRC;
-   lxbBLC.Move(lxbBL);
-   lxbBLC.Offset(0, -H2);
-   lxbBRC.Move(lxbBR);
-   lxbBRC.Offset(0, -H4);
+   Float64 Ybot = lxbBL.Y();
+   WBFL::Geometry::Point2d blc(lblc - X1L, Ybot);
+   WBFL::Geometry::Point2d x1l(lblc, Ybot);
+   BuildDimensionLine(displayList, x1l, blc);
+   WBFL::Geometry::Point2d brc(lbrc + X1R, Ybot);
+   WBFL::Geometry::Point2d x1r(lbrc, Ybot);
+   BuildDimensionLine(displayList, brc, x1r);
 
-   BuildDimensionLine(displayList, lxbBLC, lxbBL); // H2 Dimension
-   BuildDimensionLine(displayList, lxbBR, lxbBRC); // H4 Dimension
+   //Radius and depth of bottom scallop
 
-   // Lower cross beam bottom taper, horizontal dimensions
-   pnt.Release();
-   topLowerXBeamProfile->get_Item(0, &pnt);
-   WBFL::Geometry::Point2d lxbBL1, lxbBR1;
-   lxbBL1.Move(geomUtil::GetPoint(pnt));
-   lxbBL1.Offset(0, -H1 - H2);
+    // Get the center points for the arcs at column centers
+   ColumnIndexType nColumns = pPier->GetColumnCount(pierID);
 
-   pnt.Release();
-   topLowerXBeamProfile->get_Count(&nPoints);
-   topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
-   lxbBR1.Move(geomUtil::GetPoint(pnt));
-   lxbBR1.Offset(0, -H3 - H4);
+   xbrPierData pierData = pProject->GetPierData(pierID);
+   const auto& pierLayoutType = pierData.GetPierLayoutType();
 
-   WBFL::Geometry::Point2d lxbBL2, lxbBR2;
-   Float64 y;
-   std::tie(Xl,y) = lxbBL1.GetLocation(); // TRICKY: changing Xl to now be the x-location of left dimensions for the columns
-   lxbBL2.Move(Xl+X1,y);
+   if (pierLayoutType == pgsTypes::pltCommon)
+   {
+       // Lower cross beam bottom taper, vertical dimensions
+       WBFL::Geometry::Point2d lxbBLC, lxbBRC;
+       lxbBLC.Move(lxbBL);
+       lxbBLC.Offset(0, -H2L);
+       lxbBRC.Move(lxbBR);
+       lxbBRC.Offset(0, -H2R);
 
-   std::tie(Xr,y) = lxbBR1.GetLocation();
-   lxbBR2.Move(Xr-X3,y); // TRICKY: changing Xr to now be the x-location of right dimensions for the columns
+       BuildDimensionLine(displayList, lxbBLC, lxbBL); // H2L Dimension
+       BuildDimensionLine(displayList, lxbBR, lxbBRC); // H2R Dimension
 
-   // Horizontal Cross Beam Dimensions
-   BuildDimensionLine(displayList,lxbBL2,lxbBL1); // X1 Dimension
-   BuildDimensionLine(displayList,lxbBR1,lxbBR2); // X3 Dimension
+       // Lower cross beam bottom taper, horizontal dimensions
+       pnt.Release();
+       topLowerXBeamProfile->get_Item(0, &pnt);
+       WBFL::Geometry::Point2d lxbBL1, lxbBR1;
+       lxbBL1.Move(geomUtil::GetPoint(pnt));
+       lxbBL1.Offset(0, -H1L - H2L);
 
+       pnt.Release();
+       topLowerXBeamProfile->get_Count(&nPoints);
+       topLowerXBeamProfile->get_Item(nPoints - 1, &pnt);
+       lxbBR1.Move(geomUtil::GetPoint(pnt));
+       lxbBR1.Offset(0, -H1R - H2R);
+
+       WBFL::Geometry::Point2d lxbBL2, lxbBR2;
+       Float64 y;
+       std::tie(Xl, y) = lxbBL1.GetLocation(); // TRICKY: changing Xl to now be the x-location of left dimensions for the columns
+       lxbBL2.Move(Xl + X2L, y);
+
+       std::tie(Xr, y) = lxbBR1.GetLocation();
+       lxbBR2.Move(Xr - X2R, y); // TRICKY: changing Xr to now be the x-location of right dimensions for the columns
+
+       // Horizontal Cross Beam Dimensions
+       BuildDimensionLine(displayList, lxbBL2, lxbBL1); // X2L Dimension
+       BuildDimensionLine(displayList, lxbBR1, lxbBR2); // X2R Dimension
+   }
+   else if (pierLayoutType == pgsTypes::pltScalloped)
+   {
+       //Radius and depth of bottom scallop
+       // Depths follow the actual bottom profile at each column and bay.
+       
+       for (ColumnIndexType colIdx = 0;
+           colIdx + 1 < nColumns; colIdx++)
+       {
+           Float64 X1 = pPier->GetColumnLocation(pierID, colIdx);
+           Float64 X2 = pPier->GetColumnLocation(pierID, colIdx + 1);
+
+           Float64 Xmid = (X1 + X2) / 2.0;
+
+           Float64 XpMid =
+               pPier->ConvertCrossBeamToPierCoordinate(pierID, Xmid);
+
+           Float64 XpCol =
+               pPier->ConvertCrossBeamToPierCoordinate(pierID, X1);
+
+           CComPtr<IShape> shape1;
+           pSectProp->GetXBeamShape(
+               pierID,
+               pgsTypes::Stage1,
+               xbrPointOfInterest(INVALID_ID, Xmid),
+               &shape1);
+
+           CComQIPtr<IXYPosition> position1(shape1);
+
+           CComPtr<IShape> shape2;
+           pSectProp->GetXBeamShape(
+               pierID,
+               pgsTypes::Stage1,
+               xbrPointOfInterest(INVALID_ID, X1),
+               &shape2);
+
+           CComQIPtr<IXYPosition> position2(shape2);
+
+           CComPtr<IPoint2d> pntTop1;
+           CComPtr<IPoint2d> pntBot1;
+
+           position1->get_LocatorPoint(lpTopCenter, &pntTop1);
+           position1->get_LocatorPoint(lpBottomCenter, &pntBot1);
+
+           Float64 Ytop1, Ybot1;
+           pntTop1->get_Y(&Ytop1);
+           pntBot1->get_Y(&Ybot1);
+
+           WBFL::Geometry::Point2d top1(XpMid, Ytop1);
+           WBFL::Geometry::Point2d bottom1(XpMid, Ybot1);
+
+           BuildDimensionLine(displayList, top1, bottom1);
+
+           CComPtr<IPoint2d> pntTop2;
+           CComPtr<IPoint2d> pntBot2;
+
+           position2->get_LocatorPoint(lpTopCenter, &pntTop2);
+           position2->get_LocatorPoint(lpBottomCenter, &pntBot2);
+
+           Float64 Ytop2, Ybot2;
+           pntTop2->get_Y(&Ytop2);
+           pntBot2->get_Y(&Ybot2);
+
+           WBFL::Geometry::Point2d top2(XpCol, Ytop2);
+           WBFL::Geometry::Point2d bottom2(XpCol, Ybot2);
+
+           BuildDimensionLine(displayList, top2, bottom2);
+       }
+
+       // Depth dimension at the last column 
+       Float64 Xlast = pPier->GetColumnLocation(pierID, nColumns - 1);
+
+       Float64 XpLast =
+           pPier->ConvertCrossBeamToPierCoordinate(pierID, Xlast);
+
+       CComPtr<IShape> shapeLast;
+       pSectProp->GetXBeamShape(
+           pierID,
+           pgsTypes::Stage1,
+           xbrPointOfInterest(INVALID_ID, Xlast),
+           &shapeLast);
+
+       CComQIPtr<IXYPosition> positionLast(shapeLast);
+
+       CComPtr<IPoint2d> pntTopLast;
+       CComPtr<IPoint2d> pntBotLast;
+
+       positionLast->get_LocatorPoint(lpTopCenter, &pntTopLast);
+       positionLast->get_LocatorPoint(lpBottomCenter, &pntBotLast);
+
+       Float64 YtopLast, YbotLast;
+       pntTopLast->get_Y(&YtopLast);
+       pntBotLast->get_Y(&YbotLast);
+
+       WBFL::Geometry::Point2d topLast(XpLast, YtopLast);
+       WBFL::Geometry::Point2d bottomLast(XpLast, YbotLast);
+
+       BuildDimensionLine(displayList, topLast, bottomLast);
+
+
+       GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+
+       for (ColumnIndexType arcIdx = 0; arcIdx <= nColumns; ++arcIdx)
+       {
+           Float64 Xleft, Xright;
+
+           if (arcIdx == 0)
+           {
+               // Left overhang
+               Xleft = pPier->ConvertPierToCrossBeamCoordinate(
+                   pierID, lblc);
+
+               Xright = pPier->GetColumnLocation(pierID, 0);
+           }
+           else if (arcIdx == nColumns)
+           {
+               // Right overhang
+               Xleft = pPier->GetColumnLocation(
+                   pierID, nColumns - 1);
+
+               Xright = pPier->ConvertPierToCrossBeamCoordinate(
+                   pierID, lbrc);
+           }
+           else
+           {
+               // Between adjacent columns
+               Xleft = pPier->GetColumnLocation(pierID, arcIdx - 1);
+               Xright = pPier->GetColumnLocation(pierID, arcIdx);
+           }
+
+           const Float64 Xmid = (Xleft + Xright) / 2.0;
+
+           // Obtain the bottom surface elevations at the chord endpoints.
+           auto GetBottomY = [&](Float64 Xxb) -> Float64
+               {
+                   CComPtr<IShape> shape;
+
+                   pSectProp->GetXBeamShape(
+                       pierID,
+                       pgsTypes::Stage1,
+                       xbrPointOfInterest(INVALID_ID, Xxb),
+                       &shape);
+
+                   CComQIPtr<IXYPosition> position(shape);
+
+                   CComPtr<IPoint2d> pntBot;
+                   position->get_LocatorPoint(lpBottomCenter, &pntBot);
+
+                   Float64 Y;
+                   pntBot->get_Y(&Y);
+
+                   return Y;
+               };
+
+           const Float64 Yleft = GetBottomY(Xleft);
+           const Float64 Yright = GetBottomY(Xright);
+
+           // Midpoint of the chord, accounting for inclination.
+           const Float64 Ychord = (Yleft + Yright) / 2.0;
+
+           const Float64 XpMid =
+               pPier->ConvertCrossBeamToPierCoordinate(pierID, Xmid);
+
+           // Small offset below the chord.
+           WBFL::Geometry::Point2d ppRad(XpMid, Ychord - 0.5);
+
+           const Float64 radius = arcIdx == 0
+               ? pierData.GetXBeamOverhangRadius(pgsTypes::stLeft)
+               : arcIdx == nColumns
+                   ? pierData.GetXBeamOverhangRadius(pgsTypes::stRight)
+                   : pierData.GetColumnScallopRadius(arcIdx - 1);
+           const CString strRadius = FormatDimension(radius, pDisplayUnits->GetSpanLengthUnit());
+
+           CString strRadiusLabel;
+           if (arcIdx == 0)
+               strRadiusLabel.Format(_T("RL = %s"), strRadius.GetString());
+           else if (arcIdx == nColumns)
+               strRadiusLabel.Format(_T("RR = %s"), strRadius.GetString());
+           else
+               strRadiusLabel.Format(_T("R%d = %s"), arcIdx, strRadius.GetString());
+
+           auto doRadiusLabel = WBFL::DManip::TextBlock::Create();
+           doRadiusLabel->SetText(strRadiusLabel);
+           doRadiusLabel->SetBkMode(TRANSPARENT);
+           doRadiusLabel->SetTextAlign(TA_TOP | TA_CENTER);
+           doRadiusLabel->SetPosition(ppRad);
+
+           displayList->AddDisplayObject(doRadiusLabel);
+       }
+   }
+   else if (pierLayoutType == pgsTypes::pltUserDefined)
+   {
+       // Function representing the top of the lower cross beam
+       WBFL::Math::PiecewiseFunction fnTop;
+
+       CComPtr<IEnumPoint2d> enumPoints;
+       topLowerXBeamProfile->get__Enum(&enumPoints);
+
+       CComPtr<IPoint2d> pntTop;
+       while (enumPoints->Next(1, &pntTop, nullptr) != S_FALSE)
+       {
+           Float64 x, y;
+           pntTop->Location(&x, &y);
+           fnTop.AddPoint(x, y);
+           pntTop.Release();
+       }
+
+       Float64 origX = pPier->ConvertCrossBeamToPierCoordinate(pierID, 0.0);
+       Float64 origY = fnTop.Evaluate(origX) - H1L;
+       WBFL::Geometry::Point2d origin(origX, origY);
+
+       auto doOrigin = WBFL::DManip::PointDisplayObject::Create();
+       doOrigin->SetPosition(origin, false, false);
+       displayList->AddDisplayObject(doOrigin);
+
+       CString strBlcLabel = _T("(0, 0)");
+
+       auto doBlcLabel = WBFL::DManip::TextBlock::Create();
+       doBlcLabel->SetText(strBlcLabel);
+       doBlcLabel->SetBkMode(TRANSPARENT);
+       doBlcLabel->SetTextAlign(TA_TOP | TA_CENTER);
+       doBlcLabel->SetPosition(origin);
+       displayList->AddDisplayObject(doBlcLabel);
+
+       for (const auto& pnt : vPoints)
+       {
+           Float64 Xxb = pnt.Get_X();
+
+		   Float64 Xp = pPier->ConvertCrossBeamToPierCoordinate(pierID, Xxb);
+
+           const Float64 Ytop = fnTop.Evaluate(Xp);
+
+           const Float64 Ypoint = Ytop - pnt.Get_Y();
+
+           WBFL::Geometry::Point2d pp(Xp, Ypoint);
+
+           GET_IFACE2(pBroker, IEAFDisplayUnits, pDisplayUnits);
+
+           CString strPntLabel;
+           strPntLabel.Format(_T("(%s,%s)"), ::FormatDimension(Xxb, pDisplayUnits->GetSpanLengthUnit()), ::FormatDimension(pnt.Get_Y(), pDisplayUnits->GetSpanLengthUnit()));
+
+           auto doPntLabel = WBFL::DManip::TextBlock::Create();
+           doPntLabel->SetText(strPntLabel);
+           doPntLabel->SetBkMode(TRANSPARENT);
+           doPntLabel->SetTextAlign(TA_TOP | TA_CENTER);
+           doPntLabel->SetPosition(pp);
+           displayList->AddDisplayObject(doPntLabel);
+
+           auto doPoint = WBFL::DManip::PointDisplayObject::Create();
+           doPoint->SetPosition(pp, false, false);
+           displayList->AddDisplayObject(doPoint);
+       }
+
+   }
 
    // Column Dimensions
 
    // Column Height
    Float64 YbotColMin = DBL_MAX;
-   ColumnIndexType nColumns = pPier->GetColumnCount(pierID);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 XxbCol = pPier->GetColumnLocation(pierID,colIdx);
@@ -1333,7 +1672,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
    // than proceeds with the spacing between columns at their base)
    // create the dimension line with rightpt,leftpt so the text comes
    // out on the correct side
-   WBFL::Geometry::Point2d pntLeft(Xl, YbotColMin);
+   WBFL::Geometry::Point2d pntLeft(ublc, YbotColMin);
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       Float64 XxbCol = pPier->GetColumnLocation(pierID,colIdx);
@@ -1341,14 +1680,44 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
       WBFL::Geometry::Point2d pntRight(XpCol,YbotColMin);
      
-      BuildDimensionLine(displayList,pntRight,pntLeft); // first time this is X5, then S
+      BuildDimensionLine(displayList,pntRight,pntLeft); // first time this is OHL, then S
 
       pntLeft = pntRight;
    }
 
    // Right cross beam cantilever
-   WBFL::Geometry::Point2d pntRight(Xr,YbotColMin);
-   BuildDimensionLine(displayList,pntRight,pntLeft); // X6 Dimension
+   WBFL::Geometry::Point2d pntRight(ubrc,YbotColMin);
+   BuildDimensionLine(displayList,pntRight,pntLeft); // OHR Dimension
+
+   // Reference column to alignment/bridge line dimension 
+
+   pgsTypes::OffsetMeasurementType refColMeasure;
+   ColumnIndexType refColIdx;
+   Float64 refColOffset;
+
+   pierData.GetRefColumnLocation(&refColMeasure, &refColIdx, &refColOffset);
+
+   Float64 XxbRefCol = pPier->GetColumnLocation(pierID, refColIdx);
+   Float64 XpRefCol =
+       pPier->ConvertCrossBeamToPierCoordinate(pierID, XxbRefCol);
+
+   // Alignment/bridge line is at X = 0 in pier coordinates
+   Float64 XpAlignment = 0.0;
+
+   // Match the lower end of the alignment/bridge-line marker drawn in UpdateRoadwayDisplayObjects.
+   const Float64 alignmentXcl = pPier->ConvertPierToCurbLineCoordinate(pierID, 0.0);
+   const Float64 alignmentBottom = pPier->GetElevation(pierID, alignmentXcl)
+       + WBFL::Units::ConvertToSysUnits(1.0, WBFL::Units::Measure::Feet)
+       - pPier->GetMaxColumnHeight(pierID);
+   // Place the reference-column dimension six inches below that marker.
+   const Float64 Ydim = alignmentBottom
+       - WBFL::Units::ConvertToSysUnits(0.5, WBFL::Units::Measure::Feet);
+
+   WBFL::Geometry::Point2d pntRefCol(XpRefCol, Ydim);
+   WBFL::Geometry::Point2d pntAlignment(XpAlignment, Ydim);
+
+   BuildDimensionLine(displayList, pntRefCol, pntAlignment);
+
 
    //
    // Cross section dimensions
@@ -1359,11 +1728,11 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    Float64 Z = pPier->ConvertPierToCrossBeamCoordinate(pierID,m_pFrame->GetCurrentCutLocation());
 
-   if ( pProject->GetPierType(pierID) != xbrTypes::pctExpansion )
+   if ( pProject->GetPierType(pierID) != pgsTypes::pctExpansion )
    {
       // Upper Cross Beam (End View)
       CComPtr<IShape> upperXBeamShape;
-      pSectProp->GetXBeamShape(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
+      pSectProp->GetXBeamShape(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,Z),&upperXBeamShape);
 
       CComQIPtr<ICompositeShape> composite(upperXBeamShape);
       CComPtr<IShape> shape;
@@ -1390,7 +1759,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    // Lower Cross Beam (End View)
    CComPtr<IShape> lowerXBeamShape;
-   pSectProp->GetXBeamShape(pierID,xbrTypes::Stage1,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
+   pSectProp->GetXBeamShape(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Z),&lowerXBeamShape);
 
    CComQIPtr<IXYPosition> position(lowerXBeamShape);
    CComPtr<IPoint2d> pnt_left, pnt_right;
@@ -1402,7 +1771,7 @@ void CXBeamRateView::UpdateDimensionsDisplayObjects()
 
    // End View Height
    CComPtr<IShape> xbeamShape;
-   pSectProp->GetXBeamShape(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,Z),&xbeamShape);
+   pSectProp->GetXBeamShape(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,Z),&xbeamShape);
 
    position.Release();
    xbeamShape->QueryInterface(&position);

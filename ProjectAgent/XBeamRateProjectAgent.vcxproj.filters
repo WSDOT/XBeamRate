@@ -79,6 +79,18 @@
     <ClCompile Include="PermitLiveLoadReactionsPage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PierPointGrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommonPierLayoutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ScallopedPierLayoutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UserDefinedPierLayoutDlg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AASHTOConcretePage.h">
@@ -174,6 +186,21 @@
     <ClInclude Include="..\Include\IFace\RatingSpecification.h">
       <Filter>IFace</Filter>
     </ClInclude>
+    <ClInclude Include="PierPointGrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommonPierLayoutDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScallopedPierLayoutDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ScallopGeometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UserDefinedPierLayoutDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\EditOptions.bmp">
@@ -212,6 +239,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="ProjectAgent.def" />
+    <None Include="res\CommonPierLayout.emf" />
+    <None Include="res\ScallopedPierLayout.emf" />
+    <None Include="res\UserDefinedPierLayout.emf" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

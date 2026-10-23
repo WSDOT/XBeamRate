@@ -42,7 +42,7 @@ void write_substructure_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sha
 void write_concrete_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
 void write_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
 void write_longitudinal_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID);
-void write_transverse_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID,xbrTypes::Stage stage);
+void write_transverse_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID,pgsTypes::Stage stage);
 
 CPierDescriptionDetailsChapterBuilder::CPierDescriptionDetailsChapterBuilder()
 {
@@ -72,10 +72,10 @@ rptChapter* CPierDescriptionDetailsChapterBuilder::Build(const std::shared_ptr<c
    write_superstructure_data(pBroker,pDisplayUnits,pChapter,pierID);
    write_substructure_data(pBroker,pDisplayUnits,pChapter,pierID);
    write_concrete_data(pBroker,pDisplayUnits,pChapter,pierID);
-   write_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID);
    write_longitudinal_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID);
-   write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,xbrTypes::Stage1);
-   write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,xbrTypes::Stage2);
+   write_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID);
+   write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,pgsTypes::Stage1);
+   write_transverse_reinforcement_data(pBroker,pDisplayUnits,pChapter,pierID,pgsTypes::Stage2);
 
    return pChapter;
 }
@@ -108,8 +108,6 @@ void write_superstructure_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::s
    pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
    pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
    *pPara << pTable << rptNewLine;
-
-
 
    RowIndexType row = 0;
    (*pTable)(row,0) << _T("Pier Type");
@@ -184,36 +182,156 @@ void write_substructure_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sha
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Lower_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
 
-   *pPara << _T("Horizonal dimensions are in the plane of the pier.") << rptNewLine;
+   const auto& pierLayoutType = pProject->GetPierData(pierID).GetPierLayoutType();
 
    rptRcTable* pTable = rptStyleManager::CreateTableNoHeading(4);
-   pTable->SetColumnStyle(0,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(0,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetColumnStyle(2,rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
-   pTable->SetStripeRowColumnStyle(2,rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
-   *pPara << pTable << rptNewLine;
 
-   Float64 H1,H2,H3,H4,X1,X2,X3,X4,X5,X6,W;
-   pProject->GetLowerXBeamDimensions(pierID,&H1,&H2,&H3,&H4,&X1,&X2,&X3,&X4,&W);
-   X5 = pProject->GetXBeamLeftOverhang(pierID);
-   X6 = pProject->GetXBeamRightOverhang(pierID);
+   if (pierLayoutType == pgsTypes::pltScalloped)
+   {
+	   pTable->SetNumberOfColumns(3);
 
-   (*pTable)(0,0) << _T("H1 = ") << length.SetValue(H1);
-   (*pTable)(0,1) << _T("H2 = ") << length.SetValue(H2);
-   (*pTable)(0,2) << _T("H3 = ") << length.SetValue(H3);
-   (*pTable)(0,3) << _T("H4 = ") << length.SetValue(H4);
+       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Scalloped_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
+       *pPara << _T("Horizonal dimensions are in the plane of the pier.") << rptNewLine;
 
-   (*pTable)(1,0) << _T("X1 = ") << length.SetValue(X1);
-   (*pTable)(1,1) << _T("X2 = ") << length.SetValue(X2);
-   (*pTable)(1,2) << _T("X3 = ") << length.SetValue(X3);
-   (*pTable)(1,3) << _T("X4 = ") << length.SetValue(X4);
+       pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetColumnStyle(2, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(2, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       *pPara << pTable << rptNewLine;
 
-   (*pTable)(2,0) << _T("X5 = ") << length.SetValue(X5);
-   (*pTable)(2,1) << _T("X5 = ") << length.SetValue(X6);
-   (*pTable)(2,2) << _T("");
-   (*pTable)(2,3) << _T("W = ") << length.SetValue(W);
+       Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
+       std::vector<CPierPointData> vPoints;
+       pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
+
+       Float64 OHL, OHR;
+       OHL = pProject->GetXBeamLeftOverhang(pierID);
+       OHR = pProject->GetXBeamRightOverhang(pierID);
+
+
+       (*pTable)(0, 0) << _T("H1L = ") << length.SetValue(H1L);
+       (*pTable)(0, 1) << _T("X1L = ") << length.SetValue(X1L);
+       (*pTable)(0, 2) << _T("OHL = ") << length.SetValue(OHL);
+
+       (*pTable)(1, 0) << _T("H1R = ") << length.SetValue(H1R);
+       (*pTable)(1, 1) << _T("X1R = ") << length.SetValue(X1R);
+       (*pTable)(1, 2) << _T("OHR = ") << length.SetValue(OHR);
+
+       const auto& pierData = pProject->GetPierData(pierID);
+       (*pTable)(2, 0) << _T("RL = ") << length.SetValue(pierData.GetXBeamOverhangRadius(pgsTypes::stLeft));
+       (*pTable)(2, 1) << _T("RR = ") << length.SetValue(pierData.GetXBeamOverhangRadius(pgsTypes::stRight));
+       (*pTable)(2, 2) << _T("W = ") << length.SetValue(W);
+
+
+   }
+   else if (pierLayoutType == pgsTypes::pltUserDefined)
+   {
+       pTable->SetNumberOfColumns(3);
+
+	   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("UserDefined_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
+       *pPara << _T("Horizonal dimensions are in the plane of the pier.") << rptNewLine;
+
+       pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetColumnStyle(2, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(2, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       *pPara << pTable << rptNewLine;
+
+       Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
+       std::vector<CPierPointData> vPoints;
+       pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
+
+       Float64 OHL, OHR;
+       OHL = pProject->GetXBeamLeftOverhang(pierID);
+       OHR = pProject->GetXBeamRightOverhang(pierID);
+
+       (*pTable)(0, 0) << _T("H1L = ") << length.SetValue(H1L);
+       (*pTable)(0, 1) << _T("X1L = ") << length.SetValue(X1L);
+       (*pTable)(0, 2) << _T("OHL = ") << length.SetValue(OHL);
+
+       (*pTable)(1, 0) << _T("H1R = ") << length.SetValue(H1R);
+       (*pTable)(1, 1) << _T("X1R = ") << length.SetValue(X1R);
+       (*pTable)(1, 2) << _T("OHR = ") << length.SetValue(OHR);
+
+	   for (size_t i = 0; i < vPoints.size(); ++i)
+	   {
+		   (*pTable)(2 + i, 0) << _T("Point ") << (i + 1);
+		   (*pTable)(2 + i, 1) << _T("X = ") << length.SetValue(vPoints[i].Get_X());
+		   (*pTable)(2 + i, 2) << _T("Y = ") << length.SetValue(vPoints[i].Get_Y());
+	   }
+
+
+   }
+   else
+   {
+       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("Common_XBeam_Dimensions.png")) << rptNewLine << rptNewLine;
+       *pPara << _T("Horizonal dimensions are in the plane of the pier.") << rptNewLine;
+
+       
+       pTable->SetColumnStyle(0, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(0, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetColumnStyle(2, rptStyleManager::GetTableCellStyle(CB_NONE | CJ_LEFT));
+       pTable->SetStripeRowColumnStyle(2, rptStyleManager::GetTableStripeRowCellStyle(CB_NONE | CJ_LEFT));
+       *pPara << pTable << rptNewLine;
+
+       Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
+       std::vector<CPierPointData> vPoints;
+       pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
+
+       Float64 OHL, OHR;
+       OHL = pProject->GetXBeamLeftOverhang(pierID);
+       OHR = pProject->GetXBeamRightOverhang(pierID);
+
+       (*pTable)(0, 0) << _T("H1L = ") << length.SetValue(H1L);
+       (*pTable)(0, 1) << _T("H2L = ") << length.SetValue(H2L);
+       (*pTable)(0, 2) << _T("H1R = ") << length.SetValue(H1R);
+       (*pTable)(0, 3) << _T("H2R = ") << length.SetValue(H2R);
+
+       (*pTable)(1, 0) << _T("X2L = ") << length.SetValue(X2L);
+       (*pTable)(1, 1) << _T("X1L = ") << length.SetValue(X1L);
+       (*pTable)(1, 2) << _T("X2R = ") << length.SetValue(X2R);
+       (*pTable)(1, 3) << _T("X1R = ") << length.SetValue(X1R);
+
+       (*pTable)(2, 0) << _T("OHL = ") << length.SetValue(OHL);
+       (*pTable)(2, 1) << _T("OHR = ") << length.SetValue(OHR);
+       (*pTable)(2, 2) << _T("");
+       (*pTable)(2, 3) << _T("W = ") << length.SetValue(W);
+
+   }
+
+   if (pierLayoutType == pgsTypes::pltScalloped)
+   {
+      const auto& pierData = pProject->GetPierData(pierID);
+      pTable = rptStyleManager::CreateDefaultTable(2,_T("Column Scallop Depths"));
+      *pPara << pTable << rptNewLine;
+      (*pTable)(0,0) << _T("Column");
+      (*pTable)(0,1) << COLHDR(_T("Scallop Depth"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      RowIndexType row = pTable->GetNumberOfHeaderRows();
+      for (ColumnIndexType colIdx = 0; colIdx < pierData.GetColumnCount(); ++colIdx, ++row)
+      {
+         (*pTable)(row,0) << (colIdx + 1);
+         (*pTable)(row,1) << length.SetValue(pierData.GetColumnScallopDepth(colIdx));
+      }
+      *pPara << _T("Scallop depth is measured from the top of the column to the top of the lower cross beam.") << rptNewLine;
+
+      if (1 < pierData.GetColumnCount())
+      {
+         pTable = rptStyleManager::CreateDefaultTable(4,_T("Scallop Bay Radii"));
+         *pPara << pTable << rptNewLine;
+         (*pTable)(0,0) << _T("Bay");
+         (*pTable)(0,1) << _T("Left Column");
+         (*pTable)(0,2) << _T("Right Column");
+         (*pTable)(0,3) << COLHDR(_T("Radius"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+         row = pTable->GetNumberOfHeaderRows();
+         for (ColumnIndexType colIdx = 0; colIdx + 1 < pierData.GetColumnCount(); ++colIdx, ++row)
+         {
+            (*pTable)(row,0) << (colIdx + 1);
+            (*pTable)(row,1) << (colIdx + 1);
+            (*pTable)(row,2) << (colIdx + 2);
+            (*pTable)(row,3) << length.SetValue(pierData.GetColumnScallopRadius(colIdx));
+         }
+      }
+   }
 
    pTable = rptStyleManager::CreateDefaultTable(9,_T("Column Properties"));
    *pPara << pTable << rptNewLine;
@@ -421,7 +539,7 @@ void write_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sh
    GET_IFACE2(pBroker,IXBRProject,pProject);
    WBFL::Materials::Rebar::Type type;
    WBFL::Materials::Rebar::Grade grade;
-   pProject->GetRebarMaterial(pierID,&type,&grade);
+   pProject->GetStirrupMaterial(pierID,&type,&grade);
 
    std::_tstring strName = WBFL::LRFD::RebarPool::GetMaterialName(type,grade);
 
@@ -435,7 +553,7 @@ void write_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sh
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(3,_T("Reinforcement Properties"));
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(3,_T("Stirrup Properties"));
    *pPara << pTable << rptNewLine;
 
    (*pTable)(0,0) << _T("Name");
@@ -457,11 +575,13 @@ void write_longitudinal_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pB
    pPara = new rptParagraph;
    *pChapter << pPara;
 
-   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(11);
+   rptRcTable* pTable = rptStyleManager::CreateDefaultTable(14);
    *pPara << pTable << rptNewLine;
 
    INIT_UV_PROTOTYPE( rptLengthUnitValue, length, pDisplayUnits->GetSpanLengthUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, dim, pDisplayUnits->GetComponentDimUnit(), false );
+   INIT_UV_PROTOTYPE( rptStressUnitValue, modE, pDisplayUnits->GetModEUnit(), false);
+   INIT_UV_PROTOTYPE( rptStressUnitValue, stress, pDisplayUnits->GetStressUnit(), false);
 
    ColumnIndexType col = 0;
    (*pTable)(0,col++) << _T("Row");
@@ -470,6 +590,9 @@ void write_longitudinal_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pB
    (*pTable)(0,col++) << COLHDR(_T("Start"),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
    (*pTable)(0,col++) << COLHDR(_T("Length"),rptLengthUnitTag,pDisplayUnits->GetSpanLengthUnit());
    (*pTable)(0,col++) << COLHDR(_T("Cover"),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
+   (*pTable)(0,col++) << _T("Rebar") << rptNewLine << _T("Material");
+   (*pTable)(0,col++) << COLHDR(RPT_ES, rptStressUnitTag, pDisplayUnits->GetModEUnit());
+   (*pTable)(0,col++) << COLHDR(RPT_FY, rptStressUnitTag, pDisplayUnits->GetStressUnit());
    (*pTable)(0,col++) << _T("Bar") << rptNewLine << _T("Size");
    (*pTable)(0,col++) << _T("#") << rptNewLine << _T("Bars");
    (*pTable)(0,col++) << COLHDR(_T("Spacing"),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
@@ -504,6 +627,13 @@ void write_longitudinal_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pB
       }
 
       (*pTable)(row,col++) << dim.SetValue(rebarRow.Cover);
+      (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetMaterialName(rebarRow.BarType, rebarRow.BarGrade);
+
+      const auto* pRebar = WBFL::LRFD::RebarPool::GetInstance()->GetRebar(rebarRow.BarType, rebarRow.BarGrade, rebarRow.BarSize);
+
+      (*pTable)(row,col++) << modE.SetValue(pRebar->GetE());
+      (*pTable)(row,col++) << stress.SetValue(pRebar->GetYieldStrength());
+
       (*pTable)(row,col++) << WBFL::LRFD::RebarPool::GetBarSize(rebarRow.BarSize);
       (*pTable)(row,col++) << rebarRow.NumberOfBars;
       (*pTable)(row,col++) << dim.SetValue(rebarRow.BarSpacing);
@@ -530,12 +660,12 @@ void write_longitudinal_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pB
    }
 }
 
-void write_transverse_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID,xbrTypes::Stage stage)
+void write_transverse_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::shared_ptr<IEAFDisplayUnits> pDisplayUnits,rptChapter* pChapter,PierIDType pierID,pgsTypes::Stage stage)
 {
    rptParagraph* pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
    *pPara << _T("Stirrups");
-   if ( stage == xbrTypes::Stage1 )
+   if ( stage == pgsTypes::Stage1 )
    {
       *pPara << _T(" - Lower Cross Beam") << rptNewLine;
    }
@@ -546,7 +676,7 @@ void write_transverse_reinforcement_data(std::shared_ptr<WBFL::EAF::Broker> pBro
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
    const xbrStirrupData* pStirrups;
-   if ( stage == xbrTypes::Stage1 )
+   if ( stage == pgsTypes::Stage1 )
    {
       pStirrups = &(pProject->GetLowerXBeamStirrups(pierID));
    }

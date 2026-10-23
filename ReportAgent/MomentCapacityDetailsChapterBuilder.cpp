@@ -57,11 +57,18 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
    INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
    INIT_UV_PROTOTYPE( rptAreaUnitValue, area, pDisplayUnits->GetAreaUnit(), false);
    INIT_UV_PROTOTYPE( rptStressUnitValue, stress, pDisplayUnits->GetStressUnit(), false);
+   INIT_UV_PROTOTYPE( rptStressUnitValue, modE, pDisplayUnits->GetModEUnit(), false);
+
+   rptRcScalar scalar;
+   scalar.SetWidth(7);
+   scalar.SetPrecision(4);
+   scalar.SetFormat(WBFL::System::NumericFormatTool::Format::Fixed);
+   scalar.SetTolerance(1.0e-6);
 
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
 
-   ColumnIndexType nColumns = 10;
+   ColumnIndexType nColumns = 11;
    if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
    {
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamMomentCapacity2015.png")) << rptNewLine;
@@ -72,6 +79,10 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
       nColumns--; // no alpha column
    }
 
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBR_de.png")) << rptNewLine;
+
+   *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("DevelopmentLengthFactor.png")) << rptNewLine;
+
    for ( int i = 0; i < 2; i++ )
    {
       bool bPositiveMoment = (i == 0 ? true : false);
@@ -81,7 +92,6 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
 
       rptRcTable* pTable = rptStyleManager::CreateDefaultTable(nColumns,strTitle);
       *pPara << pTable << rptNewLine;
-
 
       ColumnIndexType col = 0;
       (*pTable)(0,col++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
@@ -94,6 +104,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
       (*pTable)(0,col++) << COLHDR(_T("a"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << COLHDR(_T("b"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << _T("Reinforcement");
+      (*pTable)(0,col++) << COLHDR(Sub2(_T("d"), _T("e")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
       (*pTable)(0,col++) << symbol(phi);
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("n")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
       (*pTable)(0,col++) << COLHDR(Sub2(_T("M"),_T("r")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
@@ -107,7 +118,7 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
       {
          col = 0;
 
-         const MomentCapacityDetails& mcd = pMomentCapacity->GetMomentCapacityDetails(pierID,xbrTypes::Stage2,poi,bPositiveMoment);
+         const MomentCapacityDetails& mcd = pMomentCapacity->GetMomentCapacityDetails(pierID,pgsTypes::Stage2,poi,bPositiveMoment);
 
          Float64 alpha1,beta1,c;
          mcd.solution->get_Alpha1(&alpha1);
@@ -136,9 +147,10 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
          (*pTable)(row,col++) << dim.SetValue(beta1*c);
          (*pTable)(row,col++) << dim.SetValue(bw);
 
-         rptRcTable* pReinfTable = rptStyleManager::CreateDefaultTable(4);
+         rptRcTable* pReinfTable = rptStyleManager::CreateDefaultTable(7);
          (*pTable)(row,col++) << pReinfTable;
 
+         (*pTable)(row,col++) << dim.SetValue(mcd.de);
          (*pTable)(row,col++) << mcd.phi;
          (*pTable)(row,col++) << moment.SetValue(mcd.Mn);
          (*pTable)(row,col++) << moment.SetValue(mcd.Mr);
@@ -146,8 +158,11 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
 
          (*pReinfTable)(0,0) << _T("Layer");
          (*pReinfTable)(0,1) << COLHDR(Sub2(_T("d"),_T("s")),rptLengthUnitTag,pDisplayUnits->GetComponentDimUnit());
-         (*pReinfTable)(0,2) << COLHDR(Sub2(_T("A"),_T("s")),rptAreaUnitTag,pDisplayUnits->GetAreaUnit());
-         (*pReinfTable)(0,3) << COLHDR(Sub2(_T("f"),_T("s")),rptStressUnitTag,pDisplayUnits->GetStressUnit());
+         (*pReinfTable)(0,2) << Sub2(_T("K"),_T("db"));
+         (*pReinfTable)(0,3) << COLHDR(Sub2(_T("A"),_T("s")),rptAreaUnitTag,pDisplayUnits->GetAreaUnit());
+         (*pReinfTable)(0,4) << COLHDR(Sub2(_T("E"),_T("s")),rptStressUnitTag,pDisplayUnits->GetModEUnit());
+         (*pReinfTable)(0,5) << COLHDR(Sub2(_T("f"),_T("y")),rptStressUnitTag,pDisplayUnits->GetStressUnit());
+         (*pReinfTable)(0,6) << COLHDR(Sub2(_T("f"),_T("s")),rptStressUnitTag,pDisplayUnits->GetStressUnit());
 
          IndexType nRebarLayers;
          mcd.rcBeam->get_RebarLayerCount(&nRebarLayers);
@@ -163,16 +178,19 @@ rptChapter* CMomentCapacityDetailsChapterBuilder::Build(const std::shared_ptr<co
 
          for ( IndexType rebarLayerIdx = 0; rebarLayerIdx < nRebarLayers; rebarLayerIdx++, reinfTableRow++ )
          {
-            Float64 As, ds, devFactor;
-            mcd.rcBeam->GetRebarLayer(rebarLayerIdx,&ds,&As,&devFactor);
+            Float64 As, ds, Es, Fy, devFactor;
+            mcd.rcBeam->GetRebarLayer(rebarLayerIdx,&ds,&As,&Es,&Fy,&devFactor);
 
             Float64 fs;
             vfs->get_Item(rebarLayerIdx,&fs);
 
             (*pReinfTable)(reinfTableRow,0) << LABEL_INDEX(rebarLayerIdx);
             (*pReinfTable)(reinfTableRow,1) << dim.SetValue(ds);
-            (*pReinfTable)(reinfTableRow,2) << area.SetValue(devFactor*As);
-            (*pReinfTable)(reinfTableRow,3) << stress.SetValue(fs);
+            (*pReinfTable)(reinfTableRow,2) << scalar.SetValue(devFactor);
+            (*pReinfTable)(reinfTableRow,3) << area.SetValue(As);
+            (*pReinfTable)(reinfTableRow,4) << modE.SetValue(Es);
+            (*pReinfTable)(reinfTableRow,5) << stress.SetValue(Fy);
+            (*pReinfTable)(reinfTableRow,6) << stress.SetValue(fs);
          }
 
 

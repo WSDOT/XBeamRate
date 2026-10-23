@@ -25,6 +25,7 @@
 #include <XBeamRateExt\XBRExtExp.h>
 #include <PsgLib\ColumnData.h>
 #include <PsgLib\ConcreteMaterial.h>
+#include <PsgLib/PierData2.h>
 #include <XBeamRateExt\LongitudinalRebarData.h>
 #include <XBeamRateExt\StirrupData.h>
 #include <XBeamRateExt\BearingLineData.h>
@@ -48,6 +49,11 @@ public:
 
    void SetID(PierIDType id);
    PierIDType GetID() const;
+
+
+   // Set/Get the pier layout type.
+   pgsTypes::PierLayoutType GetPierLayoutType() const;
+   void SetPierLayoutType(pgsTypes::PierLayoutType layoutType);
 
    // Set/Get the offset from the alignment to the bridge line
    void SetBridgeLineOffset(Float64 blo);
@@ -91,9 +97,9 @@ public:
    void GetDeckProfile(IPoint2dCollection** ppProfile) const;
 
    // Defines the general superstructure connectivity at this pier
-   void SetPierType(xbrTypes::PierType type);
-   xbrTypes::PierType GetPierType() const;
-   xbrTypes::PierType& GetPierType();
+   void SetPierType(pgsTypes::PierType type);
+   pgsTypes::PierType GetPierType() const;
+   pgsTypes::PierType& GetPierType();
 
    // Defines the datum for measuring the curb line locations
    pgsTypes::OffsetMeasurementType GetCurbLineDatum() const;
@@ -114,17 +120,22 @@ public:
    Float64& GetDiaphragmHeight();
    Float64& GetDiaphragmWidth();
 
-   void SetLowerXBeamDimensions(Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w);
-   void GetLowerXBeamDimensions(Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) const;
-   Float64& GetH1();
-   Float64& GetH2();
-   Float64& GetH3();
-   Float64& GetH4();
-   Float64& GetX1();
-   Float64& GetX2();
-   Float64& GetX3();
-   Float64& GetX4();
+   void SetLowerXBeamDimensions(Float64 h1l, Float64 h1r, Float64 h2l, Float64 h2r, Float64 x1l, Float64 x1r, Float64 x2l, Float64 x2r, Float64 w, std::vector<CPierPointData> vpp);
+   void GetLowerXBeamDimensions(Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pvpp) const;
+   Float64& GetH1L();
+   Float64& GetH1R();
+   Float64& GetH2L();
+   Float64& GetH2R();
+   Float64& GetX1L();
+   Float64& GetX1R();
+   Float64& GetX2L();
+   Float64& GetX2R();
    Float64& GetW();
+   void SetPierPointData(PierPointIndexType ppIdx, const CPierPointData& ppData);
+   const std::vector<CPierPointData>& GetPierPointData() const;
+
+   void SetPierPointCount(PierPointIndexType nColumns);
+   PierPointIndexType GetPierPointCount() const;
 
    // Establishes the location of the columns with respect to the alignment/bridgeline.
    void SetRefColumnLocation(pgsTypes::OffsetMeasurementType refColumnDatum,IndexType refColumnIdx,Float64 refColumnOffset);
@@ -132,6 +143,10 @@ public:
    pgsTypes::OffsetMeasurementType& GetColumnLayoutDatum();
    IndexType& GetRefColumnIndex();
    Float64& GetRefColumnOffset();
+
+   // Set/Get the column fixity for the longitudinal bridge analysis
+   void SetColumnFixity(pgsTypes::ColumnLongitudinalBaseFixityType fixityType);
+   pgsTypes::ColumnLongitudinalBaseFixityType GetColumnFixity() const;
 
    void SetColumnCount(ColumnIndexType nColumns);
    ColumnIndexType GetColumnCount() const;
@@ -144,11 +159,19 @@ public:
    Float64 GetColumnSpacing(SpacingIndexType spaceIdx) const;
    Float64& GetColumnSpacing(SpacingIndexType spaceIdx);
 
+   // Scallop depths are indexed by column; radii by the bay to its right.
+   void SetColumnScallopDepth(ColumnIndexType colIdx, Float64 depth);
+   Float64 GetColumnScallopDepth(ColumnIndexType colIdx) const;
+   void SetColumnScallopRadius(ColumnIndexType colIdx, Float64 radius);
+   Float64 GetColumnScallopRadius(ColumnIndexType colIdx) const;
+   void SetXBeamOverhangRadius(pgsTypes::SideType side, Float64 radius);
+   Float64 GetXBeamOverhangRadius(pgsTypes::SideType side) const;
+
    // Cross beam overhangs
-   void SetXBeamOverhangs(Float64 X5,Float64 X6);
-   void GetXBeamOverhangs(Float64* pX5,Float64* pX6) const;
-   Float64& GetX5();
-   Float64& GetX6();
+   void SetXBeamOverhangs(Float64 OHL,Float64 OHR);
+   void GetXBeamOverhangs(Float64* pOHL,Float64* pOHR) const;
+   Float64& GetOHL();
+   Float64& GetOHR();
 
    // Cross beam condition information
    pgsTypes::ConditionFactorType GetConditionFactorType() const;
@@ -160,10 +183,10 @@ public:
    void SetConditionFactor(Float64 conditionFactor);
 
    // Material
-   void SetRebarMaterial(WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade);
-   void GetRebarMaterial(WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const;
-   WBFL::Materials::Rebar::Type& GetRebarType();
-   WBFL::Materials::Rebar::Grade& GetRebarGrade();
+   void SetStirrupMaterial(WBFL::Materials::Rebar::Type type, WBFL::Materials::Rebar::Grade grade);
+   void GetStirrupMaterial(WBFL::Materials::Rebar::Type* pType, WBFL::Materials::Rebar::Grade* pGrade) const;
+   WBFL::Materials::Rebar::Type& GetStirrupRebarType();
+   WBFL::Materials::Rebar::Grade& GetStirrupRebarGrade();
 
    void SetConcreteMaterial(const CConcreteMaterial& concrete);
    CConcreteMaterial& GetConcreteMaterial();
@@ -205,9 +228,12 @@ protected:
 
 protected:
    PierIDType m_ID;
+
+   pgsTypes::PierLayoutType m_PierLayoutType;
+
    std::_tstring m_strSkew;
    Float64 m_BridgeLineOffset; // offset from alignment to bridge line
-   xbrTypes::PierType m_ConnectionType;
+   pgsTypes::PierType m_ConnectionType;
    pgsTypes::OffsetMeasurementType m_CurbLineDatum;
    Float64 m_LeftCurbOffset, m_RightCurbOffset; 
    Float64 m_H, m_W; // diaphragm dimensions
@@ -223,26 +249,34 @@ protected:
    CComPtr<IPoint2dCollection> m_DeckProfile; // x = offset from alignment, y = elevation
 
    // Lower X-Beam Dimensions
-   Float64 m_H1, m_H2, m_H3, m_H4;
-   Float64 m_X1, m_X2, m_X3, m_X4;
+   Float64 m_H1L, m_H1R;
+   Float64 m_H2L, m_H2R;
+   Float64 m_X1L, m_X1R;
+   Float64 m_X2L, m_X2R;
    Float64 m_XW;
+   Float64 m_OverhangRadius[2];
+   std::vector<Float64> m_ScallopDepths;
+   std::vector<Float64> m_ScallopRadii;
+   std::vector<CPierPointData> m_vPierPoints;
 
    // Column Layout
    std::vector<CColumnData> m_vColumnData;
    std::vector<Float64> m_vColumnSpacing;
 
+   pgsTypes::ColumnLongitudinalBaseFixityType m_ColumnFixity;
+
    IndexType m_RefColumnIdx;
    Float64 m_RefColumnOffset;
    pgsTypes::OffsetMeasurementType m_RefColumnDatum;
-   Float64 m_X5, m_X6;
+   Float64 m_OHL, m_OHR;
 
    // Load Rating Condition
    pgsTypes::ConditionFactorType m_ConditionFactorType;
    Float64 m_ConditionFactor;
 
    // Materials
-   WBFL::Materials::Rebar::Type m_RebarType;
-   WBFL::Materials::Rebar::Grade m_RebarGrade;
+   WBFL::Materials::Rebar::Type m_StirrupRebarType;
+   WBFL::Materials::Rebar::Grade m_StirrupRebarGrade;
    CConcreteMaterial m_Concrete;
 
    // Rebar
@@ -252,4 +286,11 @@ protected:
 
    // Bearings
    mutable std::vector<xbrBearingLineData> m_vBearingLines;
+};
+
+interface IPierLayoutDataSource
+{
+public:
+   virtual const xbrPierData * GetPierData() const = 0;
+   virtual void SetPierData(const xbrPierData& pierData) = 0;
 };
