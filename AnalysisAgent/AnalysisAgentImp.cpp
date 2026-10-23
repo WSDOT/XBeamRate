@@ -797,27 +797,51 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
       return;
    }
 
-   GET_IFACE(IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_SECTIONCHANGE);
-
+   GET_IFACE(IXBRPier,pPier);
    GET_IFACE(IXBRSectionProperties,pSectProp);
    GET_IFACE(IXBRMaterial,pMaterial);
 
    Float64 density = pMaterial->GetXBeamDensity(pierID);
    Float64 unitWeight = density*WBFL::Units::System::GetGravitationalAcceleration();
 
-   std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
-   std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   Float64 Astart = pSectProp->GetArea(pierID,pgsTypes::Stage1,*iter);
-   Float64 Wstart = unitWeight*Astart;
-   Float64 Xstart = (*iter).GetDistFromStart();
-
-   iter++;
-   for ( ; iter != end; iter++ )
+   // Use every vertex of both modeled surfaces. Section-change POIs are based
+   // on the common cap dimensions and do not describe scallops or user points.
+   // Surface coordinates are pier coordinates; loads use cross beam coordinates.
+   Float64 L = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam,pierID);
+   std::vector<Float64> locations = {0.0,L};
+   auto addSurfaceLocations = [&](IPoint2dCollection* points)
    {
-      Float64 Aend = pSectProp->GetArea(pierID,pgsTypes::Stage1,*iter);
-      Float64 Wend = unitWeight*Aend;
-      Float64 Xend = (*iter).GetDistFromStart();
+      CComPtr<IEnumPoint2d> enumPoints;
+      points->get__Enum(&enumPoints);
+      CComPtr<IPoint2d> point;
+      while (enumPoints->Next(1,&point,nullptr) != S_FALSE)
+      {
+         Float64 Xpier;
+         point->get_X(&Xpier);
+         Float64 X = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);
+         if (0.0 < X && X < L)
+         {
+            locations.push_back(X);
+         }
+         point.Release();
+      }
+   };
+
+   CComPtr<IPoint2dCollection> topSurface, bottomSurface;
+   pPier->GetTopSurface(pierID,pgsTypes::Stage1,&topSurface);
+   pPier->GetBottomSurface(pierID,pgsTypes::Stage1,&bottomSurface);
+   addSurfaceLocations(topSurface);
+   addSurfaceLocations(bottomSurface);
+   std::sort(locations.begin(),locations.end());
+   locations.erase(std::unique(locations.begin(),locations.end(),
+      [](Float64 lhs,Float64 rhs) { return IsEqual(lhs,rhs); }),locations.end());
+
+   Float64 Xstart = locations.front();
+   Float64 Wstart = unitWeight*pSectProp->GetArea(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xstart));
+   for (size_t idx = 1; idx < locations.size(); ++idx)
+   {
+      Float64 Xend = locations[idx];
+      Float64 Wend = unitWeight*pSectProp->GetArea(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xend));
 
       LowerXBeamLoad load;
       load.Xs = Xstart;
@@ -827,7 +851,6 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
       pModelData->m_LowerXBeamLoads.push_back(load);
 
       Xstart = Xend;
-      Astart = Aend;
       Wstart = Wend;
    }
 }

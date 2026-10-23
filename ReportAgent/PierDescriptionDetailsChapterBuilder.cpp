@@ -220,17 +220,6 @@ void write_substructure_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sha
        const auto& pierData = pProject->GetPierData(pierID);
        (*pTable)(2, 0) << _T("RL = ") << length.SetValue(pierData.GetXBeamOverhangRadius(pgsTypes::stLeft));
        (*pTable)(2, 1) << _T("RR = ") << length.SetValue(pierData.GetXBeamOverhangRadius(pgsTypes::stRight));
-       for (ColumnIndexType colIdx = 0; colIdx < pierData.GetColumnCount(); ++colIdx)
-       {
-           CString label;
-           label.Format(_T("D%u = "), colIdx + 1);
-           (*pTable)(3 + colIdx, 0) << (LPCTSTR)label << length.SetValue(pierData.GetColumnScallopDepth(colIdx));
-           if (colIdx + 1 < pierData.GetColumnCount())
-           {
-               label.Format(_T("R%u = "), colIdx + 1);
-               (*pTable)(3 + colIdx, 1) << (LPCTSTR)label << length.SetValue(pierData.GetColumnScallopRadius(colIdx));
-           }
-       }
        (*pTable)(2, 2) << _T("W = ") << length.SetValue(W);
 
 
@@ -308,6 +297,40 @@ void write_substructure_data(std::shared_ptr<WBFL::EAF::Broker> pBroker,std::sha
        (*pTable)(2, 2) << _T("");
        (*pTable)(2, 3) << _T("W = ") << length.SetValue(W);
 
+   }
+
+   if (pierLayoutType == pgsTypes::pltScalloped)
+   {
+      const auto& pierData = pProject->GetPierData(pierID);
+      pTable = rptStyleManager::CreateDefaultTable(2,_T("Column Scallop Depths"));
+      *pPara << pTable << rptNewLine;
+      (*pTable)(0,0) << _T("Column");
+      (*pTable)(0,1) << COLHDR(_T("Scallop Depth"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+      RowIndexType row = pTable->GetNumberOfHeaderRows();
+      for (ColumnIndexType colIdx = 0; colIdx < pierData.GetColumnCount(); ++colIdx, ++row)
+      {
+         (*pTable)(row,0) << (colIdx + 1);
+         (*pTable)(row,1) << length.SetValue(pierData.GetColumnScallopDepth(colIdx));
+      }
+      *pPara << _T("Scallop depth is measured from the top of the column to the top of the lower cross beam.") << rptNewLine;
+
+      if (1 < pierData.GetColumnCount())
+      {
+         pTable = rptStyleManager::CreateDefaultTable(4,_T("Scallop Bay Radii"));
+         *pPara << pTable << rptNewLine;
+         (*pTable)(0,0) << _T("Bay");
+         (*pTable)(0,1) << _T("Left Column");
+         (*pTable)(0,2) << _T("Right Column");
+         (*pTable)(0,3) << COLHDR(_T("Radius"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
+         row = pTable->GetNumberOfHeaderRows();
+         for (ColumnIndexType colIdx = 0; colIdx + 1 < pierData.GetColumnCount(); ++colIdx, ++row)
+         {
+            (*pTable)(row,0) << (colIdx + 1);
+            (*pTable)(row,1) << (colIdx + 1);
+            (*pTable)(row,2) << (colIdx + 2);
+            (*pTable)(row,3) << length.SetValue(pierData.GetColumnScallopRadius(colIdx));
+         }
+      }
    }
 
    pTable = rptStyleManager::CreateDefaultTable(9,_T("Column Properties"));
