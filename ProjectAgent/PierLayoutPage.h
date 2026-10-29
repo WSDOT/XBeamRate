@@ -26,8 +26,12 @@
 //
 
 #include "resource.h"
+#include "DrawPierLayoutControl.h"
 #include <PsgLib\ColumnData.h>
 #include "ColumnLayoutGrid.h"
+#include "CommonPierLayoutDlg.h"
+#include "ScallopedPierLayoutDlg.h"
+#include "UserDefinedPierLayoutDlg.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPierLayoutPage dialog
@@ -61,19 +65,43 @@ protected:
 	//{{AFX_MSG(CPierLayoutPage)
 	virtual BOOL OnInitDialog() override;
    afx_msg void OnHelp();
+   afx_msg void OnShowLiveClicked();
+   afx_msg void OnDestroy();
+   afx_msg LRESULT OnPierLayoutChanged(WPARAM, LPARAM);
+   afx_msg LRESULT OnPierLayoutPopoutClosed(WPARAM, LPARAM);
+   void RefreshPierLayoutPopout(bool fit = false);
+   IPierLayoutDataSource* GetLayoutDataSource();
+   CDrawPierLayoutControl m_PierLayoutPopout;
+
+   afx_msg void OnPierLayoutTypeChanged();
    afx_msg void OnConditionFactorTypeChanged();
-   afx_msg void OnHeightMeasureChanged();
-   afx_msg void OnAddColumn();
-   afx_msg void OnRemoveColumns();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-   CMetaFileStatic m_LayoutPicture;
-   CColumnLayoutGrid m_ColumnLayoutGrid;
+	void FillPierLayoutTypeComboBox();
 
-   void FillRefColumnComboBox(ColumnIndexType nColumns = INVALID_INDEX);
-   void FillHeightMeasureComboBox();
-   void FillTransverseLocationComboBox();
+	xbrPierData* m_pPier;
+   
+   pgsTypes::PierLayoutType m_PierLayoutType;
+
+   // Embedded dialogs
+   CCommonPierLayoutDlg m_CommonPierLayoutDlg;
+   CScallopedPierLayoutDlg m_ScallopedPierLayoutDlg;
+   CUserDefinedPierLayoutDlg m_UserDefinedPierLayoutDlg;
+
+   void SwapDialogs();
+
+
+   bool SaveColumnLayout(CDialog& dialog, CColumnLayoutGrid& grid);
+   void LoadColumnLayout(CDialog& dialog, CColumnLayoutGrid& grid, xbrPierData& pier);
+
+   bool CommitCommonPierLayout();
+   bool CommitScallopedPierLayout();
+   bool CommitUserDefinedPierLayout();
+
+   BOOL OnKillActive();
+
+   BOOL OnApply();
 };
 
 //{{AFX_INSERT_LOCATION}}

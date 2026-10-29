@@ -690,6 +690,95 @@ bool CProjectAgentImp::Save(WBFL::System::IStructuredSave* pNativeStrSave)
          IndexType ctrnpt = pAlignment->GetAlignmentPointIndex(pierStation);
          pierData.SetCrownPointOffset(pAlignment->GetAlignmentOffset(ctrnpt,pierStation));
 
+         CComPtr<IAngle> skewAngle;
+         pBridge->GetPierSkew(pierIdx, &skewAngle);
+         CComPtr<IPoint2dCollection> pierPoints;
+         pAlignment->GetRoadwaySurface(pierStation, skewAngle, &pierPoints);
+
+         Float64 leftSumX = 0.0;
+         Float64 leftSumY = 0.0;
+         Float64 leftSumXY = 0.0;
+         Float64 leftSumXX = 0.0;
+         IndexType leftCount = 0;
+
+         Float64 rightSumX = 0.0;
+         Float64 rightSumY = 0.0;
+         Float64 rightSumXY = 0.0;
+         Float64 rightSumXX = 0.0;
+         IndexType rightCount = 0;
+
+         IndexType npp;
+         pierPoints->get_Count(&npp);
+
+         for (IndexType i = 0; i < npp; i++)
+         {
+                CComPtr<IPoint2d> pPoint;
+                pierPoints->get_Item(i, &pPoint);
+
+                Float64 xp, yp;
+                pPoint->get_X(&xp);
+                pPoint->get_Y(&yp);
+
+                if (i <= ctrnpt)
+                {
+                    // Calculate the left slope using line of best fit
+                    // from the points to the left of the crown point.
+                    leftSumX += xp;
+                    leftSumY += yp;
+                    leftSumXY += xp * yp;
+                    leftSumXX += xp * xp;
+                    leftCount++;
+                }
+                if (i >= ctrnpt)
+                {
+                    // Calculate the right slope using line of best fit
+                    // from the points to the right of the crown point.
+                    rightSumX += xp;
+                    rightSumY += yp;
+                    rightSumXY += xp * yp;
+                    rightSumXX += xp * xp;
+                    rightCount++;
+                }
+         }
+
+         Float64 mLeft = 0.0;
+         Float64 mRight = 0.0;
+
+         if (leftCount >= 2)
+         {
+             Float64 denominator =
+                 leftCount * leftSumXX - leftSumX * leftSumX;
+
+             if (fabs(denominator) > DBL_EPSILON)
+             {
+                 mLeft =
+                     (leftCount * leftSumXY - leftSumX * leftSumY) /
+                     denominator;
+             }
+         }
+
+         if (rightCount >= 2)
+         {
+             Float64 denominator =
+                 rightCount * rightSumXX - rightSumX * rightSumX;
+
+             if (fabs(denominator) > DBL_EPSILON)
+             {
+                 mRight =
+                     (rightCount * rightSumXY - rightSumX * rightSumY) /
+                     denominator;
+             }
+         }
+
+         pierData.SetCrownSlope(-mLeft, mRight);
+
+
+         ColumnIndexType refColIdx;
+         Float64 refColOffset;
+         pgsTypes::OffsetMeasurementType refColMeasure;
+         pPier->GetTransverseOffset(&refColIdx, &refColOffset, &refColMeasure);
+         pierData.SetRefColumnLocation(refColMeasure, refColIdx, refColOffset);
+
          // ok, save it
          pierData.Save(pStrSave, nullptr);
       }
@@ -1389,6 +1478,12 @@ WBFL::EAF::Broker::LoadResult CProjectAgentImp::Load(WBFL::System::IStructuredLo
       UpdatePiers();
    }
 
+   // At some point in time we saved the analysis type incorrectly for PGSplice load rating options.
+   // When the timestep method is used the analysis type for pier reactions should always be set to "Continuous"
+   GET_IFACE(ILossParameters, pLossParams);
+   if (pLossParams != nullptr && pLossParams->GetLossMethod() == PrestressLossCriteria::LossMethodType::TIME_STEP)
+	   m_AnalysisType = pgsTypes::Continuous;
+
    return WBFL::EAF::Broker::LoadResult::Success;
 }
 
@@ -1573,12 +1668,12 @@ const xbrPierData& CProjectAgentImp::GetPierData(PierIDType pierID) const
    return GetPrivatePierData(pierID);
 }
 
-xbrTypes::PierType CProjectAgentImp::GetPierType(PierIDType pierID) const
+pgsTypes::PierType CProjectAgentImp::GetPierType(PierIDType pierID) const
 {
    return GetPrivatePierData(pierID).GetPierType();
 }
 
-void CProjectAgentImp::SetPierType(PierIDType pierID,xbrTypes::PierType pierType)
+void CProjectAgentImp::SetPierType(PierIDType pierID,pgsTypes::PierType pierType)
 {
    GetPrivatePierData(pierID).SetPierType(pierType);
    Fire_OnProjectChanged();
@@ -1796,7 +1891,7 @@ void CProjectAgentImp::GetBearingReactions(PierIDType pierID,IndexType brgLineId
       ResultsType resultsType = rtCumulative;
 
       xbrPierData& pierData = GetPrivatePierData(pierID);
-      if ( pierData.GetPierType() == xbrTypes::pctExpansion )
+      if ( pierData.GetPierType() == pgsTypes::pctExpansion )
       {
          GET_IFACE(IBearingDesign,pBearingDesign);
 
@@ -2023,7 +2118,7 @@ xbrTypes::ReactionLoadApplicationType CProjectAgentImp::GetReactionLoadApplicati
    }
    else
    {
-      if ( GetPierType(pierID) == xbrTypes::pctExpansion && !UseUniformLoads(pierID,0) )
+      if ( GetPierType(pierID) == pgsTypes::pctExpansion && !UseUniformLoads(pierID,0) )
       {
          return xbrTypes::rlaBearings;
       }
@@ -2108,15 +2203,15 @@ Float64 CProjectAgentImp::GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatin
    }
 }
 
-void CProjectAgentImp::SetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade)
+void CProjectAgentImp::SetStirrupMaterial(PierIDType pierID, WBFL::Materials::Rebar::Type type, WBFL::Materials::Rebar::Grade grade)
 {
-   GetPrivatePierData(pierID).SetRebarMaterial(type,grade);
-   Fire_OnProjectChanged();
+    GetPrivatePierData(pierID).SetStirrupMaterial(type, grade);
+    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const
+void CProjectAgentImp::GetStirrupMaterial(PierIDType pierID, WBFL::Materials::Rebar::Type* pType, WBFL::Materials::Rebar::Grade* pGrade) const
 {
-   GetPrivatePierData(pierID).GetRebarMaterial(pType,pGrade);
+    GetPrivatePierData(pierID).GetStirrupMaterial(pType, pGrade);
 }
 
 void CProjectAgentImp::SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete)
@@ -2130,25 +2225,25 @@ const CConcreteMaterial& CProjectAgentImp::GetConcrete(PierIDType pierID) const
    return GetPrivatePierData(pierID).GetConcreteMaterial();
 }
 
-void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w)
+void CProjectAgentImp::SetLowerXBeamDimensions(PierIDType pierID,Float64 h1l,Float64 h1r,Float64 h2l,Float64 h2r,Float64 x1l,Float64 x1r,Float64 x2l,Float64 x2r,Float64 w,std::vector<CPierPointData> pp)
 {
-   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1,h2,h3,h4,x1,x2,x3,x4,w);
+   GetPrivatePierData(pierID).SetLowerXBeamDimensions(h1l,h1r,h2l,h2r,x1l,x1r,x2l,x2r,w,pp);
    Fire_OnProjectChanged();
 }
 
-void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) const
+void CProjectAgentImp::GetLowerXBeamDimensions(PierIDType pierID, Float64* ph1l, Float64* ph1r, Float64* ph2l, Float64* ph2r, Float64* px1l, Float64* px1r, Float64* px2l, Float64* px2r, Float64* pw, std::vector<CPierPointData>* pp) const
 {
-   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1,ph2,ph3,ph4,px1,px2,px3,px4,pw);
+   GetPrivatePierData(pierID).GetLowerXBeamDimensions(ph1l,ph1r, ph2l, ph2r, px1l, px1r, px2l, px2r, pw, pp);
 }
 
 Float64 CProjectAgentImp::GetXBeamLeftOverhang(PierIDType pierID) const
 {
-   return GetPrivatePierData(pierID).GetX5();
+   return GetPrivatePierData(pierID).GetOHL();
 }
 
 Float64 CProjectAgentImp::GetXBeamRightOverhang(PierIDType pierID) const
 {
-   return GetPrivatePierData(pierID).GetX6();
+   return GetPrivatePierData(pierID).GetOHR();
 }
 
 Float64 CProjectAgentImp::GetXBeamWidth(PierIDType pierID) const
@@ -3279,7 +3374,7 @@ void CProjectAgentImp::UpdatePiers()
    }
 }
 
-void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierData)
+void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierData) // when does this get called?
 {
    // Updates our internal pier data with the pier data from the bridge model
    USES_CONVERSION;
@@ -3337,12 +3432,19 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetSkew(OLE2T(bstrSkew));
 
    // Lower Cross Beam
-   Float64 H1, H2, H3, H4;
-   Float64 X1, X2, X3, X4, W;
-   pPier->GetXBeamDimensions(pgsTypes::stLeft, &H1,&H2,&X1,&X2);
-   pPier->GetXBeamDimensions(pgsTypes::stRight,&H3,&H4,&X3,&X4);
+   const auto& pierLayoutType = pPier->GetPierLayoutType();
+   pierData.SetPierLayoutType(pierLayoutType);
+   Float64 H1L, H2L, H1R, H2R;
+   Float64 X2L, X1L, X2R, X1R, W;
+   pPier->GetXBeamDimensions(pgsTypes::stLeft, &H1L,&H2L,&X2L,&X1L);
+   pPier->GetXBeamDimensions(pgsTypes::stRight,&H1R,&H2R,&X2R,&X1R);
    W = pPier->GetXBeamWidth();
-   pierData.SetLowerXBeamDimensions(H1,H2,H3,H4,X1,X2,X3,X4,W);
+   pierData.SetXBeamOverhangRadius(pgsTypes::stLeft,
+       pPier->GetXBeamOverhangRadius(pgsTypes::stLeft));
+   pierData.SetXBeamOverhangRadius(pgsTypes::stRight,
+       pPier->GetXBeamOverhangRadius(pgsTypes::stRight));
+   std::vector<CPierPointData> vPierPoints = pPier->GetPierPointData();
+   pierData.SetLowerXBeamDimensions(H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W, vPierPoints);
 
    // Upper Cross Beam Diaphragm. Basically, this is vertical distance from top of lower cross beam to bottom of slab
    // Take max of diaphragm depth and max girder bearing deducts
@@ -3388,6 +3490,12 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    // Column Properties
    ColumnIndexType nColumns = pPier->GetColumnCount();
    pierData.SetColumnCount(nColumns);
+   for (ColumnIndexType colIdx = 0; colIdx < nColumns; ++colIdx)
+   {
+       pierData.SetColumnScallopDepth(colIdx, pPier->GetColumnScallopDepth(colIdx));
+       if (colIdx + 1 < nColumns)
+           pierData.SetColumnScallopRadius(colIdx, pPier->GetColumnScallopRadius(colIdx));
+   }
    for ( ColumnIndexType colIdx = 0; colIdx < nColumns; colIdx++ )
    {
       if ( colIdx < nColumns-1 )
@@ -3404,7 +3512,7 @@ void CProjectAgentImp::UpdatePierData(const CPierData2* pPier,xbrPierData& pierD
    pierData.SetConcreteMaterial(pPier->GetConcrete());
 
    // Bearing Lines and Bearing Locations
-   if ( pierData.GetPierType() == xbrTypes::pctExpansion )
+   if ( pierData.GetPierType() == pgsTypes::pctExpansion )
    {
       // two bearing lines
       if ( pPier->IsAbutment() )

@@ -112,8 +112,8 @@ public:
    void SetPierData(const xbrPierData& pierData) override;
    const xbrPierData& GetPierData(PierIDType pierID) const override;
 
-   xbrTypes::PierType GetPierType(PierIDType pierID) const override;
-   void SetPierType(PierIDType pierID,xbrTypes::PierType pierType) override;
+   pgsTypes::PierType GetPierType(PierIDType pierID) const override;
+   void SetPierType(PierIDType pierID,pgsTypes::PierType pierType) override;
 
    void SetDeckElevation(PierIDType pierID,Float64 deckElevation) override;
    Float64 GetDeckElevation(PierIDType pierID) const override;
@@ -168,14 +168,14 @@ public:
    Float64 GetLiveLoadReaction(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
    Float64 GetVehicleWeight(PierIDType pierID,pgsTypes::LoadRatingType ratingType,VehicleIndexType vehicleIdx) const override;
 
-   void SetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type type,WBFL::Materials::Rebar::Grade grade) override;
-   void GetRebarMaterial(PierIDType pierID,WBFL::Materials::Rebar::Type* pType,WBFL::Materials::Rebar::Grade* pGrade) const override;
+   void SetStirrupMaterial(PierIDType pierID, WBFL::Materials::Rebar::Type type, WBFL::Materials::Rebar::Grade grade) override;
+   void GetStirrupMaterial(PierIDType pierID, WBFL::Materials::Rebar::Type* pType, WBFL::Materials::Rebar::Grade* pGrade) const override;
 
    void SetConcrete(PierIDType pierID,const CConcreteMaterial& concrete) override;
    const CConcreteMaterial& GetConcrete(PierIDType pierID) const override;
 
-   void SetLowerXBeamDimensions(PierIDType pierID,Float64 h1,Float64 h2,Float64 h3,Float64 h4,Float64 x1,Float64 x2,Float64 x3,Float64 x4,Float64 w) override;
-   void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph2,Float64* ph3,Float64* ph4,Float64* px1,Float64* px2,Float64* px3,Float64* px4,Float64* pw) const override;
+   void SetLowerXBeamDimensions(PierIDType pierID, Float64 h1l, Float64 h1r, Float64 h2l, Float64 h2r, Float64 x1l, Float64 x1r, Float64 x2l, Float64 x2r, Float64 w, std::vector<CPierPointData> pp) override;
+   void GetLowerXBeamDimensions(PierIDType pierID,Float64* ph1,Float64* ph1r,Float64* ph2l,Float64* ph2r,Float64* px1l,Float64* px1r,Float64* px2l,Float64* px2r,Float64* pw,std::vector<CPierPointData>* pp) const override;
    Float64 GetXBeamLeftOverhang(PierIDType pierID) const override;
    Float64 GetXBeamRightOverhang(PierIDType pierID) const override;
    Float64 GetXBeamWidth(PierIDType pierID) const override;
