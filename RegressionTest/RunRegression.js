@@ -33,6 +33,8 @@ else if (machine=="HQE3609046")
    XBRateDrive = "F:";
 else if (machine=="HQD1764064")
    XBRateDrive = "F:";
+else if (machine=="HQE8217017")
+   XBRateDrive = "D:";
 
 var wsShell = new ActiveXObject("WScript.Shell");
 var FSO = new ActiveXObject("Scripting.FileSystemObject");
