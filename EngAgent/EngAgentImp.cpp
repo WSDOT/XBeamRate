@@ -463,7 +463,8 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,pgsT
          vfs->get_Item(idx, &f);
          if (0 < f)
          {
-            Float64 T = devFactor*As*f;
+            // The solver already limits f for incomplete development.
+            Float64 T = As*f;
             sumT += T;
             sumTd += T*ds;
          }
@@ -481,7 +482,8 @@ MomentCapacityDetails CEngAgentImp::ComputeMomentCapacity(PierIDType pierID,pgsT
          vfps->get_Item(idx, &f);
          if (0 < f)
          {
-            Float64 T = devFactor*As*f;
+            // The solver already limits f for incomplete development.
+            Float64 T = As*f;
             sumT += T;
             sumTd += T*ds;
          }
