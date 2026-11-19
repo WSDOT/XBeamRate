@@ -1,6 +1,6 @@
 ///////////////////////////////////////////////////////////////////////
 // XBeamRate - Cross Beam Load Rating
-// Copyright © 1999-2026  Washington State Department of Transportation
+// Copyright � 1999-2026  Washington State Department of Transportation
 //                        Bridge and Structures Office
 //
 // This program is free software; you can redistribute it and/or modify
@@ -252,8 +252,8 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 
       // Get properties
       Float64 Exb = pMaterial->GetXBeamEc(pierID);
-      Float64 Axb = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-      Float64 Ixb = pSectProp->GetIxx(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+      Float64 Axb = pSectProp->GetArea(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
+      Float64 Ixb = pSectProp->GetIxx(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
       Float64 EAb = Exb*Axb;
       Float64 EIb = Exb*Ixb;
 
@@ -307,8 +307,8 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 
             // create column member
             Float64 Ecol = pMaterial->GetColumnEc(pierID,colIdx);
-            Float64 Acol = pSectProp->GetArea(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
-            Float64 Icol = pSectProp->GetIyy(pierID,xbrTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+            Float64 Acol = pSectProp->GetArea(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
+            Float64 Icol = pSectProp->GetIyy(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,colIdx,0.0));
             WBFL::FEA2D::Member& mbr = femModel.CreateMember(columnMbrID--,thisJointID,jntID-1,Ecol*Acol,Ecol*Icol);
 
 
@@ -350,9 +350,12 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
             // monolithic piers are sometimes modeled with just the lower cross beam. The upper cross beam
             // height is set to 0.0. In this case, use the lower cross beam dimensions to get some sort of reasonable
             // offset for the live load transfer model
-            Float64 H1, H2, H3, H4, X1, X2, X3, X4, W;
-            pProject->GetLowerXBeamDimensions(pierID, &H1, &H2, &H3, &H4, &X1, &X2, &X3, &X4, &W);
-            Y = Max(H1 + H2, H3 + H4);
+
+
+             Float64 H1L, H1R, H2L, H2R, X1L, X1R, X2L, X2R, W;
+             std::vector<CPierPointData> vPoints;
+             pProject->GetLowerXBeamDimensions(pierID, &H1L, &H1R, &H2L, &H2R, &X1L, &X1R, &X2L, &X2R, &W, &vPoints);
+             Y = Max(H1L + H2L, H1R + H2R);
          }
 
          Float64 EI = EIb/10000; // use members that are considerably less stiff than the XBeam members (we don't want to attract the dead load into this transfer model)
@@ -794,27 +797,51 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
       return;
    }
 
-   GET_IFACE(IXBRPointOfInterest,pPoi);
-   std::vector<xbrPointOfInterest> vPoi = pPoi->GetXBeamPointsOfInterest(pierID,POI_SECTIONCHANGE);
-
+   GET_IFACE(IXBRPier,pPier);
    GET_IFACE(IXBRSectionProperties,pSectProp);
    GET_IFACE(IXBRMaterial,pMaterial);
 
    Float64 density = pMaterial->GetXBeamDensity(pierID);
    Float64 unitWeight = density*WBFL::Units::System::GetGravitationalAcceleration();
 
-   std::vector<xbrPointOfInterest>::iterator iter(vPoi.begin());
-   std::vector<xbrPointOfInterest>::iterator end(vPoi.end());
-   Float64 Astart = pSectProp->GetArea(pierID,xbrTypes::Stage1,*iter);
-   Float64 Wstart = unitWeight*Astart;
-   Float64 Xstart = (*iter).GetDistFromStart();
-
-   iter++;
-   for ( ; iter != end; iter++ )
+   // Use every vertex of both modeled surfaces. Section-change POIs are based
+   // on the common cap dimensions and do not describe scallops or user points.
+   // Surface coordinates are pier coordinates; loads use cross beam coordinates.
+   Float64 L = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam,pierID);
+   std::vector<Float64> locations = {0.0,L};
+   auto addSurfaceLocations = [&](IPoint2dCollection* points)
    {
-      Float64 Aend = pSectProp->GetArea(pierID,xbrTypes::Stage1,*iter);
-      Float64 Wend = unitWeight*Aend;
-      Float64 Xend = (*iter).GetDistFromStart();
+      CComPtr<IEnumPoint2d> enumPoints;
+      points->get__Enum(&enumPoints);
+      CComPtr<IPoint2d> point;
+      while (enumPoints->Next(1,&point,nullptr) != S_FALSE)
+      {
+         Float64 Xpier;
+         point->get_X(&Xpier);
+         Float64 X = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);
+         if (0.0 < X && X < L)
+         {
+            locations.push_back(X);
+         }
+         point.Release();
+      }
+   };
+
+   CComPtr<IPoint2dCollection> topSurface, bottomSurface;
+   pPier->GetTopSurface(pierID,pgsTypes::Stage1,&topSurface);
+   pPier->GetBottomSurface(pierID,pgsTypes::Stage1,&bottomSurface);
+   addSurfaceLocations(topSurface);
+   addSurfaceLocations(bottomSurface);
+   std::sort(locations.begin(),locations.end());
+   locations.erase(std::unique(locations.begin(),locations.end(),
+      [](Float64 lhs,Float64 rhs) { return IsEqual(lhs,rhs); }),locations.end());
+
+   Float64 Xstart = locations.front();
+   Float64 Wstart = unitWeight*pSectProp->GetArea(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xstart));
+   for (size_t idx = 1; idx < locations.size(); ++idx)
+   {
+      Float64 Xend = locations[idx];
+      Float64 Wend = unitWeight*pSectProp->GetArea(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xend));
 
       LowerXBeamLoad load;
       load.Xs = Xstart;
@@ -824,7 +851,6 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
       pModelData->m_LowerXBeamLoads.push_back(load);
 
       Xstart = Xend;
-      Astart = Aend;
       Wstart = Wend;
    }
 }
@@ -986,7 +1012,7 @@ Float64 CAnalysisAgentImp::GetUpperCrossBeamLoading(PierIDType pierID) const
    Float64 H, W;
    pProject->GetDiaphragmDimensions(pierID,&H,&W);
 
-   if ( pProject->GetPierType(pierID) == xbrTypes::pctExpansion )
+   if ( pProject->GetPierType(pierID) == pgsTypes::pctExpansion )
    {
       W *= 2;
    }

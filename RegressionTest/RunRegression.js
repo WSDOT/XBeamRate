@@ -17,24 +17,14 @@ var ExecuteCommands=true; // if false, only show commands
 var startDate = new Date();
 var startTime = startDate.getTime();
 
-// hack for convenience:
-// set up drives so pickings' and brice's machines work without command line options
-var XBRateDrive = "F:";
-var objNet = new ActiveXObject( "WScript.Network" );
-var machine = objNet.ComputerName;
-machine = machine.toUpperCase();
-if (machine=="RICHARDSDELL")
-   XBRateDrive = "C:";
-else if (machine=="HQB0630025")
-   XBRateDrive = "F:";
-else if (machine=="HQA4434036")
-   XBRateDrive = "F:";
-else if (machine=="HQE3609046")
-   XBRateDrive = "F:";
-else if (machine=="HQD1764064")
-   XBRateDrive = "F:";
-
+// Use the source root configured for this machine, as PGSuper does.
 var wsShell = new ActiveXObject("WScript.Shell");
+var projectDir = wsShell.ExpandEnvironmentStrings("%ARPDIR%");
+if (!projectDir || projectDir === "%ARPDIR%") {
+    throw new Error("Environment variable ARPDIR is not defined.");
+}
+projectDir = projectDir.replace(/[\\\/]+$/, "");
+
 var FSO = new ActiveXObject("Scripting.FileSystemObject");
 
 // Create file name for timer file
@@ -43,10 +33,10 @@ timerFileDate = startDate.toString();
 timerFileDate = timerFileDate.replace(/ /gi, "_"); // regular expression pinta to make a reasonable file name
 timerFileDate = timerFileDate.replace(/:/gi, ";");
 var timerFileName = new String;
-timerFileName = "\\ARP\\XBeamRate\\RegressionTest\\RegTimer_" + timerFileDate + ".log";
 
 // parse the command line and set options
 var st = ParseCommandLine();
+timerFileName = projectDir + "\\XBeamRate\\RegressionTest\\RegTimer_" + timerFileDate + ".log";
 
 if (ExecuteCommands) 
 {
@@ -66,8 +56,8 @@ var NewCatalogServer = new String("Regression");
 var OldCatalogPublisher = new String;
 var NewCatalogPublisher = new String("Regression");
 
-var Application = XBRateDrive+"\\ARP\\BridgeLink\\RegFreeCOM\\" +XBRatePlatform+"\\"+XBRateVersion+"\\BridgeLink.exe ";
-var StartFolderSpec = new String( XBRateDrive+"\\ARP\\XBeamRate\\RegressionTest" );
+var Application = projectDir+"\\BridgeLink\\RegFreeCOM\\" +XBRatePlatform+"\\"+XBRateVersion+"\\BridgeLink.exe ";
+var StartFolderSpec = new String( projectDir+"\\XBeamRate\\RegressionTest" );
 
 var ErrorsExist = "FALSE";
 
@@ -107,7 +97,7 @@ DisplayMessage("Elapsed Time was: "+elapsed+" Minutes");
 
 if (ExecuteCommands) {
 // only log times if the tess were actually run... (don't log times when /N option is used... it isn't meaninful data)
-    var myFile = FSO.OpenTextFile("\\ARP\\XBeamRate\\RegressionTest\\RegTest.log", 8, true); // 8 = ForAppending (for some reason the ForAppending constant isn't defined)
+    var myFile = FSO.OpenTextFile(projectDir + "\\XBeamRate\\RegressionTest\\RegTest.log", 8, true); // 8 = ForAppending (for some reason the ForAppending constant isn't defined)
     myFile.WriteLine(endDate.toString() + " : Elapsed Time was: "+elapsed+" Minutes");
     myFile.close();
 
@@ -373,7 +363,7 @@ function ParseCommandLine()
          DisplayMessage("--- Help for Test.js - Regression Testing Script ---");
          DisplayMessage("Command Line options:");
          DisplayMessage("    /?             - Help (you are here)");
-         DisplayMessage("    /D<drive-name> - Drive where XBRate is installed (e.g., /DC:)");
+         DisplayMessage("    /D<drive-name> - Override the ARPDIR drive (e.g., /DC:)");
          DisplayMessage("    /V<version>    - Version of XBRate to test (either \"Debug\", \"Profile\", or \"Release\"");
          DisplayMessage("    /P<platform>   - Platform (Win32 or X64)");
          DisplayMessage("    /N             - No execute. Display but do not execute XBRate commands.");
@@ -390,7 +380,7 @@ function ParseCommandLine()
              DisplayMessage("String was: \""+dr+"\"");
              return 1;
           }
-          XBRateDrive = dr;
+          projectDir = dr + projectDir.substring(projectDir.indexOf(":") + 1);
           didDrive=1;          
        }
        else if (s.charAt(1)=="V" || s.charAt(1)=="v")

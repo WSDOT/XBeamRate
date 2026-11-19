@@ -29,6 +29,7 @@
 #include <IFace\PointOfInterest.h>
 #include <IFace\Pier.h>
 #include <IFace\Project.h>
+#include <IFace\MomentCapacity.h>
 
 #include "XBeamRateReportSpecification.h"
 
@@ -55,7 +56,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    PierIDType pierID = pXBRRptSpec->GetPierID();
 
    GET_IFACE2(pBroker,IXBRProject,pProject);
-   xbrTypes::PierType pierType = pProject->GetPierType(pierID);
+   pgsTypes::PierType pierType = pProject->GetPierType(pierID);
 
    GET_IFACE2(pBroker,IEAFDisplayUnits,pDisplayUnits);
    INIT_UV_PROTOTYPE( rptXBRPointOfInterest, location, pDisplayUnits->GetSpanLengthUnit(), false );
@@ -65,6 +66,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    INIT_UV_PROTOTYPE( rptStressUnitValue, stress, pDisplayUnits->GetStressUnit(), false );
    INIT_UV_PROTOTYPE( rptLengthUnitValue, avs, pDisplayUnits->GetAvOverSUnit(), false );
    INIT_UV_PROTOTYPE( rptAngleUnitValue, angle, pDisplayUnits->GetAngleUnit(), false );
+   INIT_UV_PROTOTYPE( rptMomentUnitValue, moment, pDisplayUnits->GetMomentUnit(), false );
 
    rptParagraph* pPara = new rptParagraph;
    *pChapter << pPara;
@@ -73,7 +75,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
 
    pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
    *pChapter << pPara;
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       *pPara << _T("Effective Shear Dimension - Lower Cross Beam - LRFD ") << WBFL::LRFD::LrfdCw8th(_T("5.8.2.9"),_T("5.7.2.8")) << rptNewLine;
    }
@@ -87,10 +89,10 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("EffectiveShearDepth.png")) << rptNewLine;
    *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeam_dv.png")) << rptNewLine;
 
-   rptRcTable* pDvTable1 = rptStyleManager::CreateDefaultTable(12);
+   rptRcTable* pDvTable1 = rptStyleManager::CreateDefaultTable(15);
    *pPara << pDvTable1 << rptNewLine;
 
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
@@ -98,7 +100,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    }
 
    rptRcTable* pDvTable2 = nullptr;
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       pPara = new rptParagraph;
       *pChapter << pPara;
@@ -115,7 +117,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    {
       pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
       *pChapter << pPara;
-      if ( pierType == xbrTypes::pctIntegral )
+      if ( pierType == pgsTypes::pctIntegral )
       {
          *pPara << _T("Average shear reinforcement - Lower Cross Beam - MBE 6A.5.8") << rptNewLine;
       }
@@ -132,7 +134,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       pAvSTable1 = rptStyleManager::CreateDefaultTable(4);
       *pPara << pAvSTable1 << rptNewLine;
 
-      if ( pierType == xbrTypes::pctIntegral )
+      if ( pierType == pgsTypes::pctIntegral )
       {
          pPara = new rptParagraph(rptStyleManager::GetHeadingStyle());
          *pChapter << pPara;
@@ -175,7 +177,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
 
    pPara = new rptParagraph;
    *pChapter << pPara;
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVsIntegral.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << WBFL::LRFD::LrfdCw8th(_T("C5.8.3.3-1"),_T("C5.7.3.3-1")) << rptNewLine;
    }
@@ -184,7 +186,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       *pPara << rptRcImage(std::_tstring(rptStyleManager::GetImagePath()) + _T("XBeamVs.png"),rptRcImage::Middle) << _T(" based on LRFD Eqn ") << WBFL::LRFD::LrfdCw8th(_T("C5.8.3.3-1"), _T("C5.7.3.3-1")) << rptNewLine;
    }
 
-   rptRcTable* pVsTable = rptStyleManager::CreateDefaultTable((pierType == xbrTypes::pctIntegral ? 8 : 6));
+   rptRcTable* pVsTable = rptStyleManager::CreateDefaultTable((pierType == pgsTypes::pctIntegral ? 8 : 6));
    *pPara << pVsTable << rptNewLine;
 
 
@@ -225,11 +227,19 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
    (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Moment Arm"), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
    (*pDvTable1)(1, DvTableCol++) << COLHDR(Sub2(_T("d"), _T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
+   pDvTable1->SetColumnSpan(0,DvTableCol,2);
+   (*pDvTable1)(0,DvTableCol) << _T("Strength I Moment Demand");
+   (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Minimum") << rptNewLine << Sub2(_T("M"),_T("u")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+   (*pDvTable1)(1,DvTableCol++) << COLHDR(_T("Maximum") << rptNewLine << Sub2(_T("M"),_T("u")), rptMomentUnitTag, pDisplayUnits->GetMomentUnit());
+
+   pDvTable1->SetRowSpan(0, DvTableCol, 2);
+   (*pDvTable1)(0, DvTableCol++) << _T("Tension") << rptNewLine << _T("Side");
+
    pDvTable1->SetRowSpan(0,DvTableCol,2);
    (*pDvTable1)(0,DvTableCol++) << COLHDR(_T("Controlling") << rptNewLine << Sub2(_T("d"),_T("v")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
 
    //
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       DvTableCol = 0;
       pDvTable2->SetNumberOfHeaderRows(2);
@@ -269,7 +279,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       (*pAvSTable1)(0,AvSTableCol++) << COLHDR(Sub2(_T("L"),_T("shear failure plane")), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
       (*pAvSTable1)(0,AvSTableCol++) << COLHDR(_T("Avg. ") << Sub2(_T("A"),_T("v")) << _T("/s"), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
 
-      if ( pierType == xbrTypes::pctIntegral )
+      if ( pierType == pgsTypes::pctIntegral )
       {
          AvSTableCol = 0;
          (*pAvSTable2)(0,AvSTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
@@ -289,7 +299,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
 
    ColumnIndexType VsTableCol = 0;
    (*pVsTable)(0,VsTableCol++) << COLHDR(_T("Location"), rptLengthUnitTag, pDisplayUnits->GetSpanLengthUnit());
-   if ( pierType == xbrTypes::pctIntegral )
+   if ( pierType == pgsTypes::pctIntegral )
    {
       (*pVsTable)(0,VsTableCol++) << COLHDR(_T("(") << Sub2(_T("A"),_T("v")) << _T("/S)") << Sub(_T("1")), rptLengthUnitTag, pDisplayUnits->GetAvOverSUnit());
       (*pVsTable)(0,VsTableCol++) << COLHDR(Sub2(_T("d"),_T("v1")), rptLengthUnitTag, pDisplayUnits->GetComponentDimUnit());
@@ -340,7 +350,11 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       VsTableCol = 0;
       VnTableCol = 0;
 
-      const DvDetails& dvDetails1 = pShearCapacity->GetDvDetails(pierID,(pierType == xbrTypes::pctIntegral ? xbrTypes::Stage1 : xbrTypes::Stage2),poi);
+      const DvDetails& dvDetails1 = pShearCapacity->GetDvDetails(pierID,(pierType == pgsTypes::pctIntegral ? pgsTypes::Stage1 : pgsTypes::Stage2),poi);
+      GET_IFACE2(pBroker, IXBRMomentCapacity, pMomentCapacity);
+      const MinMomentCapacityDetails& min_mcd = pMomentCapacity->GetMinMomentCapacityDetails(pierID, pgsTypes::StrengthI_Inventory, (pierType == pgsTypes::pctIntegral ? pgsTypes::Stage1 : pgsTypes::Stage2), poi, false);
+      const MinMomentCapacityDetails& max_mcd = pMomentCapacity->GetMinMomentCapacityDetails(pierID, pgsTypes::StrengthI_Inventory, (pierType == pgsTypes::pctIntegral ? pgsTypes::Stage1 : pgsTypes::Stage2), poi, true);
+      
 
       (*pDvTable1)(DvTableRow,DvTableCol++) << location.SetValue(poi);
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.h);
@@ -353,12 +367,25 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(0.90*dvDetails1.de[1]);
       (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentArm[1]);
       (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentDv[1]);
-      (*pDvTable1)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails1.dv);
 
-      if ( pierType == xbrTypes::pctIntegral )
+      (*pDvTable1)(DvTableRow, DvTableCol++) << moment.SetValue(min_mcd.Mu);
+      (*pDvTable1)(DvTableRow, DvTableCol++) << moment.SetValue(max_mcd.Mu);
+
+      (*pDvTable1)(DvTableRow, DvTableCol++) << (max(abs(min_mcd.Mu), abs(max_mcd.Mu)) == abs(max_mcd.Mu)? _T("Bottom") : _T("Top"));
+
+      if ((max(abs(min_mcd.Mu), abs(max_mcd.Mu)) == abs(max_mcd.Mu)))
+      {
+          (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentDv[0]);
+      }
+      else
+      {
+          (*pDvTable1)(DvTableRow, DvTableCol++) << dim.SetValue(dvDetails1.MomentDv[1]);
+      }
+
+      if ( pierType == pgsTypes::pctIntegral )
       {
          DvTableCol = 0;
-         const DvDetails& dvDetails2 = pShearCapacity->GetDvDetails(pierID,xbrTypes::Stage2,poi);
+         const DvDetails& dvDetails2 = pShearCapacity->GetDvDetails(pierID,pgsTypes::Stage2,poi);
          (*pDvTable2)(DvTableRow,DvTableCol++) << location.SetValue(poi);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(dvDetails2.h);
          (*pDvTable2)(DvTableRow,DvTableCol++) << dim.SetValue(0.72*dvDetails2.h);
@@ -375,7 +402,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
 
       if ( WBFL::LRFD::MBEManager::Edition::SecondEditionWith2015Interims <= WBFL::LRFD::MBEManager::GetEdition() )
       {
-         const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage1,poi);
+         const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,pgsTypes::Stage1,poi);
          (*pAvSTable1)(row,AvSTableCol++) << location.SetValue(poi);
 
          rptRcTable* pAvTable = rptStyleManager::CreateDefaultTable(4);
@@ -400,10 +427,10 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
             ZoneIdx++;
          }
 
-         if ( pierType == xbrTypes::pctIntegral )
+         if ( pierType == pgsTypes::pctIntegral )
          {
             AvSTableCol = 0;
-            const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,xbrTypes::Stage2,poi);
+            const AvOverSDetails& avsDetails = pShearCapacity->GetAverageAvOverSDetails(pierID,pgsTypes::Stage2,poi);
             (*pAvSTable2)(row,AvSTableCol++) << location.SetValue(poi);
 
             rptRcTable* pAvTable = rptStyleManager::CreateDefaultTable(4);
@@ -431,7 +458,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       }
 
 
-      const ShearCapacityDetails& scd = pShearCapacity->GetShearCapacityDetails(pierID,xbrTypes::Stage2,poi);
+      const ShearCapacityDetails& scd = pShearCapacity->GetShearCapacityDetails(pierID,pgsTypes::Stage2,poi);
       
       (*pVcTable)(row,VcTableCol++) << location.SetValue(poi);
       (*pVcTable)(row,VcTableCol++) << scd.beta;
@@ -441,7 +468,7 @@ rptChapter* CShearCapacityDetailsChapterBuilder::Build(const std::shared_ptr<con
       (*pVcTable)(row,VcTableCol++) << shear.SetValue(scd.Vc);
 
       (*pVsTable)(row,VsTableCol++) << location.SetValue(poi);
-      if ( pierType == xbrTypes::pctIntegral )
+      if ( pierType == pgsTypes::pctIntegral )
       {
          (*pVsTable)(row,VsTableCol++) << avs.SetValue(scd.Av_over_S1);
          (*pVsTable)(row,VsTableCol++) << dim.SetValue(scd.dv1);

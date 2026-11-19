@@ -44,6 +44,7 @@ public:
 
 // Operations
 public:
+   void SetScalloped(bool scalloped) { m_Scalloped = scalloped; }
    void AddColumn();
    void RemoveSelectedColumns();
 
@@ -61,6 +62,9 @@ public:
 public:
    void CustomInit();
 
+   static void DDX_ColumnGrid(CDataExchange* pDX, CColumnLayoutGrid& grid, xbrPierData* pier);
+   static void DDV_ColumnGrid(CDataExchange* pDX, CColumnLayoutGrid& grid);
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CColumnLayoutGrid)
@@ -69,9 +73,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
    
    virtual void OnClickedButtonRowCol(ROWCOL nRow,ROWCOL nCol) override;
+   BOOL OnEndEditing(ROWCOL nRow, ROWCOL nCol) override;
    virtual void OnModifyCell(ROWCOL nRow,ROWCOL nCol) override;
 
 private:
+   bool m_Scalloped = false;
+   void SetGeometryCell(ROWCOL row, ROWCOL col, Float64 value);
+   void UpdateLastRowStyles();
    void AddColumn(const CColumnData& column,Float64 S);
    void SetColumnData(ROWCOL row,const CColumnData& column,Float64 S);
    void GetColumnData(ROWCOL row,CColumnData* pColumn,Float64* pS);

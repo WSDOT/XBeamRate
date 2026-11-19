@@ -29,6 +29,8 @@ xbrLongitudinalRebarData::RebarRow::RebarRow():
    LayoutType(xbrTypes::blFullLength), 
    Start(0), 
    Length(0), 
+   BarType(WBFL::Materials::Rebar::Type::A615),
+   BarGrade(WBFL::Materials::Rebar::Grade::Grade60),
    BarSize(WBFL::Materials::Rebar::Size::bs10), 
    NumberOfBars(1), 
    Cover(WBFL::Units::ConvertToSysUnits(2.0,WBFL::Units::Measure::Inch)), 
@@ -37,12 +39,20 @@ xbrLongitudinalRebarData::RebarRow::RebarRow():
    bHookEnd(false)
 {;}
 
+void xbrLongitudinalRebarData::RebarRow::SetBarMaterial(WBFL::Materials::Rebar::Type type, WBFL::Materials::Rebar::Grade grade)
+{
+   BarType = type;
+   BarGrade = grade;
+}
+
 bool xbrLongitudinalRebarData::RebarRow::operator==(const xbrLongitudinalRebarData::RebarRow& rOther) const
 {
    if(Datum != rOther.Datum) return false;
    if(LayoutType != rOther.LayoutType) return false;
    if ( !IsEqual(Start,rOther.Start) ) return false;
    if ( !IsEqual(Length,rOther.Length) ) return false;
+   if(BarType != rOther.BarType) return false;
+   if(BarGrade != rOther.BarGrade) return false;
    if(BarSize != rOther.BarSize) return false;
    if ( !IsEqual(Cover,  rOther.Cover) ) return false;
    if ( !IsEqual(BarSpacing,  rOther.BarSpacing) ) return false;
@@ -100,13 +110,15 @@ HRESULT xbrLongitudinalRebarData::Save(IStructuredSave* pStrSave,std::shared_ptr
 
    for (const auto& rebar_row : RebarRows)
    {
-      pStrSave->BeginUnit(_T("RebarRow"),1.0);
+      pStrSave->BeginUnit(_T("RebarRow"),2.0);
       pStrSave->put_Property(_T("Datum"),        CComVariant(rebar_row.Datum));
       pStrSave->put_Property(_T("LayoutType"),   CComVariant(rebar_row.LayoutType));
       pStrSave->put_Property(_T("Start"),        CComVariant(rebar_row.Start));
       pStrSave->put_Property(_T("Length"),       CComVariant(rebar_row.Length));
       pStrSave->put_Property(_T("Cover"),        CComVariant(rebar_row.Cover));
       pStrSave->put_Property(_T("NumberOfBars"), CComVariant(rebar_row.NumberOfBars));
+	  pStrSave->put_Property(_T("BarType"), CComVariant(+rebar_row.BarType)); // added in version 2.0
+	  pStrSave->put_Property(_T("BarGrade"), CComVariant(+rebar_row.BarGrade)); // added in version 2.0
       pStrSave->put_Property(_T("BarSize"),      CComVariant(+rebar_row.BarSize));
       pStrSave->put_Property(_T("BarSpacing"),   CComVariant(rebar_row.BarSpacing));
       pStrSave->put_Property(_T("StartHook"),    CComVariant(rebar_row.bHookStart));
@@ -132,6 +144,10 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,std::shared_ptr
       RebarRows.clear();
       while ( SUCCEEDED(pStrLoad->BeginUnit(_T("RebarRow"))) )
       {
+
+         Float64 version;
+         pStrLoad->get_Version(&version);
+
          RebarRow rebar_row;
 
          var.vt = VT_I4;
@@ -158,6 +174,17 @@ HRESULT xbrLongitudinalRebarData::Load(IStructuredLoad* pStrLoad,std::shared_ptr
          hr = pStrLoad->get_Property(_T("NumberOfBars"), &var);
          rebar_row.NumberOfBars = var.lVal;
 
+		 if (2.0 <= version)
+         {
+             var.vt = VT_I4;
+             hr = pStrLoad->get_Property(_T("BarType"), &var);
+             rebar_row.BarType = (WBFL::Materials::Rebar::Type)(var.lVal);
+             var.vt = VT_I4;
+             hr = pStrLoad->get_Property(_T("BarGrade"), &var);
+             rebar_row.BarGrade = (WBFL::Materials::Rebar::Grade)(var.lVal);
+         }
+
+         // Read in the same order as Save; structured storage is sequential.
          var.vt = VT_I4;
          hr = pStrLoad->get_Property(_T("BarSize"), &var );
          rebar_row.BarSize = WBFL::Materials::Rebar::Size(var.lVal);

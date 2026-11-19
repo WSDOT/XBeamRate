@@ -52,7 +52,7 @@ CConcreteMaterial& CReinforcementPageParent::GetConcrete()
    return m_pEditPierData->GetPierData()->GetConcrete();
 }
 
-xbrTypes::PierType CReinforcementPageParent::GetPierType()
+pgsTypes::PierType CReinforcementPageParent::GetPierType()
 {
    if ( m_pEditPierData->GetPierData()->IsBoundaryPier() )
    {
@@ -64,14 +64,14 @@ xbrTypes::PierType CReinforcementPageParent::GetPierType()
    }
 }
 
-WBFL::Materials::Rebar::Type& CReinforcementPageParent::GetRebarType()
+WBFL::Materials::Rebar::Type& CReinforcementPageParent::GetStirrupRebarType()
 {
-   return m_PierData.GetRebarType();
+    return m_PierData.GetStirrupRebarType();
 }
 
-WBFL::Materials::Rebar::Grade& CReinforcementPageParent::GetRebarGrade()
+WBFL::Materials::Rebar::Grade& CReinforcementPageParent::GetStirrupRebarGrade()
 {
-   return m_PierData.GetRebarGrade();
+    return m_PierData.GetStirrupRebarGrade();
 }
 
 CConcreteMaterial& CReinforcementPageParent::GetConcreteMaterial()

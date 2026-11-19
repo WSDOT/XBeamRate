@@ -26,6 +26,17 @@
 #include <XBeamRateExt\RatingArtifact.h>
 
 #include <WBFLRCCapacity.h>
+#include <vector>
+
+// Physical distances from the section cut to each bar end, as used for Kdb.
+// Several groups can belong to the same capacity layer when end distances differ.
+struct RebarDevelopmentLengths
+{
+   Float64 Ll;
+   Float64 Lr;
+   Float64 As;
+};
+
 typedef struct MomentCapacityDetails
 {
    Float64 dt; // distance from compression face to extreme tensile reinforcement
@@ -36,6 +47,7 @@ typedef struct MomentCapacityDetails
    Float64 Mr; // nominal resistance (phi*Mn)
    CComPtr<IRCBeam2> rcBeam; // need this for cracked section analysis, so cache it here
    CComPtr<ILRFDSolutionEx> solution;
+   std::vector<std::vector<RebarDevelopmentLengths>> RebarDevelopment; // indexed by rcBeam layer
 } MomentCapacityDetails;
 
 
@@ -129,17 +141,17 @@ DEFINE_GUID(IID_IXBRMomentCapacity,
 class IXBRMomentCapacity
 {
 public:
-   virtual Float64 GetMomentCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
-   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual Float64 GetMomentCapacity(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual const MomentCapacityDetails& GetMomentCapacityDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
 
-   virtual Float64 GetCrackingMoment(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
-   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual Float64 GetCrackingMoment(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual const CrackingMomentDetails& GetCrackingMomentDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
 
-   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
-   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual Float64 GetMinMomentCapacity(PierIDType pierID,pgsTypes::LimitState limitState,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
+   virtual const MinMomentCapacityDetails& GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment) const = 0;
 
    // used for WSDOT Permit rating type
-   virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx) const = 0;
+   virtual MinMomentCapacityDetails GetMinMomentCapacityDetails(PierIDType pierID,pgsTypes::LimitState limitState,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,VehicleIndexType vehicleIdx,IndexType llConfigIdx,IndexType permitLaneIdx) const = 0;
 };
 
 /*****************************************************************************
@@ -155,13 +167,13 @@ DEFINE_GUID(IID_IXBRShearCapacity,
 class IXBRShearCapacity
 {
 public:
-   virtual Float64 GetShearCapacity(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
-   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
+   virtual Float64 GetShearCapacity(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
+   virtual const ShearCapacityDetails& GetShearCapacityDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
 
-   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
+   virtual const AvOverSDetails& GetAverageAvOverSDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
 
-   virtual Float64 GetDv(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
-   virtual const DvDetails& GetDvDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
+   virtual Float64 GetDv(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
+   virtual const DvDetails& GetDvDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi) const = 0;
 };
 
 /*****************************************************************************
@@ -177,8 +189,8 @@ DEFINE_GUID(IID_IXBRCrackedSection,
 class IXBRCrackedSection
 {
 public:
-   virtual Float64 GetIcrack(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const = 0;
-   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,xbrTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const = 0;
+   virtual Float64 GetIcrack(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const = 0;
+   virtual const CrackedSectionDetails& GetCrackedSectionDetails(PierIDType pierID,pgsTypes::Stage stage,const xbrPointOfInterest& poi,bool bPositiveMoment,xbrTypes::LoadType loadType) const = 0;
 };
 
 /*****************************************************************************

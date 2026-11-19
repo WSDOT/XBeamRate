@@ -194,6 +194,8 @@
     <ClCompile Include="BearingsPage.cpp" />
     <ClCompile Include="CapacityOptionsPage.cpp" />
     <ClCompile Include="ColumnLayoutGrid.cpp" />
+    <ClCompile Include="DrawPierLayoutControl.cpp" />
+    <ClCompile Include="CommonPierLayoutDlg.cpp" />
     <ClCompile Include="ConcreteDetailsDlg.cpp" />
     <ClCompile Include="ConcreteGeneralPage.cpp" />
     <ClCompile Include="DesignLiveLoadReactionsPage.cpp" />
@@ -205,10 +207,12 @@
     <ClCompile Include="PierDlg.cpp" />
     <ClCompile Include="PierExporter.cpp" />
     <ClCompile Include="PierLayoutPage.cpp" />
+    <ClCompile Include="PierPointGrid.cpp" />
     <ClCompile Include="ProjectAgent.cpp" />
     <ClCompile Include="ProjectAgentImp.cpp" />
     <ClCompile Include="ProjectPropertiesDlg.cpp" />
     <ClCompile Include="RatingOptionsPage.cpp" />
+    <ClCompile Include="ScallopedPierLayoutDlg.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -217,9 +221,11 @@
     <ClCompile Include="txnEditOptions.cpp" />
     <ClCompile Include="txnEditPier.cpp" />
     <ClCompile Include="txnEditProject.cpp" />
+    <ClCompile Include="UserDefinedPierLayoutDlg.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ProjectAgent.def" />
+    <None Include="res\CommonPierLayout.emf" />
     <None Include="res\Dimensions_Alignment.emf" />
     <None Include="res\Dimensions_Alignment_Continuous.emf" />
     <None Include="res\Dimensions_Alignment_Expansion.emf" />
@@ -229,6 +235,8 @@
     <None Include="res\Dimensions_BridgeLine_Expansion.emf" />
     <None Include="res\Dimensions_BridgeLine_Integral.emf" />
     <None Include="res\PierLayout.emf" />
+    <None Include="res\ScallopedPierLayout.emf" />
+    <None Include="res\UserDefinedPierLayout.emf" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ProjectAgent.rc" />
@@ -242,6 +250,8 @@
     <ClInclude Include="BearingsPage.h" />
     <ClInclude Include="CapacityOptionsPage.h" />
     <ClInclude Include="ColumnLayoutGrid.h" />
+    <ClInclude Include="DrawPierLayoutControl.h" />
+    <ClInclude Include="CommonPierLayoutDlg.h" />
     <ClInclude Include="ConcreteDetailsDlg.h" />
     <ClInclude Include="ConcreteGeneralPage.h" />
     <ClInclude Include="CPProjectAgent.h" />
@@ -254,17 +264,21 @@
     <ClInclude Include="PierDlg.h" />
     <ClInclude Include="PierExporter.h" />
     <ClInclude Include="PierLayoutPage.h" />
+    <ClInclude Include="PierPointGrid.h" />
     <ClInclude Include="ProjectAgent.h" />
     <ClInclude Include="ProjectAgentCLSID.h" />
     <ClInclude Include="ProjectAgentImp.h" />
     <ClInclude Include="ProjectPropertiesDlg.h" />
     <ClInclude Include="RatingOptionsPage.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="ScallopedPierLayoutDlg.h" />
+    <ClInclude Include="ScallopGeometry.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="SuperstructureLayoutPage.h" />
     <ClInclude Include="txnEditOptions.h" />
     <ClInclude Include="txnEditPier.h" />
     <ClInclude Include="txnEditProject.h" />
+    <ClInclude Include="UserDefinedPierLayoutDlg.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\EditOptions.bmp" />
