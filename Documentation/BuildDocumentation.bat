@@ -16,8 +16,10 @@ echo ^</script^> >> %SEARCH_HTML%
 
 
 %ARPDIR%\BridgeLink\RegFreeCOM\x64\Release\MakeDocMap XBRate
-rmdir /S /Q %ARPDIR%\BridgeLink\Docs\XBRate\%1\
-mkdir %ARPDIR%\BridgeLink\Docs\XBRate\%1\
-xcopy /s /y /d %ARPDIR%\XBeamRate\Documentation\doc\html\* %ARPDIR%\BridgeLink\Docs\XBRate\%1\
-copy %ARPDIR%\XBeamRate\Documentation\XBRate.dm %ARPDIR%\BridgeLink\Docs\XBRate\%1\
+rem ** Make the BridgeLink copy the same as the build, copying only changed files so unchanged files keep
+rem    their timestamps (PublishDocumentation.bat then sends only what changed to the server)
+powershell -NoProfile -ExecutionPolicy Bypass -File %ARPDIR%\BridgeLink\SyncFolder.ps1 -Source %ARPDIR%\XBeamRate\Documentation\doc\html -Target %ARPDIR%\BridgeLink\Docs\XBRate\%1 -Keep *.dm
+if errorlevel 1 exit /B 1
+powershell -NoProfile -ExecutionPolicy Bypass -File %ARPDIR%\BridgeLink\SyncFolder.ps1 -Source %ARPDIR%\XBeamRate\Documentation\XBRate.dm -Target %ARPDIR%\BridgeLink\Docs\XBRate\%1\XBRate.dm
+if errorlevel 1 exit /B 1
 
