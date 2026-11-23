@@ -182,6 +182,8 @@ private:
       
       std::vector<BeamMember> m_XBeamMembers; // these members make up the cap beam
       std::vector<BeamMember> m_SuperstructureMembers; // these are the members where the live load is applied
+      bool m_LeftCapEndMomentFree = false;
+      bool m_RightCapEndMomentFree = false;
       
       std::vector<LowerXBeamLoad> m_LowerXBeamLoads;
 
@@ -220,6 +222,7 @@ private:
    ModelData* GetModelData(PierIDType pierID,int level = MODEL_INIT_ALL) const;
    void BuildModel(PierIDType pierID,int level) const;
    void GetFemModelLocation(ModelData* pModelData,const xbrPointOfInterest& poi,MemberIDType* pMbrID,Float64* pMbrLocation) const;
+   Float64 GetCapSectionMoment(const ModelData& model, LoadCaseIDType loadCaseID, Float64 station, Float64 leftMoment, Float64 rightMoment) const;
    void GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const;
    void GetSuperstructureFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const;
 

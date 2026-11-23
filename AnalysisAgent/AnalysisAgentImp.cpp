@@ -307,6 +307,10 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
          result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
       }
 
+      // Bearing links release cap-end rotation. Columns can transfer moment.
+      pModelData->m_LeftCapEndMomentFree = !WBFL::System::Flags<Int32>::IsSet(vXBeamNodes.front().Type, COLUMN);
+      pModelData->m_RightCapEndMomentFree = !WBFL::System::Flags<Int32>::IsSet(vXBeamNodes.back().Type, COLUMN);
+
       Float64 Exb = pMaterial->GetXBeamEc(pierID);
       const auto stiffnessBreaks = GetCapStiffnessBreaks(*pPier.get(), *pSectProp.get(), pierID, L);
       auto nextBreak = stiffnessBreaks.begin() + 1;
@@ -823,6 +827,53 @@ void CAnalysisAgentImp::GetFemModelLocation(ModelData* pModelData,const xbrPoint
    }
 }
 
+Float64 CAnalysisAgentImp::GetCapSectionMoment(const ModelData& model, LoadCaseIDType loadCaseID, Float64 station,
+                                                  Float64 leftMoment, Float64 rightMoment) const
+{
+   const bool atLeftEnd = IsZero(station);
+   const Float64 moment = atLeftEnd ? -rightMoment : leftMoment;
+   const bool atFreeEnd = atLeftEnd ? model.m_LeftCapEndMomentFree :
+      model.m_RightCapEndMomentFree && IsEqual(station, model.m_XBeamMembers.back().Xe);
+   if (!atFreeEnd)
+   {
+      return moment;
+   }
+
+   const auto& capMember = atLeftEnd ? model.m_XBeamMembers.front() : model.m_XBeamMembers.back();
+   const auto* member = model.m_Model->FindMember(capMember.mbrID);
+   const auto* loading = model.m_Model->FindLoading(loadCaseID);
+   ATLASSERT(member && loading);
+   if (!member || !loading)
+   {
+      return moment;
+   }
+
+   // A couple can be applied to the end joint or directly to the cap member.
+   const auto jointID = atLeftEnd ? member->GetStartJoint() : member->GetEndJoint();
+   for (IndexType i = 0; i < loading->GetJointLoadCount(); ++i)
+   {
+      const auto* load = loading->FindJointLoadByIndex(i);
+      if (load->GetJointID() == jointID && load->GetMz() != 0.0)
+      {
+         return moment;
+      }
+   }
+
+   const auto endLocation = atLeftEnd ? 0.0 : member->GetLength();
+   for (IndexType i = 0; i < loading->GetPointLoadCount(); ++i)
+   {
+      const auto* load = loading->FindPointLoadByIndex(i);
+      if (load->GetMemberID() == capMember.mbrID && load->GetMz() != 0.0 &&
+          IsEqual(member->GetRealLocation(load->GetLocation()), endLocation))
+      {
+         return moment;
+      }
+   }
+
+   // Without an applied couple, free-end moment is zero by equilibrium.
+   return 0.0;
+}
+
 void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X,MemberIDType* pMbrID,Float64* pMbrLocation) const
 {
    std::vector<BeamMember>::iterator iter(pModelData->m_XBeamMembers.begin());
@@ -1130,15 +1181,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,xbrTypes::ProductForceTyp
    femModel.ComputePOIForces(lcid,femPoiID,WBFL::FEA2D::MemberFaceType::Left,WBFL::FEA2D::LoadOrientation::GlobalProjected,&FxL,&FyL,&MzL);
    femModel.ComputePOIForces(lcid,femPoiID,WBFL::FEA2D::MemberFaceType::Right,WBFL::FEA2D::LoadOrientation::GlobalProjected,&FxR,&FyR,&MzR);
 
-   Float64 Mz;
-   if ( IsZero(poi.GetDistFromStart()) )
-   {
-      Mz = -MzR;
-   }
-   else
-   {
-      Mz = MzL;
-   }
+   Float64 Mz = GetCapSectionMoment(*pModelData, lcid, poi.GetDistFromStart(), MzL, MzR);
    Mz = IsZero(Mz) ? 0 : Mz;
    return Mz;
 }
@@ -1256,10 +1299,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
 
    LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
 
-   Float64 FxLeft(0), FxRight(0);
-   Float64 FyLeft(0), FyRight(0);
-   Float64 MzLeft(0), MzRight(0);
-
+   Float64 Mz = 0.0;
    for (const auto& lcid : llConfig.m_LoadCases)
    {
       Float64 fxLeft, fyLeft, mzLeft;
@@ -1268,23 +1308,7 @@ Float64 CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType 
       Float64 fxRight, fyRight, mzRight;
       femModel.ComputePOIForces(lcid,femPoiID,WBFL::FEA2D::MemberFaceType::Right,WBFL::FEA2D::LoadOrientation::Member,&fxRight,&fyRight,&mzRight);
 
-      FxLeft += fxLeft;
-      FyLeft += fyLeft;
-      MzLeft += mzLeft;
-
-      FxRight += fxRight;
-      FyRight += fyRight;
-      MzRight += mzRight;
-   }
-
-   Float64 Mz;
-   if ( IsZero(poi.GetDistFromStart()) )
-   {
-      Mz = -MzRight;
-   }
-   else
-   {
-      Mz = MzLeft;
+      Mz += GetCapSectionMoment(*pModelData, lcid, poi.GetDistFromStart(), mzLeft, mzRight);
    }
 
    Mz = IsZero(Mz) ? 0 : Mz;
@@ -1419,13 +1443,8 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
    LiveLoadConfiguration& llConfig = pModelData->m_LiveLoadConfigurations[llConfigIdx];
    ATLASSERT(llConfig.m_LoadCases.size() == nLoadedLanes);
 
-   Float64 FxLeftLegal(0), FxRightLegal(0);
-   Float64 FyLeftLegal(0), FyRightLegal(0);
-   Float64 MzLeftLegal(0), MzRightLegal(0);
-
-   Float64 FxLeftPermit(0), FxRightPermit(0);
-   Float64 FyLeftPermit(0), FyRightPermit(0);
-   Float64 MzLeftPermit(0), MzRightPermit(0);
+   *pMpermit = 0.0;
+   *pMlegal = 0.0;
 
    for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
    {
@@ -1437,37 +1456,15 @@ void CAnalysisAgentImp::GetMoment(PierIDType pierID,pgsTypes::LoadRatingType rat
       Float64 fxRight, fyRight, mzRight;
       femModel.ComputePOIForces(lcid,femPoiID,WBFL::FEA2D::MemberFaceType::Right,WBFL::FEA2D::LoadOrientation::Member,&fxRight,&fyRight,&mzRight);
 
-      if ( laneIdx == permitLaneIdx )
+      const auto moment = GetCapSectionMoment(*pModelData, lcid, poi.GetDistFromStart(), mzLeft, mzRight);
+      if (laneIdx == permitLaneIdx)
       {
-         FxLeftPermit += fxLeft;
-         FyLeftPermit += fyLeft;
-         MzLeftPermit += mzLeft;
-
-         FxRightPermit += fxRight;
-         FyRightPermit += fyRight;
-         MzRightPermit += mzRight;
+         *pMpermit += moment;
       }
       else
       {
-         FxLeftLegal += fxLeft;
-         FyLeftLegal += fyLeft;
-         MzLeftLegal += mzLeft;
-
-         FxRightLegal += fxRight;
-         FyRightLegal += fyRight;
-         MzRightLegal += mzRight;
+         *pMlegal += moment;
       }
-   }
-
-   if ( IsZero(poi.GetDistFromStart()) )
-   {
-      *pMpermit = -MzRightPermit;
-      *pMlegal  = -MzRightLegal;
-   }
-   else
-   {
-      *pMpermit = MzLeftPermit;
-      *pMlegal  = MzLeftLegal;
    }
 
    GET_IFACE(IXBRProject,pProject);
@@ -2626,8 +2623,9 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
       Float64 mpf = WBFL::LRFD::Utility::GetMultiplePresenceFactor(nLoadedLanes);
 
-      Float64 FxLeft(0), FyLeft(0), MzLeft(0);
-      Float64 FxRight(0), FyRight(0), MzRight(0);
+      Float64 FxLeft(0), FyLeft(0);
+      Float64 FxRight(0), FyRight(0);
+      Float64 Mz = 0.0;
 
       for ( IndexType laneIdx = 0; laneIdx < nLoadedLanes; laneIdx++ )
       {
@@ -2641,21 +2639,10 @@ void CAnalysisAgentImp::ComputeUnitLiveLoadResult(PierIDType pierID,const xbrPoi
 
          FxLeft += fxLeft;
          FyLeft += fyLeft;
-         MzLeft += mzLeft;
 
          FxRight += fxRight;
          FyRight += fyRight;
-         MzRight += mzRight;
-      }
-
-      Float64 Mz;
-      if ( IsZero(poi.GetDistFromStart()) )
-      {
-         Mz = -MzRight;
-      }
-      else
-      {
-         Mz = MzLeft;
+         Mz += GetCapSectionMoment(*pModelData, lcid, poi.GetDistFromStart(), mzLeft, mzRight);
       }
 
       Mz = IsZero(Mz) ? 0 : Mz;
