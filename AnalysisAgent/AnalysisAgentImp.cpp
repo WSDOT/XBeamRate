@@ -134,14 +134,71 @@ CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,
 #define BEARING 0x0001
 #define COLUMN  0x0002
 #define CURB    0x0004
+
+namespace
+{
+constexpr Float64 CapJointTolerance = 0.005;
+
 struct XBeamNode
 {
    Float64 X;
    Int32 Type;
    JointIDType jntID;
-   bool operator<(const XBeamNode& other)const { return IsLT(X,other.X,0.005); }
-   bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X,0.005); }
+   bool operator<(const XBeamNode& other)const { return IsLT(X,other.X,CapJointTolerance); }
+   bool operator==(const XBeamNode& other)const { return IsEqual(X,other.X,CapJointTolerance); }
 };
+
+std::vector<Float64> GetLowerCapProfileLocations(const IXBRPier& pier, PierIDType pierID, Float64 length)
+{
+   std::vector<Float64> locations = {0.0, length};
+   auto addSurfaceLocations = [&](IPoint2dCollection* points)
+   {
+      CComPtr<IEnumPoint2d> enumPoints;
+      points->get__Enum(&enumPoints);
+      CComPtr<IPoint2d> point;
+      while (enumPoints->Next(1, &point, nullptr) != S_FALSE)
+      {
+         Float64 pierX;
+         point->get_X(&pierX);
+         Float64 x = pier.ConvertPierToCrossBeamCoordinate(pierID, pierX);
+         if (0.0 < x && x < length)
+         {
+            locations.push_back(x);
+         }
+         point.Release();
+      }
+   };
+
+   CComPtr<IPoint2dCollection> topSurface, bottomSurface;
+   pier.GetTopSurface(pierID, pgsTypes::Stage1, &topSurface);
+   pier.GetBottomSurface(pierID, pgsTypes::Stage1, &bottomSurface);
+   addSurfaceLocations(topSurface);
+   addSurfaceLocations(bottomSurface);
+   std::sort(locations.begin(), locations.end());
+   locations.erase(std::unique(locations.begin(), locations.end(),
+      [](Float64 lhs, Float64 rhs) { return IsEqual(lhs, rhs); }), locations.end());
+   return locations;
+}
+
+std::vector<Float64> GetCapStiffnessBreaks(const IXBRPier& pier, const IXBRSectionProperties& sections,
+                                          PierIDType pierID, Float64 length)
+{
+   const auto locations = GetLowerCapProfileLocations(pier, pierID, length);
+   const auto depthAt = [&](Float64 x)
+   {
+      return sections.GetDepth(pierID, pgsTypes::Stage2, xbrPointOfInterest(INVALID_ID, x));
+   };
+
+   const auto firstDepth = depthAt(locations.front());
+   if (std::all_of(locations.begin() + 1, locations.end(),
+      [&](Float64 x) { return IsEqual(depthAt(x), firstDepth); }))
+   {
+      return {0.0, length};
+   }
+
+   return locations;
+}
+}
 
 void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 {
@@ -250,12 +307,10 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
          result = std::adjacent_find(vXBeamNodes.begin(),vXBeamNodes.end());
       }
 
-      // Get properties
       Float64 Exb = pMaterial->GetXBeamEc(pierID);
-      Float64 Axb = pSectProp->GetArea(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-      Float64 Ixb = pSectProp->GetIxx(pierID,pgsTypes::Stage2,xbrPointOfInterest(INVALID_ID,L/2));
-      Float64 EAb = Exb*Axb;
-      Float64 EIb = Exb*Ixb;
+      const auto stiffnessBreaks = GetCapStiffnessBreaks(*pPier.get(), *pSectProp.get(), pierID, L);
+      auto nextBreak = stiffnessBreaks.begin() + 1;
+      const auto endBreak = stiffnessBreaks.end() - 1;
 
       // build the model
       WBFL::FEA2D::Model& femModel = *pModelData->m_Model;
@@ -264,6 +319,23 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
       JointIDType jntID = 0;
       MemberIDType xbeamMbrID = 0;
       MemberIDType columnMbrID = -1;
+
+      auto createCapMember = [&](JointIDType start, JointIDType end, Float64 left, Float64 right)
+      {
+         // Physical joints can divide a profile interval. Use its midpoint
+         // section for every member within that interval.
+         const auto rightBreak = std::upper_bound(stiffnessBreaks.begin() + 1, endBreak, (left + right) / 2);
+         const auto propertyStation = (*(rightBreak - 1) + *rightBreak) / 2;
+         const xbrPointOfInterest section(INVALID_ID, propertyStation);
+         Float64 area = pSectProp->GetArea(pierID, pgsTypes::Stage2, section);
+         Float64 inertia = pSectProp->GetIxx(pierID, pgsTypes::Stage2, section);
+         femModel.CreateMember(xbeamMbrID, start, end, Exb * area, Exb * inertia);
+         BeamMember capMember;
+         capMember.Xs = left;
+         capMember.Xe = right;
+         capMember.mbrID = xbeamMbrID++;
+         pModelData->m_XBeamMembers.push_back(capMember);
+      };
 
       std::vector<XBeamNode>::iterator iter(vXBeamNodes.begin());
       std::vector<XBeamNode>::iterator end(vXBeamNodes.end());
@@ -278,17 +350,27 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
       for ( ; iter != end; iter++ )
       {
          XBeamNode* pThisNode = &(*iter);
+         Float64 left = pPrevNode->X;
+         while (nextBreak != endBreak && *nextBreak < pThisNode->X)
+         {
+            Float64 x = *nextBreak++;
+            if (x - left <= CapJointTolerance || pThisNode->X - x <= CapJointTolerance)
+            {
+               continue;
+            }
+            JointIDType meshJointID = jntID++;
+            femModel.CreateJoint(meshJointID, x, 0);
+            createCapMember(prevJointID, meshJointID, left, x);
+            prevJointID = meshJointID;
+            left = x;
+         }
+
          JointIDType thisJointID = jntID++;
          pThisNode->jntID = thisJointID;
 
          femModel.CreateJoint(thisJointID,pThisNode->X,0);
 
-         femModel.CreateMember(xbeamMbrID++,prevJointID,thisJointID,EAb,EIb);
-         BeamMember capMbr;
-         capMbr.Xs = pPrevNode->X;
-         capMbr.Xe = pThisNode->X;
-         capMbr.mbrID = xbeamMbrID-1;
-         pModelData->m_XBeamMembers.push_back(capMbr);
+         createCapMember(prevJointID, thisJointID, left, pThisNode->X);
 
          if ( WBFL::System::Flags<Int32>::IsSet(pThisNode->Type,COLUMN) )
          {
@@ -358,6 +440,11 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
              Y = Max(H1L + H2L, H1R + H2R);
          }
 
+         // Keep the bearing transfer model on the physical nodes and retain its
+         // reference stiffness based on the midlength section.
+         const xbrPointOfInterest referenceSection(INVALID_ID, L / 2);
+         Float64 EAb = Exb * pSectProp->GetArea(pierID, pgsTypes::Stage2, referenceSection);
+         Float64 EIb = Exb * pSectProp->GetIxx(pierID, pgsTypes::Stage2, referenceSection);
          Float64 EI = EIb/10000; // use members that are considerably less stiff than the XBeam members (we don't want to attract the dead load into this transfer model)
          Float64 EA = EAb/10000;
 
@@ -652,138 +739,31 @@ void CAnalysisAgentImp::ApplySuperstructureDeadLoadReactions(PierIDType pierID,M
             GetXBeamFemModelLocation(pModelData,Xbrg-W/2,&startMbrID,&startLocation);
             GetXBeamFemModelLocation(pModelData,Xbrg+W/2,&endMbrID,&endLocation);
 
-            if ( startMbrID == endMbrID )
+            for (MemberIDType memberID = startMbrID; memberID <= endMbrID; ++memberID)
             {
-               // distributed load is contained within a single FEM member
-               if ( !IsZero(DC) )
+               Float64 length = femModel.FindMember(memberID)->GetLength();
+               Float64 left = (memberID == startMbrID) ? startLocation : 0.0;
+               Float64 right = (memberID == endMbrID) ? endLocation : length;
+               if (left >= right)
                {
-                  dcLoading.CreateDistributedLoad(dcLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-DC,-DC,WBFL::FEA2D::LoadOrientation::GlobalProjected);
+                  continue;
                }
 
-               if ( !IsZero(DW) )
+               auto apply = [&](WBFL::FEA2D::Loading& loading, LoadIDType& loadID, Float64 reaction)
                {
-                  dwLoading.CreateDistributedLoad(dwLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-DW,-DW,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(SH) )
-               {
-                  shLoading.CreateDistributedLoad(shLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-SH,-SH,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(CR) )
-               {
-                  crLoading.CreateDistributedLoad(crLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-CR,-CR,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(PS) )
-               {
-                  psLoading.CreateDistributedLoad(psLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-PS,-PS,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(RE) )
-               {
-                  reLoading.CreateDistributedLoad(reLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,endLocation,-RE,-RE,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-            }
-            else
-            {
-               // distributed loads span over multiple FEM members
-
-               // apply loads to first member
-               if ( !IsZero(DC) )
-               {
-                  dcLoading.CreateDistributedLoad(dcLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-DC,-DC,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(DW) )
-               {
-                  dwLoading.CreateDistributedLoad(dwLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-DW,-DW,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(SH) )
-               {
-                  shLoading.CreateDistributedLoad(shLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-SH,-SH,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(CR) )
-               {
-                  crLoading.CreateDistributedLoad(crLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-CR,-CR,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(PS) )
-               {
-                  psLoading.CreateDistributedLoad(psLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-PS,-PS,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(RE) )
-               {
-                  reLoading.CreateDistributedLoad(reLoadID++,startMbrID,WBFL::FEA2D::LoadDirection::Fy,startLocation,-1.0,-RE,-RE,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               // apply loads to intermediate members
-               for ( MemberIDType mbrID = startMbrID+1; mbrID < endMbrID-1; mbrID++ )
-               {
-                  if ( !IsZero(DC) )
+                  if (!IsZero(reaction))
                   {
-                     dcLoading.CreateDistributedLoad(dcLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-DC,-DC,WBFL::FEA2D::LoadOrientation::GlobalProjected);
+                     loading.CreateDistributedLoad(loadID++, memberID, WBFL::FEA2D::LoadDirection::Fy,
+                        left, right, -reaction, -reaction, WBFL::FEA2D::LoadOrientation::GlobalProjected);
                   }
+               };
 
-                  if ( !IsZero(DW) )
-                  {
-                     dwLoading.CreateDistributedLoad(dwLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-DW,-DW,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-                  }
-
-                  if ( !IsZero(SH) )
-                  {
-                     shLoading.CreateDistributedLoad(shLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-SH,-SH,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-                  }
-
-                  if ( !IsZero(CR) )
-                  {
-                     crLoading.CreateDistributedLoad(crLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-CR,-CR,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-                  }
-
-                  if ( !IsZero(PS) )
-                  {
-                     psLoading.CreateDistributedLoad(psLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-PS,-PS,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-                  }
-
-                  if ( !IsZero(RE) )
-                  {
-                     reLoading.CreateDistributedLoad(reLoadID++,mbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,-1.0,-RE,-RE,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-                  }
-               }
-
-               // apply loads to last member
-               if ( !IsZero(DC) )
-               {
-                  dcLoading.CreateDistributedLoad(dcLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-DC,-DC,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(DW) )
-               {
-                  dwLoading.CreateDistributedLoad(dwLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-DW,-DW,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(SH) )
-               {
-                  shLoading.CreateDistributedLoad(shLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-SH,-SH,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(CR) )
-               {
-                  crLoading.CreateDistributedLoad(crLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-CR,-CR,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(PS) )
-               {
-                  psLoading.CreateDistributedLoad(psLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-PS,-PS,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
-
-               if ( !IsZero(RE) )
-               {
-                  reLoading.CreateDistributedLoad(reLoadID++,endMbrID,WBFL::FEA2D::LoadDirection::Fy,0.0,endLocation,-RE,-RE,WBFL::FEA2D::LoadOrientation::GlobalProjected);
-               }
+               apply(dcLoading, dcLoadID, DC);
+               apply(dwLoading, dwLoadID, DW);
+               apply(shLoading, shLoadID, SH);
+               apply(crLoading, crLoadID, CR);
+               apply(psLoading, psLoadID, PS);
+               apply(reLoading, reLoadID, RE);
             }
          }
       }
@@ -804,37 +784,9 @@ void CAnalysisAgentImp::ValidateLowerXBeamDeadLoad(PierIDType pierID,ModelData* 
    Float64 density = pMaterial->GetXBeamDensity(pierID);
    Float64 unitWeight = density*WBFL::Units::System::GetGravitationalAcceleration();
 
-   // Use every vertex of both modeled surfaces. Section-change POIs are based
-   // on the common cap dimensions and do not describe scallops or user points.
-   // Surface coordinates are pier coordinates; loads use cross beam coordinates.
+   // Use the Stage 1 profile vertices for lower-cap self-weight.
    Float64 L = pPier->GetXBeamLength(xbrTypes::xblBottomXBeam,pierID);
-   std::vector<Float64> locations = {0.0,L};
-   auto addSurfaceLocations = [&](IPoint2dCollection* points)
-   {
-      CComPtr<IEnumPoint2d> enumPoints;
-      points->get__Enum(&enumPoints);
-      CComPtr<IPoint2d> point;
-      while (enumPoints->Next(1,&point,nullptr) != S_FALSE)
-      {
-         Float64 Xpier;
-         point->get_X(&Xpier);
-         Float64 X = pPier->ConvertPierToCrossBeamCoordinate(pierID,Xpier);
-         if (0.0 < X && X < L)
-         {
-            locations.push_back(X);
-         }
-         point.Release();
-      }
-   };
-
-   CComPtr<IPoint2dCollection> topSurface, bottomSurface;
-   pPier->GetTopSurface(pierID,pgsTypes::Stage1,&topSurface);
-   pPier->GetBottomSurface(pierID,pgsTypes::Stage1,&bottomSurface);
-   addSurfaceLocations(topSurface);
-   addSurfaceLocations(bottomSurface);
-   std::sort(locations.begin(),locations.end());
-   locations.erase(std::unique(locations.begin(),locations.end(),
-      [](Float64 lhs,Float64 rhs) { return IsEqual(lhs,rhs); }),locations.end());
+   const auto locations = GetLowerCapProfileLocations(*pPier.get(), pierID, L);
 
    Float64 Xstart = locations.front();
    Float64 Wstart = unitWeight*pSectProp->GetArea(pierID,pgsTypes::Stage1,xbrPointOfInterest(INVALID_ID,Xstart));
@@ -881,7 +833,7 @@ void CAnalysisAgentImp::GetXBeamFemModelLocation(ModelData* pModelData,Float64 X
       if ( InRange(capMbr.Xs,X,capMbr.Xe) )
       {
          *pMbrID = capMbr.mbrID;
-         *pMbrLocation = X - capMbr.Xs;
+         *pMbrLocation = std::clamp(X - capMbr.Xs, 0.0, capMbr.Xe - capMbr.Xs);
          return;
       }
    }
@@ -898,7 +850,7 @@ void CAnalysisAgentImp::GetSuperstructureFemModelLocation(ModelData* pModelData,
       if ( InRange(capMbr.Xs,X,capMbr.Xe) )
       {
          *pMbrID = capMbr.mbrID;
-         *pMbrLocation = X - capMbr.Xs;
+         *pMbrLocation = std::clamp(X - capMbr.Xs, 0.0, capMbr.Xe - capMbr.Xs);
          return;
       }
    }
