@@ -42,6 +42,7 @@
 
 #include <numeric>
 #include <algorithm>
+#include <cmath>
 
 #include <System\Flags.h>
 #include <LRFD\Utility.h>
@@ -138,6 +139,7 @@ CAnalysisAgentImp::ModelData* CAnalysisAgentImp::GetModelData(PierIDType pierID,
 namespace
 {
 constexpr Float64 CapJointTolerance = 0.005;
+constexpr Float64 DefaultCapDepthChange = 0.05;
 
 struct XBeamNode
 {
@@ -180,24 +182,56 @@ std::vector<Float64> GetLowerCapProfileLocations(const IXBRPier& pier, PierIDTyp
    return locations;
 }
 
+void AppendCapStiffnessBreaks(std::vector<Float64>& breaks, Float64 left, Float64 right,
+                              Float64 leftDepth, Float64 rightDepth, Float64 maxRelativeDepthChange,
+                              int remainingSplits)
+{
+   const auto averageDepth = (leftDepth + rightDepth) / 2;
+   if (remainingSplits == 0 || right - left <= 2 * CapJointTolerance ||
+       std::abs(rightDepth - leftDepth) <= maxRelativeDepthChange * averageDepth)
+   {
+      return;
+   }
+
+   // Depth varies linearly between adjacent profile vertices.
+   const auto midpoint = (left + right) / 2;
+   AppendCapStiffnessBreaks(breaks, left, midpoint, leftDepth, averageDepth,
+      maxRelativeDepthChange, remainingSplits - 1);
+   breaks.push_back(midpoint);
+   AppendCapStiffnessBreaks(breaks, midpoint, right, averageDepth, rightDepth,
+      maxRelativeDepthChange, remainingSplits - 1);
+}
+
 std::vector<Float64> GetCapStiffnessBreaks(const IXBRPier& pier, const IXBRSectionProperties& sections,
-                                          PierIDType pierID, Float64 length)
+                                          PierIDType pierID, Float64 length,
+                                          Float64 maxRelativeDepthChange = DefaultCapDepthChange)
 {
    const auto locations = GetLowerCapProfileLocations(pier, pierID, length);
-   const auto depthAt = [&](Float64 x)
+   std::vector<Float64> depths;
+   depths.reserve(locations.size());
+   for (Float64 x : locations)
    {
-      return sections.GetDepth(pierID, pgsTypes::Stage2, xbrPointOfInterest(INVALID_ID, x));
-   };
+      depths.push_back(sections.GetDepth(pierID, pgsTypes::Stage2, xbrPointOfInterest(INVALID_ID, x)));
+   }
 
-   const auto firstDepth = depthAt(locations.front());
-   if (std::all_of(locations.begin() + 1, locations.end(),
-      [&](Float64 x) { return IsEqual(depthAt(x), firstDepth); }))
+   if (std::all_of(depths.begin() + 1, depths.end(),
+      [&](Float64 depth) { return IsEqual(depth, depths.front()); }))
    {
       return {0.0, length};
    }
 
-   return locations;
+   // Bound refinement near shallow taper ends.
+   constexpr int MaxRefinementLevels = 5;
+   std::vector<Float64> breaks{0.0};
+   for (size_t idx = 1; idx < locations.size(); ++idx)
+   {
+      AppendCapStiffnessBreaks(breaks, locations[idx - 1], locations[idx],
+         depths[idx - 1], depths[idx], maxRelativeDepthChange, MaxRefinementLevels);
+      breaks.push_back(locations[idx]);
+   }
+   return breaks;
 }
+
 }
 
 void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
@@ -326,7 +360,7 @@ void CAnalysisAgentImp::BuildModel(PierIDType pierID,int level) const
 
       auto createCapMember = [&](JointIDType start, JointIDType end, Float64 left, Float64 right)
       {
-         // Physical joints can divide a profile interval. Use its midpoint
+         // Physical joints can divide a stiffness interval. Use its midpoint
          // section for every member within that interval.
          const auto rightBreak = std::upper_bound(stiffnessBreaks.begin() + 1, endBreak, (left + right) / 2);
          const auto propertyStation = (*(rightBreak - 1) + *rightBreak) / 2;
