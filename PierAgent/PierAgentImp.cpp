@@ -1024,7 +1024,8 @@ Float64 CPierAgentImp::GetDevLengthFactor(PierIDType pierID,const xbrPointOfInte
    }
    else
    {
-      ATLASSERT(cut_length == 0.0); // sections shouldn't be cutting bars that don't exist
+      // The rebar layout admits cuts within tolerance of a bar end.
+      ATLASSERT(IsZero(cut_length));
       return 0.0;
    }
 }
